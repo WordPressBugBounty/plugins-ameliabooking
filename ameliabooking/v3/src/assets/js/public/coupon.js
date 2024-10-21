@@ -57,6 +57,10 @@ async function validateCoupon(store, callback) {
                 message = globalLabels.coupon_invalid
             } else if ('couponMissing' in e.response.data.data && e.response.data.data.couponMissing === true) {
                 message = globalLabels.coupon_missing
+            } else if ('emailError' in e.response.data.data && e.response.data.data.emailError === true) {
+                message = globalLabels.email_exist_error
+            } else if ('phoneError' in e.response.data.data && e.response.data.data.phoneError === true) {
+                message = globalLabels.phone_exist_error
             }
 
             store.commit(`${module}/setError`, message)

@@ -636,6 +636,11 @@
         }
       }
 
+      if (urlParams['customerId']) {
+        this.params.dates = null
+        this.params.customerId = urlParams['customerId']
+      }
+
       this.getEventOptions(true)
 
       this.setInitialCustomers()
@@ -925,7 +930,7 @@
                 while (startDate.isBefore(endDate)) {
                   let dateString = startDate.format('YYYY-MM-DD')
 
-                  let isInRange = startDate.isBetween($this.params.dates.start, $this.params.dates.end, 'days', '[]')
+                  let isInRange = $this.params.dates === null || startDate.isBetween($this.params.dates.start, $this.params.dates.end, 'days', '[]')
                   if (!(dateString in eventsDay) && isInRange) {
                     eventsDay[dateString] = {
                       date: dateString,

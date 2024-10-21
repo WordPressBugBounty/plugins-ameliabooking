@@ -9,6 +9,17 @@ export default {
   }),
 
   methods: {
+    setCustomerFromUrl (customerId) {
+      let customer = null
+      if (this.options.entities.customers.length) {
+        customer = this.options.entities.customers.find(item => item.id == customerId)
+      }
+
+      if (customer) {
+        this.params.customerId = customer.id
+      }
+    },
+
     getInitCustomerObject () {
       return {
         id: 0,
@@ -48,6 +59,10 @@ export default {
 
             this.$nextTick(() => {
               this.options.entities.customers = Object.values(customers.sort((a, b) => (a.firstName.toLowerCase() > b.firstName.toLowerCase()) ? 1 : -1))
+
+              if (this.params && this.params.customerId) {
+                this.setCustomerFromUrl(this.params.customerId)
+              }
             })
           }
         )
@@ -63,8 +78,14 @@ export default {
       this.searchCustomersTimer = setTimeout(() => {
         let lastSearchCounter = this.searchCounter
 
+        let searchParams = {search: query, page: 1, limit: this.$root.settings.general.customersFilterLimit, skipCount: 1}
+
+        if (this.params && this.params.customerId) {
+          searchParams['customers'] = [this.params.customerId]
+        }
+
         this.$http.get(`${this.$root.getAjaxUrl}/users/customers`, {
-          params: {search: query, page: 1, limit: this.$root.settings.general.customersFilterLimit, skipCount: 1}
+          params: searchParams
         })
           .then(response => {
             if (lastSearchCounter >= this.searchCounter) {

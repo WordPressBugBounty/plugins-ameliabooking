@@ -98,7 +98,7 @@
               :fit-input-width="true"
             >
               <AmOption
-                v-for="cat in availableCategories"
+                v-for="cat in categoriesMenu"
                 :key="cat.id"
                 :value="cat.id"
                 :label="cat.name"
@@ -146,7 +146,7 @@
     </template>
     <template v-if="preselectedCategories !== 1 && customizedOptions.sidebar.visibility && sideMenuVisibility" #side>
       <SideMenu
-        :menu-items="availableCategories"
+        :menu-items="categoriesMenu"
         :init-selection="categorySelected"
         identifier="id"
         name-identifier="name"
@@ -223,7 +223,7 @@
               <!-- Card Info -->
               <div class="am-fcil__item-info">
                 <div
-                  v-if="customizedOptions.packageCategory.visibility"
+                  v-if="customizedOptions.packageCategory.visibility && categorySelected"
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-folder"></span>
@@ -365,7 +365,7 @@
               <!-- Card Info -->
               <div class="am-fcil__item-info">
                 <div
-                  v-if="customizedOptions.serviceCategory.visibility"
+                  v-if="customizedOptions.serviceCategory.visibility && categorySelected"
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-folder"></span>
@@ -585,13 +585,11 @@ import { useStore } from "vuex";
 
 // * Composables
 import {
-  useAvailableServiceIdsInCategory,
+  useAvailableCategories,
   useEmployeesServiceCapacity,
   useServiceDuration,
   useServicePrice,
   useServiceLocation,
-  useDisabledPackageService,
-  usePackageAvailabilityByEmployeeAndLocation,
   usePackageEmployees,
   usePackageLocations
 } from '../../../../assets/js/public/catalog.js'
@@ -672,7 +670,6 @@ let preselectedCategories = computed (() => {
   categoryArray = categoryArray.filter(c => c)
   return categoryArray.length
 })
-
 
 // * Sidebar Menu Visibility
 let sideMenuVisibility = computed(() => {
@@ -760,43 +757,87 @@ function searchingStrings (name) {
 // * Categories menu
 let availableCategories = inject('availableCategories')
 
+let categoriesMenu = computed(() => {
+  let arr = [...availableCategories.value]
+  let arrMenu = []
+  arr.forEach(item => {
+    arrMenu.push({
+      id: item.id,
+      name: item.name
+    })
+  })
+
+  arrMenu.unshift({
+    id: null,
+    name: amLabels.value.filter_all
+  })
+
+  return arrMenu
+})
+
 // * Selected category
 let categorySelected = inject('categorySelected')
-
-let serviceIdsArray = computed(() => useAvailableServiceIdsInCategory(shortcodeData.value, amEntities.value.categories.find(item => item.id === categorySelected.value), amEntities.value, employeeFilter.value, locationFilter.value))
+let categoriesFiltered = computed(() => useAvailableCategories(amEntities.value, shortcodeData.value, employeeFilter.value, locationFilter.value))
 
 let categoryPackages = computed(() => {
   let arr = []
-  amEntities.value.packages.forEach(pack => {
-    serviceIdsArray.value.forEach(serviceId => {
-      if (
-        pack.bookable.filter(a => a.service.id === serviceId).length
-        && !arr.filter(b => b.id === pack.id).length
-        && pack.available
-        && pack.status === 'visible'
-        && !useDisabledPackageService(amEntities.value, pack)
-        && usePackageAvailabilityByEmployeeAndLocation(amEntities.value, pack, shortcodeData.value)
-        && (searchFilter.value ? searchingStrings(pack.name) : true)
-      ) {
-        arr.push(pack)
-      }
+  if (categoriesFiltered.value.find(cat => cat.id === categorySelected.value)) {
+    amEntities.value.packages.forEach(pack => {
+      categoriesFiltered.value.find(cat => cat.id === categorySelected.value).packageList.forEach(packId => {
+        if (
+          pack.id === packId
+          && (searchFilter.value ? searchingStrings(pack.name) : true)
+        ) {
+          arr.push(pack)
+        }
+      })
     })
-  })
+  } else {
+    amEntities.value.packages.forEach(pack => {
+      categoriesFiltered.value.forEach(cat => {
+        cat.packageList.forEach(packId => {
+          if (
+            pack.id === packId
+            && !arr.find(p => p.id === packId)
+            && (searchFilter.value ? searchingStrings(pack.name) : true)
+          ) {
+            arr.push(pack)
+          }
+        })
+      })
+    })
+  }
 
   return arr
 })
 let categoryServices = computed(() => {
   let arr = []
-  amEntities.value.services.forEach(service => {
-    serviceIdsArray.value.forEach(serviceId => {
-      if (
-        service.id === serviceId &&
-        (searchFilter.value ? searchingStrings(service.name) : true)
-      ) {
-        arr.push(service)
-      }
+
+  if (categorySelected.value && categoriesFiltered.value.find(cat => cat.id === categorySelected.value)) {
+    amEntities.value.services.forEach(service => {
+      categoriesFiltered.value.find(cat => cat.id === categorySelected.value).serviceIdList.forEach(serviceId => {
+        if (
+          service.id === serviceId &&
+          (searchFilter.value ? searchingStrings(service.name) : true)
+        ) {
+          arr.push(service)
+        }
+      })
     })
-  })
+  } else {
+    amEntities.value.services.forEach(service => {
+      categoriesFiltered.value.forEach(cat => {
+        cat.serviceIdList.forEach(serviceId => {
+          if (
+            service.id === serviceId &&
+            (searchFilter.value ? searchingStrings(service.name) : true)
+          ) {
+            arr.push(service)
+          }
+        })
+      })
+    })
+  }
 
   return arr
 })

@@ -79,7 +79,7 @@
       >
         <div class="am-fcip__mini-info">
           <div
-            v-if="preselected.package.length !== 1 && customizedOptions.packageBadge.visibility"
+            v-if="preselected.package.length !== 1 && customizedOptions.packageCategory.visibility && category"
             class="am-fcip__mini-info__inner"
           >
             <span class="am-icon-folder"></span>

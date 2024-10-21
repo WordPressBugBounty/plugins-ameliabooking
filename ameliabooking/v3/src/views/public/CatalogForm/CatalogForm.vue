@@ -45,7 +45,6 @@ import { useColorTransparency } from "../../../assets/js/common/colorManipulatio
 import useRestore from "../../../assets/js/public/restore";
 import useAction from "../../../assets/js/public/actions";
 import {
-  useAvailableServiceIdsInCategory,
   useAvailableCategories
 } from "../../../assets/js/public/catalog";
 import { useRenderAction } from "../../../assets/js/public/renderActions";
@@ -232,24 +231,27 @@ provide('amEntities', amEntities)
 function setShortcodeParams () {
   let preselected = store.getters['entities/getPreselected']
 
-  if (shortcodeData.value.categories_hidden && preselected.category.length !== 1) {
-    availableCategories.value = JSON.parse(JSON.stringify(useAvailableCategories(amEntities.value, shortcodeData.value)))
-    categorySelected.value = parseInt(availableCategories.value.length ? availableCategories.value[0].id : null)
-    store.commit('booking/setCategoryId', parseInt(categorySelected.value))
+  if (preselected.category.length !== 1) {
+    if (shortcodeData.value.categories_hidden) {
+      availableCategories.value = JSON.parse(JSON.stringify(useAvailableCategories(amEntities.value, shortcodeData.value)))
 
-    nextTick(() => {
-      let componentIndex = pagesArray.value.findIndex(a => a.name === 'CategoriesList')
-      pagesArray.value.splice(componentIndex, 1)
-    })
+      nextTick(() => {
+        let componentIndex = pagesArray.value.findIndex(a => a.name === 'CategoriesList')
+        pagesArray.value.splice(componentIndex, 1)
+      })
+    }
+
+    if (!shortcodeData.value.categories_hidden) {
+      availableCategories.value = JSON.parse(JSON.stringify(useAvailableCategories(amEntities.value, shortcodeData.value)))
+    }
   }
 
   if (preselected.category.length === 1) {
     store.commit('booking/setCategoryId', parseInt(preselected.category))
 
     categorySelected.value = parseInt(preselected.category[0])
-    availableCategories.value = JSON.parse(JSON.stringify(amEntities.value.categories.filter(a => {
-      return a.id === parseInt(preselected.category[0]) && a.status === 'visible' && a.serviceList.length && !!useAvailableServiceIdsInCategory(shortcodeData, a, amEntities.value).length
-    })))
+
+    availableCategories.value = JSON.parse(JSON.stringify(useAvailableCategories(amEntities.value, shortcodeData.value).filter(a => a.id === parseInt(preselected.category[0]))))
 
     nextTick(() => {
       let componentIndex = pagesArray.value.findIndex(a => a.name === 'CategoriesList')

@@ -82,7 +82,7 @@
                   >
                   </line-chart>
 
-                  <div>
+                  <div v-if="!$root.licence.isLite">
                     <a class="am-goto" @click="navigateTo('employees')">{{ $root.labels.view }} {{$root.labels.employees}}</a>
                   </div>
                 </div>
@@ -991,7 +991,7 @@
 
     </div>
 
-    <dialog-new-customize v-if="!$root.licence.isLite"></dialog-new-customize>
+    <dialog-new-customize v-if="false"></dialog-new-customize>
 
   </div>
 </template>

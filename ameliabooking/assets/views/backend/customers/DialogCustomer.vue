@@ -175,6 +175,24 @@
           </span>
         </el-form-item>
 
+        <div class="am-customer-activity" v-if="customer.countAppointmentBookings > 0 || customer.countEventBookings > 0">
+          <span class="am-customer-activity-title">{{ $root.labels.customer_activity + ':' }}</span>
+          <div class="align-left">
+            <div class="am-customer-activity-box" v-if="customer.countAppointmentBookings > 0">
+              <span>{{ $root.labels.appointments }}: {{customer.countAppointmentBookings}}</span>
+              <el-button size="small" @click="showCustomerActivity('appointments')">
+                {{ $root.labels.view_appointments }}
+              </el-button>
+            </div>
+            <div class="am-customer-activity-box" v-if="customer.countEventBookings > 0">
+              <span>{{ $root.labels.events_booked }}: {{customer.countEventBookings}}</span>
+              <el-button size="small" @click="showCustomerActivity('events')">
+                {{ $root.labels.view_events }}
+              </el-button>
+            </div>
+          </div>
+        </div>
+
         <div class="am-divider"></div>
 
         <!-- Note -->
@@ -317,6 +335,11 @@
     },
 
     methods: {
+      showCustomerActivity (bookingType) {
+        let redirectURL = new URL(window.location.href.replaceAll('customers', bookingType))
+        redirectURL.searchParams.set('customerId', this.customer.id)
+        window.location.href = redirectURL
+      },
 
       getLanguagesData () {
         this.$http.get(`${this.$root.getAjaxUrl}/entities`, {

@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Amelia\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-14 14:22+0200\n"
-"PO-Revision-Date: 2024-09-27 10:38+0200\n"
+"POT-Creation-Date: 2024-10-16 16:48+0200\n"
+"PO-Revision-Date: 2024-10-03 10:07+0200\n"
 "Last-Translator: \n"
 "Language-Team: Romanian\n"
 "Language: ro_RO\n"
@@ -15,7 +15,7 @@ msgstr ""
 "X-Poedit-Basepath: ../..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;gettext;gettext_noop;_\n"
-"X-Loco-Version: 2.6.10; wp-6.5.4\n"
+"X-Loco-Version: 2.6.11; wp-6.6.2\n"
 "X-Poedit-SearchPath-0: view/backend/view.php\n"
 "X-Poedit-SearchPath-1: src/Infrastructure/WP/Translations\n"
 
@@ -76,15 +76,18 @@ msgid ""
 "Don't use Text mode option if you already have HTML code in the description, "
 "since once this option is enabled the existing HTML tags could be lost."
 msgstr ""
+"Nu utilizați opțiunea mod text dacă aveți deja cod HTML în descriere, "
+"deoarece odată ce această opțiune este activată, etichetele HTML existente "
+"se pot pierde."
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:37
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1522
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1526
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:214
 msgid "Close"
 msgstr "Închide"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:38
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1139
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1143
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:91
 msgid "Closed"
 msgstr "Închis"
@@ -156,7 +159,7 @@ msgid "Years"
 msgstr "Ani"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:55
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1354
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1358
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:190
 msgid "Date"
 msgstr "Dată"
@@ -171,7 +174,7 @@ msgid "Description"
 msgstr "Descriere"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:58
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1175
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1179
 msgid "Details"
 msgstr "Detalii"
 
@@ -180,7 +183,7 @@ msgid "Disabled"
 msgstr "Dezactivat"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:60
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1246
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1250
 msgid "Duration"
 msgstr "Durată"
 
@@ -193,14 +196,14 @@ msgid "Edit"
 msgstr "Editează"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:63
-#: src/Infrastructure/WP/Translations/BackendStrings.php:918
+#: src/Infrastructure/WP/Translations/BackendStrings.php:919
 msgid "example@mail.com"
 msgstr "exemplu@mail.com"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:64
 #: src/Infrastructure/WP/Translations/BackendStrings.php:352
 #: src/Infrastructure/WP/Translations/BackendStrings.php:603
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1357
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1361
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:193
 msgid "Employee"
 msgstr "Membru staff"
@@ -234,7 +237,7 @@ msgstr "Eroare"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:71
 #: src/Infrastructure/WP/Translations/BackendStrings.php:607
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1524
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1528
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:186
 msgid "Event"
 msgstr "Eveniment"
@@ -374,7 +377,7 @@ msgstr "Lite vs Premium"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:101
 #: src/Infrastructure/WP/Translations/BackendStrings.php:605
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1358
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1362
 msgid "Location"
 msgstr "Locație"
 
@@ -443,7 +446,7 @@ msgid "No-show"
 msgstr "Neprezentare"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:117
-#: src/Infrastructure/WP/Translations/BackendStrings.php:909
+#: src/Infrastructure/WP/Translations/BackendStrings.php:910
 msgid "Note"
 msgstr "Notiță"
 
@@ -490,10 +493,10 @@ msgstr "Plătit parțial"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:128
 #: src/Infrastructure/WP/Translations/BackendStrings.php:602
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1340
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1350
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1508
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1529
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1344
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1354
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1512
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1533
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:189
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:216
 msgid "Payment"
@@ -524,8 +527,8 @@ msgid "Pending"
 msgstr "În așteptare"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:134
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1289
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1436
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1293
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1440
 msgid "Phone"
 msgstr "Telefon"
 
@@ -538,7 +541,7 @@ msgid "Resources"
 msgstr "Resurse"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:137
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1244
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1248
 msgid "Save"
 msgstr "Salvați"
 
@@ -556,11 +559,11 @@ msgstr "Vă rugăm să selectați ora"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:141
 #: src/Infrastructure/WP/Translations/BackendStrings.php:354
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1314
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1319
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1321
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1356
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1486
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1318
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1323
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1325
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1360
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1490
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:172
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:175
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:192
@@ -570,8 +573,8 @@ msgstr "Serviciu"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:142
 #: src/Infrastructure/WP/Translations/BackendStrings.php:355
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1342
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1487
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1346
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1491
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:183
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:254
 msgid "Services"
@@ -586,7 +589,7 @@ msgid "Showing"
 msgstr "Se afișează"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:145
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1146
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1150
 msgid "Status"
 msgstr "Stare"
 
@@ -624,7 +627,7 @@ msgid "Tomorrow"
 msgstr "Mâine"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:154
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1221
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1225
 msgid "Total"
 msgstr "Total"
 
@@ -747,7 +750,7 @@ msgstr ""
 "finalizarea rezervării."
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:193
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1235
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1239
 msgid "Address"
 msgstr "Adresă"
 
@@ -876,11 +879,11 @@ msgstr "Adresa URL de bază API:"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:217
 msgid "Appointments and Events"
-msgstr ""
+msgstr "Programări și evenimente"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:218
 msgid "Appointments and Events Settings"
-msgstr ""
+msgstr "Setări pentru programări și evenimente"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:219
 msgid "Use these settings to manage frontend bookings"
@@ -893,43 +896,47 @@ msgstr "Capacitate maximă"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:221
 msgid "Limit number of tickets per person"
-msgstr ""
+msgstr "Limitează numărul de bilete de persoană"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:222
 msgid "Waiting list"
-msgstr ""
+msgstr "Lista de asteptare"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:223
 msgid "Waiting"
-msgstr ""
+msgstr "Aşteptare"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:224
 msgid "Handle the way of adding people from Waiting List"
-msgstr ""
+msgstr "Gestionați modul de adăugare a persoanelor din Lista de așteptare"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:225
 msgid "Automatically"
-msgstr ""
+msgstr "În mod automat"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:226
 msgid "Manually"
-msgstr ""
+msgstr "Manual"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:227
 msgid ""
 "Once the booking has been canceled or rejected the new attendee will be "
 "automatically moved from waiting list to the scheduled event"
 msgstr ""
+"Odată ce rezervarea a fost anulată sau respinsă, noul participant va fi "
+"mutat automat de pe lista de așteptare la evenimentul programat"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:228
 msgid ""
 "Admin or employee will need to manually change the status on the waiting "
 "list to move the customer/attendee to the scheduled event"
 msgstr ""
+"Administratorul sau angajatul va trebui să schimbe manual starea de pe lista "
+"de așteptare pentru a muta clientul/participantul la evenimentul programat"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:229
 msgid "Show waiting list after booking is full"
-msgstr ""
+msgstr "Afișați lista de așteptare după ce rezervarea este plină"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:230
 msgid "Redirect URL for Successfully Approved Booking"
@@ -999,27 +1006,31 @@ msgstr "Înainte cu spațiu"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:242
 msgid "Logic for Counting People:"
-msgstr ""
+msgstr "Logica pentru numărarea oamenilor:"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:243
 msgid "Customer plus Additional People"
-msgstr ""
+msgstr "Client plus persoane suplimentare"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:244
 msgid ""
 "Select this option to count the total number of persons as the primary "
 "customer plus any additional people."
 msgstr ""
+"Selectați această opțiune pentru a număra numărul total de persoane ca "
+"client principal plus orice alte persoane suplimentare."
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:245
 msgid "Total Number of People"
-msgstr ""
+msgstr "Numărul total de persoane"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:246
 msgid ""
 "Select this option to count the total number of persons directly, including "
 "the primary customer."
 msgstr ""
+"Selectați această opțiune pentru a număra direct numărul total de persoane, "
+"inclusiv clientul principal."
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:247
 msgid "Include service buffer time in time slots"
@@ -1038,8 +1049,8 @@ msgid "Set Coupons to be case insensitive"
 msgstr "Setați cupoanele să nu țină seama de majuscule și minuscule"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:250
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1219
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1603
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1223
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1607
 msgid "Calendar"
 msgstr "Calendar"
 
@@ -1113,7 +1124,7 @@ msgstr ""
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:264
 msgid "Description for Square"
-msgstr ""
+msgstr "Descriere pentru Square"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:265
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:93
@@ -1166,23 +1177,23 @@ msgstr "Adresa URL a paginii panoului angajat"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:277
 msgid "Enable Waiting List"
-msgstr ""
+msgstr "Activați Lista de așteptare"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:278
 msgid "Show waiting list slots"
-msgstr ""
+msgstr "Afișează sloturile listei de așteptare"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:279
 msgid "Notify the users in waiting lists"
-msgstr ""
+msgstr "Anunțați utilizatorii din listele de așteptare"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:280
 msgid "You need to set up a Waiting List notification."
-msgstr ""
+msgstr "Trebuie să configurați o notificare pentru Lista de așteptare."
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:281
 msgid "Set Notification"
-msgstr ""
+msgstr "Setați notificarea"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:282
 msgid "Default Appointment Status"
@@ -1379,11 +1390,11 @@ msgstr "Limita este verificată prin e-mailul clientului"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:330
 msgid "Log In"
-msgstr ""
+msgstr "Logare"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:331
 msgid "Log Out"
-msgstr ""
+msgstr "Deconectați-vă"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:332
 msgid "Integrations"
@@ -1627,7 +1638,7 @@ msgstr ""
 "prin e-mail sau prin panoul pentru clienți."
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:386
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1018
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1022
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:182
 msgid "Payments"
 msgstr "Plăți"
@@ -1896,45 +1907,49 @@ msgstr ""
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:124
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:132
 msgid "Square"
-msgstr ""
+msgstr "Square"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:442
 msgid "Square account successfully disconnected"
-msgstr ""
+msgstr "Contul Square a fost deconectat cu succes"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:443
 msgid ""
 "The currency in Amelia does not match the currency of your chosen Square "
 "location"
 msgstr ""
+"Moneda din Amelia nu se potrivește cu moneda locației alese de dvs. Square"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:444
 msgid "Default Square location"
-msgstr ""
+msgstr "Locație implicită Square"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:445
 msgid "Please log in to Square"
-msgstr ""
+msgstr "Vă rugăm să vă conectați la Square"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:446
 msgid "There has been an error logging in to Square. Please try again."
 msgstr ""
+"A apărut o eroare la conectarea la Square. Vă rugăm să încercați din nou."
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:447
 msgid "Select your Square Location"
-msgstr ""
+msgstr "Selectați locația dvs. Square"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:448
 msgid "Locations must be active and have card processing enabled"
 msgstr ""
+"Locațiile trebuie să fie active și să aibă activată procesarea cardurilor"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:449
 msgid "To use Square, you must have PHP version 7.4 or higher"
 msgstr ""
+"Pentru a utiliza Square, trebuie să aveți versiunea PHP 7.4 sau mai mare"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:450
 msgid "Square Service"
-msgstr ""
+msgstr "Serviciu Square"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:451
 msgid "Enable Taxes"
@@ -1970,7 +1985,7 @@ msgstr "Vizualizați setările de activare"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:457
 msgid "View Appointments and Events Settings"
-msgstr ""
+msgstr "Vedeți setările pentru programări și evenimente"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:458
 msgid "View Company Settings"
@@ -2169,7 +2184,7 @@ msgstr "Altele"
 #: src/Infrastructure/WP/Translations/BackendStrings.php:514
 #: src/Infrastructure/WP/Translations/BackendStrings.php:629
 msgid "Event Waiting List"
-msgstr ""
+msgstr "Lista de așteptare pentru eveniment"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:516
 #: src/Infrastructure/WP/Translations/BackendStrings.php:599
@@ -2329,7 +2344,7 @@ msgid "Booked Customer (full name, email, phone)"
 msgstr "Client rezervat (nume complet, e-mail, telefon)"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:553
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1145
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1149
 msgid "Number of people"
 msgstr "Numărul de persoane"
 
@@ -2426,7 +2441,7 @@ msgid "Event description"
 msgstr "Descrierea evenimentului"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:577
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1297
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1301
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:230
 msgid "Event Location"
 msgstr "Locația evenimentului"
@@ -2444,7 +2459,7 @@ msgid "End time of the event"
 msgstr "Ora de încheiere a evenimentului"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:581
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1525
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1529
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:188
 msgid "Event ID"
 msgstr "ID eveniment"
@@ -2506,7 +2521,7 @@ msgid "Service ID"
 msgstr "ID serviciu"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:595
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1292
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1296
 msgid "Service name"
 msgstr "Numele serviciului"
 
@@ -2524,8 +2539,8 @@ msgid "Phone:"
 msgstr "Telefon:"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:604
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1067
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1320
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1071
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1324
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:174
 msgid "Category"
 msgstr "Categorie"
@@ -2537,12 +2552,12 @@ msgstr "Substituent copiat"
 #: src/Infrastructure/WP/Translations/BackendStrings.php:610
 #: src/Infrastructure/WP/Translations/BackendStrings.php:812
 #: src/Infrastructure/WP/Translations/BackendStrings.php:881
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1201
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1205
 msgid "Price"
 msgstr "Preț"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:611
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1138
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1142
 msgid "Pricing"
 msgstr "Prețuri"
 
@@ -2667,7 +2682,7 @@ msgid "Text:"
 msgstr "Text:"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:657
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1176
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1180
 msgid "Time:"
 msgstr "Timp:"
 
@@ -2812,7 +2827,7 @@ msgid "Don't show again"
 msgstr "Nu mai arăta"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:701
-#: src/Infrastructure/WP/Translations/BackendStrings.php:931
+#: src/Infrastructure/WP/Translations/BackendStrings.php:933
 msgid "Pending Appointments"
 msgstr "Rezervări în așteptare"
 
@@ -2844,8 +2859,8 @@ msgstr ""
 "timp ales."
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:707
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1099
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1202
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1103
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1206
 msgid "Time"
 msgstr "Timp"
 
@@ -2943,7 +2958,7 @@ msgid "Hide"
 msgstr "Ascunde"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:754
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1583
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1587
 msgid "Show"
 msgstr "Arată"
 
@@ -2960,7 +2975,7 @@ msgid "Add Category"
 msgstr "Adaugă categorie"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:780
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1234
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1238
 msgid "Add Extra"
 msgstr "Adaugă Extra"
 
@@ -2981,7 +2996,7 @@ msgid "Add Resource"
 msgstr "Adaugă serviciu"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:785
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1443
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1447
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:242
 msgid "Categories"
 msgstr "Categorii"
@@ -3095,7 +3110,7 @@ msgid "New Service"
 msgstr "Serviciu nou"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:813
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1413
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1417
 msgid "+more"
 msgstr "+mai mult"
 
@@ -3197,32 +3212,32 @@ msgid "Create New"
 msgstr "Crează un Nou"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:848
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1287
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1435
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1291
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1439
 msgid "Email"
 msgstr "E-mail"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:849
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1332
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1336
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:106
 msgid "Please enter first name"
 msgstr "Vă rugăm să introduceți prenumele dvs"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:850
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1334
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1338
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:107
 msgid "Please enter last name"
 msgstr "Vă rugăm să introduceți numele dvs"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:851
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1284
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1433
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1288
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1437
 msgid "First Name"
 msgstr "Prenume"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:852
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1285
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1434
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1289
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1438
 msgid "Last Name"
 msgstr "Nume"
 
@@ -3337,51 +3352,59 @@ msgid "Are you sure you want to delete this customer?"
 msgstr "Sigur doriți să ștergeți acest client?"
 
 #: src/Infrastructure/WP/Translations/BackendStrings.php:908
+msgid "Customer Activity"
+msgstr ""
+
+#: src/Infrastructure/WP/Translations/BackendStrings.php:909
 msgid "Customer has been deleted"
 msgstr "Clientul a fost șters"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:910
+#: src/Infrastructure/WP/Translations/BackendStrings.php:911
 msgid "Customer has been saved"
 msgstr "Clientul a fost salvat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:911
+#: src/Infrastructure/WP/Translations/BackendStrings.php:912
 msgid "Customers"
 msgstr "Clienți"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:912
+#: src/Infrastructure/WP/Translations/BackendStrings.php:913
 msgid "Customers have been deleted"
 msgstr "Clienții au fost ștersi"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:913
+#: src/Infrastructure/WP/Translations/BackendStrings.php:914
 msgid "customers"
 msgstr "clienți"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:914
+#: src/Infrastructure/WP/Translations/BackendStrings.php:915
 msgid "Search Customers..."
 msgstr "Căutați clienți ..."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:915
+#: src/Infrastructure/WP/Translations/BackendStrings.php:916
 msgid "Created On"
 msgstr "Creat in"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:916
+#: src/Infrastructure/WP/Translations/BackendStrings.php:917
 msgid "Date of Birth"
 msgstr "Data nașterii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:917
+#: src/Infrastructure/WP/Translations/BackendStrings.php:918
 msgid "Edit Customer"
 msgstr "Editare client"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:919
+#: src/Infrastructure/WP/Translations/BackendStrings.php:920
+msgid "Events Booked"
+msgstr ""
+
+#: src/Infrastructure/WP/Translations/BackendStrings.php:921
 msgid "You can use this option to export customers in CSV file."
 msgstr ""
 "Puteți utiliza această opțiune pentru a exporta clienții în fișier CSV."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:920
+#: src/Infrastructure/WP/Translations/BackendStrings.php:922
 msgid "Gender"
 msgstr "Sex"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:921
+#: src/Infrastructure/WP/Translations/BackendStrings.php:923
 msgid ""
 "<ul><li>No first row with column names</li><li><b>First</b> and <b>Last "
 "name</b> are two separate fields</li><li><b>Date of birth</b> in the same "
@@ -3396,7 +3419,7 @@ msgstr ""
 "li><li><b>Telefonul</b> are un cod de țară</li><li><b>Sex</b> în formă "
 "masculină sau feminină</li></ul>"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:922
+#: src/Infrastructure/WP/Translations/BackendStrings.php:924
 msgid ""
 "Valid <b>First</b> and <b>Last name</b> are required fields. <br>If invalid, "
 "other values will be skipped and not imported.<br>If multiple customers have "
@@ -3406,84 +3429,92 @@ msgstr ""
 "nu sunt valide, alte valori vor fi omise și nu vor fi importate.<br>Dacă mai "
 "mulți clienți au aceeași adresă de e-mail, doar primul va fi importat."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:923
+#: src/Infrastructure/WP/Translations/BackendStrings.php:925
 msgid "customers have been imported successfully to your customer list"
 msgstr "clienții au fost importați cu succes în lista dvs. de clienți"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:924
+#: src/Infrastructure/WP/Translations/BackendStrings.php:926
 msgid "You can use this option to import customers from a CSV file."
 msgstr ""
 "Puteți utiliza această opțiune pentru a importa clienți dintr-un fișier CSV."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:925
+#: src/Infrastructure/WP/Translations/BackendStrings.php:927
 msgid "Imported customers from file:"
 msgstr "Clienți importați din fișier:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:926
+#: src/Infrastructure/WP/Translations/BackendStrings.php:928
 msgid "Last Appointment"
 msgstr "Ultima rezervare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:927
+#: src/Infrastructure/WP/Translations/BackendStrings.php:929
 msgid "Last Appointment Ascending"
 msgstr "Ultima rezervare ascendentă"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:928
+#: src/Infrastructure/WP/Translations/BackendStrings.php:930
 msgid "Last Appointment Descending"
 msgstr "Ultima rezervare descendentă"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:929
+#: src/Infrastructure/WP/Translations/BackendStrings.php:931
 msgid "New Customer"
 msgstr "Client nou"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:930
+#: src/Infrastructure/WP/Translations/BackendStrings.php:932
 msgid "You don't have any customers here yet..."
 msgstr "Încă nu aveți clienți aici ..."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:932
+#: src/Infrastructure/WP/Translations/BackendStrings.php:934
 msgid "Required fields are: <b>First Name</b> and <b>Last Name</b>."
 msgstr "Câmpurile obligatorii sunt: <b>Prenumele</b> și <b>Nume</b>."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:933
+#: src/Infrastructure/WP/Translations/BackendStrings.php:935
 msgid "Select Date of Birth"
 msgstr "Selectați data nașterii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:934
+#: src/Infrastructure/WP/Translations/BackendStrings.php:936
 msgid "Total Appointments"
 msgstr "Total rezervări"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:935
+#: src/Infrastructure/WP/Translations/BackendStrings.php:937
 msgid "Upload Customers .csv file"
 msgstr "Încărcați fișierul .csv pentru clienți"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:947
+#: src/Infrastructure/WP/Translations/BackendStrings.php:938
+msgid "View Appointments"
+msgstr ""
+
+#: src/Infrastructure/WP/Translations/BackendStrings.php:939
+msgid "View Events"
+msgstr ""
+
+#: src/Infrastructure/WP/Translations/BackendStrings.php:951
 msgid "Drag and drop or choose from <em>files</em>"
 msgstr "Trageți și plasați sau alegeți dintre <em>fișiere</em>"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:948
+#: src/Infrastructure/WP/Translations/BackendStrings.php:952
 msgid "Import customer data"
 msgstr "Importați datele clienților"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:949
+#: src/Infrastructure/WP/Translations/BackendStrings.php:953
 msgid "Import rules"
 msgstr "Reguli de import"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:950
+#: src/Infrastructure/WP/Translations/BackendStrings.php:954
 msgid "Import successful"
 msgstr "Import cu succes"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:951
+#: src/Infrastructure/WP/Translations/BackendStrings.php:955
 msgid "Please map corresponding data to columns."
 msgstr "Vă rugăm să mapați datele corespunzătoare la coloane."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:952
+#: src/Infrastructure/WP/Translations/BackendStrings.php:956
 msgid "Some records have a wrong format"
 msgstr "Unele înregistrări au un format greșit"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:964
+#: src/Infrastructure/WP/Translations/BackendStrings.php:968
 msgid "Welcome to wpAmelia"
 msgstr "Bun venit la wpAmelia"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:965
+#: src/Infrastructure/WP/Translations/BackendStrings.php:969
 msgid ""
 "Congratulations! You are about to use the most powerful WordPress booking "
 "plugin - Amelia is designed to make the process of bookings representation "
@@ -3493,19 +3524,19 @@ msgstr ""
 "rezervare WordPress - Amelia este conceput pentru a face procesul de "
 "reprezentare și interacțiune a rezervărilor rapid, ușor și eficient."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:966
+#: src/Infrastructure/WP/Translations/BackendStrings.php:970
 msgid "Discover Amelia"
 msgstr "Descoperă Amelia"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:967
+#: src/Infrastructure/WP/Translations/BackendStrings.php:971
 msgid "News Blog"
 msgstr "Blog de știri"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:968
+#: src/Infrastructure/WP/Translations/BackendStrings.php:972
 msgid "Keep up to date!"
 msgstr "Fii la curent!"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:969
+#: src/Infrastructure/WP/Translations/BackendStrings.php:973
 msgid ""
 "Never miss notifications about new cool features, promotions, giveaways or "
 "freebies!"
@@ -3513,64 +3544,64 @@ msgstr ""
 "Nu ratați niciodată notificările despre noi funcții interesante, promoții, "
 "cadouri sau gratuități!"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:970
+#: src/Infrastructure/WP/Translations/BackendStrings.php:974
 msgid "Enter your email"
 msgstr "Introduceți Emailul dvs"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:971
+#: src/Infrastructure/WP/Translations/BackendStrings.php:975
 msgid "Subscribe"
 msgstr "Abonati-va"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:972
+#: src/Infrastructure/WP/Translations/BackendStrings.php:976
 msgid "Take a look at how our clients use Amelia"
 msgstr "Aruncă o privire la modul în care clienții noștri folosesc Amelia"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:973
+#: src/Infrastructure/WP/Translations/BackendStrings.php:977
 msgid "Read Success Stories"
 msgstr "Citiți povești de succes"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:974
+#: src/Infrastructure/WP/Translations/BackendStrings.php:978
 msgid "Have questions?"
 msgstr "Ai întrebări?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:975
+#: src/Infrastructure/WP/Translations/BackendStrings.php:979
 msgid "Our Support team will answer any of your questions"
 msgstr ""
 "Echipa noastră de asistență va răspunde la oricare dintre întrebările dvs"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:976
+#: src/Infrastructure/WP/Translations/BackendStrings.php:980
 msgid "Contact our support"
 msgstr "Contactați asistența noastră"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:977
+#: src/Infrastructure/WP/Translations/BackendStrings.php:981
 msgid "Most used Premium features"
 msgstr "Cele mai utilizate funcții Premium"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:978
+#: src/Infrastructure/WP/Translations/BackendStrings.php:982
 msgid "Online Payments"
 msgstr "Plăți online"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:979
+#: src/Infrastructure/WP/Translations/BackendStrings.php:983
 msgid "Packages of services"
 msgstr "Pachete de servicii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:980
+#: src/Infrastructure/WP/Translations/BackendStrings.php:984
 msgid "Google Calendar Sync"
 msgstr "Google Calendar Sync"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:981
+#: src/Infrastructure/WP/Translations/BackendStrings.php:985
 msgid "Zoom/Google Meet"
 msgstr "Zoom/Google Meet"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:982
+#: src/Infrastructure/WP/Translations/BackendStrings.php:986
 msgid "Custom Service Duration"
 msgstr "Durata serviciului personalizat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:994
+#: src/Infrastructure/WP/Translations/BackendStrings.php:998
 msgid "Amelia Plans Comparison"
 msgstr "Comparația planurilor Amelia"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:995
+#: src/Infrastructure/WP/Translations/BackendStrings.php:999
 msgid ""
 "Upgrade to any of our three premium versions and unlock a world of exclusive "
 "features and benefits, tailored to enhance your experience and maximize the "
@@ -3581,32 +3612,32 @@ msgstr ""
 "vă îmbunătăți experiența și pentru a maximiza valoarea pe care o obțineți de "
 "la produsul nostru."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:996
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1000
 msgid "Upgrade now"
 msgstr "Imbunatateste acum"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:997
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1001
 msgid "Support is only available through forum"
 msgstr "Suportul este disponibil doar prin forum"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1009
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1013
 msgid "Amount"
 msgstr "Suma"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1010
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1014
 msgid "Booking Start"
 msgstr "Start Rezervare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1011
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1074
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1015
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1078
 msgid "Customer Email"
 msgstr "Email-ul clientului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1012
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1016
 msgid "Employee Email"
 msgstr "E-mail membru staff"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1013
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1017
 msgid ""
 "You can use this option to export payments in CSV file<br/>for the selected "
 "date range."
@@ -3614,164 +3645,164 @@ msgstr ""
 "Puteți utiliza această opțiune pentru a exporta plățile în fișierul CSV <br/"
 "> pentru intervalul de date selectat."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1014
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1018
 msgid "Method"
 msgstr "Metodă"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1015
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1019
 msgid "You don't have any payments here yet"
 msgstr "Încă nu aveți plăți aici"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1016
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1020
 msgid "Payment date"
 msgstr "Data plății"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1017
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1021
 msgid "Payment created"
 msgstr "Plata creată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1019
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1023
 msgid "payments"
 msgstr "plăți"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1020
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1024
 msgid "Rate"
 msgstr "Rată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1032
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1036
 msgid "Appointment Date"
 msgstr "Data programarii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1033
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1037
 msgid "Appointment Info"
 msgstr "Info Programare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1034
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1038
 msgid "Event Date"
 msgstr "Data evenimentului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1035
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1039
 msgid "Are you sure you want to delete this payment?"
 msgstr "Sigur doriți să ștergeți această plată?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1036
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1040
 msgid "Discount"
 msgstr "Reducere"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1037
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1041
 msgid "Due"
 msgstr "Datorat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1038
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1042
 msgid "Enter new payment amount"
 msgstr "Introduceți noua sumă de plată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1039
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1043
 msgid "Finance"
 msgstr "Finanțe"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1040
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1044
 msgid "Payment has been deleted"
 msgstr "Plata a fost ștearsă"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1041
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1045
 msgid "Payment Details"
 msgstr "Informații despre plată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1042
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1046
 msgid "Payment has been saved"
 msgstr "Plata a fost salvată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1043
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1047
 msgid "Payments have been deleted"
 msgstr "Plățile au fost șterse"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1044
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1048
 msgid "Payment Type"
 msgstr "Tipul de plată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1045
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1305
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1049
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1309
 msgid "Service Price"
 msgstr "Preț Serviciu"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1046
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1345
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1050
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1349
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:270
 msgid "Subtotal"
 msgstr "Subtotal"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1047
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1051
 msgid "Total Price"
 msgstr "Pretul total"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1059
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1063
 msgid "Appointment has been deleted"
 msgstr "Programarea a fost ștearsă"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1060
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1064
 msgid "Appointment has been saved"
 msgstr "Programarea a fost salvată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1061
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1065
 msgid "Cancel Appointment"
 msgstr "Anulează rezervarea"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1062
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1217
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1066
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1221
 msgid "Appointment has been rescheduled"
 msgstr "Rezervarea a fost reprogramată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1063
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1067
 msgid "Appointment status has been changed to "
 msgstr "Statutul programării a fost schimbat în "
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1064
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1068
 msgid "Appointments have been deleted"
 msgstr "Programările au fost șterse"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1065
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1069
 msgid "Search for Customers, Employees, Services..."
 msgstr "Căutați clienți, membri staff, servicii ..."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1066
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1070
 msgid "Assigned to"
 msgstr "Atribuit către"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1068
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1072
 msgid "Change group status"
 msgstr "Schimbă starea grupului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1069
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1073
 msgid "Are you sure you want to delete this appointment?"
 msgstr "Sigur doriți să ștergeți această rezervare?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1070
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1074
 msgid "Are you sure you want to delete these appointments?"
 msgstr "Sigur doriți să ștergeți aceste programări ?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1071
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1075
 msgid "Are you sure you want to duplicate this appointment?"
 msgstr "Sigur vrei să dublezi această rezervare?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1072
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1076
 msgid "Create Customer"
 msgstr "Creare client"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1073
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1250
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1077
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1254
 msgid "Custom Fields"
 msgstr "Câmpuri personalizate"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1075
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1079
 msgid "Customer Phone"
 msgstr "Telefonul Clientului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1076
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1080
 msgid "Customer(s)"
 msgstr "Client (ți)"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1077
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1081
 msgid ""
 "Here you can define the number of people that are coming<br/>with this "
 "customer. The number you can choose depends<br/>on the service and employee "
@@ -3781,19 +3812,19 @@ msgstr ""
 "Numărul pe care îl puteți alege depinde <br/> de serviciul și capacitatea "
 "staff-ului."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1078
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1082
 msgid "Edit Payment Details"
 msgstr "Editați detaliile de plată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1079
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1083
 msgid "Edit Appointment"
 msgstr "Editeaza rezervarea"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1080
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1084
 msgid "End Time"
 msgstr "Oră Sfârșit"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1081
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1085
 msgid ""
 "You can use this option to export appointments in CSV file<br/>for the "
 "selected date range."
@@ -3801,7 +3832,7 @@ msgstr ""
 "Puteți utiliza această opțiune pentru a exporta rezervări în fișierul CSV "
 "<br/> pentru intervalul de timp selectat."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1082
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1086
 msgid ""
 "You can use this option to export attendees in CSV file<br/>for the selected "
 "event."
@@ -3809,15 +3840,15 @@ msgstr ""
 "Puteți utiliza această opțiune pentru a exporta participanții în fișierul "
 "CSV <br/> pentru evenimentul selectat."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1083
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1087
 msgid "New Appointment"
 msgstr "Rezervare nouă"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1084
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1088
 msgid "Notify the attendee(s)"
 msgstr "Notificați clientul (clienții)"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1085
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1089
 msgid ""
 "Check this checkbox if you want your attendee(s) to<br/>receive an email "
 "about the event’s updated information."
@@ -3825,11 +3856,11 @@ msgstr ""
 "Bifați această casetă dacă doriți ca clientul <br/>să primească un e-mail "
 "despre rezervarea programată."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1086
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1090
 msgid "Notify the customer(s)"
 msgstr "Notificați clientul (clienții)"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1087
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1091
 msgid ""
 "Check this checkbox if you want your customer(s) to<br/>receive an email "
 "about the scheduled appointment."
@@ -3837,302 +3868,302 @@ msgstr ""
 "Bifați această casetă dacă doriți ca clientul <br/>să primească un e-mail "
 "despre rezervarea programată."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1088
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1092
 msgid "Schedule"
 msgstr "Program"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1089
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1093
 msgid "Select Customer(s)"
 msgstr "Selectați clientul (clienții)"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1090
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1094
 msgid "Please select at least one customer"
 msgstr "Vă rugăm să selectați cel puțin un client"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1091
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1095
 msgid "Maximum number of places is"
 msgstr "Numărul maxim de locuri este"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1092
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1096
 msgid "Select Extra"
 msgstr "Selectați Extra"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1093
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1265
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1577
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1097
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1269
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1581
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:269
 msgid "Select Service"
 msgstr "Selectați Serviciu"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1094
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1256
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1098
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1260
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:173
 msgid "Please select service"
 msgstr "Vă rugăm să selectați serviciul"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1095
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1099
 msgid "Select Service Category"
 msgstr "Selectați categoria de servicii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1096
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1100
 msgid "Selected Customers"
 msgstr "Clienți selectați"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1097
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1101
 msgid "This service does not have any extras"
 msgstr "Acest serviciu nu are opțiuni extra"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1098
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1102
 msgid "Start Time"
 msgstr "Timp începere"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1100
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1104
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:134
 msgid "Time slot is unavailable"
 msgstr "Slotul orar nu este disponibil"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1101
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1105
 msgid "Appointment can't be canceled"
 msgstr "Rezervarea nu poate fi anulată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1102
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1106
 msgid "Appointment can't be rescheduled"
 msgstr "Rezervarea nu poate fi reprogramată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1103
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1107
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1115
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1119
 msgid "Deposit Payment"
 msgstr "Depozit de plată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1116
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1120
 msgid "Custom Pricing"
 msgstr "Prețuri personalizate"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1117
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1121
 msgid "Custom Duration and Pricing"
 msgstr "Durată și preț personalizate"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1129
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1133
 msgid "Are you sure you want to delete selected attendee?"
 msgstr "Sigur doriți să ștergeți participantul selectat?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1130
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1134
 msgid "Are you sure you want to delete selected attendees?"
 msgstr "Sigur doriți să ștergeți participanții selectați?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1131
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1135
 msgid "Are you sure you want to delete this event?"
 msgstr "Ești sigur că vrei să ștergi acest eveniment?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1132
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1136
 msgid "Are you sure you want to duplicate this event?"
 msgstr "Sigur doriți să duplicați acest eveniment?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1133
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1137
 msgid "Are you sure you want to cancel this event?"
 msgstr "Sigur doriți să anulați acest eveniment?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1134
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1138
 msgid "Are you sure you want to open this event?"
 msgstr "Ești sigur că vrei să deschizi acest eveniment?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1135
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1139
 msgid "Please cancel the event first before deleting it."
 msgstr "Vă rugăm să anulați întâi evenimentul înainte de a-l șterge."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1136
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1251
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1140
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1255
 msgid "Customize"
 msgstr "Personalizați"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1137
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1141
 msgid "Customer is already added to this event"
 msgstr "Clientul este deja adăugat la acest eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1140
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1299
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1144
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1303
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:94
 msgid "Full"
 msgstr "Deplin"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1141
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1301
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1145
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1305
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:95
 msgid "Upcoming"
 msgstr "În viitor"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1142
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1146
 msgid "Edit Event"
 msgstr "Editează eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1143
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1147
 msgid "Attendees"
 msgstr "Participanți"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1144
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1148
 msgid "Add Attendee"
 msgstr "Adăugați participant"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1147
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1151
 msgid "Number of tickets"
 msgstr "Numărul de bilete"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1148
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1152
 msgid "Edit Attendee"
 msgstr "Editează participant"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1149
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1153
 msgid "The price will multiply by the number of people/spots"
 msgstr "Prețul se va multiplica cu numărul de persoane"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1150
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1154
 msgid "Attendee has been saved"
 msgstr "Participantul a fost salvat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1151
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1155
 msgid "Remove Attendee"
 msgstr "Eliminați participantul"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1152
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1156
 msgid "Find Attendees"
 msgstr "Găsiți participanți"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1153
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1157
 msgid "Attendee have been deleted"
 msgstr "Participanții au fost ștersi"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1154
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1158
 msgid "Attendees have been deleted"
 msgstr "Participanții au fost ștersi"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1155
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1159
 msgid "Allow the same customer to book more than once"
 msgstr "Permiteți aceluiași client să rezerve de mai multe ori"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1156
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1160
 msgid "Allow bringing more people"
 msgstr "Permite aducerea mai multor persoane"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1157
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1161
 msgid "Cancel Event"
 msgstr "Anulează Eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1158
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1162
 msgid "Close Event after certain minimum is reached"
 msgstr "Închideți evenimentul după ce este atins un anumit minim"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1159
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1163
 msgid "Minimum of attendees"
 msgstr "Minim de participanți"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1160
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1164
 msgid "Minimum of bookings"
 msgstr "Minim de rezervări"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1161
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1165
 msgid "One spot is equal to one attendee."
 msgstr "Un loc este egal cu un participant."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1162
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1166
 msgid "One booking can have multiple attendees/spots in it."
 msgstr "O rezervare poate avea mai mulți participanți/locuri în ea."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1163
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1167
 msgid "Set Minimum"
 msgstr "Setați minim"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1164
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1168
 msgid "Custom Address"
 msgstr "Adresă personalizată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1165
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1169
 msgid "Delete Event"
 msgstr "Ștergeți Evenimentul"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1166
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1170
 msgid "Event has been deleted"
 msgstr "Evenimentul a fost șters"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1167
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1171
 msgid "Duplicate Event"
 msgstr "Eveniment duplicat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1168
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1172
 msgid "Name:"
 msgstr "Nume:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1169
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1173
 msgid "Booking closes:"
 msgstr "Rezervarea se închide:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1170
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1174
 msgid "Booking opens:"
 msgstr "Rezervare se deschide:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1171
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1175
 msgid "Closes on:"
 msgstr "Se închide la:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1172
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1176
 msgid "Opens on:"
 msgstr "Se deschide la:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1173
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1177
 msgid "Booking closes when event starts"
 msgstr "Rezervarea se închide la începerea evenimentului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1174
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1178
 msgid "Booking opens immediately"
 msgstr "Rezervarea se deschide imediat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1177
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1181
 msgid "Open Event"
 msgstr "Eveniment deschis"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1178
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1182
 msgid "Recurring:"
 msgstr "Recurent:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1179
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1183
 msgid "This is a recurring event"
 msgstr "Acesta este un eveniment recurent"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1180
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1184
 msgid "Event has been opened"
 msgstr "Evenimentul a fost deschis"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1181
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1185
 msgid "Event has been canceled"
 msgstr "Evenimentul a fost anulat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1182
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1186
 msgid "Event has been saved"
 msgstr "Evenimentul a fost salvat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1183
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1187
 msgid "Search Events..."
 msgstr "Căutați evenimente ..."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1184
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1188
 msgid "Maximum allowed spots"
 msgstr "Puncte maxime permise"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1185
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1189
 msgid "Select Address"
 msgstr "Selectare adresă"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1186
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1190
 msgid "Staff"
 msgstr "Personal"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1187
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1191
 msgid "Organizer"
 msgstr "Organizator"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1188
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1192
 msgid ""
 "Here you can choose the employee that will be added as Organizer of the "
 "Google/Outlook Event. <br>Other employees chosen under the Staff option will "
@@ -4142,478 +4173,478 @@ msgstr ""
 "evenimentului Google/Outlook. <br>Alți angajați aleși în cadrul opțiunii "
 "Personal vor fi adăugați ca invitați."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1189
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1193
 msgid "Dates:"
 msgstr "Perioada:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1190
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1194
 msgid "Tags"
 msgstr "Etichete"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1191
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1195
 msgid "Select or Create Tag"
 msgstr "Selectați sau Creați etichetă"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1192
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1196
 msgid "Enter Event Name"
 msgstr "Introduceți numele evenimentului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1193
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1197
 msgid "Event Gallery:"
 msgstr "Galeria evenimentelor:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1194
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1198
 msgid "Event Colors:"
 msgstr "Culori eveniment:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1195
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1199
 msgid "Preset Colors"
 msgstr "Culori presetate"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1196
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1200
 msgid "Custom Color"
 msgstr "Culoare personalizată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1197
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1201
 msgid "Show event on site"
 msgstr "Afișați evenimentul pe site"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1198
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1202
 msgid "Booking status has been changed to "
 msgstr "Starea rezervării a fost modificată la "
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1199
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1203
 msgid "There are no attendees yet..."
 msgstr "Nu există participanți încă ..."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1200
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1204
 msgid "New Event"
 msgstr "Eveniment nou"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1203
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1207
 msgid "Maximum capacity is reached"
 msgstr "Capacitatea maximă este atinsă"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1215
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1219
 msgid "This will change the time of the appointment. Continue?"
 msgstr "Aceasta va schimba ora programării. Continuați?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1216
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1220
 msgid "Appointment can't be moved in past time period"
 msgstr "Rezervarea nu poate fi mutată în perioada trecută"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1218
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1222
 msgid "Appointment can't be moved out of employee working hours"
 msgstr ""
 "Rezervarea nu poate fi mutată în afara programului de lucru al staff-ului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1220
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1224
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:96
 msgid "Confirm"
 msgstr "Confirmă"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1233
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1237
 msgid "Add Custom Field"
 msgstr "Adăugați câmp personalizat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1236
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1240
 msgid "Are you sure you want to reset your form settings?"
 msgstr "Sigur doriți să resetați setările formularului?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1237
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1241
 msgid "Your current changes will be lost."
 msgstr "Modificările dvs. actuale se vor pierde."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1238
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1242
 msgid "Yes, Reset"
 msgstr "Reset"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1239
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1243
 msgid "No, Cancel"
 msgstr "Anulează"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1240
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1244
 msgid "Reset Form"
 msgstr "Resetare formular"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1241
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1245
 msgid "Available in package"
 msgstr "Disponibil la pachet"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1242
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1246
 msgid "Bringing Anyone with You?"
 msgstr "Vine cineva cu tine?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1243
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1247
 msgid "Buttons"
 msgstr "Butoane"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1245
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1249
 msgid "Default Label"
 msgstr "Etichetă implicită"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1247
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1251
 msgid "Checkbox"
 msgstr "Căsuță de bifat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1248
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1252
 msgid "Start by clicking the Add Custom Field button"
 msgstr "Începeți făcând clic pe butonul Adăugare câmp personalizat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1249
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1253
 msgid "Text Content"
 msgstr "Conţinut Text"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1252
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1256
 msgid "Font"
 msgstr "Font"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1253
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1257
 msgid "You don't have any custom fields here yet..."
 msgstr "Încă nu aveți câmpuri personalizate aici ..."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1254
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1258
 msgid "Options"
 msgstr "Opțiuni"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1255
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1259
 msgid "Pick date & time"
 msgstr "Alege dată și oră"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1257
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1261
 msgid "Primary Color"
 msgstr "Culoare principală"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1258
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1262
 msgid "Success Color"
 msgstr "Succes"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1259
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1263
 msgid "Warning Color"
 msgstr "Culoare principală"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1260
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1264
 msgid "Error Color"
 msgstr "Culoare principală"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1261
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1265
 msgid "Radio Buttons"
 msgstr "Butoane radio"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1262
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1266
 msgid "Reset"
 msgstr "Reset"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1263
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1267
 msgid "Selectbox"
 msgstr "Selectbox"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1264
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1268
 msgid "Steps"
 msgstr "Pași"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1266
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1427
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1270
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1431
 msgid "Text"
 msgstr "Text"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1267
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1271
 msgid "Text Area"
 msgstr "Aliniere text"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1268
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1272
 msgid "Text Color"
 msgstr "Culoare Text"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1269
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1273
 msgid "Placeholder Color"
 msgstr "Substituenți SMS"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1270
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1274
 msgid "Text Color on Background"
 msgstr "Culoarea textului pe fundal"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1271
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1275
 msgid "Attachment"
 msgstr "Atașament"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1272
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1276
 msgid "Date Picker"
 msgstr "Selector de date"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1273
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1277
 msgid "Preview"
 msgstr "previzualizare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1274
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1367
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1278
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1371
 msgid "Background Color"
 msgstr "Culoare de fundal"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1275
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1279
 msgid "Background Gradient Color 1"
 msgstr "Culoare gradient de fundal 1"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1276
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1280
 msgid "Background Gradient Color 2"
 msgstr "Culoare gradient de fundal 2"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1277
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1281
 msgid "Background Gradient Angle"
 msgstr "Unghi de gradient de fundal"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1278
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1282
 msgid "Input Color"
 msgstr "Culoare de intrare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1279
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1283
 msgid "Input Text Color"
 msgstr "Introduceți culoarea textului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1280
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1284
 msgid "Dropdown Color"
 msgstr "Meniu derulant Culoare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1281
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1285
 msgid "Dropdown Text Color"
 msgstr "Meniu derulant Culoare text"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1282
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1286
 msgid "Image Color"
 msgstr "Culoarea imaginii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1283
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1287
 msgid "Repeat this appointment"
 msgstr "Repetă această întâlnire"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1286
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1290
 msgid "Last Name Input Field"
 msgstr "Câmp de introducere a numelui de familie"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1288
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1292
 msgid "Email Input Field"
 msgstr "Câmp de introducere a e-mailului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1290
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1294
 msgid "Phone Input Field"
 msgstr "Câmp de intrare pentru telefon"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1291
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1461
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1295
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1465
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:252
 msgid "Go Back"
 msgstr "Întoarce-te"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1293
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1297
 msgid "Display Field:"
 msgstr "Câmp de afișare:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1294
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1298
 msgid "Filterable Field:"
 msgstr "Câmp filtrabil:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1295
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1299
 msgid "Mandatory Field:"
 msgstr "Câmp obligatoriu:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1296
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1300
 msgid "Event Type"
 msgstr "Tipul Evenimentului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1298
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1302
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:125
 msgid "Open"
 msgstr "Deschis"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1300
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1304
 msgid "From"
 msgstr "De la"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1302
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1489
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1306
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1493
 msgid "Free"
 msgstr "Gratuit"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1303
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1307
 msgid "Event Price"
 msgstr "Preț eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1304
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1308
 msgid "Service Badge"
 msgstr "Numele serviciului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1306
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1310
 msgid "Package Name"
 msgstr "Numele pachetului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1307
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1311
 msgid "Congratulations!"
 msgstr "Felicitări!"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1308
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1312
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:79
 msgid "Add to Calendar"
 msgstr "Adaugă În Calendar"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1309
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1313
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:112
 msgid "Finish"
 msgstr "Finalizează"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1310
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1314
 msgid "Step By Step Booking Form"
 msgstr "Formular de rezervare pas cu pas"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1311
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1315
 msgid "Event Status"
 msgstr "Stare eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1312
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1316
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:210
 msgid "Filters"
 msgstr "Filtre"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1313
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1317
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:207
 msgid "Book event"
 msgstr "Eveniment de carte"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1315
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1319
 msgid "Form"
 msgstr "Formă"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1316
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1320
 msgid "Form Flow"
 msgstr "Fluxul Formelor"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1317
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1321
 msgid "Use Global Colors"
 msgstr "Utilizați culori globale"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1318
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1404
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1322
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1408
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:171
 msgid "Service Selection"
 msgstr "Selectarea serviciului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1322
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1326
 msgid "No matching data"
 msgstr "Nu există date care se potrivesc"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1324
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1328
 msgid "Bringing Anyone With You"
 msgstr "Aducând pe oricine cu tine"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1325
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1329
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:194
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:229
 msgid "Show more"
 msgstr "Afișați mai multe"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1326
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1330
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:195
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:228
 msgid "Show less"
 msgstr "Arata mai putin"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1328
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1332
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:176
 msgid "Date & Time"
 msgstr "Data și ora"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1329
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1333
 msgid "All slots are selected"
 msgstr "Toate sloturile sunt selectate"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1330
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1523
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1334
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1527
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:177
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:217
 msgid "Your Information"
 msgstr "Informatia ta"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1331
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1335
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:178
 msgid "Enter first name"
 msgstr "Introduceți prenumele"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1333
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1337
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:179
 msgid "Enter last name"
 msgstr "Introduceți numele de familie"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1335
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1339
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:180
 msgid "Enter email"
 msgstr "Introduceți adresa de email"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1336
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1340
 msgid "Please enter valid email"
 msgstr "Vă rugăm să introduceți un e-mail valid"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1337
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1341
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:181
 msgid "Enter phone"
 msgstr "Introdu telefonul"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1338
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1342
 msgid "Please enter phone"
 msgstr "Vă rugăm să introduceți telefonul"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1341
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1345
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:167
 msgid "Summary"
 msgstr "rezumat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1343
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1347
 msgid "Service Subtotal"
 msgstr "Subtotal serviciu"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1344
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1348
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:185
 msgid "people"
 msgstr "oameni"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1346
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1349
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1350
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1353
 msgid "Total Amount"
 msgstr "Valoare totală"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1347
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1351
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:163
 msgid "The payment will be done on-site."
 msgstr "Plata se va face la fața locului."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1348
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1352
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:187
 msgid "Appointment ID"
 msgstr "ID programare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1351
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1355
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:169
 msgid "Your Name"
 msgstr "Numele dumneavoastră"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1352
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1356
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:160
 msgid "Email Address"
 msgstr "Adresa de e-mail"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1353
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1357
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:164
 msgid "Phone Number"
 msgstr "Număr de telefon"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1355
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1359
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:191
 msgid "Local Time"
 msgstr "Ora locala"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1359
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1363
 msgid "Choose a Form"
 msgstr "Alegeți un formular"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1360
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1364
 msgid ""
 "Choose a form you want to customize. The Step-by-Step 2.0 form is the new "
 "and improved version which provides you with better design and user "
@@ -4623,15 +4654,15 @@ msgstr ""
 "Step 2.0 este versiunea nouă și îmbunătățită care vă oferă un design și o "
 "experiență de utilizator mai bune, precum și o viteză mai bună."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1361
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1365
 msgid "Step-by-Step Booking Form 2.0"
 msgstr "Formular de rezervare pas cu pas 2.0"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1362
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1366
 msgid "Booking Forms 1.0"
 msgstr "Formulare de rezervare 1.0"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1363
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1367
 msgid ""
 "Use the upgraded Step-by-Step Booking Form 2.0 for a simplified, direct "
 "booking process on your page. Customize its design and labels to enhance "
@@ -4642,7 +4673,7 @@ msgstr ""
 "etichetele pentru a îmbunătăți experiența utilizatorului și pentru a "
 "răspunde nevoilor dvs. de afaceri."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1364
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1368
 msgid ""
 "The original booking forms—Step-by-Step, Catalog, Event List, and Event "
 "Calendar—feature basic customization and label changes, serving as the "
@@ -4652,300 +4683,300 @@ msgstr ""
 "evenimente și calendar de evenimente – prezintă personalizare de bază și "
 "modificări de etichetă, servind drept bază pentru versiunile noastre mai noi."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1365
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1369
 msgid "Primary and state colors"
 msgstr "Culori primare și de stat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1366
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1416
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1370
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1420
 msgid "Sidebar"
 msgstr "Bara laterală"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1368
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1372
 msgid "Content"
 msgstr "Conţinut"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1369
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1373
 msgid "Heading Text Color"
 msgstr "Culoare Text"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1370
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1374
 msgid "Content Text Color"
 msgstr "Culoare Text"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1371
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1375
 msgid "Input Fields"
 msgstr "Câmpuri de intrare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1372
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1376
 msgid "Border Color"
 msgstr "Culori presetate"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1373
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1377
 msgid "Dropdowns"
 msgstr "Mențiuni derulante"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1374
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1378
 msgid "Init Cell"
 msgstr "Init Cell"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1375
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1379
 msgid "Init Cell Text"
 msgstr "Inițiază textul celulei"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1376
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1380
 msgid "Cell Selected Background"
 msgstr "Celula de fundal selectată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1377
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1381
 msgid "Cell Selected Text"
 msgstr "Celula Text selectat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1378
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1382
 msgid "Cell Disabled Background"
 msgstr "Fundal celula dezactivată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1379
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1383
 msgid "Cell Disabled Text"
 msgstr "Text celula dezactivată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1380
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1384
 msgid "Primary Button Background Color"
 msgstr "Culoarea de fundal a butonului primar"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1381
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1385
 msgid "Primary Button Text Color"
 msgstr "Culoare principală"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1382
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1386
 msgid "Secondary Button Background Color"
 msgstr "Culoare de fundal pentru butonul secundar"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1383
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1387
 msgid "Secondary Button Text Color"
 msgstr "Culoarea textului butonului secundar"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1384
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1388
 msgid "Danger Button Background Color"
 msgstr "Culoarea de fundal a butonului de pericol"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1385
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1389
 msgid "Danger Button Text Color"
 msgstr "Culoarea textului butonului de pericol"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1386
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1390
 msgid "Layout & Inputs"
 msgstr "Aspect și intrări"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1387
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1391
 msgid "Colors"
 msgstr "Culori"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1388
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1392
 msgid "Fonts"
 msgstr "Fonturi"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1389
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1393
 msgid "Order"
 msgstr "Ordin"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1390
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1394
 msgid "Step Title"
 msgstr "Titlul pasului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1391
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1395
 msgid "Footer Buttons"
 msgstr "Butoane de subsol"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1392
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1396
 msgid "Step Content"
 msgstr "Conținutul pasului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1393
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1437
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1397
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1441
 msgid "Finish Button Type"
 msgstr "Tip Buton Finish"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1394
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1438
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1398
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1442
 msgid "Panel Button Type"
 msgstr "Tip buton panou"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1395
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1399
 msgid "Summary Segment"
 msgstr "Segment rezumat"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1396
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1400
 msgid "Payment Segment"
 msgstr "Segment de plată"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1397
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1401
 msgid "Heading Title"
 msgstr "Titlul titlului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1398
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1402
 msgid "Sub Steps"
 msgstr "Sub Pasi"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1399
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1403
 msgid "Step Popups"
 msgstr "Ferestre pop-up pas"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1402
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1406
 msgid "Fonts and colors"
 msgstr "Fonturi și culori"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1403
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1407
 msgid "Set up Sidebar visibility and its content"
 msgstr "Configurați vizibilitatea Sidebar și conținutul acestuia"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1405
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1409
 msgid "Set up Services, Locations, Employees selection options"
 msgstr "Configurați opțiunile de selecție Servicii, Locații, Angajați"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1406
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1410
 msgid "Date & Time Selection"
 msgstr "Data și perioada de timp a evenimentului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1407
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1411
 msgid "Set up Calendar layout and Recurring popup options"
 msgstr "Configurați aspectul calendarului și opțiunile pop-up recurente"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1408
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1412
 msgid "Customer Information"
 msgstr "Mențiune client"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1409
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1507
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1413
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1511
 msgid "Field order, mandatory fields, labels and display options"
 msgstr ""
 "Ordinea câmpurilor, câmpuri obligatorii, etichete și opțiuni de afișare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1410
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1414
 msgid "Payment Summary"
 msgstr "Istoric plăți"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1411
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1509
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1415
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1513
 msgid "Set up labels and buttons"
 msgstr "Configurați etichete și butoane"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1412
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1511
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1416
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1515
 msgid "Set up button types and labels"
 msgstr "Configurați tipurile de butoane și etichete"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1415
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1419
 msgid "Global Settings"
 msgstr "Setări globale"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1417
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1421
 msgid "Section"
 msgstr "Actiune"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1418
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1422
 msgid "Field Order"
 msgstr "Ordine de câmp"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1419
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1510
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1530
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1423
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1514
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1534
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:97
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:215
 msgid "Congratulations"
 msgstr "Felicitări"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1421
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1425
 msgid "Footer"
 msgstr "Subsol"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1422
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1426
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:161
 msgid "Get in Touch"
 msgstr "Intrați în legătură"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1423
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1427
 msgid "Collapse Menu"
 msgstr "Restrângeți meniul"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1425
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1429
 msgid "Filled"
 msgstr "Umplut"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1426
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1430
 msgid "Plain"
 msgstr "Simplu"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1429
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1433
 msgid "Continue Button Type"
 msgstr "Continuați tipul butonului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1430
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1434
 msgid "Calendar Slot End Time"
 msgstr "Ora de încheiere a intervalului calendaristic"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1431
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1435
 msgid "Show Busy Time Slots"
 msgstr "Afișați intervalele de timp ocupate"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1432
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1436
 msgid "Calendar Time Zone"
 msgstr "Fus orar calendaristic"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1439
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1443
 msgid "Sidebar Visibility"
 msgstr "Vizibilitatea barei laterale"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1440
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1444
 msgid "Publish Form"
 msgstr "Formular de publicare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1442
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1446
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:247
 msgid "View All"
 msgstr "Vizualizare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1444
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1448
 msgid "Set up categories cards"
 msgstr "Afișați toate categoriile"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1445
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1449
 msgid "Cards"
 msgstr "Carduri"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1446
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1450
 msgid "Card Button Type"
 msgstr "Butoane radio"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1447
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1451
 msgid "Services Overview"
 msgstr "Preț Serviciu"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1448
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1452
 msgid "Set up Services view"
 msgstr "Sortare Servicii:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1449
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1453
 msgid "Service Details"
 msgstr "Detalii despre servicii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1450
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1454
 msgid "Set up Service detailed view"
 msgstr "Detalii despre servicii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1451
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1455
 msgid "Booking Form"
 msgstr "Rezervare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1452
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1456
 msgid "Set options, colors and labels for booking form"
 msgstr "Setați opțiuni, culori și etichete pentru formularul de rezervare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1454
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1458
 msgid "Catalog Booking Form 2.0"
 msgstr "Formular de rezervare de catalog 2.0"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1455
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1459
 msgid ""
 " Discover the modernized Catalog Booking Form 2.0 that showcases services in "
 "stylish card layouts. Easily add categories and adjust the appearance to "
@@ -4955,122 +4986,122 @@ msgstr ""
 "prezintă serviciile în format de card elegant. Adăugați cu ușurință "
 "categorii și ajustați aspectul pentru a reflecta marca dvs."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1458
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1462
 msgid "Total Number of Services"
 msgstr "Numărul total de persoane:"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1459
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1463
 msgid "Back Button"
 msgstr "Butoane radio"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1460
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1464
 msgid "“Back” Button Type"
 msgstr "Tip de buton „Înapoi”."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1462
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1466
 msgid "“Book Now” Button Type"
 msgstr "Tip de buton „Rezervați acum”."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1465
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1469
 msgid "Main Category Button"
 msgstr "Numele categoriei"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1466
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1470
 msgid "Category Card Side Color"
 msgstr "Culoarea laterală a cardului de categorie"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1467
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1471
 msgid "Category Color"
 msgstr "Categorie Culoare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1471
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1475
 msgid "Filter Menu Button Type"
 msgstr "Tip de buton pentru meniul de filtrare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1472
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1474
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1476
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1478
 msgid "Categories Sidebar"
 msgstr "Categorii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1473
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1477
 msgid "Filters Block"
 msgstr "Blocarea filtrelor"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1475
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1479
 msgid "Page Header"
 msgstr "Antetul paginii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1476
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1480
 msgid "Main Content"
 msgstr "Conținut principal"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1477
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1481
 msgid "Service Category"
 msgstr "Categoria de servicii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1478
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1482
 msgid "Service Duration"
 msgstr "Durata serviciului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1479
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1491
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1483
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1495
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:250
 msgid "About Service"
 msgstr "Adaugă serviciu"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1480
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1484
 msgid "“Search” option"
 msgstr "Căutați vouchere"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1481
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1485
 msgid "Card Color"
 msgstr "Culoare card"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1482
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1486
 msgid "Page Scroll Visibility"
 msgstr "Vizibilitatea derulării paginii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1484
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1488
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:248
 msgid "Search"
 msgstr "Caută"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1485
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1489
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:266
 msgid "Available"
 msgstr "Disponibil"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1488
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1492
 msgid "No results"
 msgstr "rezultate"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1490
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1494
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:249
 msgid "Book Now"
 msgstr "Rezervă"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1492
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1496
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:251
 msgid "View all photos"
 msgstr "Afișați toate locațiile"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1494
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1498
 msgid "Support Heading:"
 msgstr "În așteptare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1495
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1499
 msgid "Company Phone:"
 msgstr "Telefon companie"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1496
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1500
 msgid "Company Email:"
 msgstr "Numele Companiei"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1499
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1503
 msgid "Event List Booking Form 2.0"
 msgstr "Formularul de rezervare a listei de evenimente 2.0"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1500
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1504
 msgid ""
 "The Event List Booking Form 2.0 offers an intuitive and fast booking "
 "experience, with a design that stands out. Customers can effortlessly browse "
@@ -5080,11 +5111,11 @@ msgstr ""
 "rapidă, cu un design care iese în evidență. Clienții pot naviga fără efort "
 "și pot rezerva dintr-o listă de evenimente."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1502
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1506
 msgid "Events List"
 msgstr "Lista evenimentelor"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1503
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1507
 msgid ""
 "Set up Location, Images, Filters, Capacity, Price, and Status visibility "
 "options"
@@ -5092,245 +5123,245 @@ msgstr ""
 "Configurați opțiunile de vizibilitate pentru locație, imagini, filtre, "
 "capacitate, preț și stare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1504
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1527
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1508
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1531
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:111
 msgid "Event Info"
 msgstr "Informații Eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1505
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1509
 msgid "Set up Staff, Location, Gallery and other Event information visibility"
 msgstr ""
 "Configurați vizibilitatea personalului, a locației, a galeriei și a altor "
 "informații despre eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1506
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1510
 msgid "Customer Info"
 msgstr "Informații despre client"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1513
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1517
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:219
 msgid "Events Available"
 msgstr "Evenimente disponibile"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1514
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1518
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:220
 msgid "Event Available"
 msgstr "Eveniment disponibil"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1515
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1519
 msgid "Page"
 msgstr "Pagină"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1516
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1520
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:221
 msgid "Search for Events"
 msgstr "Căutați Evenimente"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1517
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1521
 msgid "Begins"
 msgstr "Începe"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1518
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1522
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:222
 msgid "slot left"
 msgstr "slot stânga"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1519
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1523
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:223
 msgid "slots left"
 msgstr "sloturi rămase"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1520
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1524
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:224
 msgid "Learn more"
 msgstr "Află mai multe"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1521
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1525
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:225
 msgid "Read more"
 msgstr "Citeşte mai mult"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1526
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1530
 msgid "About"
 msgstr "Despre"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1528
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1532
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:226
 msgid "Timetable"
 msgstr "Orarul"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1531
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1535
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:218
 msgid "About Event"
 msgstr "Despre Eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1532
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1536
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:211
 msgid "Event Starts"
 msgstr "Începe evenimentul"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1533
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1537
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:212
 msgid "Event Ends"
 msgstr "Evenimentul se termină"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1534
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1538
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:213
 msgid "at"
 msgstr "la"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1535
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1539
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:227
 msgid "How many attendees do you want to book event for?"
 msgstr "Pentru câți participanți doriți să rezervați un eveniment?"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1538
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1542
 msgid "Step Filters"
 msgstr "Filtre de pas"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1539
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1543
 msgid "Event Card"
 msgstr "Card de eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1540
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1544
 msgid "Step Pagination"
 msgstr "Paginarea pasului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1541
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1545
 msgid "Event Slots Capacity"
 msgstr "Capacitate sloturi pentru evenimente"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1542
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1546
 msgid "Filters Button Type"
 msgstr "Tipul de buton pentru filtre"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1543
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1547
 msgid "Read More Button Type"
 msgstr "Citește mai mult Tip buton"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1544
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1548
 msgid "Learn More Button Type"
 msgstr "Aflați mai multe tip de buton"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1545
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1549
 msgid "Event Tab Image"
 msgstr "Imagine fila Eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1546
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1550
 msgid "Step Header"
 msgstr "Antet pas"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1547
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1551
 msgid "Step Info Tab"
 msgstr "Fila Informații pas"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1548
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1552
 msgid "Booking Event Button"
 msgstr "Butonul de rezervare pentru eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1549
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1553
 msgid "Finish Button"
 msgstr "Butonul Terminare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1550
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1554
 msgid "Close Event Button"
 msgstr "Butonul de închidere a evenimentului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1551
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1555
 msgid "Event Gallery"
 msgstr "Galeria de evenimente"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1552
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1556
 msgid "Event Description"
 msgstr "Descriere Eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1554
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1558
 #: src/Infrastructure/WP/Translations/FrontendStrings.php:184
 msgid "person"
 msgstr "persoană"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1555
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1559
 msgid "Event Employees"
 msgstr "Angajații evenimentului"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1565
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1569
 msgid "Catalog"
 msgstr "Catalog"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1566
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1570
 msgid "Choose Category"
 msgstr "Alegeți Categorie"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1567
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1571
 msgid "Choose Service"
 msgstr "Alegeți Serviciu"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1568
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1572
 msgid "Choose Package"
 msgstr "Alege pachetul"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1569
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1573
 msgid "Preselect Booking Parameters"
 msgstr "Preselectați parametrii de rezervare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1570
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1574
 msgid "Skip Categories step"
 msgstr "Pasul de ignorare a categoriilor"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1571
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1575
 msgid "Insert Amelia Booking Shortcode"
 msgstr "Introduceți codul scurt de rezervare Amelia"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1572
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1576
 msgid "Select Catalog View"
 msgstr "Selectați Vizualizare catalog"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1573
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1577
 msgid "Select Category"
 msgstr "Selectați Categoria"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1574
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1578
 msgid "Select Employee"
 msgstr "Selectați Membru Staff"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1575
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1579
 msgid "Select Location"
 msgstr "Selectează locația"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1576
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1580
 msgid "Select Package"
 msgstr "Selectați Pachet"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1578
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1582
 msgid "Select Event"
 msgstr "Selectați Eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1579
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1583
 msgid "Select Events"
 msgstr "Selectați Evenimente"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1580
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1584
 msgid "Select Tag"
 msgstr "Selectează eticheta"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1581
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1585
 msgid "Select Tags"
 msgstr "Selectați Etichete"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1582
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1586
 msgid "Select View"
 msgstr "Selectează modul de vizualizare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1584
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1588
 msgid "Show All"
 msgstr "Arata tot"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1585
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1589
 msgid "Load booking form manually"
 msgstr "Încărcați manual formularul de rezervare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1586
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1590
 msgid ""
 "Add element (button, link...) ID, that will manually load amelia shortcode "
 "content"
@@ -5338,151 +5369,151 @@ msgstr ""
 "Adăugați ID-ul elementului (buton, link...), care va încărca manual "
 "conținutul codului scurt Amelia"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1587
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1591
 msgid "For multiselect: hold CTRL / Command (⌘)."
 msgstr "Pentru selecție multiplă: țineți apăsat CTRL / Comandă (⌘)."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1588
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1592
 msgid "Show all categories"
 msgstr "Afișați toate categoriile"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1589
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1593
 msgid "Show all employees"
 msgstr "Afișați tot staff-ul"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1590
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1594
 msgid "Show all locations"
 msgstr "Afișați toate locațiile"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1591
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1595
 msgid "Show all services"
 msgstr "Afișați toate serviciile"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1592
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1596
 msgid "Show all events"
 msgstr "Afișați toate evenimentele"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1593
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1597
 msgid "Show all packages"
 msgstr "Afișați toate etichetele"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1594
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1598
 msgid "Show all tags"
 msgstr "Afișați toate etichetele"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1595
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1599
 msgid "Show catalog of all categories"
 msgstr "Afișează catalogul tuturor categoriilor"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1596
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1600
 msgid "Show specific category"
 msgstr "Afișează o categorie specifică"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1597
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1601
 msgid "Show specific categories"
 msgstr "Afișați anumite categorii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1598
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1602
 msgid "Show specific package"
 msgstr "Afișați pachetul specific"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1599
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1603
 msgid "Show specific packages"
 msgstr "Afișați pachete specifice"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1600
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1604
 msgid "Show event"
 msgstr "Afișați eveniment"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1601
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1605
 msgid "Show Type"
 msgstr "Afișează tipul"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1602
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1606
 msgid "List (default)"
 msgstr "Listă (implicit)"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1604
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1608
 msgid "Show tag"
 msgstr "Afișează eticheta"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1605
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1609
 msgid "Show specific service"
 msgstr "Afișați un serviciu specific"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1606
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1610
 msgid "Show specific services"
 msgstr "Afișați anumite servicii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1607
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1611
 msgid "Trigger type"
 msgstr "Tip de declanșare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1608
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1612
 msgid "Id"
 msgstr "Id"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1609
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1613
 msgid "Class"
 msgstr "Clasă"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1610
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1614
 msgid "Trigger by attribute"
 msgstr "Declanșează după atribut"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1611
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1615
 msgid "Step Booking"
 msgstr "Rezervare pas"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1612
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1616
 msgid "Catalog Booking"
 msgstr "Rezervări medii"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1613
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1617
 msgid "Events List Booking"
 msgstr "Rezervare Lista de evenimente"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1614
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1618
 msgid "Show recurring events"
 msgstr "Afișați evenimente recurente"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1615
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1619
 msgid "Show in Amelia Popup"
 msgstr "Afișați în Amelia Popup"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1617
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1621
 msgid "AM - Booking view"
 msgstr "AM - Vizualizare rezervare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1618
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1622
 msgid "AM - Step Booking"
 msgstr "AM - Rezervare pas"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1619
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1623
 msgid "AM - Catalog Booking"
 msgstr "Amelia - Vizualizare catalog"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1620
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1624
 msgid "AM - Catalog view"
 msgstr "AM - Vedere catalog"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1621
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1625
 msgid "AM - Events view"
 msgstr "AM - Vedere evenimente"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1622
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1626
 msgid "AM - Events List Booking"
 msgstr "AM - Rezervarea listei de evenimente"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1623
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1627
 msgid "AM - Events Calendar Booking"
-msgstr ""
+msgstr "AM - Rezervarea calendarului evenimentelor"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1625
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1629
 msgid "Amelia - Booking view"
 msgstr "Amelia - Vizualizare rezervare"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1626
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1630
 msgid ""
 "Step-By-Step Booking Wizard gives your customers the option to choose "
 "everything about the booking in a few steps"
@@ -5490,11 +5521,11 @@ msgstr ""
 "Expertul de rezervare pas cu pas oferă clienților dvs. opțiunea de a alege "
 "totul la rezervare în câțiva pași"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1629
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1633
 msgid "Amelia - Step-By-Step Booking"
 msgstr "Amelia - Rezervare pas cu pas"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1630
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1634
 msgid ""
 "Step-by-Step booking view guides the customers through several steps in "
 "order to make their bookings."
@@ -5502,11 +5533,11 @@ msgstr ""
 "Vizualizarea rezervării pas cu pas ghidează clienții prin mai mulți pași "
 "pentru a-și face rezervările."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1633
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1637
 msgid "Amelia - Catalog Booking"
 msgstr "Amelia - Vizualizare catalog"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1634
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1638
 msgid ""
 "Front-end Booking Catalog is shortcode when you want to show your service in "
 "a form of a catalog"
@@ -5514,11 +5545,11 @@ msgstr ""
 "Catalogul de rezervări front-end este codul scurt atunci când doriți să vă "
 "arătați serviciul într-o formă de catalog"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1637
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1641
 msgid "Amelia - Catalog view"
 msgstr "Amelia - Vizualizare catalog"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1638
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1642
 msgid ""
 "Front-end Booking Catalog is shortcode when you want to show your service in "
 "a form of a cataloge"
@@ -5526,12 +5557,12 @@ msgstr ""
 "Catalogul de rezervări front-end este codul scurt atunci când doriți să vă "
 "arătați serviciul într-o formă de catalog"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1641
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1645
 msgid "Amelia - Events"
 msgstr "Amelia - Evenimente"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1642
 #: src/Infrastructure/WP/Translations/BackendStrings.php:1646
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1650
 msgid ""
 "Event Booking is shortcode that gives your customers the option to book one "
 "of the events that you've created on the back-end in a simple event list "
@@ -5541,26 +5572,29 @@ msgstr ""
 "opțiunea de a rezerva unul dintre evenimentele pe care le-ați creat pe back-"
 "end printr-o simplă vizualizare a listei de evenimente."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1645
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1649
 msgid "Amelia - Events List"
 msgstr "Amelia - Lista evenimentelor"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1649
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1653
 msgid "Amelia - Events Calendar"
-msgstr ""
+msgstr "Amelia - Calendar de evenimente"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1650
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1654
 msgid ""
 "Event Booking is shortcode that gives your customers the option to book one "
 "of the events that you've created on the back-end in a simple event calendar "
 "view."
 msgstr ""
+"Rezervarea evenimentelor este un cod scurt (shortcode) care oferă clienților "
+"dvs. opțiunea de a rezerva unul dintre evenimentele pe care le-ați creat în "
+"back-end într-o vizualizare simplă a calendarului de evenimente."
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1652
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1656
 msgid "You are using a form that will be outdated soon!"
 msgstr "Folosiți un formular care va fi învechit în curând!"
 
-#: src/Infrastructure/WP/Translations/BackendStrings.php:1671
+#: src/Infrastructure/WP/Translations/BackendStrings.php:1675
 msgid "Recurring Appointments"
 msgstr "Numiri recurente"
 
@@ -5971,6 +6005,9 @@ msgstr "Rezervarea nu poate fi ștearsă"
 #~ msgid "Unlimited"
 #~ msgstr "Nelimitat"
 
+#~ msgid "Waiting list is empty"
+#~ msgstr "Lista de așteptare este goală"
+
 #~ msgid "Woocommerce Order Id"
 #~ msgstr "Codul comenzii Woocommerce"
 
@@ -6040,6 +6077,10 @@ msgstr "Rezervarea nu poate fi ștearsă"
 
 #~ msgid "Warning"
 #~ msgstr "Avertizare"
+
+#~ msgid "By approving this attendee, you have exceeded the event capacity."
+#~ msgstr ""
+#~ "Prin aprobarea acestui participant, ați depășit capacitatea evenimentului."
 
 #~ msgid "Plugin has been activated"
 #~ msgstr "Pluginul a fost activat"
@@ -6759,6 +6800,9 @@ msgstr "Rezervarea nu poate fi ștearsă"
 #~ msgid "Stripe"
 #~ msgstr "Stripe"
 
+#~ msgid "Add Stripe Address Fields"
+#~ msgstr "Adăugați câmpuri de adresă Stripe"
+
 #~ msgid "Please enter live publishable key"
 #~ msgstr "Vă rugăm să introduceți cheia publicabilă live"
 
@@ -6834,6 +6878,9 @@ msgstr "Rezervarea nu poate fi ștearsă"
 
 #~ msgid "Show Checkout Form"
 #~ msgstr "Afișați formularul de plată"
+
+#~ msgid "Show Customer Information Form"
+#~ msgstr "Afișați formularul de informații despre client"
 
 #~ msgid "Select action on which event will be called"
 #~ msgstr "Selectați acțiunea pentru care eveniment va fi apelat"
@@ -7235,6 +7282,9 @@ msgstr "Rezervarea nu poate fi ștearsă"
 #~ msgid "Payment link for Stripe"
 #~ msgstr "Link de plată pentru Stripe"
 
+#~ msgid "Payment link for Square"
+#~ msgstr "Link de plată pentru Square"
+
 #~ msgid "Payment link for WooCommerce"
 #~ msgstr "Activează integrarea cu WooCommerce"
 
@@ -7605,6 +7655,18 @@ msgstr "Rezervarea nu poate fi ștearsă"
 #~ msgid "Image:"
 #~ msgstr "Imagine:"
 
+#~ msgid "Location name:"
+#~ msgstr "Nume locație:"
+
+#~ msgid "Location address:"
+#~ msgstr "Adresa locatiei:"
+
+#~ msgid "Location latitude:"
+#~ msgstr "Latitudine locație:"
+
+#~ msgid "Location longitude:"
+#~ msgstr "Longitudine locație:"
+
 #~ msgid ""
 #~ "The message header needs to be set on the Facebook Developers Settings. "
 #~ "The character limit is 60 with the replaced placeholders."
@@ -7937,6 +7999,13 @@ msgstr "Rezervarea nu poate fi ștearsă"
 
 #~ msgid "Package Booking has been saved"
 #~ msgstr "Plata a fost salvată"
+
+#~ msgid ""
+#~ "This package is canceled. <br>To book an appointment, please reopen it "
+#~ "first."
+#~ msgstr ""
+#~ "Acest pachet este anulat. <br>Pentru a rezerva o întâlnire, vă rugăm să o "
+#~ "redeschideți mai întâi."
 
 #~ msgid "Allow customers to choose employee on the customer panel"
 #~ msgstr "Permiteți clienților să vadă alți participanți"
@@ -8297,6 +8366,12 @@ msgstr "Rezervarea nu poate fi ștearsă"
 
 #~ msgid "New Employee"
 #~ msgstr "Membru staff nou"
+
+#~ msgid "This employee is the only provider on"
+#~ msgstr "Acest angajat este singurul furnizor"
+
+#~ msgid "This employee is the only provider for this service"
+#~ msgstr "Acest angajat este singurul furnizor pentru acest serviciu"
 
 #~ msgid "Applied for default employee location"
 #~ msgstr "Se aplică pentru locația implicită a membrului staff"
@@ -8773,6 +8848,13 @@ msgstr "Rezervarea nu poate fi ștearsă"
 #~ msgid "Payments for the package deal are not included in this paid amount"
 #~ msgstr ""
 #~ "Plățile pentru pachetul de oferte nu sunt incluse în această sumă plătită"
+
+#~ msgid ""
+#~ "By booking this time slot you will book appointment on top of existing "
+#~ "group appointment!"
+#~ msgstr ""
+#~ "Rezervând acest interval orar, veți rezerva o programare peste "
+#~ "programarea de grup existentă!"
 
 #~ msgid ""
 #~ "List of your appointments has changed. Take one more look and continue by "
@@ -9412,8 +9494,14 @@ msgstr "Rezervarea nu poate fi ștearsă"
 #~ msgid "Additional people"
 #~ msgstr "Oameni suplimentari"
 
+#~ msgid "Total people"
+#~ msgstr "Total oameni"
+
 #~ msgid "Number of people that are coming with you."
 #~ msgstr "Numărul de oameni care vin cu tine."
+
+#~ msgid "The total number of people for the booking."
+#~ msgstr "Numărul total de persoane pentru rezervare."
 
 #~ msgid "Package Selection"
 #~ msgstr "Selectarea pachetului"
@@ -10179,6 +10267,27 @@ msgstr "Rezervarea nu poate fi ștearsă"
 #~ msgid "Save Changes"
 #~ msgstr "Salvează modificările"
 
+#~ msgid "No appointments found"
+#~ msgstr "Nu s-au găsit programări"
+
+#~ msgid "You don't have any appointments"
+#~ msgstr "Nu ai nicio programare"
+
+#~ msgid "No packages found"
+#~ msgstr "Nu s-au găsit pachete"
+
+#~ msgid "You don't have any packages"
+#~ msgstr "Nu ai niciun pachet"
+
+#~ msgid "No events found"
+#~ msgstr "Nu au fost găsite evenimente"
+
+#~ msgid "You don't have any events"
+#~ msgstr "Nu ai niciun eveniment"
+
+#~ msgid "Empty State"
+#~ msgstr "Stare goală"
+
 #~ msgid "Step Tickets Tab"
 #~ msgstr "Fila Tichete pas"
 
@@ -10188,8 +10297,49 @@ msgstr "Rezervarea nu poate fi ștearsă"
 #~ msgid "Coupon Segment"
 #~ msgstr "Segment de cupon"
 
+#~ msgid "Waiting Button Background Color"
+#~ msgstr "Culoarea de fundal a butonului de așteptare"
+
+#~ msgid "Waiting Button Text Color"
+#~ msgstr "Culoarea textului butonului de așteptare"
+
+#~ msgid "Event Calendar Booking Form 2.0"
+#~ msgstr "Formular de rezervare pentru calendarul evenimentelor 2.0"
+
+#~ msgid ""
+#~ "Use the Event Calendar Booking Form 2.0 to display your events in a "
+#~ "calendar, allowing customers to book directly, search for specific "
+#~ "events, or view upcoming events."
+#~ msgstr ""
+#~ "Utilizați Formularul de rezervare pentru calendarul evenimentelor 2.0 "
+#~ "pentru a vă afișa evenimentele într-un calendar, permițând clienților să "
+#~ "rezerve direct, să caute anumite evenimente sau să vadă evenimentele "
+#~ "viitoare."
+
 #~ msgid "Events Calendar"
 #~ msgstr "Calendarul evenimentelor"
+
+#~ msgid "Step Search"
+#~ msgstr "Căutare în pas"
+
+#~ msgid "Join waiting list"
+#~ msgstr "Alăturați-vă listei de așteptare"
+
+#~ msgid "people waiting"
+#~ msgstr "oameni care asteapta"
+
+#~ msgid "person waiting"
+#~ msgstr "persoana care asteapta"
+
+#~ msgid "Join Waiting List Button"
+#~ msgstr "Butonul Alăturați-vă listei de așteptare"
+
+#~ msgid "You are on the waiting list with position"
+#~ msgstr "Ești pe lista de așteptare cu poziția "
+
+#~ msgid "We'll notify you if a spot opens up and your booking is approved."
+#~ msgstr ""
+#~ "Vă vom anunța dacă se deschide un loc și rezervarea dvs. este aprobată."
 
 #~ msgid "Notice: Please select at least one panel."
 #~ msgstr "Notă: Vă rugăm să selectați cel puțin un panou."
@@ -10329,6 +10479,9 @@ msgstr "Rezervarea nu poate fi ștearsă"
 #~ msgid "Check this option if you want to create recurring appointments"
 #~ msgstr "Bifați această opțiune dacă doriți să creați programări recurente"
 
+#~ msgid "(select Employee first)"
+#~ msgstr "(selectați mai întâi un angajat)"
+
 #~ msgid "until"
 #~ msgstr "pana cand"
 
@@ -10417,6 +10570,9 @@ msgstr "Rezervarea nu poate fi ștearsă"
 
 #~ msgid "Number of Additional People:"
 #~ msgstr "Număr de persoane suplimentare:"
+
+#~ msgid "Please fill in your address."
+#~ msgstr "Vă rugăm să completați adresa dvs."
 
 #~ msgid ""
 #~ "Sorry, there was an error processing your payment. Please try again later."
@@ -10652,6 +10808,12 @@ msgstr "Rezervarea nu poate fi ștearsă"
 #~ msgid "Enter your password"
 #~ msgstr "Introduceti parola"
 
+#~ msgid "You are the only provider on"
+#~ msgstr "Sunteți singurul furnizor disponibil"
+
+#~ msgid "You are the only provider for this service"
+#~ msgstr "Ești singurul furnizor pentru acest serviciu"
+
 #~ msgid "Max. Capacity"
 #~ msgstr "Max. Capacitate"
 
@@ -10736,25 +10898,3 @@ msgstr "Rezervarea nu poate fi ștearsă"
 
 #~ msgid "Zoom Links"
 #~ msgstr "Zoom Link-uri"
-
-#~ msgid "View Appointments Settings"
-#~ msgstr "Vizualizați setările pentru rezervări"
-
-#~ msgid ""
-#~ "By booking this time slot you will book appointment within a package on "
-#~ "top of existing group appointment!"
-#~ msgstr ""
-#~ "Prin rezervarea acestui interval orar, veți rezerva o programare într-un "
-#~ "pachet în plus față de programarea de grup existentă!"
-
-#~ msgid "Appointments Settings"
-#~ msgstr "Setări programări"
-
-#~ msgid ""
-#~ "Don't use Text mode option if you already have HTML code in the "
-#~ "description,<br>since once this option is enabled the existing HTML tags "
-#~ "could be lost."
-#~ msgstr ""
-#~ "Nu utilizați opțiunea Mod text dacă aveți deja cod HTML în descriere,"
-#~ "<br>deoarece odată ce această opțiune este activată, etichetele HTML "
-#~ "existente se pot pierde."

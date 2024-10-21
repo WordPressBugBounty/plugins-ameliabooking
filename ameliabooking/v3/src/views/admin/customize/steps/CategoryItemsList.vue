@@ -92,7 +92,7 @@
     </template>
     <template v-if="customizeOptions.sidebar.visibility" #side>
       <SideMenu
-        :menu-items="availableCategories"
+        :menu-items="categoriesMenu"
         :init-selection="categorySelected"
         identifier="id"
         name-identifier="name"
@@ -157,7 +157,7 @@
               <!-- Card Info -->
               <div class="am-fcil__item-info">
                 <div
-                  v-if="customizeOptions.packageCategory.visibility"
+                  v-if="customizeOptions.packageCategory.visibility && categorySelected"
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-folder"></span>
@@ -282,7 +282,7 @@
               <!-- Card Info -->
               <div class="am-fcil__item-info">
                 <div
-                  v-if="customizeOptions.serviceCategory.visibility"
+                  v-if="customizeOptions.serviceCategory.visibility && categorySelected"
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-folder"></span>
@@ -530,8 +530,35 @@ let availableCategories = ref([
   }
 ])
 
+let categoriesMenu = ref([
+  {
+    id: null,
+    name: computed(() => labelsDisplay('filter_all'))
+  },
+  {
+    id: 1,
+    name: 'Category 1',
+  },
+  {
+    id: 2,
+    name: 'Category 2',
+  },
+  {
+    id: 3,
+    name: 'Category 3',
+  },
+  {
+    id: 4,
+    name: 'Category 4',
+  },
+  {
+    id: 5,
+    name: 'Category 5',
+  }
+])
+
 // * Selected category
-let categorySelected = ref(1)
+let categorySelected = ref(null)
 
 let packArray = [
   {
@@ -686,11 +713,21 @@ let serviceArray = [
 
 let categoryPackages = computed(() => {
   let arr = []
-  availableCategories.value.find(a => a.id === categorySelected.value).packageList.forEach(b => {
-    packArray.forEach(c => {
-      if (c.id === b) arr.push(c)
+  if (categorySelected.value) {
+    availableCategories.value.find(a => a.id === categorySelected.value).packageList.forEach(b => {
+      packArray.forEach(c => {
+        if (c.id === b) arr.push(c)
+      })
     })
-  })
+  } else {
+    availableCategories.value.forEach(cat => {
+      cat.packageList.forEach(b => {
+        packArray.forEach(c => {
+          if (c.id === b && !arr.find(p => p.id === c.id)) arr.push(c)
+        })
+      })
+    })
+  }
   return arr
 })
 
@@ -706,11 +743,21 @@ function getPackServices (pack) {
 
 let categoryServices = computed(() => {
   let arr = []
-  availableCategories.value.find(a => a.id === categorySelected.value).serviceList.forEach(b => {
-    serviceArray.forEach(c => {
-      if (c.id === b) arr.push(c)
+  if (categorySelected.value) {
+    availableCategories.value.find(a => a.id === categorySelected.value).serviceList.forEach(b => {
+      serviceArray.forEach(c => {
+        if (c.id === b) arr.push(c)
+      })
     })
-  })
+  } else {
+    availableCategories.value.forEach(cat => {
+      cat.serviceList.forEach(b => {
+        serviceArray.forEach(c => {
+          if (c.id === b) arr.push(c)
+        })
+      })
+    })
+  }
   return arr
 })
 

@@ -77,7 +77,7 @@
         >
           <div class="am-fcis__mini-info">
             <div
-              v-if="customizedOptions.serviceCategory.visibility"
+              v-if="customizedOptions.serviceCategory.visibility && category"
               class="am-fcis__mini-info__inner"
             >
               <span class="am-icon-folder"></span>
@@ -364,7 +364,7 @@
                 </div>
                 <div class="am-fcis__include-info">
                   <div
-                    v-if="customizedOptions.packageCategory.visibility"
+                    v-if="customizedOptions.packageCategory.visibility && category"
                     class="am-fcis__include-info__inner"
                   >
                     <span class="am-icon-folder"></span>

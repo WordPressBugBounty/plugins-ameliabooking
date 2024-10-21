@@ -202,15 +202,18 @@ export default {
        isValidEmail: true,
        blogPosts: [],
        changelog: {
-         version: '7.8.1',
+         version: '7.8.2',
          starter: {
-           feature: [],
-           improvement: [],
+           feature: [
+             'Customer Activity - Now you can easily view all appointments and events booked by specific customers in one place'
+           ],
+           improvement: [
+             'Added possibility to show “All” services and packages on the Catalog Booking form 2.0'
+           ],
            translations: [],
            bugfix: [
-             'Fixed issue with employee_full_name property in Marketing tools',
-             'Fixed issue with extras quantity information for group appointments',
-             'Fixed issue with "Queued" status not updating for SMS notifications'
+             'Fixed issue with removing dates on the back-end Events page for Group view',
+             'Fixed issue with capacity per employee when on SBS is hidden employee selection field'
            ],
            other: [
              'Other small bug fixes and stability improvements'
@@ -221,7 +224,9 @@ export default {
            improvement: [],
            translations: [],
            bugfix: [
-             'Fixed issue with the Invoice layout and WooCommerce description format'
+             'Fixed issue with Zoom when employee panel is disabled',
+             'Fixed issue on WooCommerce Checkout page when WooCommerce Product is in cart with Amelia Booking',
+             'Fixed issue with the error messages that appear on coupon validation'
            ],
            other: []
          },
@@ -230,7 +235,7 @@ export default {
            improvement: [],
            translations: [],
            bugfix: [
-             'Fixed issue with editing events with custom pricing and waiting list',
+             'Fixed issue with duplicating events with custom pricing and waiting list'
            ],
            other: []
          },

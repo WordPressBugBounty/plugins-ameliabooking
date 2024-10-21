@@ -447,9 +447,9 @@ export default {
             }).length > 0 : false
         ) &&
         (!data.serviceId || data.packageId ? true :
-          getters.filteredEmployees(data).filter(
+          getters.filteredEmployees(data).find(
             employee => isEmployeeServiceLocation(state.entitiesRelations, employee.id, data.serviceId, location.id)
-          ).length > 0
+          ) !== undefined
         ) &&
         (!data.packageId ? true :
           state.packages.find(i => i.id === data.packageId).bookable.filter((book) => {
@@ -464,13 +464,13 @@ export default {
 
     filteredEmployees: (state) => (data) => {
       return state.employees.filter(employee =>
-        employee.serviceList.filter(
+        employee.serviceList.find(
           service =>
             (state.showHidden || service.status === 'visible') &&
             // service.maxCapacity >= data.persons &&
             (!data.serviceId ? true : isEmployeeServiceLocation(state.entitiesRelations, employee.id, service.id) && service.id === data.serviceId) &&
             (!data.locationId ? true : isEmployeeServiceLocation(state.entitiesRelations, employee.id, service.id, data.locationId))
-        ).length > 0
+        ) !== undefined
       )
     },
 

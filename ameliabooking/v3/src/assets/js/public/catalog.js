@@ -148,7 +148,8 @@ function useDisabledPackageService (entities, pack) {
     let serviceEmployees = []
     employeesIds.forEach((employeeId) => {
       if (
-        entities.entitiesRelations[employeeId][item.service.id]
+        entities.entitiesRelations[employeeId]
+        && entities.entitiesRelations[employeeId][item.service.id]
         && !serviceEmployees.find(a => a ? a.id === parseInt(employeeId) : true)
       ) {
         serviceEmployees.push(entities.employees.find(a => a.id === parseInt(employeeId)))
@@ -178,6 +179,7 @@ function usePackageAvailabilityByEmployeeAndLocation (entities, pack, shortcodeD
           item.locations.forEach(l => {
             if (
               unfilteredEmployees.value.find(a => a.id === p.id)
+              && entities.entitiesRelations[p.id]
               && entities.entitiesRelations[p.id][item.service.id]
               && entities.entitiesRelations[p.id][item.service.id].indexOf(l.id) !== -1
               && !arr.find(a => a.id === p.id)
@@ -199,7 +201,8 @@ function usePackageAvailabilityByEmployeeAndLocation (entities, pack, shortcodeD
         if (item.locations.length) {
           item.locations.forEach(l => {
             if (
-              entities.entitiesRelations[employeeId][item.service.id]
+              entities.entitiesRelations[employeeId]
+              && entities.entitiesRelations[employeeId][item.service.id]
               && entities.entitiesRelations[employeeId][item.service.id].indexOf(l.id) !== -1
               && unfilteredEmployees.value.find(a => a.id === parseInt(employeeId))
               && !arr.find(a => a.id === parseInt(employeeId))
@@ -209,7 +212,8 @@ function usePackageAvailabilityByEmployeeAndLocation (entities, pack, shortcodeD
           })
         } else {
           if (
-            entities.entitiesRelations[employeeId][item.service.id]
+            entities.entitiesRelations[employeeId]
+            && entities.entitiesRelations[employeeId][item.service.id]
             && unfilteredEmployees.value.find(a => a.id === parseInt(employeeId))
             && !arr.find(a => a.id === parseInt(employeeId))
           ) {
@@ -238,6 +242,8 @@ function usePackageEmployees (entities, pack, shortcodeData) {
           item.locations.forEach(l => {
             if (
               unfilteredEmployees.value.find(a => a.id === p.id)
+              && entities.entitiesRelations[p.id]
+              && entities.entitiesRelations[p.id][item.service.id]
               && entities.entitiesRelations[p.id][item.service.id].indexOf(l.id) !== -1
               && !arr.find(a => a.id === p.id)
             ) {
@@ -258,7 +264,8 @@ function usePackageEmployees (entities, pack, shortcodeData) {
         if (item.locations.length){
           item.locations.forEach(l => {
             if (
-              entities.entitiesRelations[employeeId][item.service.id]
+              entities.entitiesRelations[employeeId]
+              && entities.entitiesRelations[employeeId][item.service.id]
               && entities.entitiesRelations[employeeId][item.service.id].indexOf(l.id) !== -1
               && unfilteredEmployees.value.find(a => a.id === parseInt(employeeId))
               && !arr.find(a => a.id === parseInt(employeeId))
@@ -268,7 +275,8 @@ function usePackageEmployees (entities, pack, shortcodeData) {
           })
         } else {
           if (
-            entities.entitiesRelations[employeeId][item.service.id]
+            entities.entitiesRelations[employeeId]
+            && entities.entitiesRelations[employeeId][item.service.id]
             && unfilteredEmployees.value.find(a => a.id === parseInt(employeeId))
             && !arr.find(a => a.id === parseInt(employeeId))
           ) {
@@ -319,10 +327,13 @@ function usePackageLocations (entities, pack, shortcodeData) {
   return arr
 }
 
-function useAvailableCategories (entities, shortcodeData) {
+function useAvailableCategories (entities, shortcodeData, employeeId = null, locationId = null) {
   let arr = []
   entities.categories.forEach(category => {
-    let serviceIdsInCategory = useAvailableServiceIdsInCategory(shortcodeData, category, entities)
+    let serviceIdsInCategory = useAvailableServiceIdsInCategory(shortcodeData, category, entities, employeeId, locationId)
+    /* Service ids in category */
+    category.serviceIdList = serviceIdsInCategory
+
     /* Packages in category */
     category.packageList = []
     entities.packages.forEach(pack => {

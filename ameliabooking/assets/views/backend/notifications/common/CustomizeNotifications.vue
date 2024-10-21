@@ -1986,7 +1986,7 @@
               this.notification.id = id
             }
             if (this.type === 'whatsapp') {
-              this.notification.subject = (this.whatsAppPlaceholders.header[0].whatsappType === 'location' ? 'location:' : '') + this.whatsAppPlaceholders.header.map(h => h.value).join(' ')
+              this.notification.subject = (this.whatsAppPlaceholders.header.length > 0 && this.whatsAppPlaceholders.header[0].whatsappType === 'location' ? 'location:' : '') + this.whatsAppPlaceholders.header.map(h => h.value).join(' ')
               this.notification.content = this.whatsAppPlaceholders.body.map(h => h.value).join(' ')
             }
             if (!this.minimumTimeEnabled) {
