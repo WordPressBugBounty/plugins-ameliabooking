@@ -830,6 +830,7 @@ class BackendStrings
             'services_sorting_price_asc'         => __('Price Ascending', 'wpamelia'),
             'services_sorting_price_desc'        => __('Price Descending', 'wpamelia'),
             'service_show_on_site'               => __('Show service on site', 'wpamelia'),
+            'service_show_on_site_tooltip'       => __('If this option is disabled, service will be available for booking from back-end pages only.', 'wpamelia'),
             'service_recurring_cycle'            => __('Set recurring appointment', 'wpamelia'),
             'service_recurring_cycle_tooltip'    => __('If this option is disabled, your customers won\'t be able to book recurring appointments at the same time.', 'wpamelia'),
             'service_provider_remove_fail'       => __('Provider has appointments for this service', 'wpamelia'),
