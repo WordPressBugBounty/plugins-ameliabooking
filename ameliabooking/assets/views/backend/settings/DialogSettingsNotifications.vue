@@ -403,6 +403,29 @@
 
         </div>
 
+
+        <!-- Send invoice -->
+        <div :class="licenceClass()" class="am-setting-box am-switch-box">
+          <el-row type="flex" align="middle" :gutter="24">
+            <el-col :span="16">
+              {{ $root.labels.send_invoice_by_default }}
+              <el-tooltip placement="top">
+                <div slot="content" v-html="$root.labels.send_invoice_by_default_description"></div>
+                <i class="el-icon-question am-tooltip-icon"></i>
+              </el-tooltip>
+            </el-col>
+            <el-col :span="8" class="align-right">
+              <el-switch
+                  v-model="settings.sendInvoice"
+                  active-text=""
+                  inactive-text=""
+              ></el-switch>
+            </el-col>
+          </el-row>
+
+          <LicenceBlock/>
+        </div>
+
         <!-- Send ics files -->
         <div class="am-setting-box am-switch-box">
           <el-row type="flex" align="middle" :gutter="24">
@@ -543,10 +566,11 @@
   import helperMixin from '../../../js/backend/mixins/helperMixin'
   import SelectTranslate from '../parts/SelectTranslate'
   import InlinePlaceholders from '../notifications/common/InlinePlaceholders'
+  import licenceMixin from '../../../js/common/mixins/licenceMixin'
 
   export default {
 
-    mixins: [imageMixin, helperMixin],
+    mixins: [licenceMixin, imageMixin, helperMixin],
 
     props: {
       notifications: {

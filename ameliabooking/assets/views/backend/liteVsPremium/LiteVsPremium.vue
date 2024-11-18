@@ -251,6 +251,15 @@ export default {
           tag: 'New'
         },
         {
+          feature: 'Invoice',
+          lite: false,
+          starter: false,
+          standard: true,
+          pro: true,
+          elite: true,
+          tag: 'New'
+        },
+        {
           feature: 'Recurring Appointments and Events',
           lite: false,
           starter: false,
