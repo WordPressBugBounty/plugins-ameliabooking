@@ -405,7 +405,7 @@
 
 
         <!-- Send invoice -->
-        <div :class="licenceClass()" class="am-setting-box am-switch-box">
+        <div :class="licenceClass('basic')" class="am-setting-box am-switch-box">
           <el-row type="flex" align="middle" :gutter="24">
             <el-col :span="16">
               {{ $root.labels.send_invoice_by_default }}
@@ -419,11 +419,12 @@
                   v-model="settings.sendInvoice"
                   active-text=""
                   inactive-text=""
+                  :disabled="notInLicence('basic')"
               ></el-switch>
             </el-col>
           </el-row>
 
-          <LicenceBlock/>
+          <LicenceBlock :licence="'basic'"/>
         </div>
 
         <!-- Send ics files -->
@@ -581,7 +582,7 @@
       },
       employees: {
         type: Array,
-        default: () => [],
+        default: () => []
       }
     },
 
