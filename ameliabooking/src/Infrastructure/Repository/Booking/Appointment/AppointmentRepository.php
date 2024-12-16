@@ -423,6 +423,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
             ':locationId'         => $data['locationId'],
             ':parentId'           => $data['parentId'],
             ':lessonSpace'        => !empty($data['lessonSpace']) ? $data['lessonSpace'] : null,
+            ':error'              => '',
         ];
 
         try {
@@ -438,7 +439,8 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                 `serviceId`,
                 `providerId`,
                 `parentId`,
-                `lessonSpace`
+                `lessonSpace`,
+                `error`
                 )
                 VALUES (
                 :bookingStart,
@@ -450,7 +452,8 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                 :serviceId,
                 :providerId,
                 :parentId,
-                :lessonSpace
+                :lessonSpace,
+                :error
                 )"
             );
 

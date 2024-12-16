@@ -70,7 +70,8 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
             ':created'              => $data['created'],
             ':closeAfterMin'        => $data['closeAfterMin'],
             ':closeAfterMinBookings'  => $data['closeAfterMinBookings'] ? 1 : 0,
-            ':aggregatedPrice'      => $data['aggregatedPrice'] ? 1 : 0
+            ':aggregatedPrice'      => $data['aggregatedPrice'] ? 1 : 0,
+            ':error'                => '',
         ];
 
         $additionalData = Licence\DataModifier::getEventRepositoryData($data);
@@ -103,7 +104,8 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 `created`,
                 `closeAfterMin`,
                 `closeAfterMinBookings`,
-                `aggregatedPrice`
+                `aggregatedPrice`,
+                `error`
                  )
                 VALUES (
                 {$additionalData['placeholders']}
@@ -128,7 +130,8 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 :created,
                 :closeAfterMin,
                 :closeAfterMinBookings,
-                :aggregatedPrice
+                :aggregatedPrice,
+                :error
                 )"
             );
 

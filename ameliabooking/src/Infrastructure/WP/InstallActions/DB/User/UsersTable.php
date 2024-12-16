@@ -59,7 +59,7 @@ class UsersTable extends AbstractDatabaseTable
                   `translations` TEXT NULL DEFAULT NULL,
                   `timeZone` varchar({$name}) DEFAULT NULL,
                   `badgeId` int(11) DEFAULT NULL,
-                  `error` TEXT({$description}) NOT NULL DEFAULT '',
+                  `error` TEXT({$description}) DEFAULT NULL,
                   PRIMARY KEY (`id`),
                   UNIQUE KEY `email` (`email`),
                   UNIQUE KEY `id` (`id`)
