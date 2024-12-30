@@ -91,6 +91,7 @@ class PackageCustomerServiceFactory
                             'lastName'  => $row['customer_lastName'],
                             'email'     => $row['customer_email'],
                             'phone'     => $row['customer_phone'],
+                            'status'    => !empty($row['customer_status']) ? $row['customer_status'] : null,
                         ],
                         'packageId'  => $row['package_customer_packageId'],
                         'tax'        => $row['package_customer_tax'],

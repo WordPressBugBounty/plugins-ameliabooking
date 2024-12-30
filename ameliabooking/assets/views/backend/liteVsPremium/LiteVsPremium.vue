@@ -316,7 +316,7 @@ export default {
           elite: true
         },
         {
-          feature: 'Calendar Synchronizations (Google Calendar, Outlook)',
+          feature: 'Calendar Synchronizations (Google Calendar, Outlook, Apple)',
           lite: false,
           starter: false,
           standard: true,

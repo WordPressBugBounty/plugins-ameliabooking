@@ -55,7 +55,7 @@
                 :value="item.id"
                 class="am-has-option-meta"
               >
-                <span :class="getOptionClass(item)">{{ item.firstName }} {{ item.lastName }}</span>
+                <span :class="getOptionClass(item, null, item.status)">{{ item.firstName }} {{ item.lastName }}</span>
                 <span class="am-drop-item-meta" v-if="item.email">{{ item.email }}</span>
               </el-option>
               <el-option

@@ -58,6 +58,7 @@
               <AmOption
                 v-for="(tag, index) in tags"
                 :key="index"
+                :class="`am-els-tag__${tag.name.replace(/\s+/g, '')}`"
                 :value="tag.name"
                 :label="tag.name"
               >
@@ -78,6 +79,7 @@
               <AmOption
                 v-for="location in locations"
                 :key="location.id"
+                :class="`am-els-location__${location.id}`"
                 :value="location.id"
                 :label="location.name"
               >

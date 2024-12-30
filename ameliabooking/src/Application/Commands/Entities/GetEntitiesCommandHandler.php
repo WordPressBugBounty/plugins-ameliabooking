@@ -262,7 +262,9 @@ class GetEntitiesCommandHandler extends CommandHandler
             $providerRepository = $this->container->get('domain.users.providers.repository');
 
             /** @var Collection $testProviders */
-            $providers = $providerRepository->getWithSchedule([]);
+            $providers = $providerRepository->getWithSchedule(
+                ['dates' => [DateTimeService::getNowDateTimeObject()->modify('-1 days')->format('Y-m-d H:i:s')]]
+            );
 
             /** @var Provider $provider */
             foreach ($providers->getItems() as $provider) {
@@ -298,6 +300,7 @@ class GetEntitiesCommandHandler extends CommandHandler
             ) {
                 foreach ($resultData['employees'] as &$employee) {
                     unset(
+                        $employee['appleCalendarId'],
                         $employee['googleCalendar'],
                         $employee['outlookCalendar'],
                         $employee['stripeConnect'],
@@ -410,6 +413,11 @@ class GetEntitiesCommandHandler extends CommandHandler
                     /** @var Coupon $coupon */
                     $coupon = $coupons->getItem($ids['couponId']);
 
+                    if ($coupon->getAllServices() && $coupon->getAllServices()->getValue()) {
+                        $coupon->setServiceList(new Collection($allServices->getItems()));
+                        continue;
+                    }
+
                     $coupon->getServiceList()->addItem(
                         $allServices->getItem($ids['serviceId']),
                         $ids['serviceId']
@@ -423,6 +431,11 @@ class GetEntitiesCommandHandler extends CommandHandler
                     /** @var Coupon $coupon */
                     $coupon = $coupons->getItem($ids['couponId']);
 
+                    if ($coupon->getAllEvents() && $coupon->getAllEvents()->getValue()) {
+                        $coupon->setEventList(new Collection($allEvents->getItems()));
+                        continue;
+                    }
+
                     $coupon->getEventList()->addItem(
                         $allEvents->getItem($ids['eventId']),
                         $ids['eventId']
@@ -435,6 +448,11 @@ class GetEntitiesCommandHandler extends CommandHandler
                 foreach ($couponRepository->getCouponsPackagesIds($coupons->keys()) as $ids) {
                     /** @var Coupon $coupon */
                     $coupon = $coupons->getItem($ids['couponId']);
+
+                    if ($coupon->getAllPackages() && $coupon->getAllPackages()->getValue()) {
+                        $coupon->setPackageList(new Collection($allPackages->getItems()));
+                        continue;
+                    }
 
                     $coupon->getPackageList()->addItem(
                         $allPackages->getItem($ids['packageId']),

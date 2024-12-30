@@ -12,6 +12,7 @@ use AmeliaBooking\Application\Services\Booking\EventApplicationService;
 use AmeliaBooking\Application\Services\Location\AbstractLocationApplicationService;
 use AmeliaBooking\Application\Services\User\ProviderApplicationService;
 use AmeliaBooking\Domain\Collection\Collection;
+use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
 use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Factory\Bookable\Service\ServiceFactory;
 use AmeliaBooking\Domain\Services\Booking\EventDomainService;
@@ -22,7 +23,6 @@ use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ServiceRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventTagsRepository;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use Exception;
-use Interop\Container\Exception\ContainerException;
 
 /**
  * Class GutenbergBlock
@@ -33,6 +33,9 @@ class GutenbergBlock
 {
     /** @var Container $container */
     private static $container;
+
+    /** @var  Collection */
+    private static $entities;
 
     /**
      * Register WP Ajax actions.
@@ -153,6 +156,10 @@ class GutenbergBlock
      */
     public function getAllEntitiesForGutenbergBlocks()
     {
+        if (!empty(self::$entities)) {
+            return self::$entities;
+        }
+
         try {
             self::setContainer(require AMELIA_PATH . '/src/Infrastructure/ContainerConfig/container.php');
 
@@ -185,16 +192,18 @@ class GutenbergBlock
             $providerAS = self::$container->get('application.user.provider.service');
 
             /** @var Collection $providers */
-            $providers = $providerRepository->getWithSchedule([]);
+            $providers = $providerRepository->getAllIndexedById();
 
             $providerServicesData = $providerRepository->getProvidersServices();
 
             foreach ((array)$providerServicesData as $providerKey => $providerServices) {
+                /** @var Provider $provider */
                 $provider = $providers->getItem($providerKey);
 
                 $providerServiceList = new Collection();
 
                 foreach ((array)$providerServices as $serviceKey => $providerService) {
+                    /** @var Service $service */
                     $service = $services->getItem($serviceKey);
 
                     if ($service && $provider) {
@@ -256,19 +265,10 @@ class GutenbergBlock
 
             $finalData['tags'] = $tags->toArray();
 
-            return ['data' => $finalData];
+            self::$entities = ['data' => $finalData];
 
+            return self::$entities;
         } catch (Exception $exception) {
-            return ['data' => [
-                'categories'   => [],
-                'servicesList' => [],
-                'locations'    => [],
-                'employees'    => [],
-                'events'       => [],
-                'tags'         => [],
-                'packages'     => [],
-            ]];
-        } catch (ContainerException $e) {
             return ['data' => [
                 'categories'   => [],
                 'servicesList' => [],

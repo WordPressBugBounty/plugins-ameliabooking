@@ -410,9 +410,10 @@
                                         :src="$root.getUrl+'public/img/group.svg'"
                                         class=""
                                     />
-                                    <span v-for="(booking, index) in app.bookings" :class="(app.bookings.length === 1 ? getNoShowClass(booking.customerId, customersNoShowCount) : '')">
-                                      {{ ((user = getCustomerInfo(booking)) !== null ? user.firstName + ' ' + user.lastName : '') }}<span
-                                        v-if="app.bookings.length > 1 && index + 1  !== app.bookings.length">,</span>
+                                    <span v-for="(booking, index) in app.bookings"
+                                      :class="(app.bookings.length === 1 ? (getNoShowClass(booking.customerId, customersNoShowCount, null, booking.customer.status)) : '')">
+                                      {{ ((user = getCustomerInfo(booking)) !== null ? user.firstName + ' ' + user.lastName : '') }}
+                                      <span v-if="app.bookings.length > 1 && index + 1  !== app.bookings.length">,</span>
                                     </span>
                                   </h3>
                                 </el-tooltip>

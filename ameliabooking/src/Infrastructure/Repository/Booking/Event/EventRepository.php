@@ -954,6 +954,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                     ep.googleCalendarEventId AS event_googleCalendarEventId,
                     ep.googleMeetUrl AS event_googleMeetUrl,
                     ep.outlookCalendarEventId AS event_outlookCalendarEventId,
+                    ep.appleCalendarEventId AS event_appleCalendarEventId,
                     
                     et.id AS event_tagId,
                     et.name AS event_tagName,
@@ -1378,7 +1379,8 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
             ep.lessonSpace AS event_periodLessonSpace,
             ep.googleCalendarEventId AS event_googleCalendarEventId,
             ep.googleMeetUrl AS event_googleMeetUrl,
-            ep.outlookCalendarEventId AS event_outlookCalendarEventId
+            ep.outlookCalendarEventId AS event_outlookCalendarEventId,
+            ep.appleCalendarEventId AS event_appleCalendarEventId
         ";
 
         $params = [
@@ -1441,6 +1443,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 ep.googleCalendarEventId AS event_googleCalendarEventId,
                 ep.googleMeetUrl AS event_googleMeetUrl,
                 ep.outlookCalendarEventId AS event_outlookCalendarEventId,
+                ep.appleCalendarEventId AS event_appleCalendarEventId,
             ';
 
             $joins .= "

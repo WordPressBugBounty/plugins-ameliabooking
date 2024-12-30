@@ -370,6 +370,7 @@ arrApp.forEach((item, index) => {
         id: index,
         lessonSpace: '/',
         outlookCalendarEventId: '/',
+        appleCalendarEventId: null,
         periodEnd: `${moment().add(item.when+1, 'days').format('YYYY-MM-DD')} 23:00:00`,
         periodStart: `${moment().add(item.when, 'days').format('YYYY-MM-DD')} 03:00:00`,
         zoomMeeting: {
@@ -384,6 +385,7 @@ arrApp.forEach((item, index) => {
         id: index+1,
         lessonSpace: '/',
         outlookCalendarEventId: '/',
+        appleCalendarEventId: null,
         periodEnd: `${moment().add(item.when+3, 'days').format('YYYY-MM-DD')} 23:00:00`,
         periodStart: `${moment().add(item.when+2, 'days').format('YYYY-MM-DD')} 03:00:00`,
         zoomMeeting: {
@@ -398,6 +400,7 @@ arrApp.forEach((item, index) => {
         id: index+2,
         lessonSpace: '/',
         outlookCalendarEventId: '/',
+        appleCalendarEventId: null,
         periodEnd: `${moment().add(item.when+5, 'days').format('YYYY-MM-DD')} 23:00:00`,
         periodStart: `${moment().add(item.when+4, 'days').format('YYYY-MM-DD')} 03:00:00`,
         zoomMeeting: {

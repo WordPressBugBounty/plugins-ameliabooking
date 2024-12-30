@@ -90,6 +90,10 @@ class AppointmentFactory
             $appointment->setOutlookCalendarEventId(new Label($data['outlookCalendarEventId']));
         }
 
+        if (!empty($data['appleCalendarEventId'])) {
+            $appointment->setAppleCalendarEventId(new Label($data['appleCalendarEventId']));
+        }
+
         if (!empty($data['zoomMeeting']['id'])) {
             $zoomMeeting = ZoomFactory::create(
                 $data['zoomMeeting']
@@ -172,6 +176,8 @@ class AppointmentFactory
                         $row['appointment_google_meet_url'] : null,
                     'outlookCalendarEventId' => isset($row['appointment_outlook_calendar_event_id']) ?
                         $row['appointment_outlook_calendar_event_id'] : null,
+                    'appleCalendarEventId'   => isset($row['appointment_apple_calendar_event_id']) ?
+                        $row['appointment_apple_calendar_event_id'] : null,
                     'zoomMeeting'            => [
                         'id'       => $zoomMeetingJson ? $zoomMeetingJson['id'] : null,
                         'startUrl' => $zoomMeetingJson ? $zoomMeetingJson['startUrl'] : null,

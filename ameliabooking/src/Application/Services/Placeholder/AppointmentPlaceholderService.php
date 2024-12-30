@@ -124,6 +124,9 @@ class AppointmentPlaceholderService extends PlaceholderService
      * @param array        $appointment
      * @param int          $bookingKey
      * @param string       $type
+     * @param string       $token
+     * @param bool         $invoice
+     * @param string       $notificationType
      *
      * @return array
      *
@@ -134,8 +137,14 @@ class AppointmentPlaceholderService extends PlaceholderService
      * @throws ContainerException
      * @throws Exception
      */
-    public function getAppointmentPlaceholderData($appointment, $bookingKey = null, $type = null, $token = null, $invoice = false)
-    {
+    public function getAppointmentPlaceholderData(
+        $appointment,
+        $bookingKey = null,
+        $type = null,
+        $token = null,
+        $invoice = false,
+        $notificationType = null
+    ) {
         $data = [];
 
         $this->setData($appointment, $bookingKey);
@@ -145,7 +154,7 @@ class AppointmentPlaceholderService extends PlaceholderService
         $data = array_merge($data, $this->getEmployeeData($appointment, $bookingKey));
         $data = array_merge($data, $this->getBookingData($appointment, $type, $bookingKey, $token, $data['deposit'], null, $invoice));
         $data = array_merge($data, $this->getCustomFieldsData($appointment, $type, $bookingKey));
-        $data = array_merge($data, $this->getCouponsData($appointment, $type, $bookingKey));
+        $data = array_merge($data, $notificationType ? $this->getCouponsData($appointment, $type, $bookingKey) : []);
 
         return $data;
     }
@@ -155,6 +164,9 @@ class AppointmentPlaceholderService extends PlaceholderService
      * @param int          $bookingKey
      * @param string       $type
      * @param AbstractUser $customer
+     * @param array        $allBookings
+     * @param bool         $invoice
+     * @param string       $notificationType
      *
      * @return array
      *
@@ -165,8 +177,15 @@ class AppointmentPlaceholderService extends PlaceholderService
      * @throws ContainerException
      * @throws Exception
      */
-    public function getPlaceholdersData($appointment, $bookingKey = null, $type = null, $customer = null, $allBookings = null)
-    {
+    public function getPlaceholdersData(
+        $appointment,
+        $bookingKey = null,
+        $type = null,
+        $customer = null,
+        $allBookings = null,
+        $invoice = false,
+        $notificationType = null
+    ) {
         /** @var CustomerBookingRepository $bookingRepository */
         $bookingRepository = $this->container->get('domain.booking.customerBooking.repository');
 
@@ -188,7 +207,7 @@ class AppointmentPlaceholderService extends PlaceholderService
 
         $locale = $this->getLocale($appointment, $bookingKey);
 
-        $data = array_merge($data, $this->getAppointmentPlaceholderData($appointment, $bookingKey, $type, $token));
+        $data = array_merge($data, $this->getAppointmentPlaceholderData($appointment, $bookingKey, $type, $token, false, $notificationType));
         $data = array_merge($data, $this->getRecurringAppointmentsData($appointment, $bookingKey, $type, 'recurring', $bookingKeyForEmployee));
         if (empty($customer)) {
             $data = array_merge($data, $this->getGroupedAppointmentData($appointment, $bookingKey, $type, $token));

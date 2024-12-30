@@ -333,6 +333,7 @@
               @openDialog="openDialogCombinedPlaceholders"
               :googleCalendar="settings.googleCalendar"
               :outlookCalendar="settings.outlookCalendar"
+              :apple-calendar="settings.appleCalendar"
               :zoom="settings.zoom"
               :lessonSpace="settings.lessonSpace"
               :facebookPixel="settings.facebookPixel"
@@ -854,7 +855,11 @@
             }
           })
           .catch(e => {
-            this.notify(this.$root.labels.error, e.message, 'error')
+            if(e.response.data.message) {
+              this.notify(this.$root.labels.error, e.response.data.message, 'error')
+            } else {
+              this.notify(this.$root.labels.error, e.message, 'error')
+            }
           })
       },
 

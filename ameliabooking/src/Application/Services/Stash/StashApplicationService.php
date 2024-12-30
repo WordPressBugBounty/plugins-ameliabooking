@@ -119,19 +119,9 @@ class StashApplicationService
         $locations = $locationAS->getAllOrderedByName();
 
         /** @var Collection $providers */
-        $providers = $providerRepository->getWithSchedule([]);
-
-
-        $entitiesRelations = [];
-
-        /** @var Provider $provider */
-        foreach ($providers->getItems() as $providerId => $provider) {
-            $providerService->setProviderServices($provider, $services, true);
-
-            if ($data = $providerAS->getProviderServiceLocations($provider, $locations, $services, true)) {
-                $entitiesRelations[$providerId] = $data;
-            }
-        }
+        $providers = $providerRepository->getWithSchedule(
+            ['dates' => [DateTimeService::getNowDateTimeObject()->modify('-1 days')->format('Y-m-d H:i:s')]]
+        );
 
 
         /** @var Collection $availableLocations */
@@ -142,6 +132,24 @@ class StashApplicationService
 
         /** @var Collection $availableProviders */
         $availableProviders = new Collection();
+
+        $entitiesRelations = [];
+
+        /** @var Provider $provider */
+        foreach ($providers->getItems() as $providerId => $provider) {
+            if ($provider->getLocationId()) {
+                $availableLocations->addItem(
+                    $locations->getItem($provider->getLocationId()->getValue()),
+                    $provider->getLocationId()->getValue()
+                );
+            }
+
+            $providerService->setProviderServices($provider, $services, true);
+
+            if ($data = $providerAS->getProviderServiceLocations($provider, $locations, $services, true)) {
+                $entitiesRelations[$providerId] = $data;
+            }
+        }
 
         foreach ($entitiesRelations as $providerId => $providerServiceRelations) {
             foreach ($providerServiceRelations as $serviceId => $serviceLocationRelations) {

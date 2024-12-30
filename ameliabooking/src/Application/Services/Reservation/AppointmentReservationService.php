@@ -50,6 +50,7 @@ use AmeliaBooking\Domain\ValueObjects\String\PaymentType;
 use AmeliaBooking\Domain\ValueObjects\String\Status;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
+use AmeliaBooking\Infrastructure\Repository\Bookable\Service\PackageCustomerServiceRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
 use AmeliaBooking\Infrastructure\Repository\CustomField\CustomFieldRepository;
@@ -456,6 +457,25 @@ class AppointmentReservationService extends AbstractReservationService
 
             $booking->setAggregatedPrice($service->getAggregatedPrice());
         }
+
+
+        if ($booking->getPackageCustomerService() && $booking->getPackageCustomerService()->getId() === null
+            && $booking->getPackageCustomerService()->getPackageCustomer() && $booking->getPackageCustomerService()->getPackageCustomer()->getId()) {
+            /** @var PackageCustomerServiceRepository $packageCustomerServiceRepository */
+            $packageCustomerServiceRepository = $this->container->get('domain.bookable.packageCustomerService.repository');
+
+            $packageCustomerService = $packageCustomerServiceRepository->getByCriteria(
+                [
+                    'packagesCustomers' => [$booking->getPackageCustomerService()->getPackageCustomer()->getId()->getValue()],
+                    'services'          => [$service->getId()->getValue()]
+                ]
+            );
+
+            if ($packageCustomerService->length()) {
+                $booking->getPackageCustomerService()->setId(new Id($packageCustomerService->toArray()[0]['id']));
+            }
+        }
+
 
         $bookableAS->modifyServicePriceByDuration($service, $service->getDuration()->getValue());
 

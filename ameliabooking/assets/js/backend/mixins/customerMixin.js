@@ -104,7 +104,11 @@ export default {
       )
     },
 
-    getNoShowClass (customerId, customersNoShowCount = null, customer = null) {
+    getNoShowClass (customerId, customersNoShowCount = null, customer = null, status = null) {
+      if (status && status === 'blocked') {
+        return 'am-customer-name am-customer-blocked'
+      }
+
       if (!this.$root.settings.roles.enableNoShowTag) {
         return ''
       }
@@ -145,12 +149,14 @@ export default {
       return noShowClass
     },
 
-    getOptionClass (item, customersNoShowCount) {
+    getOptionClass (item, customersNoShowCount = null, status = null) {
       let customer = item.customer ? item.customer : item
       let noShowClass = this.getNoShowClass(
         (customer.id),
         (customersNoShowCount),
-        (customer.noShowCount ? customer : null))
+        (customer.noShowCount ? customer : null),
+        status
+      )
       let generatedClass = noShowClass || ''
       generatedClass += customer.email ? ' am-drop-item-name' : ''
       return generatedClass

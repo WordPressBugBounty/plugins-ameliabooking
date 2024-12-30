@@ -384,9 +384,10 @@ let appointmentsAmount = computed(() => {
 })
 
 function getPrepaidAmount () {
-  return appointmentsAmount.value.prepaid.depositAmount
-    ? appointmentsAmount.value.prepaid.depositAmount
-    : appointmentsAmount.value.prepaid.totalAmount - appointmentsAmount.value.prepaid.discountAmount + appointmentsAmount.value.prepaid.taxAmount
+  const { totalAmount, discountAmount, taxAmount, depositAmount } = appointmentsAmount.value.prepaid;
+  const total = totalAmount - discountAmount + taxAmount;
+
+  return depositAmount ? Math.min(total, depositAmount) : total;
 }
 
 function getPostpaidAmount () {

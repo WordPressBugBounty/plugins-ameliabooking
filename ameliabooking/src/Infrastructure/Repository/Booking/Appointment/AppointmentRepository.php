@@ -125,6 +125,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                     a.googleCalendarEventId AS appointment_google_calendar_event_id,
                     a.googleMeetUrl AS appointment_google_meet_url,
                     a.outlookCalendarEventId AS appointment_outlook_calendar_event_id,
+                    a.appleCalendarEventId AS appointment_apple_calendar_event_id,
                     a.zoomMeeting AS appointment_zoom_meeting,
                     a.lessonSpace AS appointment_lesson_space,
                     a.parentId AS appointment_parentId,
@@ -227,6 +228,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                     a.googleCalendarEventId AS appointment_google_calendar_event_id,
                     a.googleMeetUrl AS appointment_google_meet_url,
                     a.outlookCalendarEventId AS appointment_outlook_calendar_event_id,
+                    a.appleCalendarEventId AS appointment_apple_calendar_event_id,
                     a.zoomMeeting AS appointment_zoom_meeting,
                     a.lessonSpace AS appointment_lesson_space,
                     
@@ -325,6 +327,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                     a.googleCalendarEventId AS appointment_google_calendar_event_id,
                     a.googleMeetUrl AS appointment_google_meet_url,
                     a.outlookCalendarEventId AS appointment_outlook_calendar_event_id,
+                    a.appleCalendarEventId AS appointment_apple_calendar_event_id,
                     a.zoomMeeting AS appointment_zoom_meeting,
                     a.lessonSpace AS appointment_lesson_space,
                     
@@ -493,6 +496,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
             ':googleCalendarEventId'  => $data['googleCalendarEventId'],
             ':googleMeetUrl'          => $data['googleMeetUrl'],
             ':outlookCalendarEventId' => $data['outlookCalendarEventId'],
+            ':appleCalendarEventId'   => $data['appleCalendarEventId'],
             ':lessonSpace'            => $data['lessonSpace'],
         ];
 
@@ -511,6 +515,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                 `googleCalendarEventId` = :googleCalendarEventId,                    
                 `googleMeetUrl` = :googleMeetUrl,
                 `outlookCalendarEventId` = :outlookCalendarEventId,
+                `appleCalendarEventId` = :appleCalendarEventId,
                 `lessonSpace` = :lessonSpace
                 WHERE id = :id"
             );
@@ -1184,10 +1189,42 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                 $couponsJoin = '';
             }
 
+            $bookingsFields = '
+                cb.id AS booking_id,
+                cb.customerId AS booking_customerId,
+                cb.status AS booking_status,
+                cb.price AS booking_price,
+                cb.tax AS booking_tax,
+                cb.persons AS booking_persons,
+                cb.customFields AS booking_customFields,
+                cb.info AS booking_info,
+                cb.aggregatedPrice AS booking_aggregatedPrice,
+                cb.packageCustomerServiceId AS booking_packageCustomerServiceId,
+                cb.duration AS booking_duration,
+                cb.created AS booking_created,
+                cb.tax AS booking_tax,
+            ';
+
+            $bookingsJoin = "INNER JOIN {$this->bookingsTable} cb ON cb.appointmentId = a.id";
+
+            if (!empty($criteria['skipBookings'])) {
+                $bookingsFields = '';
+
+                $bookingsJoin = '';
+            }
+
             $where = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
             $statement = $this->connection->prepare(
                 "SELECT
+                    {$customersFields}
+                    {$bookingExtrasFields}
+                    {$providersFields}
+                    {$locationsFields}
+                    {$servicesFields}
+                    {$paymentsFields}
+                    {$couponsFields}
+                    {$bookingsFields}
                     a.id AS appointment_id,
                     a.bookingStart AS appointment_bookingStart,
                     a.bookingEnd AS appointment_bookingEnd,
@@ -1200,34 +1237,12 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                     a.googleCalendarEventId AS appointment_google_calendar_event_id,
                     a.googleMeetUrl AS appointment_google_meet_url,
                     a.outlookCalendarEventId AS appointment_outlook_calendar_event_id,
+                    a.appleCalendarEventId AS appointment_apple_calendar_event_id,
                     a.zoomMeeting AS appointment_zoom_meeting,
                     a.lessonSpace AS appointment_lesson_space,
-                    a.parentId AS appointment_parentId,
-       
-                    {$customersFields}
-                    {$bookingExtrasFields}
-                    {$providersFields}
-                    {$locationsFields}
-                    {$servicesFields}
-                    {$paymentsFields}
-                    {$couponsFields}
-                    
-                    cb.id AS booking_id,
-                    cb.customerId AS booking_customerId,
-                    cb.status AS booking_status,
-                    cb.price AS booking_price,
-                    cb.tax AS booking_tax,
-                    cb.persons AS booking_persons,
-                    cb.customFields AS booking_customFields,
-                    cb.info AS booking_info,
-                    cb.aggregatedPrice AS booking_aggregatedPrice,
-                    cb.packageCustomerServiceId AS booking_packageCustomerServiceId,
-                    cb.duration AS booking_duration,
-                    cb.created AS booking_created,
-                    cb.tax AS booking_tax
-                    
+                    a.parentId AS appointment_parentId
                 FROM {$this->table} a
-                INNER JOIN {$this->bookingsTable} cb ON cb.appointmentId = a.id
+                {$bookingsJoin}
                 {$packagesJoin}
                 {$customersJoin}
                 {$providersJoin}
@@ -1268,6 +1283,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                 a.googleCalendarEventId as appointment_google_calendar_event_id,
                 a.googleMeetUrl AS appointment_google_meet_url,
                 a.outlookCalendarEventId AS appointment_outlook_calendar_event_id,
+                a.appleCalendarEventId AS appointment_apple_calendar_event_id,
                 a.notifyParticipants AS appointment_notifyParticipants
             FROM {$this->table} a WHERE (
                   SELECT COUNT(*) FROM {$this->bookingsTable} cb WHERE a.id = cb.appointmentId
@@ -1416,6 +1432,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                     a.googleCalendarEventId AS appointment_google_calendar_event_id,
                     a.googleMeetUrl AS appointment_google_meet_url,
                     a.outlookCalendarEventId AS appointment_outlook_calendar_event_id,
+                    a.appleCalendarEventId AS appointment_apple_calendar_event_id,
                     a.zoomMeeting AS appointment_zoom_meeting,
                     a.lessonSpace AS appointment_lesson_space,
                     a.parentId AS appointment_parentId

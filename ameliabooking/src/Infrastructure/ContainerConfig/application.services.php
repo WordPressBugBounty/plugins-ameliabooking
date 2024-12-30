@@ -487,6 +487,17 @@ $entries['application.webHook.service'] = function ($c) {
 };
 
 /**
+ * Integration Service
+ *
+ * @param Container $c
+ *
+ * @return AmeliaBooking\Application\Services\Integration\ApplicationIntegrationService
+ */
+$entries['application.integration.service'] = function ($c) {
+    return new AmeliaBooking\Application\Services\Integration\ApplicationIntegrationService($c);
+};
+
+/**
  * Zoom Service
  *
  * @param Container $c

@@ -6,7 +6,7 @@
 
 namespace AmeliaBooking\Application\Services\Placeholder;
 
-use AmeliaBooking\Application\Services\Coupon\CouponApplicationService;
+use AmeliaBooking\Application\Services\Coupon\AbstractCouponApplicationService;
 use AmeliaBooking\Application\Services\Helper\HelperService;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\CouponInvalidException;
@@ -21,6 +21,7 @@ use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Entity\User\Customer;
 use AmeliaBooking\Domain\Factory\Booking\Event\EventFactory;
+use AmeliaBooking\Domain\Factory\User\UserFactory;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\LoginType;
@@ -582,7 +583,11 @@ abstract class PlaceholderService implements PlaceholderServiceInterface
 
         // If data is for customer
         /** @var Customer $customer */
-        $customer = $customerEntity ?: $userRepository->getById($appointment['bookings'][$bookingKey]['customerId']);
+        $customer = $customerEntity ?: (
+            !empty($appointment['bookings'][$bookingKey]['customer'])
+                ? UserFactory::create($appointment['bookings'][$bookingKey]['customer'])
+                : $userRepository->getById($appointment['bookings'][$bookingKey]['customerId'])
+        );
 
         $info = !empty($appointment['bookings'][$bookingKey]['info']) ?
             json_decode($appointment['bookings'][$bookingKey]['info']) : null;
@@ -830,7 +835,7 @@ abstract class PlaceholderService implements PlaceholderServiceInterface
             /** @var CouponRepository $couponRepository */
             $couponRepository = $this->container->get('domain.coupon.repository');
 
-            /** @var CouponApplicationService $couponAS */
+            /** @var AbstractCouponApplicationService $couponAS */
             $couponAS = $this->container->get('application.coupon.service');
 
             /** @var Collection $customerReservations */
@@ -838,7 +843,10 @@ abstract class PlaceholderService implements PlaceholderServiceInterface
 
             $type            = $appointment['type'];
             $customerId      = $type !== Entities::PACKAGE ? $appointment['bookings'][$bookingKey]['customerId'] : $appointment['customer']['id'];
-            $couponsCriteria = [];
+            $couponsCriteria = [
+                'notExpired'           => true,
+                'notificationInterval' => true,
+            ];
 
             if (!$customerId) {
                 return $couponsData;
@@ -846,12 +854,38 @@ abstract class PlaceholderService implements PlaceholderServiceInterface
 
             switch ($type) {
                 case Entities::APPOINTMENT:
-                    /** @var AppointmentRepository $appointmentRepository */
-                    $appointmentRepository = $this->container->get('domain.booking.appointment.repository');
-
                     $couponsCriteria['entityIds'] = [$appointment['serviceId']];
 
                     $couponsCriteria['entityType'] = Entities::SERVICE;
+
+                    break;
+
+                case Entities::EVENT:
+                    $couponsCriteria['entityIds'] = [$appointment['id']];
+
+                    $couponsCriteria['entityType'] = Entities::EVENT;
+
+                    break;
+
+                case Entities::PACKAGE:
+                    $couponsCriteria['entityIds'] = [$appointment['id']];
+
+                    $couponsCriteria['entityType'] = Entities::PACKAGE;
+
+                    break;
+            }
+
+            /** @var Collection $entityCoupons */
+            $entityCoupons = $couponAS->getAllByCriteria($couponsCriteria);
+
+            if (!$entityCoupons->length()) {
+                return $couponsData;
+            }
+
+            switch ($type) {
+                case Entities::APPOINTMENT:
+                    /** @var AppointmentRepository $appointmentRepository */
+                    $appointmentRepository = $this->container->get('domain.booking.appointment.repository');
 
                     $customerReservations = $appointmentRepository->getPeriodAppointments(
                         [
@@ -876,10 +910,6 @@ abstract class PlaceholderService implements PlaceholderServiceInterface
                     /** @var EventRepository $eventRepository */
                     $eventRepository = $this->container->get('domain.booking.event.repository');
 
-                    $couponsCriteria['entityType'] = Entities::EVENT;
-
-                    $couponsCriteria['entityIds'] = [$appointment['id']];
-
                     $eventsIds = $eventRepository->getFilteredIds(
                         [
                             'customerId'            => $customerId,
@@ -901,22 +931,12 @@ abstract class PlaceholderService implements PlaceholderServiceInterface
                     /** @var PackageCustomerRepository $packageCustomerRepository */
                     $packageCustomerRepository = $this->container->get('domain.bookable.packageCustomer.repository');
 
-                    $couponsCriteria['entityIds'] = [$appointment['id']];
-
-                    $couponsCriteria['entityType'] = Entities::PACKAGE;
-
                     $customerReservations = $packageCustomerRepository->getByEntityId($customerId, 'customerId');
 
                     break;
             }
 
-            /** @var Collection $entityCoupons */
-            $entityCoupons = $couponRepository->getAllByCriteria($couponsCriteria);
-
-            /** @var Collection $allCoupons */
-            $allCoupons = $couponRepository->getAllIndexedById();
-
-            foreach (array_diff($allCoupons->keys(), $entityCoupons->keys()) as $couponId) {
+            foreach (array_diff($couponRepository->getIds(), $entityCoupons->keys()) as $couponId) {
                 $couponsData["coupon_{$couponId}"] = '';
             }
 

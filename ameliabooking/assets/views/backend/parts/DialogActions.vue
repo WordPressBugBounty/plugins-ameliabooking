@@ -71,6 +71,21 @@
           </div>
         </transition>
 
+        <!-- Dialog Visibility Confirmation -->
+        <transition name="slide-vertical">
+          <div class="am-dialog-confirmation" v-if="status" v-show="showBlockConfirmation">
+            <h3>{{ message.confirm.block }}</h3>
+            <div class="align-left">
+              <el-button size="small" @click="showBlockConfirmation = !showBlockConfirmation">
+                {{ $root.labels.cancel }}
+              </el-button>
+              <el-button size="small" @click="blockEntity(false)" type="primary">
+                {{ getConfirmBlockButtonText().yes }}
+              </el-button>
+            </div>
+          </div>
+        </transition>
+
         <!-- Dialog Duplicate Confirmation -->
         <transition name="slide-vertical">
           <div class="am-dialog-confirmation" v-show="showDuplicateConfirmation">
@@ -168,6 +183,21 @@
                 {{ getActionRemoveButtonText() }}
               </span>
             </el-button>
+            <el-button
+              v-if="action.haveBlock"
+              class="am-button-block"
+              :type="getButtonType('block')"
+              @click="handleBlockConfirmation"
+            >
+              <img
+                class="svg-amelia"
+                :alt="$root.labels.block"
+                :src="$root.getUrl+ (isStatusBlocked() ? 'public/img/unblock.svg' : 'public/img/block.svg')"
+              />
+              <span>
+                {{ getConfirmBlockButtonText().yes }}
+              </span>
+            </el-button>
           </el-col>
           <el-col
             :sm="(action.haveRemove === false && action.haveStatus === false && action.haveDuplicate === false) ? 24 : 8"
@@ -254,6 +284,7 @@
         haveAdd: false,
         haveEdit: false,
         haveStatus: false,
+        haveBlock: false,
         haveRemove: false,
         haveRemoveEffect: false,
         ignoreDeleteEffect: false,
@@ -293,6 +324,7 @@
         showSaveConfirmation: false,
         showAddHoursDialog: false,
         confirmCalendarConflict: false,
+        showBlockConfirmation: false,
 
         deleteEffectMessage: null,
 
@@ -313,6 +345,7 @@
           case ('remove'):
             return this.hasIcons ? null : this.buttonType.remove
 
+          case ('block'):
           case ('duplicate'):
             return this.hasIcons ? null : this.buttonType.duplicate
         }
@@ -503,6 +536,24 @@
         })
       },
 
+      blockEntity (applyGlobally) {
+        this.dialogLoading = true
+        this.form.post(this.$root.getAjaxUrl + '/' + this.urlName + '/status/' + this.entity.id, {
+          'status': this.entity.status === 'visible' ? this.status.block : this.status.on,
+          'applyGlobally': applyGlobally
+        }).then(() => {
+          this.onSuccess(this.$root.labels.success, this.message.success.block, null)
+
+          if (this.updateStash) {
+            this.updateStashEntities({})
+          }
+        }).catch(error => {
+          if (error.response) {
+            this.onError('', error.response.data.data.message)
+          }
+        })
+      },
+
       duplicateEntity () {
         this.dialogLoading = true
         this.$parent.$emit('closeDialog', true)
@@ -518,6 +569,7 @@
         this.showVisibilityConfirmation = false
         this.showDeleteConfirmation = false
         this.showDuplicateConfirmation = false
+        this.showBlockConfirmation = false
       },
 
       handleDuplicateConfirmation () {
@@ -525,6 +577,7 @@
         this.showSaveConfirmation = false
         this.showDeleteConfirmation = false
         this.showVisibilityConfirmation = false
+        this.showBlockConfirmation = false
       },
 
       handleVisibilityConfirmation () {
@@ -532,12 +585,22 @@
         this.showSaveConfirmation = false
         this.showDeleteConfirmation = false
         this.showDuplicateConfirmation = false
+        this.showBlockConfirmation = false
+      },
+
+      handleBlockConfirmation () {
+        this.showBlockConfirmation = !this.showBlockConfirmation
+        this.showSaveConfirmation = false
+        this.showDeleteConfirmation = false
+        this.showDuplicateConfirmation = false
+        this.showVisibilityConfirmation = false
       },
 
       handleDeleteConfirmation () {
         this.showVisibilityConfirmation = false
         this.showDuplicateConfirmation = false
         this.showSaveConfirmation = false
+        this.showBlockConfirmation = false
 
         if (this.action.haveRemoveEffect) {
           if (this.showDeleteConfirmation === false) {
@@ -595,6 +658,16 @@
         }
       },
 
+      getConfirmBlockButtonText () {
+        return this.buttonText !== null && this.buttonText.confirm && this.buttonText.confirm.status ? {
+          yes: this.buttonText.confirm.status.block,
+          no: this.buttonText.confirm.status.no
+        } : {
+          yes: this.$root.labels.yes,
+          no: this.$root.labels.no
+        }
+      },
+
       getConfirmStatusButtonText () {
         return this.buttonText !== null && this.buttonText.confirm && this.buttonText.confirm.status ? {
           yes: this.buttonText.confirm.status.yes,
@@ -637,6 +710,10 @@
 
       isStatusOff () {
         return this.entity.status === this.status.off
+      },
+
+      isStatusBlocked () {
+        return this.entity.status === this.status.block
       }
     },
 

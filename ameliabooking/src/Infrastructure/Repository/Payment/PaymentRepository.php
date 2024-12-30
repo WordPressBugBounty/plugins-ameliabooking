@@ -420,6 +420,7 @@ class PaymentRepository extends AbstractRepository implements PaymentRepositoryI
                 cu.firstName AS customerFirstName,
                 cu.lastName AS customerLastName,
                 cu.email AS customerEmail,
+                cu.status AS customerStatus,
                 pu.firstName AS providerFirstName,
                 pu.lastName AS providerLastName,
                 pu.email AS providerEmail,
@@ -482,6 +483,7 @@ class PaymentRepository extends AbstractRepository implements PaymentRepositoryI
                 cu.firstName AS customerFirstName,
                 cu.lastName AS customerLastName,
                 cu.email AS customerEmail,
+                cu.status AS customerStatus,
                 '' AS providerFirstName,
                 '' AS providerLastName,
                 '' AS providerEmail,
@@ -543,6 +545,7 @@ class PaymentRepository extends AbstractRepository implements PaymentRepositoryI
                 cu.firstName AS customerFirstName,
                 cu.lastName AS customerLastName,
                 cu.email AS customerEmail,
+                cu.status AS customerStatus,
                 NULL AS providerFirstName,
                 NULL AS providerLastName,
                 NULL AS providerEmail,
@@ -582,7 +585,7 @@ class PaymentRepository extends AbstractRepository implements PaymentRepositoryI
 
         try {
             $statement = $this->connection->prepare(
-                "{$paymentQuery}
+                "SELECT * FROM ({$paymentQuery}) payments
                 ORDER BY {$basedOnDate}, id"
             );
 
@@ -643,6 +646,7 @@ class PaymentRepository extends AbstractRepository implements PaymentRepositoryI
                 'customerLastName' => $customerInfo ? $customerInfo['lastName'] : $row['customerLastName'],
                 'info' => $row['info'],
                 'customerEmail' => $row['customerEmail'],
+                'customerStatus' => $row['customerStatus'],
                 'coupon' => !empty($row['coupon_id']) ? [
                     'id' => $row['coupon_id'],
                     'discount' => $row['coupon_discount'],

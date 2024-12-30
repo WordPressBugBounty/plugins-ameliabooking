@@ -97,7 +97,7 @@
           >
 
             <!-- Customer Name -->
-            <h3 v-if="app.bookings.length > 1" :class="getNoShowClass(booking.customerId, customersNoShowCount)">
+            <h3 v-if="app.bookings.length > 1" :class="getNoShowClass(booking.customerId, customersNoShowCount, null, booking.customer.status)">
               {{ ((user = getCustomerById(booking.customerId)) !== null ? user.firstName + ' ' +user.lastName : '') }}
             </h3>
 

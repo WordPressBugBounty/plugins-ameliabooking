@@ -154,6 +154,10 @@ function setEntities ({ commit, rootState }, entities, types, licence, showHidde
     }
 
     if (ent === 'categories') {
+      if (settings.activation.stash) {
+        entities[ent].sort((a, b) => a.position - b.position)
+      }
+
       entities[ent].forEach((category, categoryIndex) => {
         if (settings.activation.stash) {
           category.serviceList.sort((a, b) => a.position - b.position)

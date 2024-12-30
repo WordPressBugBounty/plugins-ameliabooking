@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 4.5
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.13
+Stable tag: 1.2.14
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,14 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+V1.2.14
+* Improvement: Added class for every status option on Event Calendar form 2.0
+* BugFix: Fixed error regarding translations caused by 6.7 WordPress update
+* BugFix: Fixed issue with categories sorting not working when 'Load entities on page load' is enabled
+* BugFix: Fixed issue with the calendar when a customer reschedules appointments on the back-end
+* BugFix: Fixed issue with notifications when the appointment status is changed to Approved
+* Other small bug fixes and stability improvements
+
 V1.2.13
 * Small bug fixes and stability improvements
 

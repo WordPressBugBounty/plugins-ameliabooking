@@ -38,7 +38,7 @@ class UsersTable extends AbstractDatabaseTable
 
         return "CREATE TABLE {$table}  (
                   `id` int(11) NOT NULL AUTO_INCREMENT,
-                  `status` ENUM('hidden', 'visible', 'disabled') NOT NULL default 'visible',
+                  `status` ENUM('hidden', 'visible', 'disabled', 'blocked') NOT NULL default 'visible',
                   `type` ENUM('customer', 'provider', 'manager', 'admin') NOT NULL,
                   `externalId` bigint(20) DEFAULT NULL,
                   `firstName` varchar({$name}) NOT NULL DEFAULT '',
@@ -58,6 +58,7 @@ class UsersTable extends AbstractDatabaseTable
                   `countryPhoneIso` varchar(2) DEFAULT NULL,
                   `translations` TEXT NULL DEFAULT NULL,
                   `timeZone` varchar({$name}) DEFAULT NULL,
+                  `appleCalendarId` varchar({$name}) DEFAULT NULL,
                   `badgeId` int(11) DEFAULT NULL,
                   `error` TEXT({$description}) DEFAULT NULL,
                   PRIMARY KEY (`id`),

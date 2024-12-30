@@ -918,6 +918,7 @@ export default {
             .am-fcis__header-action {
               width: 100%;
               justify-content: space-between;
+              flex: unset;
             }
 
             &.am-mobile {
@@ -968,6 +969,7 @@ export default {
           display: flex;
           align-items: center;
           justify-content: flex-end;
+          flex: 0 0 auto;
         }
 
         &-price {

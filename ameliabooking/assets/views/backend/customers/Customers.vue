@@ -207,6 +207,7 @@
                   :key="customer.id"
                   :name="customer.id"
                   class="am-customer"
+                  :class="customer.status === 'blocked' ? 'am-customer-blocked' : ''"
               >
                 <template slot="title">
                   <div class="am-customer-data">
@@ -228,7 +229,7 @@
                           <!-- Customer Name -->
                           <el-col :lg="8" :sm="8">
                             <p class="am-col-title">{{ $root.labels.customer }}:</p>
-                            <h3 :class="getNoShowClass(null, null, customer)">
+                            <h3 :class="getNoShowClass(null, null, customer, customer.status)">
                               {{ customer.firstName + ' ' + customer.lastName }}
                             </h3>
                             <el-tooltip class="item" :content=" customer.email" placement="top">

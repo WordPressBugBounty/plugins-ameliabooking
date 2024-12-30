@@ -92,12 +92,16 @@ class AppointmentsPlaceholderService extends AppointmentPlaceholderService
         ];
     }
 
+    /** @noinspection MoreThanThreeArgumentsInspection */
     /**
      * @param array        $data
      * @param int          $bookingKey
      * @param string       $type
      * @param AbstractUser $customer
-     * @param null         $allBookings
+     * @param array        $allBookings
+     * @param bool         $invoice
+     * @param string       $notificationType
+     *
      * @return array
      *
      * @throws ContainerException
@@ -105,8 +109,15 @@ class AppointmentsPlaceholderService extends AppointmentPlaceholderService
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    public function getPlaceholdersData($data, $bookingKey = null, $type = null, $customer = null, $allBookings = null)
-    {
+    public function getPlaceholdersData(
+        $data,
+        $bookingKey = null,
+        $type = null,
+        $customer = null,
+        $allBookings = null,
+        $invoice = false,
+        $notificationType = null
+    ) {
         $providersData = [];
 
         foreach ($data['recurring'] as $item) {
@@ -114,7 +125,6 @@ class AppointmentsPlaceholderService extends AppointmentPlaceholderService
         }
 
         foreach ($providersData as $providerId => $providerAppointmentsData) {
-
             $providersData[$providerId] = $this->getRecurringAppointmentsData(
                 array_merge($data, ['recurring' => $providerAppointmentsData]),
                 $bookingKey,

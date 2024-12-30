@@ -68,7 +68,7 @@
                     :value="item"
                     class="am-has-option-meta"
                   >
-                    <span :class="getOptionClass(item, customersNoShowCount)">
+                    <span :class="getOptionClass(item, customersNoShowCount, item.customer.status)">
                       {{ !item.customer.firstName.trim() && !item.customer.lastName.trim() ? $root.labels.customer + ' ' + item.customer.id : '' }} {{ `${item.customer.firstName} ${item.customer.lastName}` }}
                     </span>
                     <span
@@ -109,7 +109,9 @@
                       <h3
                           :class="!isCabinet ? getNoShowClass(
                               ((packageServices && !appointment.id) ? getCustomerInfo(booking).id : booking.customerId),
-                              (customersNoShowCount)
+                              (customersNoShowCount),
+                              null,
+                              booking.customer.status
                               ) : ''"
                       >
                         {{ (user = getCustomerInfo(booking)) !== null ? (!user.firstName.trim() && !user.lastName.trim() ? $root.labels.customer + ' ' + user.id : user.firstName + ' ' + user.lastName) : '' }}

@@ -3,7 +3,7 @@
 Plugin Name: Amelia
 Plugin URI: https://wpamelia.com/
 Description: Amelia is a simple yet powerful automated booking specialist, working 24/7 to make sure your customers can make appointments and events even while you sleep!
-Version: 1.2.13
+Version: 1.2.14
 Author: TMS
 Author URI: https://tmsproducts.io/
 Text Domain: wpamelia
@@ -104,7 +104,7 @@ if (!defined('AMELIA_LOGIN_URL')) {
 
 // Const for Amelia version
 if (!defined('AMELIA_VERSION')) {
-    define('AMELIA_VERSION', '1.2.13');
+    define('AMELIA_VERSION', '1.2.14');
 }
 
 // Const for site URL
@@ -210,6 +210,8 @@ class Plugin
             define('AMELIA_LOCALE', get_user_locale());
         }
 
+        load_plugin_textdomain('wpamelia', false, plugin_basename(__DIR__) . '/languages/' . AMELIA_LOCALE . '/');
+
         self::weglotConflict($settingsService, false);
 
         if (StarterWooCommerceService::isEnabled()) {
@@ -254,15 +256,6 @@ class Plugin
             if ($ameliaRole === 'admin') {
                 ErrorService::setNotices();
             }
-
-            $menuItems = new Menu($settingsService);
-
-            // Init admin menu
-            $wpMenu = new Submenu(
-                new SubmenuPageHandler($settingsService),
-                $menuItems()
-            );
-            $wpMenu->init();
 
             // Add TinyMCE button for shortcode generator
             ButtonService::renderButton();
@@ -378,6 +371,21 @@ class Plugin
             return $data;
         }
 
+    }
+
+    public static function initMenu()
+    {
+        $settingsService = new SettingsService(new SettingsStorage());
+
+        $menuItems = new Menu($settingsService);
+
+        // Init admin menu
+        $wpMenu = new Submenu(
+            new SubmenuPageHandler($settingsService),
+            $menuItems()
+        );
+
+        $wpMenu->addOptionsPages();
     }
 
     public static function adminInit()
@@ -543,6 +551,8 @@ add_action('plugins_loaded', array('AmeliaBooking\Plugin', 'init'));
 
 add_action('admin_init', array('AmeliaBooking\Plugin', 'adminInit'));
 
+add_action('admin_menu', array('AmeliaBooking\Plugin', 'initMenu'));
+
 /** Activation hooks */
 register_activation_hook(__FILE__, array('AmeliaBooking\Plugin', 'activation'));
 register_activation_hook(__FILE__, array('AmeliaBooking\Infrastructure\WP\InstallActions\ActivationRolesHook', 'init'));
@@ -587,7 +597,3 @@ add_filter('submenu_file', function($submenu_file) {
 
 add_action( 'wp_logout',  array('AmeliaBooking\Infrastructure\WP\UserService\UserService', 'logoutAmeliaUser'));
 add_action( 'profile_update',  array('AmeliaBooking\Infrastructure\WP\UserService\UserService', 'updateAmeliaUser'), 10, 3);
-
-add_action('plugins_loaded', function () {
-    load_plugin_textdomain('wpamelia', false, plugin_basename(__DIR__) . '/languages/' . get_locale() . '/');
-});

@@ -153,7 +153,7 @@ class GetAppointmentsCommandHandler extends CommandHandler
                     [
                         'customers' => $isCabinetPage && $user->getType() === Entities::CUSTOMER ?
                             [$user->getId()->getValue()] : [],
-                        'providers' => $isCabinetPage && $user->getType() === Entities::PROVIDER ?
+                        'providers' => $user && $user->getType() === Entities::PROVIDER ?
                             [$user->getId()->getValue()] : [],
                     ],
                     array_merge($params, ['endsInDateRange' => $isCalendarPage]),

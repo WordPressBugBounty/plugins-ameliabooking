@@ -354,7 +354,7 @@
                             <!-- Customer -->
                             <el-col :lg="8" :sm="8">
                               <p class="am-col-title">{{ $root.labels.customer }}:</p>
-                              <h3 :class="getNoShowClass(payment.customerId)">
+                              <h3 :class="getNoShowClass(payment.customerId, null, null, payment.customerStatus)">
                                 {{ payment.customerFirstName + ' ' + payment.customerLastName }}
                               </h3>
                               <span>{{ payment.customerEmail }}</span>
@@ -794,7 +794,8 @@
                       <!-- Service -->
                       <el-col :lg="($root.licence.isPro || $root.licence.isDeveloper) ? 4:6" :sm="9">
                         <p class="am-col-title">{{ $root.labels.service }}:</p>
-                        <h4>
+                        <h4 v-if="coupon.allServices">{{$root.labels.all_services}}</h4>
+                        <h4 v-else>
                           {{coupon.serviceList.length > 0 ? (coupon.serviceList[0].name) : ''}}
                           <br>
                           <span>
@@ -813,7 +814,8 @@
                       <!-- Package -->
                       <el-col :lg="4" :sm="9" v-if="$root.licence.isPro || $root.licence.isDeveloper">
                         <p class="am-col-title">{{ $root.labels.package }}:</p>
-                        <h4>
+                        <h4 v-if="coupon.allPackages">{{$root.labels.all_packages}}</h4>
+                        <h4 v-else>
                           {{coupon.packageList.length > 0 ? (coupon.packageList[0].name) : ''}}
                           <br>
                           <span>
@@ -832,7 +834,8 @@
                       <!-- Event -->
                       <el-col :lg="($root.licence.isPro || $root.licence.isDeveloper) ? 4:6" :sm="9">
                         <p class="am-col-title">{{ $root.labels.event }}:</p>
-                        <h4>
+                        <h4 v-if="coupon.allEvents">{{$root.labels.all_events}}</h4>
+                        <h4 v-else>
                           {{coupon.eventList.length > 0 ? (coupon.eventList[0].name) : ''}}
                           <br>
                           <span>

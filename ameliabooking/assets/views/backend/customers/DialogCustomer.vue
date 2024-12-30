@@ -222,14 +222,16 @@
 
         :status="{
           on: 'visible',
-          off: 'hidden'
+          off: 'hidden',
+          block: 'blocked'
         }"
 
         :buttonText="{
           confirm: {
             status: {
               yes: customer.status === 'visible' ? $root.labels.visibility_hide : $root.labels.visibility_show,
-              no: $root.labels.no
+              no: $root.labels.no,
+              block: customer.status === 'visible' ? $root.labels.block : $root.labels.unblock
             }
           }
         }"
@@ -240,7 +242,8 @@
           haveStatus: false,
           haveRemove: $root.settings.capabilities.canDelete === true,
           haveRemoveEffect: true,
-          haveDuplicate: false
+          haveDuplicate: false,
+          haveBlock: !$root.licence.isLite
         }"
 
         :message="{
@@ -248,13 +251,15 @@
             save: $root.labels.customer_saved,
             remove: $root.labels.customer_deleted,
             show: '',
-            hide: ''
+            hide: '',
+            block: this.customer.status === 'visible' ? $root.labels.customer_blocked : $root.labels.customer_unblocked
           },
           confirm: {
             remove: $root.labels.confirm_delete_customer,
             show: '',
             hide: '',
-            duplicate: ''
+            duplicate: '',
+            block: this.customer.status === 'visible' ? $root.labels.confirm_block_customer : $root.labels.confirm_unblock_customer
           }
         }"
     >
@@ -326,6 +331,10 @@
 
       if (!this.usedLanguages.includes(this.$root.settings.wordpress.locale)) {
         this.usedLanguages.push(this.$root.settings.wordpress.locale)
+      }
+
+      if (!this.usedLanguages.includes(this.customer.language)) {
+        this.customer.language = this.$root.settings.wordpress.locale
       }
     },
 

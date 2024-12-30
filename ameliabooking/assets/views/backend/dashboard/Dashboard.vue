@@ -477,7 +477,7 @@
                                       :src="$root.getUrl+'public/img/group.svg'"
                                       class="svg-amelia"
                                     />
-                                    <span v-for="(booking, index) in app.bookings" :class="(app.bookings.length === 1 ? getNoShowClass(booking.customerId, customersNoShowCount) : '')">
+                                    <span v-for="(booking, index) in app.bookings" :class="(app.bookings.length === 1 ? getNoShowClass(booking.customerId, customersNoShowCount, null, booking.customer.status) : '')">
                                       {{ ((user = getCustomerInfo(booking)) !== null ? user.firstName + ' ' + user.lastName : '') }}<span
                                         v-if="app.bookings.length > 1 && index + 1  !== app.bookings.length">,</span>
                                     </span>

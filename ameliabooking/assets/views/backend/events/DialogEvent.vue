@@ -1943,7 +1943,8 @@
             periodEnd: periodEnd,
             googleCalendarEventId: period.googleCalendarEventId,
             googleMeetUrl: period.googleMeetUrl,
-            outlookCalendarEventId: period.outlookCalendarEventId
+            outlookCalendarEventId: period.outlookCalendarEventId,
+            appleCalendarEventId: period.appleCalendarEventId
           })
         })
 

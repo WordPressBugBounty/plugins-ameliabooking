@@ -357,6 +357,60 @@
             </el-row>
             <!-- /Outlook Calendar -->
 
+            <!-- Apple Calendar -->
+            <el-row
+                v-if="$root.settings.appleCalendar && employee.id !== 0 && !$root.licence.isLite && !$root.licence.isStarter"
+                :gutter="16"
+            >
+              <!-- Apple Calendar List -->
+              <el-form-item label="placeholder">
+                <label slot="label" style="padding: 0 8px;">
+                  {{ $root.labels.apple_calendar }}:
+                  <el-tooltip placement="top">
+                    <div slot="content" v-html="$root.labels.apple_calendar_tooltip"></div>
+                    <i class="el-icon-question am-tooltip-icon"></i>
+                  </el-tooltip>
+                </label>
+
+                <el-col :sm="15" :xs="24" style="padding: 0 8px;">
+                  <el-select
+                      v-model="employee.appleCalendarId"
+                      placeholder=""
+                      :disabled="!$root.settings.appleCalendar || appleLoading"
+                      @change="clearValidation()"
+                  >
+                    <el-option
+                        v-for="calendar in appleCalendarList"
+                        :key="calendar.id"
+                        :label="calendar.name"
+                        :value="calendar.id"
+                    >
+                    </el-option>
+                  </el-select>
+                </el-col>
+                <!-- /Apple Calendar List -->
+
+                <!-- Apple Calendar Disconnect Button -->
+                <el-col v-if="employee.appleCalendarId" :sm="9" :xs="24" style="padding: 0 8px;">
+                  <el-button
+                      class="am-google-calendar-button"
+                      type="primary"
+                      @click="disconnectFromAppleAccount()"
+                  >
+                    <div class="am-google-calendar-button-image">
+                      <img class="" :src="$root.getUrl + 'public/img/apple-button.svg'"/>
+                    </div>
+                    <span class="am-google-calendar-button-text">
+                      {{ $root.labels.apple_disconnect }}
+                    </span>
+                  </el-button>
+                </el-col>
+                <!-- /Apple Calendar Disconnect Button -->
+
+              </el-form-item>
+            </el-row>
+            <!-- /Apple Calendar -->
+
             <el-row :gutter="16">
               <!-- Zoom-->
               <el-col :sm="12" v-if="$root.settings.zoom.enabled && !$root.licence.isLite && !$root.licence.isStarter">
@@ -747,6 +801,8 @@
         outlookAuthURL: '',
         googleLoading: false,
         outlookLoading: false,
+        appleLoading: false,
+        appleCalendarList: [],
         zoomUsers: [],
         stripeLoading: false,
         stripeProvider: null,
@@ -826,6 +882,10 @@
 
           if (this.$root.settings.zoom.enabled && !this.$root.licence.isLite && !this.$root.licence.isStarter) {
             this.getZoomUsers()
+          }
+
+          if (this.$root.settings.appleCalendar && !this.$root.licence.isLite && !this.$root.licence.isStarter) {
+            this.getAppleCalendarList()
           }
 
           if (!this.employee.stripeConnect) {
@@ -1142,6 +1202,39 @@
         setTimeout(function () {
           $this.inlineSVG()
         }, 10)
+      },
+
+      getAppleCalendarList () {
+        this.appleLoading = true
+
+        this.$http.get(
+          `${this.$root.getAjaxUrl}/apple/calendar-list/` + this.employee.id
+        ).then((response) => {
+          this.appleCalendarList = response.data.data.calendarList
+          const found = this.appleCalendarList.find(
+              (calendar) => calendar.id === this.employee.appleCalendarId
+          );
+          if (!found) {
+            this.$set(this.employee, 'appleCalendarId', null)
+          }
+          this.appleLoading = false
+        }).catch(e => {
+          this.notify(this.$root.labels.error, e.message, 'error')
+          this.appleLoading = false
+        })
+      },
+
+      disconnectFromAppleAccount () {
+        this.appleLoading = true
+        this.$http.post(
+            `${this.$root.getAjaxUrl}/apple/disconnect/` + this.employee.id
+        ).then(() => {
+          this.$set(this.employee, 'appleCalendarId', null)
+          this.appleLoading = false
+        }).catch(e => {
+          this.notify(this.$root.labels.error, e.message, 'error')
+          this.appleLoading = false
+        })
       }
     },
 

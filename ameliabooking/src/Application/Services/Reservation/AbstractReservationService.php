@@ -52,6 +52,7 @@ use AmeliaBooking\Domain\ValueObjects\String\Label;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentStatus;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentType;
+use AmeliaBooking\Domain\ValueObjects\String\Status;
 use AmeliaBooking\Domain\ValueObjects\String\Token;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
@@ -322,6 +323,8 @@ abstract class AbstractReservationService implements ReservationServiceInterface
             }
         }
 
+        $user = null;
+
         // Create a new user if it doesn't exist. For adding appointment from the front-end.
         if (!$appointmentData['bookings'][0]['customerId'] && !$appointmentData['bookings'][0]['customer']['id']) {
             /** @var CustomerApplicationService $customerAS */
@@ -358,6 +361,16 @@ abstract class AbstractReservationService implements ReservationServiceInterface
                     $appointmentData['bookings'][0]['customer']['stripeConnect'] = $user->getStripeConnect()->toArray();
                 }
             }
+        } else {
+            $user = $userRepository->getById($appointmentData['bookings'][0]['customer']['id']);
+        }
+
+        if ($user->getStatus() && $user->getStatus()->getValue() === Status::BLOCKED) {
+            $result->setResult(CommandResult::RESULT_ERROR);
+            $result->setMessage(FrontendStrings::getCommonStrings()['customer_blocked']);
+            $result->setData(['customerBlocked' => true]);
+
+            return null;
         }
 
         if ($reservation->hasCustomFieldsValidation()->getValue()) {

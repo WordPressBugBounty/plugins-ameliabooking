@@ -250,7 +250,7 @@
                               <p class="am-col-title">{{ $root.labels.customer }}:</p>
                               <template>
                                 <h3>
-                                  <span :class="getNoShowClass(packageCustomer.appointments[0].booking.customer.id, customersNoShowCount)">
+                                  <span :class="getNoShowClass(packageCustomer.appointments[0].booking.customer.id, customersNoShowCount, null, packageCustomer.appointments[0].booking.customer.status)">
                                     {{ (user = getCustomerInfo(packageCustomer.appointments[0].booking)) !== null ? (!user.firstName.trim() && !user.lastName.trim() ? $root.labels.customer + ' ' + user.id : user.firstName + ' ' + user.lastName) : '' }}
                                   </span>
                                 </h3>

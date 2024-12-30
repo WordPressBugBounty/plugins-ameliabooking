@@ -15,6 +15,7 @@ use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\PositiveDuration;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
+use AmeliaBooking\Infrastructure\Services\Apple\AbstractAppleCalendarService;
 use AmeliaBooking\Infrastructure\Services\Google\AbstractGoogleCalendarService;
 use AmeliaBooking\Infrastructure\Services\Outlook\AbstractOutlookCalendarService;
 use DateTimeZone;
@@ -269,6 +270,8 @@ class GetTimeSlotsCommandHandler extends CommandHandler
 
                 AbstractOutlookCalendarService::$providersOutlookEvents = [];
 
+                AbstractAppleCalendarService::$providersAppleEvents = [];
+
                 $freeSlots = $applicationTimeSlotService->getSlotsByProps(
                     $settings,
                     array_merge(
@@ -314,6 +317,8 @@ class GetTimeSlotsCommandHandler extends CommandHandler
                     AbstractGoogleCalendarService::$providersGoogleEvents = [];
 
                     AbstractOutlookCalendarService::$providersOutlookEvents = [];
+
+                    AbstractAppleCalendarService::$providersAppleEvents = [];
 
                     $freeSlots = $applicationTimeSlotService->getSlotsByProps(
                         $settings,

@@ -1,5 +1,6 @@
 <template>
   <el-form-item
+    :id="props.id"
     ref="formFieldRef"
     class="am-ff__item"
     :prop="props.itemName"

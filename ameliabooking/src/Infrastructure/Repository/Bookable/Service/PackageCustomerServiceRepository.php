@@ -243,7 +243,8 @@ class PackageCustomerServiceRepository extends AbstractRepository
                     cu.firstName AS customer_firstName,
                     cu.lastName AS customer_lastName,
                     cu.email AS customer_email,
-                    cu.phone AS customer_phone
+                    cu.phone AS customer_phone,
+                    cu.status AS customer_status
                 FROM {$this->table} pcs
                 INNER JOIN {$this->packagesCustomersTable} pc ON pcs.packageCustomerId = pc.id
                 INNER JOIN {$usersTable} cu ON cu.id = pc.customerId

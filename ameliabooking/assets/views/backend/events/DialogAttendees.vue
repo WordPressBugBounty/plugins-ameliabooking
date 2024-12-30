@@ -86,10 +86,7 @@
                   <el-col :sm="$root.settings.capabilities.canDelete === true ? 17 : 19">
                     <div class="am-attendee-name">
                       <h3
-                        :class="showExport ? getNoShowClass(
-                          (booking.customerId !== 0 ? booking.customerId : booking.customer.id),
-                          customersNoShowCount,
-                          null): ''"
+                        :class="showExport ? (getNoShowClass((booking.customerId !== 0 ? booking.customerId : booking.customer.id), customersNoShowCount, null, booking.customer.status)): ''"
                       >
                         {{ ((user = getCustomer(booking)) !== null ? user.firstName + ' ' + user.lastName : '') +
                         (booking.token ? ' (' + booking.token.substring(0, 5) + ')' : '') }}

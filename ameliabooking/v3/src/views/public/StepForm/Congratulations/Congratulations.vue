@@ -77,11 +77,12 @@ import AddToCalendar from './AddToCalendar'
 import CartInfoService from './parts/CartInfoService'
 import AppointmentInfoService from './parts/AppointmentInfoService'
 import PackageInfoService from './parts/PackageInfoService'
-import { computed, inject, provide, markRaw, watchEffect } from 'vue'
+import { computed, inject, provide, markRaw, watchEffect, onMounted } from 'vue'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
 import { useRandomIntFromInterval, useFormattedPrice } from '../../../../assets/js/common/formatting'
 import { useStore } from 'vuex'
 import { useCart } from '../../../../assets/js/public/cart'
+import { useRenderAction } from "../../../../assets/js/public/renderActions";
 
 let props = defineProps({
   globalClass: {
@@ -214,6 +215,10 @@ const cssVars = computed(() => {
       '--am-c-atc-heading-text': amColors.value.colorMainHeadingText
     }
   }
+})
+
+onMounted(() => {
+  useRenderAction('congratulationsLoaded')
 })
 </script>
 

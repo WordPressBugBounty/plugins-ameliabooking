@@ -126,7 +126,7 @@ class GetEventsCommandHandler extends CommandHandler
                 'fetchEventsPeriods'    => true,
                 'fetchEventsTickets'    => true,
                 'fetchEventsTags'       => $isFrontEnd,
-                'fetchEventsProviders'  => $isFrontEnd,
+                'fetchEventsProviders'  => ($isFrontEnd || $command->getPage() === 'calendar'),
                 'fetchEventsImages'     => $isFrontEnd,
                 'fetchBookings'         => true,
                 'fetchBookingsTickets'  => true,

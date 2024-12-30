@@ -59,6 +59,22 @@
           </el-tab-pane>
           <!-- /Outlook Calendar -->
 
+          <!-- Apple Calendar -->
+          <el-tab-pane
+            v-if="notInLicence() ? licenceVisible() : true"
+            :label="$root.labels.apple_calendar"
+            name="appleCalendar"
+            >
+            <LicenceBlockHeader/>
+
+            <apple-calendar
+              :class="licenceClassDisabled()"
+              :appleCalendar="appleCalendarSettings"
+              @openDialog="openDialog"
+            />
+          </el-tab-pane>
+          <!-- /Apple Calendar -->
+
           <!-- Zoom -->
           <el-tab-pane
             v-if="notInLicence() ? licenceVisible() : true"
@@ -157,9 +173,11 @@
   import Zoom from './Integrations/IntegrationsZoom.vue'
   import Marketing from './Integrations/IntegrationsMarketing.vue'
   import LessonSpace from './Integrations/IntegrationsLessonSpace.vue'
+  import AppleCalendar from "./Integrations/IntegrationsAppleCalendar.vue";
 
   export default {
     components: {
+      AppleCalendar,
       GoogleCalendar,
       OutlookCalendar,
       Zoom,
@@ -173,6 +191,9 @@
         type: Object
       },
       outlookCalendar: {
+        type: Object
+      },
+      appleCalendar: {
         type: Object
       },
       zoom: {
@@ -204,6 +225,7 @@
       return {
         googleCalendarSettings: Object.assign({}, this.googleCalendar),
         outlookCalendarSettings: Object.assign({}, this.outlookCalendar),
+        appleCalendarSettings: Object.assign({}, this.appleCalendar),
         zoomSettings: Object.assign({}, this.zoom),
         lessonSpaceSettings: Object.assign({}, this.lessonSpace),
         googleAnalyticsSettings: Object.assign({}, this.googleAnalytics),
@@ -247,6 +269,7 @@
         this.$emit('updateSettings', {
           'googleCalendar': this.googleCalendarSettings,
           'outlookCalendar': this.outlookCalendarSettings,
+          'appleCalendar': this.appleCalendarSettings,
           'zoom': this.zoomSettings,
           'webHooks': this.webHooksSettings,
           'facebookPixel': this.facebookPixelSettings,

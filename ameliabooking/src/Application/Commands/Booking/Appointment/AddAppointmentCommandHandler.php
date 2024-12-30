@@ -150,7 +150,7 @@ class AddAppointmentCommandHandler extends CommandHandler
             $service
         );
 
-        if ($existingAppointment && $appointmentData['internalNotes']) {
+        if ($existingAppointment && !empty($appointmentData['internalNotes'])) {
             if ($existingAppointment->getInternalNotes() &&
                 $existingAppointment->getInternalNotes()->getValue()
             ) {

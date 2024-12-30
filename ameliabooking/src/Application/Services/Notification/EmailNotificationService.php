@@ -120,15 +120,25 @@ class EmailNotificationService extends AbstractNotificationService
             $customer->setEmail(new Email($wpUserEmail));
         }
 
+        $translateNotification = true;
+
+        $generalSettings = $settingsService->getCategorySettings('general');
+
+        $locale = $customerDefaultLanguage ?: $helperService->getLocaleFromBooking($info);
+
+        if (!in_array($locale, $generalSettings['usedLanguages'])) {
+            $translateNotification = false;
+        }
+
         $notificationSubject = $helperService->getBookingTranslation(
-            $customerDefaultLanguage ?: $helperService->getLocaleFromBooking($info),
-            $notification->getTranslations() ? $notification->getTranslations()->getValue() : null,
+            $locale,
+            $translateNotification && $notification->getTranslations() ? $notification->getTranslations()->getValue() : null,
             'subject'
         ) ?: $notification->getSubject()->getValue();
 
         $notificationContent = $helperService->getBookingTranslation(
-            $customerDefaultLanguage ?: $helperService->getLocaleFromBooking($info),
-            $notification->getTranslations() ? $notification->getTranslations()->getValue() : null,
+            $locale,
+            $translateNotification && $notification->getTranslations() ? $notification->getTranslations()->getValue() : null,
             'content'
         ) ?: $notification->getContent()->getValue();
 
@@ -137,7 +147,9 @@ class EmailNotificationService extends AbstractNotificationService
             $bookingKey,
             'email',
             null,
-            $allBookings
+            $allBookings,
+            false,
+            $notification->getName()->getValue()
         );
 
         $sendIcs        = $settingsService->getSetting('ics', 'sendIcsAttachment');

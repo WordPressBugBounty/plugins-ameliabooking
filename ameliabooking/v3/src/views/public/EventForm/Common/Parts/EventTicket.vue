@@ -154,8 +154,9 @@ let disableSelection = computed(() => {
 
   if (!selectedEvent.value.maxCustomCapacity) {
     return (
-      store.getters['tickets/getEventGlobalSpots'] !== spots.value ||
-      props.ticket.spots === props.ticket.sold
+        store.getters['tickets/getEventGlobalSpots'] !== spots.value ||
+        (!isWaitingList.value && props.ticket.spots === props.ticket.sold) ||
+        (isWaitingList.value && props.ticket.waiting === props.ticket.waitingListSpots)
     )
   }
 

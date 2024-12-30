@@ -607,6 +607,14 @@ function packageBookingApp () {
           useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
         }, 500)
       }
+
+      if ('customerBlocked' in error.response.data.data && error.response.data.data.customerBlocked === true) {
+        alertVisibility.value = true
+        alertMessage.value = props.labels.customer_blocked
+        setTimeout(function () {
+          useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
+        }, 500)
+      }
     }
 
     emits('error', error)

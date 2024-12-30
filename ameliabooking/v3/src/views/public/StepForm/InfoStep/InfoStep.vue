@@ -34,6 +34,7 @@
         <el-form-item
           v-for="(cf, index) in allCustomFields"
           v-show="cf.id in availableCustomFields"
+          :id="'am-cf-' + cf.id"
           :ref="el => customFieldsRefs[index] = el"
           :key="index"
           class="am-fs__info-form__item"

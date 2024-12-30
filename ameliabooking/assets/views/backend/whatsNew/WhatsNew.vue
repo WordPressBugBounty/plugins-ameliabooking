@@ -202,25 +202,28 @@ export default {
        isValidEmail: true,
        blogPosts: [],
        changelog: {
-         version: '7.9',
+         version: '8.0',
          starter: {
-           feature: [],
+           feature: [
+             'Added option to block specific customer from future booking'
+           ],
            improvement: [
-             'Added new placeholder %payment_due_amount% for Due amount',
-             'Optimized Event Queries'
+             'Added class for every status option on Event Calendar form 2.0',
+             ...((this.$root.licence.isStarter || this.$root.licence.isBasic)
+               ? [
+                 'Improved logic to assign coupon to new service/event when selected “All services/events”',
+                 'Optimized placeholder service - fetching coupon and customers'
+               ]
+               : [])
            ],
            translations: [],
            bugfix: [
-             'Fixed issue with logging out from customer panel when the customer is logged in to WP as well',
-             'Fixed  issue with the appointments\'/events\' times when the employee is logged in to the back-end',
-             'Fixed issue with Employee role and permission to remove an attendee',
-             'Fixed issue with the Back button on Catalog 2.0 Booking Form when one category exists',
-             'Fixed issue with responsive mode (calendar date picker) on the customer panel',
-             'Fixed conflict with the Beaver builder theme',
-             'Fixed issue with displaying the dropdown menu when selecting the header option',
-             'Fixed issue with booking forms when customer panel is on the same page',
-             'Fixed issue with the date/time step when service is longer than the employees\' work hours',
-             'Fixed issue with payment details and 100% coupon'
+             'Fixed  issue with the "Allow admin to book any time" option and employees breaks',
+             'Fixed issue with appointments when employee is logged in and the "Default items per page for Backend" option',
+             'Fixed error regarding translations caused by 6.7 WordPress update',
+             'Fixed issue with categories sorting not working when "Load entities on page load" is enabled',
+             'Fixed issue with group appointments that cover 2 days',
+             'Fixed issue with notifications when the appointment status is changed to Approved'
            ],
            other: [
              'Other small bug fixes and stability improvements'
@@ -228,43 +231,37 @@ export default {
          },
          basic: {
            feature: [
-             'INVOICE FEATURE -  Now you can automatically generate your invoices for your bookings. Available in Standard, Pro and Elite licenses'
+             'iCal synchronization for appointments and events'
            ],
-           improvement: [
-             'Improved display of location address info in ics files'
-           ],
+           improvement: [],
            translations: [],
            bugfix: [
-             'Fixed issue with payment links and approving an appointment',
-             'Fixed issue with Stripe change from test to live and customers',
-             'Fixed issue with the WooCommerce rules and the hidden option \'Create booking before payment process:\'',
-             'Fixed issue with removing/changing services in appointments when taxes are enabled',
-             'Fixed issue with prices info for events with Custom pricing by date range'
+             'Fixed issue with pay now/later info when deposit is higher than appointment price because of a coupon/discount',
+             'Fixed issue with locations when booking on the back-end and "Allow admin to book any time" option',
+             'Fixed issue with notifications translations when language removed',
+             'Fixed issue with the calendar when a customer reschedules appointments on the back-end (no locations)',
+             'Fixed issue with global days off that repeat yearly and employees timezone',
+             'Fixed issue with default location and time slots when multiple locations in work hours',
+             'Fixed issue with time slots when locations chosen in Work hours and "Allow admin to book any time" enabled'
            ],
            other: []
          },
          pro: {
            feature: [],
-           improvement: [
-             'Added filters and option to remove date filter on the “Manage packages” page'
-           ],
+           improvement: (!this.$root.licence.isStarter && !this.$root.licence.isBasic) ? [
+             'Improved logic to assign coupon to new service/event/package when selected “All services/events/packages”',
+             'Optimized placeholder service - fetching coupons, customFields and customers'
+           ] : [],
            translations: [],
            bugfix: [
-             'Fixed issue with choosing a default language in WhatsApp settings',
-             'Fixed issue with payment placeholders in Cart notifications',
-             'Fixed issue with Catalog form when a package is selected and categories are hidden',
-             'Fixed issue with refunded payment status in exported attendees/customers files',
-             'Fixed  Issue with booking appointments in packages in the customer panel and \'Show booking slots in client time zone\' option',
-             'Fixed issue with packages shown on mobile view in customer panel'
+             'Fixed issue with the waiting list when “Allow bringing more people“ is disabled and custom pricing',
+             'Fixed issue with services order on the Booking preview step when booking packages'
            ],
            other: []
          },
          developer: {
            feature: [],
-           improvement: [
-             'Improved the Add appointment API, so users can send an array of appointments which will be added',
-             'Enabled only sending packageCustomerId when creating a booking inside a package with the API, instead of packageCustomerServiceId'
-           ],
+           improvement: [],
            translations: [],
            bugfix: [],
            other: []

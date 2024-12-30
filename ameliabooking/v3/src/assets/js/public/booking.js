@@ -432,6 +432,8 @@ function useBookingError (response, store) {
       message = bookableType === 'event' ? globalLabels['customer_already_booked_ev'] : globalLabels['customer_already_booked_app']
     } else if ('timeSlotUnavailable' in response.data && response.data.timeSlotUnavailable === true) {
       message = bookableType === 'event' ? globalLabels['maximum_capacity_reached'] : globalLabels['time_slot_unavailable']
+    }  else if ('customerBlocked' in response.data && response.data.customerBlocked === true) {
+      message = globalLabels['customer_blocked']
     } else if ('bookingsLimitReached' in response.data && response.data.bookingsLimitReached === true) {
       message = globalLabels['bookings_limit_reached']
     } else if ('eventBookingUnavailable' in response.data && response.data.eventBookingUnavailable === true) {

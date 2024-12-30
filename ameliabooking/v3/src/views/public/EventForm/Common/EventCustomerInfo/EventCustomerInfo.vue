@@ -6,7 +6,7 @@
   >
     <template v-if="!loading">
       <div
-        v-if="paymentError && instantBooking"
+        v-if="(paymentError && instantBooking) || (paymentError && isWaitingAvailable)"
         class="am-elfci__error"
       >
         <AmAlert
@@ -51,7 +51,7 @@
 
     <div v-show="!loading">
       <PaymentOnSite
-        v-if="instantBooking && (amSettings.payments.wc.enabled ? amSettings.payments.wc.onSiteIfFree : true)"
+        v-if="isWaitingAvailable || (instantBooking && (amSettings.payments.wc.enabled ? amSettings.payments.wc.onSiteIfFree : true))"
         ref="refOnSiteBooking"
         :instant-booking="instantBooking"
         @payment-error="callPaymentError"
@@ -96,12 +96,6 @@ import { useStore } from 'vuex'
 import { useScrollTo } from '../../../../../assets/js/common/scrollElements.js'
 import { useResponsiveClass } from "../../../../../assets/js/common/responsive.js";
 import { usePrepaidPrice } from "../../../../../assets/js/common/appointments";
-import {
-  useBookingData,
-  useCreateBooking,
-  useCreateBookingError,
-  useCreateBookingSuccess
-} from "../../../../../assets/js/public/booking";
 
 // * _components
 import AmAlert from "../../../../_components/alert/AmAlert.vue";
@@ -376,7 +370,7 @@ Object.keys(customFields.value).forEach((fieldKey) => {
   infoFormConstruction.value[fieldKey] = {
     template: formFieldsTemplates[customFields.value[fieldKey].type],
     props: {
-      id: customFields.value[fieldKey].id,
+      id: 'am-cf-' + customFields.value[fieldKey].id,
       itemName: fieldKey,
       label: customFields.value[fieldKey].label,
       options: customFields.value[fieldKey].options,
@@ -498,34 +492,8 @@ function submitForm() {
     if (valid) {
       if (isWaitingAvailable.value) {
         store.commit('payment/setPaymentGateway', 'onSite')
-        let bookingData = useBookingData(
-          store,
-          null,
-          false,
-          {},
-          null
-        )
 
-        useCreateBooking(
-          store,
-          bookingData,
-          response => {
-            useCreateBookingSuccess(
-              store,
-              response,
-              () => {
-                nextStep()
-              }
-            )
-          },
-          error => {
-            useCreateBookingError(
-              store,
-              error.response.data,
-              () => {}
-            )
-          }
-        )
+        refOnSiteBooking.value.continueWithBooking()
       } else {
         if (!instantBooking.value) {
           nextStep()

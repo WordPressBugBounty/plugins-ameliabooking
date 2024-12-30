@@ -77,6 +77,7 @@ class LiteBackendStrings
             'google_calendar'           => __('Google Calendar', 'wpamelia'),
             'google_meet_join'          => __('Join With Google Meet', 'wpamelia'),
             'outlook_calendar'          => __('Outlook Calendar', 'wpamelia'),
+            'apple_calendar'            => __('Apple Calendar', 'wpamelia'),
             'h'                         => __('h', 'wpamelia'),
             'id'                        => __('ID', 'wpamelia'),
             'language'                  => __('Language', 'wpamelia'),
@@ -314,6 +315,9 @@ class LiteBackendStrings
             'outlook_client_secret'                  => __('Client Secret', 'wpamelia'),
             'google_redirect_uri'                    => __('Redirect URI', 'wpamelia'),
             'outlook_redirect_uri'                   => __('Redirect URI', 'wpamelia'),
+            'apple_client_id'                        => __('iCloud Email Address', 'wpamelia'),
+            'icloud_app_specific_password'           => __('iCloud App-specific Password', 'wpamelia'),
+            'apple_redirect_uri'                     => __('Redirect URI', 'wpamelia'),
             'zoom_api_key'                           => __('Client Key', 'wpamelia'),
             'zoom_api_secret'                        => __('Client Secret', 'wpamelia'),
             'zoom_jwt_warning'                       => __('The JWT app type is deprecated. We recommend that you create Server-to-Server OAuth', 'wpamelia'),
@@ -403,8 +407,10 @@ class LiteBackendStrings
             'redirect_url_after_appointment_tooltip' => __('Customer will be redirected to this URL once he schedules the appointment.', 'wpamelia'),
             'remove_google_busy_slots'               => __('Remove Google Calendar Busy Slots', 'wpamelia'),
             'remove_outlook_busy_slots'              => __('Remove Outlook Calendar Busy Slots', 'wpamelia'),
+            'remove_apple_busy_slots'                => __('Remove Apple Calendar Busy Slots', 'wpamelia'),
             'include_buffer_time_google'             => __('Include Buffer time in Google events', 'wpamelia'),
             'include_buffer_time_outlook'            => __('Include Buffer time in Outlook events', 'wpamelia'),
+            'include_buffer_time_apple'              => __('Include Buffer time in Apple events', 'wpamelia'),
             'reject_appointment_success_url'         => __('Redirect URL for Successfully Rejected Booking', 'wpamelia'),
             'reject_appointment_error_url'           => __('Redirect URL for Unsuccessfully Rejected Booking', 'wpamelia'),
             'require_cabinet_password'               => __('Require password for login', 'wpamelia'),
@@ -764,6 +770,8 @@ class LiteBackendStrings
         return [
             'visibility_hide' => __('Hide', 'wpamelia'),
             'visibility_show' => __('Show', 'wpamelia'),
+            'block'           => __('Block', 'wpamelia'),
+            'unblock'         => __('Unblock', 'wpamelia'),
         ];
     }
 
@@ -918,8 +926,12 @@ class LiteBackendStrings
         return [
             'add_customer'                 => __('Add Customer', 'wpamelia'),
             'confirm_delete_customer'      => __('Are you sure you want to delete this customer?', 'wpamelia'),
+            'confirm_block_customer'       => __('Are you sure you want to block this customer?', 'wpamelia'),
+            'confirm_unblock_customer'     => __('Are you sure you want to unblock this customer?', 'wpamelia'),
             'customer_activity'            => __('Customer Activity', 'wpamelia'),
             'customer_deleted'             => __('Customer has been deleted', 'wpamelia'),
+            'customer_blocked'             => __('Customer has been blocked', 'wpamelia'),
+            'customer_unblocked'           => __('Customer has been unblocked', 'wpamelia'),
             'customer_note'                => __('Note', 'wpamelia'),
             'customer_saved'               => __('Customer has been saved', 'wpamelia'),
             'customers'                    => __('Customers', 'wpamelia'),

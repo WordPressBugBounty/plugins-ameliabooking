@@ -118,7 +118,7 @@
           <div class="am-extra-item">
 
             <el-collapse-transition>
-              <div v-show="showDurations && editedDurationsService.id === item.id">
+              <div v-if="showDurations && editedDurationsService.id === item.id">
                 <custom-duration
                   :service="item"
                   :enabledDelete="false"

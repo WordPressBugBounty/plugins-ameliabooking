@@ -16,14 +16,13 @@ abstract class AbstractLessonSpaceService
      * @param Appointment|Event $appointment
      * @param int $entity
      * @param Collection $periods
-     * @param array $booking
      *
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      * @throws NotFoundException
      * @throws ContainerException
      */
-    abstract public function handle($appointment, $entity, $periods = null, $booking = null);
+    abstract public function handle($appointment, $entity, $periods = null);
 
     /**
      * @param $apiKey

@@ -164,6 +164,8 @@ class EventPlaceholderService extends PlaceholderService
      * @param int          $bookingKey
      * @param string       $type
      * @param string       $token
+     * @param bool         $invoice
+     * @param string       $notificationType
      *
      * @return array
      *
@@ -174,8 +176,14 @@ class EventPlaceholderService extends PlaceholderService
      * @throws \Interop\Container\Exception\ContainerException
      * @throws \Exception
      */
-    public function getEventPlaceholdersData($event, $bookingKey = null, $type = null, $token = null, $invoice = false)
-    {
+    public function getEventPlaceholdersData(
+        $event,
+        $bookingKey = null,
+        $type = null,
+        $token = null,
+        $invoice = false,
+        $notificationType = null
+    ) {
         /** @var CustomerBookingRepository $bookingRepository */
         $bookingRepository = $this->container->get('domain.booking.customerBooking.repository');
 
@@ -192,7 +200,7 @@ class EventPlaceholderService extends PlaceholderService
         $data = array_merge($data, $this->getEventData($event, $bookingKey, $token, $type));
         $data = array_merge($data, $this->getBookingData($event, $type, $bookingKey, $token, null, null, $invoice));
         $data = array_merge($data, $this->getCustomFieldsData($event, $type, $bookingKey));
-        $data = array_merge($data, $this->getCouponsData($event, $type, $bookingKey));
+        $data = array_merge($data, $notificationType ? $this->getCouponsData($event, $type, $bookingKey) : []);
 
         return $data;
     }
@@ -203,6 +211,9 @@ class EventPlaceholderService extends PlaceholderService
      * @param int          $bookingKey
      * @param string       $type
      * @param AbstractUser $customer
+     * @param array        $allBookings
+     * @param bool         $invoice
+     * @param string       $notificationType
      *
      * @return array
      *
@@ -213,15 +224,22 @@ class EventPlaceholderService extends PlaceholderService
      * @throws \Interop\Container\Exception\ContainerException
      * @throws \Exception
      */
-    public function getPlaceholdersData($event, $bookingKey = null, $type = null, $customer = null, $allBookings = null)
-    {
+    public function getPlaceholdersData(
+        $event,
+        $bookingKey = null,
+        $type = null,
+        $customer = null,
+        $allBookings = null,
+        $invoice = false,
+        $notificationType = null
+    ) {
         $this->setData($event, $bookingKey);
 
         $locale = $this->getLocale($event, $bookingKey);
 
         $data = [];
 
-        $data = array_merge($data, $this->getEventPlaceholdersData($event, $bookingKey, $type));
+        $data = array_merge($data, $this->getEventPlaceholdersData($event, $bookingKey, $type, null, false, $notificationType));
         if (empty($customer)) {
             $data = array_merge($data, $this->getGroupedEventData($event, $bookingKey, $type, $allBookings));
         }
