@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 4.5
 Tested up to: 6.8.1
 Requires PHP: 7.4
-Stable tag: 1.2.24
+Stable tag: 1.2.25
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,12 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+V1.2.25
+* Feature: Implemented option “Allow admin to book over an existing appointment”
+* Improvement: WCAG compliance for frontend forms
+* BugFix: Fixed issue with Amelia Popup
+* Other small bug fixes and stability improvements
+
 V1.2.24
 * BugFix: Fixed issue with date format in mySQL
 * Small bug fixes and stability improvements
