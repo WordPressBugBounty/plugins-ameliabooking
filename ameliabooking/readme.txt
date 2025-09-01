@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 5.3
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.2.31
+Stable tag: 1.2.32
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -287,6 +287,12 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+V1.2.32
+* BugFix: Fixed issue with additional white space on the Events form on smaller/mobile screen
+* BugFix: Fixed issue with pagination on the Events list form
+* BugFix: Fixed issue with keyboard navigation on Step-by-step Booking form
+* Other small bug fixes and stability improvements
+
 V1.2.31
 * Small bug fixes and stability improvements
 
