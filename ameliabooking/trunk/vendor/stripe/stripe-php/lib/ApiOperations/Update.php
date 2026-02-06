@@ -1,6 +1,6 @@
 <?php
 
-namespace AmeliaStripe\ApiOperations;
+namespace AmeliaVendor\Stripe\ApiOperations;
 
 /**
  * Trait for updatable resources. Adds an `update()` static method and a
@@ -15,9 +15,9 @@ trait Update
      * @param null|array $params
      * @param null|array|string $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
-     *
      * @return static the updated resource
+     *
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public static function update($id, $params = null, $opts = null)
     {
@@ -25,7 +25,7 @@ trait Update
         $url = static::resourceUrl($id);
 
         list($response, $opts) = static::_staticRequest('post', $url, $params, $opts);
-        $obj = \AmeliaStripe\Util\Util::convertToStripeObject($response->json, $opts);
+        $obj = \AmeliaVendor\Stripe\Util\Util::convertToStripeObject($response->json, $opts);
         $obj->setLastResponse($response);
 
         return $obj;
@@ -34,16 +34,20 @@ trait Update
     /**
      * @param null|array|string $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
-     *
      * @return static the saved resource
+     *
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
+     *
+     * @deprecated The `save` method is deprecated and will be removed in a
+     *     future major version of the library. Use the static method `update`
+     *     on the resource instead.
      */
     public function save($opts = null)
     {
         $params = $this->serializeParameters();
         if (\count($params) > 0) {
             $url = $this->instanceUrl();
-            list($response, $opts) = $this->_request('post', $url, $params, $opts);
+            list($response, $opts) = $this->_request('post', $url, $params, $opts, ['save']);
             $this->refreshFrom($response, $opts);
         }
 

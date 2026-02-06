@@ -19,6 +19,8 @@
       :placeholder="props.placeholder"
       :disabled="props.disabled"
       :prefix-icon="props.prefixIcon"
+      :prepend="props.prepend"
+      :append="props.append"
       :suffix-icon="props.suffixIcon"
       @enter="emits('enter')"
     />
@@ -84,7 +86,15 @@ let props = defineProps({
     type: [String, Object],
     default: ''
   },
+  prepend: {
+    type: [String, Object],
+    default: ''
+  },
   suffixIcon: {
+    type: [String, Object],
+    default: ''
+  },
+  append: {
     type: [String, Object],
     default: ''
   }

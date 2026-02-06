@@ -29,12 +29,13 @@ use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepos
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use AmeliaBooking\Infrastructure\Services\Google\AbstractGoogleCalendarService;
+use AmeliaBooking\Infrastructure\Services\Google\AbstractGoogleCalendarMiddlewareService;
 use AmeliaBooking\Infrastructure\Services\Outlook\AbstractOutlookCalendarService;
 use AmeliaBooking\Infrastructure\WP\UserService\CreateWPUser;
 use AmeliaBooking\Infrastructure\WP\UserService\UserService;
+use AmeliaVendor\Firebase\JWT\Key;
 use Exception;
-use AmeliaFirebase\JWT\JWT;
-use Interop\Container\Exception\ContainerException;
+use AmeliaVendor\Firebase\JWT\JWT;
 use Slim\Exception\ContainerValueNotFoundException;
 
 /**
@@ -83,8 +84,13 @@ class UserApplicationService
         /** @var PackageCustomerServiceRepository $packageCustomerServiceRepository */
         $packageCustomerServiceRepository = $this->container->get('domain.bookable.packageCustomerService.repository');
 
+        /** @var AbstractPackageApplicationService $packageApplicationService */
+        $packageApplicationService = $this->container->get('application.bookable.package');
+
         /** @var Collection $appointments */
         $appointments = new Collection();
+
+        $packagePurchases = [];
 
         switch ($user->getType()) {
             case (AbstractUser::USER_ROLE_PROVIDER):
@@ -103,6 +109,14 @@ class UserApplicationService
                 break;
             case (AbstractUser::USER_ROLE_CUSTOMER):
                 $appointments = $appointmentRepo->getFiltered(['customerId' => $userId]);
+
+                /** @var Collection $packageCustomerServices */
+                $packageCustomerServices = $packageCustomerServiceRepository->getByCriteria(['customers' => [$userId]]);
+
+                $packagePurchases = $packageApplicationService->getPackageUnusedBookingsCount(
+                    $packageCustomerServices,
+                    $appointments
+                );
 
                 break;
         }
@@ -124,19 +138,10 @@ class UserApplicationService
             }
         }
 
-        /** @var Collection $packageCustomerServices */
-        $packageCustomerServices = $packageCustomerServiceRepository->getByCriteria(['customerId' => $userId]);
-
-        /** @var AbstractPackageApplicationService $packageApplicationService */
-        $packageApplicationService = $this->container->get('application.bookable.package');
-
         return [
             'futureAppointments'  => $futureAppointments,
             'pastAppointments'    => $pastAppointments,
-            'packageAppointments' => $packageApplicationService->getPackageUnusedBookingsCount(
-                $packageCustomerServices,
-                $appointments
-            ),
+            'packageAppointments' => sizeof($packagePurchases)
         ];
     }
 
@@ -292,7 +297,7 @@ class UserApplicationService
         /** @var ProviderRepository $providerRepository */
         $providerRepository = $this->container->get('domain.users.providers.repository');
 
-
+        $provider = null;
         // If cabinet is for provider, return provider with services and schedule
         if ($cabinetType === AbstractUser::USER_ROLE_PROVIDER) {
             $password = $user->getPassword();
@@ -320,6 +325,11 @@ class UserApplicationService
         /** @var array $userArray */
         $userArray = $user->toArray();
 
+        // Set Time Zone to null if feature is disabled
+        if ($settingsService->isFeatureEnabled('timezones') === false) {
+            $userArray['timeZone'] = null;
+        }
+
         // Set activity if it is employee cabinet
         if ($cabinetType === AbstractUser::USER_ROLE_PROVIDER) {
             $companyDaysOff = $settingsService->getCategorySettings('daysOff');
@@ -340,15 +350,35 @@ class UserApplicationService
                     $user
                 );
             } catch (\Exception $e) {
+                $providerRepository->updateErrorColumn($user->getId()->getValue(), $e->getMessage());
+
+                $userArray['outlookCalendar']['calendarList'] = [];
+                $userArray['outlookCalendar']['calendarId'] = null;
             }
 
-            try {
-                $userArray['googleCalendar']['calendarList'] = $googleCalendarService->listCalendarList($user);
+            $userArray['googleCalendar']['calendarList'] = [];
+            $userArray['googleCalendar']['calendarId'] = null;
 
-                $userArray['googleCalendar']['calendarId'] = $googleCalendarService->getProviderGoogleCalendarId(
-                    $user
-                );
-            } catch (\Exception $e) {
+            if ($settingsService->isFeatureEnabled('googleCalendar')) {
+                try {
+                    $googleCalendar = $settingsService->getCategorySettings('googleCalendar');
+
+                    if (!$googleCalendar['accessToken']) {
+                        $userArray['googleCalendar']['calendarList'] = $googleCalendarService->listCalendarList($user);
+                        $userArray['googleCalendar']['calendarId'] = $googleCalendarService->getProviderGoogleCalendarId($user);
+                    } else {
+                        /** @var AbstractGoogleCalendarMiddlewareService $googleCalendarMiddlewareService */
+                        $googleCalendarMiddlewareService = $this->container->get(
+                            'infrastructure.google.calendar.middleware.service'
+                        );
+                        $userArray['googleCalendar']['calendarList'] = $googleCalendarMiddlewareService->getCalendarList($userArray['googleCalendar']);
+                        $userArray['googleCalendar']['calendarId'] = $provider && $provider->getGoogleCalendar() ?
+                            $provider->getGoogleCalendar()->getCalendarId()->getValue() :
+                            null;
+                    }
+                } catch (\Exception $e) {
+                    $providerRepository->updateErrorColumn($user->getId()->getValue(), $e->getMessage());
+                }
             }
         }
 
@@ -357,13 +387,14 @@ class UserApplicationService
             'is_wp_user'   => $loginType === LoginType::WP_USER
         ];
 
-        if (($loginType === LoginType::AMELIA_URL_TOKEN || $loginType === LoginType::AMELIA_CREDENTIALS) &&
+        if (
+            ($loginType === LoginType::AMELIA_URL_TOKEN || $loginType === LoginType::AMELIA_CREDENTIALS) &&
             $checkIfSavedPassword &&
             $cabinetSettings['loginEnabled']
         ) {
             if ($user->getPassword() === null || $user->getPassword()->getValue() === null) {
                 $responseData['set_password'] = true;
-            } else if ($changePass) {
+            } elseif ($changePass) {
                 $responseData['change_password'] = true;
             }
         }
@@ -403,15 +434,11 @@ class UserApplicationService
         /** @var array $jwtSettings */
         $jwtSettings = $settingsService->getSetting('roles', $jwtType);
 
-        if (!$jwtSettings['enabled']) {
-            throw new AccessDeniedException('You are not allowed to access this page.');
-        }
-
+        $secretKey = $jwtSettings[$isUrlToken ? 'urlJwtSecret' : 'headerJwtSecret'];
         try {
             $jwtObject = JWT::decode(
                 $token,
-                $jwtSettings[$isUrlToken ? 'urlJwtSecret' : 'headerJwtSecret'],
-                array('HS256')
+                new Key($secretKey, 'HS256')
             );
         } catch (Exception $e) {
             return null;
@@ -433,7 +460,8 @@ class UserApplicationService
             $usedTokens = $user->getUsedTokens() && $user->getUsedTokens()->getValue() ?
                 json_decode($user->getUsedTokens()->getValue(), true) : [];
 
-            if (in_array($token, $usedTokens, true) &&
+            if (
+                in_array($token, $usedTokens, true) &&
                 ($usedTokensCount = array_count_values($usedTokens)) &&
                 $usedTokensCount[$token] > 4
             ) {
@@ -502,7 +530,8 @@ class UserApplicationService
         $userType = $user->getType();
 
         // check if user is not logged in as Word Press User and password is required and password is not created
-        if (!$isAmeliaWPUser &&
+        if (
+            !$isAmeliaWPUser &&
             $userType !== AbstractUser::USER_ROLE_ADMIN &&
             $userType !== AbstractUser::USER_ROLE_MANAGER &&
             $cabinetSettings['loginEnabled'] &&
@@ -542,6 +571,19 @@ class UserApplicationService
         $settingsDomainService = $this->container->get('domain.settings.service');
 
         return $settingsDomainService->getSetting('roles', 'allowAdminBookAtAnyTime') &&
+            ($loggedInUser = $this->container->get('logged.in.user')) &&
+            $loggedInUser->getType() === AbstractUser::USER_ROLE_ADMIN;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isAdminAndAllowedToBookOver()
+    {
+        /** @var SettingsService $settingsDomainService */
+        $settingsDomainService = $this->container->get('domain.settings.service');
+
+        return $settingsDomainService->getSetting('roles', 'allowAdminBookOverApp') &&
             ($loggedInUser = $this->container->get('logged.in.user')) &&
             $loggedInUser->getType() === AbstractUser::USER_ROLE_ADMIN;
     }

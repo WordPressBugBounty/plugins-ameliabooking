@@ -3,6 +3,7 @@
 namespace AmeliaBooking\Application\Services\User;
 
 use AmeliaBooking\Application\Commands\CommandResult;
+use AmeliaBooking\Application\Services\Booking\EventApplicationService;
 use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
@@ -29,8 +30,8 @@ use AmeliaBooking\Infrastructure\Repository\Booking\Event\CustomerBookingEventPe
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
 use AmeliaBooking\Infrastructure\Repository\Payment\PaymentRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
+use AmeliaBooking\Infrastructure\Services\Mailchimp\AbstractMailchimpService;
 use Exception;
-use Interop\Container\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
 
 /**
@@ -40,13 +41,9 @@ use Slim\Exception\ContainerValueNotFoundException;
  */
 class CustomerApplicationService extends UserApplicationService
 {
-    private $container;
+    private Container $container;
 
     /**
-     * CustomerApplicationService constructor.
-     *
-     * @param Container $container
-     *
      * @throws \InvalidArgumentException
      */
     public function __construct(Container $container)
@@ -68,16 +65,8 @@ class CustomerApplicationService extends UserApplicationService
 
         $user = UserFactory::create($fields);
 
-        if (!$user instanceof AbstractUser) {
-            $result->setResult(CommandResult::RESULT_ERROR);
-            $result->setMessage('Could not create a new user entity.');
-
-            return $result;
-        }
-
         /** @var UserRepository $userRepository */
         $userRepository = $this->container->get('domain.users.repository');
-
 
         if ($oldUser = $userRepository->getByEmail($user->getEmail()->getValue())) {
             $result->setResult(CommandResult::RESULT_CONFLICT);
@@ -144,15 +133,16 @@ class CustomerApplicationService extends UserApplicationService
      *
      * @param array         $userData
      * @param CommandResult $result
+     * @param bool          $validateUserName
      *
      * @return Customer
      *
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
      */
-    public function getNewOrExistingCustomer($userData, $result)
+    public function getNewOrExistingCustomer($userData, $result, $validateUserName)
     {
-        /** @var AbstractUser $user */
+        /** @var AbstractUser $loggedInUser */
         $loggedInUser = $this->container->get('logged.in.user');
 
         if ($loggedInUser) {
@@ -165,6 +155,7 @@ class CustomerApplicationService extends UserApplicationService
             }
         }
 
+        /** @var Customer $user */
         $user = UserFactory::create($userData);
 
         /** @var UserRepository $userRepository */
@@ -184,7 +175,9 @@ class CustomerApplicationService extends UserApplicationService
 
             // If email already exists, check if First Name and Last Name from request are same with the First Name
             // and Last Name from $userWithSameMail. If these are not same return error message.
-            if ($settingsService->getSetting('roles', 'inspectCustomerInfo') &&
+            if (
+                $settingsService->getSetting('roles', 'inspectCustomerInfo') &&
+                $validateUserName &&
                 (strtolower(trim($userWithSameValue->getFirstName()->getValue())) !==
                     strtolower(trim($user->getFirstName()->getValue())) ||
                     strtolower(trim($userWithSameValue->getLastName()->getValue())) !==
@@ -192,6 +185,14 @@ class CustomerApplicationService extends UserApplicationService
             ) {
                 $result->setResult(CommandResult::RESULT_ERROR);
                 $result->setData($userWithSameMail ? ['emailError' => true] : ['phoneError' => true]);
+            } elseif (
+                empty($userWithSameValue->getEmail()->getValue()) && !empty($user->getEmail())
+            ) {
+                $userRepository->updateFieldById(
+                    $userWithSameValue->getId()->getValue(),
+                    $user->getEmail()->getValue(),
+                    'email'
+                );
             }
 
             return $userWithSameValue;
@@ -216,7 +217,8 @@ class CustomerApplicationService extends UserApplicationService
         foreach ($reservations->getItems() as $reservation) {
             /** @var CustomerBooking $booking */
             foreach ($reservation->getBookings()->getItems() as $key => $booking) {
-                if ($isCustomer &&
+                if (
+                    $isCustomer &&
                     (!$user || ($user && $user->getId()->getValue() !== $booking->getCustomerId()->getValue()))
                 ) {
                     $reservation->getBookings()->deleteItem($key);
@@ -230,7 +232,6 @@ class CustomerApplicationService extends UserApplicationService
      * @param bool     $isNewCustomer
      *
      * @return void
-     * @throws ContainerException
      */
     public function setWPUserForCustomer($customer, $isNewCustomer)
     {
@@ -275,9 +276,6 @@ class CustomerApplicationService extends UserApplicationService
         /** @var AppointmentRepository $appointmentRepository */
         $appointmentRepository = $this->container->get('domain.booking.appointment.repository');
 
-        /** @var EventRepository $eventRepository */
-        $eventRepository = $this->container->get('domain.booking.event.repository');
-
         /** @var CustomerBookingEventPeriodRepository $bookingEventPeriodRepository */
         $bookingEventPeriodRepository = $this->container->get('domain.booking.customerBookingEventPeriod.repository');
 
@@ -302,7 +300,15 @@ class CustomerApplicationService extends UserApplicationService
         /** @var PaymentApplicationService $paymentAS */
         $paymentAS = $this->container->get('application.payment.service');
 
-        /** @var Collection $appointments */
+        /** @var EventApplicationService $eventAS */
+        $eventAS = $this->container->get('application.booking.event.service');
+
+        /** @var AbstractMailchimpService $mailchimpService */
+        $mailchimpService = $this->container->get('infrastructure.mailchimp.service');
+
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+
         $appointments = $appointmentRepository->getFiltered(
             [
                 'customerId' => $customer->getId()->getValue()
@@ -327,7 +333,8 @@ class CustomerApplicationService extends UserApplicationService
                     }
                 }
 
-                if (!$customerBookingExtraRepository->deleteByEntityId($bookingId, 'customerBookingId') ||
+                if (
+                    !$customerBookingExtraRepository->deleteByEntityId($bookingId, 'customerBookingId') ||
                     !$bookingRepository->delete($bookingId)
                 ) {
                     return false;
@@ -356,20 +363,25 @@ class CustomerApplicationService extends UserApplicationService
                 }
             }
 
-            if (!$packageCustomerServiceRepository->deleteByEntityId(
-                $packageCustomer->getId()->getValue(),
-                'packageCustomerId'
-            ) || !$packageCustomerRepository->delete($packageCustomer->getId()->getValue())
+            if (
+                !$packageCustomerServiceRepository->deleteByEntityId(
+                    $packageCustomer->getId()->getValue(),
+                    'packageCustomerId'
+                ) || !$packageCustomerRepository->delete($packageCustomer->getId()->getValue())
             ) {
                 return false;
             }
         }
 
         /** @var Collection $events */
-        $events = $eventRepository->getFiltered(
+        $events = $eventAS->getEventsByCriteria(
             [
-                'customerId' => $customer->getId()->getValue()
-            ]
+                'customerId' => $customer->getId()->getValue(),
+            ],
+            [
+                'fetchBookings' => true,
+            ],
+            0
         );
 
         /** @var Event $event */
@@ -390,12 +402,20 @@ class CustomerApplicationService extends UserApplicationService
                     }
                 }
 
-                if (!$bookingEventPeriodRepository->deleteByEntityId($bookingId, 'customerBookingId') ||
+                if (
+                    !$bookingEventPeriodRepository->deleteByEntityId($bookingId, 'customerBookingId') ||
                     !$bookingRepository->delete($bookingId)
                 ) {
                     return false;
                 }
             }
+        }
+
+        if (
+            $settingsService->isFeatureEnabled('mailchimp') &&
+            $customer->getEmail() && $customer->getEmail()->getValue()
+        ) {
+            $mailchimpService->deleteSubscriber($customer->getEmail()->getValue());
         }
 
         return $userRepository->delete($customer->getId()->getValue());

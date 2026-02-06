@@ -1,14 +1,7 @@
 <template>
-  <div
-    class="am-pei"
-    :style="cssVars"
-  >
+  <div class="am-pei" :style="cssVars">
     <div class="am-pei__inner">
-
-      <AmCollapse
-        v-if="tickets.length"
-        class="am-pei__segment"
-      >
+      <AmCollapse v-if="features.tickets" class="am-pei__segment">
         <AmCollapseItem
           :side="true"
           @collapse-open="segmentCollapseState = false"
@@ -23,16 +16,19 @@
           </template>
           <template #icon-below>
             <Transition
-              :duration="{enter: 500, leave: 500}"
+              :duration="{ enter: 500, leave: 500 }"
               @enter="onCollapseClose"
               @leave="onCollapseOpen"
             >
-              <div
-                v-show="segmentCollapseState"
-                class="am-pei__segment-sub"
-              >
+              <div v-show="segmentCollapseState" class="am-pei__segment-sub">
                 <p>
-                  {{ `${props.selectedItem.name} x ${eventPersonsNumber} ${eventPersonsNumber > 1 ? props.customizedLabels.summary_persons : props.customizedLabels.summary_person}` }}
+                  {{
+                    `${props.selectedItem.name} x ${eventPersonsNumber} ${
+                      eventPersonsNumber > 1
+                        ? props.customizedLabels.summary_persons
+                        : props.customizedLabels.summary_person
+                    }`
+                  }}
                 </p>
                 <p class="am-amount">
                   {{ useFormattedPrice(eventSubtotalPrice) }}
@@ -42,16 +38,17 @@
           </template>
           <template #default>
             <div class="am-pei__segment-open">
-              <template
-                v-for="ticket in tickets"
-                :key="ticket.id"
-              >
-                <div
-                  v-if="ticket.persons"
-                  class="am-pei__segment-open__text"
-                >
+              <template v-for="ticket in tickets" :key="ticket.id">
+                <div v-if="ticket.persons" class="am-pei__segment-open__text">
                   <span>
-                    {{ ticket.name }} ({{ useFormattedPrice(ticket.price) }}) {{ `x ${ticket.persons} ${ticket.persons > 1 ? props.customizedLabels.summary_persons : props.customizedLabels.summary_person}`}}
+                    {{ ticket.name }} ({{ useFormattedPrice(ticket.price) }})
+                    {{
+                      `x ${ticket.persons} ${
+                        ticket.persons > 1
+                          ? props.customizedLabels.summary_persons
+                          : props.customizedLabels.summary_person
+                      }`
+                    }}
                   </span>
                   <span class="am-amount">
                     {{ useFormattedPrice(ticket.price * ticket.persons) }}
@@ -71,22 +68,41 @@
           </template>
         </AmCollapseItem>
       </AmCollapse>
+      <div
+        v-else
+        class="am-pei__segment-wrapper"
+      >
+        <div class="am-pei__segment">
+          <div class="am-pei__segment-info">
+          <span>
+            {{ labelsDisplay('summary_event') }}
+          </span>
+          </div>
+          <div class="am-pei__segment-open">
+            <div class="am-pei__segment-sub">
+              <p>
+                {{ `${props.selectedItem.name} (${useFormattedPrice(10)})`}}
+                <span>
+                  {{ `x 1 ${labelsDisplay('summary_person')}` }}
+                </span>
+              </p>
+              <p class="am-amount"> {{ useFormattedPrice(10) }} </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="am-pei__info">
-      <div class="am-pei__info-subtotal">
-        <span>{{props.customizedLabels.subtotal}}:</span>
+      <div v-if="features.coupons" class="am-pei__info-subtotal">
+        <span>{{ props.customizedLabels.subtotal }}:</span>
         <span class="am-amount">
           {{ useFormattedPrice(eventSubtotalPrice) }}
         </span>
       </div>
 
-      <el-form
-        ref="couponFormRef"
-        :rules="rules"
-        :model="couponFormData"
-      >
-        <div v-if="!licence.isLite" class="am-fs__coupon">
+      <el-form v-if="features.coupons" ref="couponFormRef" :rules="rules" :model="couponFormData">
+        <div class="am-fs__coupon">
           <el-form-item :prop="'coupon'" class="am-fs__coupon-form-item">
             <template #label>
               <span>{{ `${labelsDisplay('coupon')}:` }}</span>
@@ -103,8 +119,10 @@
         </div>
       </el-form>
 
-
-      <div v-if="!licence.isLite" class="am-pei__info-discount am-pei__info-discount-green">
+      <div
+        v-if="features.coupons"
+        class="am-pei__info-discount am-pei__info-discount-green"
+      >
         <span>
           {{ `${props.customizedLabels.discount_amount_colon}:` }}
         </span>
@@ -113,7 +131,10 @@
         </span>
       </div>
 
-      <div v-if="taxVisibility && amSettings.payments.taxes.excluded" class="am-pei__info-tax">
+      <div
+        v-if="taxVisibility && amSettings.payments.taxes.excluded"
+        class="am-pei__info-tax"
+      >
         <span>
           {{ `${props.customizedLabels.total_tax_colon}:` }}
         </span>
@@ -122,10 +143,7 @@
         </span>
       </div>
 
-      <div
-        class="am-pei__info-total"
-        :class="{'am-single-row': !discount}"
-      >
+      <div class="am-pei__info-total" :class="{ 'am-single-row': !discount }">
         <span>{{ props.customizedLabels.total_amount_colon }}</span>
         <span class="am-amount">
           {{ useFormattedPrice(totalAmount) }}
@@ -135,22 +153,26 @@
         </span>
       </div>
 
-      <template v-if="paymentGateway !== 'onSite'">
+      <template v-if="paymentGateway !== 'onSite' && features.depositPayment">
         <div class="am-pei__info-total">
-          <span>
-            {{ props.customizedLabels.paying_now }}:
-          </span>
+          <span> {{ props.customizedLabels.paying_now }}: </span>
           <span class="am-amount">
-            {{ paymentDeposit ? useFormattedPrice(totalAmount) : useFormattedPrice(depositAmount) }}
+            {{
+              paymentDeposit
+                ? useFormattedPrice(totalAmount)
+                : useFormattedPrice(depositAmount)
+            }}
           </span>
         </div>
 
         <div class="am-pei__info-total">
-          <span>
-            {{ props.customizedLabels.paying_later }}:
-          </span>
+          <span> {{ props.customizedLabels.paying_later }}: </span>
           <span class="am-amount">
-            {{ !paymentDeposit ? useFormattedPrice(totalAmount - depositAmount) : useFormattedPrice(0) }}
+            {{
+              !paymentDeposit
+                ? useFormattedPrice(totalAmount - depositAmount)
+                : useFormattedPrice(0)
+            }}
           </span>
         </div>
       </template>
@@ -160,44 +182,44 @@
 
 <script setup>
 // * _components
-import AmCollapse from "../../../../../../../_components/collapse/AmCollapse.vue";
-import AmCollapseItem from "../../../../../../../_components/collapse/AmCollapseItem.vue";
-import IconCoupon from "../../../../../../../_components/icons/IconCoupon.vue";
-import AmInput from "../../../../../../../_components/input/AmInput.vue";
-import AmButton from "../../../../../../../_components/button/AmButton.vue";
+import AmCollapse from '../../../../../../../_components/collapse/AmCollapse.vue'
+import AmCollapseItem from '../../../../../../../_components/collapse/AmCollapseItem.vue'
+import IconCoupon from '../../../../../../../_components/icons/IconCoupon.vue'
+import AmInput from '../../../../../../../_components/input/AmInput.vue'
+import AmButton from '../../../../../../../_components/button/AmButton.vue'
 
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject
-} from "vue";
+import { ref, computed, inject } from 'vue'
 
 // * Composables
-import { useFormattedPrice } from "../../../../../../../../assets/js/common/formatting";
-import { useColorTransparency } from "../../../../../../../../assets/js/common/colorManipulation";
+import { useFormattedPrice } from '../../../../../../../../assets/js/common/formatting'
+import { useColorTransparency } from '../../../../../../../../assets/js/common/colorManipulation'
+import { useReactiveCustomize } from '../../../../../../../../assets/js/admin/useReactiveCustomize.js'
 
 let props = defineProps({
   bookableType: {
     type: String,
-    default: 'appointment'
+    default: 'appointment',
   },
   paymentGateway: {
     type: String,
-    default: 'onSite'
+    default: 'onSite',
   },
   selectedItem: {
     type: Object,
-    required: true
+    required: true,
   },
   customizedLabels: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 // * Root Settings
 let amSettings = inject('settings')
+
+// * Features
+let features = inject('features')
 
 // * Plugin Licence
 let licence = inject('licence')
@@ -207,7 +229,7 @@ let tickets = ref([
   {
     id: 1,
     eventTicketId: 1,
-    name: "Ticket one",
+    name: 'Ticket one',
     persons: 3,
     price: 10,
     sold: 0,
@@ -216,7 +238,7 @@ let tickets = ref([
   {
     id: 2,
     eventTicketId: 2,
-    name: "Ticket two",
+    name: 'Ticket two',
     persons: 1,
     price: 20,
     sold: 0,
@@ -225,7 +247,7 @@ let tickets = ref([
   {
     id: 3,
     eventTicketId: 3,
-    name: "Ticket three",
+    name: 'Ticket three',
     persons: 7,
     price: 30,
     sold: 0,
@@ -239,7 +261,7 @@ let eventPersonsNumber = ref(0)
 // * Subtotal price
 let eventSubtotalPrice = computed(() => {
   let price = 0
-  tickets.value.forEach(t => {
+  tickets.value.forEach((t) => {
     price += t.price * t.persons
     eventPersonsNumber.value += t.persons
   })
@@ -249,21 +271,22 @@ let eventSubtotalPrice = computed(() => {
 let couponFormRef = ref(null)
 
 let couponFormData = ref({
-  coupon: ''
+  coupon: '',
 })
 
 // * Form validation rules
-let rules =  computed(() => {
+let rules = computed(() => {
   return {
     coupon: [
       {
-        required: amCustomize.value[pageRenderKey.value].payment.options.coupon.required,
+        required:
+          amCustomize.value[pageRenderKey.value].payment.options.coupon
+            .required,
         trigger: ['blur', 'change'],
-      }
-    ]
+      },
+    ],
   }
 })
-
 
 // * Discount
 let discount = ref(48)
@@ -282,7 +305,7 @@ let paymentDeposit = ref(false)
 // * Payment Deposit Amount
 let depositAmount = ref(56)
 
-function onCollapseClose (el) {
+function onCollapseClose(el) {
   el.style.opacity = 0
   setTimeout(() => {
     el.style.opacity = 1
@@ -290,7 +313,7 @@ function onCollapseClose (el) {
   }, 200)
 }
 
-function onCollapseOpen (el) {
+function onCollapseOpen(el) {
   el.style.opacity = 0
   el.style.setProperty('--am-h__part-sub', `${el.offsetHeight}px`)
   setTimeout(() => {
@@ -299,11 +322,13 @@ function onCollapseOpen (el) {
 }
 
 let taxVisibility = computed(() => {
-  return amSettings.payments.taxes.enabled && !licence.isStarter && !licence.isLite
+  return (
+    amSettings.payments?.taxes?.enabled && !licence.isStarter && !licence.isLite
+  )
 })
 
 // * Customize Object
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Form string recognition
 let pageRenderKey = inject('pageRenderKey')
@@ -317,10 +342,15 @@ let langKey = inject('langKey')
 // * Labels
 let amLabels = inject('labels')
 
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    let translations = amCustomize.value[pageRenderKey.value][stepName.value].translations
-    return translations && translations[label] && translations[label][langKey.value] ? translations[label][langKey.value] : amLabels[label]
+    let translations =
+      amCustomize.value[pageRenderKey.value][stepName.value].translations
+    return translations &&
+      translations[label] &&
+      translations[label][langKey.value]
+      ? translations[label][langKey.value]
+      : amLabels[label]
   })
 
   return computedLabel.value
@@ -337,10 +367,22 @@ let cssVars = computed(() => {
   return {
     '--am-font-family': amFonts.value.fontFamily,
     '--am-c-pay-text': amColors.value.colorMainText,
-    '--am-c-pay-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
-    '--am-c-pay-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
-    '--am-c-pay-text-op30': useColorTransparency(amColors.value.colorMainText, 0.3),
-    '--am-c-pay-text-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
+    '--am-c-pay-text-op70': useColorTransparency(
+      amColors.value.colorMainText,
+      0.7
+    ),
+    '--am-c-pay-text-op60': useColorTransparency(
+      amColors.value.colorMainText,
+      0.6
+    ),
+    '--am-c-pay-text-op30': useColorTransparency(
+      amColors.value.colorMainText,
+      0.3
+    ),
+    '--am-c-pay-text-op20': useColorTransparency(
+      amColors.value.colorMainText,
+      0.2
+    ),
     '--am-c-pay-border': useColorTransparency(amColors.value.colorInpBorder),
     '--am-c-pay-success': amColors.value.colorSuccess,
     '--am-c-pay-primary': amColors.value.colorPrimary,
@@ -355,8 +397,19 @@ let cssVars = computed(() => {
     &__info {
       margin: 0;
 
-
       .am-fs__coupon {
+        width: 100%;
+        display: flex;
+        padding: 0;
+        margin: 16px 0 0;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.42857;
+        gap: 4px;
+        color: var(--am-c-ps-text);
+        white-space: nowrap;
+        align-items: center;
+
         .el-form-item {
           display: flex;
           gap: 5px;
@@ -382,10 +435,10 @@ let cssVars = computed(() => {
           line-height: 1.42857;
           color: var(--am-c-pay-text);
         }
-
       }
 
-      &-discount, &-tax {
+      &-discount,
+      &-tax {
         display: flex;
         justify-content: space-between;
         font-size: 13px;
@@ -436,14 +489,14 @@ let cssVars = computed(() => {
         flex-wrap: wrap;
         width: 100%;
         padding: 12px;
-        transition-delay: .5s;
+        transition-delay: 0.5s;
 
         &-side {
           transition-delay: 0s;
         }
 
         .am-collapse-item__trigger {
-          padding: 0
+          padding: 0;
         }
       }
 
@@ -466,7 +519,7 @@ let cssVars = computed(() => {
         width: 100%;
         display: flex;
         justify-content: space-between;
-        transition: all ease-in-out .3s;
+        transition: all ease-in-out 0.3s;
 
         p {
           font-size: 13px;
@@ -487,7 +540,7 @@ let cssVars = computed(() => {
           margin: 12px 0 4px;
 
           & > span {
-            color: var(--am-c-pay-text-op70)
+            color: var(--am-c-pay-text-op70);
           }
 
           &:last-child {

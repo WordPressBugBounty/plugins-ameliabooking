@@ -2,19 +2,24 @@
 
 // File generated from our OpenAPI spec
 
-namespace AmeliaStripe\Service\BillingPortal;
+namespace AmeliaVendor\Stripe\Service\BillingPortal;
 
-class SessionService extends \AmeliaStripe\Service\AbstractService
+/**
+ * @phpstan-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ *
+ * @psalm-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ */
+class SessionService extends \AmeliaVendor\Stripe\Service\AbstractService
 {
     /**
      * Creates a session of the customer portal.
      *
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{configuration?: string, customer: string, expand?: string[], flow_data?: array{after_completion?: array{hosted_confirmation?: array{custom_message?: string}, redirect?: array{return_url: string}, type: string}, subscription_cancel?: array{retention?: array{coupon_offer: array{coupon: string}, type: string}, subscription: string}, subscription_update?: array{subscription: string}, subscription_update_confirm?: array{discounts?: array{coupon?: string, promotion_code?: string}[], items: array{id: string, price?: string, quantity?: int}[], subscription: string}, type: string}, locale?: string, on_behalf_of?: string, return_url?: string} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\BillingPortal\Session
      *
-     * @return \AmeliaStripe\BillingPortal\Session
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function create($params = null, $opts = null)
     {

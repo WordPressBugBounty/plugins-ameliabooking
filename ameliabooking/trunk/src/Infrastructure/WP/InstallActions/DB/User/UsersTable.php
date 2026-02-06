@@ -4,6 +4,7 @@ namespace AmeliaBooking\Infrastructure\WP\InstallActions\DB\User;
 
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\ValueObjects\Picture;
+use AmeliaBooking\Domain\ValueObjects\String\Description;
 use AmeliaBooking\Domain\ValueObjects\String\Email;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\String\Password;
@@ -17,8 +18,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\AbstractDatabaseTable;
  */
 class UsersTable extends AbstractDatabaseTable
 {
-
-    const TABLE = 'users';
+    public const TABLE = 'users';
 
     /**
      * @return string
@@ -28,15 +28,16 @@ class UsersTable extends AbstractDatabaseTable
     {
         $table = self::getTableName();
 
-        $name = Name::MAX_LENGTH;
-        $email = Email::MAX_LENGTH;
-        $phone = Phone::MAX_LENGTH;
-        $picture = Picture::MAX_LENGTH;
-        $password = Password::MAX_LENGTH;
+        $name        = Name::MAX_LENGTH;
+        $email       = Email::MAX_LENGTH;
+        $phone       = Phone::MAX_LENGTH;
+        $picture     = Picture::MAX_LENGTH;
+        $password    = Password::MAX_LENGTH;
+        $description = Description::MAX_LENGTH;
 
         return "CREATE TABLE {$table}  (
                   `id` int(11) NOT NULL AUTO_INCREMENT,
-                  `status` ENUM('hidden', 'visible', 'disabled') NOT NULL default 'visible',
+                  `status` ENUM('hidden', 'visible', 'disabled', 'blocked') NOT NULL default 'visible',
                   `type` ENUM('customer', 'provider', 'manager', 'admin') NOT NULL,
                   `externalId` bigint(20) DEFAULT NULL,
                   `firstName` varchar({$name}) NOT NULL DEFAULT '',
@@ -55,8 +56,14 @@ class UsersTable extends AbstractDatabaseTable
                   `stripeConnect` varchar({$name}) DEFAULT NULL,
                   `countryPhoneIso` varchar(2) DEFAULT NULL,
                   `translations` TEXT NULL DEFAULT NULL,
+                  `customFields` TEXT NULL DEFAULT NULL,
                   `timeZone` varchar({$name}) DEFAULT NULL,
+                  `appleCalendarId` varchar({$name}) DEFAULT NULL,
+                  `employeeAppleCalendar` TEXT NULL DEFAULT NULL,
+                  `googleCalendarId` varchar({$name}) DEFAULT NULL,
                   `badgeId` int(11) DEFAULT NULL,
+                  `error` TEXT({$description}) DEFAULT NULL,
+                  `show` TINYINT(1) DEFAULT 1,
                   PRIMARY KEY (`id`),
                   UNIQUE KEY `email` (`email`),
                   UNIQUE KEY `id` (`id`)

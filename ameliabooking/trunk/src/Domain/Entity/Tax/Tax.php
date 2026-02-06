@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -38,6 +39,18 @@ class Tax
 
     /** @var BooleanValueObject */
     private $excluded;
+
+    /** @var BooleanValueObject */
+    private $allServices;
+
+    /** @var BooleanValueObject */
+    private $allEvents;
+
+    /** @var BooleanValueObject */
+    private $allPackages;
+
+    /** @var BooleanValueObject */
+    private $allExtras;
 
     /** @var Collection */
     private $serviceList;
@@ -148,6 +161,22 @@ class Tax
     }
 
     /**
+     * @return BooleanValueObject
+     */
+    public function getAllServices()
+    {
+        return $this->allServices;
+    }
+
+    /**
+     * @param BooleanValueObject $allServices
+     */
+    public function setAllServices(BooleanValueObject $allServices)
+    {
+        $this->allServices = $allServices;
+    }
+
+    /**
      * @return Collection
      */
     public function getServiceList()
@@ -161,6 +190,22 @@ class Tax
     public function setServiceList(Collection $serviceList)
     {
         $this->serviceList = $serviceList;
+    }
+
+    /**
+     * @return BooleanValueObject
+     */
+    public function getAllEvents()
+    {
+        return $this->allEvents;
+    }
+
+    /**
+     * @param BooleanValueObject $allEvents
+     */
+    public function setAllEvents(BooleanValueObject $allEvents)
+    {
+        $this->allEvents = $allEvents;
     }
 
     /**
@@ -180,6 +225,22 @@ class Tax
     }
 
     /**
+     * @return BooleanValueObject
+     */
+    public function getAllPackages()
+    {
+        return $this->allPackages;
+    }
+
+    /**
+     * @param BooleanValueObject $allPackages
+     */
+    public function setAllPackages(BooleanValueObject $allPackages)
+    {
+        $this->allPackages = $allPackages;
+    }
+
+    /**
      * @return Collection
      */
     public function getPackageList()
@@ -193,6 +254,22 @@ class Tax
     public function setPackageList(Collection $packageList)
     {
         $this->packageList = $packageList;
+    }
+
+    /**
+     * @return BooleanValueObject
+     */
+    public function getAllExtras()
+    {
+        return $this->allExtras;
+    }
+
+    /**
+     * @param BooleanValueObject $allExtras
+     */
+    public function setAllExtras(BooleanValueObject $allExtras)
+    {
+        $this->allExtras = $allExtras;
     }
 
     /**
@@ -223,6 +300,10 @@ class Tax
             'type'           => $this->getType()->getValue(),
             'status'         => $this->getStatus()->getValue(),
             'excluded'       => $this->getExcluded() ? $this->getExcluded()->getValue() : null,
+            'allServices'    => $this->getAllServices() ? $this->getAllServices()->getValue() : null,
+            'allEvents'      => $this->getAllEvents() ? $this->getAllEvents()->getValue() : null,
+            'allPackages'    => $this->getAllPackages() ? $this->getAllPackages()->getValue() : null,
+            'allExtras'      => $this->getAllExtras() ? $this->getAllExtras()->getValue() : null,
             'serviceList'    => $this->getServiceList() ? $this->getServiceList()->toArray() : [],
             'eventList'      => $this->getEventList() ? $this->getEventList()->toArray() : [],
             'packageList'    => $this->getPackageList() ? $this->getPackageList()->toArray() : [],

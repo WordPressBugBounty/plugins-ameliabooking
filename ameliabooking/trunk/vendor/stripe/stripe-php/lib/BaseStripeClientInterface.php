@@ -1,6 +1,6 @@
 <?php
 
-namespace AmeliaStripe;
+namespace AmeliaVendor\Stripe;
 
 /**
  * Interface for a Stripe client.
@@ -41,4 +41,11 @@ interface BaseStripeClientInterface
      * @return string the base URL for Stripe's Files API
      */
     public function getFilesBase();
+
+    /**
+     * Gets the base URL for Stripe's Meter Events API.
+     *
+     * @return string the base URL for Stripe's Meter Events API
+     */
+    public function getMeterEventsBase();
 }

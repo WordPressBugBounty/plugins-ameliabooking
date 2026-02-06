@@ -2,19 +2,24 @@
 
 // File generated from our OpenAPI spec
 
-namespace AmeliaStripe\Service;
+namespace AmeliaVendor\Stripe\Service;
 
-class FileLinkService extends \AmeliaStripe\Service\AbstractService
+/**
+ * @phpstan-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ *
+ * @psalm-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ */
+class FileLinkService extends AbstractService
 {
     /**
      * Returns a list of file links.
      *
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{created?: array|int, ending_before?: string, expand?: string[], expired?: bool, file?: string, limit?: int, starting_after?: string} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Collection<\AmeliaVendor\Stripe\FileLink>
      *
-     * @return \AmeliaStripe\Collection<\AmeliaStripe\FileLink>
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function all($params = null, $opts = null)
     {
@@ -24,12 +29,12 @@ class FileLinkService extends \AmeliaStripe\Service\AbstractService
     /**
      * Creates a new file link object.
      *
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[], expires_at?: int, file: string, metadata?: null|array<string, string>} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\FileLink
      *
-     * @return \AmeliaStripe\FileLink
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function create($params = null, $opts = null)
     {
@@ -40,12 +45,12 @@ class FileLinkService extends \AmeliaStripe\Service\AbstractService
      * Retrieves the file link with the given ID.
      *
      * @param string $id
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[]} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\FileLink
      *
-     * @return \AmeliaStripe\FileLink
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function retrieve($id, $params = null, $opts = null)
     {
@@ -56,12 +61,12 @@ class FileLinkService extends \AmeliaStripe\Service\AbstractService
      * Updates an existing file link object. Expired links can no longer be updated.
      *
      * @param string $id
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[], expires_at?: null|array|int|string, metadata?: null|array<string, string>} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\FileLink
      *
-     * @return \AmeliaStripe\FileLink
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function update($id, $params = null, $opts = null)
     {

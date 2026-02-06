@@ -1,16 +1,26 @@
 <template>
   <template v-if="!amFonts.customFontSelected">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" type="text/css" :href="`${baseUrls.wpAmeliaPluginURL}v3/src/assets/scss/common/fonts/font.css`" media="all">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      :href="`${baseUrls.wpAmeliaPluginURL}v3/src/assets/scss/common/fonts/font.css`"
+      media="all"
+    />
   </template>
-  <div id="amelia-container" ref="ameliaContainer" class="am-fc__wrapper" :style="cssVars">
+  <div
+    id="amelia-container"
+    ref="ameliaContainer"
+    class="am-fc__wrapper"
+    :style="cssVars"
+  >
     <template v-if="ready && pagesArray.length">
       <component :is="pagesArray[pageIndex]"></component>
     </template>
     <CatalogSkeleton v-else />
   </div>
-  <BackLink/>
+  <BackLink />
 </template>
 
 <script setup>
@@ -33,27 +43,19 @@ import {
   watch,
   nextTick,
   computed,
-  onMounted
-} from "vue";
+  onMounted,
+} from 'vue'
 
 // * import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * import composable
-import { defaultCustomizeSettings } from "../../../assets/js/common/defaultCustomize";
-import { useColorTransparency } from "../../../assets/js/common/colorManipulation";
-import useRestore from "../../../assets/js/public/restore";
-import useAction from "../../../assets/js/public/actions";
-import {
-  useAvailableServiceIdsInCategory,
-  useAvailableCategories
-} from "../../../assets/js/public/catalog";
-import { useRenderAction } from "../../../assets/js/public/renderActions";
-
-const emits = defineEmits(['isRestored'])
-
-// * Global flag for determination when component is fully loaded (used for Amelia popup)
-let isMounted = inject('isMounted')
+import { defaultCustomizeSettings } from '../../../assets/js/common/defaultCustomize'
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
+import useRestore from '../../../assets/js/public/restore'
+import useAction from '../../../assets/js/public/actions'
+import { useAvailableCategories } from '../../../assets/js/public/catalog'
+import { useRenderAction } from '../../../assets/js/public/renderActions'
 
 // * Plugin Licence
 let licence = inject('licence')
@@ -72,7 +74,7 @@ let containerWidth = ref(0)
 provide('containerWidth', containerWidth)
 
 // * window resize listener
-window.addEventListener('resize', resize);
+window.addEventListener('resize', resize)
 
 // * resize function
 function resize() {
@@ -84,21 +86,19 @@ function resize() {
 onMounted(() => {
   store.commit('shortcodeParams/setForm', 'catalogForm')
 
-  document.getElementById(
-    'amelia-v2-booking-' + shortcodeData.value.counter
-  ).classList.add('amelia-v2-booking-' + shortcodeData.value.counter + '-loaded')
+  document
+    .getElementById('amelia-v2-booking-' + shortcodeData.value.counter)
+    .classList.add(
+      'amelia-v2-booking-' + shortcodeData.value.counter + '-loaded'
+    )
 
   useAction(store, {}, 'ViewContent', 'appointment', null, null)
 
   resize()
-  isMounted.value = true
 
-  useRenderAction(
-    'scrollForm',
-    {
-      offsetFromTop
-    },
-  )
+  useRenderAction('scrollForm', {
+    offsetFromTop,
+  })
 })
 
 // * Empty State
@@ -116,24 +116,21 @@ const store = useStore()
 store.commit('entities/setPreselected', shortcodeData.value)
 
 // * Get Entities from server
-store.dispatch(
-  'entities/getEntities',
-  {
-    types: [
-      'employees',
-      'categories',
-      'locations',
-      'packages',
-      'entitiesRelations',
-      'customFields',
-      'taxes',
-    ],
-    licence: licence,
-    loadEntities: !shortcodeData.value.trigger ? (window.ameliaShortcodeData.filter(i => !i.hasApiCall).length === window.ameliaShortcodeData.length
-      ? true : shortcodeData.value.hasApiCall) : true,
-    showHidden: false,
-  }
-)
+store.dispatch('entities/getEntities', {
+  types: [
+    'employees',
+    'categories',
+    'locations',
+    'packages',
+    'entitiesRelations',
+    'customFields',
+    'taxes',
+  ],
+  licence: licence,
+  loadEntities: shortcodeData.value.hasApiCall || shortcodeData.value.trigger,
+  showHidden: false,
+  isPanel: false,
+})
 
 // * Components
 const categoriesList = markRaw(CategoriesList)
@@ -141,10 +138,7 @@ const categoryItemsList = markRaw(CategoryItemsList)
 const categoryService = markRaw(CategoryService)
 const categoryPackage = markRaw(CategoryPackage)
 
-let pagesArray = ref([
-  categoriesList,
-  categoryItemsList
-])
+let pagesArray = ref([categoriesList, categoryItemsList])
 let pageIndex = ref(0)
 
 let categorySelected = ref(null)
@@ -167,49 +161,59 @@ watch(itemType, () => {
 
   if (itemType.value === '') {
     pagesArray.value.forEach((a, index) => {
-      if (a.name === 'CategoryService') removeItemFromStepArray(pagesArray.value, index)
-      if (a.name === 'CategoryPackage') removeItemFromStepArray(pagesArray.value, index)
+      if (a.name === 'CategoryService')
+        removeItemFromStepArray(pagesArray.value, index)
+      if (a.name === 'CategoryPackage')
+        removeItemFromStepArray(pagesArray.value, index)
     })
   }
 })
 
-function removeItemFromStepArray (arr, identifier) {
+function removeItemFromStepArray(arr, identifier) {
   arr.splice(identifier, 1)
 }
 
 function iOS() {
-  return [
+  return (
+    [
       'iPad Simulator',
       'iPhone Simulator',
       'iPod Simulator',
       'iPad',
       'iPhone',
-      'iPod'
-    ].includes(navigator.platform)
+      'iPod',
+    ].includes(navigator.platform) ||
     // iPad on iOS 13 detection
-    || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+    (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
+  )
 }
 
-function nextPage () {
+function nextPage() {
   pageIndex.value = pageIndex.value + 1
   if (iOS()) {
     setTimeout(() => {
-      let scrollHeightElement = ameliaContainer.value.getBoundingClientRect().top + window.pageYOffset - offsetFromTop.value
+      let scrollHeightElement =
+        ameliaContainer.value.getBoundingClientRect().top +
+        window.pageYOffset -
+        offsetFromTop.value
       window.scrollTo({
         top: scrollHeightElement,
-        behavior: "smooth"
+        behavior: 'smooth',
       })
     }, 500)
   } else {
-    let scrollHeightElement = ameliaContainer.value.getBoundingClientRect().top + window.pageYOffset - offsetFromTop.value
+    let scrollHeightElement =
+      ameliaContainer.value.getBoundingClientRect().top +
+      window.pageYOffset -
+      offsetFromTop.value
     window.scrollTo({
       top: scrollHeightElement,
-      behavior: "smooth"
+      behavior: 'smooth',
     })
   }
 }
 
-function previousPage () {
+function previousPage() {
   pageIndex.value = pageIndex.value - 1
 }
 
@@ -229,39 +233,79 @@ let amEntities = computed(() => {
 provide('amEntities', amEntities)
 
 // * Collect shortcode data
-function setShortcodeParams () {
+function setShortcodeParams() {
   let preselected = store.getters['entities/getPreselected']
 
-  if (shortcodeData.value.categories_hidden && preselected.category.length !== 1) {
-    availableCategories.value = JSON.parse(JSON.stringify(useAvailableCategories(amEntities.value, shortcodeData.value)))
-    categorySelected.value = parseInt(availableCategories.value.length ? availableCategories.value[0].id : null)
-    store.commit('booking/setCategoryId', parseInt(categorySelected.value))
+  if (preselected.category.length !== 1) {
+    if (shortcodeData.value.categories_hidden) {
+      availableCategories.value = JSON.parse(
+        JSON.stringify(
+          useAvailableCategories(amEntities.value, shortcodeData.value)
+        )
+      )
 
-    nextTick(() => {
-      let componentIndex = pagesArray.value.findIndex(a => a.name === 'CategoriesList')
-      pagesArray.value.splice(componentIndex, 1)
-    })
+      nextTick(() => {
+        let componentIndex = pagesArray.value.findIndex(
+          (a) => a.name === 'CategoriesList'
+        )
+        pagesArray.value.splice(componentIndex, 1)
+      })
+    }
+
+    if (!shortcodeData.value.categories_hidden) {
+      availableCategories.value = JSON.parse(
+        JSON.stringify(
+          useAvailableCategories(amEntities.value, shortcodeData.value)
+        )
+      )
+
+      nextTick(() => {
+        if (availableCategories.value.length === 1) {
+          store.commit(
+            'booking/setCategoryId',
+            parseInt(availableCategories.value[0].id)
+          )
+          categorySelected.value = parseInt(availableCategories.value[0].id)
+          let componentIndex = pagesArray.value.findIndex(
+            (a) => a.name === 'CategoriesList'
+          )
+          pagesArray.value.splice(componentIndex, 1)
+        }
+      })
+    }
   }
 
   if (preselected.category.length === 1) {
     store.commit('booking/setCategoryId', parseInt(preselected.category))
 
     categorySelected.value = parseInt(preselected.category[0])
-    availableCategories.value = JSON.parse(JSON.stringify(amEntities.value.categories.filter(a => {
-      return a.id === parseInt(preselected.category[0]) && a.status === 'visible' && a.serviceList.length && !!useAvailableServiceIdsInCategory(shortcodeData, a, amEntities.value).length
-    })))
+
+    availableCategories.value = JSON.parse(
+      JSON.stringify(
+        useAvailableCategories(amEntities.value, shortcodeData.value).filter(
+          (a) => a.id === parseInt(preselected.category[0])
+        )
+      )
+    )
 
     nextTick(() => {
-      let componentIndex = pagesArray.value.findIndex(a => a.name === 'CategoriesList')
+      let componentIndex = pagesArray.value.findIndex(
+        (a) => a.name === 'CategoriesList'
+      )
       pagesArray.value.splice(componentIndex, 1)
     })
   }
 
   if (preselected.service.length === 1) {
     store.commit('booking/setServiceId', parseInt(preselected.service[0]))
-    let service = store.getters['entities/getService'](parseInt(preselected.service[0]))
+    let service = store.getters['entities/getService'](
+      parseInt(preselected.service[0])
+    )
     categorySelected.value = service ? parseInt(service.categoryId) : null
-    store.commit('booking/setCategoryId', service ? parseInt(service.categoryId) : null)
+    store.commit(
+      'booking/setCategoryId',
+      service ? parseInt(service.categoryId) : null
+    )
 
     nextTick(() => {
       pagesArray.value = []
@@ -270,18 +314,23 @@ function setShortcodeParams () {
   }
 
   if (preselected.employee.length === 1) {
-    store.commit('booking/setEmployeeId',  parseInt(preselected.employee[0]))
+    store.commit('booking/setEmployeeId', parseInt(preselected.employee[0]))
   }
 
   if (preselected.location.length === 1) {
     store.commit('booking/setLocationId', parseInt(preselected.location[0]))
   }
 
-  if (preselected.package.length === 1 && store.getters['entities/getPackages'].length) {
+  if (
+    preselected.package.length === 1 &&
+    store.getters['entities/getPackages'].length
+  ) {
+    pagesArray.value = []
     store.commit('booking/setPackageId', parseInt(preselected.package[0]))
 
-    pagesArray.value = []
-    pagesArray.value.push(categoryPackage)
+    nextTick(() => {
+      pagesArray.value.push(categoryPackage)
+    })
   }
 
   if (preselected.show === 'packages') {
@@ -300,14 +349,15 @@ provide('restoreFormData', restore)
 watch(ready, (current) => {
   if (current) {
     setShortcodeParams()
-    empty.value = store.getters['entities/getServices'].length === 0 || store.getters['entities/getEmployees'].length === 0
+    empty.value =
+      store.getters['entities/getServices'].length === 0 ||
+      store.getters['entities/getEmployees'].length === 0
 
     if (restore.value) {
       itemType.value = store.state.booking.appointment.type
       nextTick(() => {
         pageIndex.value = pagesArray.value.length - 1
         categorySelected.value = store.state.booking.appointment.categoryId
-        emits('isRestored', restore.value)
       })
     }
   }
@@ -315,21 +365,29 @@ watch(ready, (current) => {
 
 // * Customized data form
 let customizedDataForm = computed(() => {
-  return amSettings.customizedData && 'cbf' in amSettings.customizedData ? amSettings.customizedData.cbf : defaultCustomizeSettings.cbf
+  return amSettings.customizedData && 'cbf' in amSettings.customizedData
+    ? amSettings.customizedData.cbf
+    : defaultCustomizeSettings.cbf
 })
 
 provide('customizedDataForm', customizedDataForm)
 
 // * Fonts
-const amFonts = ref(amSettings.customizedData ? amSettings.customizedData.fonts : defaultCustomizeSettings.fonts)
+const amFonts = ref(
+  amSettings.customizedData
+    ? amSettings.customizedData.fonts
+    : defaultCustomizeSettings.fonts
+)
 provide('amFonts', amFonts)
 
 // * Colors block
 let amColors = computed(() => {
-  return amSettings.customizedData && 'cbf' in amSettings.customizedData ? amSettings.customizedData.cbf.colors : defaultCustomizeSettings.cbf.colors
+  return amSettings.customizedData && 'cbf' in amSettings.customizedData
+    ? amSettings.customizedData.cbf.colors
+    : defaultCustomizeSettings.cbf.colors
 })
 
-provide('amColors', amColors);
+provide('amColors', amColors)
 
 let cssVars = computed(() => {
   return {
@@ -355,13 +413,19 @@ let cssVars = computed(() => {
     '--am-c-btn-prim-text': amColors.value.colorBtnPrimText,
     '--am-c-btn-sec': amColors.value.colorBtnSec,
     '--am-c-btn-sec-text': amColors.value.colorBtnSecText,
-    '--am-c-skeleton-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
-    '--am-c-skeleton-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-skeleton-op20': useColorTransparency(
+      amColors.value.colorMainText,
+      0.2
+    ),
+    '--am-c-skeleton-op60': useColorTransparency(
+      amColors.value.colorMainText,
+      0.6
+    ),
     '--am-font-family': amFonts.value.fontFamily,
   }
 })
 
-function activateCustomFontStyles () {
+function activateCustomFontStyles() {
   let head = document.head || document.getElementsByTagName('head')[0]
   if (head.querySelector('#amCustomFont')) {
     head.querySelector('#amCustomFont').remove()
@@ -383,12 +447,12 @@ let amDesignProperties = computed(() => {
     colorInputBorderRadius: '6px',
   }
 })
-provide('amDesignProperties', amDesignProperties);
+provide('amDesignProperties', amDesignProperties)
 </script>
 
 <script>
 export default {
-  name: "CatalogFormWrapper"
+  name: 'CatalogFormWrapper',
 }
 </script>
 
@@ -416,7 +480,7 @@ export default {
   --am-c-main-heading-text: #{$shade-800};
   --am-c-main-text: #{$shade-900};
   // sidebar container colors - left part of the form
-  --am-c-sb-bgr: #17295A;
+  --am-c-sb-bgr: #17295a;
   --am-c-sb-text: #{$am-white};
   // input global colors - usage input, textarea, checkbox, radio button, select input, adv select input
   --am-c-inp-bgr: #{$am-white};
@@ -437,9 +501,9 @@ export default {
   // -h- height
   // -fs- font size
   // -rad- border radius
-  --am-h-input: 40px;
-  --am-fs-input: 15px;
-  --am-rad-input: 6px;
+  --am-h-inp: 40px;
+  --am-fs-inp: 15px;
+  --am-rad-inp: 6px;
   --am-fs-label: 15px;
   --am-fs-btn: 15px;
 
@@ -457,7 +521,7 @@ export default {
     background-color: transparent;
 
     * {
-      font-family: var(--am-font-family);
+      font-family: var(--am-font-family), sans-serif;
       font-style: initial;
       box-sizing: border-box;
       word-break: break-word;
@@ -476,10 +540,11 @@ export default {
         border-radius: 8px;
         box-shadow: none;
 
+        // Form
         .el-form {
           &-item {
             display: block;
-            font-family: var(--am-font-family);
+            font-family: var(--am-font-family), sans-serif;
             font-size: var(--am-fs-label);
             margin-bottom: 24px;
 
@@ -503,7 +568,7 @@ export default {
               align-items: center;
               flex: 1;
               position: relative;
-              font-size: var(--am-fs-input);
+              font-size: var(--am-fs-inp);
               min-width: 0;
               color: var(--am-c-main-text);
             }
@@ -517,13 +582,39 @@ export default {
         }
 
         * {
-          font-family: var(--am-font-family);
+          font-family: var(--am-font-family), sans-serif;
           box-sizing: border-box;
         }
       }
     }
 
     @include empty-state;
+  }
+}
+
+// General popup styles
+.am-dialog-popup.amelia-v2-booking.amelia-v2-booking-dialog {
+  .el-dialog {
+    .el-dialog {
+      &__header {
+        padding: 0;
+      }
+
+      &__headerbtn {
+        width: 19px;
+        height: 19px;
+        top: 16px;
+        right: 16px;
+      }
+
+      &__body {
+        padding: 0;
+
+        #amelia-container {
+          margin: 0 auto;
+        }
+      }
+    }
   }
 }
 </style>

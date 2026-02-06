@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -44,6 +45,7 @@ interface ReservationServiceInterface
     /**
      * @param CustomerBooking $booking
      * @param string          $requestedStatus
+     * @param bool            $inspectCancellationTime
      *
      * @return array
      *
@@ -51,11 +53,11 @@ interface ReservationServiceInterface
      * @throws InvalidArgumentException
      * @throws NotFoundException
      * @throws QueryExecutionException
-     * @throws ContainerException
      * @throws NotFoundException
      * @throws BookingCancellationException
+     * @throws BookingUnavailableException
      */
-    public function updateStatus($booking, $requestedStatus);
+    public function updateStatus($booking, $requestedStatus, $inspectCancellationTime = true);
 
     /** @noinspection MoreThanThreeArgumentsInspection */
     /**
@@ -155,12 +157,13 @@ interface ReservationServiceInterface
     /**
      * @param AbstractCustomerBooking $booking
      * @param AbstractBookable        $bookable
+     * @oaram boolean                 $invoice
      *
-     * @return float
+     * @return array
      *
      * @throws InvalidArgumentException
      */
-    public function getPaymentAmount($booking, $bookable);
+    public function getPaymentAmount($booking, $bookable, $invoice = false);
 
     /**
      * @param Appointment|Event  $reservation
@@ -292,4 +295,38 @@ interface ReservationServiceInterface
      * @return mixed
      */
     public function getWcStatus($type, $orderStatus, $statusTarget, $isUpdate);
+
+    /**
+     * @param Reservation  $reservation
+     *
+     * @return float
+     *
+     * @throws InvalidArgumentException
+     */
+    public function getReservationPaymentAmount($reservation);
+
+    /**
+     * @param Reservation $reservation
+     * @param bool        $usePayment
+     *
+     * @return array
+     */
+    public function getProvidersPaymentAmount($reservation, $usePayment = true);
+
+    /**
+     * @param array $data
+     *
+     * @return void
+     * @throws QueryExecutionException
+     */
+    public function manageTaxes(&$data);
+
+    /**
+     * @param array $data
+     * @param bool  $invoices
+     *
+     * @return array
+     * @throws InvalidArgumentException
+     */
+    public function getPaymentSummary($data, $invoices);
 }

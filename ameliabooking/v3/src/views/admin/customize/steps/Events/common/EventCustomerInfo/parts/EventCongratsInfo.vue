@@ -2,32 +2,31 @@
   <div class="am-congrats__info-title">
     {{ `${labelsDisplay('event_about_list')}:` }}
   </div>
-  <div
-    class="am-congrats__info-item"
-    :class="responsiveClass"
-  >
+  <div class="am-congrats__info-item" :class="responsiveClass">
     <span class="am-congrats__info-item__label">
-      {{labelsDisplay('event_start')}}:
+      {{ labelsDisplay('event_start') }}:
     </span>
     <span class="am-congrats__info-item__value">
-      {{ `${getFrontedFormattedDate(dateTimeObj.dateStart)} ${labelsDisplay('event_at')} ${getEventFrontedFormattedTime(dateTimeObj.timeStart)}` }}
+      {{
+        `${getFrontedFormattedDate(dateTimeObj.dateStart)} ${labelsDisplay(
+          'event_at'
+        )} ${getEventFrontedFormattedTime(dateTimeObj.timeStart)}`
+      }}
     </span>
   </div>
-  <div
-    class="am-congrats__info-item"
-    :class="responsiveClass"
-  >
+  <div class="am-congrats__info-item" :class="responsiveClass">
     <span class="am-congrats__info-item__label">
-      {{labelsDisplay('event_end')}}:
+      {{ labelsDisplay('event_end') }}:
     </span>
     <span class="am-congrats__info-item__value">
-      {{ `${getFrontedFormattedDate(dateTimeObj.dateEnd)} ${labelsDisplay('event_at')} ${getEventFrontedFormattedTime(dateTimeObj.timeEnd)}` }}
+      {{
+        `${getFrontedFormattedDate(dateTimeObj.dateEnd)} ${labelsDisplay(
+          'event_at'
+        )} ${getEventFrontedFormattedTime(dateTimeObj.timeEnd)}`
+      }}
     </span>
   </div>
-  <div
-    class="am-congrats__info-item"
-    :class="responsiveClass"
-  >
+  <div v-if="licence.isBasic || licence.isPro || licence.isDeveloper" class="am-congrats__info-item" :class="responsiveClass">
     <span class="am-congrats__info-item__label">
       {{ labelsDisplay('event_location') }}:
     </span>
@@ -36,16 +35,16 @@
     </span>
   </div>
   <div
-    v-if="!licence.isLite && !licence.isStarter"
+    v-if="features.tickets"
     class="am-congrats__info-item"
     :class="responsiveClass"
   >
     <span class="am-congrats__info-item__label">
-      {{labelsDisplay('event_tickets')}}:
+      {{ labelsDisplay('event_tickets') }}:
     </span>
     <span
       class="am-congrats__info-item__value"
-      @click="() => showTickets = !showTickets"
+      @click="() => (showTickets = !showTickets)"
     >
       <span>{{ `x${ticketNumber} ` }}</span>
       <span class="am-clickable">{{ showLabel }}</span>
@@ -53,15 +52,16 @@
   </div>
 
   <div
-    v-if="showTickets && !licence.isLite && !licence.isStarter"
+    v-if="showTickets && features.tickets"
     class="am-congrats__info-item"
   >
     <span class="am-congrats__info-item__value collapsable">
-      <span
-        v-for="(ticket, index) in tickets"
-        :key="index"
-      >
-        {{ `${ticket.persons} x ${ticket.name}(${useFormattedPrice(ticket.price)})` }}
+      <span v-for="(ticket, index) in tickets" :key="index">
+        {{
+          `${ticket.persons} x ${ticket.name}(${useFormattedPrice(
+            ticket.price
+          )})`
+        }}
       </span>
     </span>
   </div>
@@ -70,28 +70,28 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  inject,
-  computed
-} from "vue";
+import { ref, inject, computed } from 'vue'
 
 // * Composables
 import {
   getEventFrontedFormattedTime,
-  getFrontedFormattedDate
-} from "../../../../../../../../assets/js/common/date";
-import { useFormattedPrice } from "../../../../../../../../assets/js/common/formatting";
-import { useResponsiveClass } from "../../../../../../../../assets/js/common/responsive";
+  getFrontedFormattedDate,
+} from '../../../../../../../../assets/js/common/date'
+import { useFormattedPrice } from '../../../../../../../../assets/js/common/formatting'
+import { useResponsiveClass } from '../../../../../../../../assets/js/common/responsive'
+import { useReactiveCustomize } from '../../../../../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Import libraries
-import moment from "moment";
+import moment from 'moment'
 
 // * Plugin Licence
 let licence = inject('licence')
 
+// * Features & Integrations
+let features = inject('features')
+
 // * Customize Object
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Form string recognition
 let pageRenderKey = inject('pageRenderKey')
@@ -114,10 +114,15 @@ let responsiveClass = computed(() => useResponsiveClass(componentWidth.value))
 // * Labels
 let amLabels = inject('labels')
 
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    let translations = amCustomize.value[pageRenderKey.value][stepName.value].translations
-    return translations && translations[label] && translations[label][langKey.value] ? translations[label][langKey.value] : amLabels[label]
+    let translations =
+      amCustomize.value[pageRenderKey.value][stepName.value].translations
+    return translations &&
+      translations[label] &&
+      translations[label][langKey.value]
+      ? translations[label][langKey.value]
+      : amLabels[label]
   })
 
   return computedLabel.value
@@ -125,9 +130,9 @@ function labelsDisplay (label) {
 
 let dateTimeObj = ref({
   dateStart: moment().format('YYYY-MM-DD'),
-  timeStart: moment().add(3,'hours').format('HH:mm:ss'),
+  timeStart: moment().add(3, 'hours').format('HH:mm:ss'),
   dateEnd: moment().add(2, 'days').format('YYYY-MM-DD'),
-  timeEnd: moment().add( 4, 'hours').format('HH:mm:ss'),
+  timeEnd: moment().add(4, 'hours').format('HH:mm:ss'),
 })
 
 let address = '9306 Taylorsville Road, Louisville KY 40299'
@@ -135,7 +140,9 @@ let address = '9306 Taylorsville Road, Louisville KY 40299'
 let showTickets = ref(false)
 
 let showLabel = computed(() => {
-  return showTickets.value ? labelsDisplay('event_show_less') : labelsDisplay('event_show_more')
+  return showTickets.value
+    ? labelsDisplay('event_show_less')
+    : labelsDisplay('event_show_more')
 })
 
 // * Event Tickets
@@ -143,7 +150,7 @@ let tickets = ref([
   {
     id: 1,
     eventTicketId: 1,
-    name: "Ticket one",
+    name: 'Ticket one',
     persons: 3,
     price: 10,
     sold: 0,
@@ -152,7 +159,7 @@ let tickets = ref([
   {
     id: 2,
     eventTicketId: 2,
-    name: "Ticket two",
+    name: 'Ticket two',
     persons: 5,
     price: 15,
     sold: 0,
@@ -161,7 +168,7 @@ let tickets = ref([
   {
     id: 3,
     eventTicketId: 3,
-    name: "Ticket three",
+    name: 'Ticket three',
     persons: 7,
     price: 20,
     sold: 0,
@@ -171,7 +178,7 @@ let tickets = ref([
 
 let ticketNumber = computed(() => {
   let number = 0
-  tickets.value.forEach(t => {
+  tickets.value.forEach((t) => {
     number += t.persons
   })
 

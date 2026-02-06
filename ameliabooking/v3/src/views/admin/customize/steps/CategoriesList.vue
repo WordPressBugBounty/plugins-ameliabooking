@@ -1,30 +1,31 @@
 <template>
-  <div
-    ref="ameliaContainer"
-    class="am-fcl"
-    :style="cssVars"
-  >
+  <div ref="ameliaContainer" class="am-fcl" :style="cssVars">
     <template v-for="category in categoriesList" :key="category.id">
-      <div
-        class="am-fcl__item"
-        :class="itemWidth"
-      >
+      <div class="am-fcl__item" :class="itemWidth">
         <div class="am-fcl__item-inner">
           <div
             class="am-fcl__item-content"
-            :style="customizeOptions.cardSideColor.visibility
-            ? {
-              borderLeft: '7px solid',
-              borderLeftColor: category.color
-            }
-            : {}"
+            :style="
+              customizeOptions.cardSideColor.visibility
+                ? {
+                    borderLeft: '7px solid',
+                    borderLeftColor: category.color,
+                  }
+                : {}
+            "
           >
             <div
               class="am-fcl__item-heading"
-              :style="customizeOptions.cardColor.visibility
-              ? {
-                backgroundColor: useColorTransparency(category.color, 0.1)
-              } : {}"
+              :style="
+                customizeOptions.cardColor.visibility
+                  ? {
+                      backgroundColor: useColorTransparency(
+                        category.color,
+                        0.1
+                      ),
+                    }
+                  : {}
+              "
             >
               <div class="am-fcl__item-name">
                 {{ category.name }}
@@ -34,16 +35,20 @@
                   v-if="customizeOptions.services.visibility"
                   class="am-fcl__item-segments__item"
                 >
-                  <span class="am-fcl__item-segments__item-icon am-icon-service"></span>
+                  <span
+                    class="am-fcl__item-segments__item-icon am-icon-service"
+                  ></span>
                   <span class="am-fcl__item-segments__item-count">
                     {{ category.serviceList.length }}
                   </span>
                 </div>
                 <div
-                  v-if="customizeOptions.packages.visibility && !licence.isBasic && !licence.isStarter && !licence.isLite"
+                  v-if="features.packages && customizeOptions.packages.visibility"
                   class="am-fcl__item-segments__item"
                 >
-                  <span class="am-fcl__item-segments__item-icon am-icon-shipment"></span>
+                  <span
+                    class="am-fcl__item-segments__item-icon am-icon-shipment"
+                  ></span>
                   <span class="am-fcl__item-segments__item-count">
                     {{ category.packageList.length }}
                   </span>
@@ -58,7 +63,7 @@
                 :type="customizeOptions.cardButton.buttonType"
                 :suffix="IconArrowRight"
               >
-                {{labelsDisplay('view_all')}}
+                {{ labelsDisplay('view_all') }}
               </AmButton>
             </div>
           </div>
@@ -70,17 +75,11 @@
 
 <script setup>
 // * Import from Vue
-import {
-  inject,
-  ref,
-  computed,
-  onMounted
-} from "vue";
+import {inject, ref, computed, onMounted, provide} from 'vue'
 
 // * Composables
-import {
-  useColorTransparency
-} from "../../../../assets/js/common/colorManipulation.js"
+import { useColorTransparency } from '../../../../assets/js/common/colorManipulation.js'
+import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Components
 import AmButton from '../../../_components/button/AmButton.vue'
@@ -89,8 +88,11 @@ import IconArrowRight from '../../../_components/icons/IconArrowRight.vue'
 // * Plugin Licence
 let licence = inject('licence')
 
+// * Features
+let features = inject('features')
+
 // * Customize
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Options
 let customizeOptions = computed(() => {
@@ -104,7 +106,7 @@ let ameliaContainer = ref(null)
 let containerWidth = ref(0)
 
 // * window resize listener
-window.addEventListener('resize', resize);
+window.addEventListener('resize', resize)
 
 // * resize function
 function resize() {
@@ -138,53 +140,57 @@ let itemWidth = computed(() => {
 let categoriesList = [
   {
     id: 1,
-    name: "Category 1",
+    name: 'Category 1',
     packageList: [1, 2],
     serviceList: [1, 2, 3],
     position: 1,
-    color: '#1788FB'
+    color: '#1788FB',
   },
   {
     id: 2,
-    name: "Category 2",
+    name: 'Category 2',
     packageList: [1],
     serviceList: [1, 2, 3],
     position: 1,
-    color: '#4BBEC6'
+    color: '#4BBEC6',
   },
   {
     id: 3,
-    name: "Category 3",
+    name: 'Category 3',
     packageList: [1, 2],
     serviceList: [1],
     position: 1,
-    color: '#FBC22D'
+    color: '#FBC22D',
   },
   {
     id: 4,
-    name: "Category 4",
+    name: 'Category 4',
     packageList: [1, 2],
     serviceList: [1, 2, 3],
     position: 1,
-    color: '#26CC2B'
+    color: '#26CC2B',
   },
   {
     id: 5,
-    name: "Category 5",
+    name: 'Category 5',
     packageList: [1, 2],
     serviceList: [1, 2, 3],
     position: 1,
-    color: '#774DFB'
-  }
+    color: '#774DFB',
+  },
 ]
 
 let langKey = inject('langKey')
 let amLabels = inject('labels')
 
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
     let translations = amCustomize.value.cbf.categoriesList.translations
-    return translations && translations[label] && translations[label][langKey.value] ? translations[label][langKey.value] : amLabels[label]
+    return translations &&
+      translations[label] &&
+      translations[label][langKey.value]
+      ? translations[label][langKey.value]
+      : amLabels[label]
   })
 
   return computedLabel.value
@@ -194,14 +200,17 @@ let amColors = inject('amColors')
 
 let cssVars = computed(() => {
   return {
-    '--am-c-fcl-card-text-op80': useColorTransparency(amColors.value.colorCardText, 0.8)
+    '--am-c-fcl-card-text-op80': useColorTransparency(
+      amColors.value.colorCardText,
+      0.8
+    ),
   }
 })
 </script>
 
 <script>
 export default {
-  name: "CategoriesList",
+  name: 'CategoriesList',
   key: 'categoriesList',
 }
 </script>

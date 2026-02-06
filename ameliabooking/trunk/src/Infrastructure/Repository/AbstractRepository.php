@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -8,45 +9,34 @@ namespace AmeliaBooking\Infrastructure\Repository;
 
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
-use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
-use AmeliaBooking\Domain\Entity\Coupon\Coupon;
-use AmeliaBooking\Domain\Entity\Location\Location;
-use AmeliaBooking\Domain\Entity\Notification\Notification;
-use AmeliaBooking\Domain\Entity\Payment\Payment;
-use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
-use AmeliaBooking\Infrastructure\Connection;
+use AmeliaBooking\Domain\Services\Database\ConnectionInterface;
 
-/**
- * Class AbstractRepository
- *
- * @package AmeliaBooking\Infrastructure\Repository
- */
 class AbstractRepository
 {
-    const FACTORY = '';
+    public const FACTORY = '';
 
-    /** @var \PDO */
+    /** @var ConnectionInterface */
     protected $connection;
 
     /** @var string */
     protected $table;
 
     /**
-     * @param Connection $connection
-     * @param string     $table
+     * @param ConnectionInterface $connection
+     * @param string              $table
      */
-    public function __construct(Connection $connection, $table)
+    public function __construct(ConnectionInterface $connection, $table)
     {
-        $this->connection = $connection();
-        $this->table = $table;
+        $this->connection = $connection;
+        $this->table      = $table;
     }
 
     /**
      * @param int $id
      *
-     * @return Payment|Coupon|Service|Notification|AbstractUser|Location
+     * @return mixed
      * @throws NotFoundException
      * @throws QueryExecutionException
      */
@@ -117,9 +107,9 @@ class AbstractRepository
     {
         try {
             $statement = $this->connection->query($this->selectQuery());
-            $rows = $statement->fetchAll();
+            $rows      = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get all data from ' . __CLASS__, $e->getCode(), $e);
         }
 
         $items = [];
@@ -139,9 +129,43 @@ class AbstractRepository
     {
         try {
             $statement = $this->connection->query($this->selectQuery());
+            $rows      = $statement->fetchAll();
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to get all data indexed by id from ' . __CLASS__, $e->getCode(), $e);
+        }
+
+        $collection = new Collection();
+        foreach ($rows as $row) {
+            $collection->addItem(
+                call_user_func([static::FACTORY, 'create'], $row),
+                $row['id']
+            );
+        }
+
+        return $collection;
+    }
+
+    /**
+     * @return Collection
+     * @throws InvalidArgumentException
+     * @throws QueryExecutionException
+     */
+    public function getByFieldValue($field, $value)
+    {
+        $params = [
+            ":$field"  => $value,
+        ];
+
+        try {
+            $statement = $this->connection->prepare(
+                "SELECT * FROM {$this->table} WHERE {$field} = :{$field}"
+            );
+
+            $statement->execute($params);
+
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by field value in ' . __CLASS__, $e->getCode(), $e);
         }
 
         $collection = new Collection();
@@ -168,7 +192,12 @@ class AbstractRepository
             $statement->bindParam(':id', $id);
             return $statement->execute();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to delete data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException(
+                'Unable to delete data from ' . __CLASS__ .
+                "\n" . $e->getTraceAsString(),
+                $e->getCode(),
+                $e
+            );
         }
     }
 
@@ -227,7 +256,12 @@ class AbstractRepository
 
             return $statement->execute($params);
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to delete data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException(
+                'Unable to delete data by entity id from ' . __CLASS__ .
+                "\n" . $e->getTraceAsString(),
+                $e->getCode(),
+                $e
+            );
         }
     }
 
@@ -265,12 +299,16 @@ class AbstractRepository
             $res = $statement->execute($params);
 
             if (!$res) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
+                throw new QueryExecutionException('Unable to update by entity id in table ' . $this->table . ' in class ' . __CLASS__);
             }
 
             return $res;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException(
+                'Unable to update by entity id in ' . $this->table . ' in class ' . __CLASS__ . "\n\n" . $e->getTraceAsString(),
+                $e->getCode(),
+                $e
+            );
         }
     }
 
@@ -302,12 +340,72 @@ class AbstractRepository
             $res = $statement->execute($params);
 
             if (!$res) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
+                throw new QueryExecutionException('Unable to update field by id in table ' . $this->table . ' in class ' . __CLASS__);
             }
 
             return $res;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException(
+                'Unable to update field by id in table ' . $this->table . ' in class ' . __CLASS__ . "\n\n" . $e->getTraceAsString(),
+                $e->getCode(),
+                $e
+            );
+        }
+    }
+
+    /**
+     * SET $fieldName = $fieldValue WHERE id in $ids
+     *
+     * @param array    $ids
+     * @param mixed  $fieldValue
+     * @param string $fieldName
+     *
+     * @return mixed
+     * @throws QueryExecutionException
+     */
+    public function updateFieldByIds($ids, $fieldValue, $fieldName)
+    {
+        $params = [
+            ":$fieldName" => $fieldValue
+        ];
+
+        $where = '';
+
+        if (!empty($ids)) {
+            $queryIds = [];
+
+            foreach ($ids as $index => $value) {
+                $param = ':id' . $index;
+
+                $queryIds[] = $param;
+
+                $params[$param] = $value;
+            }
+
+            $where = 'WHERE id IN (' . implode(', ', $queryIds) . ')';
+        }
+
+        try {
+            $statement = $this->connection->prepare(
+                "UPDATE {$this->table}
+                SET
+                `$fieldName` = :$fieldName
+                {$where}"
+            );
+
+            $res = $statement->execute($params);
+
+            if (!$res) {
+                throw new QueryExecutionException('Unable to update field by ids in table ' . $this->table . ' in class ' . __CLASS__);
+            }
+
+            return $res;
+        } catch (\Exception $e) {
+            throw new QueryExecutionException(
+                'Unable to update field by ids in table ' . $this->table . ' in class ' . __CLASS__ . "\n\n" . $e->getTraceAsString(),
+                $e->getCode(),
+                $e
+            );
         }
     }
 
@@ -325,25 +423,29 @@ class AbstractRepository
     public function updateFieldByColumn($fieldName, $fieldValue, $columnName, $columnValue)
     {
         $params = [
-            ":$fieldName"  => $fieldValue,
-            ":$columnName" => $columnValue,
+            ':first'  => $fieldValue,
+            ':second' => $columnValue,
         ];
 
         try {
             $statement = $this->connection->prepare(
                 "UPDATE {$this->table}
                 SET
-                `$fieldName` = :$fieldName
-                WHERE $columnName = :$columnName"
+                `$fieldName` = :first
+                WHERE $columnName = :second"
             );
 
             $res = $statement->execute($params);
 
             if (!$res) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
+                throw new QueryExecutionException('Unable to update field by column in table ' . $this->table . ' in class ' . __CLASS__);
             }
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException(
+                'Unable to update field by column in table ' . $this->table . ' in class ' . __CLASS__ . "\n\n" . $e->getTraceAsString(),
+                $e->getCode(),
+                $e
+            );
         }
     }
 
@@ -356,27 +458,27 @@ class AbstractRepository
     }
 
     /**
-     * @return bool
+     * @return void
      */
     public function beginTransaction()
     {
-        return $this->connection->beginTransaction();
+        $this->connection->beginTransaction();
     }
 
     /**
-     * @return bool
+     * @return void
      */
     public function commit()
     {
-        return $this->connection->commit();
+        $this->connection->commit();
     }
 
     /**
-     * @return bool
+     * @return void
      */
     public function rollback()
     {
-        return $this->connection->rollBack();
+        $this->connection->rollBack();
     }
 
     /**
@@ -422,7 +524,7 @@ class AbstractRepository
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get missing data from ' . __CLASS__, $e->getCode(), $e);
         }
 
         if ($rows) {
@@ -462,9 +564,40 @@ class AbstractRepository
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get ids from ' . __CLASS__, $e->getCode(), $e);
         }
 
         return array_map('intval', array_column($rows, 'id'));
+    }
+
+    /**
+     * @param int $entityId
+     * @param string $errorMessage
+     *
+     * @throws QueryExecutionException
+     */
+    public function updateErrorColumn($entityId, $errorMessage)
+    {
+        $params = [
+            ':error' => $errorMessage,
+            ':id' => $entityId
+        ];
+
+        try {
+            $statement = $this->connection->prepare(
+                "UPDATE {$this->table} e 
+                    SET e.error = CONCAT(e.error, ' | ', :error)
+                    WHERE e.id=:id;
+                "
+            );
+
+            $statement->execute($params);
+        } catch (\Exception $e) {
+            throw new QueryExecutionException(
+                'Unable to add error "' . $errorMessage . '" to ' . $this->table . ' with id ' . $entityId . ' in ' . __CLASS__,
+                $e->getCode(),
+                $e
+            );
+        }
     }
 }

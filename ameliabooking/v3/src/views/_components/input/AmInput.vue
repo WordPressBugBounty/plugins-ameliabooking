@@ -14,11 +14,27 @@
       :aria-label="props.ariaLabel"
       @blur="(e) => $emit('blur', e)"
       @focus="(e) => $emit('focus', e)"
-      @change="(currentValue, oldValue) => $emit('change', currentValue, oldValue)"
-      @input="(currentValue, oldValue) => $emit('input', currentValue, oldValue)"
+      @change="
+        (currentValue, oldValue) => $emit('change', currentValue, oldValue)
+      "
+      @input="
+        (currentValue, oldValue) => $emit('input', currentValue, oldValue)
+      "
       @keyup.enter="(e) => $emit('enter', e)"
       @clear="() => $emit('clear')"
     >
+      <!-- * Prepend Slot * -->
+      <template v-if="props.prepend" #prepend>
+        <template v-if="typeof props.prepend === 'string'">
+          {{ props.prepend }}
+        </template>
+        <component
+          :is="props.prepend"
+          v-if="typeof props.prepend === 'object'"
+        />
+      </template>
+      <!-- */ Prepend Slot * -->
+
       <!-- * Icon Start/Prefix * -->
       <template v-if="props.prefixIcon" #prefix>
         <span
@@ -44,21 +60,25 @@
         />
       </template>
       <!-- */ Icon End/Suffix * -->
+
+      <!-- * Append Slot * -->
+      <template v-if="props.append" #append>
+        <template v-if="typeof props.append === 'string'">
+          {{ props.append }}
+        </template>
+        <component :is="props.append" v-if="typeof props.append === 'object'" />
+      </template>
+      <!-- */ Append Slot * -->
     </el-input>
   </div>
 </template>
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  ref,
-  toRefs,
-  inject
-} from 'vue'
+import { computed, ref, toRefs, inject } from 'vue'
 
 // * Import from Libraries
-import {format, unformat} from 'v-money3'
+import { format, unformat } from 'v-money3'
 
 // * Composables
 import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
@@ -87,34 +107,34 @@ const props = defineProps({
   showWordLimit: {
     // * whether show word count, only works when type is 'text' or 'textarea'
     type: Boolean,
-    default: false
+    default: false,
   },
   placeholder: {
     type: String,
-    default: ''
+    default: '',
   },
   clearable: {
     // * whether to show clear button, only works when type is not 'textarea'
     type: Boolean,
-    default: false
+    default: false,
   },
   formatter: {
     // * specifies the format of the value presented input.(only works when type is 'text')
-    type: Function
+    type: Function,
   },
   parser: {
     // * specifies the value extracted from formatter input.(only works when type is 'text')
-    type: Function
+    type: Function,
   },
   showPassword: {
     // * whether to show toggleable password input, only works when type is 'password'
     type: Boolean,
-    default: false
+    default: false,
   },
   disabled: {
     // * whether to disable input
     type: Boolean,
-    default: false
+    default: false,
   },
   size: {
     type: String,
@@ -125,35 +145,43 @@ const props = defineProps({
   },
   prefixIcon: {
     type: [String, Object],
-    default: ''
+    default: '',
+  },
+  prepend: {
+    type: [String, Object],
+    default: '',
   },
   suffixIcon: {
     type: [String, Object],
-    default: ''
+    default: '',
+  },
+  append: {
+    type: [String, Object],
+    default: '',
   },
   rows: {
     // * number of rows of textarea, only works when type is 'textarea'
     type: Number,
-    default: 2
+    default: 2,
   },
   autosize: {
     // * whether textarea has an adaptive height, only works when type is 'textarea'. Can accept an object, e.g. { minRows: 2, maxRows: 6 }
     type: [Boolean, Object],
-    default: false
+    default: false,
   },
   autocomplete: {
     // * whether to enable native autocomplete
     type: String,
-    default: 'off'
+    default: 'off',
   },
   name: {
     // * native name attribute
     type: String,
-    default: ''
+    default: '',
   },
   readonly: {
     type: Boolean,
-    default: false
+    default: false,
   },
   max: {
     type: [String, Number],
@@ -175,7 +203,7 @@ const props = defineProps({
   autofocus: {
     // * whether to focus input on mounted
     type: Boolean,
-    default: false
+    default: false,
   },
   form: {
     // * native form attribute
@@ -183,7 +211,7 @@ const props = defineProps({
   },
   ariaLabel: {
     type: String,
-    default: ''
+    default: '',
   },
   tabindex: {
     // * native tabindex attribute
@@ -191,34 +219,45 @@ const props = defineProps({
   },
   validateEvent: {
     type: Boolean,
-    default: true
+    default: true,
   },
   inputStyle: {
     // * custom input style
     type: [String, Object],
-    default: () => ({})
+    default: () => ({}),
   },
   isMoney: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 // Create filtered properties
 const filteredProps = computed(() => {
   // Create a copy of props
-  const filterObj = {...props};
+  const filterObj = { ...props }
 
   // List of props to exclude
-  const excludeProps = ['id', 'type', 'modelValue', 'size', 'label', 'prefixIcon', 'suffixIcon', 'isMoney'];
+  const excludeProps = [
+    'id',
+    'type',
+    'modelValue',
+    'size',
+    'label',
+    'prefixIcon',
+    'prepend',
+    'suffixIcon',
+    'append',
+    'isMoney',
+  ]
 
   // Remove excluded props
-  excludeProps.forEach(prop => {
-    delete filterObj[prop];
-  });
+  excludeProps.forEach((prop) => {
+    delete filterObj[prop]
+  })
 
-  return filterObj;
-});
+  return filterObj
+})
 
 /**
  * Component Emits
@@ -237,7 +276,7 @@ const emits = defineEmits([
 /**
  * Component model
  */
-let {modelValue} = toRefs(props)
+let { modelValue } = toRefs(props)
 
 let model = computed({
   get: () => {
@@ -248,7 +287,12 @@ let model = computed({
   set: (val) => {
     emits(
       'update:modelValue',
-      props.isMoney ? unformat(val, {...useCurrencyOptions(), modelModifiers: {number: true},}) : val
+      props.isMoney
+        ? unformat(val, {
+            ...useCurrencyOptions(),
+            modelModifiers: { number: true },
+          })
+        : val
     )
   },
 })
@@ -337,6 +381,7 @@ const amInput = ref(null)
       max-width: 100%;
       background-color: transparent;
       box-shadow: 0 2px 2px var(--am-c-input-shadow);
+      border-radius: var(--am-rad-input);
 
       &.el-input {
         // Disabled state
@@ -366,6 +411,43 @@ const amInput = ref(null)
 
         &--prefix.el-input--suffix {
           --am-padd-input: 0 8px;
+        }
+
+        // Icons - Prepend and Append
+        &.el-input-group {
+          // Prepend
+          &--prepend {
+            --am-rad-input: 0 6px 6px 0;
+
+            .el-input-group__prepend {
+              border: none;
+              padding: 0 12px;
+              background-color: var(--am-c-inp-text-op03);
+              box-shadow: inset 1px 0 0 0 var(--am-c-input-border),
+                0 1px 0 0 var(--am-c-input-border),
+                0 -1px 0 0 var(--am-c-input-border);
+            }
+          }
+
+          // Append
+          &--append {
+            --am-rad-input: 6px 0 0 6px;
+
+            .el-input-group__append {
+              border: none;
+              padding: 0 12px;
+              background-color: var(--am-c-inp-text-op03);
+              box-shadow: 0 0 0 0 var(--am-c-input-border),
+                0 1px 0 0 var(--am-c-input-border),
+                0 -1px 0 0 var(--am-c-input-border),
+                inset -1px 0 0 0 var(--am-c-input-border);
+            }
+          }
+
+          // Both Prepend and Append
+          &--prepend.el-input-group--append {
+            --am-rad-input: 0;
+          }
         }
       }
 
@@ -413,24 +495,29 @@ const amInput = ref(null)
             color: var(--am-c-input-placeholder);
             opacity: 1; /* Ensures it’s not transparent */
           }
-          &::-webkit-input-placeholder { /* Chrome, Safari */
+          &::-webkit-input-placeholder {
+            /* Chrome, Safari */
             color: var(--am-c-input-placeholder);
           }
-          &:-moz-placeholder { /* Firefox 4-18 */
-            color: var(--am-c-input-placeholder);
-            opacity: 1;
-          }
-          &::-moz-placeholder { /* Firefox 19+ */
+          &:-moz-placeholder {
+            /* Firefox 4-18 */
             color: var(--am-c-input-placeholder);
             opacity: 1;
           }
-          &:-ms-input-placeholder { /* IE 10-11 */
+          &::-moz-placeholder {
+            /* Firefox 19+ */
+            color: var(--am-c-input-placeholder);
+            opacity: 1;
+          }
+          &:-ms-input-placeholder {
+            /* IE 10-11 */
             color: var(--am-c-input-placeholder);
           }
         }
 
         // Prefix and Suffix Icons
-        &__prefix, &__suffix {
+        &__prefix,
+        &__suffix {
           &-inner {
             align-items: center;
             font-size: 24px;
@@ -527,18 +614,22 @@ const amInput = ref(null)
             color: var(--am-c-input-placeholder);
             opacity: 1; /* Ensures it’s not transparent */
           }
-          &::-webkit-input-placeholder { /* Chrome, Safari */
+          &::-webkit-input-placeholder {
+            /* Chrome, Safari */
             color: var(--am-c-input-placeholder);
           }
-          &:-moz-placeholder { /* Firefox 4-18 */
-            color: var(--am-c-input-placeholder);
-            opacity: 1;
-          }
-          &::-moz-placeholder { /* Firefox 19+ */
+          &:-moz-placeholder {
+            /* Firefox 4-18 */
             color: var(--am-c-input-placeholder);
             opacity: 1;
           }
-          &:-ms-input-placeholder { /* IE 10-11 */
+          &::-moz-placeholder {
+            /* Firefox 19+ */
+            color: var(--am-c-input-placeholder);
+            opacity: 1;
+          }
+          &:-ms-input-placeholder {
+            /* IE 10-11 */
             color: var(--am-c-input-placeholder);
           }
         }

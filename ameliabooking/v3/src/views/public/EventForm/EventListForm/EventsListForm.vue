@@ -269,7 +269,7 @@ let ifBookedCustomerCabinetUrl = computed(() => {
 
 let customerCabinetButton = computed(() => {
   if (stepsArray.value[stepIndex.value].name === 'CongratulationsStep') {
-    return amSettings.roles.customerCabinet.enabled && amSettings.roles.customerCabinet.pageUrl !== null && ifBookedCustomerCabinetUrl.value
+    return amSettings.roles.customerCabinet.pageUrl !== null && ifBookedCustomerCabinetUrl.value
   }
 
   return true
@@ -350,7 +350,7 @@ store.dispatch(
       'customFields',
       'taxes',
     ],
-    loadEntities: shortcodeData.value.hasApiCall || shortcodeData.value.in_dialog,
+    loadEntities: shortcodeData.value.hasApiCall || shortcodeData.value.trigger,
   }
 )
 
@@ -406,6 +406,7 @@ function onClosedEventDialog () {
     store.dispatch('coupon/resetCoupon')
     store.dispatch('tickets/resetCustomTickets')
     store.dispatch('eventWaitingListOptions/resetWaitingOptions')
+    store.dispatch('payment/resetPaymentData')
   })
 }
 
@@ -663,6 +664,10 @@ export default {
     .el-dialog {
       @media only screen and (max-width: 768px) {
         margin-top: 0;
+      }
+
+      #amelia-container {
+        background-color: var(--am-c-main-bgr);
       }
 
       .el-dialog {

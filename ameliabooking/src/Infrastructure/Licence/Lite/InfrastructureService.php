@@ -26,6 +26,16 @@ class InfrastructureService
     /**
      * @param Container $c
      *
+     * @return InfrastructureServices\Google\AbstractGoogleCalendarMiddlewareService
+     */
+    public static function getCalendarGoogleMiddlewareService($c)
+    {
+        return new InfrastructureServices\Google\StarterGoogleCalendarMiddlewareService($c);
+    }
+
+    /**
+     * @param Container $c
+     *
      * @return InfrastructureServices\Outlook\AbstractOutlookCalendarService
      */
     public static function getCalendarOutlookService($c)
@@ -149,6 +159,16 @@ class InfrastructureService
         );
     }
 
+    public static function getBarionService($c)
+    {
+        return new InfrastructureServices\Payment\StarterPaymentService(
+            $c->get('domain.settings.service'),
+            new InfrastructureServices\Payment\CurrencyService(
+                $c->get('domain.settings.service')
+            )
+        );
+    }
+
     /**
      * @param $c
      * @return InfrastructureServices\Authentication\AbstractSocialAuthenticationService
@@ -156,5 +176,15 @@ class InfrastructureService
     public static function getSocialAuthenticationService($c)
     {
         return new InfrastructureServices\Authentication\StarterSocialAuthenticationService($c);
+    }
+
+    /**
+     * @param Container $c
+     *
+     * @return InfrastructureServices\QrCode\AbstractQrCodeInfrastructureService
+     */
+    public static function getQrCodeService($c)
+    {
+        return new InfrastructureServices\QrCode\StarterQrCodeInfrastructureService($c);
     }
 }

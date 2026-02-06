@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Assembling application services:
  * Instantiating application services and injecting the Infrastructure layer implementations
@@ -6,16 +7,16 @@
 
 use AmeliaBooking\Application\Services\Bookable\AbstractPackageApplicationService;
 use AmeliaBooking\Application\Services\Bookable\BookableApplicationService;
-use AmeliaBooking\Application\Services\Booking\BookingApplicationService;
 use AmeliaBooking\Application\Services\Booking\AppointmentApplicationService;
+use AmeliaBooking\Application\Services\Booking\BookingApplicationService;
 use AmeliaBooking\Application\Services\Booking\EventApplicationService;
 use AmeliaBooking\Application\Services\Cache\CacheApplicationService;
-use AmeliaBooking\Application\Services\Coupon\CouponApplicationService;
 use AmeliaBooking\Application\Services\Entity\EntityApplicationService;
 use AmeliaBooking\Application\Services\Gallery\GalleryApplicationService;
 use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Application\Services\Reservation\ReservationService;
 use AmeliaBooking\Application\Services\TimeSlot\TimeSlotService;
+use AmeliaBooking\Application\Services\WaitingList\WaitingListService;
 use AmeliaBooking\Application\Services\User\CustomerApplicationService;
 use AmeliaBooking\Application\Services\User\ProviderApplicationService;
 use AmeliaBooking\Application\Services\User\UserApplicationService;
@@ -152,8 +153,8 @@ $entries['application.reservation.service'] = function ($c) {
  *
  * @return Reservation
  */
-$entries['application.reservation'] = function ($validate) {
-    return new AmeliaBooking\Domain\Entity\Booking\Reservation($validate);
+$entries['application.reservation'] = function () {
+    return new AmeliaBooking\Domain\Entity\Booking\Reservation();
 };
 
 /**
@@ -256,6 +257,17 @@ $entries['application.timeSlot.service'] = function ($c) {
 };
 
 /**
+ * Calendar service
+ *
+ * @param Container $c
+ *
+ * @return WaitingListService
+ */
+$entries['application.waitingList.service'] = function ($c) {
+    return new AmeliaBooking\Application\Services\WaitingList\WaitingListService($c);
+};
+
+/**
  * Cache service
  *
  * @param Container $c
@@ -297,6 +309,28 @@ $entries['application.coupon.service'] = function ($c) {
  */
 $entries['application.location.service'] = function ($c) {
     return AmeliaBooking\Infrastructure\Licence\ApplicationService::getLocationService($c);
+};
+
+/**
+ * Notification Service
+ *
+ * @param Container $c
+ *
+ * @return AmeliaBooking\Application\Services\Notification\ApplicationNotificationService
+ */
+$entries['application.notification.service'] = function ($c) {
+    return new AmeliaBooking\Application\Services\Notification\ApplicationNotificationService($c);
+};
+
+/**
+ * Appointment Notification Service
+ *
+ * @param Container $c
+ *
+ * @return AmeliaBooking\Application\Services\Notification\AppointmentNotificationService
+ */
+$entries['application.notification.appointment.service'] = function ($c) {
+    return new AmeliaBooking\Application\Services\Notification\AppointmentNotificationService($c);
 };
 
 /**
@@ -455,6 +489,17 @@ $entries['application.payment.service'] = function ($c) {
 };
 
 /**
+ * Invoice service
+ *
+ * @param Container $c
+ *
+ * @return AmeliaBooking\Application\Services\Invoice\AbstractInvoiceApplicationService
+ */
+$entries['application.invoice.service'] = function ($c) {
+    return AmeliaBooking\Infrastructure\Licence\ApplicationService::getInvoiceService($c);
+};
+
+/**
  * Custom Field Service
  *
  * @param Container $c
@@ -474,6 +519,17 @@ $entries['application.customField.service'] = function ($c) {
  */
 $entries['application.webHook.service'] = function ($c) {
     return AmeliaBooking\Infrastructure\Licence\ApplicationService::getWebHookService($c);
+};
+
+/**
+ * Integration Service
+ *
+ * @param Container $c
+ *
+ * @return AmeliaBooking\Application\Services\Integration\ApplicationIntegrationService
+ */
+$entries['application.integration.service'] = function ($c) {
+    return new AmeliaBooking\Application\Services\Integration\ApplicationIntegrationService($c);
 };
 
 /**
@@ -507,4 +563,15 @@ $entries['application.ics.service'] = function ($c) {
  */
 $entries['application.stash.service'] = function ($c) {
     return new AmeliaBooking\Application\Services\Stash\StashApplicationService($c);
+};
+
+/**
+ * QR Code service
+ *
+ * @param Container $c
+ *
+ * @return AmeliaBooking\Application\Services\QrCode\AbstractQrCodeApplicationService
+ */
+$entries['application.qrcode.service'] = function ($c) {
+    return AmeliaBooking\Infrastructure\Licence\ApplicationService::getQrCodeService($c);
 };

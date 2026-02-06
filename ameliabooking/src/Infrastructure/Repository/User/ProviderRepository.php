@@ -15,8 +15,7 @@ use AmeliaBooking\Infrastructure\Connection;
 use AmeliaBooking\Infrastructure\Licence\Licence;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Bookable\ExtrasTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\AppointmentsTable;
-use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Coupon\CouponsTable;
-use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Coupon\CouponsToServicesTable;
+use AmeliaBooking\Infrastructure\Licence\LicenceConstants;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\User\WPUsersTable;
 
 /**
@@ -161,7 +160,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     /**
      * @param int $id
      *
-     * @return Provider
+     * @return Provider|null
      * @throws QueryExecutionException
      */
     public function getById($id)
@@ -181,6 +180,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     u.pictureThumbPath AS picture_thumb_path,
                     u.zoomUserId AS user_zoom_user_id,
                     u.appleCalendarId as user_apple_calendar_id,
+                    u.googleCalendarId as user_google_calendar_id,
                     u.employeeAppleCalendar as user_employee_apple_calendar,
                     u.stripeConnect AS user_stripeConnect,
                     u.translations AS user_translations,
@@ -246,6 +246,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     u.pictureThumbPath AS picture_thumb_path,
                     u.translations AS user_translations,
                     u.badgeId AS user_badge_id,
+                    u.googleCalendarId as user_google_calendar_id,
                     lt.locationId AS user_locationId
                 FROM {$this->table} u
                 LEFT JOIN {$this->providerLocationTable} lt ON lt.userId = u.id
@@ -283,6 +284,9 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
      */
     public function getFiltered($criteria, $itemsPerPage)
     {
+        // Apply Lite license restriction
+        $criteria = $this->applyLiteLicenseRestriction($criteria);
+
         try {
             $wpUserTable = WPUsersTable::getTableName();
 
@@ -298,17 +302,33 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             $where = [];
 
             if (!empty($criteria['search'])) {
-                $params[':search1'] = $params[':search2'] = $params[':search3'] = $params[':search4'] =
-                    "%{$criteria['search']}%";
+                $terms = preg_split('/\s+/', trim($criteria['search']));
+                $termIndex = 0;
+                $where1 = [];
 
+                foreach ($terms as $term) {
+                    $param = ":search{$termIndex}";
+                    $params[$param] = "%{$term}%";
+
+                    $where1[] = "(
+                        u.firstName LIKE {$param}
+                        OR u.lastName LIKE {$param}
+                        OR u.email LIKE {$param}
+                        OR u.phone LIKE {$param}
+                        OR u.note LIKE {$param}
+                        OR wpUser.display_name LIKE {$param}
+                        OR u.id LIKE {$param}
+                    )";
+
+                    $termIndex++;
+                }
+
+                $where1 = implode(' AND ', $where1);
                 $where[] = "u.id IN(
                     SELECT DISTINCT(user.id)
                         FROM {$this->table} user
                         LEFT JOIN {$wpUserTable} wpUser ON user.externalId = wpUser.ID
-                        WHERE (CONCAT(user.firstName, ' ', user.lastName) LIKE :search1
-                            OR wpUser.display_name LIKE :search2
-                            OR user.email LIKE :search3
-                            OR user.note LIKE :search4)
+                        WHERE ({$where1})
                     )";
             }
 
@@ -325,6 +345,12 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     SELECT pst.userId FROM {$this->providerServicesTable} pst
                     WHERE pst.userId = u.id AND pst.serviceId IN (" . implode(', ', $queryServices) . ')
                 )';
+            }
+
+            if (!empty($criteria['providerStatus'])) {
+                $params[':providerStatus'] = $criteria['providerStatus'];
+
+                $where[] = 'u.status = :providerStatus';
             }
 
             if (!empty($criteria['providers'])) {
@@ -389,13 +415,17 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     /**
      *
      * @param array $criteria
+     * @param bool  $filterForLicence
      *
      * @return Collection
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    public function getWithSchedule($criteria)
+    public function getWithSchedule($criteria, $filterForLicence = true)
     {
+        // Apply Lite license restriction
+        $criteria = $filterForLicence ? $this->applyLiteLicenseRestriction($criteria) : $criteria;
+
         $providerRows = [];
 
         $serviceRows = [];
@@ -440,24 +470,33 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             }
         }
 
-        $calendarJoin = '';
+        if (!empty($criteria['locations'])) {
+            $queryLocations = [];
 
-        $calendarFields = '';
+            foreach ((array)$criteria['locations'] as $index => $value) {
+                $param            = ':location' . $index;
+                $queryLocations[] = $param;
+                $params[$param]   = $value;
+            }
 
-        if (!empty($criteria['fetchCalendars'])) {
-            $calendarJoin = "
-                LEFT JOIN {$this->providersGoogleCalendarTable} gd ON gd.userId = u.id
-                LEFT JOIN {$this->providersOutlookCalendarTable} od ON od.userId = u.id
-            ";
+            $where[] = "u.id IN (
+                    SELECT plt.userId FROM {$this->providerLocationTable} plt
+                    WHERE plt.userId = u.id AND plt.locationId IN ( " . implode(', ', $queryLocations) . "))";
+        }
 
-            $calendarFields = '
-                gd.id AS google_calendar_id,
-                gd.token AS google_calendar_token,
-                gd.calendarId AS google_calendar_calendar_id,
-                od.id AS outlook_calendar_id,
-                od.token AS outlook_calendar_token,
-                od.calendarId AS outlook_calendar_calendar_id,
-            ';
+        if (!empty($criteria['services'])) {
+            $queryServices = [];
+
+            foreach ((array)$criteria['services'] as $index => $value) {
+                $param           = ':service' . $index;
+                $queryServices[] = $param;
+                $params[$param]  = $value;
+            }
+
+            $where[] = "u.id IN (
+                    SELECT pst.userId FROM {$this->providerServicesTable} pst
+                    WHERE pst.userId = u.id AND pst.serviceId IN (" . implode(', ', $queryServices) . ')
+                )';
         }
 
         if ($queryProviders) {
@@ -495,6 +534,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     u.email AS user_email,
                     u.zoomUserId AS user_zoom_user_id,
                     u.appleCalendarId AS user_apple_calendar_id,
+                    u.googleCalendarId as user_google_calendar_id,
                     u.employeeAppleCalendar AS user_employee_apple_calendar,
                     u.stripeConnect AS user_stripeConnect,
                     u.countryPhoneIso AS user_countryPhoneIso,
@@ -513,7 +553,6 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     pst.customPricing AS service_customPricing,
                     pst.minCapacity AS service_minCapacity,
                     pst.maxCapacity AS service_maxCapacity,
-                    {$calendarFields}
                     dot.id AS dayOff_id,
                     dot.name AS dayOff_name,
                     dot.startDate AS dayOff_startDate,
@@ -522,7 +561,6 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 FROM {$this->table} u
                 LEFT JOIN {$this->providerServicesTable} pst ON pst.userId = u.id
                 LEFT JOIN {$this->providerLocationTable} plt ON plt.userId = u.id
-                {$calendarJoin}
                 LEFT JOIN {$this->providerDayOffTable} dot ON dot.userId = u.id {$dotJoinQuery}
                 {$where}
                 ORDER BY CONCAT(u.firstName, ' ', u.lastName), u.id"
@@ -646,7 +684,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 LEFT JOIN {$this->providerSpecialDayPeriodTable} sdpt ON sdpt.specialDayId = sdt.id
                 LEFT JOIN {$this->providerSpecialDayPeriodServiceTable} sdpst ON sdpst.periodId = sdpt.id
                 LEFT JOIN {$this->providerSpecialDayPeriodLocationTable} sdplt ON sdplt.periodId = sdpt.id
-                {$where}"
+                {$where}
+                ORDER BY sdt.startDate ASC"
             );
 
             $statement->execute($sdtParams);
@@ -673,7 +712,60 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             )->setSpecialDayList($provider->getSpecialDayList());
         }
 
-        return Licence::getEmployees($providers);
+        if (!empty($criteria['fetchCalendars'])) {
+            $where = 'WHERE u.id IN (' . implode(', ', $providers->keys()) . ')';
+
+            try {
+                $statement = $this->connection->prepare(
+                    "SELECT
+                        u.id AS user_id,
+                        gd.id AS google_calendar_id,
+                        gd.token AS google_calendar_token,
+                        gd.calendarId AS google_calendar_calendar_id,
+                        od.id AS outlook_calendar_id,
+                        od.token AS outlook_calendar_token,
+                        od.calendarId AS outlook_calendar_calendar_id
+                    FROM {$this->table} u
+                    LEFT JOIN {$this->providersGoogleCalendarTable} gd ON gd.userId = u.id
+                    LEFT JOIN {$this->providersOutlookCalendarTable} od ON od.userId = u.id
+                    {$where}"
+                );
+
+                $statement->execute();
+
+                while ($row = $statement->fetch()) {
+                    $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
+                }
+            } catch (\Exception $e) {
+                throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            }
+
+            /** @var Collection $providersWithCalendars */
+            $providersWithCalendars = call_user_func(
+                [static::FACTORY, 'createCollection'],
+                $providerRows,
+                $serviceRows,
+                $providerServiceRows
+            );
+
+            /** @var Provider $provider */
+            foreach ($providersWithCalendars->getItems() as $provider) {
+                /** @var Provider $targetProvider */
+                $targetProvider = $providers->getItem(
+                    $provider->getId()->getValue()
+                );
+
+                if ($provider->getGoogleCalendar()) {
+                    $targetProvider->setGoogleCalendar($provider->getGoogleCalendar());
+                }
+
+                if ($provider->getOutlookCalendar()) {
+                    $targetProvider->setOutlookCalendar($provider->getOutlookCalendar());
+                }
+            }
+        }
+
+        return $providers;
     }
 
     /**
@@ -684,6 +776,9 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
      */
     public function getCount($criteria)
     {
+        // Apply Lite license restriction
+        $criteria = $this->applyLiteLicenseRestriction($criteria);
+
         $params = [
             ':type'          => AbstractUser::USER_ROLE_PROVIDER,
             ':visibleStatus' => Status::VISIBLE,
@@ -696,17 +791,33 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             $where = [];
 
             if (!empty($criteria['search'])) {
-                $params[':search1'] = $params[':search2'] = $params[':search3'] = $params[':search4'] =
-                    "%{$criteria['search']}%";
+                $terms = preg_split('/\s+/', trim($criteria['search']));
+                $termIndex = 0;
+                $where1 = [];
 
+                foreach ($terms as $term) {
+                    $param = ":search{$termIndex}";
+                    $params[$param] = "%{$term}%";
+
+                    $where1[] = "(
+                        u.firstName LIKE {$param}
+                        OR u.lastName LIKE {$param}
+                        OR u.email LIKE {$param}
+                        OR u.phone LIKE {$param}
+                        OR u.note LIKE {$param}
+                        OR wpUser.display_name LIKE {$param}
+                        OR u.id LIKE {$param}
+                    )";
+
+                    $termIndex++;
+                }
+
+                $where1 = implode(' AND ', $where1);
                 $where[] = "u.id IN(
                     SELECT DISTINCT(user.id)
                         FROM {$this->table} user
                         LEFT JOIN {$wpUserTable} wpUser ON user.externalId = wpUser.ID
-                        WHERE (CONCAT(user.firstName, ' ', user.lastName) LIKE :search1
-                            OR wpUser.display_name LIKE :search2
-                            OR user.email LIKE :search3
-                            OR user.note LIKE :search4)
+                        WHERE ({$where1})
                     )";
             }
 
@@ -737,6 +848,18 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 $where[] = "u.id IN (
                     SELECT plt.userId FROM {$this->providerLocationTable} plt
                     WHERE plt.userId = u.id AND plt.locationId IN ( " . implode(', ', $queryLocations) . "))";
+            }
+
+            if (!empty($criteria['providers'])) {
+                $queryProviders = [];
+
+                foreach ((array)$criteria['providers'] as $index => $value) {
+                    $param            = ':provider' . $index;
+                    $queryProviders[] = $param;
+                    $params[$param]   = $value;
+                }
+
+                $where[] = 'u.id IN (' . implode(', ', $queryProviders) . ')';
             }
 
             $where = $where ? ' AND ' . implode(' AND ', $where) : '';
@@ -1051,7 +1174,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         $currentDateTime = explode(' ', DateTimeService::getNowDateTime())[0];
 
         $params = [
-            ':type' => AbstractUser::USER_ROLE_PROVIDER
+            ':type'        => AbstractUser::USER_ROLE_PROVIDER,
+            ':currentDate' => $currentDateTime,
         ];
 
         try {
@@ -1066,7 +1190,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
               FROM {$this->table} u
               LEFT JOIN {$this->providerDayOffTable} dot ON dot.userId = u.id
               WHERE u.type = :type AND
-              $currentDateTime BETWEEN dot.startDate AND dot.endDate"
+              :currentDate BETWEEN dot.startDate AND dot.endDate"
             );
 
             $statement->execute($params);
@@ -1100,20 +1224,17 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         $appointmentTable = AppointmentsTable::getTableName();
 
         $params = [];
-
-        $where = [];
+        $where  = [];
 
         if ($criteria['dates']) {
             $where[] = "(a.bookingStart BETWEEN :bookingFrom AND :bookingTo)";
 
             $params[':bookingFrom'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]);
-
-            $params[':bookingTo'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][1]);
+            $params[':bookingTo']   = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][1]);
         }
 
         if (isset($criteria['status'])) {
-            $where[] = 'u.status = :status';
-
+            $where[]           = 'u.status = :status';
             $params[':status'] = $criteria['status'];
         }
 
@@ -1159,20 +1280,16 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     public function getAllNumberOfViews($criteria)
     {
         $params = [];
-
-        $where = [];
+        $where  = [];
 
         if ($criteria['dates']) {
-            $where[] = "(pv.date BETWEEN :bookingFrom AND :bookingTo)";
-
-            $params[':bookingFrom'] = explode(' ', $criteria['dates'][0])[0];
-
-            $params[':bookingTo'] = explode(' ', $criteria['dates'][1])[0];
+            $where[] = "(DATE_FORMAT(pv.date, '%Y-%m-%d') BETWEEN :bookingFrom AND :bookingTo)";
+            $params[':bookingFrom'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]);
+            $params[':bookingTo']   = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][1]);
         }
 
         if (isset($criteria['status'])) {
-            $where[] = 'u.status = :status';
-
+            $where[]           = 'u.status = :status';
             $params[':status'] = $criteria['status'];
         }
 
@@ -1209,7 +1326,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     /**
      * @param $providerId
      *
-     * @return string
+     * @return bool
      * @throws QueryExecutionException
      */
     public function addViewStats($providerId)
@@ -1264,13 +1381,53 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     }
 
     /**
+     * @param array $serviceIds
      *
      * @return array
      * @throws QueryExecutionException
      */
-    public function getProvidersServices()
+    public function getProvidersServices($serviceIds = [])
     {
+        // Apply Lite license restriction
+        $criteria = $this->applyLiteLicenseRestriction([]);
+
         try {
+            $type = AbstractUser::USER_ROLE_PROVIDER;
+
+            $params = [
+                ':type' => $type
+            ];
+
+            $where = 'WHERE u.type = :type';
+
+            // Apply provider restriction for Lite license
+            if (!empty($criteria['providers'])) {
+                $queryProviders = [];
+
+                foreach ((array)$criteria['providers'] as $index => $value) {
+                    $param = ':provider' . $index;
+                    $queryProviders[] = $param;
+                    $params[$param] = $value;
+                }
+
+                $where .= ' AND u.id IN (' . implode(', ', $queryProviders) . ')';
+            }
+
+            if (!empty($serviceIds)) {
+                $query = [];
+
+                foreach ((array)$serviceIds as $index => $value) {
+                    $param = ':serviceId' . $index;
+
+                    $query[] = $param;
+
+                    $params[$param] = $value;
+                }
+
+                $where .= ' AND st.serviceId IN (' . implode(', ', $query) . ')';
+            }
+
+
             $statement = $this->connection->prepare(
                 "SELECT
                     u.id AS user_id,
@@ -1281,15 +1438,11 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     st.maxCapacity AS service_maxCapacity
                 FROM {$this->table} u
                 INNER JOIN {$this->providerServicesTable} st ON st.userId = u.id
-                WHERE u.type = :type
+                {$where}
                 ORDER BY CONCAT(u.firstName, ' ', u.lastName)"
             );
 
-            $type = AbstractUser::USER_ROLE_PROVIDER;
-
-            $statement->bindParam(':type', $type);
-
-            $statement->execute();
+            $statement->execute($params);
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
@@ -1373,6 +1526,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 'timeZone'         => isset($row['user_timeZone']) ? $row['user_timeZone'] : null,
                 'badgeId'          => isset($row['badge_id']) ? $row['badge_id'] : null,
                 'appleCalendarId'  => isset($row['user_apple_calendar_id']) ? $row['user_apple_calendar_id'] : null,
+                'googleCalendarId' => isset($row['user_google_calendar_id']) ? $row['user_google_calendar_id'] : null,
                 'employeeAppleCalendar' => isset($row['user_employee_apple_calendar']) ? $row['user_employee_apple_calendar'] : null,
                 'show'             => isset($row['user_show']) ? $row['user_show'] : 0,
             ];
@@ -1655,5 +1809,106 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         } catch (\Exception $e) {
             throw new QueryExecutionException('Unable to delete data from ' . __CLASS__, $e->getCode(), $e);
         }
+    }
+
+    /**
+     * Get max service capacity for a specific provider
+     *
+     * @param int $providerId
+     * @param int $serviceId
+     *
+     * @return int|null
+     * @throws QueryExecutionException
+     */
+    public function getMaxCapacityByServiceId($providerId, $serviceId)
+    {
+        $params = [
+            ':userId' => $providerId,
+            ':serviceId' => $serviceId
+        ];
+
+        try {
+            $statement = $this->connection->prepare(
+                "SELECT maxCapacity 
+                FROM {$this->providerServicesTable} 
+                WHERE userId = :userId AND serviceId = :serviceId"
+            );
+
+            $statement->execute($params);
+
+            $row = $statement->fetch();
+
+            return $row ? (int)$row['maxCapacity'] : 0;
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to get max capacity from ' . __CLASS__, $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Batch update to clear googleCalendarId for all providers with a single SQL query
+     *
+     * @return bool
+     * @throws QueryExecutionException
+     */
+    public function clearGoogleCalendarIds()
+    {
+        try {
+            $statement = $this->connection->prepare(
+                "UPDATE {$this->table} 
+                 SET googleCalendarId = NULL 
+                 WHERE googleCalendarId IS NOT NULL 
+                 AND type = 'provider'"
+            );
+
+            $result = $statement->execute();
+
+            if (!$result) {
+                throw new QueryExecutionException('Unable to batch clear googleCalendarId in ' . __CLASS__);
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to batch clear googleCalendarId in ' . __CLASS__, $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Apply license restriction for Lite license - forces only the first provider (smallest ID)
+     * to be returned regardless of filters
+     *
+     * @param array $criteria
+     * @return array Modified criteria array
+     * @throws QueryExecutionException
+     */
+    private function applyLiteLicenseRestriction($criteria)
+    {
+        if (!Licence::hasLicenseAccess(LicenceConstants::STARTER)) {
+            try {
+                $params = [
+                    ':type' => AbstractUser::USER_ROLE_PROVIDER
+                ];
+
+                $statement = $this->connection->prepare(
+                    "SELECT u.id
+                    FROM {$this->table} u
+                    WHERE u.type = :type 
+                    AND u.status NOT LIKE 'disabled'
+                    ORDER BY u.id ASC
+                    LIMIT 1"
+                );
+
+                $statement->execute($params);
+                $result = $statement->fetch();
+
+                if ($result) {
+                    // Force only this specific provider to be returned
+                    $criteria['providers'] = [(int)$result['id']];
+                }
+            } catch (\Exception $e) {
+                throw new QueryExecutionException('Unable to apply Lite license restriction in ' . __CLASS__, $e->getCode(), $e);
+            }
+        }
+
+        return $criteria;
     }
 }

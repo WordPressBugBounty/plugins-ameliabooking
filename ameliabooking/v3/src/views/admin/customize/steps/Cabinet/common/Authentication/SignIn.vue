@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="am-asi"
-    :style="cssVars"
-  >
+  <div class="am-asi" :style="cssVars">
     <div class="am-asi__top">
       <AmAlert
         v-if="profileDeleted"
@@ -24,16 +21,30 @@
     </div>
 
     <!-- Social Buttons -->
-    <div v-if="!licence.isLite && !licence.isStarter">
+    <div v-if="features.googleSocialLogin || features.facebookSocialLogin">
       <div class="am-asi__social-wrapper">
-        <img :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/google.svg'" height="36">
-        <img :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/facebook.svg'" height="36">
+        <img
+          v-if="features.googleSocialLogin"
+          :src="
+            baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/google.svg'
+          "
+          height="36"
+        />
+        <img
+          v-if="features.facebookSocialLogin"
+          :src="
+            baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/facebook.svg'
+          "
+          height="36"
+        />
       </div>
       <!-- /Social Buttons -->
 
       <!-- Social Divider -->
       <div class="am-asi__social-divider">
-        <span class="par-sm">{{ labelsDisplay('or_enter_details_below') }}</span>
+        <span class="par-sm">{{
+          labelsDisplay('or_enter_details_below')
+        }}</span>
       </div>
     </div>
     <!-- /Social Divider -->
@@ -78,13 +89,7 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  defineComponent,
-  markRaw
-} from 'vue'
+import { ref, computed, inject, defineComponent, markRaw } from 'vue'
 
 // * Composables
 import { useResponsiveClass } from '../../../../../../../assets/js/common/responsive'
@@ -94,16 +99,14 @@ import { useColorTransparency } from '../../../../../../../assets/js/common/colo
 import { formFieldsTemplates } from '../../../../../../../assets/js/common/formFieldsTemplates'
 import AmButton from '../../../../../../_components/button/AmButton.vue'
 import AmAlert from '../../../../../../_components/alert/AmAlert.vue'
-import IconComponent from "../../../../../../_components/icons/IconComponent.vue";
-import {settings} from "../../../../../../../plugins/settings";
-import AmSocialButton from "../../../../../../common/FormFields/AmSocialButton.vue";
+import IconComponent from '../../../../../../_components/icons/IconComponent.vue'
 
 // * Customize
-let amCustomize = inject('customize')
+const amCustomize = inject('customize')
 
 // * Labels
+const amLabels = inject('labels')
 let langKey = inject('langKey')
-let amLabels = inject('labels')
 
 let pageRenderKey = inject('pageRenderKey')
 let stepName = inject('stepName')
@@ -111,15 +114,25 @@ let stepName = inject('stepName')
 // * Plugin Licence
 let licence = inject('licence')
 
+// * Features
+let features = inject('features')
+
 let baseUrls = inject('baseUrls')
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepName.value].translations
-    && amCustomize.value[pageRenderKey.value][stepName.value].translations[label]
-    && amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepName.value]
+      .translations &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[
+        label
+      ] &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[
+        label
+      ][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[
+          label
+        ][langKey.value]
       : amLabels[label]
   })
 
@@ -128,13 +141,13 @@ function labelsDisplay (label) {
 
 // * Icon components
 let emailIcon = defineComponent({
-  components: {IconComponent},
-  template: `<IconComponent icon="email"></IconComponent>`
+  components: { IconComponent },
+  template: `<IconComponent icon="email"></IconComponent>`,
 })
 
 let passwordIcon = defineComponent({
-  components: {IconComponent},
-  template: `<IconComponent icon="password"></IconComponent>`
+  components: { IconComponent },
+  template: `<IconComponent icon="password"></IconComponent>`,
 })
 
 /********
@@ -157,14 +170,14 @@ let infoFormRules = computed(() => {
         required: true,
         message: labelsDisplay('enter_email_or_username_warning'),
         trigger: 'submit',
-      }
+      },
     ],
     password: [
       {
         required: true,
         message: labelsDisplay('enter_password_warning'),
         trigger: 'submit',
-      }
+      },
     ],
   }
 })
@@ -178,8 +191,8 @@ let signInFormConstruction = ref({
       label: computed(() => labelsDisplay('email_or_username')),
       prefixIcon: markRaw(emailIcon),
       placeholder: '',
-      class: 'am-asi__item'
-    }
+      class: 'am-asi__item',
+    },
   },
   password: {
     template: formFieldsTemplates.text,
@@ -190,8 +203,8 @@ let signInFormConstruction = ref({
       label: computed(() => labelsDisplay('password')),
       prefixIcon: markRaw(passwordIcon),
       placeholder: '',
-      class: 'am-asi__item'
-    }
+      class: 'am-asi__item',
+    },
   },
 })
 
@@ -200,7 +213,7 @@ let profileDeleted = ref(false)
 function submitForm() {
   authFormRef.value.validate((valid) => {
     if (!valid) profileDeleted.value = true
-    return !!valid;
+    return !!valid
   })
 }
 
@@ -228,22 +241,46 @@ let cssVars = computed(() => {
     '--am-c-main-bgr': amColors.value.colorMainBgr,
     '--am-c-main-heading-text': amColors.value.colorMainHeadingText,
     '--am-c-main-text': amColors.value.colorMainText,
-    '--am-c-main-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
-    '--am-c-main-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
-    '--am-c-main-text-op40': useColorTransparency(amColors.value.colorMainText, 0.4),
-    '--am-c-main-text-op25': useColorTransparency(amColors.value.colorMainText, 0.25),
+    '--am-c-main-text-op70': useColorTransparency(
+      amColors.value.colorMainText,
+      0.7
+    ),
+    '--am-c-main-text-op60': useColorTransparency(
+      amColors.value.colorMainText,
+      0.6
+    ),
+    '--am-c-main-text-op40': useColorTransparency(
+      amColors.value.colorMainText,
+      0.4
+    ),
+    '--am-c-main-text-op25': useColorTransparency(
+      amColors.value.colorMainText,
+      0.25
+    ),
     '--am-c-inp-bgr': amColors.value.colorInpBgr,
     '--am-c-inp-border': amColors.value.colorInpBorder,
     '--am-c-inp-text': amColors.value.colorInpText,
     '--am-c-inp-placeholder': amColors.value.colorInpPlaceHolder,
     '--am-c-btn-prim': amColors.value.colorBtnPrim,
     '--am-c-btn-prim-text': amColors.value.colorBtnPrimText,
-    '--am-c-skeleton-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
-    '--am-c-skeleton-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-skeleton-op20': useColorTransparency(
+      amColors.value.colorMainText,
+      0.2
+    ),
+    '--am-c-skeleton-op60': useColorTransparency(
+      amColors.value.colorMainText,
+      0.6
+    ),
     '--am-font-family': amFonts.value.fontFamily,
 
-    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
-    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
+    '--am-c-scroll-op30': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.3
+    ),
+    '--am-c-scroll-op10': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.1
+    ),
   }
 })
 </script>
@@ -251,7 +288,7 @@ let cssVars = computed(() => {
 <script>
 export default {
   name: 'AuthSignIn',
-  key: 'signIn'
+  key: 'signIn',
 }
 </script>
 
@@ -263,7 +300,8 @@ export default {
     max-width: 400px;
     width: 100%;
     background-color: var(--am-c-main-bgr);
-    box-shadow: 0 0 9px -4px var(--am-c-main-text-op40), 0px 17px 35px -12px var(--am-c-main-text-op25);
+    box-shadow: 0 0 9px -4px var(--am-c-main-text-op40),
+      0px 17px 35px -12px var(--am-c-main-text-op25);
     border-radius: 12px;
     padding: 32px 24px 24px;
     margin: 0 auto;
@@ -317,7 +355,7 @@ export default {
       gap: 24px;
 
       img {
-        border: 1px solid #D1D5D7;
+        border: 1px solid #d1d5d7;
         padding: 4px;
         border-radius: 4px;
       }
@@ -331,7 +369,7 @@ export default {
       // Before & After
       &:before,
       &:after {
-        background: var(--shade-250, #D1D5D7);
+        background: var(--shade-250, #d1d5d7);
         content: '';
         height: 1px;
         width: 100%;
@@ -343,7 +381,7 @@ export default {
         font-style: normal;
         font-weight: 400;
         line-height: 24px;
-        color: var(--shade-500, #808A90);
+        color: var(--shade-500, #808a90);
         margin-left: 8px;
         margin-right: 8px;
       }

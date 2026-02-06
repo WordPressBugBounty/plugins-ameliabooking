@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -18,14 +19,13 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
  */
 class CustomFieldEventRepository extends AbstractRepository
 {
-
-    const FACTORY = CustomFieldOptionFactory::class;
+    public const FACTORY = CustomFieldOptionFactory::class;
 
     /**
      * @param int $customFieldId
      * @param int $eventId
      *
-     * @return bool
+     * @return int
      * @throws QueryExecutionException
      */
     public function add($customFieldId, $eventId)

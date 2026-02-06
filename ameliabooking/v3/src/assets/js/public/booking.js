@@ -106,7 +106,8 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
         customFields[availableCustomFields[key].id] = {
           label: availableCustomFields[key].label,
           type: availableCustomFields[key].type,
-          value: availableCustomFields[key].value
+          value: availableCustomFields[key].value,
+          components: availableCustomFields[key].components
         }
       }
 
@@ -237,6 +238,10 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
 
       jsonData.package = []
 
+      if (store.getters['appointmentWaitingListOptions/getIsWaitingListSlot']) {
+        jsonData.bookings[0].status = 'waiting'
+      }
+
       jsonData = Object.assign(jsonData, appointments[0])
 
       break
@@ -266,7 +271,9 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
 
       jsonData.bookings[0].persons = store.getters['persons/getPersons']
 
-      jsonData.bookings[0].utcOffset = settings.general.showClientTimeZone ? useUtcValueOffset(null) : null
+      jsonData.bookings[0].utcOffset = settings.general.showClientTimeZone ?
+          useUtcValueOffset(store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId'])['periods'][0]['periodStart']) :
+          null
 
       if (store.getters['eventWaitingListOptions/getAvailability']) {
         jsonData.bookings[0].status = 'waiting'
@@ -498,15 +505,6 @@ function useBookingError (response, store) {
   }
 
   return message
-}
-
-function saveStats (requestData) {
-  httpClient.post(
-    '/stats',
-    requestData
-  ).catch(e => {
-    console.log(e.message)
-  })
 }
 
 function useNotify (store, response, success, error) {
@@ -1001,7 +999,6 @@ export {
   getErrorMessage,
   useBookingError,
   useNotify,
-  saveStats,
   useAppointmentBookingData,
   usePackageBookingData
 }

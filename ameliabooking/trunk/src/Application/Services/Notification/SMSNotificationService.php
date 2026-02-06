@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -21,7 +22,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Notification\NotificationLogRepository;
 use AmeliaBooking\Infrastructure\Repository\Notification\NotificationSMSHistoryRepository;
 use Exception;
-use Interop\Container\Exception\ContainerException;
+use Slim\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
 
 /**
@@ -31,20 +32,20 @@ use Slim\Exception\ContainerValueNotFoundException;
  */
 class SMSNotificationService extends AbstractNotificationService
 {
-
     /** @var bool */
     private $sentSmsLowEmail = false;
 
     /** @noinspection MoreThanThreeArgumentsInspection */
     /**
-     * @param array        $appointmentArray
+     * @param array $appointmentArray
      * @param Notification $notification
-     * @param bool         $logNotification
-     * @param int|null     $bookingKey
-     *
+     * @param bool $logNotification
+     * @param int|null $bookingKey
+     * @param null $allBookings
+     * @param array $invoice
+     * @throws InvalidArgumentException
      * @throws NotFoundException
      * @throws QueryExecutionException
-     * @throws ContainerException
      * @throws Exception
      */
     public function sendNotification(
@@ -52,7 +53,8 @@ class SMSNotificationService extends AbstractNotificationService
         $notification,
         $logNotification,
         $bookingKey = null,
-        $allBookings = null
+        $allBookings = null,
+        $invoice = []
     ) {
         /** @var \AmeliaBooking\Application\Services\Settings\SettingsService $settingsAS */
         $settingsAS = $this->container->get('application.settings.service');
@@ -66,7 +68,9 @@ class SMSNotificationService extends AbstractNotificationService
             $bookingKey,
             'sms',
             null,
-            $allBookings
+            $allBookings,
+            false,
+            $notification->getName()->getValue()
         );
 
         $isCustomerPackage = isset($appointmentArray['isForCustomer']) && $appointmentArray['isForCustomer'];
@@ -109,7 +113,7 @@ class SMSNotificationService extends AbstractNotificationService
                         $notificationContent,
                         array_merge(
                             $data,
-                            ['cart_appointments_details' => $data['providersAppointments'][$user['id']]]
+                            ['cart_appointments_details' => $data['providersAppointments'][$user['id']]]['cart_appointments_details']
                         )
                     );
                 }
@@ -165,7 +169,12 @@ class SMSNotificationService extends AbstractNotificationService
         if ($smsLowEmail && $smsLowEmail['enabled']) {
             try {
                 $userResponse = $smsApiService->getUserInfo();
-                if (!empty($userResponse) && $userResponse->status === 'OK' && !empty($userResponse->user) && $userResponse->user->balance <= $smsLowEmail['minimum']) {
+                if (
+                    !empty($userResponse) &&
+                    $userResponse->status === 'OK' &&
+                    !empty($userResponse->user) &&
+                    $userResponse->user->balance <= $smsLowEmail['minimum']
+                ) {
                     /** @var EmailNotificationService $notificationService */
                     $notificationService = $this->container->get('application.emailNotification.service');
                     $notificationService->sendSmsBalanceLowEmail($smsLowEmail['email']);
@@ -201,7 +210,7 @@ class SMSNotificationService extends AbstractNotificationService
             try {
                 $data = json_decode($undeliveredNotification->getData()->getValue(), true);
 
-                if ($history = $notificationsSMSHistoryRepo->getById($data['historyId'])) {
+                if ($history = $notificationsSMSHistoryRepo->getItemById($data['historyId'])) {
                     $apiResponse = $smsApiService->send(
                         $history['phone'],
                         $data['body'],
@@ -237,7 +246,8 @@ class SMSNotificationService extends AbstractNotificationService
         $notification = $notifications->getItem($notifications->keys()[0]);
 
         // Check if notification is enabled and it is time to send notification
-        if ($notification->getStatus()->getValue() === NotificationStatus::ENABLED &&
+        if (
+            $notification->getStatus()->getValue() === NotificationStatus::ENABLED &&
             $notification->getTime() &&
             DateTimeService::getNowDateTimeObject() >=
             DateTimeService::getCustomDateTimeObject($notification->getTime()->getValue())

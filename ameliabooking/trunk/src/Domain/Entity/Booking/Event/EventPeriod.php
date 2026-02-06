@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -49,6 +50,12 @@ class EventPeriod
 
     /** @var Label */
     private $outlookCalendarEventId;
+
+    /** @var string */
+    private $microsoftTeamsUrl;
+
+    /** @var Label */
+    private $appleCalendarEventId;
 
     /**
      * @return Id
@@ -211,21 +218,55 @@ class EventPeriod
     }
 
     /**
+     * @return string
+     */
+    public function getMicrosoftTeamsUrl()
+    {
+        return $this->microsoftTeamsUrl;
+    }
+
+    /**
+     * @param string $microsoftTeamsUrl
+     */
+    public function setMicrosoftTeamsUrl($microsoftTeamsUrl)
+    {
+        $this->microsoftTeamsUrl = $microsoftTeamsUrl;
+    }
+
+    /**
+     * @return Label
+     */
+    public function getAppleCalendarEventId()
+    {
+        return $this->appleCalendarEventId;
+    }
+
+    /**
+     * @param Label $appleCalendarEventId
+     */
+    public function setAppleCalendarEventId($appleCalendarEventId)
+    {
+        $this->appleCalendarEventId = $appleCalendarEventId;
+    }
+
+    /**
      * @return array
      */
     public function toArray()
     {
         return [
-            'id'               => $this->getId() ? $this->getId()->getValue() : null,
-            'eventId'          => $this->getEventId() ? $this->getEventId()->getValue() : null,
-            'periodStart'      => $this->getPeriodStart()->getValue()->format('Y-m-d H:i:s'),
-            'periodEnd'        => $this->getPeriodEnd()->getValue()->format('Y-m-d H:i:s'),
-            'zoomMeeting'      => $this->getZoomMeeting() ? $this->getZoomMeeting()->toArray() : null,
-            'lessonSpace'      => $this->getLessonSpace() ?: null,
-            'bookings'         => $this->getBookings() ? $this->getBookings()->toArray() : [],
-            'googleCalendarEventId'  => $this->getGoogleCalendarEventId() ? $this->getGoogleCalendarEventId()->getValue(): null,
+            'id'                     => $this->getId() ? $this->getId()->getValue() : null,
+            'eventId'                => $this->getEventId() ? $this->getEventId()->getValue() : null,
+            'periodStart'            => $this->getPeriodStart()->getValue()->format('Y-m-d H:i:s'),
+            'periodEnd'              => $this->getPeriodEnd()->getValue()->format('Y-m-d H:i:s'),
+            'zoomMeeting'            => $this->getZoomMeeting() ? $this->getZoomMeeting()->toArray() : null,
+            'lessonSpace'            => $this->getLessonSpace() ?: null,
+            'bookings'               => $this->getBookings() ? $this->getBookings()->toArray() : [],
+            'googleCalendarEventId'  => $this->getGoogleCalendarEventId() ? $this->getGoogleCalendarEventId()->getValue() : null,
             'googleMeetUrl'          => $this->getGoogleMeetUrl(),
-            'outlookCalendarEventId'  => $this->getOutlookCalendarEventId() ? $this->getOutlookCalendarEventId()->getValue() : null
+            'outlookCalendarEventId' => $this->getOutlookCalendarEventId() ? $this->getOutlookCalendarEventId()->getValue() : null,
+            'microsoftTeamsUrl'      => $this->getMicrosoftTeamsUrl(),
+            'appleCalendarEventId'   => $this->getAppleCalendarEventId() ? $this->getAppleCalendarEventId()->getValue() : null,
         ];
     }
 }

@@ -127,7 +127,7 @@ store.dispatch('entities/getEntities', {
     'taxes',
   ],
   licence: licence,
-  loadEntities: shortcodeData.value.hasApiCall || shortcodeData.value.in_dialog,
+  loadEntities: shortcodeData.value.hasApiCall || shortcodeData.value.trigger,
   showHidden: false,
   isPanel: false,
 })

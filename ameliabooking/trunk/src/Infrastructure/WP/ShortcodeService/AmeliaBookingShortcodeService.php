@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -12,6 +13,7 @@ use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
+use AmeliaBooking\Infrastructure\Repository\CustomField\CustomFieldRepository;
 use AmeliaBooking\Infrastructure\WP\SettingsService\SettingsStorage;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
 use Interop\Container\Exception\ContainerException;
@@ -50,6 +52,21 @@ class AmeliaBookingShortcodeService
             wp_enqueue_script('amelia_stripe_script', 'https://js.stripe.com/v3/');
         }
 
+        if ($settingsService->getSetting('payments', 'square')['enabled'] === true) {
+            if ($settingsService->getSetting('payments', 'square')['testMode'] === true) {
+                wp_enqueue_script('amelia_square_js', 'https://sandbox.web.squarecdn.com/v1/square.js');
+            } else {
+                wp_enqueue_script('amelia_square_js', 'https://web.squarecdn.com/v1/square.js');
+            }
+            wp_enqueue_style(
+                'amelia_google_button_style',
+                'https://developers.google.com/reference/sdks/web/static/styles/code-preview.css',
+                [],
+                null,
+                'all'
+            );
+        }
+
         if ($settingsService->getSetting('payments', 'razorpay')['enabled'] === true) {
             wp_enqueue_script('amelia_razorpay_script', 'https://checkout.razorpay.com/v1/checkout.js');
         }
@@ -57,10 +74,19 @@ class AmeliaBookingShortcodeService
         $gmapApiKey = $settingsService->getSetting('general', 'gMapApiKey');
 
         if ($gmapApiKey) {
-            wp_enqueue_script(
-                'amelia_google_maps_api',
-                "https://maps.googleapis.com/maps/api/js?key={$gmapApiKey}&libraries=places&loading=async"
-            );
+            $container = $container ?: require AMELIA_PATH . '/src/Infrastructure/ContainerConfig/container.php';
+
+            /** @var CustomFieldRepository $customFieldRepository */
+            $customFieldRepository = $container->get('domain.customField.repository');
+
+            $addressCustomFields = $customFieldRepository->getByFieldValue('type', 'address');
+
+            if (count($addressCustomFields->getItems())) {
+                wp_enqueue_script(
+                    'amelia_google_maps_api',
+                    "https://maps.googleapis.com/maps/api/js?key={$gmapApiKey}&libraries=places&loading=async"
+                );
+            }
         }
 
         $scriptId = AMELIA_DEV ? 'amelia_booking_scripts_dev_vite' : 'amelia_booking_script_index';
@@ -84,7 +110,7 @@ class AmeliaBookingShortcodeService
         } else {
             wp_enqueue_script(
                 $scriptId,
-                AMELIA_URL . 'v3/public/assets/public.17ee1399.js',
+                AMELIA_URL . 'v3/public/assets/public.c4d99abe.js',
                 [],
                 AMELIA_VERSION,
                 true
@@ -126,7 +152,7 @@ class AmeliaBookingShortcodeService
             $ameliaUrl = substr($ameliaUrl, strpos(substr($ameliaUrl, 7), '/') + 7);
 
             $ameliaActionUrl = substr($ameliaActionUrl, strpos(substr($ameliaActionUrl, 7), '/') + 7);
-        } else if (strpos($ameliaUrl, 'https://') === 0) {
+        } elseif (strpos($ameliaUrl, 'https://') === 0) {
             $ameliaUrl = substr($ameliaUrl, strpos(substr($ameliaUrl, 8), '/') + 8);
 
             $ameliaActionUrl = substr($ameliaActionUrl, strpos(substr($ameliaActionUrl, 8), '/') + 8);
@@ -187,6 +213,9 @@ class AmeliaBookingShortcodeService
         switch ($handle) {
             case ('amelia_booking_scripts_dev_vite'):
             case ('amelia_booking_scripts_dev_main'):
+            case ('amelia_dev_vite_client'):
+            case ('amelia_dev_main_script'):
+            case ('amelia_prod_main_script'):
                 return "<script type='module' src='{$src}'></script>";
 
             case ('amelia_booking_script_index'):
@@ -200,9 +229,9 @@ class AmeliaBookingShortcodeService
                     if ($position !== false) {
                         $src = substr($src, $position);
                     }
-                } else if (strpos($src, 'http://') === 0) {
+                } elseif (strpos($src, 'http://') === 0) {
                     $src = substr($src, strpos(substr($src, 7), '/') + 7);
-                } else if (strpos($src, 'https://') === 0) {
+                } elseif (strpos($src, 'https://') === 0) {
                     $src = substr($src, strpos(substr($src, 8), '/') + 8);
                 }
 

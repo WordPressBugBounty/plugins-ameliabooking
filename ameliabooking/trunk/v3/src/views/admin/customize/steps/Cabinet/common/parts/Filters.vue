@@ -4,15 +4,15 @@
     :style="cssVars"
   >
     <div v-if="cWidth <= 480 && customizeOptions.timeZone.visibility && stepName !== 'packagesList'" class="am-capf__zone">
-      <TimeZoneSelect size="small"></TimeZoneSelect>
+      <TimeZoneSelect v-if="amSettings.featuresIntegrations.timezones.enabled" size="small"></TimeZoneSelect>
     </div>
     <div class="am-capf__menu">
       <TimeZoneSelect
-        v-if="cWidth <= 480 && customizeOptions.timeZone.visibility && stepName === 'packagesList'"
+        v-if="amSettings.featuresIntegrations.timezones.enabled && cWidth <= 480 && customizeOptions.timeZone.visibility && stepName === 'packagesList'"
         size="small"
       ></TimeZoneSelect>
       <AmDatePicker
-        v-if="Object.values(props.paramList).find(p => p.name === 'dates')"
+        v-if="Object.values(props.paramList).find((p) => p.name === 'dates')"
         v-model="filterParams.dates"
         type="daterange"
         :editable="false"
@@ -35,7 +35,7 @@
           @click="filtersMenuVisibility = !filtersMenuVisibility"
         >
           <span class="am-icon-filter"></span>
-          <span v-if="cWidth > 700">{{labelsDisplay('filters')}}</span>
+          <span v-if="cWidth > 700">{{ labelsDisplay('filters') }}</span>
         </AmButton>
       </div>
     </div>
@@ -43,13 +43,24 @@
     <Transition name="am-slide-fade">
       <div v-if="filtersMenuVisibility" class="am-capf__list">
         <template
-          v-for="(param, index) in Object.values(props.paramList).filter(p => p.name !== 'dates')"
+          v-for="(param, index) in Object.values(props.paramList).filter(
+            (p) => p.name !== 'dates'
+          )"
           :key="index"
         >
           <span
-            v-if="entities[param.name].length > 0 && amCustomize[pageRenderKey][stepName].options[`${param.name}Filter`].visibility"
+            v-if="
+              entities[param.name].length > 0 &&
+              amCustomize[pageRenderKey][stepName].options[
+                `${param.name}Filter`
+              ].visibility
+            "
             class="am-capf__list-item"
-            :class="[{'am-selected': filterParams[param.name].length > 0}, `am-capf__list-item-${itemsNumber}`, props.responsiveClass]"
+            :class="[
+              { 'am-selected': filterParams[param.name].length > 0 },
+              `am-capf__list-item-${itemsNumber}`,
+              props.responsiveClass,
+            ]"
           >
             <AmSelect
               :id="`am-select-${param.name}`"
@@ -60,22 +71,20 @@
               :collapse-tags="true"
               size="small"
               :popper-class="'am-filter-select-popper'"
+              clearable
               @change="changeFilters"
             >
               <AmOption
                 v-for="entity in entities[param.name]"
                 :key="entity.id"
                 :value="entity.id"
-                :label="entity.firstName ? (entity.firstName + ' ' + entity.lastName) : entity.name"
+                :label="
+                  entity.firstName
+                    ? entity.firstName + ' ' + entity.lastName
+                    : entity.name
+                "
               />
             </AmSelect>
-            <span
-              v-if="filterParams[param.name].length > 0"
-              class='am-capf__clear'
-              @click="clearFilter(param.name)"
-            >
-              <span class="am-icon-close"></span>
-            </span>
           </span>
         </template>
       </div>
@@ -85,45 +94,42 @@
 
 <script setup>
 // * _components
-import AmDatePicker from "../../../../../../_components/datePicker/AmDatePicker.vue";
-import AmSelect from "../../../../../../_components/select/AmSelect.vue";
-import AmOption from "../../../../../../_components/select/AmOption.vue";
-import AmButton from "../../../../../../_components/button/AmButton.vue";
-import IconComponent from "../../../../../../_components/icons/IconComponent.vue";
-import TimeZoneSelect from "./TimeZoneSelect.vue";
+import AmDatePicker from '../../../../../../_components/datePicker/AmDatePicker.vue'
+import AmSelect from '../../../../../../_components/select/AmSelect.vue'
+import AmOption from '../../../../../../_components/select/AmOption.vue'
+import AmButton from '../../../../../../_components/button/AmButton.vue'
+import IconComponent from '../../../../../../_components/icons/IconComponent.vue'
+import TimeZoneSelect from './TimeZoneSelect.vue'
 
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject, defineComponent
-} from "vue";
+import { ref, computed, inject } from 'vue'
 
 // * Composables
-import {
-  useColorTransparency
-} from "../../../../../../../assets/js/common/colorManipulation";
-import moment from "moment/moment";
-import {momentDateFormat} from "../../../../../../../assets/js/common/date";
-
+import { useColorTransparency } from '../../../../../../../assets/js/common/colorManipulation'
+import moment from 'moment/moment'
+import { momentDateFormat } from '../../../../../../../assets/js/common/date'
+import { useReactiveCustomize } from '../../../../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Component properties
 let props = defineProps({
   paramList: {
     type: [Object, Array],
-    default: () => []
+    default: () => [],
   },
   responsiveClass: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 // * Component emits
 const emits = defineEmits(['changeFilters'])
 
 // * Customize
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
+
+// * Root Settings
+let amSettings = inject('settings')
 
 let localLanguage = inject('localLanguage')
 
@@ -135,12 +141,19 @@ let pageRenderKey = inject('pageRenderKey')
 let stepName = inject('stepName')
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepName.value].translations
-    && amCustomize.value[pageRenderKey.value][stepName.value].translations[label]
-    && amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepName.value]
+      .translations &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[
+        label
+      ] &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[
+        label
+      ][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[
+          label
+        ][langKey.value]
       : amLabels[label]
   })
 
@@ -151,15 +164,13 @@ function labelsDisplay (label) {
 // let cabinetType = inject('cabinetType')
 
 let filterParams = ref({
-  dates: [
-    moment().toDate(),
-    moment().add(6, 'days').toDate()
-  ],
+  dates: [moment().toDate(), moment().add(6, 'days').toDate()],
   services: [],
   providers: [],
+  customers: [],
   locations: [],
   events: [],
-  packages: []
+  packages: [],
 })
 
 let entities = ref({
@@ -197,58 +208,70 @@ let entities = ref({
     {
       id: 1,
       firstName: 'John',
-      lastName: 'Doe'
+      lastName: 'Doe',
     },
     {
       id: 2,
       firstName: 'Jane',
-      lastName: 'Doe'
-    }
+      lastName: 'Doe',
+    },
+  ],
+  customers: [
+    {
+      id: 1,
+      firstName: 'John',
+      lastName: 'Doe',
+    },
+    {
+      id: 2,
+      firstName: 'Jane',
+      lastName: 'Doe',
+    },
   ],
   locations: [
     {
       id: 1,
-      name: 'Location 1'
+      name: 'Location 1',
     },
     {
       id: 2,
-      name: 'Location 2'
+      name: 'Location 2',
     },
     {
       id: 3,
-      name: 'Location 3'
-    }
+      name: 'Location 3',
+    },
   ],
   events: [
     {
       name: 'Healthy Plate Symposium',
-      id: 1
+      id: 1,
     },
     {
       name: 'Nutrition Nirvana Workshop',
-      id: 2
+      id: 2,
     },
     {
       name: 'Culinary Wellness Cooking Class',
-      id: 3
-    }
+      id: 3,
+    },
   ],
   packages: [
     {
       name: 'Package 1',
-      id: 1
+      id: 1,
     },
     {
       name: 'Package 2',
-      id: 2
-    }
-  ]
+      id: 2,
+    },
+  ],
 })
 
-let filterIcon = defineComponent({
-  components: {IconComponent},
-  template: `<IconComponent icon="filter"/>`
-})
+let filterIcon = {
+  components: { IconComponent },
+  template: `<IconComponent icon="filter"/>`,
+}
 
 let cWidth = inject('containerWidth')
 
@@ -259,26 +282,27 @@ let customizeOptions = computed(() => {
   return amCustomize.value[pageRenderKey.value][stepName.value].options
 })
 
-function datesChanged (val) {
+function datesChanged(val) {
   if (val && val[0] && val[1]) {
     filterParams.value.dates = val
     emits('changeFilters', filterParams.value)
   }
 }
 
-function changeFilters () {
-  emits('changeFilters', filterParams.value)
-}
-
-function clearFilter (name) {
-  filterParams.value[name] = []
+function changeFilters() {
   emits('changeFilters', filterParams.value)
 }
 
 let itemsNumber = computed(() => {
   let numb = 0
-  Object.values(props.paramList).forEach(p => {
-    if (p.name !== 'dates' && entities.value[p.name].length > 0 && amCustomize.value[pageRenderKey.value][stepName.value].options[`${p.name}Filter`].visibility) {
+  Object.values(props.paramList).forEach((p) => {
+    if (
+      p.name !== 'dates' &&
+      entities.value[p.name].length > 0 &&
+      amCustomize.value[pageRenderKey.value][stepName.value].options[
+        `${p.name}Filter`
+      ].visibility
+    ) {
       numb++
     }
   })
@@ -293,16 +317,25 @@ let cssVars = computed(() => {
     '--am-c-capf-heading-text': amColors.value.colorMainText,
     '--am-c-capf-text': amColors.value.colorInpText,
     '--am-c-capf-primary': amColors.value.colorPrimary,
-    '--am-c-capf-text-op10': useColorTransparency(amColors.value.colorInpText, 0.10),
-    '--am-c-capf-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
-    '--am-c-capf-primary-op70': useColorTransparency(amColors.value.colorPrimary, 0.7),
+    '--am-c-capf-text-op10': useColorTransparency(
+      amColors.value.colorInpText,
+      0.1
+    ),
+    '--am-c-capf-primary-op10': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.1
+    ),
+    '--am-c-capf-primary-op70': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.7
+    ),
   }
 })
 </script>
 
 <script>
 export default {
-  name: "CabinetFilters"
+  name: 'CabinetFilters',
 }
 </script>
 
@@ -313,7 +346,7 @@ export default {
   #amelia-container {
     // am - amelia
     // capf - catalog panel filters
-    .am-capf{
+    .am-capf {
       @include slide-fade;
       margin-bottom: 20px;
 
@@ -475,7 +508,7 @@ export default {
             &-editor {
               height: 32px;
               padding-left: 10px !important;
-              width: 100%
+              width: 100%;
             }
 
             &__icon {
@@ -508,7 +541,6 @@ export default {
             font-size: 24px;
           }
         }
-
       }
 
       &__clear {

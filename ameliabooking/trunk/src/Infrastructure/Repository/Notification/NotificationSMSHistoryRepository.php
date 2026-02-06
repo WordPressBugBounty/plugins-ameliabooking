@@ -17,7 +17,7 @@ class NotificationSMSHistoryRepository extends AbstractRepository
     /**
      * @param $data
      *
-     * @return bool
+     * @return int
      *
      * @throws QueryExecutionException
      * @throws \Exception
@@ -129,12 +129,12 @@ class NotificationSMSHistoryRepository extends AbstractRepository
     }
 
     /**
-     * @param int    $id
+     * @param int $id
      *
-     * @return array
+     * @return array|null
      * @throws QueryExecutionException
      */
-    public function getById($id)
+    public function getItemById($id)
     {
         try {
             $statement = $this->connection->prepare(
@@ -170,12 +170,12 @@ class NotificationSMSHistoryRepository extends AbstractRepository
     {
         try {
             $params = [];
-            $where = [];
+            $where  = [];
 
             if (!empty($criteria['dates'])) {
-                $where[] = "(DATE_FORMAT(h.dateTime, '%Y-%m-%d %H:%i:%s') BETWEEN :dateFrom AND :dateTo)";
+                $where[] = "(h.dateTime BETWEEN :dateFrom AND :dateTo)";
                 $params[':dateFrom'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]);
-                $params[':dateTo'] = DateTimeService::getCustomDateTimeObjectInUtc(
+                $params[':dateTo']   = DateTimeService::getCustomDateTimeObjectInUtc(
                     $criteria['dates'][1]
                 )->modify('+1 day')->format('Y-m-d H:i:s');
             }
@@ -222,12 +222,12 @@ class NotificationSMSHistoryRepository extends AbstractRepository
     {
         try {
             $params = [];
-            $where = [];
+            $where  = [];
 
             if (!empty($criteria['dates'])) {
-                $where[] = "(DATE_FORMAT(h.dateTime, '%Y-%m-%d %H:%i:%s') BETWEEN :dateFrom AND :dateTo)";
+                $where[] = "(h.dateTime BETWEEN :dateFrom AND :dateTo)";
                 $params[':dateFrom'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]);
-                $params[':dateTo'] = DateTimeService::getCustomDateTimeObjectInUtc(
+                $params[':dateTo']   = DateTimeService::getCustomDateTimeObjectInUtc(
                     $criteria['dates'][1]
                 )->modify('+1 day')->format('Y-m-d H:i:s');
             }
@@ -243,7 +243,6 @@ class NotificationSMSHistoryRepository extends AbstractRepository
             $statement->execute($params);
 
             $row = $statement->fetch()['count'];
-
         } catch (\Exception $e) {
             throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
         }

@@ -15,8 +15,7 @@ use AmeliaBooking\Infrastructure\Connection;
 use AmeliaBooking\Infrastructure\Licence\Licence;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Bookable\ExtrasTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\AppointmentsTable;
-use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Coupon\CouponsTable;
-use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Coupon\CouponsToServicesTable;
+use AmeliaBooking\Infrastructure\Licence\LicenceConstants;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\User\WPUsersTable;
 
 /**
@@ -26,7 +25,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\User\WPUsersTable;
  */
 class ProviderRepository extends UserRepository implements ProviderRepositoryInterface
 {
-    const FACTORY = ProviderFactory::class;
+    public const FACTORY = ProviderFactory::class;
 
     /** @var string */
     protected $providerWeekDayTable;
@@ -161,7 +160,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     /**
      * @param int $id
      *
-     * @return Provider
+     * @return Provider|null
      * @throws QueryExecutionException
      */
     public function getById($id)
@@ -180,6 +179,9 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     u.pictureFullPath AS picture_full_path,
                     u.pictureThumbPath AS picture_thumb_path,
                     u.zoomUserId AS user_zoom_user_id,
+                    u.appleCalendarId as user_apple_calendar_id,
+                    u.googleCalendarId as user_google_calendar_id,
+                    u.employeeAppleCalendar as user_employee_apple_calendar,
                     u.stripeConnect AS user_stripeConnect,
                     u.translations AS user_translations,
                     u.timeZone AS user_timeZone,
@@ -204,8 +206,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $statement->execute();
 
-            $providerRows = [];
-            $serviceRows = [];
+            $providerRows        = [];
+            $serviceRows         = [];
             $providerServiceRows = [];
 
             if ($statement->rowCount() === 0) {
@@ -244,6 +246,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     u.pictureThumbPath AS picture_thumb_path,
                     u.translations AS user_translations,
                     u.badgeId AS user_badge_id,
+                    u.googleCalendarId as user_google_calendar_id,
                     lt.locationId AS user_locationId
                 FROM {$this->table} u
                 LEFT JOIN {$this->providerLocationTable} lt ON lt.userId = u.id
@@ -257,8 +260,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $statement->execute();
 
-            $providerRows = [];
-            $serviceRows = [];
+            $providerRows        = [];
+            $serviceRows         = [];
             $providerServiceRows = [];
 
             while ($row = $statement->fetch()) {
@@ -281,6 +284,9 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
      */
     public function getFiltered($criteria, $itemsPerPage)
     {
+        // Apply Lite license restriction
+        $criteria = $this->applyLiteLicenseRestriction($criteria);
+
         try {
             $wpUserTable = WPUsersTable::getTableName();
 
@@ -288,25 +294,41 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $order = '';
             if (!empty($criteria['sort'])) {
-                $orderColumn = 'CONCAT(u.firstName, " ", u.lastName)';
+                $orderColumn    = 'CONCAT(u.firstName, " ", u.lastName)';
                 $orderDirection = $criteria['sort'][0] === '-' ? 'DESC' : 'ASC';
-                $order = "ORDER BY {$orderColumn} {$orderDirection}";
+                $order          = "ORDER BY {$orderColumn} {$orderDirection}";
             }
 
             $where = [];
 
             if (!empty($criteria['search'])) {
-                $params[':search1'] = $params[':search2'] = $params[':search3'] = $params[':search4'] =
-                    "%{$criteria['search']}%";
+                $terms = preg_split('/\s+/', trim($criteria['search']));
+                $termIndex = 0;
+                $where1 = [];
 
+                foreach ($terms as $term) {
+                    $param = ":search{$termIndex}";
+                    $params[$param] = "%{$term}%";
+
+                    $where1[] = "(
+                        u.firstName LIKE {$param}
+                        OR u.lastName LIKE {$param}
+                        OR u.email LIKE {$param}
+                        OR u.phone LIKE {$param}
+                        OR u.note LIKE {$param}
+                        OR wpUser.display_name LIKE {$param}
+                        OR u.id LIKE {$param}
+                    )";
+
+                    $termIndex++;
+                }
+
+                $where1 = implode(' AND ', $where1);
                 $where[] = "u.id IN(
                     SELECT DISTINCT(user.id)
                         FROM {$this->table} user
                         LEFT JOIN {$wpUserTable} wpUser ON user.externalId = wpUser.ID
-                        WHERE (CONCAT(user.firstName, ' ', user.lastName) LIKE :search1
-                            OR wpUser.display_name LIKE :search2
-                            OR user.email LIKE :search3
-                            OR user.note LIKE :search4)
+                        WHERE ({$where1})
                     )";
             }
 
@@ -314,9 +336,9 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 $queryServices = [];
 
                 foreach ((array)$criteria['services'] as $index => $value) {
-                    $param = ':service' . $index;
+                    $param           = ':service' . $index;
                     $queryServices[] = $param;
-                    $params[$param] = $value;
+                    $params[$param]  = $value;
                 }
 
                 $where[] = "u.id IN (
@@ -325,13 +347,19 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 )';
             }
 
+            if (!empty($criteria['providerStatus'])) {
+                $params[':providerStatus'] = $criteria['providerStatus'];
+
+                $where[] = 'u.status = :providerStatus';
+            }
+
             if (!empty($criteria['providers'])) {
                 $queryProviders = [];
 
                 foreach ((array)$criteria['providers'] as $index => $value) {
-                    $param = ':provider' . $index;
+                    $param            = ':provider' . $index;
                     $queryProviders[] = $param;
-                    $params[$param] = $value;
+                    $params[$param]   = $value;
                 }
 
                 $where[] = 'u.id IN (' . implode(', ', $queryProviders) . ')';
@@ -341,9 +369,9 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 $queryLocations = [];
 
                 foreach ((array)$criteria['location'] as $index => $value) {
-                    $param = ':location' . $index;
+                    $param            = ':location' . $index;
                     $queryLocations[] = $param;
-                    $params[$param] = $value;
+                    $params[$param]   = $value;
                 }
 
                 $where[] = "u.id IN (
@@ -387,13 +415,17 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     /**
      *
      * @param array $criteria
+     * @param bool  $filterForLicence
      *
      * @return Collection
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    public function getWithSchedule($criteria)
+    public function getWithSchedule($criteria, $filterForLicence = true)
     {
+        // Apply Lite license restriction
+        $criteria = $filterForLicence ? $this->applyLiteLicenseRestriction($criteria) : $criteria;
+
         $providerRows = [];
 
         $serviceRows = [];
@@ -408,10 +440,24 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
         $queryProviders = [];
 
+        if (!empty($criteria['dates'][0])) {
+            $criteria['dates'][0] = explode(' ', $criteria['dates'][0])[0];
+        }
+
+        if (!empty($criteria['dates'][1])) {
+            $criteria['dates'][1] = explode(' ', $criteria['dates'][1])[0];
+        }
+
         if (!empty($criteria['providerStatus'])) {
             $params[':providerStatus'] = $criteria['providerStatus'];
 
             $where[] = 'u.status = :providerStatus';
+        }
+
+        if (isset($criteria['show'])) {
+            $params[':show'] = $criteria['show'];
+
+            $where[] = 'u.show = :show';
         }
 
         if (!empty($criteria['providers'])) {
@@ -424,28 +470,55 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             }
         }
 
-        $calendarJoin = '';
+        if (!empty($criteria['locations'])) {
+            $queryLocations = [];
 
-        $calendarFields = '';
+            foreach ((array)$criteria['locations'] as $index => $value) {
+                $param            = ':location' . $index;
+                $queryLocations[] = $param;
+                $params[$param]   = $value;
+            }
 
-        if (!empty($criteria['fetchCalendars'])) {
-            $calendarJoin = "
-                LEFT JOIN {$this->providersGoogleCalendarTable} gd ON gd.userId = u.id
-                LEFT JOIN {$this->providersOutlookCalendarTable} od ON od.userId = u.id
-            ";
+            $where[] = "u.id IN (
+                    SELECT plt.userId FROM {$this->providerLocationTable} plt
+                    WHERE plt.userId = u.id AND plt.locationId IN ( " . implode(', ', $queryLocations) . "))";
+        }
 
-            $calendarFields = '
-                gd.id AS google_calendar_id,
-                gd.token AS google_calendar_token,
-                gd.calendarId AS google_calendar_calendar_id,
-                od.id AS outlook_calendar_id,
-                od.token AS outlook_calendar_token,
-                od.calendarId AS outlook_calendar_calendar_id,
-            ';
+        if (!empty($criteria['services'])) {
+            $queryServices = [];
+
+            foreach ((array)$criteria['services'] as $index => $value) {
+                $param           = ':service' . $index;
+                $queryServices[] = $param;
+                $params[$param]  = $value;
+            }
+
+            $where[] = "u.id IN (
+                    SELECT pst.userId FROM {$this->providerServicesTable} pst
+                    WHERE pst.userId = u.id AND pst.serviceId IN (" . implode(', ', $queryServices) . ')
+                )';
         }
 
         if ($queryProviders) {
             $where[] = 'u.id IN (' . implode(', ', $queryProviders) . ')';
+        }
+
+        $dotJoinQuery = '';
+
+        if (isset($criteria['dates'][0], $criteria['dates'][1])) {
+            $dotJoinQuery = "AND (dot.repeat = 1 OR (
+              dot.startDate BETWEEN :from1 AND :to1 OR
+              dot.endDate BETWEEN :from2 AND :to2 OR
+              (dot.startDate <= :from3 AND dot.endDate >= :to3)
+            ))";
+
+            $userParams[':from1'] = $userParams[':from2'] = $userParams[':from3'] = $criteria['dates'][0];
+
+            $userParams[':to1'] = $userParams[':to2'] = $userParams[':to3'] = $criteria['dates'][1];
+        } elseif (isset($criteria['dates'][0])) {
+            $dotJoinQuery = "AND (dot.repeat = 1 OR dot.startDate >= :from1 OR dot.endDate >= :from2)";
+
+            $userParams[':from1'] = $userParams[':from2'] = $criteria['dates'][0];
         }
 
         $where = $where ? 'WHERE ' . implode(' AND ', $where) : '';
@@ -460,6 +533,9 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     u.lastName AS user_lastName,
                     u.email AS user_email,
                     u.zoomUserId AS user_zoom_user_id,
+                    u.appleCalendarId AS user_apple_calendar_id,
+                    u.googleCalendarId as user_google_calendar_id,
+                    u.employeeAppleCalendar AS user_employee_apple_calendar,
                     u.stripeConnect AS user_stripeConnect,
                     u.countryPhoneIso AS user_countryPhoneIso,
                     u.note AS note,
@@ -470,13 +546,13 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     u.translations AS user_translations,
                     u.timeZone AS user_timeZone,
                     u.badgeId AS badge_id,
+                    u.show AS user_show,
                     plt.locationId AS user_locationId,
                     pst.serviceId AS service_id,
                     pst.price AS service_price,
                     pst.customPricing AS service_customPricing,
                     pst.minCapacity AS service_minCapacity,
                     pst.maxCapacity AS service_maxCapacity,
-                    {$calendarFields}
                     dot.id AS dayOff_id,
                     dot.name AS dayOff_name,
                     dot.startDate AS dayOff_startDate,
@@ -485,8 +561,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 FROM {$this->table} u
                 LEFT JOIN {$this->providerServicesTable} pst ON pst.userId = u.id
                 LEFT JOIN {$this->providerLocationTable} plt ON plt.userId = u.id
-                {$calendarJoin}
-                LEFT JOIN {$this->providerDayOffTable} dot ON dot.userId = u.id
+                LEFT JOIN {$this->providerDayOffTable} dot ON dot.userId = u.id {$dotJoinQuery}
                 {$where}
                 ORDER BY CONCAT(u.firstName, ' ', u.lastName), u.id"
             );
@@ -565,7 +640,30 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             )->setWeekDayList($provider->getWeekDayList());
         }
 
-        $where = 'WHERE sdt.userId IN (' . implode(', ', $providers->keys()) . ')';
+        $where = ['sdt.userId IN (' . implode(', ', $providers->keys()) . ')'];
+
+        $sdtParams = [];
+
+        if (isset($criteria['dates'][0], $criteria['dates'][1])) {
+            $where[] = "(
+              sdt.startDate BETWEEN :from1 AND :to1 OR
+              sdt.endDate BETWEEN :from2 AND :to2 OR
+              (sdt.startDate <= :from3 AND sdt.endDate >= :to3)
+            )";
+
+            $sdtParams[':from1'] = $sdtParams[':from2'] = $sdtParams[':from3'] = $criteria['dates'][0];
+
+            $sdtParams[':to1'] = $sdtParams[':to2'] = $sdtParams[':to3'] = $criteria['dates'][1];
+        } elseif (isset($criteria['dates'][0])) {
+            $where[] = "(
+              sdt.startDate >= :from1 OR
+              sdt.endDate >= :from2
+            )";
+
+            $sdtParams[':from1'] = $sdtParams[':from2'] = $criteria['dates'][0];
+        }
+
+        $where = 'WHERE ' . implode(' AND ', $where);
 
         try {
             $statement = $this->connection->prepare(
@@ -586,10 +684,11 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 LEFT JOIN {$this->providerSpecialDayPeriodTable} sdpt ON sdpt.specialDayId = sdt.id
                 LEFT JOIN {$this->providerSpecialDayPeriodServiceTable} sdpst ON sdpst.periodId = sdpt.id
                 LEFT JOIN {$this->providerSpecialDayPeriodLocationTable} sdplt ON sdplt.periodId = sdpt.id
-                {$where}"
+                {$where}
+                ORDER BY sdt.startDate ASC"
             );
 
-            $statement->execute();
+            $statement->execute($sdtParams);
 
             while ($row = $statement->fetch()) {
                 $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
@@ -613,7 +712,60 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             )->setSpecialDayList($provider->getSpecialDayList());
         }
 
-        return Licence::getEmployees($providers);
+        if (!empty($criteria['fetchCalendars'])) {
+            $where = 'WHERE u.id IN (' . implode(', ', $providers->keys()) . ')';
+
+            try {
+                $statement = $this->connection->prepare(
+                    "SELECT
+                        u.id AS user_id,
+                        gd.id AS google_calendar_id,
+                        gd.token AS google_calendar_token,
+                        gd.calendarId AS google_calendar_calendar_id,
+                        od.id AS outlook_calendar_id,
+                        od.token AS outlook_calendar_token,
+                        od.calendarId AS outlook_calendar_calendar_id
+                    FROM {$this->table} u
+                    LEFT JOIN {$this->providersGoogleCalendarTable} gd ON gd.userId = u.id
+                    LEFT JOIN {$this->providersOutlookCalendarTable} od ON od.userId = u.id
+                    {$where}"
+                );
+
+                $statement->execute();
+
+                while ($row = $statement->fetch()) {
+                    $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
+                }
+            } catch (\Exception $e) {
+                throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            }
+
+            /** @var Collection $providersWithCalendars */
+            $providersWithCalendars = call_user_func(
+                [static::FACTORY, 'createCollection'],
+                $providerRows,
+                $serviceRows,
+                $providerServiceRows
+            );
+
+            /** @var Provider $provider */
+            foreach ($providersWithCalendars->getItems() as $provider) {
+                /** @var Provider $targetProvider */
+                $targetProvider = $providers->getItem(
+                    $provider->getId()->getValue()
+                );
+
+                if ($provider->getGoogleCalendar()) {
+                    $targetProvider->setGoogleCalendar($provider->getGoogleCalendar());
+                }
+
+                if ($provider->getOutlookCalendar()) {
+                    $targetProvider->setOutlookCalendar($provider->getOutlookCalendar());
+                }
+            }
+        }
+
+        return $providers;
     }
 
     /**
@@ -624,6 +776,9 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
      */
     public function getCount($criteria)
     {
+        // Apply Lite license restriction
+        $criteria = $this->applyLiteLicenseRestriction($criteria);
+
         $params = [
             ':type'          => AbstractUser::USER_ROLE_PROVIDER,
             ':visibleStatus' => Status::VISIBLE,
@@ -636,17 +791,33 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             $where = [];
 
             if (!empty($criteria['search'])) {
-                $params[':search1'] = $params[':search2'] = $params[':search3'] = $params[':search4'] =
-                    "%{$criteria['search']}%";
+                $terms = preg_split('/\s+/', trim($criteria['search']));
+                $termIndex = 0;
+                $where1 = [];
 
+                foreach ($terms as $term) {
+                    $param = ":search{$termIndex}";
+                    $params[$param] = "%{$term}%";
+
+                    $where1[] = "(
+                        u.firstName LIKE {$param}
+                        OR u.lastName LIKE {$param}
+                        OR u.email LIKE {$param}
+                        OR u.phone LIKE {$param}
+                        OR u.note LIKE {$param}
+                        OR wpUser.display_name LIKE {$param}
+                        OR u.id LIKE {$param}
+                    )";
+
+                    $termIndex++;
+                }
+
+                $where1 = implode(' AND ', $where1);
                 $where[] = "u.id IN(
                     SELECT DISTINCT(user.id)
                         FROM {$this->table} user
                         LEFT JOIN {$wpUserTable} wpUser ON user.externalId = wpUser.ID
-                        WHERE (CONCAT(user.firstName, ' ', user.lastName) LIKE :search1
-                            OR wpUser.display_name LIKE :search2
-                            OR user.email LIKE :search3
-                            OR user.note LIKE :search4)
+                        WHERE ({$where1})
                     )";
             }
 
@@ -654,9 +825,9 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 $queryServices = [];
 
                 foreach ((array)$criteria['services'] as $index => $value) {
-                    $param = ':service' . $index;
+                    $param           = ':service' . $index;
                     $queryServices[] = $param;
-                    $params[$param] = $value;
+                    $params[$param]  = $value;
                 }
 
                 $where[] = "u.id IN (
@@ -669,14 +840,26 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 $queryLocations = [];
 
                 foreach ((array)$criteria['location'] as $index => $value) {
-                    $param = ':location' . $index;
+                    $param            = ':location' . $index;
                     $queryLocations[] = $param;
-                    $params[$param] = $value;
+                    $params[$param]   = $value;
                 }
 
                 $where[] = "u.id IN (
                     SELECT plt.userId FROM {$this->providerLocationTable} plt
                     WHERE plt.userId = u.id AND plt.locationId IN ( " . implode(', ', $queryLocations) . "))";
+            }
+
+            if (!empty($criteria['providers'])) {
+                $queryProviders = [];
+
+                foreach ((array)$criteria['providers'] as $index => $value) {
+                    $param            = ':provider' . $index;
+                    $queryProviders[] = $param;
+                    $params[$param]   = $value;
+                }
+
+                $where[] = 'u.id IN (' . implode(', ', $queryProviders) . ')';
             }
 
             $where = $where ? ' AND ' . implode(' AND ', $where) : '';
@@ -698,17 +881,15 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     }
 
     /**
-     * @param      $criteria
+     * @param $criteria
      *
      * @return Collection
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
      */
-    public function getWithServicesAndExtrasAndCoupons($criteria)
+    public function getWithServicesAndExtras($criteria)
     {
         $extrasTable = ExtrasTable::getTableName();
-        $couponToServicesTable = CouponsToServicesTable::getTableName();
-        $couponsTable = CouponsTable::getTableName();
 
         $params = [
             ':type'          => AbstractUser::USER_ROLE_PROVIDER,
@@ -719,16 +900,10 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         $where = [];
 
         foreach ((array)$criteria as $index => $value) {
-            $params[':service' . $index] = $value['serviceId'];
+            $params[':service' . $index]  = $value['serviceId'];
             $params[':provider' . $index] = $value['providerId'];
 
-            if ($value['couponId']) {
-                $params[':coupon' . $index] = $value['couponId'];
-                $params[':couponStatus' . $index] = Status::VISIBLE;
-            }
-
-            $where[] = "(s.id = :service$index AND u.id = :provider$index"
-                . ($value['couponId'] ? " AND c.id = :coupon$index AND c.status = :couponStatus$index" : '') . ')';
+            $where[] = "(s.id = :service$index AND u.id = :provider$index)";
         }
 
         $where = $where ? ' AND ' . implode(' OR ', $where) : '';
@@ -740,6 +915,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     u.firstName AS user_firstName,
                     u.lastName AS user_lastName,
                     u.email AS user_email,
+                    u.timeZone AS user_timeZone,
                     u.translations AS user_translations,
                     st.serviceId AS service_id,
                     st.price AS service_price,
@@ -770,27 +946,18 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     e.duration AS extra_duration,
                     e.description AS extra_description,
                     e.position AS extra_position,
-                    e.aggregatedPrice AS extra_aggregatedPrice,
-                    c.id AS coupon_id,
-                    c.code AS coupon_code,
-                    c.discount AS coupon_discount,
-                    c.deduction AS coupon_deduction,
-                    c.limit AS coupon_limit,
-                    c.customerLimit AS coupon_customerLimit,
-                    c.status AS coupon_status
+                    e.aggregatedPrice AS extra_aggregatedPrice
                 FROM {$this->table} u
                 INNER JOIN {$this->providerServicesTable} st ON st.userId = u.id
                 INNER JOIN {$this->serviceTable} s ON s.id = st.serviceId
                 LEFT JOIN {$extrasTable} e ON e.serviceId = s.id
-                LEFT JOIN {$couponToServicesTable} cs ON cs.serviceId = s.id
-                LEFT JOIN {$couponsTable} c ON c.id = cs.couponId
                 WHERE u.status = :userStatus AND s.status = :serviceStatus AND u.type = :type $where"
             );
 
             $statement->execute($params);
 
-            $providerRows = [];
-            $serviceRows = [];
+            $providerRows        = [];
+            $serviceRows         = [];
             $providerServiceRows = [];
 
             while ($row = $statement->fetch()) {
@@ -814,9 +981,9 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
      */
     public function getAvailable($dayIndex, $providerTimeZone)
     {
-        $currentDateTime = DateTimeService::getNowDateTime();
+        $currentDateTime           = DateTimeService::getNowDateTime();
         $currentDateTimeInTimeZone = DateTimeService::getCustomDateTimeObjectInTimeZone($currentDateTime, $providerTimeZone);
-        $currentDateTimeSQL = "STR_TO_DATE('" . $currentDateTimeInTimeZone->format('Y-m-d H:i:s') . "', '%Y-%m-%d %H:%i:%s')";
+        $currentDateTimeSQL        = "STR_TO_DATE('" . $currentDateTimeInTimeZone->format('Y-m-d H:i:s') . "', '%Y-%m-%d %H:%i:%s')";
 
         $params = [
             ':dayIndex'         => $dayIndex === 0 ? 7 : $dayIndex,
@@ -826,7 +993,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         ];
 
         try {
-            $statement = $this->connection->prepare("SELECT
+            $statement = $this->connection->prepare(
+                "SELECT
                 u.id AS user_id,
                 u.firstName AS user_firstName,
                 u.lastName AS user_lastName,
@@ -855,7 +1023,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
               {$currentDateTimeSQL} <= pt.endTime AND
               pt.startTime IS NOT NULL AND
               pt.endTime IS NOT NULL
-              ))");
+              ))"
+            );
 
             $statement->execute($params);
 
@@ -890,7 +1059,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     public function getOnSpecialDay()
     {
         $dateTimeNowString = DateTimeService::getNowDateTime();
-        $currentDateTime = "STR_TO_DATE('" . $dateTimeNowString . "', '%Y-%m-%d %H:%i:%s')";
+        $currentDateTime   = "STR_TO_DATE('" . $dateTimeNowString . "', '%Y-%m-%d %H:%i:%s')";
         $currentDateString = DateTimeService::getNowDate();
 
         $params = [
@@ -898,17 +1067,18 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         ];
 
         try {
-            $statement = $this->connection->prepare("SELECT
+            $statement = $this->connection->prepare(
+                "SELECT
                 u.id AS user_id,
                 u.firstName AS user_firstName,
                 u.lastName AS user_lastName,
                 sdpt.startTime AS sdp_startTime,
                 sdpt.endTime AS sdp_endTime,
                 IF (
-                    {$currentDateTime} >= STR_TO_DATE(CONCAT(DATE_FORMAT(sdt.startDate, '%Y-%m-%d'), ' 00:00:00'), '%Y-%m-%d %H:%i:%s') AND
-                    {$currentDateTime} <= DATE_ADD(STR_TO_DATE(CONCAT(DATE_FORMAT(sdt.endDate, '%Y-%m-%d'), ' 00:00:00'), '%Y-%m-%d %H:%i:%s'), INTERVAL 1 DAY) AND
-                    {$currentDateTime} >= STR_TO_DATE(CONCAT('{$currentDateString}', ' ', DATE_FORMAT(sdpt.startTime, '%H:%i:%s')), '%Y-%m-%d %H:%i:%s') AND
-                    {$currentDateTime} <= STR_TO_DATE(CONCAT('{$currentDateString}', ' ', DATE_FORMAT(sdpt.endTime, '%H:%i:%s')), '%Y-%m-%d %H:%i:%s'),
+                    {$currentDateTime} >= STR_TO_DATE(CONCAT(sdt.startDate, ' 00:00:00'), '%Y-%m-%d %H:%i:%s') AND
+                    {$currentDateTime} <= DATE_ADD(STR_TO_DATE(CONCAT(sdt.endDate, ' 00:00:00'), '%Y-%m-%d %H:%i:%s'), INTERVAL 1 DAY) AND
+                    {$currentDateTime} >= STR_TO_DATE(CONCAT('{$currentDateString}', ' ', sdpt.startTime), '%Y-%m-%d %H:%i:%s') AND
+                    {$currentDateTime} <= STR_TO_DATE(CONCAT('{$currentDateString}', ' ', sdpt.endTime), '%Y-%m-%d %H:%i:%s'),
                     1,
                     0
                 ) AS available
@@ -917,7 +1087,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
               INNER JOIN {$this->providerSpecialDayPeriodTable} sdpt ON sdpt.specialDayId = sdt.id
               WHERE u.type = :type AND
                 STR_TO_DATE('{$currentDateString}', '%Y-%m-%d') BETWEEN sdt.startDate AND sdt.endDate
-              ");
+              "
+            );
 
             $statement->execute($params);
 
@@ -955,7 +1126,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         ];
 
         try {
-            $statement = $this->connection->prepare("SELECT
+            $statement = $this->connection->prepare(
+                "SELECT
                 u.id AS user_id,
                 u.firstName AS user_firstName,
                 u.lastName AS user_lastName,
@@ -974,7 +1146,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
               {$currentDateTime} >= wdt.startTime AND
               {$currentDateTime} <= wdt.endTime AND
               {$currentDateTime} >= tot.startTime AND
-              {$currentDateTime} <= tot.endTime");
+              {$currentDateTime} <= tot.endTime"
+            );
 
             $statement->execute($params);
 
@@ -998,14 +1171,16 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
      */
     public function getOnVacation()
     {
-        $currentDateTime = "STR_TO_DATE('" . DateTimeService::getNowDateTime() . "', '%Y-%m-%d %H:%i:%s')";
+        $currentDateTime = explode(' ', DateTimeService::getNowDateTime())[0];
 
         $params = [
-            ':type' => AbstractUser::USER_ROLE_PROVIDER
+            ':type'        => AbstractUser::USER_ROLE_PROVIDER,
+            ':currentDate' => $currentDateTime,
         ];
 
         try {
-            $statement = $this->connection->prepare("SELECT
+            $statement = $this->connection->prepare(
+                "SELECT
                 u.id,
                 u.firstName,
                 u.lastName,
@@ -1015,7 +1190,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
               FROM {$this->table} u
               LEFT JOIN {$this->providerDayOffTable} dot ON dot.userId = u.id
               WHERE u.type = :type AND
-              DATE_FORMAT({$currentDateTime}, '%Y-%m-%d') BETWEEN dot.startDate AND dot.endDate");
+              :currentDate BETWEEN dot.startDate AND dot.endDate"
+            );
 
             $statement->execute($params);
 
@@ -1048,30 +1224,33 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         $appointmentTable = AppointmentsTable::getTableName();
 
         $params = [];
-        $where = [];
+        $where  = [];
 
         if ($criteria['dates']) {
-            $where[] = "(DATE_FORMAT(a.bookingStart, '%Y-%m-%d') BETWEEN :bookingFrom AND :bookingTo)";
+            $where[] = "(a.bookingStart BETWEEN :bookingFrom AND :bookingTo)";
+
             $params[':bookingFrom'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]);
-            $params[':bookingTo'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][1]);
+            $params[':bookingTo']   = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][1]);
         }
 
         if (isset($criteria['status'])) {
-            $where[] = 'u.status = :status';
+            $where[]           = 'u.status = :status';
             $params[':status'] = $criteria['status'];
         }
 
         $where = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         try {
-            $statement = $this->connection->prepare("SELECT
+            $statement = $this->connection->prepare(
+                "SELECT
                 u.id,
                 CONCAT(u.firstName, ' ', u.lastName) AS name,
                 COUNT(a.providerId) AS appointments
             FROM {$this->table} u 
             INNER JOIN {$appointmentTable} a ON u.id = a.providerId
             $where
-            GROUP BY providerId");
+            GROUP BY providerId"
+            );
 
             $statement->execute($params);
 
@@ -1101,30 +1280,32 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     public function getAllNumberOfViews($criteria)
     {
         $params = [];
-        $where = [];
+        $where  = [];
 
         if ($criteria['dates']) {
             $where[] = "(DATE_FORMAT(pv.date, '%Y-%m-%d') BETWEEN :bookingFrom AND :bookingTo)";
             $params[':bookingFrom'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]);
-            $params[':bookingTo'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][1]);
+            $params[':bookingTo']   = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][1]);
         }
 
         if (isset($criteria['status'])) {
-            $where[] = 'u.status = :status';
+            $where[]           = 'u.status = :status';
             $params[':status'] = $criteria['status'];
         }
 
         $where = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         try {
-            $statement = $this->connection->prepare("SELECT
+            $statement = $this->connection->prepare(
+                "SELECT
             u.id,
             CONCAT(u.firstName, ' ', u.lastName) as name,
             SUM(pv.views) AS views
             FROM {$this->table} u
             INNER JOIN {$this->providerViewsTable} pv ON pv.userId = u.id 
             $where
-            GROUP BY u.id");
+            GROUP BY u.id"
+            );
 
             $statement->execute($params);
 
@@ -1145,7 +1326,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     /**
      * @param $providerId
      *
-     * @return string
+     * @return bool
      * @throws QueryExecutionException
      */
     public function addViewStats($providerId)
@@ -1200,13 +1381,53 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     }
 
     /**
+     * @param array $serviceIds
      *
      * @return array
      * @throws QueryExecutionException
      */
-    public function getProvidersServices()
+    public function getProvidersServices($serviceIds = [])
     {
+        // Apply Lite license restriction
+        $criteria = $this->applyLiteLicenseRestriction([]);
+
         try {
+            $type = AbstractUser::USER_ROLE_PROVIDER;
+
+            $params = [
+                ':type' => $type
+            ];
+
+            $where = 'WHERE u.type = :type';
+
+            // Apply provider restriction for Lite license
+            if (!empty($criteria['providers'])) {
+                $queryProviders = [];
+
+                foreach ((array)$criteria['providers'] as $index => $value) {
+                    $param = ':provider' . $index;
+                    $queryProviders[] = $param;
+                    $params[$param] = $value;
+                }
+
+                $where .= ' AND u.id IN (' . implode(', ', $queryProviders) . ')';
+            }
+
+            if (!empty($serviceIds)) {
+                $query = [];
+
+                foreach ((array)$serviceIds as $index => $value) {
+                    $param = ':serviceId' . $index;
+
+                    $query[] = $param;
+
+                    $params[$param] = $value;
+                }
+
+                $where .= ' AND st.serviceId IN (' . implode(', ', $query) . ')';
+            }
+
+
             $statement = $this->connection->prepare(
                 "SELECT
                     u.id AS user_id,
@@ -1217,15 +1438,11 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     st.maxCapacity AS service_maxCapacity
                 FROM {$this->table} u
                 INNER JOIN {$this->providerServicesTable} st ON st.userId = u.id
-                WHERE u.type = :type
+                {$where}
                 ORDER BY CONCAT(u.firstName, ' ', u.lastName)"
             );
 
-            $type = AbstractUser::USER_ROLE_PROVIDER;
-
-            $statement->bindParam(':type', $type);
-
-            $statement->execute();
+            $statement->execute($params);
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
@@ -1263,20 +1480,20 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
      */
     private function parseUserRow($row, &$providerRows, &$serviceRows, &$providerServiceRows)
     {
-        $userId = (int)$row['user_id'];
-        $serviceId = isset($row['service_id']) ? (int)$row['service_id'] : null;
-        $extraId = isset($row['extra_id']) ? $row['extra_id'] : null;
-        $couponId = isset($row['coupon_id']) ? $row['coupon_id'] : null;
-        $googleCalendarId = isset($row['google_calendar_id']) ? $row['google_calendar_id'] : null;
+        $userId            = (int)$row['user_id'];
+        $serviceId         = isset($row['service_id']) ? (int)$row['service_id'] : null;
+        $extraId           = isset($row['extra_id']) ? $row['extra_id'] : null;
+        $couponId          = isset($row['coupon_id']) ? $row['coupon_id'] : null;
+        $googleCalendarId  = isset($row['google_calendar_id']) ? $row['google_calendar_id'] : null;
         $outlookCalendarId = isset($row['outlook_calendar_id']) ? $row['outlook_calendar_id'] : null;
-        $weekDayId = isset($row['weekDay_id']) ? $row['weekDay_id'] : null;
-        $timeOutId = isset($row['timeOut_id']) ? $row['timeOut_id'] : null;
-        $periodId = isset($row['period_id']) ? $row['period_id'] : null;
-        $periodServiceId = isset($row['periodService_id']) ? $row['periodService_id'] : null;
-        $periodLocationId = isset($row['periodLocation_id']) ? $row['periodLocation_id'] : null;
-        $specialDayId = isset($row['specialDay_id']) ? $row['specialDay_id'] : null;
-        $specialDayPeriodId = isset($row['specialDayPeriod_id']) ? $row['specialDayPeriod_id'] : null;
-        $specialDayPeriodServiceId = isset($row['specialDayPeriodService_id'])
+        $weekDayId         = isset($row['weekDay_id']) ? $row['weekDay_id'] : null;
+        $timeOutId         = isset($row['timeOut_id']) ? $row['timeOut_id'] : null;
+        $periodId          = isset($row['period_id']) ? $row['period_id'] : null;
+        $periodServiceId   = isset($row['periodService_id']) ? $row['periodService_id'] : null;
+        $periodLocationId  = isset($row['periodLocation_id']) ? $row['periodLocation_id'] : null;
+        $specialDayId      = isset($row['specialDay_id']) ? $row['specialDay_id'] : null;
+        $specialDayPeriodId         = isset($row['specialDayPeriod_id']) ? $row['specialDayPeriod_id'] : null;
+        $specialDayPeriodServiceId  = isset($row['specialDayPeriodService_id'])
             ? $row['specialDayPeriodService_id'] : null;
         $specialDayPeriodLocationId = isset($row['specialDayPeriodLocation_id'])
             ? $row['specialDayPeriodLocation_id'] : null;
@@ -1308,28 +1525,35 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 'serviceList'      => [],
                 'timeZone'         => isset($row['user_timeZone']) ? $row['user_timeZone'] : null,
                 'badgeId'          => isset($row['badge_id']) ? $row['badge_id'] : null,
+                'appleCalendarId'  => isset($row['user_apple_calendar_id']) ? $row['user_apple_calendar_id'] : null,
+                'googleCalendarId' => isset($row['user_google_calendar_id']) ? $row['user_google_calendar_id'] : null,
+                'employeeAppleCalendar' => isset($row['user_employee_apple_calendar']) ? $row['user_employee_apple_calendar'] : null,
+                'show'             => isset($row['user_show']) ? $row['user_show'] : 0,
             ];
         }
 
-        if ($googleCalendarId &&
+        if (
+            $googleCalendarId &&
             array_key_exists($userId, $providerRows) &&
             empty($providerRows[$userId]['googleCalendar'])
         ) {
-            $providerRows[$userId]['googleCalendar']['id'] = $row['google_calendar_id'];
-            $providerRows[$userId]['googleCalendar']['token'] = $row['google_calendar_token'];
+            $providerRows[$userId]['googleCalendar']['id']         = $row['google_calendar_id'];
+            $providerRows[$userId]['googleCalendar']['token']      = $row['google_calendar_token'];
             $providerRows[$userId]['googleCalendar']['calendarId'] = isset($row['google_calendar_calendar_id']) ? $row['google_calendar_calendar_id'] : null;
         }
 
-        if ($outlookCalendarId &&
+        if (
+            $outlookCalendarId &&
             array_key_exists($userId, $providerRows) &&
             empty($providerRows[$userId]['outlookCalendar'])
         ) {
-            $providerRows[$userId]['outlookCalendar']['id'] = $row['outlook_calendar_id'];
-            $providerRows[$userId]['outlookCalendar']['token'] = $row['outlook_calendar_token'];
+            $providerRows[$userId]['outlookCalendar']['id']         = $row['outlook_calendar_id'];
+            $providerRows[$userId]['outlookCalendar']['token']      = $row['outlook_calendar_token'];
             $providerRows[$userId]['outlookCalendar']['calendarId'] = isset($row['outlook_calendar_calendar_id']) ? $row['outlook_calendar_calendar_id'] : null;
         }
 
-        if ($weekDayId &&
+        if (
+            $weekDayId &&
             array_key_exists($userId, $providerRows) &&
             !array_key_exists($weekDayId, $providerRows[$userId]['weekDayList'])
         ) {
@@ -1343,7 +1567,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             ];
         }
 
-        if ($periodId &&
+        if (
+            $periodId &&
             $weekDayId &&
             array_key_exists($userId, $providerRows) &&
             array_key_exists($weekDayId, $providerRows[$userId]['weekDayList']) &&
@@ -1359,7 +1584,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             ];
         }
 
-        if ($periodServiceId &&
+        if (
+            $periodServiceId &&
             $periodId &&
             $weekDayId &&
             array_key_exists($userId, $providerRows) &&
@@ -1373,7 +1599,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             ];
         }
 
-        if ($periodLocationId &&
+        if (
+            $periodLocationId &&
             $periodId &&
             $weekDayId &&
             array_key_exists($userId, $providerRows) &&
@@ -1387,7 +1614,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             ];
         }
 
-        if ($timeOutId &&
+        if (
+            $timeOutId &&
             $weekDayId &&
             array_key_exists($userId, $providerRows) &&
             array_key_exists($weekDayId, $providerRows[$userId]['weekDayList']) &&
@@ -1400,7 +1628,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             ];
         }
 
-        if ($specialDayId &&
+        if (
+            $specialDayId &&
             array_key_exists($userId, $providerRows) &&
             !array_key_exists($specialDayId, $providerRows[$userId]['specialDayList'])
         ) {
@@ -1412,7 +1641,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             ];
         }
 
-        if ($specialDayPeriodId &&
+        if (
+            $specialDayPeriodId &&
             $specialDayId &&
             array_key_exists($userId, $providerRows) &&
             array_key_exists($specialDayId, $providerRows[$userId]['specialDayList']) &&
@@ -1428,13 +1658,17 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             ];
         }
 
-        if ($specialDayPeriodServiceId &&
+        if (
+            $specialDayPeriodServiceId &&
             $specialDayPeriodId &&
             $specialDayId &&
             array_key_exists($userId, $providerRows) &&
             array_key_exists($specialDayId, $providerRows[$userId]['specialDayList']) &&
             array_key_exists($specialDayPeriodId, $providerRows[$userId]['specialDayList'][$specialDayId]['periodList']) &&
-            !array_key_exists($specialDayPeriodServiceId, $providerRows[$userId]['specialDayList'][$specialDayId]['periodList'][$specialDayPeriodId]['periodServiceList'])
+            !array_key_exists(
+                $specialDayPeriodServiceId,
+                $providerRows[$userId]['specialDayList'][$specialDayId]['periodList'][$specialDayPeriodId]['periodServiceList']
+            )
         ) {
             $providerRows[$userId]['specialDayList'][$specialDayId]['periodList'][$specialDayPeriodId]['periodServiceList'][$specialDayPeriodServiceId] = [
                 'id'        => $specialDayPeriodServiceId,
@@ -1442,13 +1676,17 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             ];
         }
 
-        if ($specialDayPeriodLocationId &&
+        if (
+            $specialDayPeriodLocationId &&
             $specialDayPeriodId &&
             $specialDayId &&
             array_key_exists($userId, $providerRows) &&
             array_key_exists($specialDayId, $providerRows[$userId]['specialDayList']) &&
             array_key_exists($specialDayPeriodId, $providerRows[$userId]['specialDayList'][$specialDayId]['periodList']) &&
-            !array_key_exists($specialDayPeriodLocationId, $providerRows[$userId]['specialDayList'][$specialDayId]['periodList'][$specialDayPeriodId]['periodLocationList'])
+            !array_key_exists(
+                $specialDayPeriodLocationId,
+                $providerRows[$userId]['specialDayList'][$specialDayId]['periodList'][$specialDayPeriodId]['periodLocationList']
+            )
         ) {
             $providerRows[$userId]['specialDayList'][$specialDayId]['periodList'][$specialDayPeriodId]['periodLocationList'][$specialDayPeriodLocationId] = [
                 'id'         => $specialDayPeriodLocationId,
@@ -1456,7 +1694,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             ];
         }
 
-        if ($dayOffId &&
+        if (
+            $dayOffId &&
             array_key_exists($userId, $providerRows) &&
             !array_key_exists($dayOffId, $providerRows[$userId]['dayOffList'])
         ) {
@@ -1469,7 +1708,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             ];
         }
 
-        if ($serviceId &&
+        if (
+            $serviceId &&
             !array_key_exists($serviceId, $serviceRows)
         ) {
             $serviceRows[$serviceId] = [
@@ -1504,7 +1744,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             ];
         }
 
-        if ($extraId &&
+        if (
+            $extraId &&
             $serviceId &&
             array_key_exists($serviceId, $serviceRows) &&
             !array_key_exists($extraId, $serviceRows[$serviceId]['extras'])
@@ -1520,7 +1761,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             ];
         }
 
-        if ($couponId &&
+        if (
+            $couponId &&
             $serviceId &&
             array_key_exists($serviceId, $serviceRows) &&
             !array_key_exists($couponId, $serviceRows[$serviceId]['coupons'])
@@ -1567,5 +1809,106 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         } catch (\Exception $e) {
             throw new QueryExecutionException('Unable to delete data from ' . __CLASS__, $e->getCode(), $e);
         }
+    }
+
+    /**
+     * Get max service capacity for a specific provider
+     *
+     * @param int $providerId
+     * @param int $serviceId
+     *
+     * @return int|null
+     * @throws QueryExecutionException
+     */
+    public function getMaxCapacityByServiceId($providerId, $serviceId)
+    {
+        $params = [
+            ':userId' => $providerId,
+            ':serviceId' => $serviceId
+        ];
+
+        try {
+            $statement = $this->connection->prepare(
+                "SELECT maxCapacity 
+                FROM {$this->providerServicesTable} 
+                WHERE userId = :userId AND serviceId = :serviceId"
+            );
+
+            $statement->execute($params);
+
+            $row = $statement->fetch();
+
+            return $row ? (int)$row['maxCapacity'] : 0;
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to get max capacity from ' . __CLASS__, $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Batch update to clear googleCalendarId for all providers with a single SQL query
+     *
+     * @return bool
+     * @throws QueryExecutionException
+     */
+    public function clearGoogleCalendarIds()
+    {
+        try {
+            $statement = $this->connection->prepare(
+                "UPDATE {$this->table} 
+                 SET googleCalendarId = NULL 
+                 WHERE googleCalendarId IS NOT NULL 
+                 AND type = 'provider'"
+            );
+
+            $result = $statement->execute();
+
+            if (!$result) {
+                throw new QueryExecutionException('Unable to batch clear googleCalendarId in ' . __CLASS__);
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to batch clear googleCalendarId in ' . __CLASS__, $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Apply license restriction for Lite license - forces only the first provider (smallest ID)
+     * to be returned regardless of filters
+     *
+     * @param array $criteria
+     * @return array Modified criteria array
+     * @throws QueryExecutionException
+     */
+    private function applyLiteLicenseRestriction($criteria)
+    {
+        if (!Licence::hasLicenseAccess(LicenceConstants::STARTER)) {
+            try {
+                $params = [
+                    ':type' => AbstractUser::USER_ROLE_PROVIDER
+                ];
+
+                $statement = $this->connection->prepare(
+                    "SELECT u.id
+                    FROM {$this->table} u
+                    WHERE u.type = :type 
+                    AND u.status NOT LIKE 'disabled'
+                    ORDER BY u.id ASC
+                    LIMIT 1"
+                );
+
+                $statement->execute($params);
+                $result = $statement->fetch();
+
+                if ($result) {
+                    // Force only this specific provider to be returned
+                    $criteria['providers'] = [(int)$result['id']];
+                }
+            } catch (\Exception $e) {
+                throw new QueryExecutionException('Unable to apply Lite license restriction in ' . __CLASS__, $e->getCode(), $e);
+            }
+        }
+
+        return $criteria;
     }
 }

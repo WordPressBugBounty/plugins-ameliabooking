@@ -57,7 +57,7 @@ function useParsedCustomPricing (service) {
 
         service.customPricing.persons = persons
 
-        if (customPricing.enabled === 'duration') {
+        if (customPricing.enabled === 'duration' || customPricing.enabled === true) {
             service.customPricing.enabled = 'duration'
         } else if (customPricing.enabled === 'person') {
             service.customPricing.enabled = 'person'
@@ -268,6 +268,7 @@ function useFrontendEmployee (store, employee) {
         googleCalendar: employee.googleCalendar,
         outlookCalendar: employee.outlookCalendar,
         appleCalendarId: employee.appleCalendarId,
+        googleCalendarId: employee.googleCalendarId,
         employeeAppleCalendar: employee.employeeAppleCalendar ? employee.employeeAppleCalendar : {
             iCloudId: null,
             appSpecificPassword: null
@@ -315,6 +316,122 @@ function getBackendTimeOutList (store, timeOutList) {
     })
 
     return dayTimeOutList
+}
+
+function haveSameUniqueSortedValues (arr1, arr2) {
+  const unique1 = [...new Set(arr1)].sort()
+  const unique2 = [...new Set(arr2)].sort()
+
+  return unique1.length === unique2.length && unique1.every((v, i) => v === unique2[i])
+}
+
+function isChangedDayOff (savedDayOff, dayOff) {
+  return savedDayOff.name !== dayOff.name ||
+  savedDayOff.startDate !== dayOff.startDate ||
+  savedDayOff.endDate !== dayOff.endDate ||
+  savedDayOff.repeat !== dayOff.repeat
+}
+
+function isChangedSpecialDay (savedSpecialDay, specialDay) {
+  let savedPeriods = {}
+
+  savedSpecialDay.periodList.forEach((period) => {
+    savedPeriods[period.startTime + '-' + period.endTime] = {
+      locationId: period.locationId,
+      servicesIds: period.periodServiceList.map(s => s.serviceId),
+      locationsIds: period.periodLocationList.map(l => l.locationId),
+    }
+  })
+
+  let periods = {}
+
+  specialDay.periodList.forEach((period) => {
+    periods[period.startTime + '-' + period.endTime] = {
+      locationId: period.locationId,
+      servicesIds: period.periodServiceList.map(s => s.serviceId),
+      locationsIds: period.periodLocationList.map(l => l.locationId),
+    }
+  })
+
+  let changedSpecialDay =
+    savedSpecialDay.startDate !== specialDay.startDate ||
+    savedSpecialDay.endDate !== specialDay.endDate ||
+    !haveSameUniqueSortedValues(Object.keys(savedPeriods), Object.keys(periods))
+
+  if (!changedSpecialDay) {
+    Object.keys(savedPeriods).forEach((key) => {
+      if (
+        !(key in periods) ||
+        savedPeriods[key].locationId !== periods[key].locationId ||
+        !haveSameUniqueSortedValues(
+          savedPeriods[key].servicesIds,
+          periods[key].servicesIds
+        ) ||
+        !haveSameUniqueSortedValues(
+          savedPeriods[key].locationsIds,
+          periods[key].locationsIds
+        )
+      ) {
+        changedSpecialDay = true
+      }
+    })
+  }
+
+  return changedSpecialDay
+}
+
+function modifyDayList (store, employee) {
+  let modifiedDayOffList = []
+
+  let removedDayOffList = []
+
+  store.getters['employee/getSavedDayOffList'].forEach((savedDay) => {
+    let index = employee.dayOffList.findIndex(i => i.id === savedDay.id)
+
+    if (index === -1) {
+      removedDayOffList.push({id: savedDay.id})
+    } else if (isChangedDayOff(savedDay, employee.dayOffList[index])) {
+      modifiedDayOffList.push(employee.dayOffList[index])
+    }
+  })
+
+  employee.dayOffList.forEach((day) => {
+    if (day.id === null) {
+      modifiedDayOffList.push(day)
+    }
+  })
+
+  employee.dayOffList = modifiedDayOffList
+
+  employee.removedDayOffList = removedDayOffList
+
+  let modifiedSpecialDayList = []
+
+  let removedSpecialDayList = []
+
+  store.getters['employee/getSavedSpecialDayList'].forEach((savedDay) => {
+    let index = employee.specialDayList.findIndex(i => i.id === savedDay.id)
+
+    if (index === -1) {
+      removedSpecialDayList.push({id: savedDay.id})
+    } else if (isChangedSpecialDay(savedDay, employee.specialDayList[index])) {
+      modifiedSpecialDayList.push(employee.specialDayList[index])
+    }
+  })
+
+  employee.specialDayList.forEach((day) => {
+    if (day.id === null) {
+      modifiedSpecialDayList.push(day)
+    }
+  })
+
+  employee.specialDayList = modifiedSpecialDayList
+
+  employee.removedSpecialDayList = removedSpecialDayList
+
+  delete employee.savedSpecialDayList
+
+  delete employee.savedDayOffList
 }
 
 function useBackendEmployee (store, timeZone) {
@@ -434,6 +551,8 @@ function useBackendEmployee (store, timeZone) {
       }
     )
 
+    modifyDayList(store, result)
+
     delete result.descriptionMode
 
     return result
@@ -453,6 +572,24 @@ function useEmployeeServices (store) {
     return store.getters['entities/getServices'].filter(i => serviceIds.indexOf(i.id) !== -1)
 }
 
+function useFeaturesAndIntegrations (service, isPanel) {
+  if (!isPanel && !settings.featuresIntegrations.extras.enabled) {
+    service.extras = []
+  }
+
+  if (!settings.featuresIntegrations.customPricing.enabled) {
+    service.customPricing = null
+  }
+
+  if (!settings.featuresIntegrations.depositPayment.enabled) {
+    service.depositPayment = 'disabled'
+  }
+
+  if (!settings.featuresIntegrations.recurringAppointments.enabled) {
+    service.recurringCycle = 'disabled'
+  }
+}
+
 export {
     useEmployeeServices,
     useParsedCustomPricing,
@@ -461,4 +598,5 @@ export {
     useFrontendEmployee,
     useBackendEmployee,
     useFrontendEmployeeServiceList,
+    useFeaturesAndIntegrations,
 }

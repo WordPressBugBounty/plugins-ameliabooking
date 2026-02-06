@@ -28,11 +28,14 @@ use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
 use AmeliaBooking\Domain\ValueObjects\DateTime\DateTimeValue;
+use AmeliaBooking\Domain\ValueObjects\Number\Float\Price;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
+use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
+use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
 use Exception;
 use Interop\Container\Exception\ContainerException;
@@ -71,7 +74,7 @@ class UpdateAppointmentCommandHandler extends CommandHandler
     {
         $result = new CommandResult();
 
-        $this->checkMandatoryFields($command);
+        $params = $command->getField('params');
 
         /** @var AppointmentRepository $appointmentRepo */
         $appointmentRepo = $this->container->get('domain.booking.appointment.repository');
@@ -121,6 +124,32 @@ class UpdateAppointmentCommandHandler extends CommandHandler
             throw new AccessDeniedException('You are not allowed to update appointment');
         }
 
+        if (!empty($params['noteOnly'])) {
+            $appointmentId = (int)$command->getField('id');
+
+            $note = $command->getField('internalNotes');
+
+            $oldAppointment = $appointmentRepo->getById($appointmentId);
+
+            $appointmentRepo->updateFieldById($appointmentId, $note, 'internalNotes');
+
+            $result->setResult(CommandResult::RESULT_SUCCESS);
+            $result->setMessage('Successfully updated appointment note');
+            $result->setData([
+                Entities::APPOINTMENT => array_merge($oldAppointment ? $oldAppointment->toArray() : [], ['internalNotes' => $note]),
+                'appointmentStatusChanged' => false,
+                'appointmentRescheduled' => false,
+                'bookingsWithChangedStatus' => [],
+                'appointmentEmployeeChanged' => false,
+                'appointmentZoomUserChanged' => false,
+                'bookingAdded' => false
+            ]);
+
+            return $result;
+        }
+
+        $this->checkMandatoryFields($command);
+
         $appointmentData = $command->getFields();
 
         /** @var EntityApplicationService $entityService */
@@ -159,15 +188,22 @@ class UpdateAppointmentCommandHandler extends CommandHandler
         $appointment->setProvider($provider);
 
         /** @var Appointment $oldAppointment */
-        $oldAppointment      = $appointmentRepo->getById($appointment->getId()->getValue());
-        $initialBookingStart = $oldAppointment->getBookingStart()->getValue();
-        $initialBookingEnd   = $oldAppointment->getBookingEnd()->getValue();
+        $oldAppointment = $appointmentRepo->getById($appointment->getId()->getValue());
+
+        $appointment->setInitialBookingStart(
+            new DateTimeValue(clone $oldAppointment->getBookingStart()->getValue())
+        );
+
+        $appointment->setInitialBookingEnd(
+            new DateTimeValue(clone $oldAppointment->getBookingEnd()->getValue())
+        );
 
         /** @var CustomerBooking $newBooking */
         foreach ($appointment->getBookings()->getItems() as $newBooking) {
             /** @var CustomerBooking $oldBooking */
             foreach ($oldAppointment->getBookings()->getItems() as $oldBooking) {
-                if ($newBooking->getId() &&
+                if (
+                    $newBooking->getId() &&
                     $newBooking->getId()->getValue() === $oldBooking->getId()->getValue()
                 ) {
                     if ($oldBooking->getUtcOffset()) {
@@ -185,7 +221,8 @@ class UpdateAppointmentCommandHandler extends CommandHandler
                     if ($oldBooking->getStatus()->getValue() === $newBooking->getStatus()->getValue()) {
                         $newBooking->setUpdated(
                             new BooleanValueObject(
-                                $appointmentAS->appointmentDetailsChanged($appointment, $oldAppointment) || $appointmentAS->bookingDetailsChanged($newBooking, $oldBooking)
+                                $appointmentAS->appointmentDetailsChanged($appointment, $oldAppointment) ||
+                                $appointmentAS->bookingDetailsChanged($newBooking, $oldBooking)
                             )
                         );
                     }
@@ -201,52 +238,17 @@ class UpdateAppointmentCommandHandler extends CommandHandler
             )
         );
 
-        $appointmentEmployeeChanged = null;
-
-        $appointmentZoomUserChanged = false;
-
-        $appointmentZoomUsersLicenced = false;
-
-        if ($appointment->getProviderId()->getValue() !== $oldAppointment->getProviderId()->getValue()) {
-            $appointmentEmployeeChanged = $oldAppointment->getProviderId()->getValue();
-
-            $provider = $providerRepository->getById($appointment->getProviderId()->getValue());
-
-            $oldProvider = $providerRepository->getById($oldAppointment->getProviderId()->getValue());
-
-            if ($provider && $oldProvider && $provider->getZoomUserId() && $oldProvider->getZoomUserId() &&
-                $provider->getZoomUserId()->getValue() !== $oldProvider->getZoomUserId()->getValue()) {
-                $appointmentZoomUserChanged = true;
-
-                $zoomUserType = 0;
-
-                $zoomOldUserType = 0;
-
-                $zoomResult = $zoomService->getUsers();
-
-                if (!(isset($zoomResult['code']) && $zoomResult['code'] === 124) &&
-                    !($zoomResult['users'] === null && isset($zoomResult['message']))) {
-                    $zoomUsers = $zoomResult['users'];
-                    foreach ($zoomUsers as $key => $val) {
-                        if ($val['id'] === $provider->getZoomUserId()->getValue()) {
-                            $zoomUserType = $val['type'];
-                        }
-                        if ($val['id'] === $oldProvider->getZoomUserId()->getValue()) {
-                            $zoomOldUserType = $val['type'];
-                        }
-                    }
-                }
-                if ($zoomOldUserType > 1 && $zoomUserType > 1) {
-                    $appointmentZoomUsersLicenced = true;
-                }
-            }
-        }
+        $userConnectionChanges = $appointmentAS->getUserConnectionChanges(
+            $appointment->getProviderId()->getValue(),
+            $oldAppointment->getProviderId()->getValue()
+        );
 
         if ($oldAppointment->getZoomMeeting()) {
             $appointment->setZoomMeeting($oldAppointment->getZoomMeeting());
         }
 
-        if ($bookingAS->isBookingApprovedOrPending($appointment->getStatus()->getValue()) &&
+        if (
+            $bookingAS->isBookingApprovedOrPending($appointment->getStatus()->getValue()) &&
             $bookingAS->isBookingCanceledOrRejectedOrNoShow($oldAppointment->getStatus()->getValue())
         ) {
             /** @var AbstractUser $user */
@@ -268,6 +270,8 @@ class UpdateAppointmentCommandHandler extends CommandHandler
         $appointment->setGoogleCalendarEventId($oldAppointment->getGoogleCalendarEventId());
         $appointment->setGoogleMeetUrl($oldAppointment->getGoogleMeetUrl());
         $appointment->setOutlookCalendarEventId($oldAppointment->getOutlookCalendarEventId());
+        $appointment->setMicrosoftTeamsUrl($oldAppointment->getMicrosoftTeamsUrl());
+        $appointment->setAppleCalendarEventId($oldAppointment->getAppleCalendarEventId());
 
         $appointmentRepo->beginTransaction();
 
@@ -278,13 +282,14 @@ class UpdateAppointmentCommandHandler extends CommandHandler
             $removedBookings->addItem(CustomerBookingFactory::create($removedBookingData), $removedBookingData['id']);
         }
 
-        $paymentData = null;
+        $paymentData = [];
 
         $bookingAdded = $bookingAS->isBookingAdded($appointment->getBookings());
 
-        /** @var CustomerBooking $booking */
+        /** @var CustomerBooking $oldBooking */
         foreach ($oldAppointment->getBookings()->getItems() as $oldBooking) {
-            if ($appointment->getServiceId()->getValue() !== $oldAppointment->getServiceId()->getValue() &&
+            if (
+                $appointment->getServiceId()->getValue() !== $oldAppointment->getServiceId()->getValue() &&
                 !$appointmentAS->processPackageAppointmentBooking(
                     $oldBooking,
                     $removedBookings,
@@ -320,8 +325,6 @@ class UpdateAppointmentCommandHandler extends CommandHandler
             throw $e;
         }
 
-        $appointmentRepo->commit();
-
         do_action(
             'amelia_after_appointment_updated',
             $appointment ? $appointment->toArray() : null,
@@ -352,10 +355,36 @@ class UpdateAppointmentCommandHandler extends CommandHandler
             $appointment->setRescheduled(new BooleanValueObject(true));
 
             foreach ($appointment->getBookings()->getItems() as $booking) {
+                $bookingStartInUtc = DateTimeService::getCustomDateTimeObjectInUtc(
+                    $appointment->getBookingStart()->getValue()->format('Y-m-d H:i:s')
+                )->format('Y-m-d H:i:s');
+
                 $paymentAS->updateBookingPaymentDate(
                     $booking,
-                    $appointment->getBookingStart()->getValue()->format('Y-m-d H:i:s')
+                    $bookingStartInUtc
                 );
+
+                if ($appointmentAS->isPeriodCustomPricing($service)) {
+                    /** @var UserRepository $userRepository */
+                    $userRepository = $this->getContainer()->get('domain.users.repository');
+
+                    /** @var CustomerBookingRepository $bookingRepository */
+                    $bookingRepository = $this->container->get('domain.booking.customerBooking.repository');
+
+                    /** @var Provider $provider */
+                    $provider = $userRepository->getById($appointment->getProviderId()->getValue());
+
+                    $price = $appointmentAS->getBookingPriceForService(
+                        $service,
+                        null,
+                        $provider,
+                        $appointment->getBookingStart()->getValue()->format('Y-m-d H:i:s')
+                    );
+
+                    $booking->setPrice(new Price($price));
+
+                    $bookingRepository->updatePrice($booking->getId()->getValue(), $booking);
+                }
             }
 
             $bookingAS->bookingRescheduled(
@@ -373,17 +402,22 @@ class UpdateAppointmentCommandHandler extends CommandHandler
             );
         }
 
+        $appointmentRepo->commit();
+
         if ($appointmentStatusChanged) {
             $appointmentStatus = $appointment->getStatus()->getValue();
 
             /** @var CustomerBooking $booking */
             foreach ($appointment->getBookings()->getItems() as $booking) {
-                if ($booking->getStatus()->getValue() === BookingStatus::APPROVED &&
+                if (
+                    $booking->getStatus()->getValue() === BookingStatus::APPROVED &&
                     ($appointmentStatus === BookingStatus::PENDING || $appointmentStatus === BookingStatus::APPROVED)
                 ) {
                     $booking->setChangedStatus(new BooleanValueObject(true));
                 }
             }
+
+            $appointment->setChangedStatus(new BooleanValueObject(true));
         }
 
         $appointmentArray = $appointment->toArray();
@@ -403,17 +437,13 @@ class UpdateAppointmentCommandHandler extends CommandHandler
             [
                 Entities::APPOINTMENT          => $appointmentArray,
                 'appointmentStatusChanged'     => $appointmentStatusChanged,
+                'oldAppointmentStatus'         => $oldAppointment->getStatus()->getValue(),
                 'appointmentRescheduled'       => $appRescheduled,
-                'initialAppointmentDateTime'   => [
-                    'bookingStart' => $initialBookingStart->format('Y-m-d H:i:s'),
-                    'bookingEnd'   => $initialBookingEnd->format('Y-m-d H:i:s'),
-                ],
                 'bookingsWithChangedStatus'    => $bookingsWithChangedStatus,
-                'appointmentEmployeeChanged'   => $appointmentEmployeeChanged,
-                'appointmentZoomUserChanged'   => $appointmentZoomUserChanged,
+                'appointmentEmployeeChanged'   => $userConnectionChanges['appointmentEmployeeChanged'],
+                'appointmentZoomUserChanged'   => $userConnectionChanges['appointmentZoomUserChanged'],
                 'bookingAdded'                 => $bookingAdded,
-                'appointmentZoomUsersLicenced' => $appointmentZoomUsersLicenced,
-                'createPaymentLinks'           => $command->getField('createPaymentLinks')
+                'appointmentZoomUsersLicenced' => $userConnectionChanges['appointmentZoomUsersLicenced']
             ]
         );
 

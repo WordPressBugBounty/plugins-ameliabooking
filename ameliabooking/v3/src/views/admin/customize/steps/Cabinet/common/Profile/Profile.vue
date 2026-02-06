@@ -1,9 +1,5 @@
 <template>
-  <div
-    ref="pageContainer"
-    class="am-capi"
-    :style="cssVars"
-  >
+  <div ref="pageContainer" class="am-capi" :style="cssVars">
     <div class="am-capi__inner">
       <AmAlert
         v-if="alertVisibility"
@@ -14,15 +10,12 @@
         @trigger-close="closeAlert"
       >
         <template #title>
-          <span class="am-icon-checkmark-circle-full"></span> {{ successMessage }}
+          <span class="am-icon-checkmark-circle-full"></span>
+          {{ successMessage }}
         </template>
       </AmAlert>
 
-      <el-tabs
-        v-model="activeTab"
-        class="am-capi__tabs"
-        @tab-click="tabClick"
-      >
+      <el-tabs v-model="activeTab" class="am-capi__tabs" @tab-click="tabClick">
         <el-tab-pane
           class="am-capi__tabs-item"
           :label="labelsDisplay('personal_info')"
@@ -36,13 +29,23 @@
             class="am-capi__form"
             :class="responsiveClass"
           >
-            <template v-for="item in amCustomize.capc.profile.order" :key="item.id">
+            <template
+              v-for="item in amCustomize.capc.profile.order"
+              :key="item.id"
+            >
               <component
                 :is="infoFormConstruction[item.id].template"
-                v-if="amCustomize[pageRenderKey].profile.options[item.id] ? amCustomize[pageRenderKey].profile.options[item.id].visibility : true"
+                v-if="
+                  amCustomize[pageRenderKey].profile.options[item.id]
+                    ? amCustomize[pageRenderKey].profile.options[item.id]
+                        .visibility
+                    : true
+                "
                 ref="customerCollectorRef"
                 v-model="infoFormData[item.id]"
-                v-model:countryPhoneIso="infoFormConstruction[item.id].countryPhoneIso"
+                v-model:countryPhoneIso="
+                  infoFormConstruction[item.id].countryPhoneIso
+                "
                 v-bind="infoFormConstruction[item.id].props"
               ></component>
             </template>
@@ -61,7 +64,10 @@
             class="am-capi__form"
             :class="responsiveClass"
           >
-            <template v-for="(item, key) in passFormConstruction" :key="item.props.itemName">
+            <template
+              v-for="(item, key) in passFormConstruction"
+              :key="item.props.itemName"
+            >
               <component
                 :is="item.template"
                 ref="customerPassCollectorRef"
@@ -82,9 +88,15 @@
       <MainProfileFooter
         :display="activeTab"
         :customized-labels="globalStepLabels('profile')"
-        :delete-footer-type="amCustomize.capc.profile.options.deleteFooterButton.buttonType"
-        :save-footer-button="amCustomize.capc.profile.options.saveFooterButton.buttonType"
-        :pass-footer-button="amCustomize.capc.profile.options.passFooterButton.buttonType"
+        :delete-footer-type="
+          amCustomize.capc.profile.options.deleteFooterButton.buttonType
+        "
+        :save-footer-button="
+          amCustomize.capc.profile.options.saveFooterButton.buttonType
+        "
+        :pass-footer-button="
+          amCustomize.capc.profile.options.passFooterButton.buttonType
+        "
       />
     </div>
   </div>
@@ -92,32 +104,25 @@
 
 <script setup>
 // * _components
-import AmAlert from "../../../../../../_components/alert/AmAlert.vue";
+import AmAlert from '../../../../../../_components/alert/AmAlert.vue'
 
 // * Dedicated Components
-import DeleteProfile from "../parts/DeleteProfile.vue"
-import MainProfileFooter from "../../../../../../common/SbsFormConstruction/MainContent/parts/MainProfileFooter.vue"
+import DeleteProfile from '../parts/DeleteProfile.vue'
+import MainProfileFooter from '../../../../../../common/SbsFormConstruction/MainContent/parts/MainProfileFooter.vue'
 
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  provide,
-  onMounted,
-  nextTick,
-  watch
-} from "vue";
+import { ref, computed, inject, provide, onMounted, nextTick, watch } from 'vue'
 
 // * Composables
-import { useResponsiveClass } from "../../../../../../../assets/js/common/responsive";
+import { useResponsiveClass } from '../../../../../../../assets/js/common/responsive'
+import { useReactiveCustomize } from '../../../../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Form Fields Templates
-import { formFieldsTemplates } from "../../../../../../../assets/js/common/formFieldsTemplates";
-import {useColorTransparency} from "../../../../../../../assets/js/common/colorManipulation";
+import { formFieldsTemplates } from '../../../../../../../assets/js/common/formFieldsTemplates'
+import { useColorTransparency } from '../../../../../../../assets/js/common/colorManipulation'
 
 // * Customize
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Page Content width
 let pageContainer = ref(null)
@@ -127,7 +132,7 @@ let pageWidth = ref(0)
 let sidebarCollapsed = inject('sidebarCollapsed')
 
 // * window resize listener
-window.addEventListener('resize', resize);
+window.addEventListener('resize', resize)
 // * resize function
 function resize() {
   if (pageContainer.value) {
@@ -146,7 +151,7 @@ watch(sidebarCollapsed, (current) => {
   }
 })
 
-function collapseTriggered () {
+function collapseTriggered() {
   pageWidth.value = pageContainer.value.offsetWidth
 }
 
@@ -172,24 +177,38 @@ let subStepName = inject('subStepName')
 let pageRenderKey = inject('pageRenderKey')
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepName.value].translations
-    && amCustomize.value[pageRenderKey.value][stepName.value].translations[label]
-    && amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepName.value]
+      .translations &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[
+        label
+      ] &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[
+        label
+      ][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[
+          label
+        ][langKey.value]
       : amLabels[label]
   })
 
   return computedLabel.value
 }
 
-function globalStepLabels (step) {
+function globalStepLabels(step) {
   let stepLabels = {}
-  let customizedLabels = step ? amCustomize.value[pageRenderKey.value][step].translations : null
+  let customizedLabels = step
+    ? amCustomize.value[pageRenderKey.value][step].translations
+    : null
   if (customizedLabels && Object.keys(customizedLabels)) {
-    Object.keys(amCustomize.value[pageRenderKey.value][step].translations).forEach(label => {
-      stepLabels[label] = amCustomize.value[pageRenderKey.value][step].translations[label][langKey.value]
+    Object.keys(
+      amCustomize.value[pageRenderKey.value][step].translations
+    ).forEach((label) => {
+      stepLabels[label] =
+        amCustomize.value[pageRenderKey.value][step].translations[label][
+          langKey.value
+        ]
     })
   } else {
     stepLabels = {}
@@ -206,7 +225,7 @@ let successMessage = ref('')
 // * Change Password Alert visibility
 let alertVisibility = ref(false)
 
-function closeAlert () {
+function closeAlert() {
   alertVisibility.value = false
   successMessage.value = ''
 }
@@ -224,7 +243,7 @@ let infoFormData = ref({
   lastName: '',
   email: '',
   phone: '',
-  birthday: ''
+  birthday: '',
 })
 
 // * Form construction
@@ -237,7 +256,7 @@ let infoFormConstruction = computed(() => {
         label: labelsDisplay('first_name_colon'),
         placeholder: labelsDisplay('enter_first_name'),
         class: `am-capi__item ${responsiveClass.value}`,
-      }
+      },
     },
     lastName: {
       template: formFieldsTemplates.text,
@@ -246,7 +265,7 @@ let infoFormConstruction = computed(() => {
         label: labelsDisplay('last_name_colon'),
         placeholder: labelsDisplay('enter_last_name'),
         class: `am-capi__item ${responsiveClass.value}`,
-      }
+      },
     },
     email: {
       template: formFieldsTemplates.text,
@@ -255,7 +274,7 @@ let infoFormConstruction = computed(() => {
         label: labelsDisplay('email_colon'),
         placeholder: labelsDisplay('enter_email'),
         class: `am-capi__item ${responsiveClass.value}`,
-      }
+      },
     },
     phone: {
       countryPhoneIso: 'US',
@@ -264,15 +283,19 @@ let infoFormConstruction = computed(() => {
         itemName: 'phone',
         label: labelsDisplay('phone_colon'),
         placeholder: labelsDisplay('enter_phone'),
-        defaultCode: amSettings.general.phoneDefaultCountryCode === 'auto' ? 'us' : amSettings.general.phoneDefaultCountryCode.toLowerCase(),
+        defaultCode:
+          amSettings.general.phoneDefaultCountryCode === 'auto'
+            ? 'us'
+            : amSettings.general.phoneDefaultCountryCode.toLowerCase(),
         phoneError: false,
         whatsAppLabel: labelsDisplay('whatsapp_opt_in_text'),
-        isWhatsApp: amSettings.notifications.whatsAppEnabled
-          && amSettings.notifications.whatsAppAccessToken
-          && amSettings.notifications.whatsAppBusinessID
-          && amSettings.notifications.whatsAppPhoneID,
+        isWhatsApp:
+          amSettings.notifications.whatsAppEnabled &&
+          amSettings.notifications.whatsAppAccessToken &&
+          amSettings.notifications.whatsAppBusinessID &&
+          amSettings.notifications.whatsAppPhoneID,
         class: `am-capi__item ${responsiveClass.value}`,
-      }
+      },
     },
     birthday: {
       template: formFieldsTemplates.datepicker,
@@ -283,8 +306,8 @@ let infoFormConstruction = computed(() => {
         clearable: true,
         readonly: false,
         class: `am-capi__item ${responsiveClass.value}`,
-      }
-    }
+      },
+    },
   }
 })
 
@@ -296,36 +319,44 @@ let infoFormRules = computed(() => {
         required: true,
         message: labelsDisplay('enter_first_name_warning'),
         trigger: 'submit',
-      }
+      },
     ],
     lastName: [
       {
-        required: amCustomize.value[pageRenderKey.value][stepName.value].options.lastName.required,
+        required:
+          amCustomize.value[pageRenderKey.value][stepName.value].options
+            .lastName.required,
         message: labelsDisplay('enter_last_name_warning'),
         trigger: 'submit',
-      }
+      },
     ],
     email: [
       {
-        required: amCustomize.value[pageRenderKey.value][stepName.value].options.email.required,
+        required:
+          amCustomize.value[pageRenderKey.value][stepName.value].options.email
+            .required,
         type: 'email',
         message: labelsDisplay('enter_valid_email_warning'),
         trigger: 'submit',
-      }
+      },
     ],
     phone: [
       {
-        required: amCustomize.value[pageRenderKey.value][stepName.value].options.phone.required,
+        required:
+          amCustomize.value[pageRenderKey.value][stepName.value].options.phone
+            .required,
         message: labelsDisplay('enter_phone_warning'),
         trigger: 'submit',
-      }
+      },
     ],
     birthday: [
       {
-        required: amCustomize.value[pageRenderKey.value][stepName.value].options.birthday.required,
+        required:
+          amCustomize.value[pageRenderKey.value][stepName.value].options
+            .birthday.required,
         message: labelsDisplay('enter_date_of_birth_warning'),
         trigger: 'submit',
-      }
+      },
     ],
   }
 })
@@ -333,7 +364,7 @@ let infoFormRules = computed(() => {
 let deleteProfileDialog = ref(false)
 provide('deleteProfileDialog', deleteProfileDialog)
 
-function saveProfileChanges () {
+function saveProfileChanges() {
   infoFormRef.value.validate((valid) => {
     if (valid) {
       successMessage.value = labelsDisplay('profile_data_success')
@@ -360,7 +391,7 @@ let passFormRef = ref(null)
 // * Form data
 let passFormData = ref({
   newPass: '',
-  confirmPass: ''
+  confirmPass: '',
 })
 
 // * Form construction
@@ -376,7 +407,7 @@ let passFormConstruction = computed(() => {
         placeholder: '',
         minLength: 3,
         class: `am-capp__item ${responsiveClass.value}`,
-      }
+      },
     },
     confirmPass: {
       template: formFieldsTemplates.text,
@@ -388,8 +419,8 @@ let passFormConstruction = computed(() => {
         placeholder: '',
         minLength: 3,
         class: `am-capp__item ${responsiveClass.value}`,
-      }
-    }
+      },
+    },
   }
 })
 
@@ -405,8 +436,8 @@ let passFormRules = computed(() => {
       {
         min: 4,
         message: labelsDisplay('new_password_length'),
-        trigger: 'submit'
-      }
+        trigger: 'submit',
+      },
     ],
     confirmPass: [
       {
@@ -417,18 +448,19 @@ let passFormRules = computed(() => {
       {
         min: 4,
         message: labelsDisplay('new_password_length'),
-        trigger: 'submit'
+        trigger: 'submit',
       },
       {
-        validator: () => passFormData.value.newPass === passFormData.value.confirmPass,
+        validator: () =>
+          passFormData.value.newPass === passFormData.value.confirmPass,
         message: labelsDisplay('passwords_not_match'),
-        trigger: 'submit'
-      }
+        trigger: 'submit',
+      },
     ],
   }
 })
 
-function tabClick () {
+function tabClick() {
   alertVisibility.value = false
 }
 
@@ -451,15 +483,18 @@ let cssVars = computed(() => {
   return {
     '--am-c-capi-primary': amColors.value.colorPrimary,
     '--am-c-capi-text': amColors.value.colorMainText,
-    '--am-c-capi-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1)
+    '--am-c-capi-text-op10': useColorTransparency(
+      amColors.value.colorMainText,
+      0.1
+    ),
   }
 })
 </script>
 
 <script>
 export default {
-  name: "CabinetProfile",
-  key: 'profile'
+  name: 'CabinetProfile',
+  key: 'profile',
 }
 </script>
 
@@ -476,7 +511,6 @@ export default {
 
     // Tabs
     .el-tabs {
-
       &__nav {
         &-wrap {
           &:after {
@@ -519,7 +553,11 @@ export default {
         $count: 100;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+            animation: 600ms
+              cubic-bezier(0.45, 1, 0.4, 1.2)
+              #{$i *
+              100}ms
+              am-animation-slide-up;
             animation-fill-mode: both;
           }
         }

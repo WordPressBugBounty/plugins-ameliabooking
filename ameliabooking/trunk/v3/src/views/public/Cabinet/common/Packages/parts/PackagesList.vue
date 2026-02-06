@@ -1,7 +1,7 @@
 <template>
   <template v-if="props.packages.length">
     <div
-      v-for="pack in props.packages"
+      v-for="(pack, index) in props.packages"
       :key="pack[0]"
       :style="cssVars"
       class="am-sc"
@@ -11,20 +11,70 @@
         class="am-sc__top"
         :class="responsiveClass"
       >
-        <div class="am-sc__top-left">
-          <div class="am-sc__name">
-            {{ pack[1].packageData.name }}
+        <div class="am-sc__top-menu">
+          <div class="am-sc__top-left">
+            <div class="am-sc__name">
+              {{ pack[1].packageData.name }}
+            </div>
+            <div
+                v-if="pack[1].packageData.end"
+                class="am-sc__date"
+            >
+              {{ amLabels.package_book_expire}} {{ getFrontedFormattedDate(pack[1].packageData.end.split(' ')[0]) }}
+            </div>
+            <div v-else class="am-sc__date">
+              {{ `${amLabels.package_book_expiration} ${amLabels.package_book_unlimited}` }}
+            </div>
           </div>
-          <div
-            v-if="pack[1].packageData.end"
-            class="am-sc__date"
+          <el-popover
+            v-if="!licence.isStarter && amSettings.featuresIntegrations.invoices.enabled"
+            ref="editRef"
+            :visible="editPopVisible[index]"
+            :persistent="false"
+            :show-arrow="false"
+            :width="'auto'"
+            :popper-class="'am-sc__popper'"
+            :popper-style="cssVars"
+            trigger="click"
+            placement="bottom-end"
           >
-            {{ amLabels.package_book_expire}} {{ getFrontedFormattedDate(pack[1].packageData.end.split(' ')[0]) }}
-          </div>
-          <div v-else class="am-sc__date">
-            {{ `${amLabels.package_book_expiration} ${amLabels.package_book_unlimited}` }}
-          </div>
+            <template #reference>
+              <span
+                class="am-cc__edit-btn am-icon-dots-vertical"
+                @click="editItem($event, index)"
+              ></span>
+            </template>
+            <div
+              v-click-outside="() => closeEditItemPopup(index)"
+              class="am-sc__edit"
+            >
+              <!-- Invoice -->
+              <div
+                v-if="!licence.isStarter"
+                class="am-sc__edit-item"
+                @click="previewInvoice(index)"
+              >
+                <span class="am-icon-eye"></span>
+                <span class="am-sc__edit-text">
+                  {{ amLabels['preview_invoice'] }}
+                </span>
+              </div>
+
+              <div
+                v-if="!licence.isStarter"
+                class="am-sc__edit-item"
+                @click="downloadInvoice(index)"
+              >
+                <span class="am-icon-download"></span>
+                <span class="am-sc__edit-text">
+                  {{ amLabels['download_invoice'] }}
+                </span>
+              </div>
+              <!-- /Invoice -->
+            </div>
+          </el-popover>
         </div>
+
         <div
           class="am-sc__top-right"
           :class="responsiveClass"
@@ -40,9 +90,9 @@
       </div>
       <template v-if="pack[1].packageData.end && pack[1].packageData.status !== 'canceled'">
         <div v-if="expirationDate(pack[1].packageData.end.split(' ')[0]) > 0" class="am-sc__bottom">
-        <span class="am-sc__expiration">
-          <span class="am-icon-triangle-info"></span> {{ `${amLabels.package_deal_expire_in} ${expirationDate(pack[1].packageData.end.split(' ')[0])} ${amLabels.expires_days}, ${amLabels.appointments_deal_expire}` }}
-        </span>
+          <span class="am-sc__expiration" :class="{'am-mobile': cWidth < 481}">
+            <span class="am-icon-triangle-info"></span> {{ `${amLabels.package_deal_expire_in} ${expirationDate(pack[1].packageData.end.split(' ')[0])} ${amLabels.expires_days}, ${amLabels.appointments_deal_expire}` }}
+          </span>
         </div>
       </template>
     </div>
@@ -57,12 +107,13 @@
 <script setup>
 // * Import from libraries
 import moment from 'moment'
+import { ClickOutside as vClickOutside } from "element-plus";
 
 // * Import from Vue
 import {
   reactive,
   computed,
-  inject
+  inject, ref, onMounted
 } from "vue";
 
 // * Dedicated components
@@ -75,6 +126,13 @@ import {
 import {
   useColorTransparency
 } from "../../../../../../assets/js/common/colorManipulation";
+import httpClient from "../../../../../../plugins/axios";
+import {useAuthorizationHeaderObject} from "../../../../../../assets/js/public/panel";
+import {createFileUrlFromResponse} from "../../../../../../assets/js/common/helper";
+import {useStore} from "vuex";
+
+// * Vars
+let store = useStore()
 
 // * Component properties
 let props = defineProps({
@@ -126,6 +184,8 @@ function packagesSlotsCalculation(data) {
  * * Customize
  * */
 
+let cWidth = inject('containerWidth')
+
 // * Root Settings
 const amSettings = inject('settings')
 
@@ -161,6 +221,66 @@ let amLabels = computed(() => {
 // * Colors
 let amColors = inject('amColors')
 
+// * Plugin Licence
+let licence = inject('licence')
+
+const editPopVisible = ref([]);
+
+onMounted(() => {
+  editPopVisible.value = props.packages.map(() => false);
+});
+
+function editItem(e, index) {
+  e.stopPropagation();
+  editPopVisible.value = editPopVisible.value.map((val, i) =>
+      i === index ? !val : false
+  );
+}
+
+function closeEditItemPopup(index) {
+  editPopVisible.value[index] = false;
+}
+function previewInvoice (index) {
+  store.commit('cabinet/setPackageLoading', true)
+  httpClient.post(
+    '/invoices/' + props.packages[index][1].packageData.payments[0].id,
+    { format: 'pdf' },
+    Object.assign(useAuthorizationHeaderObject(store), {params: {source: 'cabinet-customer'}})
+  ).then(response => {
+    window.open(createFileUrlFromResponse(response))
+    editPopVisible.value[index] = false;
+  })
+  .catch(e => {
+    console.log(e.message)
+  }).finally(() => {
+    store.commit('cabinet/setPackageLoading', false)
+  })
+}
+
+function downloadInvoice (index) {
+  store.commit('cabinet/setPackageLoading', true)
+  const format = amSettings.notifications.invoiceFormat || 'pdf'
+  httpClient.post(
+    '/invoices/' + props.packages[index][1].packageData.payments[0].id,
+    { format },
+    Object.assign(useAuthorizationHeaderObject(store), {params: {source: 'cabinet-customer'}})
+  ).then(response => {
+    let url = createFileUrlFromResponse(response, format)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `Invoice.${format}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    editPopVisible.value[index] = false;
+  })
+  .catch(e => {
+    console.log(e.message)
+  }).finally(() => {
+    store.commit('cabinet/setPackageLoading', false)
+  })
+}
+
 let cssVars = computed(() => {
   return {
     '--am-c-sc-bgr': amColors.value.colorMainBgr,
@@ -168,6 +288,8 @@ let cssVars = computed(() => {
     '--am-c-sc-text': amColors.value.colorMainText,
     '--am-c-sc-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
     '--am-c-sc-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-sc-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
+    '--am-c-sc-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15),
     '--am-c-sc-warning-op50': useColorTransparency(amColors.value.colorWarning, 0.5),
   }
 })
@@ -182,7 +304,7 @@ export default {
 <style lang="scss">
 @mixin select-card-block {
   // am - amelia
-  // sc - select block
+  // sc - select card
   .am-sc {
     display: flex;
     flex-direction: column;
@@ -208,9 +330,21 @@ export default {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-direction: column;
 
       &.am-rw-500 {
         flex-wrap: wrap;
+      }
+
+      &-menu {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+
+        .am-cc__edit-btn {
+          height: 100%;
+        }
       }
 
       &-right {
@@ -219,6 +353,12 @@ export default {
         align-items: center;
         flex: 0 0 auto;
         cursor: pointer;
+        margin-top: 12px;
+        width: 100%;
+        justify-content: center;
+        border-radius: 8px;
+        border: 1px solid var(--am-c-sc-bgr-op15);
+        padding: 4px;
 
         * {
           color: var(--am-c-sc-text);
@@ -268,7 +408,13 @@ export default {
       background-color: var(--am-c-sc-warning-op50);
       border-radius: 10px;
       padding: 0 8px;
-      margin: 16px 0 0;
+      margin: 10px 0 0;
+      width: 100%;
+      justify-content: center;
+
+      &.am-mobile {
+        margin: 16px 0 0;
+      }
 
       [class^='am-icon'] {
         display: block;
@@ -276,6 +422,52 @@ export default {
         margin-right: 4px;
       }
     }
+  }
+}
+
+.am-sc {
+  &__edit {
+    &-item {
+      display: flex;
+      align-items: center;
+      color: var(--am-c-sc-text);
+      border-radius: 4px;
+      padding: 4px;
+      cursor: pointer;
+      transition: background-color .3s ease-in-out;
+
+      &:hover {
+        background-color: var(--am-c-sc-text-op15);
+      }
+
+      span[class^="am-icon"] {
+        font-size: 24px;
+        color: inherit;
+        margin: 0 4px 0 0;
+      }
+    }
+
+    &-text {
+      font-size: 14px;
+      line-height: 1.7142857;
+      color: inherit;
+    }
+  }
+}
+
+.am-sc__popper {
+  padding: 6px 4px;
+  background-color: var(--am-c-sc-bgr);
+  border-color: var(--am-c-sc-bgr);
+  box-shadow: 0 2px 12px 0 var(--am-c-sc-text-op10);
+
+  * {
+    font-family: var(--am-font-family), sans-serif;
+    box-sizing: border-box;
+  }
+
+  &.el-popover.el-popper {
+    padding: 6px 4px;
   }
 }
 

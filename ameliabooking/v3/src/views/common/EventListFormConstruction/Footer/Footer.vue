@@ -19,7 +19,10 @@
     ></div>
     <AmButton
       v-if="props.paymentGateway !== 'payPal' || isCongratzStep"
-      :class="[{mainBtnClass}, {'square-continue': props.paymentGateway === 'square'}]"
+      :class="[
+        { mainBtnClass },
+        { 'square-continue': props.paymentGateway === 'square' },
+      ]"
       :type="props.primaryFooterButtonType"
       :category="isWaitingList() ? 'waiting' : 'primary'"
       size="medium"
@@ -49,35 +52,35 @@ import {
   ref,
   computed,
   // watch,
-  watchEffect
+  watchEffect,
 } from 'vue'
 
 let props = defineProps({
   ready: {
     type: Boolean,
-    default: true
+    default: true,
   },
   loading: {
     type: Boolean,
-    default: false
+    default: false,
   },
   loadingUpcoming: {
     type: Boolean,
-    default: false
+    default: false,
   },
   customizedLabels: {
     type: Object,
     default: () => {
       return {}
-    }
+    },
   },
   primaryFooterButtonType: {
     type: String,
-    default: 'filled'
+    default: 'filled',
   },
   secondaryFooterButtonType: {
     type: String,
-    default: 'plain'
+    default: 'plain',
   },
   waitingFooterButtonType: {
     type: String,
@@ -85,16 +88,16 @@ let props = defineProps({
   },
   paymentGateway: {
     type: String,
-    default: ''
+    default: '',
   },
   secondButtonShow: {
     type: Boolean,
-    default: true
+    default: true,
   },
   isWaitingList: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 // * Step Functions
@@ -102,10 +105,13 @@ const { secondButtonClick } = inject('secondButton', {
   secondButtonClick: () => {},
 })
 
-const { footerButtonClick, footerBtnDisabled } = inject('changingStepsFunctions', {
-  footerButtonClick: () => {},
-  footerBtnDisabled: ref(false)
-})
+const { footerButtonClick, footerBtnDisabled } = inject(
+  'changingStepsFunctions',
+  {
+    footerButtonClick: () => {},
+    footerBtnDisabled: ref(false),
+  }
+)
 
 // flag for payPal button on congratz step
 let isCongratzStep = ref(false)
@@ -114,27 +120,34 @@ const steps = inject('stepsArray')
 const currentStep = inject('stepIndex')
 
 let primaryBtnLabel = computed(() => {
-  if (isWaitingList()) { // TODO - check from where to pass waitingList settings
+  if (isWaitingList()) {
+    // TODO - check from where to pass waitingList settings
     return 'join_waiting_list'
   }
 
-  if (steps.value[currentStep.value].name === 'EventInfo' || steps.value[currentStep.value].name === 'EventPayment') {
+  if (
+    steps.value[currentStep.value].name === 'EventInfo' ||
+    steps.value[currentStep.value].name === 'EventPayment'
+  ) {
     return 'event_book_event'
   }
 
-  if (steps.value[currentStep.value].name === 'CongratulationsStep') return 'finish_appointment'
+  if (steps.value[currentStep.value].name === 'CongratulationsStep')
+    return 'finish_appointment'
 
   return 'continue'
 })
 
 let secondaryBtnLabel = computed(() => {
-  if (steps.value[currentStep.value].name === 'CongratulationsStep') return 'congrats_panel'
+  if (steps.value[currentStep.value].name === 'CongratulationsStep')
+    return 'congrats_panel'
 
   return 'event_close'
 })
 
 let mainBtnClass = computed(() => {
-  if (steps.value[currentStep.value].name === 'CongratulationsStep') return 'am-elf__footer-btn__finish'
+  if (steps.value[currentStep.value].name === 'CongratulationsStep')
+    return 'am-elf__footer-btn__finish'
 
   return ''
 })
@@ -145,24 +158,34 @@ watchEffect(() => {
   }
 })
 
-const shortcodeData = inject('shortcodeData', ref({
-  counter: 1000
-}))
+const shortcodeData = inject(
+  'shortcodeData',
+  ref({
+    counter: 1000,
+  })
+)
 
 // * Labels
 const amLabels = inject('labels')
-function displayLabels (label) {
-  return Object.keys(props.customizedLabels).length && props.customizedLabels[label] ? props.customizedLabels[label] : amLabels[label]
+function displayLabels(label) {
+  return Object.keys(props.customizedLabels).length &&
+    props.customizedLabels[label]
+    ? props.customizedLabels[label]
+    : amLabels[label]
 }
 
-function isWaitingList () {
-  return (steps.value[currentStep.value].name === 'EventInfo' || steps.value[currentStep.value].name === 'EventTickets') && props.isWaitingList
+function isWaitingList() {
+  return (
+    (steps.value[currentStep.value].name === 'EventInfo' ||
+      steps.value[currentStep.value].name === 'EventTickets') &&
+    props.isWaitingList
+  )
 }
 </script>
 
 <script>
 export default {
-  name: "EventListFooter"
+  name: 'EventListFooter',
 }
 </script>
 

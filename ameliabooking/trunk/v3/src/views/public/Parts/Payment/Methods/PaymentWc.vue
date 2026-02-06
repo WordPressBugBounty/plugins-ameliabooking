@@ -47,11 +47,9 @@ let stepsArray = inject('stepsArray')
  *************/
 
 const {
-  nextStep,
   footerButtonReset,
   footerButtonClicked
 } = inject('changingStepsFunctions', {
-  nextStep: () => {},
   footerButtonReset: () => {},
   footerButtonClicked: {
     value: false
@@ -62,7 +60,8 @@ defineExpose({
   continueWithBooking
 })
 
-let amLabels = inject('amLabels')
+// * Labels
+const amLabels = inject('labels')
 
 watchEffect(() => {
   if (footerButtonClicked.value && !props.instantBooking) {

@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -20,7 +21,6 @@ use AmeliaBooking\Domain\ValueObjects\String\Cycle;
  */
 class RecurringFactory
 {
-
     /**
      * @param $data
      *

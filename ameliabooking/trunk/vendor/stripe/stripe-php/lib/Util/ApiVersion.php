@@ -2,9 +2,9 @@
 
 // File generated from our OpenAPI spec
 
-namespace AmeliaStripe\Util;
+namespace AmeliaVendor\Stripe\Util;
 
 class ApiVersion
 {
-    const CURRENT = '2022-08-01';
+    const CURRENT = '2025-04-30.basil';
 }

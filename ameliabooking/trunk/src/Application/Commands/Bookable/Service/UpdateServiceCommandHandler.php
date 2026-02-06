@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -122,8 +123,10 @@ class UpdateServiceCommandHandler extends CommandHandler
 
         $serviceRepository->beginTransaction();
 
-        if ($command->getField('applyGlobally') &&
-            !$providerServiceRepository->updateServiceForAllProviders($service, $command->getArg('id'))) {
+        if (
+            $command->getField('applyGlobally') &&
+            !$providerServiceRepository->updateServiceForAllProviders($service, $command->getArg('id'))
+        ) {
             $serviceRepository->rollback();
 
             $result->setResult(CommandResult::RESULT_ERROR);

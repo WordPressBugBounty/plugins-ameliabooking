@@ -68,7 +68,14 @@
           ></component>
         </template>
 
-        <el-form-item v-if="amSettings.mailchimp.subscribeFieldVisible && customizedOptions.email.visibility" class="am-elfci__item am-subscribe" >
+        <el-form-item
+          v-if="
+            amSettings.featuresIntegrations.mailchimp.enabled &&
+            amSettings.mailchimp.subscribeFieldVisible &&
+            customizedOptions.email.visibility
+          "
+          class="am-elfci__item am-subscribe"
+        >
           <AmCheckbox
             v-model="subscribeToMailchimp"
             :label="amLabels.subscribe_to_mailing_list"
@@ -84,6 +91,7 @@
             ref="customFieldsCollectorRefs"
             v-model="infoFormData[`cf${item.id}`]"
             v-bind="infoFormConstruction[`cf${item.id}`].props"
+            @address-selected="(address) => addressSelected(address, item.id)"
           ></component>
         </template>
       </el-form>
@@ -147,6 +155,7 @@ import httpClient from "../../../../../plugins/axios";
 import AmSocialButton from "../../../../common/FormFields/AmSocialButton.vue";
 import {SocialAuthOptions} from "../../../../../assets/js/admin/socialAuthOptions";
 import AmCheckbox from "../../../../_components/checkbox/AmCheckbox.vue";
+import {mapAddressComponentsForXML} from "../../../../../assets/js/common/helper";
 
 let props = defineProps({
   globalClass: {
@@ -178,6 +187,9 @@ watch(
         if (customer.customFields.includes('datepicker')) {
           refreshDatePickerValue.value = true
         }
+        
+        // Force phone component to re-render with new value
+        refreshPhoneComponent.value++
       }
     }
 )
@@ -287,6 +299,9 @@ let couponCode = ref('')
 // * Form field date picker needs refresh
 let refreshDatePickerValue = ref(false)
 
+// * Form field phone needs refresh
+let refreshPhoneComponent = ref(0)
+
 // * Form data
 let infoFormData = ref({
   firstName: computed({
@@ -365,7 +380,10 @@ let infoFormConstruction = ref({
       itemName: 'phone',
       label: amLabels.value.phone_colon,
       placeholder: amLabels.value.enter_phone,
-      defaultCode: amSettings.general.phoneDefaultCountryCode === 'auto' ? '' : amSettings.general.phoneDefaultCountryCode.toLowerCase(),
+      defaultCode: computed(() => {
+        const savedCountry = store.getters['customerInfo/getCustomerCountryPhoneIso']
+        return savedCountry || (amSettings.general.phoneDefaultCountryCode === 'auto' ? '' : amSettings.general.phoneDefaultCountryCode.toLowerCase())
+      }),
       phoneError: false,
       whatsAppLabel: amLabels.value.whatsapp_opt_in_text,
       isWhatsApp: amSettings.notifications.whatsAppEnabled
@@ -375,7 +393,8 @@ let infoFormConstruction = ref({
       class: 'am-elfci__item',
       disabled: computed(() => {
         return !!(store.getters['customerInfo/getCustomerPhone'] && store.getters['customerInfo/getLoggedUser'])
-      })
+      }),
+      refreshTrigger: computed(() => refreshPhoneComponent.value)
     }
   },
 })
@@ -661,6 +680,14 @@ function checkCustomerCustomFieldVisibility (cf) {
   }
 
   return true
+}
+
+function addressSelected (addressComponents, cfId) {
+  if (addressComponents && store.getters['customFields/getCustomFields']['cf' + cfId]) {
+    const cf = store.getters['customFields/getCustomFields']['cf' + cfId]
+    cf.components = mapAddressComponentsForXML(addressComponents)
+    store.commit('customFields/setCustomField', cf)
+  }
 }
 
 // * Responsive - Container Width

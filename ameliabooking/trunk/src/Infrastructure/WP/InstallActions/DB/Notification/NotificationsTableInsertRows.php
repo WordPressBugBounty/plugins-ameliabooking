@@ -13,8 +13,7 @@ use AmeliaBooking\Infrastructure\WP\Translations\NotificationsStrings;
  */
 class NotificationsTableInsertRows extends AbstractDatabaseTable
 {
-
-    const TABLE = 'notifications';
+    public const TABLE = 'notifications';
 
     /**
      * @return array
@@ -146,6 +145,17 @@ class NotificationsTableInsertRows extends AbstractDatabaseTable
             $rows = array_merge($rows, [NotificationsStrings::getCustomerWaitingListSmsNotification()]);
         }
 
+        $customerAppointmentWaitingList = !(int)$wpdb->get_row(
+            "SELECT COUNT(*) AS count FROM {$table} WHERE name = 'customer_appointment_waiting'"
+        )->count;
+
+        if ($customerAppointmentWaitingList) {
+            $rows = array_merge($rows, [NotificationsStrings::getCustomerAppointmentWaitingListEmailNotification()]);
+            $rows = array_merge($rows, [NotificationsStrings::getCustomerAppointmentWaitingListSmsNotification()]);
+            $rows = array_merge($rows, [NotificationsStrings::getCustomerAppointmentWaitingListAvailableSpotEmailNotification()]);
+            $rows = array_merge($rows, [NotificationsStrings::getCustomerAppointmentWaitingListAvailableSpotSmsNotification()]);
+        }
+
         $providerWaitingList = !(int)$wpdb->get_row(
             "SELECT COUNT(*) AS count FROM {$table} WHERE name = 'provider_event_waiting'"
         )->count;
@@ -153,6 +163,23 @@ class NotificationsTableInsertRows extends AbstractDatabaseTable
         if ($providerWaitingList) {
             $rows = array_merge($rows, [NotificationsStrings::getProviderWaitingListEmailNotification()]);
             $rows = array_merge($rows, [NotificationsStrings::getProviderWaitingListSmsNotification()]);
+        }
+
+        $customerQrCode = !(int)$wpdb->get_row(
+            "SELECT COUNT(*) AS count FROM {$table} WHERE name = 'customer_event_qr_code'"
+        )->count;
+
+        if ($customerQrCode) {
+            $rows = array_merge($rows, [NotificationsStrings::getCustomerQrCodeEmailNotification()]);
+        }
+
+        $providerAppointmentWaitingList = !(int)$wpdb->get_row(
+            "SELECT COUNT(*) AS count FROM {$table} WHERE name = 'provider_appointment_waiting'"
+        )->count;
+
+        if ($providerAppointmentWaitingList) {
+            $rows = array_merge($rows, [NotificationsStrings::getProviderAppointmentWaitingListEmailNotification()]);
+            $rows = array_merge($rows, [NotificationsStrings::getProviderAppointmentWaitingListSmsNotification()]);
         }
 
         $addWhatsApp = !(int)$wpdb->get_row("SELECT COUNT(*) AS count FROM {$table} WHERE type = 'whatsapp'")->count;
@@ -177,6 +204,15 @@ class NotificationsTableInsertRows extends AbstractDatabaseTable
             $rows = array_merge($rows, NotificationsStrings::getWhatsAppWaitingListNotifications());
         }
 
+        $whatsAppAppointmentWaitingList = !(int)$wpdb->get_row(
+            "SELECT COUNT(*) AS count FROM {$table} WHERE name = 'provider_appointment_waiting' AND type = 'whatsapp'"
+        )->count;
+
+        if ($whatsAppAppointmentWaitingList) {
+            $rows = array_merge($rows, NotificationsStrings::getWhatsAppAppointmentWaitingListNotifications());
+            $rows = array_merge($rows, NotificationsStrings::getWhatsAppAppointmentWaitingListAvailableSpotNotifications());
+        }
+
         $appointmentUpdated = !(int)$wpdb->get_row("SELECT COUNT(*) AS count FROM {$table} WHERE name LIKE '%appointment_updated'")->count;
         if ($appointmentUpdated) {
             $rows = array_merge($rows, NotificationsStrings::getAppointmentUpdatedNotifications($addEmail));
@@ -185,6 +221,14 @@ class NotificationsTableInsertRows extends AbstractDatabaseTable
         $eventUpdated = !(int)$wpdb->get_row("SELECT COUNT(*) AS count FROM {$table} WHERE name LIKE '%event_updated'")->count;
         if ($eventUpdated) {
             $rows = array_merge($rows, NotificationsStrings::getEventUpdatedNotifications($addEmail));
+        }
+
+        $invoiceNotifications = !(int)$wpdb->get_row(
+            "SELECT COUNT(*) AS count FROM {$table} WHERE name = 'customer_invoice'"
+        )->count;
+
+        if ($invoiceNotifications) {
+            $rows = array_merge($rows, NotificationsStrings::getInvoiceNotification());
         }
 
         $result = [];

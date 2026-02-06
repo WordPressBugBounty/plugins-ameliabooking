@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -86,7 +87,7 @@ class Service extends AbstractBookable
     /** @var  Json */
     protected $translations;
 
-    /** @var  Json */
+    /** @var  Json|null */
     protected $customPricing;
 
     /** @var  IntegerValue */
@@ -401,7 +402,7 @@ class Service extends AbstractBookable
     }
 
     /**
-     * @return Json
+     * @return Json|null
      */
     public function getCustomPricing()
     {
@@ -409,9 +410,9 @@ class Service extends AbstractBookable
     }
 
     /**
-     * @param Json $customPricing
+     * @param Json|null $customPricing
      */
-    public function setCustomPricing(Json $customPricing)
+    public function setCustomPricing($customPricing)
     {
         $this->customPricing = $customPricing;
     }
@@ -483,7 +484,7 @@ class Service extends AbstractBookable
                 'recurringSub'     => $this->getRecurringSub() ? $this->getRecurringSub()->getValue() : null,
                 'recurringPayment' => $this->getRecurringPayment() ? $this->getRecurringPayment()->getValue() : null,
                 'translations'     => $this->getTranslations() ? $this->getTranslations()->getValue() : null,
-                'minSelectedExtras'=> $this->getMinSelectedExtras() ? $this->getMinSelectedExtras()->getValue() : null,
+                'minSelectedExtras' => $this->getMinSelectedExtras() ? $this->getMinSelectedExtras()->getValue() : null,
                 'mandatoryExtra'   => $this->getMandatoryExtra() ? $this->getMandatoryExtra()->getValue() : null,
                 'customPricing'    => $this->getCustomPricing() ? $this->getCustomPricing()->getValue() : null,
                 'maxExtraPeople'   => $this->getMaxExtraPeople() ? $this->getMaxExtraPeople()->getValue() : null,

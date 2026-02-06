@@ -4,6 +4,7 @@ namespace AmeliaBooking\Application\Commands\Booking\Appointment;
 
 use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Application\Commands\CommandResult;
+use AmeliaBooking\Application\Services\Reservation\AbstractReservationService;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\Payment\Payment;
 use AmeliaBooking\Domain\Services\Reservation\ReservationServiceInterface;
@@ -41,7 +42,7 @@ class SuccessfulBookingCommandHandler extends CommandHandler
         $type = $command->getField('type') === Entities::CART ?
             Entities::APPOINTMENT : $command->getField('type');
 
-        /** @var ReservationServiceInterface $reservationService */
+        /** @var AbstractReservationService $reservationService */
         $reservationService = $this->container->get('application.reservation.service')->get($type);
 
         /** @var PaymentRepository $paymentRepository */
@@ -79,7 +80,8 @@ class SuccessfulBookingCommandHandler extends CommandHandler
             'customer' => $command->getField('customer'),
             'paymentId' => $command->getField('paymentId'),
             'packageCustomerId' => $command->getField('packageCustomerId'),
-            'isPackageAppointment' => $command->getFields()['isPackageAppointment']
+            'isPackageAppointment' => !empty($command->getFields()['isPackageAppointment']),
+            'packageBookingFromBackend' => !empty($command->getFields()['packageBookingFromBackend'])
         ];
 
         $resultData = apply_filters('amelia_before_post_booking_actions_filter', $resultData);
@@ -97,7 +99,8 @@ class SuccessfulBookingCommandHandler extends CommandHandler
             $resultData['customer'],
             $resultData['paymentId'],
             $resultData['packageCustomerId'],
-            $resultData['isPackageAppointment']
+            $resultData['isPackageAppointment'],
+            $resultData['packageBookingFromBackend']
         );
     }
 }

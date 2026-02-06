@@ -2,9 +2,14 @@
 
 // File generated from our OpenAPI spec
 
-namespace AmeliaStripe\Service\TestHelpers\Treasury;
+namespace AmeliaVendor\Stripe\Service\TestHelpers\Treasury;
 
-class OutboundPaymentService extends \AmeliaStripe\Service\AbstractService
+/**
+ * @phpstan-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ *
+ * @psalm-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ */
+class OutboundPaymentService extends \AmeliaVendor\Stripe\Service\AbstractService
 {
     /**
      * Transitions a test mode created OutboundPayment to the <code>failed</code>
@@ -12,12 +17,12 @@ class OutboundPaymentService extends \AmeliaStripe\Service\AbstractService
      * state.
      *
      * @param string $id
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[]} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Treasury\OutboundPayment
      *
-     * @return \AmeliaStripe\Treasury\OutboundPayment
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function fail($id, $params = null, $opts = null)
     {
@@ -30,12 +35,12 @@ class OutboundPaymentService extends \AmeliaStripe\Service\AbstractService
      * state.
      *
      * @param string $id
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[]} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Treasury\OutboundPayment
      *
-     * @return \AmeliaStripe\Treasury\OutboundPayment
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function post($id, $params = null, $opts = null)
     {
@@ -48,15 +53,33 @@ class OutboundPaymentService extends \AmeliaStripe\Service\AbstractService
      * state.
      *
      * @param string $id
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[], returned_details?: array{code?: string}} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Treasury\OutboundPayment
      *
-     * @return \AmeliaStripe\Treasury\OutboundPayment
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function returnOutboundPayment($id, $params = null, $opts = null)
     {
         return $this->request('post', $this->buildPath('/v1/test_helpers/treasury/outbound_payments/%s/return', $id), $params, $opts);
+    }
+
+    /**
+     * Updates a test mode created OutboundPayment with tracking details. The
+     * OutboundPayment must not be cancelable, and cannot be in the
+     * <code>canceled</code> or <code>failed</code> states.
+     *
+     * @param string $id
+     * @param null|array{expand?: string[], tracking_details: array{ach?: array{trace_id: string}, type: string, us_domestic_wire?: array{chips?: string, imad?: string, omad?: string}}} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
+     *
+     * @return \AmeliaVendor\Stripe\Treasury\OutboundPayment
+     *
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
+     */
+    public function update($id, $params = null, $opts = null)
+    {
+        return $this->request('post', $this->buildPath('/v1/test_helpers/treasury/outbound_payments/%s', $id), $params, $opts);
     }
 }

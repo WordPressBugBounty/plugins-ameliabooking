@@ -12,10 +12,11 @@
       <span class="am-ff__item-label" v-html="props.label" />
     </template>
     <AmInputPhone
+      :key="`phone-${localDefaultCode}-${props.refreshTrigger}`"
       v-model="model"
       :name="props.itemName"
       :placeholder="props.placeholder"
-      :default-code="props.defaultCode"
+      :default-code="localDefaultCode"
       :disabled="props.disabled"
       style="position: relative"
       @country-phone-iso-updated="countryPhoneIsoUpdated"
@@ -38,7 +39,10 @@ import {
   computed,
   inject,
   ref,
-  toRefs
+  toRefs,
+  onMounted,
+  watch,
+  nextTick
 } from "vue";
 
 // * Composables
@@ -77,6 +81,7 @@ let props = defineProps({
   },
   defaultCode: {
     type: String,
+    default: ''
   },
   isWhatsApp: {
     type: [Boolean, String, Number],
@@ -89,6 +94,10 @@ let props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  refreshTrigger: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -104,9 +113,34 @@ let model = computed({
   }
 })
 
+// * Local ref for default code to handle reactivity
+let localDefaultCode = ref(props.defaultCode)
+
 function countryPhoneIsoUpdated (val) {
   emits('update:countryPhoneIso', val)
 }
+
+// * Watch for refresh trigger to update country code
+watch(() => props.refreshTrigger, () => {
+  nextTick(() => {
+    localDefaultCode.value = props.defaultCode
+    if (props.defaultCode) {
+      emits('update:countryPhoneIso', props.defaultCode.toLowerCase())
+    }
+  })
+})
+
+// * Watch for defaultCode changes
+watch(() => props.defaultCode, (newVal) => {
+  localDefaultCode.value = newVal
+})
+
+onMounted(() => {
+  localDefaultCode.value = props.defaultCode
+  if (props.defaultCode) {
+    emits('update:countryPhoneIso', props.defaultCode.toLowerCase())
+  }
+})
 
 // * Colors
 let amColors = inject('amColors')
@@ -114,6 +148,7 @@ let cssVars = computed(() => {
   return {
     // is - Info Step, wa - WhatsApp
     '--am-c-is-wa-text': useColorTransparency(amColors.value.colorMainText, 0.5),
+    // ! Inline styles need to be removed
     'margin-bottom': props.isWhatsApp && !props.phoneError ? '10px' : '24px'
   }
 })
@@ -134,7 +169,7 @@ export default {
 <style lang="scss">
 .amelia-v2-booking {
   #amelia-container {
-    .am-fs__info-form__item {
+    .am-fs__info-form__item, .am-ff__item {
       .am-whatsapp-opt-in-text {
         color: var(--am-c-is-wa-text);
         font-weight: 400;

@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -31,7 +32,7 @@ class ResourceEntitiesRepository extends AbstractRepository
     /**
      * @param array $entity
      *
-     * @return bool
+     * @return int
      * @throws QueryExecutionException
      */
     public function add($entity)
@@ -126,7 +127,6 @@ class ResourceEntitiesRepository extends AbstractRepository
             $statement->execute($params);
 
             $entityRows = $statement->fetchAll();
-
         } catch (\Exception $e) {
             throw new QueryExecutionException('Unable to get entities in ' . __CLASS__, $e->getCode(), $e);
         }
@@ -181,7 +181,6 @@ class ResourceEntitiesRepository extends AbstractRepository
             );
 
             return $statement->execute($params);
-
         } catch (\Exception $e) {
             throw new QueryExecutionException('Unable to delete entities in ' . __CLASS__, $e->getCode(), $e);
         }

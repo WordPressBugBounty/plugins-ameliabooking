@@ -1,18 +1,18 @@
 <?php
 
-namespace AmeliaStripe\Service;
+namespace AmeliaVendor\Stripe\Service;
 
-class OAuthService extends \AmeliaStripe\Service\AbstractService
+class OAuthService extends AbstractService
 {
     /**
      * Sends a request to Stripe's Connect API.
      *
-     * @param string $method the HTTP method
+     * @param 'delete'|'get'|'post' $method the HTTP method
      * @param string $path the path of the request
      * @param array $params the parameters of the request
-     * @param array|\AmeliaStripe\Util\RequestOptions $opts the special modifiers of the request
+     * @param array|\AmeliaVendor\Stripe\Util\RequestOptions $opts the special modifiers of the request
      *
-     * @return \AmeliaStripe\StripeObject the object returned by Stripe's Connect API
+     * @return \AmeliaVendor\Stripe\StripeObject the object returned by Stripe's Connect API
      */
     protected function requestConnect($method, $path, $params, $opts)
     {
@@ -41,7 +41,7 @@ class OAuthService extends \AmeliaStripe\Service\AbstractService
         if (!\array_key_exists('response_type', $params)) {
             $params['response_type'] = 'code';
         }
-        $query = \AmeliaStripe\Util\Util::encodeParameters($params);
+        $query = \AmeliaVendor\Stripe\Util\Util::encodeParameters($params);
 
         return $base . '/oauth/authorize?' . $query;
     }
@@ -53,9 +53,9 @@ class OAuthService extends \AmeliaStripe\Service\AbstractService
      * @param null|array $params
      * @param null|array $opts
      *
-     * @throws \AmeliaStripe\Exception\OAuth\OAuthErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\StripeObject object containing the response from the API
      *
-     * @return \AmeliaStripe\StripeObject object containing the response from the API
+     * @throws \AmeliaVendor\Stripe\Exception\OAuth\OAuthErrorException if the request fails
      */
     public function token($params = null, $opts = null)
     {
@@ -71,9 +71,9 @@ class OAuthService extends \AmeliaStripe\Service\AbstractService
      * @param null|array $params
      * @param null|array $opts
      *
-     * @throws \AmeliaStripe\Exception\OAuth\OAuthErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\StripeObject object containing the response from the API
      *
-     * @return \AmeliaStripe\StripeObject object containing the response from the API
+     * @throws \AmeliaVendor\Stripe\Exception\OAuth\OAuthErrorException if the request fails
      */
     public function deauthorize($params = null, $opts = null)
     {
@@ -92,7 +92,7 @@ class OAuthService extends \AmeliaStripe\Service\AbstractService
         }
         if (null === $clientId) {
             $msg = 'No client_id provided. (HINT: set your client_id using '
-              . '`new \AmeliaStripe\StripeClient([clientId => <CLIENT-ID>
+              . '`new \AmeliaVendor\Stripe\StripeClient([clientId => <CLIENT-ID>
                 ])`)".  You can find your client_ids '
               . 'in your Stripe dashboard at '
               . 'https://dashboard.stripe.com/account/applications/settings, '
@@ -100,7 +100,7 @@ class OAuthService extends \AmeliaStripe\Service\AbstractService
               . 'https://stripe.com/docs/connect/standard-accounts for details, '
               . 'or email support@stripe.com if you have any questions.';
 
-            throw new \AmeliaStripe\Exception\AuthenticationException($msg);
+            throw new \AmeliaVendor\Stripe\Exception\AuthenticationException($msg);
         }
 
         return $clientId;
@@ -116,35 +116,35 @@ class OAuthService extends \AmeliaStripe\Service\AbstractService
     }
 
     /**
-     * @param array|\AmeliaStripe\Util\RequestOptions $opts the special modifiers of the request
+     * @param array|\AmeliaVendor\Stripe\Util\RequestOptions $opts the special modifiers of the request
      *
-     * @throws \AmeliaStripe\Exception\InvalidArgumentException
+     * @return \AmeliaVendor\Stripe\Util\RequestOptions
      *
-     * @return \AmeliaStripe\Util\RequestOptions
+     * @throws \AmeliaVendor\Stripe\Exception\InvalidArgumentException
      */
     private function _parseOpts($opts)
     {
         if (\is_array($opts)) {
             if (\array_key_exists('connect_base', $opts)) {
                 // Throw an exception for the convenience of anybody migrating to
-                // \AmeliaStripe\Service\OAuthService from \AmeliaStripe\OAuth, where `connect_base`
+                // \Stripe\Service\OAuthService from \Stripe\OAuth, where `connect_base`
                 // was the name of the parameter that behaves as `api_base` does here.
-                throw new \AmeliaStripe\Exception\InvalidArgumentException('Use `api_base`, not `connect_base`');
+                throw new \AmeliaVendor\Stripe\Exception\InvalidArgumentException('Use `api_base`, not `connect_base`');
             }
         }
 
-        return \AmeliaStripe\Util\RequestOptions::parse($opts);
+        return \AmeliaVendor\Stripe\Util\RequestOptions::parse($opts);
     }
 
     /**
-     * @param \AmeliaStripe\Util\RequestOptions $opts
+     * @param \AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
      * @return string
      */
     private function _getBase($opts)
     {
-        return isset($opts->apiBase) ?
-          $opts->apiBase :
-          $this->client->getConnectBase();
+        return isset($opts->apiBase)
+          ? $opts->apiBase
+          : $this->client->getConnectBase();
     }
 }

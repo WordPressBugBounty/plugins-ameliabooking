@@ -5,10 +5,7 @@
     position="center"
     :style="cssDialogVars"
   >
-    <div
-      ref="popupInnerRef"
-      class="am-csd__inner"
-    >
+    <div ref="popupInnerRef" class="am-csd__inner">
       <div class="am-csd__header">
         <div class="am-csd__header-text">
           {{ labelsDisplay('no_selected_slot_requirements') }}
@@ -17,33 +14,46 @@
           <IconComponent icon="close"></IconComponent>
         </div>
       </div>
-      <div
-        ref="rescheduleRef"
-        class="am-csd__content"
-      >
+      <div ref="rescheduleRef" class="am-csd__content">
         <!-- Packages filters -->
         <el-form
-          v-if="subStepName === 'bookAppointment' && (amCustomize[pageRenderKey][stepRecognition].options.employee.visibility || amCustomize[pageRenderKey][stepRecognition].options.location.visibility)"
+          v-if="
+            subStepName === 'bookAppointment' &&
+            (amCustomize[pageRenderKey][stepRecognition].options.employee
+              .visibility ||
+              amCustomize[pageRenderKey][stepRecognition].options.location
+                .visibility)
+          "
           ref="packageFormRef"
           class="am-csd__filter-wrapper"
           :rules="rules"
           :model="packageFormData"
           label-position="top"
         >
-          <div
-            class="am-csd__filter"
-            :class="responsiveClass"
-          >
+          <div class="am-csd__filter" :class="responsiveClass">
             <el-form-item
-              v-if="amCustomize[pageRenderKey][stepRecognition].options.employee.visibility"
-              :class="[{'am-csd__filter-item-full': !amCustomize[pageRenderKey][stepRecognition].options.location.visibility},responsiveClass]"
+              v-if="
+                amCustomize[pageRenderKey][stepRecognition].options.employee
+                  .visibility
+              "
+              :class="[
+                {
+                  'am-csd__filter-item-full':
+                    !amCustomize[pageRenderKey][stepRecognition].options
+                      .location.visibility,
+                },
+                responsiveClass,
+              ]"
               :label="`${labelsDisplay('package_appointment_employee')}:`"
               :prop="'employee'"
             >
               <AmSelect
                 v-model="packageFormData.employee"
                 clearable
-                :filterable="amCustomize[pageRenderKey][stepRecognition].options.employee.filterable"
+                :filterable="
+                  amCustomize[pageRenderKey][stepRecognition].options.employee
+                    .filterable
+                "
                 :placeholder="`${labelsDisplay('package_select_employee')}...`"
                 :fit-input-width="true"
                 :popper-class="'am-csd__filter-employees'"
@@ -60,8 +70,12 @@
                     :price="0"
                     :image-thumb="provider.pictureThumbPath"
                     :description="provider.description"
-                    :dialog-title="labelsDisplay('employee_information_package')"
-                    :dialog-button-text="labelsDisplay('select_this_employee_package')"
+                    :dialog-title="
+                      labelsDisplay('employee_information_package')
+                    "
+                    :dialog-button-text="
+                      labelsDisplay('select_this_employee_package')
+                    "
                     :badge="provider.badge"
                   ></AmOptionTemplate2>
                 </AmOption>
@@ -69,15 +83,28 @@
             </el-form-item>
 
             <el-form-item
-              v-if="amCustomize[pageRenderKey][stepRecognition].options.location.visibility"
-              :class="[{'am-csd__filter-item-full': !amCustomize[pageRenderKey][stepRecognition].options.employee.visibility},responsiveClass]"
+              v-if="
+                amCustomize[pageRenderKey][stepRecognition].options.location
+                  .visibility
+              "
+              :class="[
+                {
+                  'am-csd__filter-item-full':
+                    !amCustomize[pageRenderKey][stepRecognition].options
+                      .employee.visibility,
+                },
+                responsiveClass,
+              ]"
               :label="`${labelsDisplay('package_appointment_location')}:`"
               :prop="'location'"
             >
               <AmSelect
                 v-model="packageFormData.location"
                 clearable
-                :filterable="amCustomize[pageRenderKey][stepRecognition].options.location.filterable"
+                :filterable="
+                  amCustomize[pageRenderKey][stepRecognition].options.location
+                    .filterable
+                "
                 :placeholder="`${labelsDisplay('package_select_location')}...`"
                 :fit-input-width="true"
               >
@@ -101,13 +128,19 @@
         <AmButton
           category="secondary"
           :size="popupInnerWidth <= 360 ? 'small' : 'default'"
-          :type="amCustomize[pageRenderKey][stepRecognition].options.cancelBtn.buttonType"
+          :type="
+            amCustomize[pageRenderKey][stepRecognition].options.cancelBtn
+              .buttonType
+          "
         >
           {{ labelsDisplay('cancel') }}
         </AmButton>
         <AmButton
           :size="popupInnerWidth <= 360 ? 'small' : 'default'"
-          :type="amCustomize[pageRenderKey][stepRecognition].options.continueBtn.buttonType"
+          :type="
+            amCustomize[pageRenderKey][stepRecognition].options.continueBtn
+              .buttonType
+          "
         >
           {{ labelsDisplay('continue') }}
         </AmButton>
@@ -118,36 +151,30 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  watch,
-  onMounted,
-  nextTick
-} from "vue";
+import { ref, computed, inject, watch, onMounted, nextTick } from 'vue'
 
 // * _components
-import AmSlidePopup from "../../../../../../_components/slide-popup/AmSlidePopup.vue";
-import IconComponent from "../../../../../../_components/icons/IconComponent.vue";
-import AmButton from "../../../../../../_components/button/AmButton.vue";
-import AmSelect from "../../../../../../_components/select/AmSelect.vue";
-import AmOption from "../../../../../../_components/select/AmOption.vue";
-import AmOptionTemplate2 from "../../../../../../_components/select/parts/AmOptionTemplate2.vue";
+import AmSlidePopup from '../../../../../../_components/slide-popup/AmSlidePopup.vue'
+import IconComponent from '../../../../../../_components/icons/IconComponent.vue'
+import AmButton from '../../../../../../_components/button/AmButton.vue'
+import AmSelect from '../../../../../../_components/select/AmSelect.vue'
+import AmOption from '../../../../../../_components/select/AmOption.vue'
+import AmOptionTemplate2 from '../../../../../../_components/select/parts/AmOptionTemplate2.vue'
 
 // * Templates
 import Calendar from '../../../parts/Calendar.vue'
 
 // * Composables
-import { useResponsiveClass } from "../../../../../../../assets/js/common/responsive";
-import { useColorTransparency } from "../../../../../../../assets/js/common/colorManipulation";
+import { useResponsiveClass } from '../../../../../../../assets/js/common/responsive'
+import { useColorTransparency } from '../../../../../../../assets/js/common/colorManipulation'
+import { useReactiveCustomize } from '../../../../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Components props
 let props = defineProps({
   visibility: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 // * Popup contnte width
@@ -158,7 +185,7 @@ let popupInnerWidth = ref(0)
 let sidebarCollapsed = inject('sidebarCollapsed')
 
 // * window resize listener
-window.addEventListener('resize', resize);
+window.addEventListener('resize', resize)
 
 // * resize function
 function resize() {
@@ -179,7 +206,7 @@ watch(sidebarCollapsed, (current) => {
   }
 })
 
-function collapseTriggered () {
+function collapseTriggered() {
   popupInnerWidth.value = popupInnerRef.value.offsetWidth
 }
 
@@ -211,7 +238,7 @@ let amLabels = inject('labels')
 let stepName = inject('stepName')
 let subStepName = inject('subStepName')
 let pageRenderKey = inject('pageRenderKey')
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 let stepRecognition = computed(() => {
   if (subStepName.value) return subStepName.value
@@ -219,12 +246,16 @@ let stepRecognition = computed(() => {
 })
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepRecognition.value].translations
-    && amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label]
-    && amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepRecognition.value]
+      .translations &&
+      amCustomize.value[pageRenderKey.value][stepRecognition.value]
+        .translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepRecognition.value]
+        .translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepRecognition.value]
+          .translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -236,7 +267,7 @@ function labelsDisplay (label) {
  *********/
 let packageFormData = ref({
   employee: null,
-  location: null
+  location: null,
 })
 
 let packageFormRef = ref(null)
@@ -245,33 +276,45 @@ let packageFormRef = ref(null)
 let rules = ref({
   employee: [
     {
-      required: computed(() => amCustomize.value[pageRenderKey.value][stepRecognition.value].options.employee.required),
+      required: computed(
+        () =>
+          amCustomize.value[pageRenderKey.value][stepRecognition.value].options
+            .employee.required
+      ),
       message: labelsDisplay('please_select_employee'),
       trigger: 'submit',
-    }
+    },
   ],
   location: [
     {
-      required: computed(() => amCustomize.value[pageRenderKey.value][stepRecognition.value].options.location.required),
+      required: computed(
+        () =>
+          amCustomize.value[pageRenderKey.value][stepRecognition.value].options
+            .location.required
+      ),
       message: labelsDisplay('please_select_location'),
       trigger: 'submit',
-    }
-  ]
+    },
+  ],
 })
 
-let employees = [{
-  id: 1,
-  firstName: 'John',
-  lastName: 'Doe',
-  pictureThumbPath: null,
-  description: '',
-  badge: null
-}]
+let employees = [
+  {
+    id: 1,
+    firstName: 'John',
+    lastName: 'Doe',
+    pictureThumbPath: null,
+    description: '',
+    badge: null,
+  },
+]
 
-let locations = [{
-  id: 1,
-  name: 'Location 1'
-}]
+let locations = [
+  {
+    id: 1,
+    name: 'Location 1',
+  },
+]
 
 // * Fonts
 let amFonts = inject('amFonts')
@@ -283,9 +326,18 @@ let cssDialogVars = computed(() => {
   return {
     '--am-c-csd-text': amColors.value.colorMainText,
     '--am-c-csd-bgr': amColors.value.colorMainBgr,
-    '--am-c-csd-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
-    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
-    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
+    '--am-c-csd-text-op10': useColorTransparency(
+      amColors.value.colorMainText,
+      0.1
+    ),
+    '--am-c-scroll-op30': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.3
+    ),
+    '--am-c-scroll-op10': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.1
+    ),
     '--am-font-family': amFonts.value.fontFamily,
   }
 })
@@ -293,7 +345,7 @@ let cssDialogVars = computed(() => {
 
 <script>
 export default {
-  name: 'AppointmentBooking'
+  name: 'AppointmentBooking',
 }
 </script>
 
@@ -391,7 +443,8 @@ export default {
       }
     }
 
-    &__inner {}
+    &__inner {
+    }
 
     &__header {
       display: flex;
@@ -412,7 +465,7 @@ export default {
     }
 
     &__content {
-      padding: 0  24px;
+      padding: 0 24px;
     }
 
     &__alert {
@@ -482,7 +535,7 @@ export default {
               align-items: center;
               flex: 1;
               position: relative;
-              font-size: var(--am-fs-input);
+              font-size: var(--am-fs-inp);
               min-width: 0;
             }
 
@@ -496,7 +549,7 @@ export default {
       }
 
       .el-form {
-        &-item{
+        &-item {
           width: calc(50% - 12px);
 
           &.am-csd__filter-item-full {

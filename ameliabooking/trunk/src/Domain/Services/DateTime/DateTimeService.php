@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -25,7 +26,7 @@ class DateTimeService
             if ($settings['timeZoneString']) {
                 self::$timeZone = new \DateTimeZone($settings['timeZoneString']);
             } elseif ($settings['gmtOffset']) {
-                $hours = (int)$settings['gmtOffset'];
+                $hours   = (int)$settings['gmtOffset'];
                 $minutes = ($settings['gmtOffset'] - floor($settings['gmtOffset'])) * 60;
 
                 self::$timeZone = new \DateTimeZone(sprintf('%+03d:%02d', $hours, $minutes));
@@ -33,6 +34,16 @@ class DateTimeService
                 self::$timeZone = new \DateTimeZone('UTC');
             }
         }
+    }
+
+    /**
+     * @param string $timeZone
+     *
+     * @return \DateTimeZone
+     */
+    public static function createTimeZone($timeZone)
+    {
+        return new \DateTimeZone($timeZone);
     }
 
     /**
@@ -259,7 +270,7 @@ class DateTimeService
      *
      * @param $dateString
      *
-     * @return int
+     * @return string
      */
     public static function getDayIndex($dateString)
     {
@@ -281,5 +292,11 @@ class DateTimeService
         );
 
         return $dateTimes;
+    }
+
+    public static function getDateTimeStringInUtc(string $dateTimeString): string
+    {
+        return self::getCustomDateTimeObject($dateTimeString)
+            ->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
     }
 }

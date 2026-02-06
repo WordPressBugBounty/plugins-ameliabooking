@@ -3,12 +3,12 @@
 namespace AmeliaHttp\Discovery;
 
 use AmeliaHttp\Discovery\Exception\DiscoveryFailedException;
-use AmeliaPsr\Http\Message\RequestFactoryInterface;
-use AmeliaPsr\Http\Message\ResponseFactoryInterface;
-use AmeliaPsr\Http\Message\ServerRequestFactoryInterface;
-use AmeliaPsr\Http\Message\StreamFactoryInterface;
-use AmeliaPsr\Http\Message\UploadedFileFactoryInterface;
-use AmeliaPsr\Http\Message\UriFactoryInterface;
+use AmeliaVendor\Psr\Http\Message\RequestFactoryInterface;
+use AmeliaVendor\Psr\Http\Message\ResponseFactoryInterface;
+use AmeliaVendor\Psr\Http\Message\ServerRequestFactoryInterface;
+use AmeliaVendor\Psr\Http\Message\StreamFactoryInterface;
+use AmeliaVendor\Psr\Http\Message\UploadedFileFactoryInterface;
+use AmeliaVendor\Psr\Http\Message\UriFactoryInterface;
 
 /**
  * Finds PSR-17 factories.
@@ -19,7 +19,7 @@ final class Psr17FactoryDiscovery extends ClassDiscovery
 {
     private static function createException($type, Exception $e)
     {
-        return new \Http\Discovery\Exception\NotFoundException(
+        return new \AmeliaHttp\Discovery\Exception\NotFoundException(
             'No PSR-17 '.$type.' found. Install a package from this list: https://packagist.org/providers/psr/http-factory-implementation',
             0,
             $e

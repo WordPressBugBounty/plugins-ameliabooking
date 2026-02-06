@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -9,11 +10,12 @@ namespace AmeliaBooking\Infrastructure\WP\EventListeners\Booking\Appointment;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Services\Booking\BookingApplicationService;
 use AmeliaBooking\Application\Services\Booking\IcsApplicationService;
+use AmeliaBooking\Application\Services\Integration\ApplicationIntegrationService;
 use AmeliaBooking\Application\Services\Notification\EmailNotificationService;
 use AmeliaBooking\Application\Services\Notification\SMSNotificationService;
 use AmeliaBooking\Application\Services\Notification\AbstractWhatsAppNotificationService;
+use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Application\Services\WebHook\AbstractWebHookApplicationService;
-use AmeliaBooking\Application\Services\Zoom\AbstractZoomApplicationService;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
 use AmeliaBooking\Domain\Entity\Booking\Event\Event;
@@ -21,12 +23,11 @@ use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Factory\Booking\Appointment\AppointmentFactory;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
+use AmeliaBooking\Infrastructure\Repository\User\CustomerRepository;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
-use AmeliaBooking\Infrastructure\Services\Google\AbstractGoogleCalendarService;
-use AmeliaBooking\Infrastructure\Services\LessonSpace\AbstractLessonSpaceService;
-use AmeliaBooking\Infrastructure\Services\Outlook\AbstractOutlookCalendarService;
+use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ServiceRepository;
 use Exception;
 use Interop\Container\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
@@ -39,10 +40,10 @@ use Slim\Exception\ContainerValueNotFoundException;
 class AppointmentStatusUpdatedEventHandler
 {
     /** @var string */
-    const APPOINTMENT_STATUS_UPDATED = 'appointmentStatusUpdated';
+    public const APPOINTMENT_STATUS_UPDATED = 'appointmentStatusUpdated';
 
     /** @var string */
-    const BOOKING_STATUS_UPDATED = 'bookingStatusUpdated';
+    public const BOOKING_STATUS_UPDATED = 'bookingStatusUpdated';
 
     /**
      * @param CommandResult $commandResult
@@ -57,10 +58,8 @@ class AppointmentStatusUpdatedEventHandler
      */
     public static function handle($commandResult, $container)
     {
-        /** @var AbstractGoogleCalendarService $googleCalendarService */
-        $googleCalendarService = $container->get('infrastructure.google.calendar.service');
-        /** @var AbstractOutlookCalendarService $outlookCalendarService */
-        $outlookCalendarService = $container->get('infrastructure.outlook.calendar.service');
+        /** @var ApplicationIntegrationService $applicationIntegrationService */
+        $applicationIntegrationService = $container->get('application.integration.service');
         /** @var EmailNotificationService $emailNotificationService */
         $emailNotificationService = $container->get('application.emailNotification.service');
         /** @var SMSNotificationService $smsNotificationService */
@@ -73,60 +72,26 @@ class AppointmentStatusUpdatedEventHandler
         $webHookService = $container->get('application.webHook.service');
         /** @var BookingApplicationService $bookingApplicationService */
         $bookingApplicationService = $container->get('application.booking.booking.service');
-        /** @var AbstractZoomApplicationService $zoomService */
-        $zoomService = $container->get('application.zoom.service');
-        /** @var AbstractLessonSpaceService $lessonSpaceService */
-        $lessonSpaceService = $container->get('infrastructure.lesson.space.service');
 
         $appointment = $commandResult->getData()[Entities::APPOINTMENT];
-
-        $oldStatus = $commandResult->getData()['oldStatus'];
 
         /** @var Appointment|Event $reservationObject */
         $reservationObject = AppointmentFactory::create($appointment);
 
         $bookingApplicationService->setReservationEntities($reservationObject);
 
-        if ($zoomService) {
-            $zoomService->handleAppointmentMeeting($reservationObject, self::APPOINTMENT_STATUS_UPDATED);
-
-            if ($reservationObject->getZoomMeeting()) {
-                $appointment['zoomMeeting'] = $reservationObject->getZoomMeeting()->toArray();
-            }
-        }
-
-        if ($lessonSpaceService) {
-            $lessonSpaceService->handle($reservationObject, Entities::APPOINTMENT);
-            if ($reservationObject->getLessonSpace()) {
-                $appointment['lessonSpace'] = $reservationObject->getLessonSpace();
-            }
-        }
+        $applicationIntegrationService->handleAppointment(
+            $reservationObject,
+            $appointment,
+            ApplicationIntegrationService::APPOINTMENT_STATUS_UPDATED,
+            [
+                ApplicationIntegrationService::SKIP_GOOGLE_CALENDAR  => $appointment['status'] === BookingStatus::NO_SHOW,
+                ApplicationIntegrationService::SKIP_OUTLOOK_CALENDAR => $appointment['status'] === BookingStatus::NO_SHOW,
+                ApplicationIntegrationService::SKIP_APPLE_CALENDAR   => $appointment['status'] === BookingStatus::NO_SHOW,
+            ]
+        );
 
         $bookings = $commandResult->getData()['bookingsWithChangedStatus'];
-
-        if ($appointment['status'] !== BookingStatus::NO_SHOW) {
-            try {
-                $googleCalendarService->handleEvent($reservationObject, self::APPOINTMENT_STATUS_UPDATED);
-            } catch (Exception $e) {
-            }
-
-            if ($reservationObject->getGoogleCalendarEventId() !== null) {
-                $appointment['googleCalendarEventId'] = $reservationObject->getGoogleCalendarEventId()->getValue();
-            }
-            if ($reservationObject->getGoogleMeetUrl() !== null) {
-                $appointment['googleMeetUrl'] = $reservationObject->getGoogleMeetUrl();
-            }
-
-            try {
-                $outlookCalendarService->handleEvent($reservationObject, self::APPOINTMENT_STATUS_UPDATED, $oldStatus);
-            } catch (Exception $e) {
-            }
-
-            if ($reservationObject->getOutlookCalendarEventId() !== null) {
-                $appointment['outlookCalendarEventId'] = $reservationObject->getOutlookCalendarEventId()->getValue();
-            }
-        }
-
 
         // if appointment approved add ics file to bookings
         if ($appointment['status'] === BookingStatus::APPROVED || $appointment['status'] === BookingStatus::PENDING) {
@@ -141,6 +106,34 @@ class AppointmentStatusUpdatedEventHandler
                         [],
                         true
                     );
+                }
+
+                if (!empty($appointment['createPaymentLinks'])) {
+                    $paymentId = !empty($booking['payments'][0]['id']) ? $booking['payments'][0]['id'] : null;
+
+                    if (!empty($paymentId)) {
+                        /** @var ServiceRepository $serviceRepository */
+                        $serviceRepository = $container->get('domain.bookable.service.repository');
+
+                        /** @var CustomerRepository $customerRepository */
+                        $customerRepository = $container->get('domain.users.customers.repository');
+
+                        $data = [
+                            'booking' => $booking,
+                            'type' => Entities::APPOINTMENT,
+                            'appointment' => $appointment,
+                            'paymentId' => $paymentId,
+                            'bookable' => $serviceRepository->getById($appointment['serviceId'])->toArray(),
+                            'customer' => !empty($booking['customer'])
+                                ? $booking['customer']
+                                : $customerRepository->getById($booking['customerId'])->toArray()
+                        ];
+
+                        /** @var PaymentApplicationService $paymentAS */
+                        $paymentAS = $container->get('application.payment.service');
+
+                        $appointment['bookings'][$index]['payments'][0]['paymentLinks'] = $paymentAS->createPaymentLink($data, $index);
+                    }
                 }
             }
         }

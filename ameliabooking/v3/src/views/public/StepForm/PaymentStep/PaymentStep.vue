@@ -193,7 +193,8 @@ const paymentTypes = {
   razorpay: markRaw(PaymentCommon),
   mollie: markRaw(PaymentCommon),
   wc: markRaw(PaymentWc),
-  square: markRaw(PaymentSquare)
+  square: markRaw(PaymentSquare),
+  barion: markRaw(PaymentCommon)
 }
 
 let ready = computed(() => store.getters['entities/getReady'])
@@ -299,6 +300,7 @@ let availablePayments = computed(() => {
         mollie: false,
         square: false,
         razorpay: false,
+        barion: false,
       }
     }
 
@@ -331,6 +333,7 @@ let availablePayments = computed(() => {
       mollie: settings.payments.mollie.enabled,
       square: settings.payments.square.enabled,
       razorpay: settings.payments.razorpay.enabled,
+      barion: settings.payments.barion.enabled,
     } : {
       onSite: 'onSite' in entityPayments ? entityPayments.onSite && settings.payments.onSite : settings.payments.onSite,
       stripe: 'stripe' in entityPayments ? entityPayments.stripe.enabled && settings.payments.stripe.enabled : settings.payments.stripe.enabled,
@@ -339,6 +342,7 @@ let availablePayments = computed(() => {
       mollie: 'mollie' in entityPayments ? entityPayments.mollie.enabled && settings.payments.mollie.enabled : settings.payments.mollie.enabled,
       razorpay: 'razorpay' in entityPayments ? entityPayments.razorpay.enabled && settings.payments.razorpay.enabled : settings.payments.razorpay.enabled,
       square: 'square' in entityPayments ? entityPayments.square.enabled && settings.payments.square.enabled : settings.payments.square.enabled,
+      barion: 'barion' in entityPayments ? entityPayments.barion.enabled && settings.payments.barion.enabled && ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode) : settings.payments.barion.enabled && ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode),
     }
 
     if (!payments.onSite &&
@@ -347,7 +351,8 @@ let availablePayments = computed(() => {
         !payments.wc &&
         !payments.mollie &&
         !payments.square &&
-        !payments.razorpay
+        !payments.razorpay &&
+        !payments.barion
     ) {
       payments = {
         onSite: settings.payments.onSite,
@@ -357,6 +362,7 @@ let availablePayments = computed(() => {
         mollie: settings.payments.mollie.enabled,
         square: settings.payments.square.enabled,
         razorpay: settings.payments.razorpay.enabled,
+        barion: settings.payments.barion.enabled,
       }
     }
 
@@ -447,10 +453,14 @@ function getPaymentBtn (key) {
       return {text: amLabels.value['stripe'], name: 'stripe.svg'}
     case 'razorpay':
       return {text: amLabels.value['razorpay'], name: 'razorpay.svg'}
-    case 'mollie': case 'wc':
-      return {text: amLabels.value['on_line'], name: 'stripe.svg'}
+    case 'mollie':
+      return {text: amLabels.value['mollie'], name: 'mollie.svg'}
+    case 'wc':
+      return {text: amLabels.value['on_line'], name: 'online.svg'}
     case 'square':
       return {text: amLabels.value['square'], name: 'square.svg'}
+    case 'barion':
+      return {text: amLabels.value['barion'], name: 'barion.svg'}
     default:
       return ''
   }
@@ -458,7 +468,7 @@ function getPaymentBtn (key) {
 
 function getPaymentSentence () {
   return paymentGateway.value === 'onSite' && !mandatoryOnSitePayment.value ? amLabels.value.payment_onsite_sentence :
-    (paymentGateway.value === 'mollie' || paymentGateway.value === 'wc') ? amLabels.value.payment_wc_mollie_sentence : ''
+    (paymentGateway.value === 'mollie' || paymentGateway.value === 'wc' || paymentGateway.value === 'barion') ? amLabels.value.payment_wc_mollie_sentence : ''
 }
 
 </script>
@@ -600,6 +610,13 @@ export default {
         img {
           height: 24px;
           width: 24px;
+        }
+
+        &-barion {
+          img {
+            height: 24px;
+            width: 50px;
+          }
         }
 
         div {

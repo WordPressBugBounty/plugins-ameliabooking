@@ -562,6 +562,7 @@ export default {
     --am-padd-select: 0 12px;
     width: 100%;
     box-shadow: 0 2px 2px var(--am-c-select-shadow);
+    border-radius: var(--am-rad-select);
 
     // Select Wrapper
     &-wrapper {

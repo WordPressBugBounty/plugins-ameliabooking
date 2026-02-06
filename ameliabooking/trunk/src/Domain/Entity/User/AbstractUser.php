@@ -21,10 +21,10 @@ use AmeliaBooking\Domain\ValueObjects\String\Status;
  */
 abstract class AbstractUser
 {
-    const USER_ROLE_ADMIN = 'admin';
-    const USER_ROLE_PROVIDER = 'provider';
-    const USER_ROLE_MANAGER = 'manager';
-    const USER_ROLE_CUSTOMER = 'customer';
+    public const USER_ROLE_ADMIN    = 'admin';
+    public const USER_ROLE_PROVIDER = 'provider';
+    public const USER_ROLE_MANAGER  = 'manager';
+    public const USER_ROLE_CUSTOMER = 'customer';
 
     /** @var Description */
     private $note;
@@ -74,6 +74,15 @@ abstract class AbstractUser
     /** @var  Json */
     protected $translations;
 
+    /** @var  Json */
+    protected $customFields;
+
+    /** @var Name */
+    private $appleCalendarId;
+
+    /** @var Name */
+    private $googleCalendarId;
+
     /**
      * AbstractUser constructor.
      *
@@ -87,8 +96,8 @@ abstract class AbstractUser
         Email $email
     ) {
         $this->firstName = $firstName;
-        $this->lastName = $lastName;
-        $this->email = $email;
+        $this->lastName  = $lastName;
+        $this->email     = $email;
     }
 
     /**
@@ -364,6 +373,55 @@ abstract class AbstractUser
     }
 
     /**
+     * @return Json
+     */
+    public function getCustomFields()
+    {
+        return $this->customFields;
+    }
+
+    /**
+     * @param Json|null $customFields
+     */
+    public function setCustomFields($customFields)
+    {
+        $this->customFields = $customFields;
+    }
+
+
+    /**
+     * @return Name
+     */
+    public function getAppleCalendarId()
+    {
+        return $this->appleCalendarId;
+    }
+
+    /**
+     * @param Name $appleCalendarId
+     */
+    public function setAppleCalendarId(Name $appleCalendarId)
+    {
+        $this->appleCalendarId = $appleCalendarId;
+    }
+
+    /**
+     * @return Name
+     */
+    public function getGoogleCalendarId()
+    {
+        return $this->googleCalendarId;
+    }
+
+    /**
+     * @param Name $googleCalendarId
+     */
+    public function setGoogleCalendarId(Name $googleCalendarId)
+    {
+        $this->googleCalendarId = $googleCalendarId;
+    }
+
+    /**
      * @return array
      */
     public function toArray()
@@ -384,6 +442,9 @@ abstract class AbstractUser
             'pictureFullPath'  => null !== $this->getPicture() ? $this->getPicture()->getFullPath() : null,
             'pictureThumbPath' => null !== $this->getPicture() ? $this->getPicture()->getThumbPath() : null,
             'translations'     => $this->getTranslations() ? $this->getTranslations()->getValue() : null,
+            'customFields'     => $this->getCustomFields() ? $this->getCustomFields()->getValue() : null,
+            'appleCalendarId'  => null !== $this->getAppleCalendarId() ? $this->getAppleCalendarId()->getValue() : null,
+            'googleCalendarId' => null !== $this->getGoogleCalendarId() ? $this->getGoogleCalendarId()->getValue() : null,
 //            'password'         => null !== $this->getPassword() ? $this->getPassword()->getValue() : null
         ];
     }

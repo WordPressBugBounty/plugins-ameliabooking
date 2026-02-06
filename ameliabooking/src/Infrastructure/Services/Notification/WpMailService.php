@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -54,16 +54,13 @@ class WpMailService extends AbstractMailService implements MailServiceInterface
 
         foreach ($attachments as $attachment) {
             if (!empty($attachment['content'])) {
-                $isInvoice = strpos($attachment['type'], 'pdf') !== false;
-                if ($isInvoice) {
-                    $tmpFile = tempnam(sys_get_temp_dir(), 'Invoice_');
-                } else {
-                    $tmpFile = tempnam(sys_get_temp_dir(), 'cal_');
-                }
+                $extension = pathinfo($attachment['name'], PATHINFO_EXTENSION);
+                $fileName = pathinfo($attachment['name'], PATHINFO_FILENAME);
+                $tmpFile = tempnam(sys_get_temp_dir(), $fileName . '_');
                 if (
                     $tmpFile &&
                     file_put_contents($tmpFile, $attachment['content']) !== false &&
-                    @rename($tmpFile, $tmpFile .= ($isInvoice ? '.pdf' : '.ics')) !== false
+                    @rename($tmpFile, $tmpFile .= '.' . $extension) !== false
                 ) {
                     $attachmentsLocations[] = $tmpFile;
                 }

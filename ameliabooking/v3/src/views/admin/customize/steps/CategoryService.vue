@@ -3,7 +3,9 @@
     wrapper-class="am-fcis"
     form-class="am-fcis__form"
     heading-class="am-fcis__header"
-    :content-class="`am-fcis__content ${customizeOptions.pageScroll.visibility ? '' : 'no-scroll'}`"
+    :content-class="`am-fcis__content ${
+      customizeOptions.pageScroll.visibility ? '' : 'no-scroll'
+    }`"
     :style="cssVars"
   >
     <template #header>
@@ -16,7 +18,7 @@
       <div class="am-fcis__header-top">
         <div class="am-fcis__header-text">
           <span class="am-fcis__header-name">
-            {{service.name}}
+            {{ service.name }}
           </span>
           <div
             v-if="customizeOptions.serviceBadge.visibility"
@@ -33,7 +35,11 @@
             v-if="customizeOptions.servicePrice.visibility"
             class="am-fcis__header-price"
           >
-            {{ service.price ? useFormattedPrice(service.price) : labelsDisplay('free') }}
+            {{
+              service.price
+                ? useFormattedPrice(service.price)
+                : labelsDisplay('free')
+            }}
           </span>
           <span class="am-fcis__header-btn">
             <AmButton :type="customizeOptions.bookingBtn.buttonType">
@@ -43,10 +49,12 @@
         </div>
       </div>
       <div
-        v-if="customizeOptions.serviceCategory.visibility
-        || customizeOptions.serviceDuration.visibility
-        || customizeOptions.serviceCapacity.visibility
-        || customizeOptions.serviceLocation.visibility"
+        v-if="
+          customizeOptions.serviceCategory.visibility ||
+          customizeOptions.serviceDuration.visibility ||
+          customizeOptions.serviceCapacity.visibility ||
+          customizeOptions.serviceLocation.visibility
+        "
         class="am-fcis__header-bottom"
       >
         <div class="am-fcis__mini-info">
@@ -65,18 +73,28 @@
             <span>{{ serviceDuration(service.duration) }}</span>
           </div>
           <div
-            v-if="customizeOptions.serviceCapacity.visibility && !licence.isLite"
+            v-if="
+              customizeOptions.serviceCapacity.visibility && !licence.isLite
+            "
             class="am-fcis__mini-info__inner"
           >
             <span class="am-icon-user"></span>
             <span>1/10</span>
           </div>
           <div
-            v-if="customizeOptions.serviceLocation.visibility && !licence.isLite && !licence.isStarter"
+            v-if="
+              customizeOptions.serviceLocation.visibility &&
+              !licence.isLite &&
+              !licence.isStarter
+            "
             class="am-fcis__mini-info__inner"
           >
             <span class="am-icon-locations"></span>
-            <span>{{ service.location ? service.location : labelsDisplay('multiple_locations') }}</span>
+            <span>{{
+              service.location
+                ? service.location
+                : labelsDisplay('multiple_locations')
+            }}</span>
           </div>
         </div>
       </div>
@@ -86,8 +104,10 @@
       <div v-if="service.gallery.length" class="am-fcis__gallery">
         <div
           class="am-fcis__gallery-hero"
-          :class="{'w100': service.gallery.length === 1}"
-          :style="{backgroundImage: `url(${service.gallery[0].pictureFullPath})`}"
+          :class="{ w100: service.gallery.length === 1 }"
+          :style="{
+            backgroundImage: `url(${service.gallery[0].pictureFullPath})`,
+          }"
         ></div>
         <div
           v-if="serviceThumbsGallery.length"
@@ -97,14 +117,14 @@
             v-for="(img, index) in serviceThumbsGallery"
             :key="index"
             class="am-fcis__gallery-thumb"
-            :class="{'am-one-thumb': serviceThumbsGallery.length === 1}"
-            :style="{backgroundImage: `url(${img.pictureFullPath})`}"
+            :class="{ 'am-one-thumb': serviceThumbsGallery.length === 1 }"
+            :style="{ backgroundImage: `url(${img.pictureFullPath})` }"
           ></div>
           <AmButton
             class="am-fcis__gallery-btn"
             category="secondary"
             type="filled"
-            @click="() => galleryDialog = true"
+            @click="() => (galleryDialog = true)"
           >
             <span class="am-icon-gallery"></span>
             <span>
@@ -125,39 +145,59 @@
       >
         <div class="am-gd" :style="cssGalleryDialogVars">
           <div class="am-gd__display-wrapper">
-            <div class="am-gd__arrows" style="display: flex; justify-content: space-between">
+            <div
+              class="am-gd__arrows"
+              style="display: flex; justify-content: space-between"
+            >
               <span
                 class="am-icon-arrow-left"
-                @click="() => activeImage = activeImage <= 0 ? service.gallery.length - 1 : activeImage - 1"
+                @click="
+                  () =>
+                    (activeImage =
+                      activeImage <= 0
+                        ? service.gallery.length - 1
+                        : activeImage - 1)
+                "
               ></span>
               <span
                 class="am-icon-arrow-right"
-                @click="() => activeImage = service.gallery.length - 1 === activeImage ? 0 : activeImage + 1"
+                @click="
+                  () =>
+                    (activeImage =
+                      service.gallery.length - 1 === activeImage
+                        ? 0
+                        : activeImage + 1)
+                "
               ></span>
             </div>
             <div
               v-for="(img, index) in service.gallery"
               :key="index"
               class="am-gd__display"
-              :style="{display: index === activeImage ? 'flex': 'none'}"
-              @click="() => activeImage = service.gallery.length - 1 === activeImage ? 0 : activeImage + 1"
+              :style="{ display: index === activeImage ? 'flex' : 'none' }"
+              @click="
+                () =>
+                  (activeImage =
+                    service.gallery.length - 1 === activeImage
+                      ? 0
+                      : activeImage + 1)
+              "
             >
-              <img :src="img.pictureFullPath" :alt="index">
+              <img :src="img.pictureFullPath" :alt="index" />
             </div>
           </div>
           <div class="am-gd__selection">
-            {{`${activeImage + 1}/${service.gallery.length}`}}
+            {{ `${activeImage + 1}/${service.gallery.length}` }}
           </div>
           <div class="am-gd__thumb-wrapper">
             <div
               v-for="(img, index) in service.gallery"
               :key="index"
               class="am-gd__thumb"
-              :class="{'am-active': index === activeImage}"
-              :style="{backgroundImage: `url(${img.pictureFullPath})`}"
-              @click="() => activeImage = index"
-            >
-            </div>
+              :class="{ 'am-active': index === activeImage }"
+              :style="{ backgroundImage: `url(${img.pictureFullPath})` }"
+              @click="() => (activeImage = index)"
+            ></div>
           </div>
         </div>
       </AmDialog>
@@ -165,34 +205,48 @@
 
       <!-- Service Info - (description, employees) -->
       <div
-        v-if="customizeOptions.serviceDescription.visibility || customizeOptions.serviceEmployees.visibility"
+        v-if="
+          customizeOptions.serviceDescription.visibility ||
+          customizeOptions.serviceEmployees.visibility
+        "
         class="am-fcis__info"
       >
         <div class="am-fcis__info-tab__wrapper">
           <div
-            v-if="service.description && customizeOptions.serviceDescription.visibility"
+            v-if="
+              service.description &&
+              customizeOptions.serviceDescription.visibility
+            "
             class="am-fcis__info-tab"
-            :class="{'am-active': tabsActive === 'description'}"
-            @click="() => tabsActive = 'description'"
+            :class="{ 'am-active': tabsActive === 'description' }"
+            @click="() => (tabsActive = 'description')"
           >
             {{ labelsDisplay('about_service') }}
           </div>
           <div
-            v-if="customizeOptions.serviceEmployees.visibility && !licence.isLite"
-            :class="{'am-active': tabsActive === 'employees'}"
+            v-if="
+              customizeOptions.serviceEmployees.visibility && !licence.isLite
+            "
+            :class="{ 'am-active': tabsActive === 'employees' }"
             class="am-fcis__info-tab"
-            @click="() => tabsActive = 'employees'"
+            @click="() => (tabsActive = 'employees')"
           >
             {{ labelsDisplay('tab_employees') }}
           </div>
         </div>
         <div
-          v-if="customizeOptions.serviceDescription.visibility || customizeOptions.serviceEmployees.visibility"
+          v-if="
+            customizeOptions.serviceDescription.visibility ||
+            customizeOptions.serviceEmployees.visibility
+          "
           class="am-fcis__info-content__wrapper"
         >
           <!-- Description -->
           <div
-            v-if="service.description && customizeOptions.serviceDescription.visibility"
+            v-if="
+              service.description &&
+              customizeOptions.serviceDescription.visibility
+            "
             v-show="tabsActive === 'description'"
             class="am-fcis__info-content"
           >
@@ -205,20 +259,35 @@
 
           <!-- Employees -->
           <div
-            v-if="customizeOptions.serviceEmployees.visibility && !licence.isLite"
+            v-if="
+              customizeOptions.serviceEmployees.visibility && !licence.isLite
+            "
             v-show="tabsActive === 'employees'"
             class="am-fcis__info-content"
           >
-            <div v-for="employee in serviceEmployees" :key="employee.id" class="am-fcis__info-employee">
+            <div
+              v-for="employee in serviceEmployees"
+              :key="employee.id"
+              class="am-fcis__info-employee"
+            >
               <div class="am-fcis__info-employee__hero">
-                <div class="am-fcis__info-employee__img" :style="{...employeeImage(employee)}">
+                <div
+                  class="am-fcis__info-employee__img"
+                  :style="{ ...employeeImage(employee) }"
+                >
                   {{ employeeSign(employee) }}
                 </div>
                 <div class="am-fcis__info-employee__name">
                   {{ employee.firstName }} {{ employee.lastName }}
                 </div>
               </div>
-              <div v-if="serviceEmployeePrice(employee) && customizeOptions.serviceEmployeePrice.visibility" class="am-fcis__info-employee__price">
+              <div
+                v-if="
+                  serviceEmployeePrice(employee) &&
+                  customizeOptions.serviceEmployeePrice.visibility
+                "
+                class="am-fcis__info-employee__price"
+              >
                 {{ serviceEmployeePrice(employee) }}
               </div>
             </div>
@@ -230,7 +299,10 @@
 
       <!-- Available Service in Packages -->
       <div
-        v-if="customizeOptions.servicePackages.visibility && !licence.isBasic && !licence.isStarter && !licence.isLite"
+        v-if="
+          customizeOptions.servicePackages.visibility &&
+          features.packages
+        "
         class="am-fcis__include-wrapper"
       >
         <div class="am-fcis__include-heading">
@@ -239,7 +311,7 @@
           </span>
           <span
             class="am-fcis__include-heading__btn"
-            @click="() => displayAllPackages = !displayAllPackages"
+            @click="() => (displayAllPackages = !displayAllPackages)"
           >
             <template v-if="!displayAllPackages">
               {{ labelsDisplay('more_packages') }}
@@ -255,7 +327,10 @@
           class="am-fcis__include"
         >
           <div class="am-fcis__include-hero">
-            <div class="am-fcis__include-img" :style="{...packageImage(pack)}">
+            <div
+              class="am-fcis__include-img"
+              :style="{ ...packageImage(pack) }"
+            >
               {{ !pack.pictureFullPath ? pack.name.charAt(0) : '' }}
             </div>
             <div class="am-fcis__include-text">
@@ -268,10 +343,14 @@
                   class="am-fcis__include-cost"
                 >
                   <span v-if="pack.discount" class="am-fcis__include-discount">
-                    {{`${labelsDisplay('save')} ${pack.discount}%`}}
+                    {{ `${labelsDisplay('save')} ${pack.discount}%` }}
                   </span>
                   <span class="am-fcis__include-price">
-                    {{ pack.price ? useFormattedPrice(usePackageAmount(pack)) : labelsDisplay('free') }}
+                    {{
+                      pack.price
+                        ? useFormattedPrice(usePackageAmount(pack))
+                        : labelsDisplay('free')
+                    }}
                   </span>
                 </div>
               </div>
@@ -289,10 +368,21 @@
                 >
                   <span class="am-icon-clock"></span>
                   <span v-if="pack.endDate">
-                    {{ `${labelsDisplay('expires_at')} ${pack.endDate.split(' ')[0]}` }}
+                    {{
+                      `${labelsDisplay('expires_at')} ${
+                        pack.endDate.split(' ')[0]
+                      }`
+                    }}
                   </span>
                   <span v-else-if="pack.durationCount">
-                    {{ `${labelsDisplay('expires_after')} ${pack.durationCount} ${durationTypeLabel(pack.durationCount, pack.durationType)}` }}
+                    {{
+                      `${labelsDisplay('expires_after')} ${
+                        pack.durationCount
+                      } ${durationTypeLabel(
+                        pack.durationCount,
+                        pack.durationType
+                      )}`
+                    }}
                   </span>
                   <span v-else>
                     {{ labelsDisplay('without_expiration') }}
@@ -306,12 +396,19 @@
                   <span>1/1</span>
                 </div>
                 <div
-                  v-if="pack.locations.length && customizeOptions.packageLocation.visibility"
+                  v-if="
+                    pack.locations.length &&
+                    customizeOptions.packageLocation.visibility
+                  "
                   class="am-fcis__include-info__inner"
                 >
                   <span class="am-icon-locations"></span>
                   <span>
-                    {{ pack.locations.length === 1 ? pack.locations[0].name : labelsDisplay('multiple_locations') }}
+                    {{
+                      pack.locations.length === 1
+                        ? pack.locations[0].name
+                        : labelsDisplay('multiple_locations')
+                    }}
                   </span>
                 </div>
                 <div
@@ -322,7 +419,7 @@
                     {{ `${labelsDisplay('in_package')}:` }}
                   </span>
                   <span v-for="obj in pack.services" :key="obj.id">
-                    {{obj.name}}
+                    {{ obj.name }}
                   </span>
                 </div>
               </div>
@@ -350,23 +447,25 @@ import {
   onMounted,
   onBeforeUnmount,
   watchEffect,
-} from "vue";
+} from 'vue'
 
 // * Composables
-import {useFormattedPrice} from '../../../../assets/js/common/formatting.js'
+import { useFormattedPrice } from '../../../../assets/js/common/formatting.js'
 import {
   amCardColors,
-  useColorTransparency
+  useColorTransparency,
 } from '../../../../assets/js/common/colorManipulation.js'
-import {
-  usePackageAmount,
-} from '../../../../assets/js/public/package.js'
+import { usePackageAmount } from '../../../../assets/js/public/package.js'
+import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Plugin Licence
 let licence = inject('licence')
 
+// * Features
+let features = inject('features')
+
 // * Customize
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Options
 let customizeOptions = computed(() => {
@@ -382,15 +481,17 @@ let activeImage = ref(0)
 // * Selected category
 let category = ref({
   id: 1,
-  name: "Category 1",
+  name: 'Category 1',
 })
 
 // * Service info tabs
 let tabsActive = ref('description')
 
 watchEffect(() => {
-  if (!customizeOptions.value.serviceDescription.visibility) tabsActive.value = 'employees'
-  if (!customizeOptions.value.serviceEmployees.visibility) tabsActive.value = 'description'
+  if (!customizeOptions.value.serviceDescription.visibility)
+    tabsActive.value = 'employees'
+  if (!customizeOptions.value.serviceEmployees.visibility)
+    tabsActive.value = 'description'
 })
 
 onBeforeUnmount(() => {
@@ -400,122 +501,138 @@ onBeforeUnmount(() => {
 // * Selected service
 let service = ref({
   id: 1,
-  name: "Service 1",
+  name: 'Service 1',
   category: null,
   categoryId: 1,
-  color: "#1788FB",
+  color: '#1788FB',
   customPricing: {
     3600: {
       price: 23,
-      rules: []
-    }
+      rules: [],
+    },
   },
   price: 100,
   deposit: 5,
-  description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+  description:
+    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
   duration: 3600,
   extras: [
     {
       id: 10,
       extraId: 10,
       aggregatedPrice: false,
-      description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
       duration: 1800,
       maxQuantity: 5,
-      name: "Extra 2-1",
+      name: 'Extra 2-1',
       position: 1,
       price: 5,
       serviceId: null,
       translations: null,
-    }
+    },
   ],
   gallery: [
     {
       pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_gallery_placeholder.svg`,
-      pictureThumbPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+      pictureThumbPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
     },
     {
       pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
-      pictureThumbPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+      pictureThumbPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
     },
     {
       pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
-      pictureThumbPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+      pictureThumbPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
     },
     {
       pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
-      pictureThumbPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+      pictureThumbPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
     },
     {
       pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
-      pictureThumbPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
-    }
+      pictureThumbPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
+    },
   ],
   pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
   pictureThumbPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
-  location: 'Location 1'
+  location: 'Location 1',
 })
 
 let serviceEmployees = ref([
   {
     id: 1,
-    firstName: "Herman",
-    lastName: "Small",
+    firstName: 'Herman',
+    lastName: 'Small',
     pictureFullPath: null,
     pictureThumbPath: null,
     price: 20,
   },
   {
     id: 2,
-    firstName: "Abbie",
-    lastName: "William",
+    firstName: 'Abbie',
+    lastName: 'William',
     pictureFullPath: null,
     pictureThumbPath: null,
     price: 150,
   },
   {
     id: 3,
-    firstName: "Miya",
-    lastName: "Burrows",
+    firstName: 'Miya',
+    lastName: 'Burrows',
     pictureFullPath: null,
     pictureThumbPath: null,
     price: 80,
   },
   {
     id: 4,
-    firstName: "Derrick",
-    lastName: "Cardenas",
+    firstName: 'Derrick',
+    lastName: 'Cardenas',
     pictureFullPath: null,
     pictureThumbPath: null,
     price: 120,
   },
   {
     id: 5,
-    firstName: "Zeynep",
-    lastName: "Whittington",
+    firstName: 'Zeynep',
+    lastName: 'Whittington',
     pictureFullPath: null,
     pictureThumbPath: null,
     price: 45,
-  }
+  },
 ])
 
 function employeeImage(employee) {
-  if (employee.pictureFullPath) return {backgroundImage: `url(${employee.pictureFullPath})`}
+  if (employee.pictureFullPath)
+    return { backgroundImage: `url(${employee.pictureFullPath})` }
 
-  return {backgroundColor: `${amCardColors.value[Math.floor(Math.random() * amCardColors.value.length)]}`}
+  return {
+    backgroundColor: `${
+      amCardColors.value[Math.floor(Math.random() * amCardColors.value.length)]
+    }`,
+  }
 }
 
 function employeeSign(employee) {
   if (!employee.pictureFullPath) {
     let name = `${employee.firstName} ${employee.lastName}`
-    return name.split(' ').map((s) => s.charAt(0)).join('').toUpperCase().substring(0, 3).replace(/[^\w\s]/g, '')
+    return name
+      .split(' ')
+      .map((s) => s.charAt(0))
+      .join('')
+      .toUpperCase()
+      .substring(0, 3)
+      .replace(/[^\w\s]/g, '')
   }
   return ''
 }
 
 function serviceEmployeePrice(employee) {
   let servicePrice = employee.price
-  if (servicePrice - service.value.price !== 0) return `${servicePrice - service.value.price > 0 ? '+' : '-'} ${useFormattedPrice(servicePrice - service.value.price)}`
+  if (servicePrice - service.value.price !== 0)
+    return `${
+      servicePrice - service.value.price > 0 ? '+' : '-'
+    } ${useFormattedPrice(servicePrice - service.value.price)}`
   return ''
 }
 
@@ -524,7 +641,9 @@ onMounted(() => {
 })
 
 let serviceThumbsGallery = computed(() => {
-  let thumbs = service.value.gallery.length ? JSON.parse(JSON.stringify(service.value.gallery)) : []
+  let thumbs = service.value.gallery.length
+    ? JSON.parse(JSON.stringify(service.value.gallery))
+    : []
   if (service.value.gallery.length === 1) return []
   thumbs.shift()
   if (thumbs.length > 2) thumbs.splice(2, thumbs.length - 2)
@@ -534,214 +653,212 @@ let serviceThumbsGallery = computed(() => {
 let servicePackages = ref([
   {
     id: 1,
-    name: "Package 1",
+    name: 'Package 1',
     calculatedPrice: false,
     price: 500,
     deposit: 50,
     discount: 10,
-    depositPayment: "percentage",
-    color: "#689BCA",
-    description: "My name a Borat. I come from Kazakhstan. Can I say a first, we support your war of terror! May we show our support to our boys in Iraq! May US and A kill every single terrorist! May your George Bush drink the blood of every single man, women, and child of Iraq! May you destroy their country so that for next thousand years not even a single lizard will survive in their desert!",
+    depositPayment: 'percentage',
+    color: '#689BCA',
+    description:
+      'My name a Borat. I come from Kazakhstan. Can I say a first, we support your war of terror! May we show our support to our boys in Iraq! May US and A kill every single terrorist! May your George Bush drink the blood of every single man, women, and child of Iraq! May you destroy their country so that for next thousand years not even a single lizard will survive in their desert!',
     durationCount: 2,
-    durationType: "week",
+    durationType: 'week',
     endDate: null,
-    locations: [
-      {name: 'Location 1'},
-      {name: 'Location 2'}
-    ],
+    locations: [{ name: 'Location 1' }, { name: 'Location 2' }],
     pictureFullPath: null,
     pictureThumbPath: null,
     services: [
       {
         id: 1,
-        name: 'Service 1'
+        name: 'Service 1',
       },
       {
         id: 2,
-        name: 'Service 2'
+        name: 'Service 2',
       },
       {
         id: 3,
-        name: 'Service 3'
+        name: 'Service 3',
       },
       {
         id: 4,
-        name: 'Service 4'
+        name: 'Service 4',
       },
       {
         id: 5,
-        name: 'Service 5'
-      }
-    ]
+        name: 'Service 5',
+      },
+    ],
   },
   {
     id: 2,
-    name: "Package 2",
+    name: 'Package 2',
     calculatedPrice: false,
     price: 500,
     deposit: 50,
     discount: 10,
-    depositPayment: "percentage",
-    color: "#689BCA",
-    description: "My name a Borat. I come from Kazakhstan. Can I say a first, we support your war of terror! May we show our support to our boys in Iraq! May US and A kill every single terrorist! May your George Bush drink the blood of every single man, women, and child of Iraq! May you destroy their country so that for next thousand years not even a single lizard will survive in their desert!",
+    depositPayment: 'percentage',
+    color: '#689BCA',
+    description:
+      'My name a Borat. I come from Kazakhstan. Can I say a first, we support your war of terror! May we show our support to our boys in Iraq! May US and A kill every single terrorist! May your George Bush drink the blood of every single man, women, and child of Iraq! May you destroy their country so that for next thousand years not even a single lizard will survive in their desert!',
     durationCount: 2,
-    durationType: "week",
+    durationType: 'week',
     endDate: null,
-    locations: [
-      {name: 'Location 1'},
-      {name: 'Location 2'}
-    ],
-    pictureFullPath: "http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d.jpeg",
-    pictureThumbPath: "http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d-150x150.jpeg",
+    locations: [{ name: 'Location 1' }, { name: 'Location 2' }],
+    pictureFullPath:
+      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d.jpeg',
+    pictureThumbPath:
+      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d-150x150.jpeg',
     services: [
       {
         id: 1,
-        name: 'Service 1'
+        name: 'Service 1',
       },
       {
         id: 2,
-        name: 'Service 2'
+        name: 'Service 2',
       },
       {
         id: 3,
-        name: 'Service 3'
+        name: 'Service 3',
       },
       {
         id: 4,
-        name: 'Service 4'
+        name: 'Service 4',
       },
       {
         id: 5,
-        name: 'Service 5'
-      }
-    ]
+        name: 'Service 5',
+      },
+    ],
   },
   {
     id: 3,
-    name: "Package 3",
+    name: 'Package 3',
     calculatedPrice: false,
     price: 500,
     deposit: 50,
     discount: 10,
-    depositPayment: "percentage",
-    color: "#689BCA",
-    description: "My name a Borat. I come from Kazakhstan. Can I say a first, we support your war of terror! May we show our support to our boys in Iraq! May US and A kill every single terrorist! May your George Bush drink the blood of every single man, women, and child of Iraq! May you destroy their country so that for next thousand years not even a single lizard will survive in their desert!",
+    depositPayment: 'percentage',
+    color: '#689BCA',
+    description:
+      'My name a Borat. I come from Kazakhstan. Can I say a first, we support your war of terror! May we show our support to our boys in Iraq! May US and A kill every single terrorist! May your George Bush drink the blood of every single man, women, and child of Iraq! May you destroy their country so that for next thousand years not even a single lizard will survive in their desert!',
     durationCount: 2,
-    durationType: "week",
+    durationType: 'week',
     endDate: null,
-    locations: [
-      {name: 'Location 1'},
-      {name: 'Location 2'}
-    ],
-    pictureFullPath: "http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d.jpeg",
-    pictureThumbPath: "http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d-150x150.jpeg",
+    locations: [{ name: 'Location 1' }, { name: 'Location 2' }],
+    pictureFullPath:
+      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d.jpeg',
+    pictureThumbPath:
+      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d-150x150.jpeg',
     services: [
       {
         id: 1,
-        name: 'Service 1'
+        name: 'Service 1',
       },
       {
         id: 2,
-        name: 'Service 2'
+        name: 'Service 2',
       },
       {
         id: 3,
-        name: 'Service 3'
+        name: 'Service 3',
       },
       {
         id: 4,
-        name: 'Service 4'
+        name: 'Service 4',
       },
       {
         id: 5,
-        name: 'Service 5'
-      }
-    ]
+        name: 'Service 5',
+      },
+    ],
   },
   {
     id: 4,
-    name: "Package 4",
+    name: 'Package 4',
     calculatedPrice: false,
     price: 500,
     deposit: 50,
     discount: 10,
-    depositPayment: "percentage",
-    color: "#689BCA",
-    description: "My name a Borat. I come from Kazakhstan. Can I say a first, we support your war of terror! May we show our support to our boys in Iraq! May US and A kill every single terrorist! May your George Bush drink the blood of every single man, women, and child of Iraq! May you destroy their country so that for next thousand years not even a single lizard will survive in their desert!",
+    depositPayment: 'percentage',
+    color: '#689BCA',
+    description:
+      'My name a Borat. I come from Kazakhstan. Can I say a first, we support your war of terror! May we show our support to our boys in Iraq! May US and A kill every single terrorist! May your George Bush drink the blood of every single man, women, and child of Iraq! May you destroy their country so that for next thousand years not even a single lizard will survive in their desert!',
     durationCount: 2,
-    durationType: "week",
+    durationType: 'week',
     endDate: null,
-    locations: [
-      {name: 'Location 1'},
-      {name: 'Location 2'}
-    ],
-    pictureFullPath: "http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d.jpeg",
-    pictureThumbPath: "http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d-150x150.jpeg",
+    locations: [{ name: 'Location 1' }, { name: 'Location 2' }],
+    pictureFullPath:
+      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d.jpeg',
+    pictureThumbPath:
+      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d-150x150.jpeg',
     services: [
       {
         id: 1,
-        name: 'Service 1'
+        name: 'Service 1',
       },
       {
         id: 2,
-        name: 'Service 2'
+        name: 'Service 2',
       },
       {
         id: 3,
-        name: 'Service 3'
+        name: 'Service 3',
       },
       {
         id: 4,
-        name: 'Service 4'
+        name: 'Service 4',
       },
       {
         id: 5,
-        name: 'Service 5'
-      }
-    ]
+        name: 'Service 5',
+      },
+    ],
   },
   {
     id: 5,
-    name: "Package 5",
+    name: 'Package 5',
     calculatedPrice: false,
     price: 500,
     deposit: 50,
     discount: 10,
-    depositPayment: "percentage",
-    color: "#689BCA",
-    description: "My name a Borat. I come from Kazakhstan. Can I say a first, we support your war of terror! May we show our support to our boys in Iraq! May US and A kill every single terrorist! May your George Bush drink the blood of every single man, women, and child of Iraq! May you destroy their country so that for next thousand years not even a single lizard will survive in their desert!",
+    depositPayment: 'percentage',
+    color: '#689BCA',
+    description:
+      'My name a Borat. I come from Kazakhstan. Can I say a first, we support your war of terror! May we show our support to our boys in Iraq! May US and A kill every single terrorist! May your George Bush drink the blood of every single man, women, and child of Iraq! May you destroy their country so that for next thousand years not even a single lizard will survive in their desert!',
     durationCount: 2,
-    durationType: "week",
+    durationType: 'week',
     endDate: null,
-    locations: [
-      {name: 'Location 1'},
-      {name: 'Location 2'}
-    ],
-    pictureFullPath: "http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d.jpeg",
-    pictureThumbPath: "http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d-150x150.jpeg",
+    locations: [{ name: 'Location 1' }, { name: 'Location 2' }],
+    pictureFullPath:
+      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d.jpeg',
+    pictureThumbPath:
+      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d-150x150.jpeg',
     services: [
       {
         id: 1,
-        name: 'Service 1'
+        name: 'Service 1',
       },
       {
         id: 2,
-        name: 'Service 2'
+        name: 'Service 2',
       },
       {
         id: 3,
-        name: 'Service 3'
+        name: 'Service 3',
       },
       {
         id: 4,
-        name: 'Service 4'
+        name: 'Service 4',
       },
       {
         id: 5,
-        name: 'Service 5'
-      }
-    ]
-  }
+        name: 'Service 5',
+      },
+    ],
+  },
 ])
 
 let displayAllPackages = ref(false)
@@ -752,9 +869,10 @@ let displayServicePackages = computed(() => {
 })
 
 function packageImage(pack) {
-  if (pack.pictureFullPath) return {backgroundImage: `url(${pack.pictureFullPath})`}
+  if (pack.pictureFullPath)
+    return { backgroundImage: `url(${pack.pictureFullPath})` }
 
-  return {backgroundColor: pack.color}
+  return { backgroundColor: pack.color }
 }
 
 let galleryDialog = ref(false)
@@ -763,10 +881,14 @@ let galleryDialog = ref(false)
 let langKey = inject('langKey')
 let amLabels = inject('labels')
 
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
     let translations = amCustomize.value.cbf.categoryService.translations
-    return translations && translations[label] && translations[label][langKey.value] ? translations[label][langKey.value] : amLabels[label]
+    return translations &&
+      translations[label] &&
+      translations[label][langKey.value]
+      ? translations[label][langKey.value]
+      : amLabels[label]
   })
 
   return computedLabel.value
@@ -788,9 +910,13 @@ function durationTypeLabel(duration, type) {
 
 function serviceDuration(seconds) {
   let hours = Math.floor(seconds / 3600)
-  let minutes = seconds / 60 % 60
+  let minutes = (seconds / 60) % 60
 
-  return (hours ? (hours + amLabels.h + ' ') : '') + ' ' + (minutes ? (minutes + amLabels.min) : '')
+  return (
+    (hours ? hours + amLabels.h + ' ' : '') +
+    ' ' +
+    (minutes ? minutes + amLabels.min : '')
+  )
 }
 
 // * Fonts
@@ -801,11 +927,26 @@ let amColors = inject('amColors')
 
 let cssVars = computed(() => {
   return {
-    '--am-c-fcis-success-op20': useColorTransparency(amColors.value.colorSuccess, 0.20),
-    '--am-c-fcis-primary-op20': useColorTransparency(amColors.value.colorPrimary, 0.20),
-    '--am-c-fcis-text-op80': useColorTransparency(amColors.value.colorMainText, 0.80),
-    '--am-c-fcis-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03),
-    '--am-c-fcis-btn-op50': useColorTransparency(amColors.value.colorBtnSec, 0.5),
+    '--am-c-fcis-success-op20': useColorTransparency(
+      amColors.value.colorSuccess,
+      0.2
+    ),
+    '--am-c-fcis-primary-op20': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.2
+    ),
+    '--am-c-fcis-text-op80': useColorTransparency(
+      amColors.value.colorMainText,
+      0.8
+    ),
+    '--am-c-fcis-text-op03': useColorTransparency(
+      amColors.value.colorMainText,
+      0.03
+    ),
+    '--am-c-fcis-btn-op50': useColorTransparency(
+      amColors.value.colorBtnSec,
+      0.5
+    ),
   }
 })
 
@@ -815,8 +956,14 @@ let cssGalleryDialogVars = computed(() => {
     '--am-c-fcis-text': amColors.value.colorMainText,
     '--am-c-fcis-success': amColors.value.colorSuccess,
     '--am-c-fcis-primary': amColors.value.colorPrimary,
-    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
-    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
+    '--am-c-scroll-op30': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.3
+    ),
+    '--am-c-scroll-op10': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.1
+    ),
     '--am-font-family': amFonts.fontFamily,
   }
 })
@@ -824,8 +971,8 @@ let cssGalleryDialogVars = computed(() => {
 
 <script>
 export default {
-  name: "CategoryService",
-  key: "categoryService"
+  name: 'CategoryService',
+  key: 'categoryService',
 }
 </script>
 
@@ -858,7 +1005,8 @@ export default {
           padding: 0 0 16px;
         }
 
-        &-text {}
+        &-text {
+        }
 
         &-name {
           display: inline-flex;
@@ -880,7 +1028,8 @@ export default {
           color: var(--am-c-fcis-primary);
         }
 
-        &-btn {}
+        &-btn {
+        }
 
         &-bottom {
           padding: 0 0 16px;
@@ -905,7 +1054,7 @@ export default {
         &.am-service {
           background-color: var(--am-c-fcis-success-op20);
           span {
-            color:  var(--am-c-fcis-success);
+            color: var(--am-c-fcis-success);
           }
         }
 
@@ -915,7 +1064,7 @@ export default {
           font-weight: 400;
           line-height: 1;
 
-          &[class*="am-icon"] {
+          &[class*='am-icon'] {
             font-size: 24px;
           }
         }
@@ -946,7 +1095,7 @@ export default {
             white-space: nowrap;
             overflow: hidden;
 
-            &[class*="am-icon"] {
+            &[class*='am-icon'] {
               flex: 0 0 auto;
               font-size: 24px;
               color: var(--am-c-fcis-primary);
@@ -1007,7 +1156,8 @@ export default {
             max-width: 264px;
             position: relative;
 
-            &:after, &:before {
+            &:after,
+            &:before {
               content: '';
               display: block;
               clear: both;
@@ -1300,7 +1450,7 @@ export default {
               color: var(--am-c-fcis-text-op80);
               flex-wrap: wrap;
 
-              &[class*="am-icon"] {
+              &[class*='am-icon'] {
                 flex: 0 0 auto;
                 font-size: 24px;
                 color: var(--am-c-fcis-primary);
@@ -1335,7 +1485,8 @@ export default {
                 border-radius: 50%;
               }
 
-              &:first-child, &:nth-child(2) {
+              &:first-child,
+              &:nth-child(2) {
                 padding-right: 2px;
 
                 &::after {

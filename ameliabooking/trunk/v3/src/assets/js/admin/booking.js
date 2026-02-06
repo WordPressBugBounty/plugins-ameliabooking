@@ -5,7 +5,7 @@ function useParams (store, cabinetType) {
   }
 }
 
-function useCustomFieldsData(bookings) {
+function useCustomFieldsData(bookings, userType) {
   let result = []
 
   bookings.forEach((booking) => {
@@ -13,24 +13,51 @@ function useCustomFieldsData(bookings) {
       let customFields = JSON.parse(booking.customFields)
 
       Object.keys(customFields).forEach((customFieldId) => {
-        result.push({
-          label: customFields[customFieldId].label,
-          value: customFields[customFieldId].value
-        })
+        if (customFields[customFieldId]) {
+          let value = customFields[customFieldId].type === 'file'
+              ? (customFields[customFieldId]?.value ? customFields[customFieldId].value : '')
+              : customFields[customFieldId].value
+
+          if (Array.isArray(value) ? value.length : value) {
+            result.push({
+              label: customFields[customFieldId].label,
+              value: value,
+            })
+          }
+        }
       })
     }
   })
 
-  return result
+  if (userType === 'customer') {
+    return result
+  }
+
+  // For employee view, keep unique custom fields with their values
+  const uniqueFields = new Map()
+  result.filter(i => i.value).forEach(item => {
+    if (!uniqueFields.has(item.label)) {
+      uniqueFields.set(item.label, item)
+    }
+  })
+  return Array.from(uniqueFields.values())
 }
 
 function useExtrasData(bookings, bookable) {
-  let result = []
+  let result = {}
 
   bookings.forEach((booking) => {
     if (['approved', 'pending'].includes(booking.status)) {
       booking.extras.forEach((bookingExtra) => {
-        result.push(Object.assign(bookingExtra, bookable.extras.find(i => i.id === bookingExtra.extraId)))
+        if (!(bookingExtra.extraId in result)) {
+          result[bookingExtra.extraId] = {
+            quantity: 0,
+            price: bookingExtra.price,
+            name: bookable.extras.find(i => i.id === bookingExtra.extraId).name,
+          }
+        }
+
+        result[bookingExtra.extraId].quantity = result[bookingExtra.extraId].quantity + bookingExtra.quantity
       })
     }
   })

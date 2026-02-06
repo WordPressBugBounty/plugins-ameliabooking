@@ -39,7 +39,7 @@
         <!-- /Zoom link -->
 
         <!-- Lesson Space Link -->
-        <a v-if="item.lessonSpaceLink" class="am-cc__periods-link">
+        <a v-if="amSettings.featuresIntegrations.lessonSpace.enabled && item.lessonSpaceLink" class="am-cc__periods-link">
           <span class="am-icon-link"></span>
           {{ amLabels.lesson_space_link }}
         </a>
@@ -65,6 +65,9 @@ import {
 
 // * Vars
 const amLabels = inject('labels')
+
+// * Root Settings
+let amSettings = inject('settings')
 
 let props = defineProps({
   data: {

@@ -8,7 +8,7 @@
   >
     <template #label>
       <span class="am-fs__info-form__label">
-        {{labelsDisplay('email_colon')}}
+        {{ labelsDisplay('email_colon') }}
       </span>
     </template>
     <AmInput
@@ -16,15 +16,15 @@
       name="email"
       type="text"
       :placeholder="labelsDisplay('enter_email')"
-    ></AmInput>
+    />
   </el-form-item>
   <!-- /Email -->
 </template>
 
 <script setup>
-import AmInput from'../../../_components/input/AmInput.vue'
+import AmInput from '../../../_components/input/AmInput.vue'
 
-import { computed, inject } from "vue";
+import { computed, inject } from 'vue'
 
 let langKey = inject('langKey')
 let amLabels = inject('labels')
@@ -33,12 +33,16 @@ let pageRenderKey = inject('pageRenderKey')
 let amCustomize = inject('customize')
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value].infoStep.translations
-    && amCustomize.value[pageRenderKey.value].infoStep.translations[label]
-    && amCustomize.value[pageRenderKey.value].infoStep.translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value].infoStep.translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value].infoStep.translations &&
+      amCustomize.value[pageRenderKey.value].infoStep.translations[label] &&
+      amCustomize.value[pageRenderKey.value].infoStep.translations[label][
+        langKey.value
+      ]
+      ? amCustomize.value[pageRenderKey.value].infoStep.translations[label][
+          langKey.value
+        ]
       : amLabels[label]
   })
 
@@ -51,10 +55,8 @@ let infoFormData = inject('infoFormData')
 
 <script>
 export default {
-  name: "EmailFormField"
+  name: 'EmailFormField',
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

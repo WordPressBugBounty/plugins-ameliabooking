@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Database hook for activation
  */
 
 namespace AmeliaBooking\Infrastructure\WP\InstallActions;
 
+use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Bookable\CategoriesTableInsertRows;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Bookable\PackagesCustomersServicesTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Bookable\PackagesCustomersTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Bookable\PackagesServicesLocationsTable;
@@ -71,7 +73,6 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\User\Provider\ProvidersDay
  */
 class ActivationDatabaseHook
 {
-
     /**
      * Initialize the plugin
      */
@@ -110,6 +111,8 @@ class ActivationDatabaseHook
         ProvidersOutlookCalendarTable::init();
 
         CategoriesTable::init();
+
+        CategoriesTableInsertRows::init();
 
         ServicesTable::init();
 

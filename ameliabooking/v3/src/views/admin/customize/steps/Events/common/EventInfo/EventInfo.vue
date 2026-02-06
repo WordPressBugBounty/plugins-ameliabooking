@@ -1,10 +1,6 @@
 <template>
   <!-- Event List (elf) -->
-  <div
-    class="am-eli"
-    :class="props.globalClass"
-    :style="cssVars"
-  >
+  <div class="am-eli" :class="props.globalClass" :style="cssVars">
     <GalleryCarousel
       v-if="selectedEvent.gallery.length && customizeOptions.gallery.visibility"
       :gallery="selectedEvent.gallery"
@@ -31,10 +27,7 @@
 
     <div class="am-eli__main">
       <el-tabs v-model="activeName">
-        <el-tab-pane
-          :label="labelsDisplay('event_info')"
-          name="first"
-        >
+        <el-tab-pane :label="labelsDisplay('event_info')" name="first">
           <div
             v-if="selectedEvent.periods.length"
             class="am-eli__timetable am-eli__main-item"
@@ -89,22 +82,19 @@
           </template>
         </el-tab-pane>
         <el-tab-pane
-          v-if="tickets.length"
+          v-if="features.tickets"
           :label="labelsDisplay('event_tickets')"
           name="second"
         >
-          <template
+          <EventTicket
             v-for="ticket in tickets"
             :key="ticket.id"
-          >
-            <EventTicket
-              :ticket="ticket"
-              :capacity="selectedEvent.maxCustomCapacity"
-              :extra-people="selectedEvent.maxExtraPeople"
-              :customized-labels="customLabels"
-              :readonly="true"
-            />
-          </template>
+            :ticket="ticket"
+            :capacity="selectedEvent.maxCustomCapacity"
+            :extra-people="selectedEvent.maxExtraPeople"
+            :customized-labels="customLabels"
+            :readonly="true"
+          />
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -115,15 +105,14 @@
     :visibility="bringingAnyoneVisibility"
     custom-class="am-eli__bringing-wrapper"
   >
-    <EventBringingAnyone/>
+    <EventBringingAnyone />
 
     <template #footer>
-      <div
-        class="am-eli__bringing-footer"
-        :class="responsiveClass"
-      >
+      <div class="am-eli__bringing-footer" :class="responsiveClass">
         <AmButton
-          :type="amCustomize[pageRenderKey].bringingAnyone.options.secBtn.buttonType"
+          :type="
+            amCustomize[pageRenderKey].bringingAnyone.options.secBtn.buttonType
+          "
           category="secondary"
           :disabled="false"
           @click="noOneBringWith"
@@ -132,7 +121,9 @@
         </AmButton>
         <AmButton
           :category="isWaiting ? 'waiting' : 'primary'"
-          :type="amCustomize[pageRenderKey].bringingAnyone.options.primBtn.buttonType"
+          :type="
+            amCustomize[pageRenderKey].bringingAnyone.options.primBtn.buttonType
+          "
           :disabled="false"
           @click="bringPeopleWithYou"
         >
@@ -146,58 +137,51 @@
 
 <script setup>
 // * _components
-import AmButton from "../../../../../../_components/button/AmButton.vue";
-import AmSlidePopup from "../../../../../../_components/slide-popup/AmSlidePopup.vue";
+import AmButton from '../../../../../../_components/button/AmButton.vue'
+import AmSlidePopup from '../../../../../../_components/slide-popup/AmSlidePopup.vue'
 
 // * Dedicated Components
-import EventCard from "../../EventList/parts/EventCard.vue";
-import DescriptionItem from "../../../../../../public/EventForm/Common/Parts/DescriptionItem.vue";
-import EventEmployee from "../../../../../../public/EventForm/Common/Parts/EventEmployee.vue";
+import EventCard from '../../EventList/parts/EventCard.vue'
+import DescriptionItem from '../../../../../../public/EventForm/Common/Parts/DescriptionItem.vue'
+import EventEmployee from '../../../../../../public/EventForm/Common/Parts/EventEmployee.vue'
 
 // * Parts
-import EventTicket from "../EventTickets/parts/EventTicket.vue";
-import GalleryCarousel from "../../../../../../public/EventForm/Common/Parts/GalleryCarousel.vue";
+import EventTicket from '../EventTickets/parts/EventTicket.vue'
+import GalleryCarousel from '../../../../../../public/EventForm/Common/Parts/GalleryCarousel.vue'
 
 // * Dialogs
-import EventBringingAnyone from "./parts/EventBringingAnyone.vue";
+import EventBringingAnyone from './parts/EventBringingAnyone.vue'
 
 // * Import from Vue
-import {
-  computed,
-  inject,
-  ref,
-  reactive,
-} from "vue";
-import moment from "moment/moment";
+import { computed, inject, ref, reactive } from 'vue'
+import moment from 'moment/moment'
 
 // * Composables
-import { useColorTransparency } from "../../../../../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../../../../../assets/js/common/colorManipulation'
 import {
   getEventFrontedFormattedTime,
-  getFrontedFormattedDate
-} from "../../../../../../../assets/js/common/date";
-import { useResponsiveClass } from "../../../../../../../assets/js/common/responsive";
+  getFrontedFormattedDate,
+} from '../../../../../../../assets/js/common/date'
+import { useResponsiveClass } from '../../../../../../../assets/js/common/responsive'
+import { useReactiveCustomize } from '../../../../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Components Properties
 let props = defineProps({
   globalClass: {
     type: String,
-    default: ''
+    default: '',
   },
   inDialog: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
-// * Root settings
-let amSettings = inject('settings')
-
-// * Licence
-let licence = inject('licence')
+// * Features
+let features = inject('features')
 
 let isWaiting = computed(() => {
-  return amSettings.appointments.waitingListEvents.enabled && !licence.isBasic && !licence.isStarter && !licence.isLite
+  return features.value.waitingList
 })
 
 // * Base Urls
@@ -206,18 +190,29 @@ const baseUrls = inject('baseUrls')
 let selectedEvent = ref({
   id: 3,
   bookable: true,
-  color:"#1788FB",
+  color: '#1788FB',
   opened: true,
   full: !!isWaiting.value,
   closed: false,
-  description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+  description:
+    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
   fullPayment: false,
   gallery: [
-    {pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,},
-    {pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,},
-    {pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,},
-    {pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,},
-    {pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,}
+    {
+      pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
+    },
+    {
+      pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
+    },
+    {
+      pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
+    },
+    {
+      pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
+    },
+    {
+      pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
+    },
   ],
   locationId: 1,
   customPricing: true,
@@ -226,7 +221,7 @@ let selectedEvent = ref({
       enabled: true,
       id: 1,
       eventId: 1,
-      name: "Ticket one",
+      name: 'Ticket one',
       price: 10,
       sold: 0,
       spots: 20,
@@ -235,7 +230,7 @@ let selectedEvent = ref({
       enabled: true,
       id: 2,
       eventId: 1,
-      name: "Ticket two",
+      name: 'Ticket two',
       price: 50,
       sold: 0,
       spots: 20,
@@ -244,27 +239,33 @@ let selectedEvent = ref({
       enabled: true,
       id: 2,
       eventId: 1,
-      name: "Ticket three",
+      name: 'Ticket three',
       price: 100,
       sold: 0,
       spots: 20,
-    }
+    },
   ],
   depositPerPerson: true,
-  depositPayment: "percentage",
+  depositPayment: 'percentage',
   deposit: 10,
   maxCapacity: 9,
   maxCustomCapacity: null,
   maxExtraPeople: 3,
-  name: "Event 3",
+  name: 'Event 3',
   organizerId: 1,
   periods: [
     {
       id: 1,
       eventId: 1,
-      periodStart: moment().add(2, 'days').add(5, "hours").format('YYYY-MM-DD hh:mm:ss'),
-      periodEnd: moment().add(4, 'days').add(10, "hours").format('YYYY-MM-DD hh:mm:ss'),
-    }
+      periodStart: moment()
+        .add(2, 'days')
+        .add(5, 'hours')
+        .format('YYYY-MM-DD hh:mm:ss'),
+      periodEnd: moment()
+        .add(4, 'days')
+        .add(10, 'hours')
+        .format('YYYY-MM-DD hh:mm:ss'),
+    },
   ],
   pictureFullPath: null,
   pictureThumbPath: null,
@@ -275,24 +276,27 @@ let selectedEvent = ref({
       id: 1,
       firstName: 'Jane',
       lastName: 'Doe',
-      description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     },
     {
       id: 2,
       firstName: 'Sahar',
       lastName: 'Potter',
-      description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     },
     {
       id: 3,
       firstName: 'Miles',
       lastName: 'Shannon',
-      description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     },
   ],
-  show:true,
-  status:"approved",
-  tags:[{}],
+  show: true,
+  status: 'approved',
+  tags: [{}],
 })
 
 // * Locations array
@@ -300,18 +304,18 @@ let locations = ref([
   {
     id: 1,
     name: 'Location 1',
-    address: 'Location 1'
+    address: 'Location 1',
   },
   {
     id: 2,
     name: 'Location 2',
-    address: 'Location 2'
+    address: 'Location 2',
   },
   {
     id: 3,
     name: 'Location 3',
-    address: 'Location 3'
-  }
+    address: 'Location 3',
+  },
 ])
 
 // * Event Tickets
@@ -319,7 +323,7 @@ let tickets = ref([
   {
     id: 1,
     eventTicketId: 1,
-    name: "Ticket one",
+    name: 'Ticket one',
     persons: 0,
     price: 10,
     sold: 5,
@@ -328,7 +332,7 @@ let tickets = ref([
   {
     id: 2,
     eventTicketId: 2,
-    name: "Ticket two",
+    name: 'Ticket two',
     persons: 0,
     price: 10,
     sold: 1,
@@ -337,7 +341,7 @@ let tickets = ref([
   {
     id: 3,
     eventTicketId: 3,
-    name: "Ticket three",
+    name: 'Ticket three',
     persons: 0,
     price: 10,
     sold: 0,
@@ -352,8 +356,14 @@ let selectedEventsPeriods = computed(() => {
   selectedEvent.value.periods.forEach(function (period) {
     let periodStartDate = moment(period.periodStart.split(' ')[0], 'YYYY-MM-DD')
     let periodEndDate = moment(period.periodEnd.split(' ')[0], 'YYYY-MM-DD')
-    let periodStartTime = moment(period.periodStart.split(' ')[1], 'HH:mm:ss').format('HH:mm:ss')
-    let periodEndTime = moment(period.periodEnd.split(' ')[1], 'HH:mm:ss').format('HH:mm:ss')
+    let periodStartTime = moment(
+      period.periodStart.split(' ')[1],
+      'HH:mm:ss'
+    ).format('HH:mm:ss')
+    let periodEndTime = moment(
+      period.periodEnd.split(' ')[1],
+      'HH:mm:ss'
+    ).format('HH:mm:ss')
 
     if (periodEndTime === '00:00:00') {
       periodEndTime = '24:00:00'
@@ -369,29 +379,34 @@ let selectedEventsPeriods = computed(() => {
         periodStartDate.add(1, 'days')
       }
 
-      periodDates.forEach(dayPeriod => {
+      periodDates.forEach((dayPeriod) => {
         periodsArr.push({
           id: period.id,
           start: dayPeriod + ' ' + periodStartTime,
-          end: dayPeriod + ' ' + periodEndTime
+          end: dayPeriod + ' ' + periodEndTime,
         })
       })
     } else {
       periodsArr.push({
         id: period.id,
         start: periodStartDate.format('YYYY-MM-DD') + ' ' + periodStartTime,
-        end: periodEndDate.format('YYYY-MM-DD') + ' ' + periodEndTime
+        end: periodEndDate.format('YYYY-MM-DD') + ' ' + periodEndTime,
       })
     }
   })
 
   let periods = []
-  periodsArr.sort((a, b) => moment(a.start, 'YYYY-MM-DD HH:mm:ss') - moment(b.start, 'YYYY-MM-DD HH:mm:ss'))
-    .forEach(item => {
+  periodsArr
+    .sort(
+      (a, b) =>
+        moment(a.start, 'YYYY-MM-DD HH:mm:ss') -
+        moment(b.start, 'YYYY-MM-DD HH:mm:ss')
+    )
+    .forEach((item) => {
       periods.push({
         dateOfMonth: getFrontedFormattedDate(item.start.split(' ')[0]),
         timeStart: getEventFrontedFormattedTime(item.start.split(' ')[1]),
-        timeEnd: getEventFrontedFormattedTime(item.end.split(' ')[1])
+        timeEnd: getEventFrontedFormattedTime(item.end.split(' ')[1]),
       })
     })
 
@@ -402,7 +417,7 @@ let eventRange = computed(() => {
   let rangeArr = []
   let rangeObj = {}
 
-  selectedEvent.value.periods.forEach(item => {
+  selectedEvent.value.periods.forEach((item) => {
     rangeArr.push(
       moment(item.periodStart, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD'),
       moment(item.periodEnd, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD')
@@ -419,8 +434,8 @@ let eventRange = computed(() => {
 let eventOrganizer = ref({
   firstName: 'John',
   lastName: 'Doe',
-  description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
-
+  description:
+    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
 })
 
 function noOneBringWith() {}
@@ -430,14 +445,14 @@ function bringPeopleWithYou() {}
 // * Customize
 let pageRenderKey = inject('pageRenderKey')
 let stepName = inject('stepName')
-let subStepName = inject('subStepName')
+let subStepName = useReactiveCustomize().subStepName
 
 // * Bringing Anyone With You
 let bringingAnyoneVisibility = computed(() => {
   return subStepName.value === 'bringingAnyone'
 })
 
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Options
 let customizeOptions = computed(() => {
@@ -448,10 +463,15 @@ let customizeOptions = computed(() => {
 let langKey = inject('langKey')
 let amLabels = inject('labels')
 
-function labelsDisplay (label, stepKey = 'info') {
+function labelsDisplay(label, stepKey = 'info') {
   let computedLabel = computed(() => {
-    let translations = amCustomize.value[pageRenderKey.value][stepKey].translations
-    return translations && translations[label] && translations[label][langKey.value] ? translations[label][langKey.value] : amLabels[label]
+    let translations =
+      amCustomize.value[pageRenderKey.value][stepKey].translations
+    return translations &&
+      translations[label] &&
+      translations[label][langKey.value]
+      ? translations[label][langKey.value]
+      : amLabels[label]
   })
 
   return computedLabel.value
@@ -459,11 +479,11 @@ function labelsDisplay (label, stepKey = 'info') {
 
 // * Computed labels
 let customLabels = computed(() => {
-  let computedLabels = reactive({...amLabels})
+  let computedLabels = reactive({ ...amLabels })
 
   if (amCustomize.value.elf.info.translations) {
     let customizedLabels = amCustomize.value.elf.info.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][langKey.value]) {
         computedLabels[labelKey] = customizedLabels[labelKey][langKey.value]
       } else if (customizedLabels[labelKey].default) {
@@ -493,20 +513,35 @@ let cssVars = computed(() => {
     '--am-c-eli-primary': amColors.value.colorPrimary,
     '--am-c-eli-bgr': amColors.value.colorMainBgr,
     '--am-c-eli-text': amColors.value.colorMainText,
-    '--am-c-eli-text-op90': useColorTransparency(amColors.value.colorMainText, 0.9),
-    '--am-c-eli-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
-    '--am-c-eli-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
-    '--am-c-eli-text-op60': useColorTransparency(amColors.value.colorMainText, 0.7),
-    '--am-c-eli-text-op20': useColorTransparency(amColors.value.colorMainText, 0.1),
+    '--am-c-eli-text-op90': useColorTransparency(
+      amColors.value.colorMainText,
+      0.9
+    ),
+    '--am-c-eli-text-op80': useColorTransparency(
+      amColors.value.colorMainText,
+      0.8
+    ),
+    '--am-c-eli-text-op70': useColorTransparency(
+      amColors.value.colorMainText,
+      0.7
+    ),
+    '--am-c-eli-text-op60': useColorTransparency(
+      amColors.value.colorMainText,
+      0.7
+    ),
+    '--am-c-eli-text-op20': useColorTransparency(
+      amColors.value.colorMainText,
+      0.1
+    ),
   }
 })
 </script>
 
 <script>
 export default {
-  name: "EventInfo",
-  key: "info",
-  label: "event_info"
+  name: 'EventInfo',
+  key: 'info',
+  label: 'event_info',
 }
 </script>
 
@@ -545,7 +580,6 @@ export default {
 
         .el-tab {
           &s {
-
             &__nav {
               &-wrap {
                 &:after {

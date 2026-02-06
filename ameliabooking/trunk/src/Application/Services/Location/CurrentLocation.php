@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -19,8 +20,6 @@ class CurrentLocation extends AbstractCurrentLocation
      * @param string $ipLocateApyKey
      *
      * @return string
-     *
-     * @SuppressWarnings(PHPMD.Superglobals)
      */
     public function getCurrentLocationCountryIso($ipLocateApyKey)
     {
@@ -30,7 +29,7 @@ class CurrentLocation extends AbstractCurrentLocation
             curl_setopt(
                 $curlHandle,
                 CURLOPT_URL,
-                'https://www.iplocate.io/api/lookup/' . $_SERVER['REMOTE_ADDR'] . ($ipLocateApyKey ? ('?apikey=' . $ipLocateApyKey): '')
+                'https://www.iplocate.io/api/lookup/' . $_SERVER['REMOTE_ADDR'] . ($ipLocateApyKey ? ('?apikey=' . $ipLocateApyKey) : '')
             );
 
             curl_setopt($curlHandle, CURLOPT_CONNECTTIMEOUT, 2);

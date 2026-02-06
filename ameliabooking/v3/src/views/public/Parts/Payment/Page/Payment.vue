@@ -57,8 +57,9 @@
           >
             <img
               v-if="available"
-              :src="`${baseUrls.wpAmeliaPluginURL}/v3/src/assets/img/icons/${gateway === 'mollie' || gateway === 'wc' ? 'stripe' : gateway}.svg`"
+              :src="`${baseUrls.wpAmeliaPluginURL}/v3/src/assets/img/icons/${gateway === 'wc' ? 'online' : gateway}.svg`"
               :alt="gateway"
+              :class="gateway"
             >
             <div>
               <p>{{ getPaymentBtnString(gateway) }}</p>
@@ -205,7 +206,8 @@ const paymentTypes = {
   razorpay: markRaw(PaymentCommon),
   mollie: markRaw(PaymentCommon),
   wc: markRaw(PaymentWc),
-  square: markRaw(PaymentSquare)
+  square: markRaw(PaymentSquare),
+  barion: markRaw(PaymentCommon),
 }
 
 let ready = computed(() => store.getters['getReady'])
@@ -243,7 +245,7 @@ let paymentSentence = computed(() => {
   let sentence = ''
   if (paymentGateway.value === 'onSite' && !mandatoryOnSitePayment.value) {
     sentence = amLabels.payment_onsite_sentence
-  } else if (paymentGateway.value === 'mollie' || paymentGateway.value === 'wc') {
+  } else if (paymentGateway.value === 'mollie' || paymentGateway.value === 'wc' || paymentGateway.value === 'barion') {
     sentence = amLabels.payment_wc_mollie_sentence
   }
 
@@ -276,7 +278,8 @@ let availablePayments = computed(() => {
         wc: false,
         mollie: false,
         razorpay: false,
-        square: false
+        square: false,
+        barion: false,
       }
     }
 
@@ -292,6 +295,7 @@ let availablePayments = computed(() => {
       mollie: amSettings.value.payments.mollie.enabled,
       razorpay: amSettings.value.payments.razorpay.enabled,
       square: settings.payments.square.enabled,
+      barion: settings.payments.barion.enabled,
     } : {
       onSite: 'onSite' in entityPayments ? entityPayments.onSite && amSettings.value.payments.onSite : amSettings.value.payments.onSite,
       stripe: 'stripe' in entityPayments ? entityPayments.stripe.enabled && amSettings.value.payments.stripe.enabled : amSettings.value.payments.stripe.enabled,
@@ -300,6 +304,7 @@ let availablePayments = computed(() => {
       mollie: 'mollie' in entityPayments ? entityPayments.mollie.enabled && amSettings.value.payments.mollie.enabled : amSettings.value.payments.mollie.enabled,
       razorpay: 'razorpay' in entityPayments ? entityPayments.razorpay.enabled && amSettings.value.payments.razorpay.enabled : amSettings.value.payments.razorpay.enabled,
       square: 'square' in entityPayments ? entityPayments.square.enabled && settings.payments.square.enabled : settings.payments.square.enabled,
+      barion: 'barion' in entityPayments ? entityPayments.barion.enabled && settings.payments.barion.enabled && ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode) : settings.payments.barion.enabled && ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode),
     }
 
     if (!payments.onSite &&
@@ -308,7 +313,8 @@ let availablePayments = computed(() => {
       !payments.wc &&
       !payments.mollie &&
       !payments.square &&
-      !payments.razorpay
+      !payments.razorpay &&
+      !payments.barion
     ) {
       payments = {
         onSite: amSettings.value.payments.onSite,
@@ -318,6 +324,7 @@ let availablePayments = computed(() => {
         mollie: amSettings.value.payments.mollie.enabled,
         square: settings.payments.square.enabled,
         razorpay: amSettings.value.payments.razorpay.enabled,
+        barion: settings.payments.barion.enabled,
       }
     }
 
@@ -422,8 +429,12 @@ function getPaymentBtnString (key) {
       return amLabels['stripe']
     case 'razorpay':
       return amLabels['razorpay']
-    case 'mollie': case 'wc':
+    case 'mollie':
+      return amLabels['mollie']
+    case 'wc':
       return amLabels['on_line']
+    case 'barion':
+      return amLabels['barion']
     default:
       return ''
   }
@@ -568,6 +579,10 @@ export default {
         img {
           height: 24px;
           width: 24px;
+        }
+
+        .barion {
+          width: 50px;
         }
 
         div {

@@ -58,6 +58,18 @@ function useOppositeColor (colorData) {
 }
 
 function useColorTransparency (color, opacity = 1) {
+  if (color.indexOf('rgb(') > -1) {
+    color = color.substr(4).split(')')[0].split(',')
+    let colorObject = {
+      r: color[0].replace(' ', ''),
+      g: color[1].replace(' ', ''),
+      b: color[2].replace(' ', ''),
+      a: opacity
+    }
+
+    return `rgba(${colorObject.r}, ${colorObject.g}, ${colorObject.b}, ${colorObject.a})`
+  }
+
   if (color.indexOf('rgba') > -1) {
     color = color.substr(5).split(')')[0].split(',')
     let colorObject = {

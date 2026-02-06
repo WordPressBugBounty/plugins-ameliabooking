@@ -1,8 +1,7 @@
 <?php
 
 // File generated from our OpenAPI spec
-
-namespace AmeliaStripe;
+namespace AmeliaVendor\Stripe;
 
 /**
  * @property string $id Unique identifier for the object.
@@ -10,33 +9,46 @@ namespace AmeliaStripe;
  * @property int $created Time at which the object was created. Measured in seconds since the Unix epoch.
  * @property int $expires Time at which the key will expire. Measured in seconds since the Unix epoch.
  * @property bool $livemode Has the value <code>true</code> if the object exists in live mode or the value <code>false</code> if the object exists in test mode.
- * @property string $secret The key's secret. You can use this value to make authorized requests to the Stripe API.
+ * @property null|string $secret The key's secret. You can use this value to make authorized requests to the Stripe API.
  */
 class EphemeralKey extends ApiResource
 {
     const OBJECT_NAME = 'ephemeral_key';
-
-    use ApiOperations\Create {
+    /**
+     * Invalidates a short-lived API key for a given resource.
+     *
+     * @param null|array{expand?: string[]} $params
+     * @param null|array|string $opts
+     *
+     * @return EphemeralKey the deleted resource
+     *
+     * @throws Exception\ApiErrorException if the request fails
+     */
+    public function delete($params = null, $opts = null)
+    {
+        self::_validateParams($params);
+        $url = $this->instanceUrl();
+        list($response, $opts) = $this->_request('delete', $url, $params, $opts);
+        $this->refreshFrom($response, $opts);
+        return $this;
+    }
+    use \AmeliaVendor\Stripe\ApiOperations\Create {
         create as protected _create;
     }
-
-    use ApiOperations\Delete;
-
     /**
      * @param null|array $params
      * @param null|array|string $opts
      *
-     * @throws \AmeliaStripe\Exception\InvalidArgumentException if stripe_version is missing
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return EphemeralKey the created key
      *
-     * @return \AmeliaStripe\EphemeralKey the created key
+     * @throws Exception\InvalidArgumentException if stripe_version is missing
+     * @throws Exception\ApiErrorException if the request fails
      */
     public static function create($params = null, $opts = null)
     {
         if (!$opts || !isset($opts['stripe_version'])) {
             throw new Exception\InvalidArgumentException('stripe_version must be specified to create an ephemeral key');
         }
-
         return self::_create($params, $opts);
     }
 }

@@ -2,19 +2,24 @@
 
 // File generated from our OpenAPI spec
 
-namespace AmeliaStripe\Service\FinancialConnections;
+namespace AmeliaVendor\Stripe\Service\FinancialConnections;
 
-class AccountService extends \AmeliaStripe\Service\AbstractService
+/**
+ * @phpstan-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ *
+ * @psalm-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ */
+class AccountService extends \AmeliaVendor\Stripe\Service\AbstractService
 {
     /**
      * Returns a list of Financial Connections <code>Account</code> objects.
      *
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{account_holder?: array{account?: string, customer?: string}, ending_before?: string, expand?: string[], limit?: int, session?: string, starting_after?: string} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Collection<\AmeliaVendor\Stripe\FinancialConnections\Account>
      *
-     * @return \AmeliaStripe\Collection<\AmeliaStripe\FinancialConnections\Account>
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function all($params = null, $opts = null)
     {
@@ -25,12 +30,12 @@ class AccountService extends \AmeliaStripe\Service\AbstractService
      * Lists all owners for a given <code>Account</code>.
      *
      * @param string $id
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{ending_before?: string, expand?: string[], limit?: int, ownership: string, starting_after?: string} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Collection<\AmeliaVendor\Stripe\FinancialConnections\AccountOwner>
      *
-     * @return \AmeliaStripe\Collection<\AmeliaStripe\FinancialConnections\AccountOwner>
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function allOwners($id, $params = null, $opts = null)
     {
@@ -43,12 +48,12 @@ class AccountService extends \AmeliaStripe\Service\AbstractService
      * transactions).
      *
      * @param string $id
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[]} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\FinancialConnections\Account
      *
-     * @return \AmeliaStripe\FinancialConnections\Account
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function disconnect($id, $params = null, $opts = null)
     {
@@ -59,12 +64,12 @@ class AccountService extends \AmeliaStripe\Service\AbstractService
      * Refreshes the data associated with a Financial Connections <code>Account</code>.
      *
      * @param string $id
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[], features: string[]} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\FinancialConnections\Account
      *
-     * @return \AmeliaStripe\FinancialConnections\Account
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function refresh($id, $params = null, $opts = null)
     {
@@ -75,15 +80,49 @@ class AccountService extends \AmeliaStripe\Service\AbstractService
      * Retrieves the details of an Financial Connections <code>Account</code>.
      *
      * @param string $id
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[]} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\FinancialConnections\Account
      *
-     * @return \AmeliaStripe\FinancialConnections\Account
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function retrieve($id, $params = null, $opts = null)
     {
         return $this->request('get', $this->buildPath('/v1/financial_connections/accounts/%s', $id), $params, $opts);
+    }
+
+    /**
+     * Subscribes to periodic refreshes of data associated with a Financial Connections
+     * <code>Account</code>.
+     *
+     * @param string $id
+     * @param null|array{expand?: string[], features: string[]} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
+     *
+     * @return \AmeliaVendor\Stripe\FinancialConnections\Account
+     *
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
+     */
+    public function subscribe($id, $params = null, $opts = null)
+    {
+        return $this->request('post', $this->buildPath('/v1/financial_connections/accounts/%s/subscribe', $id), $params, $opts);
+    }
+
+    /**
+     * Unsubscribes from periodic refreshes of data associated with a Financial
+     * Connections <code>Account</code>.
+     *
+     * @param string $id
+     * @param null|array{expand?: string[], features: string[]} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
+     *
+     * @return \AmeliaVendor\Stripe\FinancialConnections\Account
+     *
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
+     */
+    public function unsubscribe($id, $params = null, $opts = null)
+    {
+        return $this->request('post', $this->buildPath('/v1/financial_connections/accounts/%s/unsubscribe', $id), $params, $opts);
     }
 }

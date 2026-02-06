@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -8,6 +9,7 @@ namespace AmeliaBooking\Application\Commands\Bookable\Service;
 
 use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Application\Commands\CommandResult;
+use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
 use AmeliaBooking\Domain\Entity\Entities;
@@ -18,6 +20,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ServiceRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
 use Slim\Exception\ContainerValueNotFoundException;
+use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 
 /**
  * Class GetServiceCommandHandler
@@ -36,6 +39,10 @@ class GetServiceCommandHandler extends CommandHandler
      */
     public function handle(GetServiceCommand $command)
     {
+        if (!$command->getPermissionService()->currentUserCanRead(Entities::SERVICES)) {
+            throw new AccessDeniedException('You are not allowed to read services.');
+        }
+
         $result = new CommandResult();
 
         /** @var ServiceRepository $serviceRepository */
@@ -50,7 +57,8 @@ class GetServiceCommandHandler extends CommandHandler
         )->getItem($command->getArg('id'));
 
         // fix for wrongly saved JSON
-        if ($service->getSettings() &&
+        if (
+            $service->getSettings() &&
             json_decode($service->getSettings()->getValue(), true) === null
         ) {
             $service->setSettings(null);
@@ -70,6 +78,12 @@ class GetServiceCommandHandler extends CommandHandler
         );
 
         $serviceArray = $service->toArray();
+
+        /** @var ProviderRepository $providerRepository */
+        $providerRepository = $this->container->get('domain.users.providers.repository');
+
+        $providers = $providerRepository->getProvidersServices([$service->getId()->getValue()]);
+        $serviceArray['providers'] = array_keys($providers);
 
         $serviceArray = apply_filters('amelia_get_service_filter', $serviceArray);
 

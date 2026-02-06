@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -25,7 +26,6 @@ use Slim\Exception\ContainerValueNotFoundException;
  */
 class UpdateStashCommandHandler extends CommandHandler
 {
-
     /**
      * @param UpdateStashCommand $command
      *
@@ -34,7 +34,6 @@ class UpdateStashCommandHandler extends CommandHandler
      * @throws InvalidArgumentException
      * @throws AccessDeniedException
      * @throws QueryExecutionException
-     * @throws \Interop\Container\Exception\ContainerException
      */
     public function handle(UpdateStashCommand $command)
     {
@@ -54,7 +53,8 @@ class UpdateStashCommandHandler extends CommandHandler
             $currentUser =  null;
         }
 
-        if ($currentUser && (
+        if (
+            $currentUser && (
                 $currentUser->getType() === AbstractUser::USER_ROLE_ADMIN ||
                 $currentUser->getType() === AbstractUser::USER_ROLE_PROVIDER ||
                 $currentUser->getType() === AbstractUser::USER_ROLE_MANAGER

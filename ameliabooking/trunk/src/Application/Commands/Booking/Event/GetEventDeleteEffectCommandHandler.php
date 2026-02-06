@@ -28,10 +28,10 @@ class GetEventDeleteEffectCommandHandler extends CommandHandler
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
-     * @throws \Interop\Container\Exception\ContainerException
      */
     public function handle(GetEventDeleteEffectCommand $command)
     {
+        // TODO - Redesign: Remove command handler since user will have possibility to Cancel and Delete at once and status will be checked on frontend
         if (!$command->getPermissionService()->currentUserCanWrite(Entities::EVENTS)) {
             throw new AccessDeniedException('You are not allowed to write events');
         }
@@ -46,10 +46,12 @@ class GetEventDeleteEffectCommandHandler extends CommandHandler
 
         $result->setResult(CommandResult::RESULT_SUCCESS);
         $result->setMessage('Successfully retrieved message.');
-        $result->setData([
+        $result->setData(
+            [
             'valid'   => $event->getStatus()->getValue() === BookingStatus::REJECTED,
-            'message' => $event->getStatus()->getValue() === BookingStatus::REJECTED ? '' : BackendStrings::getEventStrings()['event_cancel_before_delete']
-        ]);
+            'message' => $event->getStatus()->getValue() === BookingStatus::REJECTED ? '' : BackendStrings::get('event_cancel_before_delete')
+            ]
+        );
 
         return $result;
     }

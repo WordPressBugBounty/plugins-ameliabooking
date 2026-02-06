@@ -10,10 +10,8 @@ use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
 use AmeliaBooking\Domain\Entity\Booking\SlotsEntities;
 use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Factory\Booking\SlotsEntitiesFactory;
-use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\Services\Resource\AbstractResourceService;
 use AmeliaBooking\Domain\Services\User\ProviderService;
-use AmeliaBooking\Domain\ValueObjects\DateTime\DateTimeValue;
 use AmeliaBooking\Domain\ValueObjects\Duration;
 
 /**
@@ -65,11 +63,29 @@ class EntityService
         /** @var Collection $locations */
         $locations = $slotsEntities->getLocations() ?: new Collection();
 
+        if (!empty($props['locationIds'])) {
+            /** @var Collection $filteredLocations */
+            $filteredLocations = new Collection();
+            foreach ($props['locationIds'] as $locationId) {
+                if ($locations->keyExists($locationId)) {
+                    $filteredLocations->addItem(
+                        $locations->getItem($locationId),
+                        $locationId
+                    );
+                }
+            }
+            $locations = $filteredLocations;
+        }
+
         /** @var Collection $filteredProviders */
         $filteredProviders = new Collection();
 
         /** @var Provider $provider */
         foreach ($providers->getItems() as $provider) {
+            if ($settings['timezonesFeatureEnabled'] === false) {
+                $provider->setTimeZone(null);
+            }
+
             if ($provider->getServiceList()->keyExists($props['serviceId'])) {
                 if ($settings['allowAdminBookAtAnyTime']) {
                     $this->providerService->setProvidersAlwaysAvailable(
@@ -108,7 +124,8 @@ class EntityService
             [
                 'service'  => $services->keys(),
                 'location' => $locations->keys(),
-            ]
+            ],
+            $props['serviceId']
         );
 
         /** @var SlotsEntities $filteredSlotsEntities */
@@ -150,7 +167,7 @@ class EntityService
      * @param Collection    $appointments
      * @param array         $props
      *
-     * @return array
+     * @return void
      * @throws InvalidArgumentException
      */
     public function filterSlotsAppointments($slotsEntities, $appointments, $props)
@@ -165,7 +182,8 @@ class EntityService
 
         /** @var Appointment $appointment */
         foreach ($appointments->getItems() as $index => $appointment) {
-            if (!in_array($appointment->getProviderId()->getValue(), $providersIds) ||
+            if (
+                !in_array($appointment->getProviderId()->getValue(), $providersIds) ||
                 (
                     $props['excludeAppointmentId'] && $index === $props['excludeAppointmentId']
                 )
@@ -173,11 +191,6 @@ class EntityService
                 $appointments->deleteItem($index);
             }
         }
-
-        $continuousAppointments = [];
-        $continuousAppointmentsProviders = [];
-
-        $lastIndex = null;
 
         /** @var Appointment $appointment */
         foreach ($appointments->getItems() as $index => $appointment) {
@@ -190,51 +203,7 @@ class EntityService
                 $services->getItem($appointment->getServiceId()->getValue());
 
             $appointment->setService($providerService);
-
-            if ($lastIndex) {
-                /** @var Appointment $previousAppointment */
-                $previousAppointment = $appointments->getItem($lastIndex);
-
-                if ((
-                        $previousAppointment->getLocationId() && $appointment->getLocationId() ?
-                        $previousAppointment->getLocationId()->getValue() === $appointment->getLocationId()->getValue() : true
-                    ) &&
-                    $previousAppointment->getProviderId()->getValue() === $appointment->getProviderId()->getValue() &&
-                    $previousAppointment->getServiceId()->getValue() === $appointment->getServiceId()->getValue() &&
-                    $providerService->getMaxCapacity()->getValue() === 1 &&
-                    $appointment->getBookingStart()->getValue()->format('H:i') !== '00:00' &&
-                    $previousAppointment->getBookingEnd()->getValue()->format('Y-m-d H:i') ===
-                    $appointment->getBookingStart()->getValue()->format('Y-m-d H:i')
-
-                ) {
-
-                    $continuousAppointments[$appointment->getBookingStart()->getValue()->format('Y-m-d')]
-                    [$appointment->getBookingStart()->getValue()->format('H:i')] = [];
-
-                    if (empty($continuousAppointmentsProviders[$appointment->getBookingStart()->getValue()->format('Y-m-d')][$appointment->getProviderId()->getValue()])) {
-                        $continuousAppointmentsProviders[$appointment->getBookingStart()->getValue()->format('Y-m-d')][$appointment->getProviderId()->getValue()] = 1;
-                    } else {
-                        $continuousAppointmentsProviders[$appointment->getBookingStart()->getValue()->format('Y-m-d')][$appointment->getProviderId()->getValue()]++;
-                    }
-
-                    $previousAppointment->setBookingEnd(
-                        new DateTimeValue(
-                            DateTimeService::getCustomDateTimeObject(
-                                $appointment->getBookingEnd()->getValue()->format('Y-m-d H:i:s')
-                            )
-                        )
-                    );
-
-                    $appointments->deleteItem($index);
-                } else {
-                    $lastIndex = $index;
-                }
-            } else {
-                $lastIndex = $index;
-            }
         }
-
-        return [$continuousAppointments, $continuousAppointmentsProviders];
     }
 
     /**

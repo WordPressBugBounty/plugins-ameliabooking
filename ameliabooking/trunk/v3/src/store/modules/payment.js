@@ -66,5 +66,16 @@ export default {
     }
   },
 
-  actions: {}
+  actions: {
+    resetPaymentData ({commit}) {
+      commit('setAllData', {
+        amount: 0,
+        gateway: '',
+        deposit: false,
+        depositAmount: 0,
+        depositType: '',
+        data: {},
+      })
+    }
+  }
 }

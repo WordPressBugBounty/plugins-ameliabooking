@@ -82,6 +82,10 @@ class EntityService
 
         /** @var Provider $provider */
         foreach ($providers->getItems() as $provider) {
+            if ($settings['timezonesFeatureEnabled'] === false) {
+                $provider->setTimeZone(null);
+            }
+
             if ($provider->getServiceList()->keyExists($props['serviceId'])) {
                 if ($settings['allowAdminBookAtAnyTime']) {
                     $this->providerService->setProvidersAlwaysAvailable(
@@ -120,7 +124,8 @@ class EntityService
             [
                 'service'  => $services->keys(),
                 'location' => $locations->keys(),
-            ]
+            ],
+            $props['serviceId']
         );
 
         /** @var SlotsEntities $filteredSlotsEntities */

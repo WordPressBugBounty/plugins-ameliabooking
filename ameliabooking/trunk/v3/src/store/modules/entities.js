@@ -6,6 +6,7 @@ import {
 } from "../../plugins/settings.js";
 import {useUrlParams, useUrlQueryParams} from "../../assets/js/common/helper";
 import { getBadgeTranslated, useTranslateEntities } from "../../assets/js/public/translation";
+import { useFeaturesAndIntegrations, useParsedCustomPricing } from "../../assets/js/common/employee";
 
 function isEmployeeServiceLocation (relations, employeeId, serviceId, locationId = null) {
   if (locationId) {
@@ -13,27 +14,6 @@ function isEmployeeServiceLocation (relations, employeeId, serviceId, locationId
   }
 
   return employeeId in relations && serviceId in relations[employeeId]
-}
-
-function getParsedCustomPricing (service) {
-  if (!('customPricing' in service) || service.customPricing === null) {
-    service.customPricing = {enabled: false, durations: {}}
-  } else {
-    let customPricing = (typeof service.customPricing === 'object') ? service.customPricing : JSON.parse(service.customPricing)
-
-    service.customPricing = {enabled: customPricing.enabled, durations: {}}
-
-    service.customPricing.durations[service.duration] = {price: service.price, rules: []}
-
-    if (customPricing.enabled) {
-      service.customPricing.durations = Object.assign(
-        service.customPricing.durations,
-        customPricing.durations
-      )
-    }
-  }
-
-  return service.customPricing
 }
 
 function setLiteService () {
@@ -123,7 +103,7 @@ function useStarterEntities (entities) {
   return entities
 }
 
-function setEntities ({ commit, rootState }, entities, types, licence, showHidden) {
+function setEntities ({ commit, rootState }, entities, types, licence, showHidden, isPanel) {
   commit('setShowHidden', showHidden)
 
   let availableTranslationsShort = settings.general.usedLanguages.map(
@@ -143,9 +123,17 @@ function setEntities ({ commit, rootState }, entities, types, licence, showHidde
   ) {
     useTranslateEntities(entities)
 
-    rootState.settings.roles.providerBadges.badges.forEach(badge => {
+    rootState.settings.roles.providerBadges.badges?.forEach(badge => {
       badge.content = getBadgeTranslated(badge)
     })
+  }
+
+  if (!isPanel && !settings.featuresIntegrations.customFields.enabled) {
+    entities['customFields'] = []
+  }
+
+  if (!isPanel && !settings.featuresIntegrations.packages.enabled) {
+    entities['packages'] = []
   }
 
   types.forEach(ent => {
@@ -154,12 +142,20 @@ function setEntities ({ commit, rootState }, entities, types, licence, showHidde
     }
 
     if (ent === 'categories') {
+      if (settings.activation.stash) {
+        entities[ent].sort((a, b) => a.position - b.position)
+      }
+
       entities[ent].forEach((category, categoryIndex) => {
         if (settings.activation.stash) {
           category.serviceList.sort((a, b) => a.position - b.position)
         }
         category.serviceList.forEach((service, serviceIndex) => {
-          entities[ent][categoryIndex].serviceList[serviceIndex].customPricing = getParsedCustomPricing(service)
+          useFeaturesAndIntegrations(service, isPanel)
+
+          useFeaturesAndIntegrations(entities[ent][categoryIndex].serviceList[serviceIndex], isPanel)
+
+          entities[ent][categoryIndex].serviceList[serviceIndex].customPricing = useParsedCustomPricing(service)
         })
       })
     }
@@ -182,18 +178,24 @@ function setEntities ({ commit, rootState }, entities, types, licence, showHidde
           entities[ent][employeeIndex].serviceList[serviceIndex].minCapacity = employeeMinCapacity
           entities[ent][employeeIndex].serviceList[serviceIndex].maxCapacity = employeeMaxCapacity
 
-          entities[ent][employeeIndex].serviceList[serviceIndex].customPricing = getParsedCustomPricing(
+          useFeaturesAndIntegrations(entities[ent][employeeIndex].serviceList[serviceIndex], isPanel)
+
+          useFeaturesAndIntegrations(employeeService, isPanel)
+
+          useFeaturesAndIntegrations(service, isPanel)
+
+          entities[ent][employeeIndex].serviceList[serviceIndex].customPricing = useParsedCustomPricing(
             employeeService.customPricing ? employeeService : service
           )
         })
 
         if (employee.badgeId) {
-          employee.badge = rootState.settings.roles.providerBadges.badges.find(badge => badge.id === employee.badgeId)
+          employee.badge = rootState.settings.roles.providerBadges.badges?.find(badge => badge.id === employee.badgeId)
         } else {
           employee.badge = null
         }
 
-        if (showHidden || employee.status !== 'hidden') {
+        if (showHidden || (employee.status !== 'hidden' && employee.show)) {
           arr.push(employee)
         }
       })
@@ -213,7 +215,10 @@ function setEntities ({ commit, rootState }, entities, types, licence, showHidde
     commit(
       'set' + ent.charAt(0).toUpperCase() + ent.slice(1),
       ent === 'customFields' ? entities['customFields'].sort(function(a, b) {
-        return ((a['position'] < b['position']) ? -1 : ((a['position'] > b['position']) ? 1 : 0));
+        if (a['saveType'] === b['saveType']) {
+          return a['position'] - b['position']
+        }
+        return a['saveType'].localeCompare(b['saveType'])
       }) : entities[ent]
     )
   })
@@ -233,6 +238,7 @@ export default {
   namespaced: true,
 
   state: () => ({
+    settings: [],
     taxes: [],
     categories: [],
     services: [],
@@ -243,6 +249,8 @@ export default {
     packages: [],
     entitiesRelations: {},
     customFields: [],
+    tags: [],
+    spaces: [],
     ready: false,
     showHidden: false,
     originalPreselected: {},
@@ -250,6 +258,14 @@ export default {
   }),
 
   getters: {
+    getSettings (state) {
+      return state.settings
+    },
+
+    getSpaces (state) {
+      return state.spaces
+    },
+
     getEntitiesRelations (state) {
       return state.entitiesRelations
     },
@@ -334,6 +350,10 @@ export default {
       return state.locations.find(i => parseInt(i.id) === parseInt(id)) || null
     },
 
+    getTags (state) {
+      return state.tags
+    },
+
     getCustomFields (state) {
       return state.customFields
     },
@@ -345,15 +365,16 @@ export default {
     filteredCategories: (state, getters) => (data) => {
       let categories = []
 
-      let categoriesIds = getters.filteredServices(data).map(service => service.categoryId)
+      let categoriesIds = getters.filteredServices(data).filter(service => !data.serviceId || service.id === data.serviceId).map(service => service.categoryId)
 
       state.categories.forEach((category) => {
         if (categoriesIds.indexOf(category.id) !== -1) {
           let availableCategory = Object.assign(
+            {},
             category
           )
           availableCategory.serviceList = getters.filteredServices(data).filter(service => service.categoryId === category.id)
-          categories.push(category)
+          categories.push(availableCategory)
         }
       })
 
@@ -447,9 +468,9 @@ export default {
             }).length > 0 : false
         ) &&
         (!data.serviceId || data.packageId ? true :
-          getters.filteredEmployees(data).filter(
+          getters.filteredEmployees(data).find(
             employee => isEmployeeServiceLocation(state.entitiesRelations, employee.id, data.serviceId, location.id)
-          ).length > 0
+          ) !== undefined
         ) &&
         (!data.packageId ? true :
           state.packages.find(i => i.id === data.packageId).bookable.filter((book) => {
@@ -464,13 +485,13 @@ export default {
 
     filteredEmployees: (state) => (data) => {
       return state.employees.filter(employee =>
-        employee.serviceList.filter(
+        employee.serviceList.find(
           service =>
             (state.showHidden || service.status === 'visible') &&
             // service.maxCapacity >= data.persons &&
             (!data.serviceId ? true : isEmployeeServiceLocation(state.entitiesRelations, employee.id, service.id) && service.id === data.serviceId) &&
             (!data.locationId ? true : isEmployeeServiceLocation(state.entitiesRelations, employee.id, service.id, data.locationId))
-        ).length > 0
+        ) !== undefined
       )
     },
 
@@ -550,6 +571,14 @@ export default {
   },
 
   mutations: {
+    setSettings (state, payload) {
+      state.settings = payload
+    },
+
+    setSpaces (state, payload) {
+      state.spaces = payload
+    },
+
     setTaxes (state, payload) {
       state.taxes = payload
     },
@@ -582,6 +611,10 @@ export default {
 
     setLocations (state, payload) {
       state.locations = payload
+    },
+
+    setTags (state, payload) {
+      state.tags = payload
     },
 
     setPackages (state, payload) {
@@ -657,9 +690,17 @@ export default {
     setPreselectedValues (state) {
       state.originalPreselected = JSON.parse(JSON.stringify(state.preselected))
 
-      state.employees = state.employees.filter(e => state.showHidden || e.status === 'visible')
-      state.services = state.services.filter(s => (state.showHidden ? true : s.status === 'visible' && s.show) && state.employees.filter(e => e.serviceList.find(eS => eS.id === s.id)).length)
+      state.employees = state.employees.filter(e => (state.showHidden || (e.status === 'visible' && e.show)))
+      state.services = state.services.filter(s => (state.showHidden ? true : (s.status === 'visible' && s.show)) && state.employees.filter(e => e.serviceList.find(eS => eS.id === s.id)).length)
       state.locations = state.locations.filter(l => state.showHidden || l.status === 'visible')
+
+      if (!state.showHidden) {
+        state.employees.forEach(e => {
+          if (!e.show) {
+            delete state.entitiesRelations[e.id]
+          }
+        })
+      }
 
       if ('category' in state.preselected && state.preselected.category.length > 0) {
         state.categories = state.categories.filter(c => state.preselected.category.map(id => parseInt(id)).includes(c.id))
@@ -749,13 +790,13 @@ export default {
     getEntities ({ commit, rootState }, payload) {
       let types = payload.types
 
-      if (payload.loadEntities && !getEntitiesVariableName()) {
+      if (payload.loadEntities && (payload.isPanel || !getEntitiesVariableName())) {
         httpClient.get('/entities', { params: useUrlParams({types: types, page: 'booking', lite: true}) }).then(response => {
           window.ameliaAppointmentEntities = response.data.data
 
           let entities = JSON.parse(JSON.stringify(window.ameliaAppointmentEntities))
 
-          setEntities({ commit, rootState }, entities, types, payload.licence, payload.showHidden)
+          setEntities({ commit, rootState }, entities, types, payload.licence, payload.showHidden, payload.isPanel)
         })
       } else {
         let ameliaApiInterval = setInterval(
@@ -767,7 +808,7 @@ export default {
 
               let entities = JSON.parse(JSON.stringify(window[name]))
 
-              setEntities({ commit, rootState }, entities, types, payload.licence, payload.showHidden)
+              setEntities({ commit, rootState }, entities, types, payload.licence, payload.showHidden, payload.isPanel)
             }
           },
           1000

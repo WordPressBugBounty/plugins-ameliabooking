@@ -244,7 +244,6 @@
         <MainContentFooter
           :second-button-show="
             stepsArray[stepIndex] === congratulationsStep &&
-            amSettings.roles.customerCabinet.enabled &&
             amSettings.roles.customerCabinet.pageUrl !== null
           "
           :add-to-cart-button-show="
@@ -685,7 +684,7 @@ store.dispatch('entities/getEntities', {
     'taxes',
   ],
   licence: licence,
-  loadEntities: shortcodeData.value.hasApiCall || shortcodeData.value.in_dialog,
+  loadEntities: shortcodeData.value.hasApiCall || shortcodeData.value.trigger,
   showHidden: false,
   isPanel: false,
 })
@@ -1316,6 +1315,11 @@ provide('addPaymentsStep', { addPaymentsStep })
 
 provide('removePaymentsStep', { removePaymentsStep })
 
+// Provide cart step controls for child components (e.g., Calendar) so they can hide cart during waiting list selection
+provide('addCartStep', { addCartStep: () => addCartStep(stepIndex.value) })
+
+provide('removeCartStep', { removeCartStep })
+
 function addPaymentsStep() {
   stepsArray.value.splice(stepsArray.value.length - 1, 0, paymentStep)
 
@@ -1334,12 +1338,16 @@ function addCartStep(index) {
   stepChanger(stepsArray, [], [cartStep], index)
 
   stepChanger(sidebarSteps, [], [], index)
+
+  sidebarDataUpdate()
 }
 
 function removeCartStep() {
   stepChanger(stepsArray, ['CartStep'], [], stepIndex.value)
 
   stepChanger(sidebarSteps, ['CartStep'], [], stepIndex.value)
+
+  sidebarDataUpdate()
 }
 
 /**
@@ -1353,6 +1361,40 @@ let selectedServiceExtras = computed(() => {
 
   return service ? service.extras : []
 })
+
+// * Appointment Waiting List: populate module on service selection
+watch(() => store.getters['booking/getServiceId'], (newServiceId) => {
+  // Reset first
+  store.dispatch('appointmentWaitingListOptions/resetWaitingOptions')
+
+  if (!newServiceId) return
+
+  let globalEnabled = !!(amSettings.featuresIntegrations?.waitingListAppointments?.enabled)
+  if (!globalEnabled) return
+
+  let service = store.getters['entities/getService'](newServiceId)
+  if (!service || !service.settings) return
+
+  let serviceSettings = null
+  try {
+    serviceSettings = JSON.parse(service.settings)
+  } catch (e) {
+    serviceSettings = null
+  }
+  if (!serviceSettings || !serviceSettings.waitingList || !serviceSettings.waitingList.enabled) return
+
+  const wl = serviceSettings.waitingList
+  // Backend may not yet supply peopleWaiting for appointments; default 0
+  let waitingPayload = {
+    enabled: !!wl.enabled,
+    maxCapacity: wl.maxCapacity || 0,
+    maxExtraPeople: wl.maxExtraPeople || 0,
+    maxExtraPeopleEnabled: !!wl.maxExtraPeopleEnabled,
+    peopleWaiting: wl.peopleWaiting || 0,
+    isWaitingListSlot: false
+  }
+  store.commit('appointmentWaitingListOptions/setAllData', waitingPayload)
+}, { immediate: true })
 
 /**
  * Add or Remove steps from Steps Array
@@ -1544,7 +1586,15 @@ let keepPaymentStep = computed(() =>
   !empty.value ? (useCart(store).length ? usePrepaidPrice(store) !== 0 : useCheckingIfAllNotFree(store)) : true
 )
 
+// Appointment waiting list flag
+const isWaitingListBooking = computed(() => store.getters['appointmentWaitingListOptions/getIsWaitingListSlot'])
+
 watchEffect(() => {
+  // If waiting list, remove payment step
+  if (isWaitingListBooking.value) {
+    removePaymentsStep()
+    return
+  }
   if (!isRestored.value && !keepPaymentStep.value) {
     removePaymentsStep()
   } else if (!isRestored.value) {

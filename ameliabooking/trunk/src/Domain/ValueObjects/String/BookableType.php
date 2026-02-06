@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -15,11 +16,10 @@ use AmeliaBooking\Domain\Entity\Entities;
  */
 final class BookableType
 {
-    const SERVICE = Entities::SERVICE;
+    public const SERVICE = Entities::SERVICE;
 
-    const EVENT = Entities::EVENT;
-
-    const PACKAGE = Entities::PACKAGE;
+    public const EVENT = Entities::EVENT;
+    public const PACKAGE = Entities::PACKAGE;
 
     /**
      * @var string

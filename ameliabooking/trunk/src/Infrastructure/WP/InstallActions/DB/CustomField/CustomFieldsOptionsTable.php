@@ -12,8 +12,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\AbstractDatabaseTable;
  */
 class CustomFieldsOptionsTable extends AbstractDatabaseTable
 {
-
-    const TABLE = 'custom_fields_options';
+    public const TABLE = 'custom_fields_options';
 
     /**
      * @return string
@@ -26,7 +25,7 @@ class CustomFieldsOptionsTable extends AbstractDatabaseTable
         return "CREATE TABLE {$table} (
                    `id` INT(11) NOT NULL AUTO_INCREMENT,
                    `customFieldId` int(11) NOT NULL,
-                   `label` TEXT NOT NULL DEFAULT '',
+                   `label` TEXT DEFAULT NULL,
                    `position` int(11) NOT NULL,
                    `translations` TEXT NULL DEFAULT NULL,
                     PRIMARY KEY (`id`)

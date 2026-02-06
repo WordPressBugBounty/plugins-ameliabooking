@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -20,7 +21,6 @@ use AmeliaBooking\Domain\ValueObjects\Number\Integer\PositiveInteger;
  */
 class CustomerBookingExtraFactory
 {
-
     /**
      * @param $data
      *
@@ -30,9 +30,12 @@ class CustomerBookingExtraFactory
     public static function create($data)
     {
         $customerBookingExtra = new CustomerBookingExtra(
-            new Id($data['extraId']),
-            new PositiveInteger($data['quantity'])
+            new Id($data['extraId'])
         );
+
+        if (isset($data['quantity'])) {
+            $customerBookingExtra->setQuantity(new PositiveInteger($data['quantity']));
+        }
 
         if (isset($data['id'])) {
             $customerBookingExtra->setId(new Id($data['id']));
@@ -53,7 +56,7 @@ class CustomerBookingExtraFactory
         if (!empty($data['tax'])) {
             if (is_string($data['tax'])) {
                 $customerBookingExtra->setTax(new Json($data['tax']));
-            } else if (json_encode($data['tax']) !== false) {
+            } elseif (json_encode($data['tax']) !== false) {
                 $customerBookingExtra->setTax(new Json(json_encode($data['tax'])));
             }
         }

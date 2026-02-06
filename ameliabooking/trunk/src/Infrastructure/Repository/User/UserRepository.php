@@ -15,6 +15,7 @@ use AmeliaBooking\Domain\ValueObjects\Json;
 use AmeliaBooking\Domain\ValueObjects\String\Password;
 use AmeliaBooking\Infrastructure\Licence;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
+use AmeliaBooking\Infrastructure\DB\WPDB\Statement;
 use AmeliaBooking\Infrastructure\Repository\AbstractRepository;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\CustomerBookingsTable;
 
@@ -25,8 +26,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\CustomerBookingsTa
  */
 class UserRepository extends AbstractRepository implements UserRepositoryInterface
 {
-
-    const FACTORY = UserFactory::class;
+    public const FACTORY = UserFactory::class;
 
     /**
      * @param AbstractUser $entity
@@ -39,23 +39,26 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
         $data = $entity->toArray();
 
         $params = [
-            ':type'             => $data['type'],
-            ':status'           => $data['status'] ?: 'visible',
-            ':externalId'       => $data['externalId'] ?: null,
-            ':firstName'        => $data['firstName'],
-            ':lastName'         => $data['lastName'],
-            ':email'            => $data['email'],
-            ':note'             => isset($data['note']) ? $data['note'] : null,
-            ':description'      => isset($data['description']) ? $data['description'] : null,
-            ':phone'            => isset($data['phone']) ? $data['phone'] : null,
-            ':gender'           => isset($data['gender']) ? $data['gender'] : null,
-            ':birthday'         => $data['birthday'] ? $data['birthday']->format('Y-m-d') : null,
-            ':pictureFullPath'  => $data['pictureFullPath'],
-            ':pictureThumbPath' => $data['pictureThumbPath'],
-            ':password'         => isset($data['password']) ? $data['password'] : null,
-            ':usedTokens'       => isset($data['usedTokens']) ? $data['usedTokens'] : null,
-            ':countryPhoneIso'  => isset($data['countryPhoneIso']) ? $data['countryPhoneIso'] : null,
-            ':stripeConnect'    => !empty($data['stripeConnect']) ? json_encode($data['stripeConnect']) : null,
+            ':type'                  => $data['type'],
+            ':status'                => $data['status'] ?: 'visible',
+            ':externalId'            => $data['externalId'] ?: null,
+            ':firstName'             => $data['firstName'],
+            ':lastName'              => $data['lastName'],
+            ':email'                 => $data['email'],
+            ':note'                  => isset($data['note']) ? $data['note'] : null,
+            ':description'           => isset($data['description']) ? $data['description'] : null,
+            ':phone'                 => isset($data['phone']) ? $data['phone'] : null,
+            ':gender'                => isset($data['gender']) ? $data['gender'] : null,
+            ':birthday'              => $data['birthday'] ? $data['birthday']->format('Y-m-d') : null,
+            ':pictureFullPath'       => $data['pictureFullPath'],
+            ':pictureThumbPath'      => $data['pictureThumbPath'],
+            ':password'              => isset($data['password']) ? $data['password'] : null,
+            ':usedTokens'            => isset($data['usedTokens']) ? $data['usedTokens'] : null,
+            ':countryPhoneIso'       => isset($data['countryPhoneIso']) ? $data['countryPhoneIso'] : null,
+            ':stripeConnect'         => !empty($data['stripeConnect']) ? json_encode($data['stripeConnect']) : null,
+            ':employeeAppleCalendar' => !empty($data['employeeAppleCalendar']) ? json_encode($data['employeeAppleCalendar']) : null,
+            ':error'                 => '',
+            ':customFields'          => isset($data['customFields']) ? $data['customFields'] : null,
         ];
 
         $additionalData = Licence\DataModifier::getUserRepositoryData($data);
@@ -82,7 +85,10 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                 `countryPhoneIso`,
                 `usedTokens`,
                 `stripeConnect`,
-                `password`
+                `employeeAppleCalendar`,   
+                `password`,
+                `error`,
+                `customFields`
                 ) VALUES (
                 {$additionalData['placeholders']}
                 :type,
@@ -101,7 +107,10 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                 :countryPhoneIso,
                 :usedTokens,
                 :stripeConnect,
-                :password
+                :employeeAppleCalendar,
+                :password,
+                :error,
+                :customFields
                 )"
             );
 
@@ -114,7 +123,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
             throw new QueryExecutionException('Unable to add data in ' . __CLASS__, $e->getCode(), $e);
         }
 
-        return $this->connection->lastInsertId();
+        return (int) $this->connection->lastInsertId();
     }
 
     /**
@@ -147,7 +156,9 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
             ':countryPhoneIso'  => isset($data['countryPhoneIso']) ? $data['countryPhoneIso'] : null,
             ':password'         => isset($data['password']) ? $data['password'] : null,
             ':stripeConnect'    => !empty($data['stripeConnect']) ? json_encode($data['stripeConnect']) : null,
+            ':employeeAppleCalendar' => !empty($data['employeeAppleCalendar']) ? json_encode($data['employeeAppleCalendar']) : null,
             ':id'               => $id,
+            ':customFields'     => isset($data['customFields']) ? $data['customFields'] : null,
         ];
 
         $additionalData = Licence\DataModifier::getUserRepositoryData($data);
@@ -171,7 +182,9 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                 `countryPhoneIso` = :countryPhoneIso,
                 `pictureFullPath` = :pictureFullPath,
                 `pictureThumbPath` = :pictureThumbPath,
-                `stripeConnect` = :stripeConnect,
+                `stripeConnect` = :stripeConnect,     
+                `employeeAppleCalendar` = :employeeAppleCalendar,           
+                `customFields` = :customFields,
                 `password` = IFNULL(:password, `password`)
                 WHERE 
                 id = :id"
@@ -349,7 +362,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
      * @param boolean $setPassword
      * @param boolean $setUsedTokens
      *
-     * @return Admin|Customer|Manager|Provider
+     * @return Admin|Customer|Manager|Provider|null
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
      */
@@ -389,7 +402,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
     /**
      * @param string $phone
      *
-     * @return Admin|Customer|Manager|Provider
+     * @return Admin|Customer|Manager|Provider|null
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
      */
@@ -427,7 +440,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
     {
         try {
             $params[':type'] = $type;
-            $statement = $this->connection->prepare(
+            $statement       = $this->connection->prepare(
                 "
                 SELECT DISTINCT 
                     u.email AS email
@@ -436,7 +449,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                 "
             );
             $statement->execute($params);
-            $rows = $statement->fetchAll(\PDO::FETCH_COLUMN);
+            $rows = $statement->fetchAll(Statement::FETCH_COLUMN);
         } catch (\Exception $e) {
             throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
         }

@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -68,18 +69,21 @@ class AppointmentsPlaceholderService extends AppointmentPlaceholderService
             'appointment_end_time'    => date_i18n($timeFormat, date_create('1 hour')->getTimestamp()),
             'appointment_notes'       => 'Appointment note',
             'appointment_price'       => $helperService->getFormattedPrice(100),
+            'payment_due_amount'      => $helperService->getFormattedPrice(80),
             'appointment_cancel_url'  => 'http://cancel_url.com',
             'zoom_join_url'           => $type === 'email' ?
-                '<a href="#">' . BackendStrings::getCommonStrings()['zoom_click_to_join'] . '</a>' : 'https://join_zoom_link.com',
+                '<a href="#">' . BackendStrings::get('zoom_click_to_join') . '</a>' : 'https://join_zoom_link.com',
             'zoom_host_url'           => $type === 'email' ?
-                '<a href="#">' . BackendStrings::getCommonStrings()['zoom_click_to_start'] . '</a>' : 'https://start_zoom_link.com',
-            'google_meet_url'          => $type === 'email' ?
-                '<a href="#">' . BackendStrings::getCommonStrings()['google_meet_join'] . '</a>' : 'https://join_google_meet_link.com',
-            'lesson_space_url'       => $type === 'email' ?
-                '<a href="#">' . BackendStrings::getCommonStrings()['lesson_space_join'] . '</a>' : 'https://lessonspace.com/room-id',
+                '<a href="#">' . BackendStrings::get('zoom_click_to_start') . '</a>' : 'https://start_zoom_link.com',
+            'google_meet_url'         => $type === 'email' ?
+                '<a href="#">' . BackendStrings::get('google_meet_join') . '</a>' : 'https://join_google_meet_link.com',
+            'lesson_space_url'        => $type === 'email' ?
+                '<a href="#">' . BackendStrings::get('lesson_space_join') . '</a>' : 'https://lessonspace.com/room-id',
+            'microsoft_teams_url'     => $type === 'email' ?
+                '<a href="#">' . BackendStrings::get('microsoft_teams_join') . '</a>' : 'https://join_microsoft_teams_link.com',
             'appointment_duration'    => $helperService->secondsToNiceDuration(1800),
             'appointment_deposit_payment'     => $helperService->getFormattedPrice(20),
-            'appointment_status'      => BackendStrings::getCommonStrings()['approved'],
+            'appointment_status'      => BackendStrings::get('approved'),
             'category_name'           => 'Category Name',
             'service_description'     => 'Service Description',
             'reservation_description' => 'Service Description',
@@ -91,12 +95,16 @@ class AppointmentsPlaceholderService extends AppointmentPlaceholderService
         ];
     }
 
+    /** @noinspection MoreThanThreeArgumentsInspection */
     /**
      * @param array        $data
      * @param int          $bookingKey
      * @param string       $type
      * @param AbstractUser $customer
-     * @param null         $allBookings
+     * @param array        $allBookings
+     * @param bool         $invoice
+     * @param string       $notificationType
+     *
      * @return array
      *
      * @throws ContainerException
@@ -104,8 +112,15 @@ class AppointmentsPlaceholderService extends AppointmentPlaceholderService
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    public function getPlaceholdersData($data, $bookingKey = null, $type = null, $customer = null, $allBookings = null)
-    {
+    public function getPlaceholdersData(
+        $data,
+        $bookingKey = null,
+        $type = null,
+        $customer = null,
+        $allBookings = null,
+        $invoice = false,
+        $notificationType = null
+    ) {
         $providersData = [];
 
         foreach ($data['recurring'] as $item) {
@@ -113,7 +128,6 @@ class AppointmentsPlaceholderService extends AppointmentPlaceholderService
         }
 
         foreach ($providersData as $providerId => $providerAppointmentsData) {
-
             $providersData[$providerId] = $this->getRecurringAppointmentsData(
                 array_merge($data, ['recurring' => $providerAppointmentsData]),
                 $bookingKey,

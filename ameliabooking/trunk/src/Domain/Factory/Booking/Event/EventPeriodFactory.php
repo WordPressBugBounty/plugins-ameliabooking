@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -23,7 +24,6 @@ use AmeliaBooking\Domain\ValueObjects\String\Token;
  */
 class EventPeriodFactory
 {
-
     /**
      * @param $data
      *
@@ -74,7 +74,13 @@ class EventPeriodFactory
             $eventPeriod->setOutlookCalendarEventId(new Label($data['outlookCalendarEventId']));
         }
 
+        if (!empty($data['microsoftTeamsUrl'])) {
+            $eventPeriod->setMicrosoftTeamsUrl($data['microsoftTeamsUrl']);
+        }
 
+        if (!empty($data['appleCalendarEventId'])) {
+            $eventPeriod->setAppleCalendarEventId(new Label($data['appleCalendarEventId']));
+        }
 
         return $eventPeriod;
     }

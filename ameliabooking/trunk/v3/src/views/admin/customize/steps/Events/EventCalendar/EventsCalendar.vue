@@ -31,7 +31,7 @@
             <AmInput
               v-model="eventSearch"
               :placeholder="`${labelsDisplay('event_search')}...`"
-              :icon-start="iconSearch"
+              :prefix-icon="iconSearch"
               size="small"
             />
           </div>
@@ -90,6 +90,7 @@
               </AmSelect>
             </div>
             <div
+              v-if="locations.length > 0"
               class="am-ecs__filters-menu__items"
               :class="[filterResponsiveClass, filterClassWidth.location]"
             >
@@ -277,12 +278,7 @@
       </div>
 
       <div
-        v-if="
-          amSettings.appointments.waitingListEvents.enabled &&
-          !licence.isBasic &&
-          !licence.isStarter &&
-          !licence.isLite
-        "
+        v-if="features.waitingList"
         ref="sideTabRef"
         class="am-ecs__side-tab"
       >
@@ -327,7 +323,7 @@
                 {{ calculatedEventPrice(evt) }}
                 <template v-if="taxVisibility">
                   {{
-                    amSettings.payments.taxes.excluded
+                    amSettings.payments?.taxes?.excluded
                       ? ` +${labelsDisplay('total_tax_colon')}`
                       : ` ${labelsDisplay('incl_tax')}`
                   }}
@@ -426,7 +422,7 @@
                 {{ calculatedEventPrice(evt) }}
                 <template v-if="taxVisibility">
                   {{
-                    amSettings.payments.taxes.excluded
+                    amSettings.payments?.taxes?.excluded
                       ? ` +${labelsDisplay('total_tax_colon')}`
                       : ` ${labelsDisplay('incl_tax')}`
                   }}
@@ -524,6 +520,7 @@ import {
   ref,
   watch,
   watchEffect,
+  onBeforeUnmount
 } from 'vue'
 
 // * Components Width and Height
@@ -544,6 +541,7 @@ import {
   useMinTicketPrice,
 } from '../../../../../../assets/js/public/events'
 import { useFormattedPrice } from '../../../../../../assets/js/common/formatting'
+import { useReactiveCustomize } from '../../../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Structure Components
 import AmButton from '../../../../../_components/button/AmButton.vue'
@@ -554,6 +552,9 @@ import AmInput from '../../../../../_components/input/AmInput.vue'
 
 // * Licence
 let licence = inject('licence')
+
+// * Features
+let features = inject('features')
 
 // * Root Settings
 let amSettings = inject('settings')
@@ -606,7 +607,7 @@ let calLoaderHeight = ref(0)
 let sideBlockHeight = ref(0)
 
 /// * Customize
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Options
 let customizeOptions = computed(() => {
@@ -2103,10 +2104,7 @@ function eventArrayBuilder(evtArr) {
 
       let isWaiting =
         event.name === 'Event 10' &&
-        amSettings.appointments.waitingListEvents.enabled &&
-        !licence.isBasic &&
-        !licence.isStarter &&
-        !licence.isLite
+        features.value.waitingList
 
       buildArr.push({
         evtId: event.id,
@@ -2309,67 +2307,76 @@ let iconArrRight = {
 
 let iconType = {
   components: { IconComponent },
-  template: `<IconComponent icon="folder"/>`
+  template: `<IconComponent icon="folder"/>`,
 }
 
 let iconLocation = {
   components: { IconComponent },
-  template: `<IconComponent icon="locations"/>`
+  template: `<IconComponent icon="locations"/>`,
 }
 
 let iconEmployee = {
   components: { IconComponent },
-  template: `<IconComponent icon="employee"/>`
+  template: `<IconComponent icon="employee"/>`,
 }
 
 let iconStatus = {
   components: { IconComponent },
-  template: `<IconComponent icon="circle-empty"/>`
+  template: `<IconComponent icon="circle-empty"/>`,
 }
 
 // ** Filters **
 let filtersMenuVisibility = ref(false)
 
 // * Locations array
-let locations = ref([
-  {
-    id: 1,
-    name: 'Location 1',
-    address: 'Location 1',
-  },
-  {
-    id: 2,
-    name: 'Location 2',
-    address: 'Location 2',
-  },
-  {
-    id: 3,
-    name: 'Location 3',
-    address: 'Location 3',
-  },
-])
+let locations = computed(() => {
+
+  if (licence.isLite || licence.isStarter) return []
+
+  return [
+    {
+      id: 1,
+      name: 'Location 1',
+      address: 'Location 1',
+    },
+    {
+      id: 2,
+      name: 'Location 2',
+      address: 'Location 2',
+    },
+    {
+      id: 3,
+      name: 'Location 3',
+      address: 'Location 3',
+    },
+  ]
+})
 
 // * Tags array
 let tags = ref([{ name: 'Tag 1' }, { name: 'Tag 2' }, { name: 'Tag 3' }])
 
 // * Employees array
-let employees = ref([
-  {
-    id: 1,
-    firstName: 'John',
-    lastName: 'Doe',
-  },
-  {
-    id: 2,
-    firstName: 'Jane',
-    lastName: 'Doe',
-  },
-  {
-    id: 3,
-    firstName: 'John',
-    lastName: 'Wick',
-  },
-])
+let employees = computed(() => {
+  if (licence.isLite) return []
+
+  return [
+    {
+      id: 1,
+      firstName: 'John',
+      lastName: 'Doe',
+    },
+    {
+      id: 2,
+      firstName: 'Jane',
+      lastName: 'Doe',
+    },
+    {
+      id: 3,
+      firstName: 'John',
+      lastName: 'Wick',
+    },
+  ]
+})
 
 // * Status Array
 let evtStatus = ref(['Open', 'Full', 'Upcoming', 'Closed', 'Canceled'])
@@ -2457,8 +2464,8 @@ watchEffect(() => {
       48 -
       (sideHeaderHeight.value + 36)
 
-    if (amSettings.appointments.waitingListEvents.enabled) {
-      sideBlockHeight.value += sideTabHeight
+    if (features.value.waitingList) {
+      sideBlockHeight.value += sideTabHeight.value
     }
   }
 
@@ -4421,7 +4428,7 @@ function eventPlacesBlock(evt) {
 
 let taxVisibility = computed(() => {
   return (
-    amSettings.payments.taxes.enabled &&
+    amSettings.payments?.taxes?.enabled &&
     customizeOptions.value.tax.visibility &&
     !licence.isStarter &&
     !licence.isLite
@@ -4433,6 +4440,10 @@ window.addEventListener('resize', handleResize)
 function handleResize() {
   eventCalendarRef.value.getApi().render()
 }
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+})
 
 // * Colors
 let amColors = inject('amColors')

@@ -16,7 +16,7 @@ use AmeliaBooking\Infrastructure\Repository\AbstractRepository;
  */
 class ProviderServiceRepository extends AbstractRepository
 {
-    const FACTORY = ServiceFactory::class;
+    public const FACTORY = ServiceFactory::class;
 
     /**
      * @param Service $entity
@@ -78,7 +78,7 @@ class ProviderServiceRepository extends AbstractRepository
      * @param Service $entity
      * @param int     $id
      *
-     * @return int
+     * @return void
      * @throws QueryExecutionException
      */
     public function update($entity, $id)
@@ -114,8 +114,6 @@ class ProviderServiceRepository extends AbstractRepository
         } catch (\Exception $e) {
             throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
         }
-
-        return $this->connection->lastInsertId();
     }
 
     /**
@@ -386,7 +384,7 @@ class ProviderServiceRepository extends AbstractRepository
 
         try {
             $statement = $this->connection->prepare(
-              "SELECT
+                "SELECT
               ps.serviceId, ps.userId
               FROM {$this->table} ps
               GROUP BY ps.serviceId
@@ -396,8 +394,6 @@ class ProviderServiceRepository extends AbstractRepository
             $statement->execute();
 
             $rows = $statement->fetchAll();
-
-
         } catch (\Exception $e) {
             throw new QueryExecutionException('Unable to find data from ' . __CLASS__, $e->getCode(), $e);
         }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -9,6 +9,7 @@ namespace AmeliaBooking\Application\Services\Notification;
 
 use AmeliaBooking\Application\Services\Helper\HelperService;
 use AmeliaBooking\Application\Services\Placeholder\PlaceholderService;
+use AmeliaBooking\Application\Services\QrCode\QrCodeApplicationService;
 use AmeliaBooking\Application\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Entity\Entities;
@@ -19,6 +20,7 @@ use AmeliaBooking\Domain\Entity\User\Customer;
 use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
+use AmeliaBooking\Domain\ValueObjects\String\Email;
 use AmeliaBooking\Domain\ValueObjects\String\NotificationStatus;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Notification\NotificationLogRepository;
@@ -28,7 +30,7 @@ use AmeliaBooking\Infrastructure\Services\Notification\MailgunService;
 use AmeliaBooking\Infrastructure\Services\Notification\OutlookService;
 use AmeliaBooking\Infrastructure\Services\Notification\PHPMailService;
 use AmeliaBooking\Infrastructure\Services\Notification\SMTPService;
-use AmeliaBooking\Domain\ValueObjects\String\Email;
+use AmeliaBooking\Infrastructure\WP\Integrations\ThriveAutomator\Apps\AmeliaBooking;
 use Exception;
 use InvalidArgumentException;
 use Slim\Exception\ContainerException;
@@ -51,7 +53,6 @@ class EmailNotificationService extends AbstractNotificationService
      * @throws \AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException
      * @throws ContainerValueNotFoundException
      * @throws QueryExecutionException
-     * @throws \Interop\Container\Exception\ContainerException
      * @throws Exception
      */
     public function sendNotification(
@@ -113,13 +114,13 @@ class EmailNotificationService extends AbstractNotificationService
         if ($userLanguage) {
             $customerDefaultLanguage =
                 $customer && $customer->getTranslations() ?
-                    json_decode($customer->getTranslations()->getValue(), true)['defaultLanguage'] :
-                    null;
+                json_decode($customer->getTranslations()->getValue(), true)['defaultLanguage'] :
+                null;
         } else {
             $customerDefaultLanguage =
                 ($isCustomerPackage && isset($appointmentArray['customer']['translations'])) ?
-                    json_decode($appointmentArray['customer']['translations'], true)['defaultLanguage'] :
-                    null;
+                json_decode($appointmentArray['customer']['translations'], true)['defaultLanguage'] :
+                null;
         }
 
         // set customer email if WP user is connected and ameliaCustomer doesn't have email
@@ -189,10 +190,9 @@ class EmailNotificationService extends AbstractNotificationService
             try {
                 if ($user['email']) {
                     $appointmentId = $appointmentArray['type'] === Entities::APPOINTMENT ?
-                        $appointmentArray['id'] :
-                        (
+                        $appointmentArray['id'] : (
                             $appointmentArray['type'] === Entities::APPOINTMENTS ?
-                                $appointmentArray['recurring'][0]['appointment']['id'] : null
+                            $appointmentArray['recurring'][0]['appointment']['id'] : null
                         );
 
                     if (!empty($appointmentArray['isRetry'])) {
@@ -250,6 +250,22 @@ class EmailNotificationService extends AbstractNotificationService
                         ]
                     );
 
+                    $qrCodeItems = [];
+
+                    if (
+                        $notification->getName()->getValue() === 'customer_event_qr_code' && $bookingKey !== null
+                    ) {
+                        if (!empty($appointmentArray['bookings'][$bookingKey]['qrCodes'])) {
+                            /** @var QrCodeApplicationService $qrApplicationService */
+                            $qrApplicationService = $this->container->get('application.qrcode.service');
+
+                            $qrCodeItems = $qrApplicationService->createQrCodeEventTickets(
+                                $appointmentArray,
+                                $appointmentArray['bookings'][$bookingKey]
+                            );
+                        }
+                    }
+
                     if ($logNotification && $user['id']) {
                         $logNotificationId = $notificationLogRepo->add(
                             $notification,
@@ -268,12 +284,23 @@ class EmailNotificationService extends AbstractNotificationService
                     }
 
                     if ($this->getSend() && empty($emailData['skipSending'])) {
+                        $attachments = [];
+                        if (!empty($emailData['attachments'])) {
+                            $attachments = array_merge($attachments, $emailData['attachments']);
+                        }
+                        if (!empty($invoice)) {
+                            $attachments = array_merge($attachments, [$invoice]);
+                        }
+                        if (!empty($qrCodeItems)) {
+                            $attachments = array_merge($attachments, $qrCodeItems);
+                        }
+
                         $mailService->send(
                             $emailData['email'],
                             $emailData['subject'],
                             $emailData['body'],
                             $emailData['bcc'],
-                            array_merge($emailData['attachments'], [$invoice])
+                            $attachments
                         );
                     } elseif (empty($emailData['skipSending'])) {
                         $this->addPreparedNotificationData(
@@ -294,7 +321,6 @@ class EmailNotificationService extends AbstractNotificationService
      * @throws ContainerValueNotFoundException
      * @throws QueryExecutionException
      * @throws \AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException
-     * @throws \Interop\Container\Exception\ContainerException
      */
     public function sendUndeliveredNotifications()
     {
@@ -339,7 +365,6 @@ class EmailNotificationService extends AbstractNotificationService
      * @throws ContainerValueNotFoundException
      * @throws QueryExecutionException
      * @throws \AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException
-     * @throws \Interop\Container\Exception\ContainerException
      * @throws Exception
      */
     public function sendBirthdayGreetingNotifications()
@@ -376,7 +401,6 @@ class EmailNotificationService extends AbstractNotificationService
      * @throws ContainerValueNotFoundException
      * @throws QueryExecutionException
      * @throws \AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException
-     * @throws \Interop\Container\Exception\ContainerException
      * @throws Exception
      */
     public function sendInvoiceNotification($customerId, $invoice)
@@ -403,7 +427,6 @@ class EmailNotificationService extends AbstractNotificationService
      * @throws ContainerValueNotFoundException
      * @throws QueryExecutionException
      * @throws \AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException
-     * @throws \Interop\Container\Exception\ContainerException
      * @throws Exception
      */
     public function sendOtherNotifications($notifications, $customers, $attachments = [])
@@ -527,7 +550,7 @@ class EmailNotificationService extends AbstractNotificationService
                     'customer_first_name' => $customer->getFirstName()->getValue(),
                     'customer_last_name'  => $customer->getLastName()->getValue(),
                     'customer_full_name'  =>
-                        $customer->getFirstName()->getValue() . ' ' . $customer->getLastName()->getValue(),
+                    $customer->getFirstName()->getValue() . ' ' . $customer->getLastName()->getValue(),
                     'customer_phone'      => $customer->getPhone() ? $customer->getPhone()->getValue() : '',
                     'customer_panel_url'  => $cabinetType === 'customer' ? $helperService->getCustomerCabinetUrl(
                         $customer->getEmail()->getValue(),
@@ -565,8 +588,8 @@ class EmailNotificationService extends AbstractNotificationService
 
                 $customerDefaultLanguage =
                     $cabinetType === 'customer' && $customer->getTranslations() ?
-                        json_decode($customer->getTranslations()->getValue(), true)['defaultLanguage'] :
-                        null;
+                    json_decode($customer->getTranslations()->getValue(), true)['defaultLanguage'] :
+                    null;
 
                 if (!empty($customerDefaultLanguage)) {
                     $notificationSubject = $helperService->getBookingTranslation(
@@ -641,7 +664,7 @@ class EmailNotificationService extends AbstractNotificationService
                     'employee_first_name' => $provider['firstName'],
                     'employee_last_name'  => $provider['lastName'],
                     'employee_full_name'  =>
-                        $provider['firstName'] . ' ' . $provider['lastName'],
+                    $provider['firstName'] . ' ' . $provider['lastName'],
                     'employee_phone'      => $provider['phone'],
                     'employee_password'   => $plainPassword,
                     'employee_panel_url'  => trim(
@@ -764,7 +787,14 @@ class EmailNotificationService extends AbstractNotificationService
             $body
         );
 
-        $body = preg_replace("/\r|\n/", "", $body);
+        // Remove only formatting newlines/tabs between block-level tags
+        // This preserves intentional spaces between inline elements like <span> text </span>
+        // phpcs:ignore
+        $body = preg_replace(
+            '/(<\/(p|div|h[1-6]|ul|ol|li|table|tr|td|th|blockquote)>)\s+(<(p|div|h[1-6]|ul|ol|li|table|tr|td|th|blockquote)[^>]*>)/i',
+            '$1$3',
+            $body
+        );
 
         // fix for 2 x style attribute on same html tag
         $splitBodyByTags = explode('<', $body);
@@ -779,6 +809,10 @@ class EmailNotificationService extends AbstractNotificationService
 
         $breakReplacement = $settingsService->getSetting('notifications', 'breakReplacement');
 
+        // First, handle empty paragraphs (created by double Enter in WYSIWYG)
+        // Convert </p><p><br></p><p> sequences to preserve blank lines
+        $body = preg_replace('/<\/p><p><br\s*\/?><\/p><p>/i', '</p>###EMPTY_PARA###<p>', $body);
+
         $replaceSource = [
             '</p><p>',
             '<p>',
@@ -791,18 +825,18 @@ class EmailNotificationService extends AbstractNotificationService
             ''
         ];
 
-        if (strpos($body, '<p>') !== false) {
-            array_unshift($replaceSource, '<br>');
-            array_unshift($replaceTarget, '');
-        }
+        $body = str_replace(
+            $replaceSource,
+            $replaceTarget,
+            $this->replaceStyledTags($body)
+        );
+
+        // Now convert the empty paragraph placeholders to double line break for blank line
+        $body = str_replace('###EMPTY_PARA###', '<br><br>', $body);
 
         return $breakReplacement === '' || $breakReplacement === '<br>' ?
-            str_replace(
-                $replaceSource,
-                $replaceTarget,
-                $this->replaceStyledTags($body)
-            ) :
-            str_replace('<p><br></p>', $breakReplacement, $this->replaceStyledTags($body));
+            $body :
+            str_replace('<p><br></p>', $breakReplacement, $body);
     }
 
 
@@ -825,7 +859,7 @@ class EmailNotificationService extends AbstractNotificationService
                   <li>Log in to your account.</li>
                   <li>Go to the "Notifications" and in "SMS Notification" section go to “Recharge Balance”</li>
              </ol>
-            Need assistance? Contact our <a href="https://store.tms-plugins.com/?ameliaGleap=1">support team</a>.<br><br>
+            Need assistance? Contact our <a href="https://store.Melograno Ventures.com/?ameliaGleap=1">support team</a>.<br><br>
             Thank you for your attention.<br><br>
             Best regards,<br>
             Team Amelia

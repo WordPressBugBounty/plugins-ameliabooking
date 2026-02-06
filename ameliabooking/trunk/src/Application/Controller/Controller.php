@@ -11,6 +11,7 @@ use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Domain\Events\DomainEventBus;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Infrastructure\WP\SettingsService\SettingsStorage;
+use AmeliaBooking\Domain\Common\Exceptions\CustomException;
 use League\Tactician\CommandBus;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -22,12 +23,12 @@ use Slim\Http\Response;
  */
 abstract class Controller
 {
-    const STATUS_OK = 200;
-    const STATUS_REDIRECT = 302;
-    const STATUS_FORBIDDEN = 403;
-    const STATUS_NOT_FOUNT = 404;
-    const STATUS_CONFLICT = 409;
-    const STATUS_INTERNAL_SERVER_ERROR = 500;
+    public const STATUS_OK        = 200;
+    public const STATUS_REDIRECT  = 302;
+    public const STATUS_FORBIDDEN = 403;
+    public const STATUS_NOT_FOUNT = 404;
+    public const STATUS_CONFLICT  = 409;
+    public const STATUS_INTERNAL_SERVER_ERROR = 500;
 
     /**
      * @var CommandBus
@@ -57,13 +58,12 @@ abstract class Controller
      * Base Controller constructor.
      *
      * @param Container $container
-     *
-     * @throws \Interop\Container\Exception\ContainerException
+     * @param bool $fromApi
      */
     public function __construct(Container $container, $fromApi = false)
     {
-        $this->commandBus = $container->getCommandBus();
-        $this->eventBus = $container->getEventBus();
+        $this->commandBus         = $container->getCommandBus();
+        $this->eventBus           = $container->getEventBus();
         $this->permissionsService = $fromApi ? $container->getApiPermissionsService() : $container->getPermissionsService();
         $this->userApplicationService = $fromApi ? $container->getApiUserApplicationService() : $container->getUserApplicationService();
     }
@@ -83,11 +83,10 @@ abstract class Controller
      *
      * @param CommandResult  $result
      *
-     * @return null
+     * @return void
      */
     protected function emitSuccessEvent(DomainEventBus $eventBus, CommandResult $result)
     {
-        return null;
     }
 
     /**
@@ -128,8 +127,25 @@ abstract class Controller
         $command->setPermissionService($this->permissionsService);
         $command->setUserApplicationService($this->userApplicationService);
 
-        /** @var CommandResult $commandResult */
-        $commandResult = $this->commandBus->handle($command);
+        try {
+            /** @var CommandResult $commandResult */
+            $commandResult = $this->commandBus->handle($command);
+        } catch (CustomException $e) {
+            $response = $response->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $response = $response->withStatus(self::STATUS_INTERNAL_SERVER_ERROR);
+
+            $response =  $response->write(
+                json_encode(
+                    [
+                        'data' => [
+                            'message' => $e->getMessage()
+                        ]
+                    ]
+                )
+            );
+
+            return $response;
+        }
 
         if ($commandResult->getResult() === CommandResult::RESULT_ERROR) {
             if ($settingsService->getSetting('activation', 'responseErrorAsConflict')) {
@@ -174,10 +190,10 @@ abstract class Controller
             $response = $response->withHeader('Content-Type', 'application/json;charset=utf-8');
             $response = $response->write(
                 $this->sendJustData ? $commandResult->getData() :
-                json_encode(
-                    $commandResult->hasDataInResponse() ?
-                        $responseBody : array_merge($responseBody, ['data' => []])
-                )
+                    json_encode(
+                        $commandResult->hasDataInResponse() ?
+                            $responseBody : array_merge($responseBody, ['data' => []])
+                    )
             );
         }
 
@@ -213,10 +229,29 @@ abstract class Controller
 
     /**
      * @param mixed $params
+     * @param array $keys
      */
-    protected function setArrayParams(&$params)
+    protected function setArrayParams(&$params, $keys = [])
     {
-        $names = ['categories', 'services', 'packages', 'employees', 'providers', 'providerIds', 'locations', 'events', 'dates', 'types', 'fields'];
+        $names = array_merge([
+            'customers',
+            'categories',
+            'services',
+            'packages',
+            'employees',
+            'providers',
+            'providerIds',
+            'locations',
+            'locationIds',
+            'events',
+            'tag',
+            'dates',
+            'types',
+            'fields',
+            'statuses',
+            'stats',
+            'bookingTypes',
+        ], $keys);
 
         foreach ($names as $name) {
             if (!empty($params[$name])) {
@@ -229,7 +264,7 @@ abstract class Controller
                 $params['dates'][0] : DateTimeService::getNowDate();
         }
 
-        if (isset($params['dates'][1])) {
+        if (isset($params['dates'][1]) && $params['dates'][1]) {
             $params['dates'][1] = preg_match("/^\d{4}-\d{2}-\d{2}$/", $params['dates'][1]) ?
                 $params['dates'][1] : DateTimeService::getNowDate();
         }

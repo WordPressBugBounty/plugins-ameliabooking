@@ -2,19 +2,24 @@
 
 // File generated from our OpenAPI spec
 
-namespace AmeliaStripe\Service\Treasury;
+namespace AmeliaVendor\Stripe\Service\Treasury;
 
-class ReceivedCreditService extends \AmeliaStripe\Service\AbstractService
+/**
+ * @phpstan-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ *
+ * @psalm-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ */
+class ReceivedCreditService extends \AmeliaVendor\Stripe\Service\AbstractService
 {
     /**
      * Returns a list of ReceivedCredits.
      *
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{ending_before?: string, expand?: string[], financial_account: string, limit?: int, linked_flows?: array{source_flow_type: string}, starting_after?: string, status?: string} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Collection<\AmeliaVendor\Stripe\Treasury\ReceivedCredit>
      *
-     * @return \AmeliaStripe\Collection<\AmeliaStripe\Treasury\ReceivedCredit>
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function all($params = null, $opts = null)
     {
@@ -26,12 +31,12 @@ class ReceivedCreditService extends \AmeliaStripe\Service\AbstractService
      * ReceivedCredit ID from the ReceivedCredit list.
      *
      * @param string $id
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[]} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Treasury\ReceivedCredit
      *
-     * @return \AmeliaStripe\Treasury\ReceivedCredit
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function retrieve($id, $params = null, $opts = null)
     {

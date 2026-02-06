@@ -25,14 +25,16 @@
           :start="getFrontedFormattedTime(appointment.bookingStart.split(' ')[1].slice(0, 5))"
           :name="store.getters['entities/getService'](appointment.serviceId).name"
           :employee="appointmentEmployee(appointment.provider.id)"
+          :customers="appointmentCustomers(appointment)"
           :price="getPrice(appointment)"
           :duration="useAppointmentDuration(store, appointment)"
           :periods="[]"
           :extras="useExtrasData(appointment.bookings, store.getters['entities/getService'](appointment.serviceId))"
           :tickets="[]"
-          :custom-fields="useCustomFieldsData(appointment.bookings)"
+          :custom-fields="useCustomFieldsData(appointment.bookings, cabinetType)"
           :location="appointment.locationId ? store.getters['entities/getLocation'](appointment.locationId) : null"
           :google-meet-link="appointment.googleMeetUrl"
+          :microsoft-teams-link="appointment.microsoftTeamsUrl"
           :zoom-link="appointment.zoomMeeting ? appointment.zoomMeeting.joinUrl : ''"
           :lesson-space-link="appointment.lessonSpace"
           :bookable="appointment.service"
@@ -44,12 +46,15 @@
           :customized-options="customizedOptions(props.stepKey)"
           @cancel-booking="(data) => { targetBooking = data }"
           @rescheduling="rescheduling"
+          @edit-appointment="(data) => {emits('editAppointment', data)}"
+          @status-change="(message, type) => emits('statusChange', message, type)"
         ></CollapseCard>
       </template>
     </div>
   </div>
 
   <CancelPopup
+    v-if="originKey === 'capc'"
     :visibility="targetBooking !== null"
     :title="customizedLabels('cancelAppointment').cancel_appointment"
     :description="customizedLabels('cancelAppointment').confirm_cancel_appointment"
@@ -58,11 +63,13 @@
     :customized-options="customizedOptions('cancelAppointment')"
     :loading="waitingForCancelation"
     @close="targetBooking = null"
+    @decline="targetBooking = null"
     @confirm="cancelBooking"
   >
   </CancelPopup>
 
   <AppointmentBooking
+    v-if="originKey === 'capc'"
     :visibility="targetAppointment !== null"
     :appointment="targetAppointment"
     :slots-params="slotsParams"
@@ -146,7 +153,14 @@ let props = defineProps({
 let store = useStore()
 
 // * Components emits
-let emits = defineEmits(['booked', 'canceled'])
+let emits = defineEmits([
+  'booked',
+  'canceled',
+  'editAppointment',
+  'statusChange'
+])
+
+let originKey = inject('originKey')
 
 // * Settings
 const amSettings = inject('settings')
@@ -187,18 +201,34 @@ function cancelBooking () {
 }
 
 function getPrice (appointment) {
-  let amountData = useAppointmentBookingAmountData(
-      store,
-      {
-        price: appointment.bookings[0].price,
-        persons: appointment.bookings[0].persons,
-        aggregatedPrice: appointment.bookings[0].aggregatedPrice,
-        extras: appointment.bookings[0].extras,
-        tax: appointment.bookings[0].tax,
-        coupon: appointment.bookings[0].coupon
-      },
-      false
-  )
+  let amountData = {
+    total: 0,
+    bookable: 0,
+    discount: 0,
+    tax: 0,
+  }
+
+  appointment.bookings.forEach((booking) => {
+    if (booking.status === 'approved' || booking.status === 'pending') {
+      let bookingAmountData = useAppointmentBookingAmountData(
+        store,
+        {
+          price: booking.price,
+          persons: booking.persons,
+          aggregatedPrice: booking.aggregatedPrice,
+          extras: booking.extras,
+          tax: booking.tax,
+          coupon: booking.coupon
+        },
+        false
+      )
+
+      amountData.total += bookingAmountData.total
+      amountData.bookable += bookingAmountData.bookable
+      amountData.discount += bookingAmountData.discount
+      amountData.tax += bookingAmountData.tax
+    }
+  })
 
   return amountData.total - amountData.discount + amountData.tax
 }
@@ -237,6 +267,7 @@ function rescheduling (data) {
     group: 1,
     timeZone: store.getters['cabinet/getTimeZone'],
     page: 'cabinet',
+    structured: true,
   }
 
   targetAppointment.value = data
@@ -245,6 +276,24 @@ function rescheduling (data) {
 
 function appointmentEmployee(id) {
   return store.getters['entities/getEmployee'](id)
+}
+
+function appointmentCustomers(appointment) {
+  return appointment.bookings
+    .filter((b) => b.status !== 'rejected' && b.status !== 'canceled')
+    .map((b) => {
+      let customer
+      if ('info' in b && b.info) {
+        customer = 'customer' in b ? b.customer : {}
+        customer = Object.assign(customer, JSON.parse(b.info))
+      } else {
+        customer = b.customer
+      }
+      
+      // Add booking status to customer data
+      customer.bookingStatus = b.status
+      return customer
+    })
 }
 
 // * Customized form data

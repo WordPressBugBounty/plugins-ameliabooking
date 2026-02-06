@@ -15,9 +15,10 @@
       </span>
     </template>
     <AmInputPhone
+      :key="`phone-${defaultCountryCode}-${props.refreshTrigger}`"
       v-model="infoFormData.phone"
       :placeholder="amLabels.enter_phone"
-      :default-code="settings.general.phoneDefaultCountryCode === 'auto' ? '' : settings.general.phoneDefaultCountryCode.toLowerCase()"
+      :default-code="defaultCountryCode"
       name="phone"
       style="position: relative"
       @country-phone-iso-updated="(val) => {emits('countryPhoneIsoUpdated', val)}"
@@ -39,7 +40,12 @@ import {
   inject,
   ref,
   onMounted,
+  watch,
+  nextTick
 } from "vue";
+
+// * Vuex
+import { useStore } from 'vuex'
 
 // * Composables
 import {
@@ -56,7 +62,20 @@ let props = defineProps({
   phoneError: {
     type: Boolean,
     default: false
+  },
+  refreshTrigger: {
+    type: Number,
+    default: 0
   }
+})
+
+// * Store
+const store = useStore()
+
+// * Computed default country code - prioritize saved country ISO
+let defaultCountryCode = computed(() => {
+  const savedCountry = store.getters['booking/getCustomerCountryPhoneIso']
+  return savedCountry || (settings.general.phoneDefaultCountryCode === 'auto' ? '' : settings.general.phoneDefaultCountryCode.toLowerCase())
 })
 
 // * Colors
@@ -85,8 +104,15 @@ function whatsAppSetUp () {
 }
 
 onMounted(() => {
-  if (settings.general.phoneDefaultCountryCode && settings.general.phoneDefaultCountryCode !== 'auto') {
-    emits('countryPhoneIsoUpdated', settings.general.phoneDefaultCountryCode.toLowerCase())
+  if (defaultCountryCode.value) {
+    emits('countryPhoneIsoUpdated', defaultCountryCode.value)
+  }
+})
+
+// * Watch for country code changes to emit updates
+watch(defaultCountryCode, (newVal) => {
+  if (newVal) {
+    emits('countryPhoneIsoUpdated', newVal)
   }
 })
 

@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -15,5 +16,4 @@ use AmeliaBooking\Application\Commands\Command;
  */
 class GetServiceCommand extends Command
 {
-
 }

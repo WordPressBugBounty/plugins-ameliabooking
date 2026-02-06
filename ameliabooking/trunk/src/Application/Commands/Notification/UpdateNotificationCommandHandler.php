@@ -17,7 +17,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
 use AmeliaBooking\Infrastructure\Repository\Notification\NotificationRepository;
 use AmeliaBooking\Infrastructure\Repository\Notification\NotificationsToEntitiesRepository;
-use \Interop\Container\Exception\ContainerException;
+use Interop\Container\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
 
 /**
@@ -82,7 +82,15 @@ class UpdateNotificationCommandHandler extends CommandHandler
         $content = $command->getField('content');
 
         if ($command->getField('type') === 'email') {
-            $content = preg_replace("/\r|\n/", "", $content);
+            // If content has paragraph tags, only remove newlines between HTML tags (formatting)
+            // Otherwise convert newlines to <br> tags for plain text content
+            if (strpos($content, '<p>') !== false || strpos($content, '<P>') !== false) {
+                // WYSIWYG mode: remove only formatting newlines between tags
+                $content = preg_replace('/>\s+</', '><', $content);
+            } else {
+                // Plain text/HTML mode: convert newlines to <br> tags
+                $content = nl2br($content);
+            }
         }
 
         if ($command->getField('type') !== 'whatsapp') {
@@ -91,13 +99,13 @@ class UpdateNotificationCommandHandler extends CommandHandler
             $content       = $contentRes[1];
         }
 
-        $isCustom = $command->getField('customName') !== null ;
+        $isCustom = $command->getField('customName') !== null;
 
-        $notificationData['id'] = $notificationId;
-        $notificationData['name'] = $isCustom ? $command->getField('name') : $currentNotification->getName()->getValue();
-        $notificationData['status'] = $command->getField('status') ?: $currentNotification->getStatus()->getValue();
-        $notificationData['type'] = $currentNotification->getType()->getValue();
-        $notificationData['sendTo'] = $currentNotification->getSendTo()->getValue();
+        $notificationData['id']      = $notificationId;
+        $notificationData['name']    = $isCustom ? $command->getField('name') : $currentNotification->getName()->getValue();
+        $notificationData['status']  = $command->getField('status') ?: $currentNotification->getStatus()->getValue();
+        $notificationData['type']    = $currentNotification->getType()->getValue();
+        $notificationData['sendTo']  = $currentNotification->getSendTo()->getValue();
         $notificationData['content'] = $content;
 
         $notificationData = apply_filters('amelia_before_notification_updated_filter', $notificationData);

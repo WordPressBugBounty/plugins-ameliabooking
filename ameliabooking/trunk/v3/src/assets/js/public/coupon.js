@@ -57,6 +57,10 @@ async function validateCoupon(store, callback) {
                 message = globalLabels.coupon_invalid
             } else if ('couponMissing' in e.response.data.data && e.response.data.data.couponMissing === true) {
                 message = globalLabels.coupon_missing
+            } else if ('emailError' in e.response.data.data && e.response.data.data.emailError === true) {
+                message = globalLabels.email_exist_error
+            } else if ('phoneError' in e.response.data.data && e.response.data.data.phoneError === true) {
+                message = globalLabels.phone_exist_error
             }
 
             store.commit(`${module}/setError`, message)
@@ -85,7 +89,8 @@ function getCouponEntityIds (store) {
             ids = store.getters['eventBooking/getSelectedEventId']
             break
         case 'cart':
-            ids = useCart(store).filter(i => i.serviceId && (i.serviceId in i.services)).map(i => i.serviceId).join(',')
+            ids = useCart(store).filter(i => i.serviceId && (i.serviceId in i.services)).map(i => i.serviceId)
+            ids = [...new Set(ids)].join(',')
             break
         case 'appointment': case 'package':
             ids = store.getters['entities/getBookableFromBookableEntities'](

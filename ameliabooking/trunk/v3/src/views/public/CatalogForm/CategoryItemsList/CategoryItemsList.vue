@@ -10,7 +10,7 @@
     <template #header>
       <span class="am-fcil__filter-buttons">
         <Header
-          v-if="preselectedCategories !== 1 && !shortcodeData.categories_hidden"
+          v-if="preselectedCategories !== 1 && !shortcodeData.categories_hidden && availableCategories.length !== 1"
           :btn-size="filterWidth < 481 ? 'medium' : 'mini'"
           :btn-string="amLabels.back_btn"
           :btn-type="customizedOptions.backBtn.buttonType"
@@ -33,15 +33,23 @@
       <div class="am-fcil__filter">
         <div
           v-if="customizedOptions.searchInput.visibility"
+          role="search"
+          :aria-label="amLabels.filter_input"
           class="am-fcil__filter-item"
           :class="filterClassWidth.search"
         >
-          <AmInput v-model="searchFilter" :placeholder="amLabels.filter_input" :icon-start="iconSearch"></AmInput>
+          <AmInput
+            v-model="searchFilter"
+            :placeholder="amLabels.filter_input"
+            :prefix-icon="iconSearch"
+          />
         </div>
         <Transition name="slide-fade">
           <div
             v-if="shortcodeData.employee.length !== 1 && amEntities.employees.length > 1 && customizedOptions.filterEmployee.visibility && filterMobileMenu && !licence.isLite"
             class="am-fcil__filter-item"
+            role="search"
+            :aria-label="amLabels.filter_employee"
             :class="filterClassWidth.employee"
           >
             <AmSelect
@@ -49,10 +57,12 @@
               clearable
               filterable
               :placeholder="amLabels.filter_employee"
+              :aria-label="amLabels.filter_employee"
+              :filter-method="filterEmployee"
               :fit-input-width="true"
             >
               <AmOption
-                v-for="employee in amEntities.employees"
+                v-for="employee in filteredEmployees"
                 :key="employee.id"
                 :value="employee.id"
                 :label="`${employee.firstName} ${employee.lastName}`"
@@ -65,6 +75,8 @@
           <div
             v-if="shortcodeData.location.length !== 1 && amEntities.locations.length > 1 && customizedOptions.filterLocation.visibility && filterMobileMenu && !licence.isLite && !licence.isStarter"
             class="am-fcil__filter-item"
+            role="search"
+            :aria-label="amLabels.filter_location"
             :class="filterClassWidth.location"
           >
             <AmSelect
@@ -72,10 +84,12 @@
               clearable
               filterable
               :placeholder="amLabels.filter_location"
+              :aria-label="amLabels.filter_location"
               :fit-input-width="true"
+              :filter-method="filterLocation"
             >
               <AmOption
-                v-for="location in amEntities.locations"
+                v-for="location in filteredLocations"
                 :key="location.id"
                 :value="location.id"
                 :label="location.name"
@@ -86,7 +100,7 @@
         </Transition>
         <Transition name="slide-fade">
           <div
-            v-if="preselectedCategories !== 1 && customizedOptions.sidebar.visibility && !sideMenuVisibility && filterMobileMenu"
+            v-if="availableCategories.length !== 1 && preselectedCategories !== 1 && customizedOptions.sidebar.visibility && !sideMenuVisibility && filterMobileMenu"
             class="am-fcil__filter-item am-w100"
             :class="filterClassWidth.category"
           >
@@ -98,7 +112,7 @@
               :fit-input-width="true"
             >
               <AmOption
-                v-for="cat in availableCategories"
+                v-for="cat in categoriesMenu"
                 :key="cat.id"
                 :value="cat.id"
                 :label="cat.name"
@@ -109,6 +123,8 @@
         </Transition>
         <div
           v-if="!preselected.show && customizedOptions.filterButtons.visibility && categoryPackages.length !== 0 && categoryServices.length !== 0 && !useCartHasItems(store)"
+          role="search"
+          aria-label="Filter Buttons"
           class="am-fcil__filter-item"
           :class="filterClassWidth.buttons"
         >
@@ -144,9 +160,9 @@
         </div>
       </div>
     </template>
-    <template v-if="preselectedCategories !== 1 && customizedOptions.sidebar.visibility && sideMenuVisibility" #side>
+    <template v-if="availableCategories.length !== 1 && preselectedCategories !== 1 && customizedOptions.sidebar.visibility && sideMenuVisibility" #side>
       <SideMenu
-        :menu-items="availableCategories"
+        :menu-items="categoriesMenu"
         :init-selection="categorySelected"
         identifier="id"
         name-identifier="name"
@@ -156,7 +172,11 @@
       ></SideMenu>
     </template>
     <template #heading>
-      <div class="am-fcil__heading">
+      <div
+        role="heading"
+        aria-level="2"
+        class="am-fcil__heading"
+      >
         {{ headingStringRender }}
       </div>
     </template>
@@ -166,6 +186,7 @@
         <div
           v-for="item in categoryPackages"
           :key="item.id"
+          role="group"
           class="am-fcil__item"
           :class="{'am-mobile': containerWidth < 481}"
         >
@@ -223,7 +244,7 @@
               <!-- Card Info -->
               <div class="am-fcil__item-info">
                 <div
-                  v-if="customizedOptions.packageCategory.visibility"
+                  v-if="customizedOptions.packageCategory.visibility && categorySelected"
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-folder"></span>
@@ -257,7 +278,7 @@
                 >
                   <span class="am-icon-locations"></span>
                   <span>
-                    {{ usePackageLocations(amEntities, item, shortcodeData).length === 1 ? (usePackageLocations(amEntities, item, shortcodeData)[0].address ? usePackageLocations(amEntities, item, shortcodeData)[0].address : usePackageLocations(amEntities, item, shortcodeData)[0].name) : amLabels.multiple_locations }}
+                    {{ displayPackageLocationLabel(amEntities, item) }}
                   </span>
                 </div>
               </div>
@@ -365,7 +386,7 @@
               <!-- Card Info -->
               <div class="am-fcil__item-info">
                 <div
-                  v-if="customizedOptions.serviceCategory.visibility"
+                  v-if="customizedOptions.serviceCategory.visibility && categorySelected"
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-folder"></span>
@@ -483,8 +504,7 @@
                 <template #default>
                   <div
                     v-if="useDescriptionVisibility(employee.description)"
-                    class="am-fcil-employee__text"
-                    :class="{'ql-description': employee.description.includes('<!-- Content -->')}"
+                    class="am-fcil-employee__text ql-description"
                     v-html="employee.description"
                   ></div>
                 </template>
@@ -526,7 +546,7 @@
     ref="ameliaContainer"
     class="am-empty"
   >
-    <img :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/am-empty-booking.svg'">
+    <img :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/am-empty-booking.svg'" alt="Empty">
     <div class="am-empty__heading">
       {{ amLabels.oops }}
     </div>
@@ -570,7 +590,6 @@ import AmImagePlaceholder from '../../../_components/image-placeholder/AmImagePl
 import CategoryBooking from '../CategoryBooking/CategoryBooking.vue'
 
 import {
-  defineComponent,
   inject,
   ref,
   reactive,
@@ -585,13 +604,11 @@ import { useStore } from "vuex";
 
 // * Composables
 import {
-  useAvailableServiceIdsInCategory,
+  useAvailableCategories,
   useEmployeesServiceCapacity,
   useServiceDuration,
   useServicePrice,
   useServiceLocation,
-  useDisabledPackageService,
-  usePackageAvailabilityByEmployeeAndLocation,
   usePackageEmployees,
   usePackageLocations
 } from '../../../../assets/js/public/catalog.js'
@@ -673,7 +690,6 @@ let preselectedCategories = computed (() => {
   return categoryArray.length
 })
 
-
 // * Sidebar Menu Visibility
 let sideMenuVisibility = computed(() => {
   let sidebarByContainer = contentRef.value && contentRef.value.catContainerWidth ? contentRef.value.catContainerWidth > 768 : true
@@ -682,6 +698,37 @@ let sideMenuVisibility = computed(() => {
 
 // * Entities
 let amEntities = inject('amEntities')
+
+// * Filtered employees
+let queryEmployeeLower = ref('')
+function filterEmployee (query) {
+  queryEmployeeLower.value = query.toLowerCase()
+}
+let filteredEmployees = computed(() => {
+  if (queryEmployeeLower.value) {
+    return amEntities.value.employees.filter(item => {
+      const fullName = `${item.firstName} ${item.lastName}`.toLowerCase()
+      return fullName.includes(queryEmployeeLower.value)
+    })
+  }
+
+  return amEntities.value.employees
+})
+
+// * Filtered Locations
+let queryLocationLower = ref('')
+function filterLocation (query) {
+  queryLocationLower.value = query.toLowerCase()
+}
+let filteredLocations = computed(() => {
+  if (queryLocationLower.value) {
+    return amEntities.value.locations.filter(item => {
+      return item.name.toLowerCase().includes(queryLocationLower.value)
+    })
+  }
+
+  return amEntities.value.locations
+})
 
 // * Cart button
 let cartBtnVisibility = computed(() => useCartStep(store) && useCartHasItems(store) > 0)
@@ -716,17 +763,17 @@ let amLabels = computed(() => {
 // * FILTERS
 let searchFilter = ref('')
 
-let iconSearch = defineComponent({
+let iconSearch = {
   components: {IconComponent},
   template: `<IconComponent icon="search"/>`
-})
+}
 
 let filterMobileMenu = ref(true)
 
-let iconSearchMenu = defineComponent({
+let iconSearchMenu = {
   components: {IconComponent},
   template: `<IconComponent icon="filter"/>`
-})
+}
 
 let filterWidth = computed(() => {
   return contentRef.value && contentRef.value.catHeaderWidth ? contentRef.value.catHeaderWidth : 0
@@ -760,43 +807,87 @@ function searchingStrings (name) {
 // * Categories menu
 let availableCategories = inject('availableCategories')
 
+let categoriesMenu = computed(() => {
+  let arr = [...availableCategories.value]
+  let arrMenu = []
+  arr.forEach(item => {
+    arrMenu.push({
+      id: item.id,
+      name: item.name
+    })
+  })
+
+  arrMenu.unshift({
+    id: 0,
+    name: amLabels.value.filter_all
+  })
+
+  return arrMenu
+})
+
 // * Selected category
 let categorySelected = inject('categorySelected')
-
-let serviceIdsArray = computed(() => useAvailableServiceIdsInCategory(shortcodeData.value, amEntities.value.categories.find(item => item.id === categorySelected.value), amEntities.value, employeeFilter.value, locationFilter.value))
+let categoriesFiltered = computed(() => useAvailableCategories(amEntities.value, shortcodeData.value, employeeFilter.value, locationFilter.value))
 
 let categoryPackages = computed(() => {
   let arr = []
-  amEntities.value.packages.forEach(pack => {
-    serviceIdsArray.value.forEach(serviceId => {
-      if (
-        pack.bookable.filter(a => a.service.id === serviceId).length
-        && !arr.filter(b => b.id === pack.id).length
-        && pack.available
-        && pack.status === 'visible'
-        && !useDisabledPackageService(amEntities.value, pack)
-        && usePackageAvailabilityByEmployeeAndLocation(amEntities.value, pack, shortcodeData.value)
-        && (searchFilter.value ? searchingStrings(pack.name) : true)
-      ) {
-        arr.push(pack)
-      }
+  if (categoriesFiltered.value.find(cat => cat.id === categorySelected.value)) {
+    amEntities.value.packages.forEach(pack => {
+      categoriesFiltered.value.find(cat => cat.id === categorySelected.value).packageList.forEach(packId => {
+        if (
+          pack.id === packId
+          && (searchFilter.value ? searchingStrings(pack.name) : true)
+        ) {
+          arr.push(pack)
+        }
+      })
     })
-  })
+  } else {
+    amEntities.value.packages.forEach(pack => {
+      categoriesFiltered.value.forEach(cat => {
+        cat.packageList.forEach(packId => {
+          if (
+            pack.id === packId
+            && !arr.find(p => p.id === packId)
+            && (searchFilter.value ? searchingStrings(pack.name) : true)
+          ) {
+            arr.push(pack)
+          }
+        })
+      })
+    })
+  }
 
   return arr
 })
 let categoryServices = computed(() => {
   let arr = []
-  amEntities.value.services.forEach(service => {
-    serviceIdsArray.value.forEach(serviceId => {
-      if (
-        service.id === serviceId &&
-        (searchFilter.value ? searchingStrings(service.name) : true)
-      ) {
-        arr.push(service)
-      }
+
+  if (categorySelected.value && categoriesFiltered.value.find(cat => cat.id === categorySelected.value)) {
+    amEntities.value.services.forEach(service => {
+      categoriesFiltered.value.find(cat => cat.id === categorySelected.value).serviceIdList.forEach(serviceId => {
+        if (
+          service.id === serviceId &&
+          (searchFilter.value ? searchingStrings(service.name) : true)
+        ) {
+          arr.push(service)
+        }
+      })
     })
-  })
+  } else {
+    amEntities.value.services.forEach(service => {
+      categoriesFiltered.value.forEach(cat => {
+        cat.serviceIdList.forEach(serviceId => {
+          if (
+            service.id === serviceId &&
+            (searchFilter.value ? searchingStrings(service.name) : true)
+          ) {
+            arr.push(service)
+          }
+        })
+      })
+    })
+  }
 
   return arr
 })
@@ -941,8 +1032,9 @@ onMounted(() => {
 
 // * Choose category from categories menu
 function selectCategory (category) {
-  categorySelected.value = category.id
-  store.commit('booking/setCategoryId', parseInt(category.id))
+  const categoryId = category.id === 0 ? null : category.id
+  categorySelected.value = categoryId
+  store.commit('booking/setCategoryId',categoryId)
 }
 
 let itemType = inject('itemType')
@@ -1064,9 +1156,18 @@ function packageDurationLabel(duration, type) {
   return string
 }
 
+function displayPackageLocationLabel (entities, item) {
+  let locations = usePackageLocations(entities, item)
+  if (locations.length === 1 || (locations.length && locations.every(location => location.id === locations[0].id))) {
+    return locations[0].address ? locations[0].address : locations[0].name
+  }
+  return amLabels.value.multiple_locations
+}
+
 function displayServiceLocationLabel (entities, id) {
-  if (useServiceLocation(entities, id).length === 1) {
-    return useServiceLocation(entities, id)[0].address ? useServiceLocation(entities, id)[0].address : useServiceLocation(entities, id)[0].name
+  let locations = useServiceLocation(entities, id)
+  if (locations.length === 1 || (locations.length && locations.every(location => location.id === locations[0].id))) {
+    return locations[0].address ? locations[0].address : locations[0].name
   }
   return amLabels.value.multiple_locations
 }
@@ -1092,7 +1193,7 @@ let cssVars = computed(() => {
     '--am-c-fcil-primary-op20': useColorTransparency(amColors.value.colorPrimary, 0.20),
     '--am-c-fcil-success-op20': useColorTransparency(amColors.value.colorSuccess, 0.20),
     '--am-c-fcil-filter-text-op10': useColorTransparency(amColors.value.colorInpText, 0.1),
-    '--am-w-fcil-main': preselectedCategories.value !== 1 && customizedOptions.value.sidebar.visibility && sideMenuVisibility.value ? 'calc(100% - 220px)' : '100%',
+    '--am-w-fcil-main': availableCategories.value.length !== 1 && preselectedCategories.value !== 1 && customizedOptions.value.sidebar.visibility && sideMenuVisibility.value ? 'calc(100% - 220px)' : '100%',
     '--am-w-fcil-card': contentRef.value && contentRef.value.catFormWidth < 580 ? '100%' : '50%',
   }
 })
@@ -1555,7 +1656,7 @@ export default {
     z-index: 9999999 !important;
 
     * {
-      font-family: var(--am-f-fcil-employee-f);
+      font-family: var(--am-f-fcil-employee-f), sans-serif;
     }
 
     .el-dialog {

@@ -88,7 +88,7 @@ function useEventBookingsPrice (event) {
           subTotal += booking.ticketsData[i].persons * booking.ticketsData[i].price
         }
       } else {
-        subTotal += event.price
+        subTotal += event.price * booking.persons
       }
 
       let amountData = useAmount(
@@ -185,10 +185,32 @@ function useEventLocation (store, event) {
   return null
 }
 
+function useEventQrCodes (event) {
+  let qrCodesArr = []
+
+  event.bookings.forEach((booking) => {
+    if (['approved', 'pending'].includes(booking.status) && booking.qrCodes) {
+      let arr = JSON.parse(booking.qrCodes)
+      arr = arr.map(qr => {
+        return {
+          ...qr,
+          bookingId: booking.id,
+          eventId: event.id
+        }
+      })
+
+      qrCodesArr = qrCodesArr.concat(arr)
+    }
+  })
+
+  return qrCodesArr
+}
+
 export {
   useParsedEvents,
   useEventBookingsPrice,
   usePeriodsData,
   useTicketsData,
   useEventLocation,
+  useEventQrCodes
 }

@@ -1,29 +1,41 @@
 <template>
-  <div class="am-adv-select__wrapper">
+  <div
+    ref="advSelectWrapperRef"
+    class="am-adv-select__wrapper"
+  >
     <el-cascader
       ref="advSelect"
       v-model="model"
       class="am-adv-select"
       :class="[
         `am-adv-select--${size}`,
-         {'am-adv-select--disabled': disabled}
-       ]"
-      v-bind="$attrs"
-      :options="options"
-      :props="propsData"
-      :placeholder="placeholder"
-      :disabled="disabled"
-      :clearable="clearable"
-      :show-all-levels="showAllLevels"
-      :collapse-tags="collapseTags"
-      :separator="separator"
-      :filterable="filterable"
-      :filter-method="filterMethod"
-      :debounce="debounce"
-      :before-filter="beforeFilter"
+        {'am-adv-select--disabled': disabled},
+        {'am-rtl': isRtl}
+      ]"
+      :options="props.options"
+      :props="props.propsData"
+      :placeholder="props.placeholder"
+      :disabled="props.disabled"
+      :clearable="props.clearable"
+      :show-all-levels="props.showAllLevels"
+      :collapse-tags="props.collapseTags"
+      :collapse-tags-tooltip="props.collapseTagsTooltip"
+      :separator="props.separator"
+      :filterable="props.filterable"
+      :filter-method="props.filterMethod"
+      :debounce="props.debounce"
+      :before-filter="props.beforeFilter"
       :popper-class="popperClasses"
-      :teleported="teleported"
+      :teleported="props.teleported"
+      :tag-type="props.tagType"
+      :tag-effect="props.tagEffect"
+      :validate-event="props.validateEvent"
+      :max-collapse-tags="props.maxCollapseTags"
+      :persistent="props.persistent"
+      :fallback-placements="props.fallbackPlacements"
+      :placement="props.placement"
       :style="cssVars"
+      :aria-label="props.ariaLabel"
       @change="handleChange"
       @expand-change="handleExpandChange"
       @blur="(e) => emits('blur', e)"
@@ -31,6 +43,13 @@
       @visible-change="handleVisibleChange"
       @remove-tag="(val) => emits('remove-tag', val)"
     >
+      <template v-if="props.prefixIcon" #prefix>
+        <component :is="props.prefixIcon" v-if="typeof props.prefixIcon === 'object'" />
+        <span
+          v-if="typeof props.prefixIcon === 'string'"
+          :class="`am-icon-${props.prefixIcon}`"
+        />
+      </template>
       <template #empty>
         <span>
           {{ emptyStateString }}
@@ -43,10 +62,10 @@
           :style="cssDropdownVars"
         >
           <span class="am-adv-select__item-label">
-            {{ data[propsData.label] }}
+            {{ data[props.propsData.label] }}
           </span>
           <span class="am-adv-select__item-quantity">
-            {{ `(${data[propsData.children].length})` }}
+            {{ `(${data[props.propsData.children].length})` }}
           </span>
         </div>
         <div
@@ -56,7 +75,7 @@
           :style="cssDropdownVars"
         >
           <span class="am-adv-select__item-label">
-            {{ data[propsData.label] }}
+            {{ data[props.propsData.label] }}
           </span>
           <span v-if="data.price" class="am-adv-select__item-price">
             {{` ${useFormattedPrice(data.price)}` }}
@@ -99,9 +118,16 @@
 </template>
 
 <script setup>
-import { computed, onMounted, inject, nextTick, ref, toRefs } from 'vue'
+import {
+  computed,
+  inject,
+  nextTick,
+  ref,
+  toRefs
+} from 'vue'
 import { useColorTransparency } from "../../../assets/js/common/colorManipulation";
 import { useFormattedPrice } from '../../../assets/js/common/formatting'
+import { useElementSize } from '@vueuse/core'
 
 /**
  * Component Props
@@ -114,10 +140,12 @@ const props = defineProps({
     type: [String, Array, Object, Number],
   },
   options: {
+    // * data of the options, the key of value and label can be customize by CascaderProps
     type: Array,
     default: () => []
   },
   propsData: {
+    // * configuration options, see the following CascaderProps table.
     type: Object,
   },
   size: {
@@ -130,33 +158,45 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
-    default: 'Select'
+    default: ''
   },
   disabled: {
+    // * whether Cascader is disabled
     type: Boolean,
     default: false
   },
   clearable: {
+    // * whether selected value can be cleared
     type: Boolean,
     default: true,
   },
   showAllLevels: {
+    // * whether to display all levels of the selected value in the input
     type: Boolean,
     default: true
   },
   collapseTags: {
+    // * whether to collapse tags in multiple selection mode
     type: Boolean,
     default: true
   },
+  collapseTagsTooltip: {
+    // * whether show all selected tags when mouse hover text of collapse-tags. To use this, collapse-tags must be true
+    type: Boolean,
+    default: false
+  },
   separator: {
+    // * option label separator
     type: String,
     default: ' / '
   },
   filterable: {
+    // * whether to filter options
     type: Boolean,
     default: true
   },
   filterMethod: {
+    // * customize search logic, the first parameter is node, the second is keyword, and need return a boolean value indicating whether it hits.
     type: Function,
     default: (node, keyword) => {
       let search = keyword.toLowerCase()
@@ -166,19 +206,84 @@ const props = defineProps({
     }
   },
   debounce: {
+    // * debounce delay when typing filter keyword, in milliseconds
     type: Number,
     default: 300
   },
   beforeFilter: {
+    // * hook function before filtering with the value to be filtered as its parameter. If false is returned or a Promise is returned and then is rejected, filtering will be aborted
     type: Function
   },
   popperClass: {
+    // * custom class name for Cascader's dropdown
     type: String,
     default: ''
   },
   teleported: {
+    // * whether cascader popup is teleported
     type: Boolean,
     default: true
+  },
+  tagType: {
+    // * tag type
+    type: String,
+    default: 'info',
+    validator(value) {
+      return ['info', 'success', 'warning', 'danger'].includes(value)
+    }
+  },
+  tagEffect: {
+    // * tag effect
+    type: String,
+    default: 'light',
+    validator(value) {
+      return ['dark', 'light', 'plain'].includes(value)
+    }
+  },
+  validateEvent: {
+    // * event name that triggers validation
+    type: Boolean,
+    default: true
+  },
+  maxCollapseTags: {
+    // * The max tags number to be shown. To use this, collpase-tags must be true
+    type: Number,
+    default: 1
+  },
+  persistent: {
+    // * when dropdown is inactive and persistent is false, dropdown will be destroyed
+    type: Boolean,
+    default: true
+  },
+  fallbackPlacements: {
+    // * ist of possible positions for Tooltip popper.js
+    type: Array,
+    default: () => ['bottom-start', 'top-start', 'right', 'left']
+  },
+  placement: {
+    // * placement of the dropdown, default is bottom-start
+    type: String,
+    default: 'bottom-start',
+    validator(value) {
+      return [
+        'top',
+        'top-start',
+        'top-end',
+        'bottom',
+        'bottom-start',
+        'bottom-end',
+        'left',
+        'left-start',
+        'left-end',
+        'right',
+        'right-start',
+        'right-end'
+      ].includes(value)
+    },
+  },
+  prefixIcon: {
+    type: [String, Object],
+    default: ''
   },
   currencySymbol: {
     type: String,
@@ -195,10 +300,6 @@ const props = defineProps({
   emptyStateString: {
     type: String,
     default: 'No matching data'
-  },
-  dropdownArrowVisibility: {
-    type: Boolean,
-    default: false
   },
   taxOptions: {
     type: [Object, Array],
@@ -217,7 +318,11 @@ const props = defineProps({
   taxVisible: {
     type: Boolean,
     default: true
-  }
+  },
+  ariaLabel: {
+    type: String,
+    default: 'dropdown'
+  },
 })
 
 /**
@@ -244,8 +349,22 @@ function taxVisibility (id) {
 let cWidth = inject('containerWidth', 0)
 let checkScreen = computed(() => cWidth.value < 560 || (cWidth.value > 560 && cWidth.value < 640))
 
+// * Element Wrapper Size
+const advSelectWrapperRef = ref(null)
+
+const {width: wrapperWidth} = useElementSize(advSelectWrapperRef)
+
 // * Component reference
 const advSelect = ref(null)
+
+// * Component text orientation
+let isRtl = computed(() => {
+  if (document) {
+    return document.documentElement.dir === 'rtl'
+  }
+
+  return false
+})
 
 /**
  * Dropdown (Popper) ID
@@ -345,9 +464,10 @@ function handleChange(val) {
  */
 function handleExpandChange(val) {
   nextTick(() => {
-    teleportSubCategoryDisable.value = true
+    if (val && val.length > 0) {
+      teleportSubCategoryDisable.value = true
+    }
   })
-  advSelect.value.popperPaneRef.style.width = `${advSelect.value.input.input.offsetWidth}px`
   emits('expand-change', val)
 }
 
@@ -363,17 +483,14 @@ function handleVisibleChange(e) {
 
     teleportCategoryDisable.value = true
     if (advSelect.value) {
-      popperId.value = advSelect.value.tooltipRef.appendTo
-
-      advSelect.value.popperPaneRef.style.width = `${advSelect.value.input.input.offsetWidth}px`
-
-      advSelect.value.popperPaneRef.style.setProperty('--am-c-advs-item-bgr', amColors.value.colorDropBgr)
-      advSelect.value.popperPaneRef.style.setProperty('--am-c-advs-item-border', amColors.value.colorDropBorder)
-      advSelect.value.popperPaneRef.style.setProperty('--am-c-advs-item-bgr-op10', useColorTransparency(amColors.value.colorDropText, 0.1))
-      advSelect.value.popperPaneRef.style.setProperty('--am-c-advs-item-label', amColors.value.colorDropText)
-      advSelect.value.popperPaneRef.style.setProperty('--am-c-advs-item-label-op65', useColorTransparency(amColors.value.colorDropText, 0.65))
-      advSelect.value.popperPaneRef.style.setProperty('--am-c-advs-item-border-op10', useColorTransparency(amColors.value.colorDropText, 0.1))
-      advSelect.value.popperPaneRef.style.setProperty('--am-font-family', amFonts.value.fontFamily)
+      advSelect.value.contentRef.style.setProperty('--am-c-advs-item-bgr', amColors.value.colorDropBgr)
+      advSelect.value.contentRef.style.setProperty('--am-c-advs-item-border', amColors.value.colorDropBorder)
+      advSelect.value.contentRef.style.setProperty('--am-c-advs-item-bgr-op10', useColorTransparency(amColors.value.colorDropText, 0.1))
+      advSelect.value.contentRef.style.setProperty('--am-c-advs-item-label', amColors.value.colorDropText)
+      advSelect.value.contentRef.style.setProperty('--am-c-advs-item-label-op65', useColorTransparency(amColors.value.colorDropText, 0.65))
+      advSelect.value.contentRef.style.setProperty('--am-c-advs-item-border-op10', useColorTransparency(amColors.value.colorDropText, 0.1))
+      advSelect.value.contentRef.style.setProperty('--am-font-family', amFonts.value.fontFamily)
+      advSelect.value.contentRef.style.setProperty('width', `${wrapperWidth.value}px`)
     }
   })
   emits('visible-change', e)
@@ -385,17 +502,6 @@ let cssTeleport = computed(() => {
     '--am-fs-advs-item-heading': checkScreen.value ? '16px' : '12px',
     '--am-c-advs-item-heading-op65': useColorTransparency(amColors.value.colorDropText, 0.65),
     '--am-c-advs-shadow': useColorTransparency(amColors.value.colorInpText, 0.05),
-  }
-})
-
-/**
- * Lifecycle Hooks
- */
-onMounted(() => {
-  if (!props.dropdownArrowVisibility) {
-    advSelect.value.tooltipRef.popperRef.popperInstanceRef.state.styles.arrow.display = 'none'
-  } else {
-    delete advSelect.value.tooltipRef.popperRef.popperInstanceRef.state.styles.arrow.display
   }
 })
 </script>
@@ -415,10 +521,10 @@ onMounted(() => {
     --am-c-advs-border: var(--am-c-inp-border);
     --am-c-advs-text: var(--am-c-inp-text);
     --am-c-advs-placeholder: var(--am-color-input-placeholder);
-    --am-rad-advs: var(--am-rad-input);
-    --am-fs-advs: var(--am-fs-input);
-    --am-h-advs: var(--am-h-input);
-    --am-padd-advs: 8px 12px;
+    --am-rad-advs: var(--am-rad-inp);
+    --am-fs-advs: var(--am-fs-inp);
+    --am-h-advs: var(--am-h-inp);
+    --am-padd-advs: 0 12px;
     width: 100%;
 
     &__wrapper {
@@ -428,18 +534,19 @@ onMounted(() => {
     // Size - default / medium / small / mini / micro
     &--default {
       --am-h-advs: 40px;
-      --am-padd-advs: 8px 12px;
     }
     &--medium {
       --am-h-advs: 36px;
-      --am-padd-advs: 6px 10px;
     }
     &--small {
       --am-h-advs: 32px;
-      --am-padd-advs: 4px 10px;
     }
-    &-mini {}
-    &-micro {}
+    &--mini {
+      --am-h-advs: 28px;
+    }
+    &--micro {
+      --am-h-advs: 24px;
+    }
 
     // Disabled
     &--disabled {
@@ -447,46 +554,56 @@ onMounted(() => {
       --am-c-advs-text: var(--am-c-advs-text-op60);
     }
 
+    // Element visual presentation
     .el-input {
-      .el-icon {
-        font-family: 'amelia-icons';
-        font-size: 16px;
-        color: var(--am-c-advs-text);
+      border: none;
+      border-radius: 4px;
+      box-shadow: 0 2px 2px var(--am-c-advs-shadow);
 
-        &.icon-arrow-down {
-          &:before {
-            font-family: 'amelia-icons' !important;
-            font-size: 16px;
-            content: $am-icon-arrow-down;
-          }
+      &.is-focus {
+        // prevent hover color to be applied
+        .el-input__wrapper {
+          --am-c-advs-border: var(--am-c-primary);
+        }
+      }
 
-          svg {
-            display: none;
-          }
+      &.el-input--prefix {
+        --am-padd-advs: 0 8px;
+      }
+
+      // Visual presentation of input
+      &__wrapper {
+        display: inline-flex;
+        align-items: center;
+        gap: 0 6px;
+        background-image: none;
+        background-color: var(--am-c-advs-bgr);
+        border: none;
+        border-radius: var(--am-rad-advs);
+        box-shadow: 0 0 0 1px var(--am-c-advs-border);
+        padding: var(--am-padd-advs);
+        height: var(--am-h-advs);
+        transition: 0.3s;
+
+        &:hover {
+          --am-c-advs-border: var(--am-c-advs-text-op40);
         }
 
-        &.icon-circle-close {
-          &:before {
-            content: $am-icon-close;
-          }
-
-          svg {
-            display: none;
-          }
+        &:focus, &:active &.is-focus {
+          --am-c-advs-border: var(--am-c-primary);
         }
       }
 
       &__inner {
-        height: var(--am-h-advs);
+        height: 24px;
         font-size: var(--am-fs-advs);
         font-weight: 400;
         line-height: 1.6;
         color: var(--am-c-advs-text);
-        border: 1px solid var(--am-c-advs-border);
+        background-color: transparent;
+        border: none;
         border-radius: var(--am-rad-advs);
-        background-color: var(--am-c-advs-bgr);
-        padding: var(--am-padd-advs);
-        box-shadow: 0 2px 2px var(--am-c-advs-shadow);
+        padding: 0;
         width: 100%;
 
         &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
@@ -502,18 +619,62 @@ onMounted(() => {
           color: var(--am-c-advs-placeholder);
         }
 
-        &:hover:not(:focus):not(:active) {
-          --am-c-advs-border: var(--am-c-advs-text-op40);
-        }
-
-        &:focus, &:active {
-          --am-c-advs-border: var(--am-c-primary);
+        &:focus {
+          border: none;
+          box-shadow: none;
         }
       }
 
       &__suffix {
         .el-input__validateIcon {
-          display: none;
+          border: none;
+        }
+
+        .el-icon {
+          font-family: 'amelia-icons';
+          font-size: 18px;
+          color: var(--am-c-advs-text);
+
+          &.icon-arrow-down {
+            &:before {
+              font-family: 'amelia-icons' !important;
+              font-size: 18px;
+              content: $am-icon-arrow-down;
+            }
+
+            svg {
+              display: none;
+            }
+          }
+
+          &.icon-circle-close {
+            &:before {
+              font-family: 'amelia-icons' !important;
+              font-size: 18px;
+              content: $am-icon-close;
+            }
+
+            svg {
+              display: none;
+            }
+          }
+        }
+      }
+
+      &__prefix {
+        [class^='am-icon'] {
+          font-size: 24px;
+          line-height: 1;
+          color: var(--am-c-advs-text);
+        }
+      }
+    }
+
+    &.am-rtl {
+      .el-input {
+        &__suffix {
+          right: unset;
+          left: 12px;
         }
       }
     }
@@ -539,6 +700,8 @@ onMounted(() => {
   --am-h-advs-item-heading: 26px;
   --am-fs-advs-item-heading: 12px;
 
+  max-width: 454px;
+  width: 100%;
   z-index: 9999999999 !important;
 
   &.el-cascader__dropdown.el-popper[role=tooltip] {
@@ -576,11 +739,14 @@ onMounted(() => {
     &-panel {
       display: flex;
       background-color: var(--am-c-advs-item-bgr);
+      max-width: 454px;
+      width: 100%;
     }
 
     // Panel sides (columns) - Menu
     &-menu {
       width: 100%;
+      min-width: 170px;
 
       // First column
       &:nth-child(1) {
@@ -702,10 +868,13 @@ onMounted(() => {
 
   // Mobile
   &-mobile {
+    width: calc(100% - 20px);
+
     .el-cascader {
       // Panel - dropdown
       &-panel {
         height: min-content;
+        max-width: 100%;
         width: 100%;
         display: flex;
         flex-direction: column;

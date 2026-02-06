@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -34,6 +35,9 @@ class Payment
 
     /** @var  Id */
     private $parentId;
+
+    /** @var Id */
+    private $invoiceNumber;
 
     /** @var  Price */
     private $amount;
@@ -85,6 +89,9 @@ class Payment
 
     /** @var Json */
     private $transfers;
+
+    /** @var array */
+    private $paymentLinks;
 
     /**
      * Payment constructor.
@@ -176,6 +183,23 @@ class Payment
     {
         $this->parentId = $parentId;
     }
+
+    /**
+     * @return Id
+     */
+    public function getInvoiceNumber()
+    {
+        return $this->invoiceNumber;
+    }
+
+    /**
+     * @param Id $invoiceNumber
+     */
+    public function setInvoiceNumber($invoiceNumber)
+    {
+        $this->invoiceNumber = $invoiceNumber;
+    }
+
 
     /**
      * @return Price
@@ -450,6 +474,22 @@ class Payment
         $this->transfers = $transfers;
     }
 
+    /**
+     * @return array
+     */
+    public function getPaymentLinks()
+    {
+        return $this->paymentLinks;
+    }
+
+    /**
+     * @param array $paymentLinks
+     */
+    public function setPaymentLinks($paymentLinks)
+    {
+        $this->paymentLinks = $paymentLinks;
+    }
+
 
     /**
      * @return array
@@ -478,6 +518,8 @@ class Payment
             'wcItemTaxValue'    => $this->getWcItemTaxValue() ? $this->getWcItemTaxValue()->getValue() : null,
             'transactionId'     => $this->getTransactionId(),
             'transfers'         => $this->getTransfers() ? $this->getTransfers()->getValue() : null,
+            'invoiceNumber'     => $this->getInvoiceNumber() ? $this->getInvoiceNumber()->getValue() : null,
+            'paymentLinks'      => $this->getPaymentLinks() ?: null,
         ];
     }
 }

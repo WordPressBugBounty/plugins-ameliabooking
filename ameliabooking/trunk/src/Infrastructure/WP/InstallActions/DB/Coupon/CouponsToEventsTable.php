@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -16,8 +17,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\AbstractDatabaseTable;
  */
 class CouponsToEventsTable extends AbstractDatabaseTable
 {
-
-    const TABLE = 'coupons_to_events';
+    public const TABLE = 'coupons_to_events';
 
     /**
      * @return string

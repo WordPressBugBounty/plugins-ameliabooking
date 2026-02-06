@@ -27,6 +27,7 @@ import cabinet from "../../../store/modules/cabinet.js";
 import cabinetFilters from "../../../store/modules/cabinetFilters.js"
 import eventWaitingListOptions from "../../../store/modules/eventWaitingListOptions"
 import stepByStepFilters from "../../../store/modules/stepByStepFilters.js"
+import appointmentWaitingListOptions from "../../../store/modules/appointmentWaitingListOptions"
 
 import {
   provide,
@@ -258,13 +259,13 @@ function createAmelia(shortcodeData) {
     }
   })
 
-  if (settings.googleTag.id) {
+  if (settings.featuresIntegrations.googleAnalytics.enabled && settings.googleTag.id) {
     app.use(VueGtag, {
       config: {id: wpAmeliaSettings.googleTag.id}
     })
   }
 
-  if (settings.googleAnalytics.id) {
+  if (settings.featuresIntegrations.googleAnalytics.enabled && settings.googleAnalytics.id) {
     app.use(VueGtag, {
       config: {id: wpAmeliaSettings.googleAnalytics.id}
     })
@@ -397,6 +398,7 @@ function createAmelia(shortcodeData) {
           cabinetFilters,
           eventWaitingListOptions,
           stepByStepFilters,
+          appointmentWaitingListOptions
         },
       })
     )

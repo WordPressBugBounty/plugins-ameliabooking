@@ -14,7 +14,7 @@ use AmeliaBooking\Infrastructure\Repository\AbstractRepository;
  */
 class DayOffRepository extends AbstractRepository
 {
-    const FACTORY = DayOffFactory::class;
+    public const FACTORY = DayOffFactory::class;
 
     /**
      * @param DayOff $entity
@@ -58,7 +58,7 @@ class DayOffRepository extends AbstractRepository
      * @param DayOff $entity
      * @param int    $id
      *
-     * @return bool
+     * @return void
      * @throws QueryExecutionException
      */
     public function update($entity, $id)
@@ -84,8 +84,6 @@ class DayOffRepository extends AbstractRepository
             if (!$res) {
                 throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
             }
-
-            return $res;
         } catch (\Exception $e) {
             throw new QueryExecutionException('Unable to add save in ' . __CLASS__, $e->getCode(), $e);
         }

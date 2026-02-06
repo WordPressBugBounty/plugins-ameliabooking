@@ -16,6 +16,7 @@ use AmeliaBooking\Domain\Entity\Booking\Event\EventPeriod;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
+use AmeliaBooking\Domain\ValueObjects\DateTime\DateTimeValue;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
 use Exception;
@@ -35,8 +36,7 @@ class UpdateEventCommandHandler extends CommandHandler
     public $mandatoryFields = [
         'id',
         'name',
-        'periods',
-        'applyGlobally'
+        'periods'
     ];
 
     /**
@@ -86,7 +86,8 @@ class UpdateEventCommandHandler extends CommandHandler
             return $result;
         }
 
-        if ($userAS->isCustomer($user) ||
+        if (
+            $userAS->isCustomer($user) ||
             (
                 $userAS->isProvider($user) && !$settingsDS->getSetting('roles', 'allowWriteEvents')
             )
@@ -97,7 +98,7 @@ class UpdateEventCommandHandler extends CommandHandler
         $entityService->removeMissingEntitiesForEvent($eventData);
 
 
-        /** @var Event $event */
+        /** @var Event $oldEvent */
         $oldEvent = $eventApplicationService->getEventById(
             $eventData['id'],
             [
@@ -106,14 +107,15 @@ class UpdateEventCommandHandler extends CommandHandler
                 'fetchEventsTags'       => true,
                 'fetchEventsProviders'  => true,
                 'fetchEventsImages'     => true,
-                'fetchApprovedBookings' => false,
+                'fetchBookings'         => true,
                 'fetchBookingsTickets'  => true,
                 'fetchBookingsUsers'    => true,
                 'fetchBookingsPayments' => true,
             ]
         );
 
-        $eventData = apply_filters('amelia_before_event_updated_filter', $eventData, $oldEvent ? $oldEvent->toArray() : null, $command->getField('applyGlobally'));
+        $eventData =
+            apply_filters('amelia_before_event_updated_filter', $eventData, $oldEvent ? $oldEvent->toArray() : null, $command->getField('applyGlobally'));
 
         do_action('amelia_before_event_updated', $eventData, $oldEvent ? $oldEvent->toArray() : null, $command->getField('applyGlobally'));
 
@@ -127,10 +129,21 @@ class UpdateEventCommandHandler extends CommandHandler
             return $result;
         }
 
-        if ($oldEvent->getRecurring() &&
+        /** @var DateTimeValue $newUntil */
+        $newUntil = $event->getRecurring()
+            ? $event->getRecurring()->getUntil()->getValue()->setTime(0, 0, 0)
+            : null;
+
+        /** @var DateTimeValue $oldUntil */
+        $oldUntil = $oldEvent->getRecurring()
+            ? $oldEvent->getRecurring()->getUntil()->getValue()->setTime(0, 0, 0)
+            : null;
+
+        if (
+            $oldEvent->getRecurring() &&
             $event->getRecurring() &&
             (
-                $event->getRecurring()->getUntil()->getValue() < $oldEvent->getRecurring()->getUntil()->getValue() ||
+                $newUntil < $oldUntil ||
                 $event->getRecurring()->getCycle()->getValue() !== $oldEvent->getRecurring()->getCycle()->getValue()
             )
         ) {
@@ -146,7 +159,8 @@ class UpdateEventCommandHandler extends CommandHandler
         foreach ($oldEvent->getPeriods()->getItems() as $oldEventPeriod) {
             /** @var EventPeriod $eventPeriod */
             foreach ($event->getPeriods()->getItems() as $eventPeriod) {
-                if ($eventPeriod->getId() &&
+                if (
+                    $eventPeriod->getId() &&
                     $oldEventPeriod->getId()->getValue() === $eventPeriod->getId()->getValue()
                 ) {
                     if ($oldEventPeriod->getZoomMeeting()) {
@@ -174,7 +188,12 @@ class UpdateEventCommandHandler extends CommandHandler
 
         $eventRepository->commit();
 
-        do_action('amelia_after_event_updated', $event ? $event->toArray() : null, $oldEvent ? $oldEvent->toArray() : null, $command->getField('applyGlobally'));
+        do_action(
+            'amelia_after_event_updated',
+            $event ? $event->toArray() : null,
+            $oldEvent ? $oldEvent->toArray() : null,
+            $command->getField('applyGlobally')
+        );
 
         $providersRemoved = array_udiff(
             $oldEvent->getProviders()->getItems(),
@@ -216,8 +235,10 @@ class UpdateEventCommandHandler extends CommandHandler
             $zoomUserType    = 0;
             $zoomOldUserType = 0;
             $zoomResult      = $zoomService->getUsers();
-            if (!(isset($zoomResult['code']) && $zoomResult['code'] === 124) &&
-                !($zoomResult['users'] === null && isset($zoomResult['message']))) {
+            if (
+                !(isset($zoomResult['code']) && $zoomResult['code'] === 124) &&
+                !($zoomResult['users'] === null && isset($zoomResult['message']))
+            ) {
                 $zoomUsers = $zoomResult['users'];
                 foreach ($zoomUsers as $key => $val) {
                     if ($val['id'] === $event->getZoomUserId()->getValue()) {

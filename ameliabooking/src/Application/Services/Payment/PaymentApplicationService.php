@@ -28,9 +28,11 @@ use AmeliaBooking\Domain\Entity\Coupon\Coupon;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\Location\Location;
 use AmeliaBooking\Domain\Entity\Payment\Payment;
+use AmeliaBooking\Domain\Entity\Stripe\StripeConnect;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Entity\User\Customer;
 use AmeliaBooking\Domain\Entity\User\Provider;
+use AmeliaBooking\Domain\Factory\Bookable\Service\PackageCustomerFactory;
 use AmeliaBooking\Domain\Factory\Bookable\Service\PackageFactory;
 use AmeliaBooking\Domain\Factory\Bookable\Service\ServiceFactory;
 use AmeliaBooking\Domain\Factory\Booking\Appointment\CustomerBookingFactory;
@@ -59,6 +61,7 @@ use AmeliaBooking\Infrastructure\Repository\Bookable\Service\PackageCustomerRepo
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\PackageCustomerServiceRepository;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\PackageRepository;
+use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ServiceRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
 use AmeliaBooking\Infrastructure\Repository\Cache\CacheRepository;
@@ -67,9 +70,11 @@ use AmeliaBooking\Infrastructure\Repository\Location\LocationRepository;
 use AmeliaBooking\Infrastructure\Repository\Payment\PaymentRepository;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use AmeliaBooking\Infrastructure\Repository\User\CustomerRepository;
+use AmeliaBooking\Infrastructure\Routes\Stripe\Stripe;
 use AmeliaBooking\Infrastructure\Services\Payment\CurrencyService;
 use AmeliaBooking\Infrastructure\Services\Payment\RazorpayService;
 use AmeliaBooking\Infrastructure\Services\Payment\SquareService;
+use AmeliaBooking\Infrastructure\Services\Payment\StripeService;
 use AmeliaBooking\Infrastructure\WP\HelperService\HelperService;
 use AmeliaBooking\Infrastructure\WP\Integrations\WooCommerce\StarterWooCommerceService;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
@@ -171,53 +176,55 @@ class PaymentApplicationService
 
         $secondaryPaymentsData = [];
 
-        foreach ($paymentsData as $paymentData) {
-            $secondaryPaymentsData[] = [
-                'paymentId'  => $paymentData['id'],
-                'parentId'   => $paymentData['parentId'],
-                'columnName' => !empty($paymentData['packageCustomerId']) ? 'packageCustomerId' : 'customerBookingId',
-                'columnId'   => $paymentData['packageCustomerId'] ?: $paymentData['customerBookingId'],
-            ];
-        }
-
-        $secondaryPaymentsIds = $paymentRepository->getSecondaryPaymentIds($secondaryPaymentsData, $isInvoicePage);
-
-        $groupedSecondaryPaymentsTypesIds = [];
-
-        foreach ($secondaryPaymentsIds as $id => $type) {
-            $groupedSecondaryPaymentsTypesIds[$type][] = $id;
-        }
-
         $secondaryPayments = [];
 
-        if (
-            !empty($groupedSecondaryPaymentsTypesIds['appointment']) ||
-            !empty($groupedSecondaryPaymentsTypesIds['event']) ||
-            !empty($groupedSecondaryPaymentsTypesIds['package'])
-        ) {
-            $appointmentsSecondaryPaymentsData = !empty($groupedSecondaryPaymentsTypesIds['appointment'])
-                ? $paymentRepository->getAppointmentsPaymentsByIds($groupedSecondaryPaymentsTypesIds['appointment'])
-                : [];
+        if (!isset($params['separateRows'])) {
+            foreach ($paymentsData as $paymentData) {
+                $secondaryPaymentsData[] = [
+                    'paymentId'  => $paymentData['id'],
+                    'parentId'   => $paymentData['parentId'],
+                    'columnName' => !empty($paymentData['packageCustomerId']) ? 'packageCustomerId' : 'customerBookingId',
+                    'columnId'   => $paymentData['packageCustomerId'] ?: $paymentData['customerBookingId'],
+                ];
+            }
 
-            $eventsSecondaryPaymentsData = !empty($groupedSecondaryPaymentsTypesIds['event'])
-                ? $paymentRepository->getEventsPaymentsByIds($groupedSecondaryPaymentsTypesIds['event'])
-                : [];
+            $secondaryPaymentsIds = $paymentRepository->getSecondaryPaymentIds($secondaryPaymentsData, $isInvoicePage);
 
-            $packagesSecondaryPaymentsData = !empty($groupedSecondaryPaymentsTypesIds['package'])
-                ? $paymentRepository->getPackagesPaymentsByIds($groupedSecondaryPaymentsTypesIds['package'])
-                : [];
+            $groupedSecondaryPaymentsTypesIds = [];
 
             foreach ($secondaryPaymentsIds as $id => $type) {
-                if (!empty($appointmentsSecondaryPaymentsData[$id])) {
-                    $secondaryPayments[$id] = $appointmentsSecondaryPaymentsData[$id];
-                }
+                $groupedSecondaryPaymentsTypesIds[$type][] = $id;
+            }
 
-                if (!empty($eventsSecondaryPaymentsData[$id])) {
-                    $secondaryPayments[$id] = $eventsSecondaryPaymentsData[$id];
-                }
+            if (
+                !empty($groupedSecondaryPaymentsTypesIds['appointment']) ||
+                !empty($groupedSecondaryPaymentsTypesIds['event']) ||
+                !empty($groupedSecondaryPaymentsTypesIds['package'])
+            ) {
+                $appointmentsSecondaryPaymentsData = !empty($groupedSecondaryPaymentsTypesIds['appointment'])
+                    ? $paymentRepository->getAppointmentsPaymentsByIds($groupedSecondaryPaymentsTypesIds['appointment'])
+                    : [];
 
-                if (!empty($packagesSecondaryPaymentsData[$id])) {
-                    $secondaryPayments[$id] = $packagesSecondaryPaymentsData[$id];
+                $eventsSecondaryPaymentsData = !empty($groupedSecondaryPaymentsTypesIds['event'])
+                    ? $paymentRepository->getEventsPaymentsByIds($groupedSecondaryPaymentsTypesIds['event'])
+                    : [];
+
+                $packagesSecondaryPaymentsData = !empty($groupedSecondaryPaymentsTypesIds['package'])
+                    ? $paymentRepository->getPackagesPaymentsByIds($groupedSecondaryPaymentsTypesIds['package'])
+                    : [];
+
+                foreach ($secondaryPaymentsIds as $id => $type) {
+                    if (!empty($appointmentsSecondaryPaymentsData[$id])) {
+                        $secondaryPayments[$id] = $appointmentsSecondaryPaymentsData[$id];
+                    }
+
+                    if (!empty($eventsSecondaryPaymentsData[$id])) {
+                        $secondaryPayments[$id] = $eventsSecondaryPaymentsData[$id];
+                    }
+
+                    if (!empty($packagesSecondaryPaymentsData[$id])) {
+                        $secondaryPayments[$id] = $packagesSecondaryPaymentsData[$id];
+                    }
                 }
             }
         }
@@ -229,22 +236,22 @@ class PaymentApplicationService
                 if (
                     $paymentData['id'] !== $secondaryPayment['id'] &&
                     (
-                    (
-                    $paymentData['packageCustomerId'] &&
-                    $secondaryPayment['packageCustomerId'] &&
-                    (int)$paymentData['packageCustomerId'] === (int)$secondaryPayment['packageCustomerId']
-                    ) ||
-                    (
-                        $paymentData['customerBookingId'] &&
-                        $secondaryPayment['customerBookingId'] &&
-                        (int)$paymentData['customerBookingId'] === (int)$secondaryPayment['customerBookingId']
-                    ) ||
-                    (
-                        $isInvoicePage &&
-                        ((int)$paymentData['id'] === (int)$secondaryPayment['parentId'] ||
-                        (int)$paymentData['parentId'] === (int)$secondaryPayment['id'] ||
-                        ($paymentData['parentId'] && (int)$paymentData['parentId'] === (int)$secondaryPayment['parentId']))
-                    )
+                        (
+                            $paymentData['packageCustomerId'] &&
+                            $secondaryPayment['packageCustomerId'] &&
+                            (int)$paymentData['packageCustomerId'] === (int)$secondaryPayment['packageCustomerId']
+                        ) ||
+                        (
+                            $paymentData['customerBookingId'] &&
+                            $secondaryPayment['customerBookingId'] &&
+                            (int)$paymentData['customerBookingId'] === (int)$secondaryPayment['customerBookingId']
+                        ) ||
+                        (
+                            $isInvoicePage &&
+                            ((int)$paymentData['id'] === (int)$secondaryPayment['parentId'] ||
+                                (int)$paymentData['parentId'] === (int)$secondaryPayment['id'] ||
+                                ($paymentData['parentId'] && (int)$paymentData['parentId'] === (int)$secondaryPayment['parentId']))
+                        )
                     )
                 ) {
                     $paymentData['secondaryPayments'][] = $secondaryPayment;
@@ -279,7 +286,15 @@ class PaymentApplicationService
         foreach ($events->getItems() as $event) {
             /** @var CustomerBooking $booking */
             foreach ($event->getBookings()->getItems() as $booking) {
-                if (($key = array_search($booking->getId()->getValue(), $bookingsIds)) !== false) {
+                $keys = [];
+
+                foreach ($bookingsIds as $key => $bookingId) {
+                    if ((int)$bookingId === $booking->getId()->getValue()) {
+                        $keys[] = $key;
+                    }
+                }
+
+                foreach ($keys as $key) {
                     $paymentsData[$paymentDataValues[$key]['id']]['bookingStart'] =
                         $event->getPeriods()->getItem(0)->getPeriodStart()->getValue()->format('Y-m-d H:i:s');
 
@@ -287,6 +302,9 @@ class PaymentApplicationService
                     foreach ($event->getProviders()->getItems() as $provider) {
                         $paymentsData[$paymentDataValues[$key]['id']]['providers'][] = [
                             'id' => $provider->getId()->getValue(),
+                            'firstName' => $provider->getFirstName()->getValue(),
+                            'lastName' => $provider->getLastName()->getValue(),
+                            'picture' => $provider->getPicture() ? $provider->getPicture()->getThumbPath() : null,
                             'fullName' => $provider->getFullName(),
                             'email' => $provider->getEmail()->getValue(),
                         ];
@@ -303,7 +321,7 @@ class PaymentApplicationService
                         foreach ($booking->getTicketsBooking()->getItems() as $bookingToEventTicket) {
                             $price += $bookingToEventTicket->getPersons()
                                 ? (
-                                $booking->getAggregatedPrice()->getValue()
+                                    $booking->getAggregatedPrice()->getValue()
                                     ? $bookingToEventTicket->getPersons()->getValue()
                                     : 1
                                 ) * $bookingToEventTicket->getPrice()->getValue()
@@ -327,33 +345,37 @@ class PaymentApplicationService
         }
 
         foreach ($paymentsData as &$item) {
-            $item = $this->addWcFields($item);
+            $this->addWcFields($item);
+
             foreach ($item['secondaryPayments'] as &$secondaryPayment) {
-                $secondaryPayment = $this->addWcFields($secondaryPayment);
+                $this->addWcFields($secondaryPayment);
             }
         }
 
         return $paymentsData;
     }
 
-    public function addWcFields($item)
+    /**
+     * @param array $item
+     *
+     * @return void
+     */
+    public function addWcFields(&$item)
     {
         if (!empty($item['wcOrderId']) && StarterWooCommerceService::isEnabled()) {
             $item['wcOrderUrl'] = HelperService::getWooCommerceOrderUrl($item['wcOrderId']);
 
             $wcOrderItemValues = HelperService::getWooCommerceOrderItemAmountValues($item['wcOrderId']);
 
-            $key = !empty($item['wcOrderItemId']) && !empty($wcOrderItemValues[$item['wcOrderItemId']]) ?
-                $item['wcOrderItemId'] : array_keys($wcOrderItemValues)[0];
-
             if ($wcOrderItemValues) {
+                $key = !empty($item['wcOrderItemId']) && !empty($wcOrderItemValues[$item['wcOrderItemId']]) ?
+                    $item['wcOrderItemId'] : array_keys($wcOrderItemValues)[0];
+
                 $item['wcItemCouponValue'] = $wcOrderItemValues[$key]['coupon'];
 
                 $item['wcItemTaxValue'] = $wcOrderItemValues[$key]['tax'];
             }
         }
-
-        return $item;
     }
 
     /** @noinspection MoreThanThreeArgumentsInspection */
@@ -369,7 +391,6 @@ class PaymentApplicationService
      *
      * @throws ContainerValueNotFoundException
      * @throws Exception
-     * @throws \Interop\Container\Exception\ContainerException
      */
     public function processPayment($result, $paymentData, $reservation, $bookingType, &$paymentTransactionId, &$transfers)
     {
@@ -389,7 +410,8 @@ class PaymentApplicationService
                 $paymentData['gateway'] === 'payPal' ||
                 $paymentData['gateway'] === 'mollie' ||
                 $paymentData['gateway'] === 'razorpay' ||
-                $paymentData['gateway'] === 'square'
+                $paymentData['gateway'] === 'square' ||
+                $paymentData['gateway'] === 'barion'
             )
         ) {
             $result->setResult(CommandResult::RESULT_ERROR);
@@ -435,7 +457,7 @@ class PaymentApplicationService
                 return true;
 
             case ('stripe'):
-                /** @var PaymentServiceInterface $paymentService */
+                /** @var StripeService $paymentService */
                 $paymentService = $this->container->get('infrastructure.payment.stripe.service');
 
                 $this->setTransfers(
@@ -457,19 +479,17 @@ class PaymentApplicationService
                 /** @var CustomerRepository $customerRepository */
                 $customerRepository = $this->container->get('domain.users.customers.repository');
 
-                $stripeCustomerId = null;
-
                 $customer = null;
 
+                $stripeCustomerId = null;
+
                 if ($reservation->getCustomer() && $reservation->getCustomer()->getId()) {
-                    /** @var Customer $customer */
+                    /** @var \AmeliaBooking\Domain\Entity\User\Customer $customer */
                     $customer = $customerRepository->getById($reservation->getCustomer()->getId()->getValue());
 
-                    if ($customer && $customer->getType() === AbstractUser::USER_ROLE_CUSTOMER) {
-                        $stripeCustomerId = $customer->getStripeConnect() && $customer->getStripeConnect()->getId()
-                            ? $customer->getStripeConnect()->getId()->getValue() : null;
-                    }
+                    $stripeCustomerId = $paymentService->getStripeCustomerId($customer, $transfers);
                 }
+
 
                 try {
                     $response = $paymentService->execute(
@@ -531,10 +551,11 @@ class PaymentApplicationService
                 }
 
                 if (!empty($response['customerId']) && ($stripeCustomerId === null || $response['customerId'] !== $stripeCustomerId)) {
-                    $stripeConnect = StripeFactory::create(['id' => $response['customerId']]);
+                    $newStripeConnectArray = $paymentService->setNewStripeCustomerId($customer, $response['customerId'], $transfers);
+
                     $customerRepository->updateFieldById(
                         $reservation->getCustomer()->getId()->getValue(),
-                        json_encode($stripeConnect->toArray()),
+                        json_encode($newStripeConnectArray),
                         'stripeConnect'
                     );
                 }
@@ -601,6 +622,7 @@ class PaymentApplicationService
 
             case ('wc'):
             case ('mollie'):
+            case ('barion'):
                 return true;
             case ('razorpay'):
                 /** @var RazorpayService $paymentService */
@@ -741,7 +763,6 @@ class PaymentApplicationService
      * @return array
      *
      * @throws ContainerValueNotFoundException
-     * @throws \Interop\Container\Exception\ContainerException
      * @throws InvalidArgumentException
      */
     public function getBookingInformationForPaymentSettings($reservation, $paymentType, $bookingIndex = null)
@@ -941,7 +962,6 @@ class PaymentApplicationService
      * @return Payment
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
-     * @throws \Interop\Container\Exception\ContainerException
      * @throws Exception
      */
     public function insertPaymentFromLink($originalPayment, $amount, $type)
@@ -970,10 +990,9 @@ class PaymentApplicationService
      * @param string|null $paymentMethod
      * @param string $customRedirectUrl
      *
-     * @return array
+     * @return array|null
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
-     * @throws \Interop\Container\Exception\ContainerException
      * @throws Exception
      */
     public function createPaymentLink($data, $index = null, $recurringKey = null, $paymentMethod = null, $customRedirectUrl = null)
@@ -1003,11 +1022,14 @@ class PaymentApplicationService
                     json_decode($data['bookable']['settings'], true) :
                     null;
 
-            $paymentLinksSettings = !empty($entitySettings) && !empty($entitySettings['payments']['paymentLinks']) ?
-                $entitySettings['payments']['paymentLinks'] : null;
+            $paymentLinksSettings =
+                !empty($entitySettings) &&
+                !empty($entitySettings['payments']['paymentLinks']['enabled'])
+                    ? $entitySettings['payments']['paymentLinks']
+                    : null;
             $paymentLinksEnabled  =
                 $paymentLinksSettings ?
-                    $paymentLinksSettings['enabled'] :
+                    !empty($paymentLinksSettings['enabled']) :
                     $settingsService->getSetting('payments', 'paymentLinks')['enabled'];
             if (
                 !$paymentLinksEnabled ||
@@ -1098,6 +1120,10 @@ class PaymentApplicationService
                     !empty($entitySettings) && !empty($entitySettings['payments']['square']) ?
                         ($entitySettings['payments']['square']['enabled'] && $paymentSettings['square']['enabled']) :
                         $paymentSettings['square']['enabled'],
+                'barion'   =>
+                        !empty($entitySettings) && !empty($entitySettings['payments']['barion']) ?
+                            ($entitySettings['payments']['barion']['enabled'] && $paymentSettings['barion']['enabled']) :
+                            $paymentSettings['barion']['enabled'],
             ];
 
             $methods = apply_filters('amelia_payment_link_methods', $methods, $data);
@@ -1119,14 +1145,27 @@ class PaymentApplicationService
                 $appointmentData['wcProductId'] = $bookableSettings && isset($bookableSettings['payments']['wc']['productId']) ?
                     $bookableSettings['payments']['wc']['productId'] : null;
 
-                $linkPayment = PaymentFactory::create($oldPayment);
+                $linkPayment = PaymentFactory::create([
+                    'status' => PaymentStatus::PENDING,
+                    'amount' => $amount,
+                    'gateway' => 'wc',
+                    'entity' => $type,
+                    'dateTime' => null,
+                ]);
 
-                $linkPayment->setStatus(new PaymentStatus(PaymentStatus::PENDING));
-                $linkPayment->setDateTime(null);
-                $linkPayment->setWcOrderId(null);
-                $linkPayment->setGatewayTitle(null);
-                $linkPayment->setEntity(new Name($type));
+                if ($oldPayment['gateway'] === 'onSite') {
+                    $linkPayment->setId(new Id($oldPayment['id']));
+                    $linkPayment->setWcOrderItemId(new Id($oldPayment['wcOrderItemId']));
+                    $linkPayment->setWcOrderId(new Id($oldPayment['wcOrderId']));
+                }
+
                 $linkPayment->setActionsCompleted(new BooleanValueObject(true));
+                if (!empty($oldPayment['customerBookingId'])) {
+                    $linkPayment->setCustomerBookingId(new Id($oldPayment['customerBookingId']));
+                }
+                if (!empty($oldPayment['invoiceNumber'])) {
+                    $linkPayment->setInvoiceNumber(new Id($oldPayment['invoiceNumber']));
+                }
                 if ($type === Entities::PACKAGE) {
                     $linkPayment->setCustomerBookingId(null);
                     $linkPayment->setPackageCustomerId(new Id($data['packageCustomerId']));
@@ -1137,14 +1176,53 @@ class PaymentApplicationService
                 $appointmentData['payment']['fromPanel']  = !empty($data['fromPanel']);
                 $appointmentData['payment']['newPayment'] = $oldPayment['gateway'] !== 'onSite';
 
-                $paymentLink = StarterWooCommerceService::createWcOrder($appointmentData, $amount, $oldPayment['wcOrderId']);
+                $paymentLink = StarterWooCommerceService::getPaymentLink($appointmentData, $amount, $oldPayment['wcOrderId'], $amount === $totalPrice);
                 if (!empty($paymentLink['link'])) {
                     $paymentLinks['payment_link_woocommerce'] = $paymentLink['link'];
                 } else {
                     $paymentLinks['payment_link_error_message'] = 'There has been an error creating the payment link';
                 }
 
-                return apply_filters('amelia_wc_payment_link', $paymentLinks, $amount, $data);
+                $paymentLinks = apply_filters('amelia_wc_payment_link', $paymentLinks, $amount, $data);
+            }
+
+            if (!empty($methods['barion'])) {
+                /** @var PaymentServiceInterface $paymentService */
+                $paymentService = $this->container->get('infrastructure.payment.barion.service');
+
+                $additionalInformation = $paymentAS->getBookingInformationForPaymentSettings(
+                    $reservation,
+                    PaymentType::BARION
+                );
+
+                $name = '';
+                if ($type === Entities::APPOINTMENT) {
+                    /** @var ServiceRepository $serviceRepository */
+                    $serviceRepository = $this->container->get('domain.bookable.service.repository');
+                    $service = $serviceRepository->getById($reservation['serviceId']);
+                    $name = $service->getName()->getValue();
+                } else {
+                    $name = $reservation['name'];
+                }
+
+                $paymentData = [
+                    'amount'      => $amount,
+                    'reservation' => $reservation,
+                    'returnUrl'   => $callbackLink . '&paymentMethod=barion&barionStatus=success',
+                    'cancelUrl'   => $callbackLink . '&paymentMethod=barion&barionStatus=canceled',
+                    'name'        => $name,
+                    'info'        => $additionalInformation,
+                    'paymentId'   => $data['paymentId'],
+                ];
+
+                $paymentLink = $paymentService->getPaymentLink($paymentData);
+
+                if (empty($paymentLink['Errors'])) {
+                    $paymentLinks['payment_link_barion'] = $paymentLink['GatewayUrl'];
+                } else {
+                    $paymentLinks['payment_link_error_code']    = $paymentLink['Status'];
+                    $paymentLinks['payment_link_error_message'] = $paymentLink['Message'];
+                }
             }
 
             if (!empty($methods['payPal'])) {
@@ -1298,20 +1376,16 @@ class PaymentApplicationService
 
                 $additionalInformation = $paymentAS->getBookingInformationForPaymentSettings($reservation, PaymentType::MOLLIE, $index);
 
-                $info        = json_decode($booking['info'], true);
                 $paymentData =
                     [
                         'amount'      => [
                             'currency' =>  $settingsService->getCategorySettings('payments')['currency'],
-                            'value' => number_format((float)$amount, 2, '.', '')//strval($amount)
+                            'value' => number_format((float)$amount, 2, '.', '') //strval($amount)
                         ],
                         'description' => $additionalInformation['description'] ?: $data['bookable']['name'],
                         'redirectUrl' => $redirectUrl,
                         'webhookUrl'  => (AMELIA_DEV ? str_replace('localhost', AMELIA_NGROK_URL, $callbackLink) : $callbackLink) . '&paymentMethod=mollie',
-//                    'locale'      => str_replace('-', '_', $info['locale']),
-//                    'method'      => $settingsService->getSetting('payments', 'mollie')['method'],
-//                    'metaData'    => $additionalInformation['metaData'] ?: [],
-                ];
+                    ];
 
                 $paymentLink = $paymentService->getPaymentLink($paymentData);
                 if ($paymentLink['status'] === 200 && !empty($paymentLink['link'])) {
@@ -1416,9 +1490,9 @@ class PaymentApplicationService
      * @param string $type
      * @return string
      */
-    public function getFullStatus($booking, $type)
+    public function getFullStatus($booking, $type, $reservationEntity = null)
     {
-        $bookingPrice = $this->calculateAppointmentPrice($booking, $type); //add wc tax
+        $bookingPrice = $this->calculateAppointmentPrice($booking, $type, $reservationEntity);
 
         $paidAmount     = 0;
         $refundedAmount = 0;
@@ -1441,32 +1515,21 @@ class PaymentApplicationService
     }
 
     /**
-     * @param array  $booking
+     * Create a bookable entity with extras populated from booking data
+     * This method extracts the logic from calculateAppointmentPrice to make it reusable
+     *
+     * @param array $booking
      * @param string $type
-     * @param null   $reservationEntity
-     *
-     * @return float
-     *
+     * @return AbstractBookable
      * @throws InvalidArgumentException
-     * @throws NotFoundException
-     * @throws QueryExecutionException
      */
-    public function calculateAppointmentPrice($booking, $type, $reservationEntity = null)
+    public function createBookableWithExtras($booking, $type)
     {
-        /** @var ReservationServiceInterface $reservationService */
-        $reservationService = $this->container->get('application.reservation.service')->get($type);
-
-        /** @var Reservation $reservation */
-        $reservation = new Reservation();
-
         /** @var AbstractBookable|null $bookable */
         $bookable = null;
 
         switch ($type) {
             case (Entities::APPOINTMENT):
-                /** @var Coupon $coupon */
-                $coupon = !empty($booking['coupon']) ? CouponFactory::create($booking['coupon']) : null;
-
                 $serviceExtras = [];
 
                 /** @var CustomerBookingExtra $extra */
@@ -1485,27 +1548,9 @@ class PaymentApplicationService
                         'extras'          => $serviceExtras,
                     ]
                 );
-
-                /** @var CustomerBooking $booking */
-                $booking = CustomerBookingFactory::create(
-                    [
-                        'persons' => $booking['persons'],
-                        'coupon'  => $coupon ? $coupon->toArray() : null,
-                        'extras'  => $booking['extras'],
-                        'tax'     => !empty($booking['tax']) ? json_encode($booking['tax']) : null,
-                    ]
-                );
-
-                $reservation->setBooking($booking);
-
-                $reservation->setRecurring(new Collection());
-
                 break;
 
             case (Entities::EVENT):
-                /** @var Coupon $coupon */
-                $coupon = !empty($booking['coupon']) ? CouponFactory::create($booking['coupon']) : null;
-
                 $customTickets = !empty($booking['ticketsData']) ? $booking['ticketsData'] : [];
 
                 $eventCustomPricing = [];
@@ -1527,15 +1572,71 @@ class PaymentApplicationService
                         'customTickets'   => !empty($eventCustomPricing) ? $eventCustomPricing : null,
                     ]
                 );
+                break;
+        }
+
+        return $bookable;
+    }
+
+    /**
+     * @param array  $booking
+     * @param string $type
+     * @param array  $reservationEntity
+     *
+     * @return float
+     *
+     * @throws ContainerValueNotFoundException
+     * @throws InvalidArgumentException
+     * @throws QueryExecutionException
+     */
+    public function calculateAppointmentPrice($booking, $type, $reservationEntity = null)
+    {
+        /** @var ReservationServiceInterface $reservationService */
+        $reservationService = $this->container->get('application.reservation.service')->get($type);
+
+        /** @var Reservation $reservation */
+        $reservation = new Reservation();
+
+        /** @var AbstractBookable|null $bookable */
+        $bookable = null;
+
+        switch ($type) {
+            case (Entities::APPOINTMENT):
+                /** @var Coupon $coupon */
+                $coupon = !empty($booking['coupon']) ? CouponFactory::create($booking['coupon']) : null;
+
+                $bookable = $this->createBookableWithExtras($booking, $type);
+
+                /** @var CustomerBooking $booking */
+                $booking = CustomerBookingFactory::create(
+                    [
+                        'persons' => $booking['persons'],
+                        'coupon'  => $coupon ? $coupon->toArray() : null,
+                        'extras'  => $booking['extras'],
+                        'tax'     => !empty($booking['tax']) ? json_encode($booking['tax']) : null,
+                    ]
+                );
+
+                $reservation->setBooking($booking);
+
+                $reservation->setRecurring(new Collection());
+
+                break;
+
+            case (Entities::EVENT):
+                /** @var Coupon $coupon */
+                $coupon = !empty($booking['coupon']) ? CouponFactory::create($booking['coupon']) : null;
+
+                $bookable = $this->createBookableWithExtras($booking, $type);
 
                 /** @var CustomerBooking $booking */
                 $booking = CustomerBookingFactory::create(
                     [
                         'persons'         => $booking['persons'],
                         'coupon'          => $coupon ? $coupon->toArray() : null,
-                        'tax'             => !empty($booking['tax']) ? json_encode($booking['tax']) : null,
+                        'tax'             => !empty($booking['tax']) ? (is_array($booking['tax']) ? json_encode($booking['tax']) : $booking['tax']) : null,
                         'aggregatedPrice' => $booking['aggregatedPrice'],
-                        'ticketsData'     => $booking['ticketsData'],
+                        'ticketsData'     => !empty($booking['ticketsData']) ? $booking['ticketsData'] : null,
                     ]
                 );
 
@@ -1547,10 +1648,14 @@ class PaymentApplicationService
                 /** @var PackageCustomerRepository $packageCustomerRepository */
                 $packageCustomerRepository = $this->container->get('domain.bookable.packageCustomer.repository');
 
-                /** @var PackageCustomer $packageCustomer */
-                $packageCustomer = $packageCustomerRepository->getById($reservationEntity['packageCustomerId']);
+                if (!empty($reservationEntity['packageCustomer'])) {
+                    $packageCustomer = PackageCustomerFactory::create($reservationEntity['packageCustomer']);
+                } else {
+                    /** @var PackageCustomer $packageCustomer */
+                    $packageCustomer = $packageCustomerRepository->getById($reservationEntity['packageCustomerId']);
+                }
 
-                if ($packageCustomer->getCouponId()) {
+                if ($packageCustomer->getCouponId() && $packageCustomer->getCoupon() === null) {
                     /** @var CouponRepository $couponRepository */
                     $couponRepository = $this->container->get('domain.coupon.repository');
 
@@ -1685,7 +1790,6 @@ class PaymentApplicationService
      * @return CommandResult
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
-     * @throws \Interop\Container\Exception\ContainerException
      * @throws Exception
      */
     public function updateCache($result, $appointmentData, $cache, $reservation, $squareData = null)
@@ -1755,7 +1859,6 @@ class PaymentApplicationService
      *
      * @throws ContainerValueNotFoundException
      * @throws Exception
-     * @throws \Interop\Container\Exception\ContainerException
      */
     public function setTransfers($paymentData, $reservation, $bookingType, &$transfers, $usePayment)
     {
@@ -1825,7 +1928,6 @@ class PaymentApplicationService
      * @return CommandResult
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
-     * @throws \Interop\Container\Exception\ContainerException
      * @throws Exception
      */
     public function updateAppointmentAndCache($type, $status, $cache, $transactionId)
@@ -2107,7 +2209,7 @@ class PaymentApplicationService
                         $paymentRepository->updateFieldById(
                             $payment->getId()->getValue(),
                             $packageCustomerService->getPackageCustomer()->getPrice()->getValue() >
-                            $payment->getAmount()->getValue() ? PaymentStatus::PARTIALLY_PAID : PaymentStatus::PAID,
+                                $payment->getAmount()->getValue() ? PaymentStatus::PARTIALLY_PAID : PaymentStatus::PAID,
                             'status'
                         );
 
@@ -2232,7 +2334,7 @@ class PaymentApplicationService
             $trigger = $cacheDataArray && isset($cacheDataArray['request']['trigger'])
                 ? $cacheDataArray['request']['trigger']
                 : (
-                $cacheDataArray && isset($cacheDataArray['request']['form']['shortcode']['trigger'])
+                    $cacheDataArray && isset($cacheDataArray['request']['form']['shortcode']['trigger'])
                     ? $cacheDataArray['request']['form']['shortcode']['trigger']
                     : ''
                 );
@@ -2411,10 +2513,10 @@ class PaymentApplicationService
                         /** @var CustomerBooking $appointmentBooking */
                         foreach ($packageAppointment->getBookings()->getItems() as $appointmentBooking) {
                             $packageBooking = $appointmentBooking->getPackageCustomerService() &&
-                            in_array(
-                                $appointmentBooking->getPackageCustomerService()->getId()->getValue(),
-                                $packageCustomerServices->keys()
-                            ) ? $appointmentBooking : null;
+                                in_array(
+                                    $appointmentBooking->getPackageCustomerService()->getId()->getValue(),
+                                    $packageCustomerServices->keys()
+                                ) ? $appointmentBooking : null;
                         }
 
                         switch ($status) {
@@ -2499,7 +2601,6 @@ class PaymentApplicationService
     }
 
     /**
-     * @throws \Interop\Container\Exception\ContainerException
      * @throws InvalidArgumentException
      */
     private function createSquarePaymentIntent($paymentData, $paymentAmount, $reservation)

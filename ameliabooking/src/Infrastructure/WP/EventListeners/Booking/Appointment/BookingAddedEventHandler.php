@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -14,6 +14,7 @@ use AmeliaBooking\Application\Services\Booking\IcsApplicationService;
 use AmeliaBooking\Application\Services\Helper\HelperService;
 use AmeliaBooking\Application\Services\Integration\ApplicationIntegrationService;
 use AmeliaBooking\Application\Services\Invoice\AbstractInvoiceApplicationService;
+use AmeliaBooking\Application\Services\Notification\ApplicationNotificationService;
 use AmeliaBooking\Application\Services\Notification\EmailNotificationService;
 use AmeliaBooking\Application\Services\Notification\SMSNotificationService;
 use AmeliaBooking\Application\Services\Notification\AbstractWhatsAppNotificationService;
@@ -101,7 +102,9 @@ class BookingAddedEventHandler
 
         $invoice = null;
         if (
-            $paymentId && $settingsService->getSetting('notifications', 'sendInvoice') &&
+            $paymentId &&
+            $settingsService->isFeatureEnabled('invoices') &&
+            $settingsService->getSetting('notifications', 'sendInvoice') &&
             (empty($booking) || $booking['status'] !== BookingStatus::WAITING)
         ) {
             $invoice = $invoiceService->generateInvoice($paymentId);
@@ -175,7 +178,6 @@ class BookingAddedEventHandler
 
                 $webHookService->process(self::PACKAGE_PURCHASED, $packageReservation, null);
 
-
                 if (!empty($paymentId)) {
                     $paymentRepository->updateFieldById($paymentId, 1, 'actionsCompleted');
                 }
@@ -212,14 +214,15 @@ class BookingAddedEventHandler
             $data['bookable'] = $reservationObject->toArray();
         }
 
-        $currentBookingIndex = 0;
-
         foreach ($reservation['bookings'] as $index => $reservationBooking) {
             if ($booking['id'] === $reservationBooking['id']) {
                 $reservation['bookings'][$index]['isLastBooking'] = true;
                 $reservationObject->getBookings()->getItem($index)->setLastBooking(new BooleanValueObject(true));
 
-                $currentBookingIndex = $index;
+                if (empty($reservationBooking['customer']) && !empty($commandResult->getData()['customer'])) {
+                    $reservation['bookings'][$index]['customer'] = $commandResult->getData()['customer'];
+                }
+
                 if (!empty($paymentId) && !$commandResult->getData()['packageId'] && empty($commandResult->getData()['fromLink'])) {
                     $reservation['bookings'][$index]['payments'][0]['paymentLinks'] = $paymentAS->createPaymentLink($data, $index);
                 }
@@ -293,6 +296,8 @@ class BookingAddedEventHandler
             $recurringBookingIds[] = $recurringReservation[Entities::BOOKING]['id'];
         }
 
+        $bookingKey = null;
+
         foreach ($reservation['bookings'] as $index => $reservationBooking) {
             if (
                 $reservationBooking['id'] === $booking['id'] &&
@@ -306,6 +311,8 @@ class BookingAddedEventHandler
                 );
 
                 $reservation['bookings'][$index]['icsFiles'] = $icsFiles;
+
+                $bookingKey = $index;
             }
         }
 
@@ -351,6 +358,19 @@ class BookingAddedEventHandler
 
         if (!empty($commandResult->getData()['packageBookingFromBackend'])) {
             $booking['packageBookingFromBackend'] = $commandResult->getData()['packageBookingFromBackend'];
+        }
+
+        if (
+            $settingsService->isFeatureEnabled('eTickets') &&
+            $appointmentStatusChanged !== true &&
+            $type === Entities::EVENT &&
+            !empty($booking['payments'][0]) &&
+            ($booking['payments'][0]['status'] === 'paid' || $booking['payments'][0]['gateway'] === 'onSite')
+        ) {
+            /** @var ApplicationNotificationService $applicationNotificationService */
+            $applicationNotificationService = $container->get('application.notification.service');
+
+            $applicationNotificationService->sendEventQrNotification($reservationObject, $bookingKey);
         }
 
         if (

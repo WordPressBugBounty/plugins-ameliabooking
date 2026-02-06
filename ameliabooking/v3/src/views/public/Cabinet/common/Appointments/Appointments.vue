@@ -67,8 +67,8 @@
           :text="amLabels.have_no_app"
         ></EmptyState>
         <AmPagination
-          v-if="!appointmentVisibility && dateGroupedAppointments && Object.keys(dateGroupedAppointments).length > 0 && appointmentsCount > amSettings.general.itemsPerPageBackEnd"
-          :page-size="amSettings.general.itemsPerPageBackEnd"
+          v-if="!appointmentVisibility && dateGroupedAppointments && Object.keys(dateGroupedAppointments).length > 0 && appointmentsCount > amSettings.general.itemsPerPage"
+          :page-size="amSettings.general.itemsPerPage"
           :pager-count="5"
           layout="prev, pager, next"
           :total="appointmentsCount"
@@ -347,16 +347,25 @@ function editAppointment (appointment) {
 
       let customFields = booking.customFields ? JSON.parse(booking.customFields) : {}
 
-      Object.keys(customFields).forEach((id) => {
-        customFields[id] = Object.assign(
-          {},
-          customFields[id],
-          {
-            value: customFields[id].type === 'datepicker'
-              ? (customFields[id].value ? moment(customFields[id].value).toDate() : '')
-              : customFields[id].value,
+      store.getters['entities/getCustomFields'].forEach((customField) => {
+        if (customField.allServices ||
+          customField.services.some((e) => e.id === service.id)
+        ) {
+          customFields[customField.id] = customFields[customField.id] ? Object.assign(
+            {},
+            customFields[customField.id],
+            {
+              value: customFields[customField.id].type === 'datepicker'
+                ? (customFields[customField.id].value ? moment(customFields[customField.id].value).toDate() : '')
+                : customFields[customField.id].value,
+            }
+          ) : {
+            label: customField.label,
+            type: customField.type,
+            value: customField.type === 'checkbox' ? [] : '',
+            position: customField.position,
           }
-        )
+        }
       })
 
       bookings.push({

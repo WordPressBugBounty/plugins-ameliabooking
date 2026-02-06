@@ -5,6 +5,10 @@ import {
 import { createStore } from "vuex";
 import entities from "./../../../store/modules/entities";
 import booking from "./../../../store/modules/booking";
+import event from "./../../../store/modules/event";
+import attendee from "./../../../store/modules/attendee";
+import appointment from "./../../../store/modules/appointment";
+import employee from "./../../../store/modules/employee";
 import eventEntities from "../../../store/modules/eventEntities";
 import eventBooking from "../../../store/modules/eventBooking";
 import shortcodeParams from "../../../store/modules/shortcodeParams";
@@ -12,6 +16,7 @@ import params from "../../../store/modules/params";
 import pagination from "../../../store/modules/pagination";
 import customerInfo from "../../../store/modules/customerInfo";
 import customFields from "../../../store/modules/customFields";
+import recurring from "../../../store/modules/recurring";
 import persons from "../../../store/modules/persons.js";
 import tickets from "../../../store/modules/tickets.js";
 import payment from "../../../store/modules/payment.js";
@@ -20,7 +25,9 @@ import coupon from "../../../store/modules/coupon.js";
 import auth from "../../../store/modules/auth.js";
 import cabinet from "../../../store/modules/cabinet.js";
 import cabinetFilters from "../../../store/modules/cabinetFilters.js"
-import eventWaitingListOptions from "../../../store/modules/eventWaitingListOptions";
+import eventWaitingListOptions from "../../../store/modules/eventWaitingListOptions"
+import stepByStepFilters from "../../../store/modules/stepByStepFilters.js"
+import appointmentWaitingListOptions from "../../../store/modules/appointmentWaitingListOptions"
 
 import {
   provide,
@@ -35,6 +42,15 @@ import {
 } from "./facebookPixel.js";
 
 import {useLicence} from "../common/licence";
+
+import dayjs from "dayjs";
+import updateLocale from "dayjs/plugin/updateLocale";
+
+dayjs.extend(updateLocale);
+
+dayjs.updateLocale(dayjs.locale(), {
+  weekStart: window.wpAmeliaSettings.wordpress.startOfWeek,
+})
 
 // It is necessary to investigate what is the best practice
 // import axios from './plugins/axios'
@@ -84,9 +100,6 @@ if (window.ameliaShortcodeDataTriggered !== undefined) {
 
     // * Shortcodes that are rendered in Amelia Popup
     if (shortCodeData.in_dialog) {
-      // * vue creation
-      createAmelia(shortCodeData)
-
       // * Collection of all external buttons that are connected to "Amelia popup"
       let externalButtonsLoading = setInterval(() => {
         let externalButtons = shortCodeData.trigger_type && shortCodeData.trigger_type === 'class' ? [...document.getElementsByClassName(shortCodeData.trigger)]
@@ -94,20 +107,52 @@ if (window.ameliaShortcodeDataTriggered !== undefined) {
 
         if (externalButtons.length > 0 && externalButtons[0] !== null && typeof externalButtons[0] !== 'undefined') {
           clearInterval(externalButtonsLoading)
+
+          // * Detect if form loaded from redirection
+          if ('ameliaCache' in window && window.ameliaCache.length && window.ameliaCache[0]) {
+            let cacheData = JSON.parse(window.ameliaCache[0])
+            if (cacheData &&
+              'request' in cacheData &&
+              'form' in cacheData.request &&
+              'shortcode' in cacheData.request.form &&
+              'trigger' in cacheData.request.form.shortcode &&
+              cacheData.request.form.shortcode.trigger &&
+              parseInt(cacheData.request.form.shortcode.counter) === parseInt(shortCodeData.counter)
+            ) {
+              shortCodeData.isRestored = true
+            }
+          }
+
+          // * vue creation
+          createAmelia(shortCodeData)
+
           // * Made the buttons invisible because amelia components are not fully loaded
           externalButtons.forEach(btn => {
-            btn.style.display = 'none'
+            btn.style.pointerEvents = 'none'
           })
+
+          // Create a timeout to prevent buttons from being permanently disabled
+          let componentLoadTimeout
 
           let componentsLoaded = setInterval(() => {
             if (isMounted.value) {
               clearInterval(componentsLoaded)
+              clearTimeout(componentLoadTimeout)
               // * Made the buttons visible because amelia components are fully loaded
               externalButtons.forEach(btn => {
-                btn.style.removeProperty('display')
+                btn.style.removeProperty('pointer-events')
               })
             }
           }, 250)
+
+          // Safety timeout - if components don't load within 12 seconds, enable buttons anyway
+          componentLoadTimeout = setTimeout(() => {
+            clearInterval(componentsLoaded)
+            console.warn('Amelia components loading timeout')
+            externalButtons.forEach(btn => {
+              btn.style.removeProperty('pointer-events')
+            })
+          }, 12000)
         }
       }, 250)
     } else {
@@ -184,13 +229,21 @@ window.ameliaShortcodeData.forEach((item) => {
 })
 
 function createAmelia(shortcodeData) {
-  const settings = reactive(window.wpAmeliaSettings)
+  let wpAmeliaSettings = JSON.parse(JSON.stringify(window.wpAmeliaSettings))
+
+  if (window?.ameliaActions?.init) {
+    window.ameliaActions.init(shortcodeData, wpAmeliaSettings)
+  }
+
+  const settings = reactive(wpAmeliaSettings)
+
+  let wpAmeliaTimeZones = 'wpAmeliaTimeZones' in window ? window.wpAmeliaTimeZones : []
 
   let app = createApp({
     setup() {
       const baseURLs = reactive(window.wpAmeliaUrls)
       const labels = reactive(window.wpAmeliaLabels)
-      const timeZones = reactive(window.wpAmeliaTimeZones)
+      const timeZones = reactive(wpAmeliaTimeZones)
       const timeZone = ref('wpAmeliaTimeZone' in window ? window.wpAmeliaTimeZone[0] : '')
       const localLanguage = ref(window.localeLanguage[0])
       const licence = reactive(useLicence())
@@ -206,23 +259,27 @@ function createAmelia(shortcodeData) {
     }
   })
 
-  if (settings.googleTag.id) {
+  if (settings.featuresIntegrations.googleAnalytics.enabled && settings.googleTag.id) {
     app.use(VueGtag, {
-      config: {id: window.wpAmeliaSettings.googleTag.id}
+      config: {id: wpAmeliaSettings.googleTag.id}
     })
   }
 
-  if (settings.googleAnalytics.id) {
+  if (settings.featuresIntegrations.googleAnalytics.enabled && settings.googleAnalytics.id) {
     app.use(VueGtag, {
-      config: {id: window.wpAmeliaSettings.googleAnalytics.id}
+      config: {id: wpAmeliaSettings.googleAnalytics.id}
     })
   }
 
   if (settings.facebookPixel.id) {
     install()
 
-    init(window.wpAmeliaSettings.facebookPixel.id)
+    init(wpAmeliaSettings.facebookPixel.id)
   }
+
+  let data = 'ameliaCache' in window && window.ameliaCache.length && window.ameliaCache[0]
+    ? JSON.parse(window.ameliaCache[0])
+    : null
 
   app
     .component('StepFormWrapper', StepFormWrapper)
@@ -236,15 +293,20 @@ function createAmelia(shortcodeData) {
         namespaced: true,
 
         state: () => ({
-          settings: reactive(window.wpAmeliaSettings),
+          settings: reactive(wpAmeliaSettings),
           labels: reactive(window.wpAmeliaLabels),
           localLanguage: ref(window.localeLanguage[0]),
           baseUrls: reactive(window.wpAmeliaUrls),
-          timeZones: reactive(window.wpAmeliaTimeZones),
+          timeZones: reactive(wpAmeliaTimeZones),
           timeZone: ref('wpAmeliaTimeZone' in window ? window.wpAmeliaTimeZone[0] : ''),
+          isRtl: ref(document.documentElement.dir === 'rtl'),
           ready: false,
           loading: true,
           formKey: '',
+          restoring: data &&
+            data?.request?.form?.shortcode?.counter &&
+            parseInt(data.request.form.shortcode.counter) === parseInt(shortcodeData.counter),
+          restored: false,
         }),
 
         getters: {
@@ -264,6 +326,14 @@ function createAmelia(shortcodeData) {
             return state.baseUrls
           },
 
+          getRestoring (state) {
+            return state.restoring
+          },
+
+          getRestored (state) {
+            return state.restored
+          },
+
           getReady (state) {
             return state.ready
           },
@@ -274,10 +344,22 @@ function createAmelia(shortcodeData) {
 
           getFormKey (state) {
             return state.formKey
+          },
+
+          getIsRtl (state) {
+            return state.isRtl
           }
         },
 
         mutations: {
+          setRestoring (state, payload) {
+            state.restoring = payload
+          },
+
+          setRestored (state, payload) {
+            state.restored = payload
+          },
+
           setReady (state, payload) {
             state.ready = payload
           },
@@ -294,6 +376,10 @@ function createAmelia(shortcodeData) {
         modules: {
           entities,
           booking,
+          event,
+          attendee,
+          appointment,
+          employee,
           eventEntities,
           eventBooking,
           shortcodeParams,
@@ -301,6 +387,7 @@ function createAmelia(shortcodeData) {
           pagination,
           customerInfo,
           customFields,
+          recurring,
           persons,
           tickets,
           payment,
@@ -309,7 +396,9 @@ function createAmelia(shortcodeData) {
           auth,
           cabinet,
           cabinetFilters,
-          eventWaitingListOptions
+          eventWaitingListOptions,
+          stepByStepFilters,
+          appointmentWaitingListOptions
         },
       })
     )

@@ -1,24 +1,35 @@
 <template>
-  <div
-    ref="infoFormWrapperRef"
-    class="am-elfci"
-    :class="props.globalClass"
-  >
+  <div ref="infoFormWrapperRef" class="am-elfci" :class="props.globalClass">
     <!-- Social Buttons -->
-    <div v-if="!licence.isLite && !licence.isStarter">
+    <div v-if="features.googleSocialLogin || features.facebookSocialLogin">
       <div class="am-elfci__social-wrapper">
         <div class="am-elfci__social-wrapper__label">
           {{ labelsDisplay('auto_fill_your_details') }}
         </div>
         <div class="am-elfci__social-wrapper__social-buttons">
-          <img :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/google.svg'" height="32">
-          <img :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/facebook.svg'" height="32">
+          <img
+            v-if="features.googleSocialLogin"
+            :src="
+              baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/google.svg'
+            "
+            height="32"
+          />
+          <img
+            v-if="features.facebookSocialLogin"
+            :src="
+              baseUrls.wpAmeliaPluginURL +
+              '/v3/src/assets/img/icons/facebook.svg'
+            "
+            height="32"
+          />
         </div>
       </div>
 
       <!-- Social Divider -->
       <div class="am-elfci__social-divider">
-        <span class="par-sm">{{ labelsDisplay('or_enter_details_below') }}</span>
+        <span class="par-sm">{{
+          labelsDisplay('or_enter_details_below')
+        }}</span>
       </div>
       <!-- /Social Divider -->
     </div>
@@ -38,13 +49,19 @@
           v-if="infoFormConstruction[item.id].visibility"
           ref="customerCollectorRef"
           v-model="infoFormData[item.id]"
-          v-model:countryPhoneIso="infoFormConstruction[item.id].countryPhoneIso"
+          v-model:countryPhoneIso="
+            infoFormConstruction[item.id].countryPhoneIso
+          "
           v-bind="infoFormConstruction[item.id].props"
         ></component>
       </template>
 
       <el-form-item
-          v-if="amSettings.mailchimp.subscribeFieldVisible && amCustomize[pageRenderKey].customerInfo.options.email.visibility"
+          v-if="
+            amSettings.featuresIntegrations.mailchimp.enabled &&
+            amSettings.mailchimp.subscribeFieldVisible &&
+            amCustomize[pageRenderKey].customerInfo.options.email.visibility
+          "
           class="am-elfci__item am-subscribe"
       >
         <AmCheckbox
@@ -58,31 +75,32 @@
 </template>
 
 <script setup>
+import AmCheckbox from '../../../../../../_components/checkbox/AmCheckbox.vue'
+
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject,
-} from 'vue'
+import { ref, computed, inject } from 'vue'
 
 // * Form Fields Templates
-import { formFieldsTemplates } from "../../../../../../../assets/js/common/formFieldsTemplates";
+import { formFieldsTemplates } from '../../../../../../../assets/js/common/formFieldsTemplates'
 
 // * Composables
-import { useResponsiveClass } from "../../../../../../../assets/js/common/responsive";
-import AmCheckbox from "../../../../../../_components/checkbox/AmCheckbox.vue";
+import { useResponsiveClass } from '../../../../../../../assets/js/common/responsive'
+import { useReactiveCustomize } from '../../../../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Components
 let props = defineProps({
   globalClass: {
     type: String,
-    default: ''
+    default: '',
   },
   inDialog: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
+
+// * Features
+let features = inject('features')
 
 // * Settings
 // * Root Settings
@@ -92,7 +110,7 @@ const amSettings = inject('settings')
 let pageRenderKey = inject('pageRenderKey')
 
 // * Customize
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Plugin Licence
 let licence = inject('licence')
@@ -113,10 +131,15 @@ let customizeOptions = computed(() => {
 let langKey = inject('langKey')
 let amLabels = inject('labels')
 
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    let translations = amCustomize.value[pageRenderKey.value].customerInfo.translations
-    return translations && translations[label] && translations[label][langKey.value] ? translations[label][langKey.value] : amLabels[label]
+    let translations =
+      amCustomize.value[pageRenderKey.value].customerInfo.translations
+    return translations &&
+      translations[label] &&
+      translations[label][langKey.value]
+      ? translations[label][langKey.value]
+      : amLabels[label]
   })
 
   return computedLabel.value
@@ -139,8 +162,8 @@ let infoFormConstruction = ref({
       itemName: 'firstName',
       label: computed(() => labelsDisplay('first_name_colon')),
       placeholder: computed(() => labelsDisplay('enter_first_name')),
-      class: 'am-elfci__item'
-    }
+      class: 'am-elfci__item',
+    },
   },
   lastName: {
     template: formFieldsTemplates.text,
@@ -149,8 +172,8 @@ let infoFormConstruction = ref({
       itemName: 'lastName',
       label: computed(() => labelsDisplay('last_name_colon')),
       placeholder: computed(() => labelsDisplay('enter_last_name')),
-      class: 'am-elfci__item'
-    }
+      class: 'am-elfci__item',
+    },
   },
   email: {
     template: formFieldsTemplates.text,
@@ -159,8 +182,8 @@ let infoFormConstruction = ref({
       itemName: 'email',
       label: computed(() => labelsDisplay('email_colon')),
       placeholder: computed(() => labelsDisplay('enter_email')),
-      class: 'am-elfci__item'
-    }
+      class: 'am-elfci__item',
+    },
   },
   phone: {
     countryPhoneIso: '',
@@ -170,15 +193,19 @@ let infoFormConstruction = ref({
       itemName: 'phone',
       label: computed(() => labelsDisplay('phone_colon')),
       placeholder: computed(() => labelsDisplay('enter_phone')),
-      defaultCode: amSettings.general.phoneDefaultCountryCode === 'auto' ? '' : amSettings.general.phoneDefaultCountryCode.toLowerCase(),
+      defaultCode:
+        amSettings.general.phoneDefaultCountryCode === 'auto'
+          ? ''
+          : amSettings.general.phoneDefaultCountryCode.toLowerCase(),
       phoneError: false,
       whatsAppLabel: computed(() => labelsDisplay('whatsapp_opt_in_text')),
-      isWhatsApp: amSettings.notifications.whatsAppEnabled
-        && amSettings.notifications.whatsAppAccessToken
-        && amSettings.notifications.whatsAppBusinessID
-        && amSettings.notifications.whatsAppPhoneID,
-      class: 'am-elfci__item'
-    }
+      isWhatsApp:
+        amSettings.notifications.whatsAppEnabled &&
+        amSettings.notifications.whatsAppAccessToken &&
+        amSettings.notifications.whatsAppBusinessID &&
+        amSettings.notifications.whatsAppPhoneID,
+      class: 'am-elfci__item',
+    },
   },
 })
 
@@ -188,16 +215,16 @@ let infoFormRules = computed(() => {
     firstName: [
       {
         required: true,
-        message:  labelsDisplay('enter_first_name_warning'),
+        message: labelsDisplay('enter_first_name_warning'),
         trigger: ['blur', 'submit'],
-      }
+      },
     ],
     lastName: [
       {
         required: customizeOptions.value.lastName.required,
         message: labelsDisplay('enter_last_name_warning'),
         trigger: ['blur', 'submit'],
-      }
+      },
     ],
     email: [
       {
@@ -205,14 +232,14 @@ let infoFormRules = computed(() => {
         type: 'email',
         message: labelsDisplay('enter_valid_email_warning'),
         trigger: ['blur', 'submit'],
-      }
+      },
     ],
     phone: [
       {
         required: customizeOptions.value.phone.required,
         message: labelsDisplay('enter_phone_warning'),
         trigger: ['blur', 'submit'],
-      }
+      },
     ],
   }
 })
@@ -229,9 +256,9 @@ let responsiveClass = computed(() => useResponsiveClass(componentWidth.value))
 
 <script>
 export default {
-  name: "EventCustomerInfo",
-  key: "customerInfo",
-  label: "event_customer_info"
+  name: 'EventCustomerInfo',
+  key: 'customerInfo',
+  label: 'event_customer_info',
 }
 </script>
 
@@ -250,7 +277,7 @@ export default {
       &__label {
         font-weight: 500;
         font-size: 15px;
-        color: var(--black, #04080B);
+        color: var(--black, #04080b);
       }
 
       &__social-buttons {
@@ -261,7 +288,7 @@ export default {
         gap: 24px;
 
         img {
-          border: 1px solid #D1D5D7;
+          border: 1px solid #d1d5d7;
           padding: 8px;
           border-radius: 4px;
           height: 40px;
@@ -278,7 +305,7 @@ export default {
       // Before & After
       &:before,
       &:after {
-        background: var(--shade-250, #D1D5D7);
+        background: var(--shade-250, #d1d5d7);
         content: '';
         height: 1px;
         width: 100%;
@@ -290,7 +317,7 @@ export default {
         font-style: normal;
         font-weight: 400;
         line-height: 24px;
-        color: var(--shade-500, #808A90);
+        color: var(--shade-500, #808a90);
         margin-left: 8px;
         margin-right: 8px;
       }
@@ -320,7 +347,11 @@ export default {
         $count: 100;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+            animation: 600ms
+              cubic-bezier(0.45, 1, 0.4, 1.2)
+              #{$i *
+              100}ms
+              am-animation-slide-up;
             animation-fill-mode: both;
           }
         }
@@ -354,7 +385,6 @@ export default {
             font-weight: 500;
             line-height: unset;
             margin-bottom: 4px;
-            padding: 0;
 
             &:before {
               color: var(--am-c-error);

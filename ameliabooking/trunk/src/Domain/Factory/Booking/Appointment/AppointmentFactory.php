@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -29,7 +30,6 @@ use AmeliaBooking\Domain\ValueObjects\String\Token;
  */
 class AppointmentFactory
 {
-
     /**
      * @param $data
      *
@@ -45,6 +45,10 @@ class AppointmentFactory
             new Id($data['serviceId']),
             new Id($data['providerId'])
         );
+
+        if (isset($data['createPaymentLinks'])) {
+            $appointment->setCreatePaymentLinks($data['createPaymentLinks']);
+        }
 
         if (!empty($data['id'])) {
             $appointment->setId(new Id($data['id']));
@@ -90,6 +94,14 @@ class AppointmentFactory
             $appointment->setOutlookCalendarEventId(new Label($data['outlookCalendarEventId']));
         }
 
+        if (!empty($data['microsoftTeamsUrl'])) {
+            $appointment->setMicrosoftTeamsUrl($data['microsoftTeamsUrl']);
+        }
+
+        if (!empty($data['appleCalendarEventId'])) {
+            $appointment->setAppleCalendarEventId(new Label($data['appleCalendarEventId']));
+        }
+
         if (!empty($data['zoomMeeting']['id'])) {
             $zoomMeeting = ZoomFactory::create(
                 $data['zoomMeeting']
@@ -104,6 +116,26 @@ class AppointmentFactory
 
         if (isset($data['isRescheduled'])) {
             $appointment->setRescheduled(new BooleanValueObject($data['isRescheduled']));
+        }
+
+        if (array_key_exists('isChangedStatus', $data)) {
+            $appointment->setChangedStatus(new BooleanValueObject($data['isChangedStatus']));
+        }
+
+        if (!empty($data['initialAppointmentDateTime']['bookingStart'])) {
+            $appointment->setInitialBookingStart(
+                new DateTimeValue(
+                    DateTimeService::getCustomDateTimeObject($data['initialAppointmentDateTime']['bookingStart'])
+                )
+            );
+        }
+
+        if (!empty($data['initialAppointmentDateTime']['bookingEnd'])) {
+            $appointment->setInitialBookingEnd(
+                new DateTimeValue(
+                    DateTimeService::getCustomDateTimeObject($data['initialAppointmentDateTime']['bookingEnd'])
+                )
+            );
         }
 
         $bookings = new Collection();
@@ -133,15 +165,15 @@ class AppointmentFactory
         $appointments = [];
 
         foreach ($rows as $row) {
-            $appointmentId = $row['appointment_id'];
-            $bookingId = isset($row['booking_id']) ? $row['booking_id'] : null;
+            $appointmentId  = $row['appointment_id'];
+            $bookingId      = isset($row['booking_id']) ? $row['booking_id'] : null;
             $bookingExtraId = isset($row['bookingExtra_id']) ? $row['bookingExtra_id'] : null;
-            $paymentId = isset($row['payment_id']) ? $row['payment_id'] : null;
-            $couponId = isset($row['coupon_id']) ? $row['coupon_id'] : null;
-            $customerId = isset($row['customer_id']) ? $row['customer_id'] : null;
-            $providerId = isset($row['provider_id']) ? $row['provider_id'] : null;
-            $locationId = isset($row['location_id']) ? $row['location_id'] : null;
-            $serviceId = isset($row['service_id']) ? $row['service_id'] : null;
+            $paymentId      = isset($row['payment_id']) ? $row['payment_id'] : null;
+            $couponId       = isset($row['coupon_id']) ? $row['coupon_id'] : null;
+            $customerId     = isset($row['customer_id']) ? $row['customer_id'] : null;
+            $providerId     = isset($row['provider_id']) ? $row['provider_id'] : null;
+            $locationId     = isset($row['location_id']) ? $row['location_id'] : null;
+            $serviceId      = isset($row['service_id']) ? $row['service_id'] : null;
 
             if (!array_key_exists($appointmentId, $appointments)) {
                 $zoomMeetingJson = !empty($row['appointment_zoom_meeting']) ?
@@ -159,6 +191,8 @@ class AppointmentFactory
                     ),
                     'notifyParticipants'     => isset($row['appointment_notifyParticipants']) ?
                         $row['appointment_notifyParticipants'] : null,
+                    'createPaymentLinks'     => isset($row['appointment_createPaymentLinks']) ?
+                        $row['appointment_createPaymentLinks'] : null,
                     'serviceId'              => $row['appointment_serviceId'],
                     'providerId'             => $row['appointment_providerId'],
                     'locationId'             => isset($row['appointment_locationId']) ?
@@ -172,6 +206,10 @@ class AppointmentFactory
                         $row['appointment_google_meet_url'] : null,
                     'outlookCalendarEventId' => isset($row['appointment_outlook_calendar_event_id']) ?
                         $row['appointment_outlook_calendar_event_id'] : null,
+                    'microsoftTeamsUrl'      => isset($row['appointment_microsoft_teams_url']) ?
+                        $row['appointment_microsoft_teams_url'] : null,
+                    'appleCalendarEventId'   => isset($row['appointment_apple_calendar_event_id']) ?
+                        $row['appointment_apple_calendar_event_id'] : null,
                     'zoomMeeting'            => [
                         'id'       => $zoomMeetingJson ? $zoomMeetingJson['id'] : null,
                         'startUrl' => $zoomMeetingJson ? $zoomMeetingJson['startUrl'] : null,
@@ -247,6 +285,7 @@ class AppointmentFactory
                         'parentId'          => !empty($row['payment_parentId']) ? $row['payment_parentId'] : null,
                         'amount'            => $row['payment_amount'],
                         'data'              => $row['payment_data'],
+                        'invoiceNumber'     => !empty($row['payment_invoiceNumber']) ? $row['payment_invoiceNumber'] : null,
                         'wcOrderId'         => !empty($row['payment_wcOrderId']) ? $row['payment_wcOrderId'] : null,
                         'wcOrderItemId'     => !empty($row['payment_wcOrderItemId']) ?
                             $row['payment_wcOrderItemId'] : null,
@@ -255,14 +294,15 @@ class AppointmentFactory
             }
 
             if ($bookingId && $couponId) {
-                $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['id'] = $couponId;
-                $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['code'] = $row['coupon_code'];
-                $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['discount'] = $row['coupon_discount'];
-                $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['deduction'] = $row['coupon_deduction'];
-                $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['limit'] = $row['coupon_limit'];
+                $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['id']            = $couponId;
+                $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['code']          = $row['coupon_code'];
+                $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['discount']      = $row['coupon_discount'];
+                $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['deduction']     = $row['coupon_deduction'];
+                $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['limit']         = $row['coupon_limit'];
                 $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['customerLimit'] = $row['coupon_customerLimit'];
-                $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['status'] = $row['coupon_status'];
+                $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['status']        = $row['coupon_status'];
                 $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['expirationDate'] = $row['coupon_expirationDate'];
+                $appointments[$appointmentId]['bookings'][$bookingId]['coupon']['startDate']     = $row['coupon_startDate'];
             }
 
             if ($bookingId && $customerId) {
@@ -276,6 +316,7 @@ class AppointmentFactory
                         'phone'     => $row['customer_phone'],
                         'gender'    => $row['customer_gender'],
                         'status'    => $row['customer_status'],
+                        'birthday'  => !empty($row['customer_birthday']) ? $row['customer_birthday'] : null,
                         'type'      => 'customer',
                     ];
             }
@@ -305,33 +346,39 @@ class AppointmentFactory
                         'firstName' => $row['provider_firstName'],
                         'lastName'  => $row['provider_lastName'],
                         'email'     => $row['provider_email'],
-                        'note'      => $row['provider_note'],
-                        'description' => $row['provider_description'],
-                        'phone'     => $row['provider_phone'],
-                        'gender'    => $row['provider_gender'],
+                        'note'      => !empty($row['provider_note']) ? $row['provider_note'] : null,
+                        'description' => !empty($row['provider_description']) ? $row['provider_description'] : null,
+                        'phone'     => !empty($row['provider_phone']) ? $row['provider_phone'] : null,
+                        'gender'    => !empty($row['provider_gender']) ? $row['provider_gender'] : null,
                         'timeZone'  => !empty($row['provider_timeZone']) ? $row['provider_timeZone'] : null,
                         'type'      => 'provider',
+                        'badgeId'   => !empty($row['provider_badgeId']) ? $row['provider_badgeId'] : null,
+                        'pictureFullPath' => !empty($row['provider_pictureFullPath']) ? $row['provider_pictureFullPath'] : null,
+                        'pictureThumbPath' => !empty($row['provider_pictureThumbPath']) ? $row['provider_pictureThumbPath'] : null,
                     ];
             }
 
             if ($serviceId) {
-                $appointments[$appointmentId]['service']['id'] = $row['service_id'];
-                $appointments[$appointmentId]['service']['name'] = $row['service_name'];
-                $appointments[$appointmentId]['service']['description'] = $row['service_description'];
-                $appointments[$appointmentId]['service']['color'] = $row['service_color'];
-                $appointments[$appointmentId]['service']['price'] = $row['service_price'];
-                $appointments[$appointmentId]['service']['status'] = $row['service_status'];
-                $appointments[$appointmentId]['service']['categoryId'] = $row['service_categoryId'];
-                $appointments[$appointmentId]['service']['minCapacity'] = $row['service_minCapacity'];
-                $appointments[$appointmentId]['service']['maxCapacity'] = $row['service_maxCapacity'];
-                $appointments[$appointmentId]['service']['duration'] = $row['service_duration'];
-                $appointments[$appointmentId]['service']['timeBefore'] = isset($row['service_timeBefore'])
+                $appointments[$appointmentId]['service']['id']               = $row['service_id'];
+                $appointments[$appointmentId]['service']['name']             = isset($row['service_name']) ? $row['service_name'] : null;
+                $appointments[$appointmentId]['service']['description']      = isset($row['service_description']) ? $row['service_description'] : null;
+                $appointments[$appointmentId]['service']['pictureFullPath']  = isset($row['service_pictureFullPath']) ? $row['service_pictureFullPath'] : null;
+                $appointments[$appointmentId]['service']['pictureThumbPath'] = isset($row['service_pictureThumbPath']) ?
+                    $row['service_pictureThumbPath'] : null;
+                $appointments[$appointmentId]['service']['color']            = isset($row['service_color']) ? $row['service_color'] : null;
+                $appointments[$appointmentId]['service']['price']            = isset($row['service_price']) ? $row['service_price'] : null;
+                $appointments[$appointmentId]['service']['status']           = isset($row['service_status']) ? $row['service_status'] : null;
+                $appointments[$appointmentId]['service']['categoryId']       = isset($row['service_categoryId']) ? $row['service_categoryId'] : null;
+                $appointments[$appointmentId]['service']['minCapacity']      = isset($row['service_minCapacity']) ? $row['service_minCapacity'] : null;
+                $appointments[$appointmentId]['service']['maxCapacity']      = isset($row['service_maxCapacity']) ? $row['service_maxCapacity'] : null;
+                $appointments[$appointmentId]['service']['duration']         = isset($row['service_duration']) ? $row['service_duration'] : null;
+                $appointments[$appointmentId]['service']['timeBefore']       = isset($row['service_timeBefore'])
                     ? $row['service_timeBefore'] : null;
-                $appointments[$appointmentId]['service']['timeAfter'] = isset($row['service_timeAfter'])
+                $appointments[$appointmentId]['service']['timeAfter']        = isset($row['service_timeAfter'])
                     ? $row['service_timeAfter'] : null;
                 $appointments[$appointmentId]['service']['aggregatedPrice'] = isset($row['service_aggregatedPrice'])
                     ? $row['service_aggregatedPrice'] : null;
-                $appointments[$appointmentId]['service']['settings'] = isset($row['service_settings'])
+                $appointments[$appointmentId]['service']['settings']        = isset($row['service_settings'])
                     ? $row['service_settings'] : null;
             }
         }

@@ -3,8 +3,11 @@
     <div class="am-congrats__main">
       <img
         v-if="props.type !== 'event'"
-        :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/congratulations/congratulations.svg'"
-      >
+        :src="
+          baseUrls.wpAmeliaPluginURL +
+          '/v3/src/assets/img/congratulations/congratulations.svg'
+        "
+      />
 
       <p v-if="type !== 'event'" class="am-congrats__main-heading">
         {{ labelsDisplay('congratulations') }}
@@ -25,12 +28,12 @@
       <template #info>
         <component :is="componentTypes[props.type]">
           <template #payment>
-            <PaymentCongratsInfo/>
+            <PaymentCongratsInfo />
           </template>
         </component>
       </template>
       <template #customer>
-        <CustomerCongratsInfo/>
+        <CustomerCongratsInfo />
       </template>
     </CongratsInfo>
 
@@ -40,39 +43,35 @@
 
 <script setup>
 // * Parts
-import CongratsInfo from "../../../../public/Parts/Congratulations/Parts/CongratsInfo.vue";
-import PaymentCongratsInfo from "../parts/PaymentCongratsInfo.vue";
-import CustomerCongratsInfo from "../parts/CustomerCongratsInfo.vue";
-import EventCongratsInfo from "../Events/common/EventCustomerInfo/parts/EventCongratsInfo.vue";
+import CongratsInfo from '../../../../public/Parts/Congratulations/Parts/CongratsInfo.vue'
+import PaymentCongratsInfo from '../parts/PaymentCongratsInfo.vue'
+import CustomerCongratsInfo from '../parts/CustomerCongratsInfo.vue'
+import EventCongratsInfo from '../Events/common/EventCustomerInfo/parts/EventCongratsInfo.vue'
 
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  markRaw
-} from "vue";
+import { ref, computed, inject, markRaw } from 'vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
+import { useReactiveCustomize } from '../../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Component Properties
 let props = defineProps({
   type: {
     type: String,
-    required: true
+    required: true,
   },
   selectedItem: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 // * Base Urls
 const baseUrls = inject('baseUrls')
 
 // * Customize Object
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Form string recognition
 let pageRenderKey = inject('pageRenderKey')
@@ -86,10 +85,15 @@ let langKey = inject('langKey')
 // * Labels
 let amLabels = inject('labels')
 
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    let translations = amCustomize.value[pageRenderKey.value][stepName.value].translations
-    return translations && translations[label] && translations[label][langKey.value] ? translations[label][langKey.value] : amLabels[label]
+    let translations =
+      amCustomize.value[pageRenderKey.value][stepName.value].translations
+    return translations &&
+      translations[label] &&
+      translations[label][langKey.value]
+      ? translations[label][langKey.value]
+      : amLabels[label]
   })
 
   return computedLabel.value
@@ -109,7 +113,7 @@ let itemIdLabel = computed(() => {
 })
 
 let componentTypes = ref({
-  event: markRaw(EventCongratsInfo)
+  event: markRaw(EventCongratsInfo),
 })
 
 // * Fonts
@@ -123,10 +127,19 @@ let cssVars = computed(() => {
   return {
     '--am-font-family': amFonts.value.fontFamily,
     '--am-c-congrats-heading-text': amColors.value.colorMainHeadingText,
-    '--am-c-congrats-heading-text-op40': useColorTransparency(amColors.value.colorMainHeadingText, 0.4),
+    '--am-c-congrats-heading-text-op40': useColorTransparency(
+      amColors.value.colorMainHeadingText,
+      0.4
+    ),
     '--am-c-congrats-text': amColors.value.colorMainText,
-    '--am-c-congrats-text-op30': useColorTransparency(amColors.value.colorMainText, 0.3),
-    '--am-c-congrats-text-op40': useColorTransparency(amColors.value.colorMainText, 0.4),
+    '--am-c-congrats-text-op30': useColorTransparency(
+      amColors.value.colorMainText,
+      0.3
+    ),
+    '--am-c-congrats-text-op40': useColorTransparency(
+      amColors.value.colorMainText,
+      0.4
+    ),
     '--am-c-congrats-primary': amColors.value.colorPrimary,
   }
 })
@@ -147,14 +160,18 @@ let cssVars = computed(() => {
         $count: 5;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+            animation: 600ms
+              cubic-bezier(0.45, 1, 0.4, 1.2)
+              #{$i *
+              100}ms
+              am-animation-slide-up;
             animation-fill-mode: both;
           }
         }
       }
 
       & img {
-        width:54px;
+        width: 54px;
         margin-bottom: 8px;
       }
 
@@ -167,7 +184,7 @@ let cssVars = computed(() => {
       }
 
       &-atc {
-        margin-top: 16px
+        margin-top: 16px;
       }
 
       & span {

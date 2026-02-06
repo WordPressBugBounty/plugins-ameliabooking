@@ -104,7 +104,7 @@
               :capacity="!isWaitingList ? selectedEvent.maxCustomCapacity : selectedEvent.maxCustomCapacity ? waitingListOptions.maxCapacity : null"
               :extra-people="!isWaitingList ? selectedEvent.maxExtraPeople : waitingListOptions.maxExtraPeopleEnabled ? waitingListOptions.maxExtraPeople : null"
               :customized-labels="amLabels"
-              :read-only="true"
+              :readonly="true"
             />
           </template>
         </el-tab-pane>
@@ -188,6 +188,7 @@ import {
 import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
 import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
 import { useTaxVisibility } from "../../../../../assets/js/common/pricing";
+import useAction from '../../../../../assets/js/public/actions'
 import moment from "moment/moment";
 
 // * Components Properties
@@ -483,9 +484,22 @@ watchEffect(() => {
   }
 }, {flush: 'post'})
 
+// * Event Tickets
 let tickets = computed(() => {
-  let arr = store.getters['tickets/getTicketsData']
-  return arr.sort((a, b) => a.price - b.price)
+  const sorted = [...(store.getters['tickets/getTicketsData'] || [])].sort((a, b) => a.price - b.price)
+  if (window?.ameliaActions?.EventTickets) {
+    let override
+    useAction(
+      store,
+      { tickets: sorted, setTickets: arr => { if (Array.isArray(arr)) override = arr } },
+      'EventTickets',
+      'event',
+      null,
+      null
+    )
+    return Array.isArray(override) ? override : sorted
+  }
+  return sorted
 })
 
 // * Watching when footer button was clicked
@@ -548,6 +562,8 @@ export default {
 <style lang="scss">
 .amelia-v2-booking #amelia-container {
   // eli - event list info
+  --am-c-eli-bgr: var(--am-c-main-bgr);
+  background: var(--am-c-eli-bgr);
   .am-eli {
     * {
       font-family: var(--am-font-family);
@@ -663,6 +679,7 @@ export default {
         align-items: center;
         justify-content: flex-end;
         width: 100%;
+        gap: 8px;
 
         &.am-rw-500 {
           flex-direction: column;
@@ -670,13 +687,11 @@ export default {
           .am-button--secondary {
             order: 2;
             width: 100%;
-            margin: 0;
           }
 
           .am-button--primary {
             order: 1;
             width: 100%;
-            margin-bottom: 8px;
           }
         }
       }

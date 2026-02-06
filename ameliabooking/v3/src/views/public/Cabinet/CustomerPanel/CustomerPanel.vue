@@ -135,6 +135,7 @@
                 </div>
                 <TimeZoneSelect
                   v-if="
+                    amSettings.featuresIntegrations.timezones.enabled &&
                     entitiesReady &&
                     sidebarVisibility &&
                     timeZoneSelectVisibility
@@ -488,6 +489,7 @@ if (shortcodeData.value.events || !shortcodeData.value.appointments) {
 }
 
 if (
+  amSettings.featuresIntegrations.packages.enabled &&
   (shortcodeData.value.appointments || !shortcodeData.value.events) &&
   (licence.isPro || licence.isDeveloper)
 ) {
@@ -526,6 +528,7 @@ if (shortcodeData.value.events || !shortcodeData.value.appointments) {
 }
 
 if (
+  amSettings.featuresIntegrations.packages.enabled &&
   shortcodeData.value.cabinetType === 'customer' &&
   (shortcodeData.value.appointments || !shortcodeData.value.events) &&
   (licence.isPro || licence.isDeveloper)
@@ -927,6 +930,10 @@ export default {
         * {
           font-family: var(--am-font-family), sans-serif;
           box-sizing: border-box;
+        }
+
+        .am-fs-sb__page {
+          max-height: 40px;
         }
       }
     }

@@ -5,25 +5,46 @@ namespace AmeliaBooking\Infrastructure\Services\LessonSpace;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
+use AmeliaBooking\Domain\Entity\Booking\Event\Event;
+use AmeliaBooking\Domain\Services\Settings\SettingsService;
+use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
-use AmeliaBooking\Infrastructure\Routes\Booking\Event\Event;
 use Interop\Container\Exception\ContainerException;
 
 abstract class AbstractLessonSpaceService
 {
     /**
+     * @var SettingsService $settingsService
+     */
+    protected $settingsService;
+
+    /** @var Container $container */
+    protected $container;
+
+    /**
+     * AbstractLessonSpaceService constructor.
+     *
+     * @param Container $container
+     * @param SettingsService $settingsService
+     */
+    public function __construct(Container $container, SettingsService $settingsService)
+    {
+        $this->settingsService = $settingsService;
+        $this->container       = $container;
+    }
+
+    /**
      * @param Appointment|Event $appointment
      * @param int $entity
      * @param Collection $periods
-     * @param array $booking
      *
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      * @throws NotFoundException
      * @throws ContainerException
      */
-    abstract public function handle($appointment, $entity, $periods = null, $booking = null);
+    abstract public function handle($appointment, $entity, $periods = null);
 
     /**
      * @param $apiKey

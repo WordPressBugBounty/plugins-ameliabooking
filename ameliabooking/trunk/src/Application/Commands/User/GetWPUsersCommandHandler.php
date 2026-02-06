@@ -24,7 +24,6 @@ class GetWPUsersCommandHandler extends CommandHandler
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
      * @throws \AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException
-     * @throws \Interop\Container\Exception\ContainerException
      */
     public function handle(GetWPUsersCommand $command)
     {
@@ -57,9 +56,11 @@ class GetWPUsersCommandHandler extends CommandHandler
         $result->setResult(CommandResult::RESULT_SUCCESS);
         $result->setMessage('Successfully retrieved users.');
 
-        $result->setData([
+        $result->setData(
+            [
             Entities::USER . 's' => $wpUsers
-        ]);
+            ]
+        );
 
         return $result;
     }

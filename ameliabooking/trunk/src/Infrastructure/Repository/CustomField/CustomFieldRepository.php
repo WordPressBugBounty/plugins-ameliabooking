@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -21,8 +22,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
  */
 class CustomFieldRepository extends AbstractRepository implements CustomFieldRepositoryInterface
 {
-
-    const FACTORY = CustomFieldFactory::class;
+    public const FACTORY = CustomFieldFactory::class;
 
     /** @var string */
     private $customFieldsOptionsTable;
@@ -59,9 +59,9 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
         $eventTable
     ) {
         parent::__construct($connection, $table);
-        $this->customFieldsOptionsTable = $customFieldsOptionsTable;
+        $this->customFieldsOptionsTable  = $customFieldsOptionsTable;
         $this->customFieldsServicesTable = $customFieldsServicesTable;
-        $this->servicesTable = $serviceTable;
+        $this->servicesTable           = $serviceTable;
         $this->customFieldsEventsTable = $customFieldsEventsTable;
         $this->eventsTable = $eventTable;
     }
@@ -69,7 +69,7 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
     /**
      * @param CustomField $entity
      *
-     * @return bool
+     * @return int
      * @throws QueryExecutionException
      */
     public function add($entity)
@@ -77,12 +77,18 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
         $data = $entity->toArray();
 
         $params = [
-            ':label'        => $data['label'],
-            ':type'         => $data['type'],
-            ':required'     => $data['required'] ? 1 : 0,
-            ':position'     => $data['position'],
-            ':translations' => $data['translations'],
-            ':width'        => $data['width'],
+            ':label'           => isset($data['label']) ? $data['label'] : '',
+            ':type'            => $data['type'],
+            ':saveType'        => $data['saveType'],
+            ':required'        => $data['required'] ? 1 : 0,
+            ':position'        => $data['position'],
+            ':translations'    => $data['translations'],
+            ':width'           => $data['width'],
+            ':saveFirstChoice' => $data['saveFirstChoice'] ? 1 : 0,
+            ':includeInInvoice' => $data['includeInInvoice'] ? 1 : 0,
+            ':allServices'     => $data['allServices'] ? 1 : 0,
+            ':allEvents'       => $data['allEvents'] ? 1 : 0,
+            ':useAsLocation'   => $data['useAsLocation'] ? 1 : 0,
         ];
 
         try {
@@ -90,9 +96,31 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
                 "INSERT INTO
                 {$this->table}
                 (
-                `label`, `type`, `required`, `position`, `translations`, `width`
+                `label`,
+                 `type`,
+                 `saveType`,
+                 `required`,
+                 `position`,
+                 `translations`,
+                 `width`,
+                 `saveFirstChoice`,
+                 `includeInInvoice`,
+                 `allServices`,
+                 `allEvents`,
+                 `useAsLocation`
                 ) VALUES (
-                :label, :type, :required, :position, :translations, :width
+                          :label,
+                          :type,
+                          :saveType,
+                          :required,
+                          :position,
+                          :translations,
+                          :width,
+                          :saveFirstChoice,
+                          :includeInInvoice,
+                          :allServices,
+                          :allEvents,
+                          :useAsLocation
                 )"
             );
 
@@ -121,15 +149,17 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
         $data = $entity->toArray();
 
         $params = [
-            ':label'         => $data['label'],
-            ':required'      => $data['required'] ? 1 : 0,
-            ':position'      => $data['position'],
-            ':translations'  => $data['translations'],
-            ':allServices'   => $data['allServices'] ? 1 : 0,
-            ':allEvents'     => $data['allEvents'] ? 1 : 0,
-            ':useAsLocation' => $data['useAsLocation'] ? 1 : 0,
-            ':width'         => $data['width'] ? : 50,
-            ':id'            => $id,
+            ':label'           => $data['label'],
+            ':required'        => $data['required'] ? 1 : 0,
+            ':position'        => $data['position'],
+            ':translations'    => $data['translations'],
+            ':allServices'     => $data['allServices'] ? 1 : 0,
+            ':allEvents'       => $data['allEvents'] ? 1 : 0,
+            ':useAsLocation'   => $data['useAsLocation'] ? 1 : 0,
+            ':saveFirstChoice' => $data['saveFirstChoice'] ? 1 : 0,
+            ':width'           => $data['width'] ? : 50,
+            ':includeInInvoice' => $data['includeInInvoice'] ? 1 : 0,
+            ':id'              => $id,
         ];
 
         try {
@@ -143,6 +173,8 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
                 `allServices` = :allServices,
                 `allEvents` = :allEvents,
                 `useAsLocation` = :useAsLocation,
+                `saveFirstChoice` = :saveFirstChoice,
+                `includeInInvoice` = :includeInInvoice,
                 `width` = :width
                 WHERE
                 id = :id"
@@ -164,7 +196,7 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
      * @return Collection|mixed
      * @throws QueryExecutionException
      */
-    public function getAll($criteria = [])
+    public function getAll($criteria = [], $getEntities = true)
     {
         $params = [];
 
@@ -176,48 +208,68 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
             $where[] = 'e.id = :eventId || cf.allEvents = 1';
         }
 
+        $fields = '';
+
+        $joins = '';
+
+        if ($getEntities) {
+            $fields .= '
+                s.id AS s_id,
+                s.name AS s_name,
+                s.description AS s_description,
+                s.color AS s_color,
+                s.price AS s_price,
+                s.status AS s_status,
+                s.categoryId AS s_categoryId,
+                s.minCapacity AS s_minCapacity,
+                s.maxCapacity AS s_maxCapacity,
+                s.duration AS s_duration,
+                e.id AS e_id,
+                e.name AS e_name,
+                e.price AS e_price,
+                e.parentId AS e_parentId,
+            ';
+
+            $joins .= "
+                LEFT JOIN {$this->customFieldsServicesTable} cfs ON cfs.customFieldId = cf.id
+                LEFT JOIN {$this->customFieldsEventsTable} cfe ON cfe.customFieldId = cf.id
+                LEFT JOIN {$this->servicesTable} s ON s.id = cfs.serviceId
+                LEFT JOIN {$this->eventsTable} e ON e.id = cfe.eventId
+            ";
+        }
+
+        $fields .= '
+            cf.id AS cf_id,
+            cf.label AS cf_label,
+            cf.type AS cf_type,
+            cf.saveType AS cf_saveType,
+            cf.required AS cf_required,
+            cf.position AS cf_position,
+            cf.translations AS cf_translations,
+            cf.allServices AS cf_allServices,
+            cf.allEvents AS cf_allEvents,
+            cf.useAsLocation AS cf_useAsLocation,
+            cf.width AS cf_width,
+            cf.saveFirstChoice AS cf_saveFirstChoice,
+            cf.includeInInvoice AS cf_includeInInvoice,
+            cfo.id AS cfo_id,
+            cfo.customFieldId AS cfo_custom_field_id,
+            cfo.label AS cfo_label,
+            cfo.position AS cfo_position,
+            cfo.translations AS cfo_translations
+        ';
+
         $where = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         try {
             $statement = $this->connection->prepare(
                 "SELECT
-                    cf.id AS cf_id,
-                    cf.label AS cf_label,
-                    cf.type AS cf_type,
-                    cf.required AS cf_required,
-                    cf.position AS cf_position,
-                    cf.translations AS cf_translations,
-                    cf.allServices AS cf_allServices,
-                    cf.allEvents AS cf_allEvents,
-                    cf.useAsLocation AS cf_useAsLocation,
-                    cf.width AS cf_width,
-                    cfo.id AS cfo_id,
-                    cfo.customFieldId AS cfo_custom_field_id,
-                    cfo.label AS cfo_label,
-                    cfo.position AS cfo_position,
-                    cfo.translations AS cfo_translations,
-                    s.id AS s_id,
-                    s.name AS s_name,
-                    s.description AS s_description,
-                    s.color AS s_color,
-                    s.price AS s_price,
-                    s.status AS s_status,
-                    s.categoryId AS s_categoryId,
-                    s.minCapacity AS s_minCapacity,
-                    s.maxCapacity AS s_maxCapacity,
-                    s.duration AS s_duration,
-                    e.id AS e_id,
-                    e.name AS e_name,
-                    e.price AS e_price,
-                    e.parentId AS e_parentId
+                {$fields}
                 FROM {$this->table} cf
                 LEFT JOIN {$this->customFieldsOptionsTable} cfo ON cfo.customFieldId = cf.id
-                LEFT JOIN {$this->customFieldsServicesTable} cfs ON cfs.customFieldId = cf.id
-                LEFT JOIN {$this->customFieldsEventsTable} cfe ON cfe.customFieldId = cf.id
-                LEFT JOIN {$this->servicesTable} s ON s.id = cfs.serviceId
-                LEFT JOIN {$this->eventsTable} e ON e.id = cfe.eventId
+                {$joins}
                 {$where}
-                ORDER BY cf.position, cfo.position, cf.position"
+                ORDER BY cf.position, cfo.position"
             );
 
             $statement->execute($params);

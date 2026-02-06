@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See COPYING.md for license details.
  */
 
@@ -10,6 +11,7 @@ use AmeliaBooking\Application\Controller\User\Customer\GetCustomersController;
 use AmeliaBooking\Application\Controller\User\Customer\GetCustomerController;
 use AmeliaBooking\Application\Controller\User\Customer\AddCustomerController;
 use AmeliaBooking\Application\Controller\User\Customer\UpdateCustomerController;
+use AmeliaBooking\Application\Controller\User\Customer\UpdateCustomerStatusController;
 use AmeliaBooking\Application\Controller\User\DeleteUserController;
 use AmeliaBooking\Application\Controller\User\GetCurrentUserController;
 use AmeliaBooking\Application\Controller\User\GetUserDeleteEffectController;
@@ -47,6 +49,8 @@ class User
         $app->post('/users/customers/delete/{id:[0-9]+}', DeleteUserController::class);
 
         $app->get('/users/customers/effect/{id:[0-9]+}', GetUserDeleteEffectController::class);
+
+        $app->post('/users/customers/status/{id:[0-9]+}', UpdateCustomerStatusController::class);
 
         // Providers
         $app->get('/users/providers/{id:[0-9]+}', GetProviderController::class);

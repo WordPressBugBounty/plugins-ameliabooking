@@ -1,7 +1,5 @@
 <?php
 
-namespace AmeliaStripe\Exception;
+namespace AmeliaVendor\Stripe\Exception;
 
-class InvalidArgumentException extends \InvalidArgumentException implements ExceptionInterface
-{
-}
+class InvalidArgumentException extends \InvalidArgumentException implements ExceptionInterface {}

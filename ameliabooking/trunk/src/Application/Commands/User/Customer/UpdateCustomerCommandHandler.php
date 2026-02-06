@@ -12,12 +12,14 @@ use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Entity\User\Customer;
 use AmeliaBooking\Domain\Factory\User\UserFactory;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
+use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\String\Password;
+use AmeliaBooking\Domain\ValueObjects\String\Phone;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
-use Interop\Container\Exception\ContainerException;
+use AmeliaBooking\Infrastructure\Services\Mailchimp\AbstractMailchimpService;
 
 /**
  * Class UpdateCustomerCommandHandler
@@ -31,7 +33,6 @@ class UpdateCustomerCommandHandler extends CommandHandler
      *
      * @return CommandResult
      *
-     * @throws ContainerException
      * @throws InvalidArgumentException
      * @throws NotFoundException
      * @throws QueryExecutionException
@@ -39,7 +40,6 @@ class UpdateCustomerCommandHandler extends CommandHandler
      */
     public function handle(UpdateCustomerCommand $command)
     {
-        /** @var CommandResult $result */
         $result = new CommandResult();
 
         $this->checkMandatoryFields($command);
@@ -47,27 +47,43 @@ class UpdateCustomerCommandHandler extends CommandHandler
         /** @var UserApplicationService $userAS */
         $userAS = $this->getContainer()->get('application.user.service');
 
-        /** @var Customer $oldUser */
-        $oldUser = null;
-
         /** @var UserRepository $userRepository */
         $userRepository = $this->getContainer()->get('domain.users.repository');
 
+        /** @var AbstractMailchimpService $mailchimpService */
+        $mailchimpService = $this->container->get('infrastructure.mailchimp.service');
+
         $userRepository->beginTransaction();
 
+        $customerData = $command->getFields();
+
         if (!$command->getPermissionService()->currentUserCanWrite(Entities::CUSTOMERS)) {
-            $oldUser = $userAS->getAuthenticatedUser($command->getToken(), false, 'customerCabinet');
+            if ($command->getToken()) {
+                /** @var AbstractUser $provider */
+                $provider = $command->getCabinetType() === 'provider'
+                    ? $userAS->getAuthenticatedUser($command->getToken(), false, 'providerCabinet')
+                    : null;
 
-            if ($oldUser === null || $oldUser->getId()->getValue() !== intval($command->getArg('id'))) {
-                $result->setResult(CommandResult::RESULT_ERROR);
-                $result->setMessage('Could not retrieve user');
-                $result->setData(
-                    [
-                        'reauthorize' => true
-                    ]
-                );
+                $oldUser = $provider === null
+                    ? $userAS->getAuthenticatedUser($command->getToken(), false, 'customerCabinet')
+                    : $userRepository->getById($customerData['id']);
 
-                return $result;
+                if (
+                    $provider === null &&
+                    ($oldUser === null || $oldUser->getId()->getValue() !== intval($command->getArg('id')))
+                ) {
+                    $result->setResult(CommandResult::RESULT_ERROR);
+                    $result->setMessage('Could not retrieve user');
+                    $result->setData(
+                        [
+                            'reauthorize' => true
+                        ]
+                    );
+
+                    return $result;
+                }
+            } else {
+                throw new AccessDeniedException('You are not allowed to perform this action!');
             }
         } else {
             $oldUser = $userRepository->getById($command->getArg('id'));
@@ -83,7 +99,8 @@ class UpdateCustomerCommandHandler extends CommandHandler
         /** @var AbstractUser $currentUser */
         $currentUser = $this->container->get('logged.in.user');
 
-        if ($command->getField('email') === '' &&
+        if (
+            $command->getField('email') === '' &&
             !$settingsService->getSetting('roles', 'allowCustomerDeleteProfile') &&
             (!$currentUser || $currentUser->getType() === AbstractUser::USER_ROLE_CUSTOMER)
         ) {
@@ -93,10 +110,9 @@ class UpdateCustomerCommandHandler extends CommandHandler
             return $result;
         }
 
-        $customerData = $command->getFields();
-
         if (!isset($customerData['password'])) {
             $customerData['translations'] = !empty($customerData['translations']) ? $customerData['translations'] : null;
+
             $customerData['birthday'] = !empty($customerData['birthday']) ? $customerData['birthday'] : null;
         }
 
@@ -107,14 +123,13 @@ class UpdateCustomerCommandHandler extends CommandHandler
         /** @var Customer $newUser */
         $newUser = UserFactory::create($newUserData);
 
-        if (!($newUser instanceof AbstractUser)) {
-            $result->setResult(CommandResult::RESULT_ERROR);
-            $result->setMessage('Could not update user.');
-
-            return $result;
+        // If the phone is not set and the old phone is set, set the phone and country phone iso to null
+        if (!$customerData['phone'] && $oldUser->getPhone() && $oldUser->getPhone()->getValue()) {
+            $newUser->setPhone(new Phone(null));
+            $newUser->setCountryPhoneIso(new Name(null));
         }
 
-        if ($oldUser &&
+        if (
             $userRepository->getByEmail($newUser->getEmail()->getValue()) &&
             $oldUser->getEmail()->getValue() !== $newUser->getEmail()->getValue()
         ) {
@@ -126,7 +141,6 @@ class UpdateCustomerCommandHandler extends CommandHandler
         }
 
         if ($command->getField('password')) {
-            /** @var Password $newPassword */
             $newPassword = new Password($command->getField('password'));
 
             $userRepository->updateFieldById($command->getArg('id'), $newPassword->getValue(), 'password');
@@ -138,7 +152,7 @@ class UpdateCustomerCommandHandler extends CommandHandler
             }
         }
 
-        do_action('amelia_before_customer_updated', $newUser? $newUser->toArray() : null);
+        do_action('amelia_before_customer_updated', $newUser ? $newUser->toArray() : null);
 
         if (!$userRepository->update($command->getArg('id'), $newUser)) {
             $userRepository->rollback();
@@ -154,7 +168,7 @@ class UpdateCustomerCommandHandler extends CommandHandler
             $userAS = $this->getContainer()->get('application.user.service');
 
             $userAS->setWpUserIdForNewUser($command->getArg('id'), $newUser);
-        } else if ($newUser->getExternalId() && $newUser->getExternalId()->getValue()) {
+        } elseif ($newUser->getExternalId() && $newUser->getExternalId()->getValue()) {
             add_filter('amelia_user_profile_updated', '__return_true');
             wp_update_user(
                 [
@@ -176,7 +190,15 @@ class UpdateCustomerCommandHandler extends CommandHandler
             /** @var CustomerBookingRepository $bookingRepository */
             $bookingRepository = $this->container->get('domain.booking.customerBooking.repository');
 
-            $bookingRepository->updateInfoByCustomerId($oldUser->getId()->getValue(), null);
+            $bookingRepository->updateFieldByColumn('info', null, 'customerId', $oldUser->getId()->getValue());
+        }
+
+        if (
+            $settingsService->isFeatureEnabled('mailchimp') &&
+            $oldUser->getEmail() && $oldUser->getEmail()->getValue() &&
+            $newUser->getEmail() && $newUser->getEmail()->getValue()
+        ) {
+            $mailchimpService->addOrUpdateSubscriber($oldUser->getEmail()->getValue(), $newUser->toArray(), false);
         }
 
         $userRepository->commit();

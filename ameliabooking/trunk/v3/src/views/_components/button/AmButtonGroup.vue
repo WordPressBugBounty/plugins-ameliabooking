@@ -1,8 +1,26 @@
 <template>
-  <div class="am-button-group">
+  <div
+    class="am-button-group"
+    :class="{'am-rtl': isRtl}"
+  >
     <slot></slot>
   </div>
 </template>
+
+<script setup>
+// * import from Vue
+import {
+  computed,
+} from "vue"
+
+let isRtl = computed(() => {
+  if (document) {
+    return document.documentElement.dir === 'rtl'
+  }
+
+  return false
+})
+</script>
 
 <script>
 export default {
@@ -16,6 +34,10 @@ export default {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
+
+    &.am-rtl {
+      flex-direction: row-reverse;
+    }
 
     & > .am-button {
       box-shadow: none;
@@ -35,7 +57,7 @@ export default {
       }
 
       &:first-child:last-child {
-        border-radius: var(--am-rad-input);
+        border-radius: var(--am-rad-inp);
       }
 
       &:not(:first-child):not(:last-child) {

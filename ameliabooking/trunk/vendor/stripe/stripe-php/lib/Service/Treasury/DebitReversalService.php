@@ -2,19 +2,24 @@
 
 // File generated from our OpenAPI spec
 
-namespace AmeliaStripe\Service\Treasury;
+namespace AmeliaVendor\Stripe\Service\Treasury;
 
-class DebitReversalService extends \AmeliaStripe\Service\AbstractService
+/**
+ * @phpstan-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ *
+ * @psalm-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ */
+class DebitReversalService extends \AmeliaVendor\Stripe\Service\AbstractService
 {
     /**
      * Returns a list of DebitReversals.
      *
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{ending_before?: string, expand?: string[], financial_account: string, limit?: int, received_debit?: string, resolution?: string, starting_after?: string, status?: string} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Collection<\AmeliaVendor\Stripe\Treasury\DebitReversal>
      *
-     * @return \AmeliaStripe\Collection<\AmeliaStripe\Treasury\DebitReversal>
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function all($params = null, $opts = null)
     {
@@ -24,12 +29,12 @@ class DebitReversalService extends \AmeliaStripe\Service\AbstractService
     /**
      * Reverses a ReceivedDebit and creates a DebitReversal object.
      *
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[], metadata?: array<string, string>, received_debit: string} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Treasury\DebitReversal
      *
-     * @return \AmeliaStripe\Treasury\DebitReversal
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function create($params = null, $opts = null)
     {
@@ -40,12 +45,12 @@ class DebitReversalService extends \AmeliaStripe\Service\AbstractService
      * Retrieves a DebitReversal object.
      *
      * @param string $id
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[]} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Treasury\DebitReversal
      *
-     * @return \AmeliaStripe\Treasury\DebitReversal
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function retrieve($id, $params = null, $opts = null)
     {

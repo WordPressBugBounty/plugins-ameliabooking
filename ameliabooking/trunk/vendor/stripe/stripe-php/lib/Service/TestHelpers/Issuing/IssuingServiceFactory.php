@@ -2,20 +2,26 @@
 
 // File generated from our OpenAPI spec
 
-namespace AmeliaStripe\Service\TestHelpers\Issuing;
+namespace AmeliaVendor\Stripe\Service\TestHelpers\Issuing;
 
 /**
  * Service factory class for API resources in the Issuing namespace.
  *
+ * @property AuthorizationService $authorizations
  * @property CardService $cards
+ * @property PersonalizationDesignService $personalizationDesigns
+ * @property TransactionService $transactions
  */
-class IssuingServiceFactory extends \AmeliaStripe\Service\AbstractServiceFactory
+class IssuingServiceFactory extends \AmeliaVendor\Stripe\Service\AbstractServiceFactory
 {
     /**
      * @var array<string, string>
      */
     private static $classMap = [
+        'authorizations' => AuthorizationService::class,
         'cards' => CardService::class,
+        'personalizationDesigns' => PersonalizationDesignService::class,
+        'transactions' => TransactionService::class,
     ];
 
     protected function getServiceClass($name)

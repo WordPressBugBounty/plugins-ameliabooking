@@ -4,6 +4,7 @@ namespace AmeliaBooking\Application\Commands\Bookable\Category;
 
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Commands\CommandHandler;
+use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Services\Bookable\BookableApplicationService;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Collection\AbstractCollection;
@@ -20,14 +21,19 @@ use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ServiceRepository;
 class GetCategoriesCommandHandler extends CommandHandler
 {
     /**
+     * @param GetCategoriesCommand $command
+     *
      * @return CommandResult
      * @throws \Slim\Exception\ContainerValueNotFoundException
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
-     * @throws \Interop\Container\Exception\ContainerException
      */
-    public function handle()
+    public function handle(GetCategoriesCommand $command)
     {
+        if (!$command->getPermissionService()->currentUserCanRead(Entities::SERVICES)) {
+            throw new AccessDeniedException('You are not allowed to read categories.');
+        }
+
         $result = new CommandResult();
 
         /** @var ServiceRepository $serviceRepository */
@@ -71,9 +77,11 @@ class GetCategoriesCommandHandler extends CommandHandler
 
         $result->setResult(CommandResult::RESULT_SUCCESS);
         $result->setMessage('Successfully retrieved categories.');
-        $result->setData([
+        $result->setData(
+            [
             Entities::CATEGORIES => $categoriesArray
-        ]);
+            ]
+        );
 
         return $result;
     }

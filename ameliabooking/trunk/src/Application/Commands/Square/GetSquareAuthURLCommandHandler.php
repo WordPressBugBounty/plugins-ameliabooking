@@ -10,7 +10,7 @@ use Interop\Container\Exception\ContainerException;
 /**
  * Class GetSquareAuthURLCommandHandler
  *
- * @package AmeliaBooking\Application\Commands\Outlook
+ * @package AmeliaBooking\Application\Commands\Square
  */
 class GetSquareAuthURLCommandHandler extends CommandHandler
 {
@@ -31,9 +31,11 @@ class GetSquareAuthURLCommandHandler extends CommandHandler
 
         $result->setResult(CommandResult::RESULT_SUCCESS);
         $result->setMessage('Successfully retrieved square authorization URL');
-        $result->setData([
+        $result->setData(
+            [
             'authUrl' => filter_var($authUrl, FILTER_SANITIZE_URL)
-        ]);
+            ]
+        );
 
         return $result;
     }

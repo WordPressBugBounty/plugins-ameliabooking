@@ -6,6 +6,7 @@ use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Entity\Google\GoogleCalendar;
 use AmeliaBooking\Domain\Entity\Outlook\OutlookCalendar;
 use AmeliaBooking\Domain\Entity\Stripe\StripeConnect;
+use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\String\Description;
 use AmeliaBooking\Domain\ValueObjects\String\Email;
@@ -24,6 +25,9 @@ class Provider extends AbstractUser
 
     /** @var Collection */
     private $serviceList;
+
+    /** @var Collection */
+    private $eventList;
 
     /** @var Collection */
     private $dayOffList;
@@ -55,6 +59,13 @@ class Provider extends AbstractUser
     /** @var StripeConnect */
     private $stripeConnect;
 
+    /** @var AppleCalendarEmployeeConnect */
+    private $employeeAppleCalendar;
+
+    /** @var  BooleanValueObject */
+    private $show;
+
+
     /**
      * @param Name       $firstName
      * @param Name       $lastName
@@ -78,11 +89,11 @@ class Provider extends AbstractUser
         Collection $appointmentList
     ) {
         parent::__construct($firstName, $lastName, $email);
-        $this->phone = $phone;
-        $this->weekDayList = $weekDayList;
-        $this->serviceList = $serviceList;
-        $this->dayOffList = $dayOffList;
-        $this->specialDayList = $specialDayList;
+        $this->phone           = $phone;
+        $this->weekDayList     = $weekDayList;
+        $this->serviceList     = $serviceList;
+        $this->dayOffList      = $dayOffList;
+        $this->specialDayList  = $specialDayList;
         $this->appointmentList = $appointmentList;
     }
 
@@ -124,6 +135,22 @@ class Provider extends AbstractUser
     public function setServiceList(Collection $serviceList)
     {
         $this->serviceList = $serviceList;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getEventList()
+    {
+        return $this->eventList;
+    }
+
+    /**
+     * @param Collection $eventList
+     */
+    public function setEventList(Collection $eventList)
+    {
+        $this->eventList = $eventList;
     }
 
     /**
@@ -231,7 +258,7 @@ class Provider extends AbstractUser
     }
 
     /**
-     * @param Name $timeZone
+     * @param Name|null $timeZone
      */
     public function setTimeZone($timeZone)
     {
@@ -286,6 +313,32 @@ class Provider extends AbstractUser
         $this->stripeConnect = $stripeConnect;
     }
 
+    /**
+     * @return AppleCalendarEmployeeConnect
+     */
+    public function getEmployeeAppleCalendar()
+    {
+        return $this->employeeAppleCalendar;
+    }
+
+    /**
+     * @param AppleCalendarEmployeeConnect $employeeAppleCalendar
+     */
+    public function setEmployeeAppleCalendar($employeeAppleCalendar)
+    {
+        $this->employeeAppleCalendar = $employeeAppleCalendar;
+    }
+
+    public function getShow()
+    {
+        return $this->show;
+    }
+
+    public function setShow(BooleanValueObject $show)
+    {
+        $this->show = $show;
+    }
+
 
     /**
      * Returns the Provider entity fields in an array form
@@ -298,6 +351,7 @@ class Provider extends AbstractUser
                 'phone'           => $this->phone->getValue(),
                 'weekDayList'     => $this->weekDayList->toArray(),
                 'serviceList'     => $this->serviceList->toArray(),
+                'eventList'       => $this->eventList ? $this->eventList->toArray() : [],
                 'dayOffList'      => $this->dayOffList->toArray(),
                 'specialDayList'  => $this->specialDayList->toArray(),
                 'locationId'      => $this->getLocationId() ? $this->getLocationId()->getValue() : null,
@@ -307,6 +361,8 @@ class Provider extends AbstractUser
                 'description'     => $this->getDescription() ? $this->getDescription()->getValue() : null,
                 'badgeId'         => $this->getBadgeId() ? $this->getBadgeId()->getValue() : null,
                 'stripeConnect'   => $this->getStripeConnect() ? $this->getStripeConnect()->toArray() : null,
+                'employeeAppleCalendar' => $this->getEmployeeAppleCalendar() ? $this->getEmployeeAppleCalendar()->toArray() : null,
+                'show'                  => $this->getShow() ? $this->getShow()->getValue() : null,
             ]
         );
     }

@@ -1,17 +1,27 @@
 <template>
   <div class="am-fs__payments-wrapper" :style="cssVars">
     <div class="am-fs__payments">
-
       <AmCollapse class="am-fs__payments-services">
-        <AmCollapseItem :side="true" @collapse-open="recurringCollapseState = false" @collapse-close="recurringCollapseState = true">
+        <AmCollapseItem
+          :side="true"
+          @collapse-open="recurringCollapseState = false"
+          @collapse-close="recurringCollapseState = true"
+        >
           <template #heading>
             <div class="am-fs__payments-services-info">
               <span>{{ labelsDisplay('summary_services') }}</span>
             </div>
           </template>
           <template #icon-below>
-            <Transition :duration="{enter: 500, leave: 500}" @enter="onCollapseClose" @leave="onCollapseOpen">
-              <div v-show="recurringCollapseState" class="am-fs__payments-services-sub">
+            <Transition
+              :duration="{ enter: 500, leave: 500 }"
+              @enter="onCollapseClose"
+              @leave="onCollapseOpen"
+            >
+              <div
+                v-show="recurringCollapseState"
+                class="am-fs__payments-services-sub"
+              >
                 <p>{{ labelsDisplay('summary_services_subtotal') }}</p>
                 <p>1000.00$</p>
               </div>
@@ -20,15 +30,25 @@
           <template #default>
             <div class="am-fs__payments-services-open">
               <div>
-                <span> Service 1 (125.00$) x 4 {{labelsDisplay('summary_persons')}}</span>
+                <span>
+                  Service 1 (125.00$) x 4
+                  {{ labelsDisplay('summary_persons') }}</span
+                >
                 <span> 500.00$ </span>
               </div>
 
-              <div v-if="!licence.isLite && !licence.isStarter" style="color: #4D5B63;" class="am-fs__payments-services-open-total">
-                <span>2 {{ labelsDisplay('summary_recurrences') }} x Service 1 (125.00$) x 4 {{ labelsDisplay('summary_persons') }}</span>
+              <div
+                v-if="features.recurringAppointments"
+                style="color: #4d5b63"
+                class="am-fs__payments-services-open-total"
+              >
+                <span
+                  >2 {{ labelsDisplay('summary_recurrences') }} x Service 1
+                  (125.00$) x 4 {{ labelsDisplay('summary_persons') }}</span
+                >
               </div>
 
-              <div style="font-weight: 500;">
+              <div style="font-weight: 500">
                 <span>{{ labelsDisplay('summary_services_subtotal') }}</span>
                 <span>1000.00$</span>
               </div>
@@ -37,16 +57,27 @@
         </AmCollapseItem>
       </AmCollapse>
 
-      <AmCollapse v-if="!licence.isLite" class="am-fs__payments-services">
-        <AmCollapseItem :side="true" @collapse-open="extrasCollapseState = false" @collapse-close="extrasCollapseState = true">
+      <AmCollapse v-if="features.extras" class="am-fs__payments-services">
+        <AmCollapseItem
+          :side="true"
+          @collapse-open="extrasCollapseState = false"
+          @collapse-close="extrasCollapseState = true"
+        >
           <template #heading>
             <div class="am-fs__payments-services-info">
               <span>{{ labelsDisplay('summary_extras') }}</span>
             </div>
           </template>
           <template #icon-below>
-            <Transition :duration="{enter: 500, leave: 500}" @enter="onCollapseClose" @leave="onCollapseOpen">
-              <div v-show="extrasCollapseState" class="am-fs__payments-services-sub">
+            <Transition
+              :duration="{ enter: 500, leave: 500 }"
+              @enter="onCollapseClose"
+              @leave="onCollapseOpen"
+            >
+              <div
+                v-show="extrasCollapseState"
+                class="am-fs__payments-services-sub"
+              >
                 <p>{{ labelsDisplay('summary_extras_subtotal') }}</p>
                 <p>224.00$</p>
               </div>
@@ -55,12 +86,19 @@
           <template #default>
             <div class="am-fs__payments-services-open">
               <div v-for="extra in extras" :key="extra.extraId">
-                <span>x {{extra.times}} {{extra.name}} ({{ useFormattedPrice(extra.price) }}) <span>x 4 {{ labelsDisplay('summary_persons') }}</span> </span>
+                <span
+                  >x {{ extra.times }} {{ extra.name }} ({{
+                    useFormattedPrice(extra.price)
+                  }}) <span>x 4 {{ labelsDisplay('summary_persons') }}</span>
+                </span>
                 <span>{{ extra.sum }}</span>
               </div>
 
               <div class="am-fs__payments-services-open-total">
-                <span>2 {{ labelsDisplay('summary_recurrences') }} x {{ labelsDisplay('summary_extras') }} ( 112.00$ )</span>
+                <span
+                  >2 {{ labelsDisplay('summary_recurrences') }} x
+                  {{ labelsDisplay('summary_extras') }} ( 112.00$ )</span
+                >
               </div>
 
               <div class="am-fs__payments-services-open-total">
@@ -74,26 +112,22 @@
     </div>
 
     <div class="am-fs__payments-app-info">
-      <div class="am-fs__payments-app-info-subtotal">
+      <div v-if="features.coupons" class="am-fs__payments-app-info-subtotal">
         <span>{{ labelsDisplay('subtotal') }}:</span>
         <span>1124.00$</span>
       </div>
 
-      <el-form
-          ref="couponFormRef"
-          :rules="rules"
-          :model="couponFormData"
-      >
-        <div v-if="!licence.isLite" class="am-fs__coupon">
+      <el-form v-if="features.coupons" ref="couponFormRef" :rules="rules" :model="couponFormData">
+        <div class="am-fs__coupon">
           <el-form-item :prop="'coupon'" class="am-fs__coupon-form-item">
             <template #label>
               <span>{{ `${labelsDisplay('coupon')}:` }}</span>
             </template>
             <AmInput
-                v-model="couponFormData.coupon"
-                size="small"
-                :icon-start="IconCoupon"
-            ></AmInput>
+              v-model="couponFormData.coupon"
+              size="small"
+              :prefix-icon="IconCoupon"
+            />
           </el-form-item>
 
           <AmButton size="small">
@@ -102,7 +136,10 @@
         </div>
       </el-form>
 
-      <div v-if="!licence.isLite" class="am-fs__payments-app-info-discount am-fs__payments-app-info-discount-green">
+      <div
+        v-if="features.coupons"
+        class="am-fs__payments-app-info-discount am-fs__payments-app-info-discount-green"
+      >
         <span>{{ labelsDisplay('discount_amount_colon') }}:</span>
         <span>142.40$</span>
       </div>
@@ -112,7 +149,7 @@
         <span>1081.60$</span>
       </div>
 
-      <div v-if="props.paymentGateway !== 'onSite'">
+      <div v-if="props.paymentGateway !== 'onSite' && features.depositPayment">
         <div class="am-fs__payments-app-info-total">
           <span>{{ labelsDisplay('paying_now') }}:</span>
           <span>200.00$</span>
@@ -134,71 +171,76 @@ import AmCollapse from '../../../../_components/collapse/AmCollapse'
 import AmCollapseItem from '../../../../_components/collapse/AmCollapseItem'
 import IconCoupon from '../../../../_components/icons/IconCoupon.vue'
 import { computed, inject, ref } from 'vue'
-import {useColorTransparency} from "../../../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
 import { useFormattedPrice } from '../../../../../assets/js/common/formatting'
-import {defaultCustomizeSettings} from "../../../../../assets/js/common/defaultCustomize";
+import { useReactiveCustomize } from '../../../../../assets/js/admin/useReactiveCustomize.js'
 
-// * Plugin Licence
-let licence = inject('licence')
+// * Features
+let features = inject('features')
 
 let props = defineProps({
   bookableType: {
     type: String,
-    default: 'appointment'
+    default: 'appointment',
   },
   paymentGateway: {
     type: String,
-    default: 'onSite'
-  }
+    default: 'onSite',
+  },
 })
 
 let langKey = inject('langKey')
 let amLabels = inject('labels')
 
 let pageRenderKey = inject('pageRenderKey')
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 let couponFormRef = ref(null)
 
 let couponFormData = ref({
-  coupon: ''
+  coupon: '',
 })
 
 // * Form validation rules
-let rules =  computed(() => {
+let rules = computed(() => {
   return {
     coupon: [
       {
-        required: amCustomize.value[pageRenderKey.value].paymentStep.options.coupon.required,
+        required:
+          amCustomize.value[pageRenderKey.value].paymentStep.options.coupon
+            .required,
         trigger: ['blur', 'change'],
-      }
-    ]
+      },
+    ],
   }
 })
-
 
 let extras = [
   {
     name: 'Extra 1',
     price: '3.00$',
     times: '1',
-    sum: '12.00$'
+    sum: '12.00$',
   },
   {
     name: 'Extra 2',
     price: '5.00$',
     times: '5',
-    sum: '100.00$'
-  }
+    sum: '100.00$',
+  },
 ]
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value].paymentStep.translations
-    && amCustomize.value[pageRenderKey.value].paymentStep.translations[label]
-    && amCustomize.value[pageRenderKey.value].paymentStep.translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value].paymentStep.translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value].paymentStep.translations &&
+      amCustomize.value[pageRenderKey.value].paymentStep.translations[label] &&
+      amCustomize.value[pageRenderKey.value].paymentStep.translations[label][
+        langKey.value
+      ]
+      ? amCustomize.value[pageRenderKey.value].paymentStep.translations[label][
+          langKey.value
+        ]
       : amLabels[label]
   })
 
@@ -209,7 +251,7 @@ function labelsDisplay (label) {
 let recurringCollapseState = ref(true)
 let extrasCollapseState = ref(true)
 
-function onCollapseClose (el) {
+function onCollapseClose(el) {
   el.style.opacity = 0
   setTimeout(() => {
     el.style.opacity = 1
@@ -217,7 +259,7 @@ function onCollapseClose (el) {
   }, 200)
 }
 
-function onCollapseOpen (el) {
+function onCollapseOpen(el) {
   el.style.opacity = 0
   el.style.setProperty('--am-h-services-sub', `${el.offsetHeight}px`)
   setTimeout(() => {
@@ -230,19 +272,27 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-pay-text': amColors.value.colorMainText,
-    '--am-c-pay-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
-    '--am-c-pay-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
-    '--am-c-pay-text-op30': useColorTransparency(amColors.value.colorMainText, 0.3),
+    '--am-c-pay-text-op70': useColorTransparency(
+      amColors.value.colorMainText,
+      0.7
+    ),
+    '--am-c-pay-text-op60': useColorTransparency(
+      amColors.value.colorMainText,
+      0.6
+    ),
+    '--am-c-pay-text-op30': useColorTransparency(
+      amColors.value.colorMainText,
+      0.3
+    ),
     '--am-c-pay-success': amColors.value.colorSuccess,
     '--am-c-pay-primary': amColors.value.colorPrimary,
   }
 })
 </script>
 
-
 <script>
 export default {
-  name: 'AppointmentInfo'
+  name: 'AppointmentInfo',
 }
 </script>
 
@@ -308,14 +358,14 @@ export default {
           flex-wrap: wrap;
           width: 100%;
           padding: 12px;
-          transition-delay: .5s;
+          transition-delay: 0.5s;
 
           &-side {
             transition-delay: 0s;
           }
 
           .am-collapse-item__trigger {
-            padding: 0
+            padding: 0;
           }
         }
         .am-collapse-item__content {
@@ -342,7 +392,7 @@ export default {
             margin: 12px 0 4px;
 
             & > span {
-              color: var(--am-c-pay-text-op70)
+              color: var(--am-c-pay-text-op70);
             }
 
             &:last-child {
@@ -364,7 +414,7 @@ export default {
           width: 100%;
           display: flex;
           justify-content: space-between;
-          transition: all ease-in-out .3s;
+          transition: all ease-in-out 0.3s;
 
           p {
             font-size: 13px;
@@ -395,7 +445,8 @@ export default {
       white-space: nowrap;
       align-items: center;
 
-      .am-icon-info-reverse, .am-icon-check {
+      .am-icon-info-reverse,
+      .am-icon-check {
         font-size: 18px;
       }
 
@@ -421,20 +472,8 @@ export default {
         }
       }
 
-      .am-icon-coupon {
-        /* $shade-900 */
-        color: var(--am-c-inp-text);
-        font-size: 20px;
-      }
-
-      .am-input {
-        input {
-          padding-left : 32px;
-        }
-      }
-
       & > span {
-        margin-right: 3px
+        margin-right: 3px;
       }
 
       &-invalid {
@@ -457,7 +496,7 @@ export default {
           margin-bottom: 0;
           width: 100%;
           .el-form-item__error {
-            display: none
+            display: none;
           }
         }
       }
@@ -480,5 +519,4 @@ export default {
     }
   }
 }
-
 </style>

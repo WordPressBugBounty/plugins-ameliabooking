@@ -13,8 +13,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\AbstractDatabaseTable;
  */
 class EventsPeriodsTable extends AbstractDatabaseTable
 {
-
-    const TABLE = 'events_periods';
+    public const TABLE = 'events_periods';
 
     /**
      * @return string
@@ -36,6 +35,8 @@ class EventsPeriodsTable extends AbstractDatabaseTable
                    `googleCalendarEventId` VARCHAR(255) NULL,
                    `googleMeetUrl` VARCHAR(255) NULL,
                    `outlookCalendarEventId` VARCHAR(255) NULL,
+                   `microsoftTeamsUrl` VARCHAR(255) NULL,
+                   `appleCalendarEventId` VARCHAR(255) NULL,
                     PRIMARY KEY (`id`)
                 ) DEFAULT CHARSET=utf8 COLLATE utf8_general_ci";
     }

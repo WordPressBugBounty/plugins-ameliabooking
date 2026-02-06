@@ -19,7 +19,8 @@ class SquareRefundWebhookController extends Controller
      * @var array
      */
     protected $allowedFields = [
-        'data'
+        'data',
+        'signature',
     ];
 
     /**
@@ -30,7 +31,7 @@ class SquareRefundWebhookController extends Controller
      */
     protected function instantiateCommand(Request $request, $args)
     {
-        $command = new SquareRefundWebhookCommand($args);
+        $command     = new SquareRefundWebhookCommand($args);
         $requestBody = $request->getParsedBody();
         $this->setCommandFields($command, $requestBody);
 

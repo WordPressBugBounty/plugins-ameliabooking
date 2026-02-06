@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -28,7 +29,6 @@ class AmeliaShortcodeService
     /**
      * Prepare scripts and styles
      * @throws InvalidArgumentException
-     * @throws \Interop\Container\Exception\ContainerException
      */
     public static function prepareScriptsAndStyles()
     {
@@ -76,6 +76,21 @@ class AmeliaShortcodeService
             wp_enqueue_script('amelia_stripe_js', 'https://js.stripe.com/v3/');
         }
 
+        if ($settingsService->getSetting('payments', 'square')['enabled'] === true) {
+            if ($settingsService->getSetting('payments', 'square')['testMode'] === true) {
+                wp_enqueue_script('amelia_square_js', 'https://sandbox.web.squarecdn.com/v1/square.js');
+            } else {
+                wp_enqueue_script('amelia_square_js', 'https://web.squarecdn.com/v1/square.js');
+            }
+            wp_enqueue_style(
+                'amelia_google_button_style',
+                'https://developers.google.com/reference/sdks/web/static/styles/code-preview.css',
+                [],
+                null,
+                'all'
+            );
+        }
+
         // Enqueue Styles
         wp_enqueue_style(
             'amelia_booking_styles_vendor',
@@ -86,7 +101,8 @@ class AmeliaShortcodeService
 
         $customUrl = $settingsService->getSetting('activation', 'customUrl');
 
-        if ($settingsService->getSetting('customization', 'useGenerated') === null ||
+        if (
+            $settingsService->getSetting('customization', 'useGenerated') === null ||
             $settingsService->getSetting('customization', 'useGenerated')
         ) {
             wp_enqueue_style(
@@ -150,10 +166,15 @@ class AmeliaShortcodeService
             );
         }
 
+        $allowedUploadedFileExtensions =
+            !empty($settingsService->getSetting('general', 'customFieldsAllowedExtensions'))
+                ? $settingsService->getSetting('general', 'customFieldsAllowedExtensions')
+                : AbstractCustomFieldApplicationService::$allowedUploadedFileExtensions;
+
         wp_localize_script(
             'amelia_booking_scripts',
             'fileUploadExtensions',
-            array_keys(AbstractCustomFieldApplicationService::$allowedUploadedFileExtensions)
+            array_keys($allowedUploadedFileExtensions)
         );
 
         if ($settingsService->getSetting('activation', 'stash') && self::$counter === 1) {

@@ -19,15 +19,14 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Notification\Notifications
  */
 class NotificationRepository extends AbstractRepository implements NotificationRepositoryInterface
 {
+    public const FACTORY = NotificationFactory::class;
 
-    const FACTORY = NotificationFactory::class;
-
-    const CUSTOM = false;
+    public const CUSTOM = false;
 
     /**
      * @param Notification $entity
      *
-     * @return bool
+     * @return int
      * @throws QueryExecutionException
      */
     public function add($entity)
@@ -130,13 +129,15 @@ class NotificationRepository extends AbstractRepository implements NotificationR
     }
 
     /**
+     * @param bool $includeCustom Whether to include custom notifications
      * @return Collection
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    public function getAll()
+    public function getAll($includeCustom = true)
     {
-        $custom = !self::CUSTOM ? ' WHERE customName IS NULL' : '';
+        // Only include custom notifications if both self::CUSTOM is true AND $includeCustom parameter is true
+        $custom = (!self::CUSTOM || !$includeCustom) ? ' WHERE customName IS NULL' : '';
 
         try {
             $statement = $this->connection->query($this->selectQuery() . $custom);
@@ -157,14 +158,16 @@ class NotificationRepository extends AbstractRepository implements NotificationR
     /**
      * @param $name
      * @param $type
+     * @param bool $includeCustom Whether to include custom notifications (default: true for backward compatibility)
      *
      * @return Collection
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    public function getByNameAndType($name, $type)
+    public function getByNameAndType($name, $type, $includeCustom = true)
     {
-        $custom = !self::CUSTOM ? 'customName IS NULL AND ' : '';
+        // Only include custom notifications if both self::CUSTOM is true AND $includeCustom parameter is true
+        $custom = (!self::CUSTOM || !$includeCustom) ? 'customName IS NULL AND ' : '';
 
         try {
             $statement = $this->connection->prepare(
@@ -179,7 +182,6 @@ class NotificationRepository extends AbstractRepository implements NotificationR
             $statement->execute($params);
 
             $rows = $statement->fetchAll();
-
         } catch (\Exception $e) {
             throw new QueryExecutionException('Unable to find by name and type in ' . __CLASS__, $e->getCode(), $e);
         }
@@ -222,6 +224,4 @@ class NotificationRepository extends AbstractRepository implements NotificationR
             throw new QueryExecutionException('Unable to delete data from ' . __CLASS__, $e->getCode(), $e);
         }
     }
-
-
 }

@@ -55,11 +55,12 @@ function useAppointmentParams (store) {
     ),
     group: 1,
     page: 'booking',
+    structured: true,
     persons: store.getters['booking/getBookingPersons']
   }
 }
 
-function useAppointmentSlots (params, fetchedSlots, callback, customCallback) {
+function useAppointmentSlots (params, fetchedSlots, callback, customCallback, waitingListOptions = null) {
   httpClient.get(
     '/slots',
     {params: useUrlParams(params)}
@@ -78,6 +79,41 @@ function useAppointmentSlots (params, fetchedSlots, callback, customCallback) {
     let occupied = 'queryTimeZone' in params && params.queryTimeZone
       ? useLocalFromUtcSlots(response.data.data.occupied) : response.data.data.occupied
 
+    // Waiting list slots provided by backend (preferred)
+    let waitingListSlots = {}
+
+    // Fallback: derive on frontend if backend doesn't yet supply and waiting list enabled
+    if (!Object.keys(waitingListSlots).length) {
+      const wlEnabled = !!(waitingListOptions && waitingListOptions.enabled)
+      if (wlEnabled) {
+        Object.keys(occupied || {}).forEach(date => {
+          Object.keys(occupied[date] || {}).forEach(time => {
+            if (!(date in slots) || !(time in slots[date])) {
+              const providersData = occupied[date][time] || []
+              const serviceId = params.serviceId
+              const duration = params.serviceDuration
+              // Consider only rows for this service; require at least one match
+              const serviceRows = providersData.filter(p => p.s === serviceId)
+              if (duration && (serviceRows.length && serviceRows[0].d !== duration / 60)) return
+              const fullyBooked = serviceRows.length && serviceRows.every(p => p.c <= 0)
+              if (!fullyBooked) return
+              let canAdd = true
+              if (waitingListOptions.maxCapacity) {
+                const currentWaiting = providersData[0].w || 0
+                if (currentWaiting >= waitingListOptions.maxCapacity) {
+                  canAdd = false
+                }
+              }
+              if (canAdd) {
+                if (!(date in waitingListSlots)) waitingListSlots[date] = {}
+                waitingListSlots[date][time] = providersData
+              }
+            }
+          })
+        })
+      }
+    }
+
     callback(
       slots,
       occupied,
@@ -86,7 +122,8 @@ function useAppointmentSlots (params, fetchedSlots, callback, customCallback) {
       response.data.data.busyness,
       response.data.data.appCount,
       {providerId: response.data.data.lastProvider, fromBackend: true},
-      customCallback
+      customCallback,
+      waitingListSlots
     )
   })
 }
@@ -156,6 +193,8 @@ function useSlotsCallback(
     result['calendarStartDate'] = activeService.list[cartItem.index].date
       ? activeService.list[cartItem.index].date : (dates.length ? dates[0] : null)
 
+    result['calendarEventDate'] = activeService.list[cartItem.index].date ? activeService.list[cartItem.index].date : ''
+
     if (!(activeService.list[cartItem.index].date in slots)) {
       store.commit('booking/setMultipleAppointmentsDate', null)
       store.commit('booking/setMultipleAppointmentsTime', null)
@@ -193,6 +232,121 @@ function useSlotsCallback(
   return result
 }
 
+function useSlotsPricing (store, slots, serviceId) {
+  let employeesPrices = {}
+
+  store.getters['entities/getEmployees'].forEach((item) => {
+    let employeeService = item.serviceList.find(i => i.id === serviceId)
+
+    if (typeof employeeService !== 'undefined') {
+      employeesPrices[item.id] = item.serviceList.find(i => i.id === serviceId).price
+    }
+  })
+
+  let result = {}
+
+  let minPrice = null
+
+  let midPrice = null
+
+  let maxPrice = null
+
+  let multipleMin = false
+
+  let multipleMid = false
+
+  let multipleMax = false
+
+  Object.keys(slots).forEach((date) => {
+    result[date] = {slots: {}}
+
+    Object.keys(slots[date]).forEach((time) => {
+      let haveHigh = false
+
+      let haveLow = false
+
+      let haveMid = false
+
+      let minDatePrice = null
+
+      let maxDatePrice = null
+
+      slots[date][time].forEach((i) => {
+        let price = i.p === null ? employeesPrices[i.e] : i.p
+
+        if (minDatePrice === null || price < minDatePrice) {
+          minDatePrice = price
+        }
+
+        if (maxDatePrice === null || price > maxDatePrice) {
+          maxDatePrice = price
+        }
+
+        if (price === employeesPrices[i.e]) {
+          if (midPrice !== null && price !== midPrice) {
+            multipleMid = true
+          }
+
+          if (midPrice === null || price < midPrice) {
+            midPrice = price
+          }
+
+          haveMid = true
+        } else if (price < employeesPrices[i.e]) {
+          if (minPrice !== null && price !== minPrice) {
+            multipleMin = true
+          }
+
+          if (minPrice === null || minDatePrice < minPrice) {
+            minPrice = minDatePrice
+          }
+
+          haveLow = true
+        } else if (price > employeesPrices[i.e]) {
+          if (maxPrice !== null && price !== maxPrice) {
+            multipleMax = true
+          }
+
+          if (maxPrice === null || maxDatePrice < maxPrice) {
+            maxPrice = maxDatePrice
+          }
+
+          haveHigh = true
+        }
+      })
+
+      result[date].slots[time] = {
+        type: haveLow && !haveHigh && !haveMid ? 'low' : (haveHigh && !haveLow && !haveMid ? 'high' : 'mid'),
+        price: minDatePrice
+      }
+    })
+
+    result[date].price = Object.values(result[date].slots).filter(i => i.price === null).length === 0
+
+    let types = Object.values(result[date].slots).map(i => i.type)
+
+    if (types.filter(i => i === 'low').length === types.length) {
+      result[date].type = 'low'
+    } else if (types.filter(i => i === 'high').length === types.length) {
+      result[date].type = 'high'
+    } else {
+      result[date].type = 'mid'
+    }
+  })
+
+  return {
+    price: {
+      low: minPrice,
+      mid: midPrice,
+      high: maxPrice,
+      uniqueMin: !multipleMin,
+      uniqueMid: !multipleMid,
+      uniqueMax: !multipleMax
+    },
+    dates: result
+  }
+}
+
 export {
   useRange,
   useSelectedDuration,
@@ -202,4 +356,5 @@ export {
   useSlotsCallback,
   useAppointmentSlots,
   useAppointmentParams,
+  useSlotsPricing,
 }

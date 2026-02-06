@@ -9,22 +9,16 @@ namespace AmeliaBooking\Domain\ValueObjects\String;
  */
 final class FeeType
 {
-    const DISABLED = 'disabled';
+    public const DISABLED = 'disabled';
 
-    const FIXED = 'fixed';
+    public const FIXED = 'fixed';
 
-    const PERCENTAGE = 'percentage';
+    public const PERCENTAGE = 'percentage';
 
     /**
      * @var string
      */
     private $status;
-
-    /**
-     * Status constructor.
-     *
-     * @param int $status
-     */
     public function __construct($status)
     {
         $this->status = $status;

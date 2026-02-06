@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -15,7 +16,7 @@ use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
  */
 class AbstractDatabaseTable
 {
-    const TABLE = '';
+    public const TABLE = '';
 
     /**
      * @return string
@@ -29,6 +30,15 @@ class AbstractDatabaseTable
 
         global $wpdb;
         return $wpdb->prefix . 'amelia_' . static::TABLE;
+    }
+
+    /**
+     * @return string
+     * @throws InvalidArgumentException
+     */
+    public static function buildTable()
+    {
+        return '';
     }
 
     /**

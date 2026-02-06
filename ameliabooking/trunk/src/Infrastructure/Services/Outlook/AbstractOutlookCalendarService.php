@@ -6,6 +6,7 @@ use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
 use AmeliaBooking\Domain\Entity\User\Provider;
+use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use DateTime;
 use Exception;
@@ -20,6 +21,9 @@ use WP_Error;
  */
 abstract class AbstractOutlookCalendarService
 {
+    /** @var Container $container */
+    protected $container;
+
     public static $providersOutlookEvents = [];
 
     /**
@@ -42,21 +46,11 @@ abstract class AbstractOutlookCalendarService
     /**
      * @param $authCode
      * @param $redirectUri
+     * @param $providerId
      *
      * @return array
      */
-    abstract public function fetchAccessTokenWithAuthCode($authCode, $redirectUri);
-
-    /**
-     * @param Provider $provider
-     *
-     * @return void
-     * @throws ContainerException
-     * @throws InvalidArgumentException
-     * @throws QueryExecutionException
-     * @throws Exception
-     */
-    abstract public function authorizeProvider($provider);
+    abstract public function fetchAccessTokenWithAuthCode($authCode, $redirectUri, $providerId);
 
     /**
      * @param Provider $provider
@@ -144,5 +138,31 @@ abstract class AbstractOutlookCalendarService
         $excludeAppointmentId,
         $startDateTime,
         $endDateTime
+    );
+
+    /** @noinspection MoreThanThreeArgumentsInspection */
+    /**
+     * @param string $from
+     * @param string $fromName
+     * @param string $replyTo
+     * @param string $to
+     * @param string $subject
+     * @param string $body
+     * @param array  $bccEmails
+     * @param array  $attachments
+     *
+     * @return void
+     *
+     * @throws ContainerException
+     */
+    abstract public function sendEmail(
+        $from,
+        $fromName,
+        $replyTo,
+        $to,
+        $subject,
+        $body,
+        $bccEmails = [],
+        $attachments = []
     );
 }

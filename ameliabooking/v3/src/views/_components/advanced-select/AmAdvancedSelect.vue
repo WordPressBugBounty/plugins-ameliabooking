@@ -464,7 +464,9 @@ function handleChange(val) {
  */
 function handleExpandChange(val) {
   nextTick(() => {
-    teleportSubCategoryDisable.value = true
+    if (val && val.length > 0) {
+      teleportSubCategoryDisable.value = true
+    }
   })
   emits('expand-change', val)
 }

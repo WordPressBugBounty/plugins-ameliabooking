@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -52,11 +53,11 @@ class WeekDay
         Collection $timeOutList,
         Collection $periodList
     ) {
-        $this->dayIndex = $dayIndex;
-        $this->startTime = $startTime;
-        $this->endTime = $endTime;
+        $this->dayIndex    = $dayIndex;
+        $this->startTime   = $startTime;
+        $this->endTime     = $endTime;
         $this->timeOutList = $timeOutList;
-        $this->periodList = $periodList;
+        $this->periodList  = $periodList;
     }
 
     /**

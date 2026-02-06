@@ -2,7 +2,9 @@
   <Content
     wrapper-class="am-fcil"
     form-class="am-fcil__main"
-    :content-class="`am-fcil__wrapper ${customizeOptions.pageScroll.visibility ? '' : 'no-scroll'}`"
+    :content-class="`am-fcil__wrapper ${
+      customizeOptions.pageScroll.visibility ? '' : 'no-scroll'
+    }`"
     :style="cssVars"
   >
     <template #header>
@@ -12,14 +14,23 @@
       ></Header>
       <div class="am-fcil__filter">
         <div
-          v-if="amCustomize.cbf.categoryItemsList.options.searchInput.visibility"
+          v-if="
+            amCustomize.cbf.categoryItemsList.options.searchInput.visibility
+          "
           class="am-fcil__filter-item"
           :class="filterClassWidth.search"
         >
-          <AmInput v-model="searchFilter" :placeholder="labelsDisplay('filter_input')" :icon-start="iconSearch"></AmInput>
+          <AmInput
+            v-model="searchFilter"
+            :placeholder="labelsDisplay('filter_input')"
+            :prefix-icon="iconSearch"
+          />
         </div>
         <div
-          v-if="amCustomize.cbf.categoryItemsList.options.filterEmployee.visibility && !licence.isLite"
+          v-if="
+            amCustomize.cbf.categoryItemsList.options.filterEmployee
+              .visibility && !licence.isLite
+          "
           class="am-fcil__filter-item"
           :class="filterClassWidth.employee"
         >
@@ -40,7 +51,12 @@
           </AmSelect>
         </div>
         <div
-          v-if="amCustomize.cbf.categoryItemsList.options.filterLocation.visibility && !licence.isLite && !licence.isStarter"
+          v-if="
+            amCustomize.cbf.categoryItemsList.options.filterLocation
+              .visibility &&
+            !licence.isLite &&
+            !licence.isStarter
+          "
           class="am-fcil__filter-item"
           :class="filterClassWidth.location"
         >
@@ -61,27 +77,38 @@
           </AmSelect>
         </div>
         <div
-          v-if="amCustomize.cbf.categoryItemsList.options.filterButtons.visibility && !licence.isBasic && !licence.isStarter && !licence.isLite"
+          v-if="
+            features.packages &&
+            amCustomize.cbf.categoryItemsList.options.filterButtons.visibility
+          "
           class="am-fcil__filter-item am-w30"
         >
           <div class="am-fcil__filter-item__btn-wrapper">
             <div
               class="am-fcil__filter-item__btn"
-              :class="{'am-active': displayCategoryPackages && displayCategoryServices}"
+              :class="{
+                'am-active': displayCategoryPackages && displayCategoryServices,
+              }"
               @click="changeCategoryItemsVisibility('all')"
             >
               {{ labelsDisplay('filter_all') }}
             </div>
             <div
               class="am-fcil__filter-item__btn"
-              :class="{'am-active': displayCategoryPackages && !displayCategoryServices}"
+              :class="{
+                'am-active':
+                  displayCategoryPackages && !displayCategoryServices,
+              }"
               @click="changeCategoryItemsVisibility('packages')"
             >
               {{ labelsDisplay('filter_packages') }}
             </div>
             <div
               class="am-fcil__filter-item__btn"
-              :class="{'am-active': !displayCategoryPackages && displayCategoryServices}"
+              :class="{
+                'am-active':
+                  !displayCategoryPackages && displayCategoryServices,
+              }"
               @click="changeCategoryItemsVisibility('services')"
             >
               {{ labelsDisplay('filter_services') }}
@@ -92,12 +119,12 @@
     </template>
     <template v-if="customizeOptions.sidebar.visibility" #side>
       <SideMenu
-        :menu-items="availableCategories"
+        :menu-items="categoriesMenu"
         :init-selection="categorySelected"
         identifier="id"
         name-identifier="name"
         :footer-string="labelsDisplay('get_in_touch')"
-        company-email="support@ameliatms.com"
+        company-email="support@wpamelia.com"
         @click="selectCategory"
       ></SideMenu>
     </template>
@@ -108,7 +135,7 @@
     </template>
     <template #content>
       <!-- Packages -->
-      <template v-if="displayCategoryPackages">
+      <template v-if="features.packages && displayCategoryPackages">
         <div
           v-for="item in categoryPackages"
           :key="item.id"
@@ -117,8 +144,11 @@
           <div class="am-fcil__item-inner">
             <div
               class="am-fcil__item-content"
-              :style="amCustomize.cbf.categoryItemsList.options.cardColor.visibility ?
-              {backgroundColor: useColorTransparency(item.color, 0.1)} : {}"
+              :style="
+                amCustomize.cbf.categoryItemsList.options.cardColor.visibility
+                  ? { backgroundColor: useColorTransparency(item.color, 0.1) }
+                  : {}
+              "
             >
               <!-- Card Badge -->
               <div
@@ -134,7 +164,11 @@
               </div>
 
               <!-- Card Hero Image -->
-              <div v-if="item.pictureFullPath" class="am-fcil__item-hero" :style="{backgroundImage: `url(${item.pictureFullPath})`}"></div>
+              <div
+                v-if="item.pictureFullPath"
+                class="am-fcil__item-hero"
+                :style="{ backgroundImage: `url(${item.pictureFullPath})` }"
+              ></div>
 
               <!-- Card Heading -->
               <div class="am-fcil__item-heading">
@@ -146,10 +180,18 @@
                   class="am-fcil__item-cost"
                 >
                   <span v-if="item.discount" class="am-fcil__item-discount">
-                    {{`${labelsDisplay('save')} ${item.discount}%`}}
+                    {{ `${labelsDisplay('save')} ${item.discount}%` }}
                   </span>
                   <span class="am-fcil__item-price">
-                    {{ item.price ? useFormattedPrice(item.discount ? item.price - item.price / 100 * item.discount : item.price ) : labelsDisplay('free') }}
+                    {{
+                      item.price
+                        ? useFormattedPrice(
+                            item.discount
+                              ? item.price - (item.price / 100) * item.discount
+                              : item.price
+                          )
+                        : labelsDisplay('free')
+                    }}
                   </span>
                 </div>
               </div>
@@ -157,11 +199,17 @@
               <!-- Card Info -->
               <div class="am-fcil__item-info">
                 <div
-                  v-if="customizeOptions.packageCategory.visibility"
+                  v-if="
+                    customizeOptions.packageCategory.visibility &&
+                    categorySelected
+                  "
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-folder"></span>
-                  <span>{{ availableCategories.find(a => a.id === categorySelected).name }}</span>
+                  <span>{{
+                    availableCategories.find((a) => a.id === categorySelected)
+                      .name
+                  }}</span>
                 </div>
                 <div
                   v-if="customizeOptions.packageDuration.visibility"
@@ -172,7 +220,14 @@
                     {{ `${labelsDisplay('expires_at')} ${item.endDate}` }}
                   </span>
                   <span v-else-if="item.durationCount">
-                    {{ `${labelsDisplay('expires_after')} ${item.durationCount} ${packageDurationLabel(item.durationCount, item.durationType)}` }}
+                    {{
+                      `${labelsDisplay('expires_after')} ${
+                        item.durationCount
+                      } ${packageDurationLabel(
+                        item.durationCount,
+                        item.durationType
+                      )}`
+                    }}
                   </span>
                   <span v-else>
                     {{ labelsDisplay('without_expiration') }}
@@ -191,7 +246,11 @@
                 >
                   <span class="am-icon-locations"></span>
                   <span>
-                    {{ itemLocations(item.locations, locationsList).length === 1 ? itemLocations(item.locations, locationsList)[0].name : labelsDisplay('multiple_locations') }}
+                    {{
+                      itemLocations(item.locations, locationsList).length === 1
+                        ? itemLocations(item.locations, locationsList)[0].name
+                        : labelsDisplay('multiple_locations')
+                    }}
                   </span>
                 </div>
               </div>
@@ -204,7 +263,7 @@
                   {{ `${labelsDisplay('in_package')}:` }}
                 </span>
                 <span v-for="obj in getPackServices(item)" :key="obj.id">
-                  {{obj.name}}
+                  {{ obj.name }}
                 </span>
               </div>
             </div>
@@ -220,7 +279,9 @@
                 {{ labelsDisplay('view_employees') }}
               </AmButton>
               <AmButton
-                :class="{'am-w100': !customizeOptions.cardEmployeeBtn.visibility}"
+                :class="{
+                  'am-w100': !customizeOptions.cardEmployeeBtn.visibility,
+                }"
                 size="small"
                 :type="btnType('cardContinueBtn')"
               >
@@ -242,8 +303,11 @@
           <div class="am-fcil__item-inner">
             <div
               class="am-fcil__item-content"
-              :style="amCustomize.cbf.categoryItemsList.options.cardColor.visibility ?
-              {backgroundColor: useColorTransparency(item.color, 0.1)} : {}"
+              :style="
+                amCustomize.cbf.categoryItemsList.options.cardColor.visibility
+                  ? { backgroundColor: useColorTransparency(item.color, 0.1) }
+                  : {}
+              "
             >
               <!-- Card Badge -->
               <div
@@ -253,14 +317,18 @@
                 <div class="am-fcil__item-badge am-service">
                   <span class="am-icon-service"></span>
                   <span>
-                  {{ labelsDisplay('heading_service') }}
-                </span>
+                    {{ labelsDisplay('heading_service') }}
+                  </span>
                 </div>
               </div>
               <!-- /Card Badge -->
 
               <!-- Card Hero Image -->
-              <div v-if="item.pictureFullPath" class="am-fcil__item-hero" :style="{backgroundImage: `url(${item.pictureFullPath})`}"></div>
+              <div
+                v-if="item.pictureFullPath"
+                class="am-fcil__item-hero"
+                :style="{ backgroundImage: `url(${item.pictureFullPath})` }"
+              ></div>
               <!-- /Card Hero Image -->
 
               <!-- Card Heading -->
@@ -273,7 +341,11 @@
                   class="am-fcil__item-cost"
                 >
                   <span class="am-fcil__item-price">
-                    {{ item.price ? useFormattedPrice(item.price) : labelsDisplay('free') }}
+                    {{
+                      item.price
+                        ? useFormattedPrice(item.price)
+                        : labelsDisplay('free')
+                    }}
                   </span>
                 </div>
               </div>
@@ -282,11 +354,17 @@
               <!-- Card Info -->
               <div class="am-fcil__item-info">
                 <div
-                  v-if="customizeOptions.serviceCategory.visibility"
+                  v-if="
+                    customizeOptions.serviceCategory.visibility &&
+                    categorySelected
+                  "
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-folder"></span>
-                  <span>{{ availableCategories.find(a => a.id === categorySelected).name }}</span>
+                  <span>{{
+                    availableCategories.find((a) => a.id === categorySelected)
+                      .name
+                  }}</span>
                 </div>
                 <div
                   v-if="customizeOptions.serviceDuration.visibility"
@@ -296,19 +374,30 @@
                   <span>{{ serviceDuration(item.duration) }}</span>
                 </div>
                 <div
-                  v-if="customizeOptions.serviceCapacity.visibility && !licence.isLite"
+                  v-if="
+                    customizeOptions.serviceCapacity.visibility &&
+                    !licence.isLite
+                  "
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-user"></span>
                   <span>{{ `${item.minCapacity}/${item.maxCapacity}` }}</span>
                 </div>
                 <div
-                  v-if="customizeOptions.serviceLocation.visibility && !licence.isLite && !licence.isStarter"
+                  v-if="
+                    customizeOptions.serviceLocation.visibility &&
+                    !licence.isLite &&
+                    !licence.isStarter
+                  "
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-locations"></span>
                   <span>
-                    {{ itemLocations(item.locations, locationsList).length === 1 ? itemLocations(item.locations, locationsList)[0].name : labelsDisplay('multiple_locations') }}
+                    {{
+                      itemLocations(item.locations, locationsList).length === 1
+                        ? itemLocations(item.locations, locationsList)[0].name
+                        : labelsDisplay('multiple_locations')
+                    }}
                   </span>
                 </div>
               </div>
@@ -318,7 +407,9 @@
             <!-- Card Footer -->
             <div class="am-fcil__item-footer">
               <AmButton
-                v-if="customizeOptions.cardEmployeeBtn.visibility && !licence.isLite"
+                v-if="
+                  customizeOptions.cardEmployeeBtn.visibility && !licence.isLite
+                "
                 size="small"
                 :type="btnType('cardEmployeeBtn')"
                 @click="getDialogEmployees('service')"
@@ -326,7 +417,9 @@
                 {{ labelsDisplay('view_employees') }}
               </AmButton>
               <AmButton
-                :class="{'am-w100': !customizeOptions.cardEmployeeBtn.visibility}"
+                :class="{
+                  'am-w100': !customizeOptions.cardEmployeeBtn.visibility,
+                }"
                 size="small"
                 :type="btnType('cardContinueBtn')"
               >
@@ -378,7 +471,11 @@
                   </div>
                 </template>
                 <template #default>
-                  <div v-if="employee.description" class="am-fcil-employee__text" v-html="employee.description"></div>
+                  <div
+                    v-if="employee.description"
+                    class="am-fcil-employee__text"
+                    v-html="employee.description"
+                  ></div>
                 </template>
               </AmCollapseItem>
             </AmCollapse>
@@ -390,7 +487,11 @@
             :type="btnType('dialogEmployeeBtn')"
             category="primary"
           >
-            {{ dialogEmployeesType === 'service' ? labelsDisplay('book_service') : labelsDisplay('book_package') }}
+            {{
+              dialogEmployeesType === 'service'
+                ? labelsDisplay('book_service')
+                : labelsDisplay('book_package')
+            }}
           </AmButton>
         </template>
       </AmDialog>
@@ -418,23 +519,22 @@ import AmImagePlaceholder from '../../../_components/image-placeholder/AmImagePl
 import moment from 'moment'
 
 // * Import from Vue
-import {
-  inject,
-  ref,
-  defineComponent,
-  computed
-} from "vue";
+import { inject, ref, defineComponent, computed } from 'vue'
 
 // * Composables
 import { useFormattedPrice } from '../../../../assets/js/common/formatting.js'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation.js'
 import { getFrontedFormattedDate } from '../../../../assets/js/common/date.js'
+import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Plugin Licence
 let licence = inject('licence')
 
+// * Features
+let features = inject('features')
+
 // * Customize
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Options
 let customizeOptions = computed(() => {
@@ -452,7 +552,7 @@ let employeesList = ref([
   { id: 2, firstName: 'Arlene', lastName: 'Linton' },
   { id: 3, firstName: 'Merrilyn', lastName: 'Temple' },
   { id: 4, firstName: 'Ardith', lastName: 'Stanley' },
-  { id: 5, firstName: 'Dale', lastName: 'Jonathan' }
+  { id: 5, firstName: 'Dale', lastName: 'Jonathan' },
 ])
 let employeeFilter = ref(null)
 
@@ -461,12 +561,14 @@ let locationsList = ref([
   { id: 2, name: 'Location 2' },
   { id: 3, name: 'Location 3' },
   { id: 4, name: 'Location 4' },
-  { id: 5, name: 'Location 5' }
+  { id: 5, name: 'Location 5' },
 ])
 let locationFilter = ref(null)
 
 // * Category items (packages, services) visibility
-let displayCategoryPackages = ref(!licence.isBasic && !licence.isStarter && !licence.isLite)
+let displayCategoryPackages = ref(
+  !licence.isBasic && !licence.isStarter && !licence.isLite
+)
 let displayCategoryServices = ref(true)
 
 function changeCategoryItemsVisibility(key) {
@@ -494,7 +596,7 @@ let availableCategories = ref([
     packageList: [1, 2],
     serviceList: [1, 6, 7],
     status: 'visible',
-    translations: null
+    translations: null,
   },
   {
     id: 2,
@@ -502,7 +604,7 @@ let availableCategories = ref([
     packageList: [2],
     serviceList: [2, 4, 5],
     status: 'visible',
-    translations: null
+    translations: null,
   },
   {
     id: 3,
@@ -510,7 +612,7 @@ let availableCategories = ref([
     packageList: [2, 3],
     serviceList: [3],
     status: 'visible',
-    translations: null
+    translations: null,
   },
   {
     id: 4,
@@ -518,7 +620,7 @@ let availableCategories = ref([
     packageList: [3, 4],
     serviceList: [4, 5],
     status: 'visible',
-    translations: null
+    translations: null,
   },
   {
     id: 5,
@@ -526,42 +628,71 @@ let availableCategories = ref([
     packageList: [5],
     serviceList: [1, 7],
     status: 'visible',
-    translations: null
-  }
+    translations: null,
+  },
+])
+
+let categoriesMenu = ref([
+  {
+    id: null,
+    name: computed(() => labelsDisplay('filter_all')),
+  },
+  {
+    id: 1,
+    name: 'Category 1',
+  },
+  {
+    id: 2,
+    name: 'Category 2',
+  },
+  {
+    id: 3,
+    name: 'Category 3',
+  },
+  {
+    id: 4,
+    name: 'Category 4',
+  },
+  {
+    id: 5,
+    name: 'Category 5',
+  },
 ])
 
 // * Selected category
-let categorySelected = ref(1)
+let categorySelected = ref(null)
 
 let packArray = [
   {
     id: 1,
-    name: "Package 1",
-    color: "#774DFB",
+    name: 'Package 1',
+    color: '#774DFB',
     price: 500,
     discount: 10,
     endDate: null,
     providers: [1, 2],
     services: [1, 2, 3],
     locations: [1],
-    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
   },
   {
     id: 2,
-    name: "Package 2",
-    color: "#230c86",
+    name: 'Package 2',
+    color: '#230c86',
     price: 500,
     discount: 10,
-    endDate: getFrontedFormattedDate(moment().add(5, 'days').format('YYYY-MM-DD')),
+    endDate: getFrontedFormattedDate(
+      moment().add(5, 'days').format('YYYY-MM-DD')
+    ),
     providers: [1, 2],
     services: [1, 2, 3],
     locations: [2, 3],
-    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
   },
   {
     id: 3,
-    name: "Package 3",
-    color: "#ab0c48",
+    name: 'Package 3',
+    color: '#ab0c48',
     price: 500,
     discount: 10,
     endDate: null,
@@ -570,134 +701,148 @@ let packArray = [
     providers: [1, 2],
     services: [1, 2, 3],
     locations: [3],
-    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
   },
   {
     id: 4,
-    name: "Package 4",
-    color: "#2cc915",
+    name: 'Package 4',
+    color: '#2cc915',
     price: 500,
     discount: 10,
     endDate: null,
     providers: [1, 2],
     services: [1, 2, 3],
     locations: [4, 5],
-    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
   },
   {
     id: 5,
-    name: "Package 5",
-    color: "#bd971d",
+    name: 'Package 5',
+    color: '#bd971d',
     price: 500,
     discount: 10,
-    endDate: getFrontedFormattedDate(moment().add(5, 'days').format('YYYY-MM-DD')),
+    endDate: getFrontedFormattedDate(
+      moment().add(5, 'days').format('YYYY-MM-DD')
+    ),
     providers: [1, 2],
     services: [1, 2, 3],
     locations: [5],
-    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
-  }
+    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
+  },
 ]
 let serviceArray = [
   {
     id: 1,
-    name: "Service 1",
+    name: 'Service 1',
     categoryId: 1,
-    color: "#774DFB",
+    color: '#774DFB',
     duration: 5400,
     maxCapacity: 10,
     minCapacity: 1,
     locations: [1, 2],
     price: 125,
-    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
   },
   {
     id: 2,
-    name: "Service 2",
+    name: 'Service 2',
     categoryId: 1,
-    color: "#230c86",
+    color: '#230c86',
     duration: 5400,
     maxCapacity: 10,
     minCapacity: 1,
     locations: [2],
     price: 125,
-    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
   },
   {
     id: 3,
-    name: "Service 3",
+    name: 'Service 3',
     categoryId: 1,
-    color: "#ab0c48",
+    color: '#ab0c48',
     duration: 5400,
     maxCapacity: 10,
     minCapacity: 1,
     locations: [3, 4],
     price: 125,
-    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
   },
   {
     id: 4,
-    name: "Service 4",
+    name: 'Service 4',
     categoryId: 1,
-    color: "#2cc915",
+    color: '#2cc915',
     duration: 5400,
     maxCapacity: 10,
     minCapacity: 1,
     locations: [4],
     price: 125,
-    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
   },
   {
     id: 5,
-    name: "Service 5",
+    name: 'Service 5',
     categoryId: 1,
-    color: "#bd971d",
+    color: '#bd971d',
     duration: 5400,
     maxCapacity: 10,
     minCapacity: 1,
     locations: [4, 5],
     price: 125,
-    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
   },
   {
     id: 6,
-    name: "Service 6",
+    name: 'Service 6',
     categoryId: 1,
-    color: "#bd971d",
+    color: '#bd971d',
     duration: 5400,
     maxCapacity: 10,
     minCapacity: 1,
     locations: [5],
     price: 125,
-    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
+    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
   },
   {
     id: 7,
-    name: "Service 7",
+    name: 'Service 7',
     categoryId: 1,
-    color: "#bd971d",
+    color: '#bd971d',
     duration: 5400,
     maxCapacity: 10,
     minCapacity: 1,
     locations: [1, 2],
     price: 125,
-    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`
-  }
+    pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
+  },
 ]
 
 let categoryPackages = computed(() => {
   let arr = []
-  availableCategories.value.find(a => a.id === categorySelected.value).packageList.forEach(b => {
-    packArray.forEach(c => {
-      if (c.id === b) arr.push(c)
+  if (categorySelected.value) {
+    availableCategories.value
+      .find((a) => a.id === categorySelected.value)
+      .packageList.forEach((b) => {
+        packArray.forEach((c) => {
+          if (c.id === b) arr.push(c)
+        })
+      })
+  } else {
+    availableCategories.value.forEach((cat) => {
+      cat.packageList.forEach((b) => {
+        packArray.forEach((c) => {
+          if (c.id === b && !arr.find((p) => p.id === c.id)) arr.push(c)
+        })
+      })
     })
-  })
+  }
   return arr
 })
 
-function getPackServices (pack) {
+function getPackServices(pack) {
   let arr = []
-  pack.services.forEach(a => {
-    serviceArray.forEach(b => {
+  pack.services.forEach((a) => {
+    serviceArray.forEach((b) => {
       if (b.id === a) arr.push(b)
     })
   })
@@ -706,33 +851,72 @@ function getPackServices (pack) {
 
 let categoryServices = computed(() => {
   let arr = []
-  availableCategories.value.find(a => a.id === categorySelected.value).serviceList.forEach(b => {
-    serviceArray.forEach(c => {
-      if (c.id === b) arr.push(c)
+  if (categorySelected.value) {
+    availableCategories.value
+      .find((a) => a.id === categorySelected.value)
+      .serviceList.forEach((b) => {
+        serviceArray.forEach((c) => {
+          if (c.id === b) arr.push(c)
+        })
+      })
+  } else {
+    availableCategories.value.forEach((cat) => {
+      cat.serviceList.forEach((b) => {
+        serviceArray.forEach((c) => {
+          if (c.id === b) arr.push(c)
+        })
+      })
     })
-  })
+  }
   return arr
 })
 
 let headingStringRender = computed(() => {
-  let serviceString = categoryServices.value.length > 1 ? labelsDisplay('heading_services') : labelsDisplay('heading_service')
-  let packageString = categoryPackages.value.length ? categoryPackages.value.length > 1 ? labelsDisplay('packages') : labelsDisplay('package') : ''
+  let serviceString =
+    categoryServices.value.length > 1
+      ? labelsDisplay('heading_services')
+      : labelsDisplay('heading_service')
+  let packageString = categoryPackages.value.length
+    ? categoryPackages.value.length > 1
+      ? labelsDisplay('packages')
+      : labelsDisplay('package')
+    : ''
 
   if (!categoryServices.value.length && !categoryPackages.value.length) {
     return labelsDisplay('no_search_data')
   }
 
-  if (displayCategoryServices.value && (!displayCategoryPackages.value || !categoryPackages.value.length)) {
-    return `${labelsDisplay('available')} - ${ categoryServices.value.length } ${serviceString}`
+  if (
+    displayCategoryServices.value &&
+    (!displayCategoryPackages.value || !categoryPackages.value.length)
+  ) {
+    return `${labelsDisplay('available')} - ${
+      categoryServices.value.length
+    } ${serviceString}`
   }
 
-  if ((!displayCategoryServices.value || !categoryServices.value.length) && displayCategoryPackages.value) {
-    return `${labelsDisplay('available')} - ${categoryPackages.value.length } ${packageString}`
+  if (
+    (!displayCategoryServices.value || !categoryServices.value.length) &&
+    displayCategoryPackages.value
+  ) {
+    return `${labelsDisplay('available')} - ${
+      categoryPackages.value.length
+    } ${packageString}`
   }
 
   let connective = categoryPackages.value.length ? '/' : ''
 
-  return `${labelsDisplay('available')} - ${categoryServices.value.length} ${serviceString} ${connective} ${categoryPackages.value.length} ${packageString}`
+  if (features.value.packages === false) {
+    return `${labelsDisplay('available')} - ${
+      categoryServices.value.length
+    } ${serviceString}`
+  }
+
+  return `${labelsDisplay('available')} - ${
+    categoryServices.value.length
+  } ${serviceString} ${connective} ${
+    categoryPackages.value.length
+  } ${packageString}`
 })
 
 let dialogEmployees = ref(false)
@@ -742,80 +926,93 @@ let dialogEmployeesArray = ref([
     id: 1,
     firstName: 'Silas',
     lastName: 'Rudy',
-    description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
   },
   {
     id: 2,
     firstName: 'Arlene',
     lastName: 'Linton',
-    description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
   },
   {
     id: 3,
     firstName: 'Merrilyn',
     lastName: 'Temple',
-    description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
   },
   {
     id: 4,
     firstName: 'Ardith',
     lastName: 'Stanley',
-    description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
   },
   {
     id: 5,
     firstName: 'Dale',
     lastName: 'Jonathan',
-    description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
-  }
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+  },
 ])
 
-function closeEmployeeDialog () {
+function closeEmployeeDialog() {}
 
-}
-
-function getDialogEmployees (item = '') {
+function getDialogEmployees(item = '') {
   dialogEmployeesType.value = item
   dialogEmployees.value = true
 }
 
 // * Choose category from categories menu
-function selectCategory (category) {
+function selectCategory(category) {
   categorySelected.value = category.id
 }
 
 // let itemType = inject('itemType')
 
 let iconSearch = defineComponent({
-  components: {IconComponent},
-  template: `<IconComponent icon="search"/>`
+  components: { IconComponent },
+  template: `<IconComponent icon="search"/>`,
 })
 
 let filterClassWidth = computed(() => {
   let options = amCustomize.value.cbf.categoryItemsList.options
   let searchVisibility = options.searchInput.visibility
   let employeeVisibility = options.filterEmployee.visibility && !licence.isLite
-  let locationVisibility = options.filterLocation.visibility && !licence.isLite && !licence.isStarter
-  let buttonsVisibility = options.filterButtons.visibility && !licence.isBasic && !licence.isStarter && !licence.isLite
+  let locationVisibility =
+    options.filterLocation.visibility && !licence.isLite && !licence.isStarter
+  let buttonsVisibility =
+    options.filterButtons.visibility &&
+    features.value.packages
 
   let classFilter = {
     search: 'am-w30',
     employee: 'am-w20',
     location: 'am-w20',
-    buttons: 'am-w30'
+    buttons: 'am-w30',
   }
 
   if (!searchVisibility || !buttonsVisibility) {
-    classFilter.employee = (!searchVisibility && !buttonsVisibility) ? 'am-w50' : 'am-w35'
-    classFilter.location = (!searchVisibility && !buttonsVisibility) ? 'am-w50' : 'am-w35'
-    classFilter.search = !buttonsVisibility && !locationVisibility && !employeeVisibility ? 'am-w100' : 'am-w30'
+    classFilter.employee =
+      !searchVisibility && !buttonsVisibility ? 'am-w50' : 'am-w35'
+    classFilter.location =
+      !searchVisibility && !buttonsVisibility ? 'am-w50' : 'am-w35'
+    classFilter.search =
+      !buttonsVisibility && !locationVisibility && !employeeVisibility
+        ? 'am-w100'
+        : 'am-w30'
 
     if (!employeeVisibility) {
-      classFilter.location = (!searchVisibility && !buttonsVisibility) ? 'am-w100' : 'am-w70'
+      classFilter.location =
+        !searchVisibility && !buttonsVisibility ? 'am-w100' : 'am-w70'
     }
 
     if (!locationVisibility) {
-      classFilter.employee = (!searchVisibility && !buttonsVisibility) ? 'am-w100' : 'am-w70'
+      classFilter.employee =
+        !searchVisibility && !buttonsVisibility ? 'am-w100' : 'am-w70'
     }
   } else {
     if (!employeeVisibility) {
@@ -826,7 +1023,7 @@ let filterClassWidth = computed(() => {
       classFilter.employee = 'am-w40'
     }
 
-    if (!employeeVisibility && !locationVisibility ) {
+    if (!employeeVisibility && !locationVisibility) {
       classFilter.search = 'am-w70'
     }
   }
@@ -835,10 +1032,10 @@ let filterClassWidth = computed(() => {
 })
 
 // * Items location
-function itemLocations (locations, locationsOption) {
+function itemLocations(locations, locationsOption) {
   let arr = []
-  locationsOption.forEach(a => {
-    locations.forEach(b => {
+  locationsOption.forEach((a) => {
+    locations.forEach((b) => {
       if (a.id === b) {
         arr.push(a)
       }
@@ -852,16 +1049,20 @@ function itemLocations (locations, locationsOption) {
 let langKey = inject('langKey')
 let amLabels = inject('labels')
 
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
     let translations = amCustomize.value.cbf.categoryItemsList.translations
-    return translations && translations[label] && translations[label][langKey.value] ? translations[label][langKey.value] : amLabels[label]
+    return translations &&
+      translations[label] &&
+      translations[label][langKey.value]
+      ? translations[label][langKey.value]
+      : amLabels[label]
   })
 
   return computedLabel.value
 }
 
-function btnType (btnKey) {
+function btnType(btnKey) {
   let btnType = computed(() => {
     return amCustomize.value.cbf.categoryItemsList.options[btnKey].buttonType
   })
@@ -887,9 +1088,13 @@ let amFonts = inject('amFonts')
 
 function serviceDuration(seconds) {
   let hours = Math.floor(seconds / 3600)
-  let minutes = seconds / 60 % 60
+  let minutes = (seconds / 60) % 60
 
-  return (hours ? (hours + amLabels.h + ' ') : '') + ' ' + (minutes ? (minutes + amLabels.min) : '')
+  return (
+    (hours ? hours + amLabels.h + ' ' : '') +
+    ' ' +
+    (minutes ? minutes + amLabels.min : '')
+  )
 }
 
 // * Colors
@@ -897,14 +1102,37 @@ let amColors = inject('amColors')
 
 let cssVars = computed(() => {
   return {
-    '--am-c-fcil-text-op-10': useColorTransparency(amColors.value.colorSbText, 0.1),
-    '--am-c-fcil-main-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15),
-    '--am-c-fcil-card-text-op15': useColorTransparency(amColors.value.colorCardText, 0.15),
-    '--am-c-fcil-card-text-op80': useColorTransparency(amColors.value.colorCardText, 0.80),
-    '--am-c-fcil-primary-op20': useColorTransparency(amColors.value.colorPrimary, 0.20),
-    '--am-c-fcil-success-op20': useColorTransparency(amColors.value.colorSuccess, 0.20),
-    '--am-c-fcil-filter-text-op10': useColorTransparency(amColors.value.colorInpText, 0.1),
-    '--am-w-fcil-main': !customizeOptions.value.sidebar.visibility ? '100%' : 'calc(100% - 220px)'
+    '--am-c-fcil-text-op-10': useColorTransparency(
+      amColors.value.colorSbText,
+      0.1
+    ),
+    '--am-c-fcil-main-text-op15': useColorTransparency(
+      amColors.value.colorMainText,
+      0.15
+    ),
+    '--am-c-fcil-card-text-op15': useColorTransparency(
+      amColors.value.colorCardText,
+      0.15
+    ),
+    '--am-c-fcil-card-text-op80': useColorTransparency(
+      amColors.value.colorCardText,
+      0.8
+    ),
+    '--am-c-fcil-primary-op20': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.2
+    ),
+    '--am-c-fcil-success-op20': useColorTransparency(
+      amColors.value.colorSuccess,
+      0.2
+    ),
+    '--am-c-fcil-filter-text-op10': useColorTransparency(
+      amColors.value.colorInpText,
+      0.1
+    ),
+    '--am-w-fcil-main': !customizeOptions.value.sidebar.visibility
+      ? '100%'
+      : 'calc(100% - 220px)',
   }
 })
 
@@ -914,10 +1142,19 @@ let popupCssVars = computed(() => {
     '--am-c-fcil-employee-bgr': amColors.value.colorMainBgr,
     '--am-c-fcil-employee-heading': amColors.value.colorMainHeadingText,
     '--am-c-fcil-employee-text': amColors.value.colorMainText,
-    '--am-c-fcil-employee-text-op80': useColorTransparency(amColors.value.colorMainText, 0.80),
-    '--am-c-fcil-employee-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15),
+    '--am-c-fcil-employee-text-op80': useColorTransparency(
+      amColors.value.colorMainText,
+      0.8
+    ),
+    '--am-c-fcil-employee-text-op15': useColorTransparency(
+      amColors.value.colorMainText,
+      0.15
+    ),
     '--am-c-fcil-employee-primary': amColors.value.colorPrimary,
-    '--am-c-fcil-employee-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
+    '--am-c-fcil-employee-primary-op10': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.1
+    ),
     '--am-c-inp-border': amColors.value.colorInpBorder,
     '--am-c-main-text': amColors.value.colorMainText,
   }
@@ -926,13 +1163,13 @@ let popupCssVars = computed(() => {
 
 <script>
 export default {
-  name: "CategoryItemsList",
-  key: "categoryItemsList"
+  name: 'CategoryItemsList',
+  key: 'categoryItemsList',
 }
 </script>
 
 <style lang="scss">
-#amelia-app-backend-new #amelia-container.am-fc__wrapper  {
+#amelia-app-backend-new #amelia-container.am-fc__wrapper {
   // am-    amelia
   // -c-    color
   // -fcil- form category items list
@@ -984,11 +1221,12 @@ export default {
           line-height: 1.6;
           padding: 2px 8px;
           border-radius: 6px;
-          transition: all .2s ease-in-out;
+          transition: all 0.2s ease-in-out;
           cursor: pointer;
           color: var(--am-c-fcil-filter-placeholder);
 
-          &:hover, &.am-active {
+          &:hover,
+          &.am-active {
             color: var(--am-c-fcil-filter-text);
             background-color: var(--am-c-fcil-filter-inp-bgr);
           }
@@ -1057,7 +1295,7 @@ export default {
       padding: 16px 24px 16px;
     }
 
-    &__wrapper{
+    &__wrapper {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
@@ -1100,7 +1338,11 @@ export default {
         border-radius: 12px;
 
         &.am-package {
-          background: linear-gradient(95.75deg, var(--am-c-fcil-card-bgr) -110.8%,  var(--am-c-warning) 114.33%);
+          background: linear-gradient(
+            95.75deg,
+            var(--am-c-fcil-card-bgr) -110.8%,
+            var(--am-c-warning) 114.33%
+          );
           span {
             color: var(--am-c-fcil-card-bgr);
           }
@@ -1109,7 +1351,7 @@ export default {
         &.am-service {
           background-color: var(--am-c-fcil-success-op20);
           span {
-            color:  var(--am-c-fcil-success);
+            color: var(--am-c-fcil-success);
           }
         }
 
@@ -1124,7 +1366,7 @@ export default {
           font-weight: 400;
           line-height: 1;
 
-          &[class*="am-icon"] {
+          &[class*='am-icon'] {
             font-size: 24px;
           }
         }
@@ -1213,7 +1455,7 @@ export default {
             white-space: nowrap;
             overflow: hidden;
 
-            &[class*="am-icon"] {
+            &[class*='am-icon'] {
               flex: 0 0 auto;
               font-size: 24px;
               color: var(--am-c-fcil-primary);
@@ -1249,7 +1491,8 @@ export default {
             padding-right: 2px;
           }
 
-          &:first-child, &:last-child {
+          &:first-child,
+          &:last-child {
             &:after {
               display: none;
             }
@@ -1306,18 +1549,21 @@ export default {
     }
 
     .am-collapse-item {
-
       $count: 100;
       @for $i from 0 through $count {
         &:nth-child(#{$i + 1}) {
-          animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+          animation: 600ms
+            cubic-bezier(0.45, 1, 0.4, 1.2)
+            #{$i *
+            100}ms
+            am-animation-slide-up;
           animation-fill-mode: both;
         }
       }
 
       &__heading {
         padding: 8px;
-        transition-delay: .5s;
+        transition-delay: 0.5s;
 
         &-side {
           transition-delay: 0s;

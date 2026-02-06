@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -8,11 +9,11 @@ namespace AmeliaBooking\Application\Services\Notification;
 
 use AmeliaBooking\Application\Services\Booking\BookingApplicationService;
 use AmeliaBooking\Application\Services\Booking\EventApplicationService;
+use AmeliaBooking\Application\Services\Invoice\AbstractInvoiceApplicationService;
 use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\CustomerBooking;
-use AmeliaBooking\Domain\Entity\Booking\Event\Event;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\Notification\Notification;
 use AmeliaBooking\Domain\Factory\Booking\Appointment\CustomerBookingFactory;
@@ -24,6 +25,7 @@ use AmeliaBooking\Domain\ValueObjects\String\NotificationStatus;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
+use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ServiceRepository;
 use AmeliaBooking\Infrastructure\Repository\Notification\NotificationLogRepository;
 use AmeliaBooking\Infrastructure\Repository\Notification\NotificationRepository;
 use AmeliaBooking\Infrastructure\Repository\Notification\NotificationsToEntitiesRepository;
@@ -45,7 +47,7 @@ abstract class AbstractNotificationService
     /** @var string */
     protected $type;
 
-    /** @var array */
+    /** @var boolean */
     protected $sendNotifications = true;
 
     /** @var array */
@@ -62,6 +64,14 @@ abstract class AbstractNotificationService
         $this->container = $container;
 
         $this->type = $type;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
     }
 
     /**
@@ -114,7 +124,8 @@ abstract class AbstractNotificationService
         $notification,
         $logNotification,
         $bookingKey = null,
-        $allBookings = null
+        $allBookings = null,
+        $invoice = []
     );
 
 
@@ -137,15 +148,20 @@ abstract class AbstractNotificationService
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    protected function getByNameAndType($name, $type)
+    public function getByNameAndType($name, $type)
     {
         /** @var NotificationRepository $notificationRepo */
         $notificationRepo = $this->container->get('domain.notification.repository');
         /** @var NotificationsToEntitiesRepository $notificationEntitiesRepo */
         $notificationEntitiesRepo = $this->container->get('domain.notificationEntities.repository');
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+
+        // Check if custom notifications feature is enabled
+        $isCustomNotificationsEnabled = $settingsService->isFeatureEnabled('customNotifications');
 
         /** @var Collection $notifications */
-        $notifications = $notificationRepo->getByNameAndType($name, $type);
+        $notifications = $notificationRepo->getByNameAndType($name, $type, $isCustomNotificationsEnabled);
         /** @var Notification $notification */
         foreach ($notifications->getItems() as $notification) {
             if ($notification->getCustomName() !== null) {
@@ -184,7 +200,7 @@ abstract class AbstractNotificationService
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    public function sendAppointmentStatusNotifications($appointmentArray, $forcedStatusChange, $logNotification, $isBackend = false)
+    public function sendAppointmentStatusNotifications($appointmentArray, $forcedStatusChange, $logNotification, $isBackend = false, $sendInvoice = false)
     {
         /** @var BookingApplicationService $bookingAS */
         $bookingAS = $this->container->get('application.booking.booking.service');
@@ -201,7 +217,8 @@ abstract class AbstractNotificationService
         $appointmentArray['sendCF'] = true;
 
         $dontSend = $appointmentArray['type'] === Entities::EVENT && $appointmentArray['status'] === BookingStatus::REJECTED
-            && DateTimeService::getNowDateTimeObject() > DateTimeService::getCustomDateTimeObject($appointmentArray['periods'][count($appointmentArray['periods']) - 1]['periodStart']);
+            && DateTimeService::getNowDateTimeObject() >
+            DateTimeService::getCustomDateTimeObject($appointmentArray['periods'][count($appointmentArray['periods']) - 1]['periodStart']);
 
         /** @var Notification $providerNotification */
         foreach ($providerNotifications->getItems() as $providerNotification) {
@@ -242,7 +259,9 @@ abstract class AbstractNotificationService
                     $appointmentArray['isBackend'] = $isBackend;
                     // Notify each customer from customer bookings
                     foreach (array_keys($appointmentArray['bookings']) as $bookingKey) {
-                        if (!$appointmentArray['bookings'][$bookingKey]['isChangedStatus'] ||
+                        if (
+                            !$appointmentArray['bookings'][$bookingKey]['isChangedStatus'] ||
+                            $appointmentArray['bookings'][$bookingKey]['status'] === BookingStatus::WAITING ||
                             (
                                 isset($appointmentArray['bookings'][$bookingKey]['skipNotification']) &&
                                 $appointmentArray['bookings'][$bookingKey]['skipNotification']
@@ -251,106 +270,23 @@ abstract class AbstractNotificationService
                             continue;
                         }
 
+                        $invoice = null;
+                        if ($sendInvoice) {
+                            /** @var AbstractInvoiceApplicationService $invoiceService */
+                            $invoiceService = $this->container->get('application.invoice.service');
+
+                            $invoice = $invoiceService->generateInvoice($appointmentArray['bookings'][$bookingKey]['payments'][0]['id']);
+                        }
+
                         $this->sendNotification(
                             $appointmentArray,
                             $customerNotification,
                             $logNotification,
-                            $bookingKey
+                            $bookingKey,
+                            null,
+                            $invoice
                         );
                     }
-                }
-            }
-        }
-    }
-
-    /**
-     * @param array $appointmentArray
-     * @param array $bookingsArray
-     * @param bool $forcedStatusChange
-     *
-     * @throws QueryExecutionException
-     * @throws InvalidArgumentException
-     */
-    public function sendAppointmentEditedNotifications($appointmentArray, $bookingsArray, $forcedStatusChange)
-    {
-        /** @var BookingApplicationService $bookingAS */
-        $bookingAS = $this->container->get('application.booking.booking.service');
-
-        // Notify customers
-        if ($appointmentArray['notifyParticipants']) {
-            // If appointment status is 'pending', remove all 'approved' bookings because they can't receive
-            // notification that booking is 'approved' until appointment status is changed to 'approved'
-            if ($appointmentArray['status'] === 'pending') {
-                $bookingsArray = $bookingAS->removeBookingsByStatuses($bookingsArray, ['approved']);
-            }
-
-            // If appointment status is changed, because minimum capacity condition is satisfied or not,
-            // remove all 'approved' bookings because notification is already sent to them.
-            if ($forcedStatusChange === true) {
-                $bookingsArray = $bookingAS->removeBookingsByStatuses($bookingsArray, ['approved']);
-            }
-
-            if (!$appointmentArray['employee_changed']) {
-                $appointmentArray['bookings'] = $bookingsArray;
-            }
-
-            foreach (array_keys($appointmentArray['bookings']) as $bookingKey) {
-                /** @var Collection $customerNotifications */
-                $customerNotifications =
-                    $this->getByNameAndType(
-                        "customer_appointment_{$appointmentArray['bookings'][$bookingKey]['status']}",
-                        $this->type
-                    );
-
-                $sendDefault = $this->sendDefault($customerNotifications, $appointmentArray);
-                foreach ($customerNotifications->getItems() as $customerNotification) {
-                    if ($customerNotification->getStatus()->getValue() === NotificationStatus::ENABLED) {
-                        if (!$this->checkCustom($customerNotification, $appointmentArray, $sendDefault)) {
-                            continue;
-                        }
-                        if ((
-                                !$appointmentArray['bookings'][$bookingKey]['isChangedStatus'] &&
-                                !$appointmentArray['employee_changed']
-                            ) || (
-                                isset($appointmentArray['bookings'][$bookingKey]['skipNotification']) &&
-                                $appointmentArray['bookings'][$bookingKey]['skipNotification']
-                            )
-                        ) {
-                            continue;
-                        }
-
-                        if (!$appointmentArray['employee_changed']) {
-                            $this->sendNotification(
-                                $appointmentArray,
-                                $customerNotification,
-                                true,
-                                $bookingKey
-                            );
-                        }
-                    }
-                }
-            }
-        }
-        if ($appointmentArray['employee_changed']) {
-            // Notify provider
-            /** @var Collection $providerNotifications */
-            $providerNotifications = $this->getByNameAndType(
-                "provider_{$appointmentArray['type']}_{$appointmentArray['status']}",
-                $this->type
-            );
-
-            $sendDefault = $this->sendDefault($providerNotifications, $appointmentArray);
-
-            foreach ($providerNotifications->getItems() as $providerNotification) {
-                if ($providerNotification->getStatus()->getValue() === NotificationStatus::ENABLED) {
-                    if (!$this->checkCustom($providerNotification, $appointmentArray, $sendDefault)) {
-                        continue;
-                    }
-                    $this->sendNotification(
-                        $appointmentArray,
-                        $providerNotification,
-                        true
-                    );
                 }
             }
         }
@@ -442,8 +378,11 @@ abstract class AbstractNotificationService
                     }
                     // Notify each customer from customer bookings
                     foreach (array_keys($appointmentArray['bookings']) as $bookingKey) {
-                        if ($appointmentArray['bookings'][$bookingKey]['status'] === BookingStatus::APPROVED && $appointmentArray['status'] === BookingStatus::APPROVED &&
-                        ($appointmentArray['bookings'][$bookingKey]['isUpdated'] || $appointmentArray['type'] === Entities::EVENT)) {
+                        if (
+                            $appointmentArray['bookings'][$bookingKey]['status'] === BookingStatus::APPROVED &&
+                            $appointmentArray['status'] === BookingStatus::APPROVED &&
+                            ($appointmentArray['bookings'][$bookingKey]['isUpdated'] || $appointmentArray['type'] === Entities::EVENT)
+                        ) {
                             $this->sendNotification(
                                 $appointmentArray,
                                 $customerNotification,
@@ -487,28 +426,34 @@ abstract class AbstractNotificationService
      * @param array $appointmentArray
      * @param array $bookingArray
      * @param bool $logNotification
+     * @param array $invoice
      *
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    public function sendBookingAddedNotifications($appointmentArray, $bookingArray, $logNotification)
+    public function sendBookingAddedNotifications($appointmentArray, $bookingArray, $logNotification, $invoice = null)
     {
-
         /** @var SettingsService $settingsService */
         $settingsService = $this->container->get('domain.settings.service');
 
         $defaultStatus = BookingStatus::WAITING !== $bookingArray['status'] ? $appointmentArray['status'] : $bookingArray['status'];
 
-        if ($appointmentArray['type'] !== Entities::EVENT && $defaultStatus === BookingStatus::APPROVED) {
+        if ($appointmentArray['type'] !== Entities::EVENT && $defaultStatus === BookingStatus::APPROVED && empty($bookingArray['packageBookingFromBackend'])) {
 
             /** @var ServiceRepository $serviceRepository */
             $serviceRepository = $this->container->get('domain.bookable.service.repository');
 
             $service = $serviceRepository->getById($appointmentArray['serviceId']);
 
-            $defaultStatus = ($service->getSettings() && !empty(json_decode($service->getSettings()->getValue(), true)['general']['defaultAppointmentStatus'])) ?
-                json_decode($service->getSettings()->getValue(), true)['general']['defaultAppointmentStatus'] :
-                $settingsService->getSetting('general', 'defaultAppointmentStatus');
+            $defaultStatus =
+                ($service->getSettings() && !empty(json_decode($service->getSettings()->getValue(), true)['general']['defaultAppointmentStatus'])) ?
+                    json_decode($service->getSettings()->getValue(), true)['general']['defaultAppointmentStatus'] :
+                    $settingsService->getSetting('general', 'defaultAppointmentStatus');
+        } elseif (
+            $appointmentArray['type'] === Entities::EVENT &&
+            $settingsService->getSetting('general', 'defaultEventStatus') === BookingStatus::PENDING
+        ) {
+            $defaultStatus = $bookingArray['status'];
         }
 
         $customerNotifications = $this->getByNameAndType(
@@ -529,7 +474,9 @@ abstract class AbstractNotificationService
                     $appointmentArray,
                     $customerNotification,
                     $logNotification,
-                    array_search($bookingArray['id'], array_column($appointmentArray['bookings'], 'id'), true)
+                    $bookingArray ? array_search($bookingArray['id'], array_column($appointmentArray['bookings'], 'id'), true) : null,
+                    null,
+                    $invoice
                 );
             }
         }
@@ -571,7 +518,7 @@ abstract class AbstractNotificationService
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    public function sendCustomerBookingNotification($appointmentArray, $bookingArray)
+    public function sendCustomerBookingNotification($appointmentArray, $bookingArray, $sendInvoice = false)
     {
         // Notify customers
         if ($appointmentArray['notifyParticipants']) {
@@ -590,11 +537,22 @@ abstract class AbstractNotificationService
                         true
                     );
 
+                    $invoice = null;
+
+                    if ($sendInvoice) {
+                        /** @var AbstractInvoiceApplicationService $invoiceService */
+                        $invoiceService = $this->container->get('application.invoice.service');
+
+                        $invoice = $invoiceService->generateInvoice($appointmentArray['bookings'][$bookingKey]['payments'][0]['id']);
+                    }
+
                     $this->sendNotification(
                         $appointmentArray,
                         $customerNotification,
                         true,
-                        $bookingKey
+                        $bookingKey,
+                        null,
+                        $invoice
                     );
                 }
             }
@@ -710,7 +668,8 @@ abstract class AbstractNotificationService
         /** @var Notification $customerNotification */
         foreach ($customerNotifications->getItems() as $customerNotification) {
             // Check if notification is enabled and it is time to send notification
-            if ($customerNotification->getStatus()->getValue() === NotificationStatus::ENABLED &&
+            if (
+                $customerNotification->getStatus()->getValue() === NotificationStatus::ENABLED &&
                 $customerNotification->getTime() &&
                 DateTimeService::getNowDateTimeObject() >=
                 DateTimeService::getCustomDateTimeObject($customerNotification->getTime()->getValue())
@@ -725,7 +684,11 @@ abstract class AbstractNotificationService
 
                         break;
                     case Entities::EVENT:
-                        $reservations = $notificationLogRepo->getCustomersNextDayEvents($customerNotification->getId()->getValue(), $customerNotification->getCustomName() === null);
+                        $reservations =
+                            $notificationLogRepo->getCustomersNextDayEvents(
+                                $customerNotification->getId()->getValue(),
+                                $customerNotification->getCustomName() === null
+                            );
 
                         break;
                 }
@@ -756,7 +719,8 @@ abstract class AbstractNotificationService
         /** @var Notification $providerNotification */
         foreach ($providerNotifications->getItems() as $providerNotification) {
             // Check if notification is enabled and it is time to send notification
-            if ($providerNotification->getStatus()->getValue() === NotificationStatus::ENABLED &&
+            if (
+                $providerNotification->getStatus()->getValue() === NotificationStatus::ENABLED &&
                 $providerNotification->getTime() &&
                 DateTimeService::getNowDateTimeObject() >=
                 DateTimeService::getCustomDateTimeObject($providerNotification->getTime()->getValue())
@@ -771,7 +735,11 @@ abstract class AbstractNotificationService
 
                         break;
                     case Entities::EVENT:
-                        $reservations = $notificationLogRepo->getProvidersNextDayEvents($providerNotification->getId()->getValue(), $providerNotification->getCustomName() === null);
+                        $reservations =
+                            $notificationLogRepo->getProvidersNextDayEvents(
+                                $providerNotification->getId()->getValue(),
+                                $providerNotification->getCustomName() === null
+                            );
 
                         break;
                 }
@@ -784,10 +752,11 @@ abstract class AbstractNotificationService
                         continue;
                     }
 
-                    $bookingArray = $reservationArray['bookings'][count($reservationArray['bookings'])-1];
+                    $bookingArray = $reservationArray['bookings'][count($reservationArray['bookings']) - 1];
                     /** @var CustomerBooking $bookingObject */
                     $bookingObject    = $bookingArray ? CustomerBookingFactory::create($bookingArray) : null;
-                    $reservationStart = $entityType === Entities::APPOINTMENT ? $reservationArray['bookingStart'] : $reservationArray['periods'][0]['periodStart'];
+                    $reservationStart =
+                        $entityType === Entities::APPOINTMENT ? $reservationArray['bookingStart'] : $reservationArray['periods'][0]['periodStart'];
 
                     if ($this->pastMinimumTimeBeforeBooking($providerNotification, $bookingObject, $reservationStart)) {
                         continue;
@@ -896,16 +865,10 @@ abstract class AbstractNotificationService
                             $reservations->keys(),
                             [
                                 'fetchEventsPeriods'    => true,
-                                'fetchEventsTickets'    => false,
-                                'fetchEventsTags'       => false,
                                 'fetchEventsProviders'  => true,
-                                'fetchEventsImages'     => false,
-                                'fetchBookingsTickets'  => false,
-                                'fetchBookingsCoupons'  => true,
-                                'fetchApprovedBookings' => false,
-                                'fetchBookingsPayments' => true,
-                                'fetchBookingsUsers'    => false,
                                 'fetchBookings'         => true,
+                                'fetchBookingsCoupons'  => true,
+                                'fetchBookingsPayments' => true,
                             ]
                         ) : new Collection();
 
@@ -937,8 +900,10 @@ abstract class AbstractNotificationService
      */
     private function pastMinimumTimeBeforeBooking($notification, $booking, $appointmentStart)
     {
-        if ($booking && $booking->getCreated() && $notification->getMinimumTimeBeforeBooking() && $notification->getMinimumTimeBeforeBooking()->getValue() &&
-            json_decode($notification->getMinimumTimeBeforeBooking()->getValue())) {
+        if (
+            $booking && $booking->getCreated() && $notification->getMinimumTimeBeforeBooking() && $notification->getMinimumTimeBeforeBooking()->getValue() &&
+            json_decode($notification->getMinimumTimeBeforeBooking()->getValue())
+        ) {
             $minimumTime = json_decode($notification->getMinimumTimeBeforeBooking()->getValue(), true);
             $seconds     = 1;
             switch ($minimumTime['period']) {
@@ -946,21 +911,23 @@ abstract class AbstractNotificationService
                     $seconds = 60;
                     break;
                 case 'hours':
-                    $seconds = 60*60;
+                    $seconds = 60 * 60;
                     break;
                 case 'days':
-                    $seconds = 24*60*60;
+                    $seconds = 24 * 60 * 60;
                     break;
                 case 'weeks':
-                    $seconds = 7*24*60*60;
+                    $seconds = 7 * 24 * 60 * 60;
                     break;
                 case 'months':
-                    $seconds = 30*7*24*60*60;
+                    $seconds = 30 * 7 * 24 * 60 * 60;
                     break;
             }
-            $time = $minimumTime['amount']*$seconds;
-            if (DateTimeService::getCustomDateTimeObject($appointmentStart)->modify('-' . $time . ' second')
-                <= DateTimeService::getCustomDateTimeObject($booking->getCreated()->getValue()->format('Y-m-d H:i:s'))) {
+            $time = $minimumTime['amount'] * $seconds;
+            if (
+                DateTimeService::getCustomDateTimeObject($appointmentStart)->modify('-' . $time . ' second')
+                <= DateTimeService::getCustomDateTimeObject($booking->getCreated()->getValue()->format('Y-m-d H:i:s'))
+            ) {
                 return true;
             }
         }
@@ -997,11 +964,13 @@ abstract class AbstractNotificationService
             $data = $appointmentArray;
             $reservationObject = $bookingApplicationService->getReservationEntity($appointmentArray);
 
-            $reservationStart = $appointmentArray['type'] === Entities::APPOINTMENT ? $appointmentArray['bookingStart'] : $appointmentArray['periods'][0]['periodStart'];
+            $reservationStart =
+                $appointmentArray['type'] === Entities::APPOINTMENT ? $appointmentArray['bookingStart'] : $appointmentArray['periods'][0]['periodStart'];
 
             if ($notification->getSendTo()->getValue() === NotificationSendTo::PROVIDER) {
                 /** @var CustomerBooking $bookingObject */
-                $bookingObject = $reservationObject->getBookings()->getItem($reservationObject->getBookings()->keys()[$reservationObject->getBookings()->length()-1]);
+                $bookingObject =
+                    $reservationObject->getBookings()->getItem($reservationObject->getBookings()->keys()[$reservationObject->getBookings()->length() - 1]);
 
                 if ($this->pastMinimumTimeBeforeBooking($notification, $bookingObject, $reservationStart)) {
                     continue;
@@ -1028,7 +997,12 @@ abstract class AbstractNotificationService
                         continue;
                     }
 
-                    if ($notification->getContent() && $notification->getContent()->getValue() && strpos($notification->getContent()->getValue(), '%payment_link_') !== false) {
+                    if (
+                        (!array_key_exists('createPaymentLinks', $appointmentArray) || !empty($appointmentArray['createPaymentLinks'])) &&
+                        $notification->getContent() &&
+                        $notification->getContent()->getValue() &&
+                        strpos($notification->getContent()->getValue(), '%payment_link_') !== false
+                    ) {
                         $data['booking']  = $bookingObject ? $bookingObject->toArray() : $appointmentArray['bookings'][$bookingKey];
                         $data['customer'] =  $data['booking']['customer'];
                         $data[$appointmentArray['type']] = $appointmentArray;
@@ -1090,7 +1064,7 @@ abstract class AbstractNotificationService
      * @return bool
      *
      */
-    private function checkCustom($notification, $appointmentArray, $sendDefault)
+    public function checkCustom($notification, $appointmentArray, $sendDefault)
     {
         if (!$sendDefault && !$notification->getCustomName()) {
             return false;
@@ -1116,7 +1090,7 @@ abstract class AbstractNotificationService
      * @return bool
      *
      */
-    private function sendDefault($notifications, $appointmentArray)
+    public function sendDefault($notifications, $appointmentArray)
     {
         $entityId = $appointmentArray['type'] === Entities::EVENT ? $appointmentArray['id'] : $appointmentArray['serviceId'];
         $parentId = $appointmentArray['parentId'];
@@ -1138,7 +1112,7 @@ abstract class AbstractNotificationService
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    public function sendPackageNotifications($data, $logNotification, $notifyCustomers = true)
+    public function sendPackageNotifications($data, $logNotification, $notifyCustomers = true, $invoice = null)
     {
         /** @var Collection $customerNotifications */
         $customerNotifications = $this->getByNameAndType(
@@ -1153,7 +1127,10 @@ abstract class AbstractNotificationService
                 $this->sendNotification(
                     $data,
                     $customerNotification,
-                    $logNotification
+                    $logNotification,
+                    null,
+                    null,
+                    $invoice
                 );
             }
         }
@@ -1183,7 +1160,7 @@ abstract class AbstractNotificationService
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    public function sendCartNotifications($data, $logNotification, $notifyCustomers = true)
+    public function sendCartNotifications($data, $logNotification, $notifyCustomers = true, $invoice = null)
     {
         /** @var Collection $customerNotifications */
         $customerNotifications = $this->getByNameAndType(
@@ -1198,7 +1175,10 @@ abstract class AbstractNotificationService
                 $this->sendNotification(
                     $data,
                     $customerNotification,
-                    $logNotification
+                    $logNotification,
+                    null,
+                    null,
+                    $invoice
                 );
             }
         }

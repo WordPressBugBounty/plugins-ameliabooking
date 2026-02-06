@@ -37,7 +37,7 @@ abstract class AbstractCouponApplicationService
     /**
      * @param Coupon $coupon
      *
-     * @return boolean
+     * @return int
      *
      * @throws ContainerValueNotFoundException
      * @throws QueryExecutionException
@@ -88,6 +88,7 @@ abstract class AbstractCouponApplicationService
      * @param Coupon $coupon
      * @param int    $userId
      * @param bool   $inspectCoupon
+     * @param bool   $isPlaceholder
      *
      * @return boolean
      *
@@ -97,7 +98,7 @@ abstract class AbstractCouponApplicationService
      * @throws InvalidArgumentException
      * @throws CouponExpiredException
      */
-    abstract public function inspectCoupon($coupon, $userId, $inspectCoupon);
+    abstract public function inspectCoupon($coupon, $userId, $inspectCoupon, $isPlaceholder = false);
 
     /**
      * @param Coupon   $coupon
@@ -115,4 +116,13 @@ abstract class AbstractCouponApplicationService
      * @return Collection
      */
     abstract public function getAll();
+
+    /**
+     * @param array $criteria
+     *
+     * @return Collection
+     * @throws InvalidArgumentException
+     * @throws QueryExecutionException
+     */
+    abstract public function getAllByCriteria($criteria = []);
 }

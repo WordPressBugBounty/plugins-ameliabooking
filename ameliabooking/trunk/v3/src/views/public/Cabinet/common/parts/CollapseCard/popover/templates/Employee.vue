@@ -21,8 +21,7 @@
       </div>
       <div
         v-if="props.data.description"
-        class="am-cc__employee-desc"
-        :class="{'ql-description': props.data.description.includes('<!-- Content -->')}"
+        class="am-cc__employee-desc ql-description"
         v-html="props.data.description"
       ></div>
     </template>
@@ -49,8 +48,7 @@
         </div>
         <div
           v-if="descVisibility(empl.description)"
-          class="am-cc__employee-desc"
-          :class="{'ql-description': empl.description.includes('<!-- Content -->')}"
+          class="am-cc__employee-desc ql-description"
           v-html="empl.description"
         ></div>
       </template>

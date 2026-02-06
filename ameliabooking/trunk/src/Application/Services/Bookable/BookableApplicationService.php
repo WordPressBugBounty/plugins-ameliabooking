@@ -75,7 +75,6 @@ use Slim\Exception\ContainerValueNotFoundException;
  */
 class BookableApplicationService
 {
-
     private $container;
 
     /**
@@ -108,7 +107,7 @@ class BookableApplicationService
         $providerServices = $serviceRepository->getProviderServicesWithExtras($serviceId, $providerId);
 
         return $providerServices->keyExists($serviceId) ?
-            $providerServices->getItem($serviceId) : $serviceRepository->getById($serviceId);
+            $providerServices->getItem($serviceId) : $serviceRepository->getByIdWithExtras($serviceId);
     }
 
     /**
@@ -430,39 +429,85 @@ class BookableApplicationService
 
                     $updateProviderService = false;
 
-                    if ((!$providerService->getCustomPricing() && $service->getCustomPricing()) ||
+                    if (
+                        (!$providerService->getCustomPricing() && $service->getCustomPricing()) ||
                         ($providerService->getCustomPricing() && !$service->getCustomPricing())
                     ) {
                         $updateProviderService = true;
 
                         $providerService->setCustomPricing($service->getCustomPricing());
                     } elseif ($service->getCustomPricing() && $providerService->getCustomPricing()) {
+                        $updateProviderService = true;
+
                         $serviceCustomPricing = json_decode($service->getCustomPricing()->getValue(), true);
 
+                        if (empty($serviceCustomPricing['persons'])) {
+                            $serviceCustomPricing['persons'] = [];
+                        }
+
+                        if (empty($serviceCustomPricing['periods'])) {
+                            $serviceCustomPricing['periods'] = ['default' => [], 'custom' => []];
+                        }
+
                         $providerCustomPricing = json_decode($providerService->getCustomPricing()->getValue(), true);
+
+                        if (empty($providerCustomPricing['persons'])) {
+                            $providerCustomPricing['persons'] = [];
+                        }
+
+                        if (empty($providerCustomPricing['periods'])) {
+                            $providerCustomPricing['periods'] = ['default' => [], 'custom' => []];
+                        }
 
                         foreach ($serviceCustomPricing['durations'] as $duration => $durationData) {
                             if (array_key_exists($duration, $providerCustomPricing['durations'])) {
                                 $serviceCustomPricing['durations'][$duration] =
                                     $providerCustomPricing['durations'][$duration];
-                            } else {
-                                $updateProviderService = true;
                             }
                         }
 
-                        if ($serviceCustomPricing['enabled'] !== $providerCustomPricing['enabled']) {
-                            $updateProviderService = true;
+                        foreach ($serviceCustomPricing['persons'] as $range => $rangeData) {
+                            if (array_key_exists($range, $providerCustomPricing['persons'])) {
+                                $serviceCustomPricing['persons'][$range] =
+                                    $providerCustomPricing['persons'][$range];
+                            }
                         }
 
-                        $providerService->setCustomPricing(new Json(json_encode($serviceCustomPricing)));
-
-                        if (!$updateProviderService) {
-                            foreach ($providerCustomPricing['durations'] as $duration => $durationData) {
-                                if (!array_key_exists($duration, $serviceCustomPricing['durations'])) {
-                                    $updateProviderService = true;
+                        foreach ($serviceCustomPricing['periods']['default'] as $indexService => &$dayData) {
+                            foreach ($dayData['ranges'] as &$serviceRange) {
+                                foreach ($providerCustomPricing['periods']['default'] as $indexProvider => $providerData) {
+                                    if ($indexService === $indexProvider) {
+                                        foreach ($providerData['ranges'] as $providerRange) {
+                                            if ($providerRange['from'] === $serviceRange['from'] &&
+                                                $providerRange['to'] === $serviceRange['to']
+                                            ) {
+                                                $serviceRange['price'] = $providerRange['price'];
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
+
+                        foreach ($serviceCustomPricing['periods']['custom'] as &$dayData) {
+                            foreach ($dayData['ranges'] as &$serviceRange) {
+                                foreach ($providerCustomPricing['periods']['custom'] as $providerData) {
+                                    if ($dayData['dates']['start'] === $providerData['dates']['start'] &&
+                                        $dayData['dates']['end'] === $providerData['dates']['end']
+                                    ) {
+                                        foreach ($providerData['ranges'] as $providerRange) {
+                                            if ($providerRange['from'] === $serviceRange['from'] &&
+                                                $providerRange['to'] === $serviceRange['to']
+                                            ) {
+                                                $serviceRange['price'] = $providerRange['price'];
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        $providerService->setCustomPricing(new Json(json_encode($serviceCustomPricing)));
                     }
 
                     if ($updateProviderService) {
@@ -851,10 +896,11 @@ class BookableApplicationService
             /** @var PackageService $packageService */
             foreach ($package->getBookable()->getItems() as $packageService) {
                 if ($packageService->getService()->getId()->getValue() === $service->getId()->getValue()) {
-                    if (!$packageServiceProviderRepository->deleteByEntityId(
-                        $packageService->getId()->getValue(),
-                        'packageServiceId'
-                    ) ||
+                    if (
+                        !$packageServiceProviderRepository->deleteByEntityId(
+                            $packageService->getId()->getValue(),
+                            'packageServiceId'
+                        ) ||
                         !$packageServiceLocationRepository->deleteByEntityId(
                             $packageService->getId()->getValue(),
                             'packageServiceId'
@@ -939,11 +985,13 @@ class BookableApplicationService
 
         /** @var PackageCustomerService $packageCustomerService */
         foreach ($packageCustomerServices->getItems() as $packageCustomerService) {
-            if (!$customerBookingRepository->updateByEntityId(
-                $packageCustomerService->getId()->getValue(),
-                null,
-                'packageCustomerServiceId'
-            )) {
+            if (
+                !$customerBookingRepository->updateByEntityId(
+                    $packageCustomerService->getId()->getValue(),
+                    null,
+                    'packageCustomerServiceId'
+                )
+            ) {
                 return false;
             }
         }
@@ -966,10 +1014,11 @@ class BookableApplicationService
                 }
             }
 
-            if (!$packageCustomerServiceRepository->deleteByEntityId(
-                $packageCustomer->getId()->getValue(),
-                'packageCustomerId'
-            ) ||
+            if (
+                !$packageCustomerServiceRepository->deleteByEntityId(
+                    $packageCustomer->getId()->getValue(),
+                    'packageCustomerId'
+                ) ||
                 !$packageCustomerRepository->delete($packageCustomer->getId()->getValue())
             ) {
                 return false;
@@ -980,7 +1029,8 @@ class BookableApplicationService
         foreach ($package->getBookable()->getItems() as $packageService) {
             $packageServiceId = $packageService->getId()->getValue();
 
-            if (!$packageServiceLocationRepository->deleteByEntityId($packageServiceId, 'packageServiceId') ||
+            if (
+                !$packageServiceLocationRepository->deleteByEntityId($packageServiceId, 'packageServiceId') ||
                 !$packageServiceProviderRepository->deleteByEntityId($packageServiceId, 'packageServiceId')
             ) {
                 return false;
@@ -1053,47 +1103,6 @@ class BookableApplicationService
 
             /** @var Appointment $appointment */
             foreach ($appointments->getItems() as $appointment) {
-                $serviceId = $appointment->getServiceId()->getValue();
-
-                /** @var CustomerBooking $customerBooking */
-                foreach ($appointment->getBookings()->getItems() as $customerBooking) {
-                    if ($customerBooking->getPackageCustomerService() &&
-                        $packageCustomerServices->keyExists(
-                            $customerBooking->getPackageCustomerService()->getId()->getValue()
-                        )
-                    ) {
-                        /** @var PackageCustomerService $packageCustomerService */
-                        $packageCustomerService = $packageCustomerServices->getItem(
-                            $customerBooking->getPackageCustomerService()->getId()->getValue()
-                        );
-
-                        $packageId = $packageCustomerService->getPackageCustomer()->getPackageId()->getValue();
-
-                        $id = $packageCustomerService->getId()->getValue();
-
-                        $customerId = $customerBooking->getCustomerId()->getValue();
-
-                        if (!empty($packageData[$customerId][$serviceId][$packageId][$id])) {
-                            if ($packageData[$customerId][$serviceId][$packageId][$id]['available'] > 0) {
-                                $packageData[$customerId][$serviceId][$packageId][$id]['available']--;
-                            } else {
-                                foreach ($packageData[$customerId][$serviceId][$packageId] as $pcsId => $value) {
-                                    if ($value['available'] > 0) {
-                                        $packageData[$customerId][$serviceId][$packageId][$pcsId]['available']--;
-
-                                        $customerBooking->getPackageCustomerService()->setId(new Id($pcsId));
-
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            /** @var Appointment $appointment */
-            foreach ($appointments->getItems() as $appointment) {
                 if ($appointment->getBookings()->length() === 1) {
                     if (!$appointmentApplicationService->delete($appointment)) {
                         return false;
@@ -1109,7 +1118,8 @@ class BookableApplicationService
 
                     /** @var CustomerBooking $customerBooking */
                     foreach ($appointment->getBookings()->getItems() as $customerBooking) {
-                        if ($customerBooking->getPackageCustomerService() &&
+                        if (
+                            $customerBooking->getPackageCustomerService() &&
                             in_array(
                                 $customerBooking->getPackageCustomerService()->getId()->getValue(),
                                 $packageCustomerServices->keys()
@@ -1154,11 +1164,12 @@ class BookableApplicationService
             }
         }
 
-        if (!$packageCustomerServiceRepository->deleteByEntityId(
-            $packageCustomer->getId()->getValue(),
-            'packageCustomerId'
-        ) ||
-        !$packageCustomerRepository->delete($packageCustomer->getId()->getValue())
+        if (
+            !$packageCustomerServiceRepository->deleteByEntityId(
+                $packageCustomer->getId()->getValue(),
+                'packageCustomerId'
+            ) ||
+            !$packageCustomerRepository->delete($packageCustomer->getId()->getValue())
         ) {
             return false;
         }
@@ -1186,32 +1197,5 @@ class BookableApplicationService
         return
             $customerBookingExtraRepository->deleteByEntityId($extra->getId()->getValue(), 'extraId') &&
             $extraRepository->delete($extra->getId()->getValue());
-    }
-
-    /**
-     *
-     * @param Service $service
-     * @param int     $duration
-     *
-     * @return boolean
-     *
-     * @throws ContainerValueNotFoundException
-     * @throws InvalidArgumentException
-     */
-    public function modifyServicePriceByDuration($service, $duration)
-    {
-        if ($duration) {
-            $customPricing = $service->getCustomPricing()
-                ? json_decode($service->getCustomPricing()->getValue(), true) : null;
-
-            if ($customPricing &&
-                $customPricing['enabled'] &&
-                array_key_exists($duration, $customPricing['durations'])
-            ) {
-                $service->setPrice(
-                    new Price($customPricing['durations'][$duration]['price'])
-                );
-            }
-        }
     }
 }

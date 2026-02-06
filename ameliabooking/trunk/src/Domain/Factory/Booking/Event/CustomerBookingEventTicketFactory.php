@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -19,7 +20,6 @@ use AmeliaBooking\Domain\ValueObjects\Number\Integer\IntegerValue;
  */
 class CustomerBookingEventTicketFactory
 {
-
     /**
      * @param $data
      *
@@ -47,7 +47,7 @@ class CustomerBookingEventTicketFactory
         }
 
         if (isset($data['price'])) {
-            $customerBookingEventTicket->setPrice(new Price($data['price']));
+            $customerBookingEventTicket->setPrice(new Price((float)$data['price']));
         }
 
         return $customerBookingEventTicket;

@@ -37,7 +37,7 @@
       <p>
         {{ amLabels.payment_protected_policy }}
       </p>
-      <img :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/icons/stripeLogo.svg'" alt="Stripe policy">
+      <img :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/icons/stripe.svg'" alt="Stripe policy">
       <span>
         {{ amLabels.stripe }}
       </span>
@@ -393,7 +393,7 @@ async function stripePaymentCreate () {
 
 function stripePaymentActionRequired (response) {
   const { expressCheckoutEvent } = response || {}
-  
+
   stripeObject.handleNextAction({
     clientSecret: response.paymentIntentClientSecret
   }).then(

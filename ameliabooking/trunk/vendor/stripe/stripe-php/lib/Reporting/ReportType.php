@@ -2,19 +2,17 @@
 
 // File generated from our OpenAPI spec
 
-namespace AmeliaStripe\Reporting;
+namespace AmeliaVendor\Stripe\Reporting;
 
 /**
- * The Report Type resource corresponds to a particular type of report, such as the
- * &quot;Activity summary&quot; or &quot;Itemized payouts&quot; reports. These
- * objects are identified by an ID belonging to a set of enumerated values. See <a
- * href="https://stripe.com/docs/reporting/statements/api">API Access to Reports
- * documentation</a> for those Report Type IDs, along with required and optional
- * parameters.
+ * The Report Type resource corresponds to a particular type of report, such as
+ * the &quot;Activity summary&quot; or &quot;Itemized payouts&quot; reports. These objects are
+ * identified by an ID belonging to a set of enumerated values. See
+ * <a href="https://stripe.com/docs/reporting/statements/api">API Access to Reports documentation</a>
+ * for those Report Type IDs, along with required and optional parameters.
  *
- * Note that certain report types can only be run based on your live-mode data (not
- * test-mode data), and will error when queried without a <a
- * href="https://stripe.com/docs/keys#test-live-modes">live-mode API key</a>.
+ * Note that certain report types can only be run based on your live-mode data (not test-mode
+ * data), and will error when queried without a <a href="https://stripe.com/docs/keys#test-live-modes">live-mode API key</a>.
  *
  * @property string $id The <a href="https://stripe.com/docs/reporting/statements/api#available-report-types">ID of the Report Type</a>, such as <code>balance.summary.1</code>.
  * @property string $object String representing the object's type. Objects of the same type share the same value.
@@ -26,10 +24,44 @@ namespace AmeliaStripe\Reporting;
  * @property int $updated When this Report Type was latest updated. Measured in seconds since the Unix epoch.
  * @property int $version Version of the Report Type. Different versions report with the same ID will have the same purpose, but may take different run parameters or have different result schemas.
  */
-class ReportType extends \AmeliaStripe\ApiResource
+class ReportType extends \AmeliaVendor\Stripe\ApiResource
 {
     const OBJECT_NAME = 'reporting.report_type';
 
-    use \AmeliaStripe\ApiOperations\All;
-    use \AmeliaStripe\ApiOperations\Retrieve;
+    /**
+     * Returns a full list of Report Types.
+     *
+     * @param null|array{expand?: string[]} $params
+     * @param null|array|string $opts
+     *
+     * @return \AmeliaVendor\Stripe\Collection<ReportType> of ApiResources
+     *
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
+     */
+    public static function all($params = null, $opts = null)
+    {
+        $url = static::classUrl();
+
+        return static::_requestPage($url, \AmeliaVendor\Stripe\Collection::class, $params, $opts);
+    }
+
+    /**
+     * Retrieves the details of a Report Type. (Certain report types require a <a
+     * href="https://stripe.com/docs/keys#test-live-modes">live-mode API key</a>.).
+     *
+     * @param array|string $id the ID of the API resource to retrieve, or an options array containing an `id` key
+     * @param null|array|string $opts
+     *
+     * @return ReportType
+     *
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
+     */
+    public static function retrieve($id, $opts = null)
+    {
+        $opts = \AmeliaVendor\Stripe\Util\RequestOptions::parse($opts);
+        $instance = new static($id, $opts);
+        $instance->refresh();
+
+        return $instance;
+    }
 }

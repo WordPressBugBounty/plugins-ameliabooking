@@ -26,6 +26,7 @@ class UpdateProviderController extends Controller
         'lastName',
         'birthday',
         'email',
+        'employeeAppleCalendar',
         'externalId',
         'locationId',
         'avatar',
@@ -37,12 +38,16 @@ class UpdateProviderController extends Controller
         'serviceList',
         'weekDayList',
         'specialDayList',
+        'removedSpecialDayList',
         'timeOutList',
         'periodList',
         'dayOffList',
+        'removedDayOffList',
         'pictureFullPath',
         'pictureThumbPath',
         'zoomUserId',
+        'appleCalendarId',
+        'googleCalendarId',
         'googleCalendar',
         'outlookCalendar',
         'password',
@@ -51,6 +56,7 @@ class UpdateProviderController extends Controller
         'timeZone',
         'badgeId',
         'stripeConnect',
+        'show'
     ];
 
     /**

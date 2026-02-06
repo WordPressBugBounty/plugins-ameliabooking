@@ -2,9 +2,14 @@
 
 // File generated from our OpenAPI spec
 
-namespace AmeliaStripe\Service;
+namespace AmeliaVendor\Stripe\Service;
 
-class BalanceService extends \AmeliaStripe\Service\AbstractService
+/**
+ * @phpstan-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ *
+ * @psalm-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ */
+class BalanceService extends AbstractService
 {
     /**
      * Retrieves the current account balance, based on the authentication that was used
@@ -12,12 +17,12 @@ class BalanceService extends \AmeliaStripe\Service\AbstractService
      * href="/docs/connect/account-balances#accounting-for-negative-balances">Accounting
      * for negative balances</a>.
      *
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[]} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Balance
      *
-     * @return \AmeliaStripe\Balance
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function retrieve($params = null, $opts = null)
     {

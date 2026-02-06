@@ -59,6 +59,15 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
 
   let customFields = {}
 
+  let customerCustomFields = {}
+
+  let bookableTypeCustomFields = bookableType !== 'event' ? store.getters['entities/getCustomFields'] : store.getters['customFields/getFilteredCustomFieldsArray']
+
+  let allCustomFields = bookableTypeCustomFields.reduce((acc, field) => {
+    acc[field.id] = field
+    return acc
+  }, {})
+
   let availableCustomFields = bookableType !== 'event' ? store.getters['booking/getAvailableCustomFields'] : store.getters['customFields/getCustomFields']
 
   let attachments = bookableType !== 'event' ? store.getters['booking/getAttachments'] : {}
@@ -97,7 +106,8 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
         customFields[availableCustomFields[key].id] = {
           label: availableCustomFields[key].label,
           type: availableCustomFields[key].type,
-          value: availableCustomFields[key].value
+          value: availableCustomFields[key].value,
+          components: availableCustomFields[key].components
         }
       }
 
@@ -117,6 +127,13 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
         customFields[availableCustomFields[key].id].value = availableCustomFields[key].value ?
           useStringFromDate(new Date(availableCustomFields[key].value)) : null
       }
+    }
+  }
+
+  for (let key in customFields) {
+    if (allCustomFields[key].saveType === "customer") {
+      customerCustomFields[key] = customFields[key]
+      delete customFields[key]
     }
   }
 
@@ -153,6 +170,8 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
     })
   }
 
+  const gateway = bookableType !== 'event' ? store.getters['booking/getPaymentGateway'] : store.getters['payment/getPaymentGateway']
+
   let jsonData = {
     type: bookableType,
     bookings: [
@@ -168,15 +187,17 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
           lastName: bookableType !== 'event' ? store.getters['booking/getCustomerLastName'] : store.getters['customerInfo/getCustomerLastName'],
           email: bookableType !== 'event' ? store.getters['booking/getCustomerEmail'] : store.getters['customerInfo/getCustomerEmail'],
           phone: bookableType !== 'event' ? store.getters['booking/getCustomerPhone'] : store.getters['customerInfo/getCustomerPhone'],
+          subscribeToMailchimp: bookableType !== 'event' ? store.getters['booking/getCustomerSubscribe'] : store.getters['customerInfo/getCustomerSubscribe'],
           countryPhoneIso: bookableType !== 'event' ? store.getters['booking/getCustomerCountryPhoneIso'] : store.getters['customerInfo/getCustomerCountryPhoneIso'],
           externalId: bookableType !== 'event' ? store.getters['booking/getCustomerExternalId'] : store.getters['customerInfo/getCustomerExternalId'],
           translations: store.getters['booking/getCustomerTranslations'],
+          customFields: customerCustomFields,
         }
       }
     ],
     payment: Object.assign(
       {
-        gateway: bookableType !== 'event' ? store.getters['booking/getPaymentGateway'] : store.getters['payment/getPaymentGateway'],
+        gateway: gateway,
         currency: settings.payments.currencyCode,
       },
       {
@@ -217,6 +238,10 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
 
       jsonData.package = []
 
+      if (store.getters['appointmentWaitingListOptions/getIsWaitingListSlot']) {
+        jsonData.bookings[0].status = 'waiting'
+      }
+
       jsonData = Object.assign(jsonData, appointments[0])
 
       break
@@ -246,7 +271,9 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
 
       jsonData.bookings[0].persons = store.getters['persons/getPersons']
 
-      jsonData.bookings[0].utcOffset = settings.general.showClientTimeZone ? useUtcValueOffset(null) : null
+      jsonData.bookings[0].utcOffset = settings.general.showClientTimeZone ?
+          useUtcValueOffset(store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId'])['periods'][0]['periodStart']) :
+          null
 
       if (store.getters['eventWaitingListOptions/getAvailability']) {
         jsonData.bookings[0].status = 'waiting'
@@ -270,6 +297,8 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
     })
   }
 
+  const cacheComponentProps = bookingData.componentProps
+
   if (Object.keys(attachments).length && !mandatoryJson) {
     bookingData = new FormData()
 
@@ -286,6 +315,10 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
         'Content-Type': 'multipart/form-data'
       }
     }
+  }
+
+  if (gateway === 'mollie' || gateway === 'wc' || gateway === 'barion') {
+    sessionStorage.setItem("ameliaCacheData", JSON.stringify({request: cacheComponentProps, paymentMethod: gateway, type: bookableType}));
   }
 
   return {
@@ -432,6 +465,8 @@ function useBookingError (response, store) {
       message = bookableType === 'event' ? globalLabels['customer_already_booked_ev'] : globalLabels['customer_already_booked_app']
     } else if ('timeSlotUnavailable' in response.data && response.data.timeSlotUnavailable === true) {
       message = bookableType === 'event' ? globalLabels['maximum_capacity_reached'] : globalLabels['time_slot_unavailable']
+    }  else if ('customerBlocked' in response.data && response.data.customerBlocked === true) {
+      message = globalLabels['customer_blocked']
     } else if ('bookingsLimitReached' in response.data && response.data.bookingsLimitReached === true) {
       message = globalLabels['bookings_limit_reached']
     } else if ('eventBookingUnavailable' in response.data && response.data.eventBookingUnavailable === true) {
@@ -448,6 +483,8 @@ function useBookingError (response, store) {
       message = globalLabels['coupon_expired']
     } else if ('couponMissing' in response.data && response.data.couponMissing === true) {
       message = globalLabels['coupon_missing']
+    } else if ('emailRequired' in response.data && response.data.emailRequired === true) {
+      message = globalLabels['email_required']
     } else if ('paymentSuccessful' in response.data && response.data.paymentSuccessful === false) {
       if (response.data.message) {
         message = response.data.message
@@ -468,15 +505,6 @@ function useBookingError (response, store) {
   }
 
   return message
-}
-
-function saveStats (requestData) {
-  httpClient.post(
-    '/stats',
-    requestData
-  ).catch(e => {
-    console.log(e.message)
-  })
 }
 
 function useNotify (store, response, success, error) {
@@ -971,7 +999,6 @@ export {
   getErrorMessage,
   useBookingError,
   useNotify,
-  saveStats,
   useAppointmentBookingData,
   usePackageBookingData
 }

@@ -7,6 +7,7 @@ use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
 use AmeliaBooking\Domain\Entity\Booking\Event\Event;
 use AmeliaBooking\Domain\Entity\User\Provider;
+use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use DateTime;
@@ -20,6 +21,9 @@ use Interop\Container\Exception\ContainerException;
  */
 abstract class AbstractGoogleCalendarService
 {
+    /** @var Container $container */
+    protected $container;
+
     public static $providersGoogleEvents = [];
 
     /**
@@ -37,7 +41,7 @@ abstract class AbstractGoogleCalendarService
      *
      * @param $authCode
      * @param $redirectUri
-     * @return string
+     * @return array|string
      */
     abstract public function fetchAccessTokenWithAuthCode($authCode, $redirectUri);
 

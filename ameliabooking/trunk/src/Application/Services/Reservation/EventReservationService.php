@@ -3,9 +3,12 @@
 namespace AmeliaBooking\Application\Services\Reservation;
 
 use AmeliaBooking\Application\Commands\CommandResult;
+use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Services\Booking\EventApplicationService;
 use AmeliaBooking\Application\Services\Coupon\CouponApplicationService;
 use AmeliaBooking\Application\Services\Deposit\AbstractDepositApplicationService;
+use AmeliaBooking\Application\Services\Helper\HelperService;
+use AmeliaBooking\Application\Services\QrCode\QrCodeApplicationService;
 use AmeliaBooking\Application\Services\Tax\TaxApplicationService;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\BookingCancellationException;
@@ -35,6 +38,7 @@ use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Factory\Booking\Appointment\CustomerBookingFactory;
 use AmeliaBooking\Domain\Factory\Booking\Event\CustomerBookingEventPeriodFactory;
 use AmeliaBooking\Domain\Factory\Booking\Event\CustomerBookingEventTicketFactory;
+use AmeliaBooking\Domain\Factory\Booking\Event\EventFactory;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\Services\Reservation\ReservationServiceInterface;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
@@ -42,6 +46,7 @@ use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
 use AmeliaBooking\Domain\ValueObjects\Number\Float\Price;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\IntegerValue;
+use AmeliaBooking\Domain\ValueObjects\String\AmountType;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentType;
 use AmeliaBooking\Domain\ValueObjects\String\Token;
@@ -129,6 +134,7 @@ class EventReservationService extends AbstractReservationService
                 'fetchEventsPeriods'    => true,
                 'fetchEventsTickets'    => true,
                 'fetchApprovedBookings' => true,
+                'fetchBookings'         => true,
                 'fetchBookingsTickets'  => true,
                 'fetchEventsProviders'  => true,
             ]
@@ -138,8 +144,11 @@ class EventReservationService extends AbstractReservationService
             $event->setCustomTickets($eventApplicationService->getTicketsPriceByDateRange($event->getCustomTickets()));
         }
 
-        $bookingArray =  array_merge($eventData['bookings'][0], empty($eventData['bookings'][0]['status']) ?
-            ['status' => BookingStatus::APPROVED] : ['status' => $eventData['bookings'][0]['status']]);
+        $bookingArray =  array_merge(
+            $eventData['bookings'][0],
+            empty($eventData['bookings'][0]['status']) ?
+            ['status' => BookingStatus::APPROVED] : ['status' => $eventData['bookings'][0]['status']]
+        );
 
         $bookingArray = apply_filters('amelia_before_event_booking_saved_filter', $bookingArray, $event ? $event->toArray() : null);
 
@@ -154,7 +163,7 @@ class EventReservationService extends AbstractReservationService
         $bookingStatus = empty($eventData['bookings'][0]['status']) ? BookingStatus::APPROVED : $eventData['bookings'][0]['status'];
 
         if (!empty($eventData['payment']['gateway'])) {
-            $bookingStatus = in_array($eventData['payment']['gateway'], [PaymentType::MOLLIE, PaymentType::SQUARE]) ?
+            $bookingStatus = in_array($eventData['payment']['gateway'], [PaymentType::MOLLIE, PaymentType::BARION]) ?
                 BookingStatus::PENDING : (empty($eventData['bookings'][0]['status']) ? BookingStatus::APPROVED : $eventData['bookings'][0]['status']);
 
             if (!empty($eventData['payment']['orderStatus'])) {
@@ -176,7 +185,8 @@ class EventReservationService extends AbstractReservationService
             if ($customerBooking->getStatus()->getValue() === BookingStatus::APPROVED) {
                 $personsCount += $customerBooking->getPersons()->getValue();
             }
-            if ($customerBooking->getStatus()->getValue() !== BookingStatus::CANCELED &&
+            if (
+                $customerBooking->getStatus()->getValue() !== BookingStatus::CANCELED &&
                 !$event->getBookMultipleTimes()->getValue() &&
                 $booking->getCustomerId() &&
                 $booking->getCustomerId()->getValue() === $customerBooking->getCustomerId()->getValue()
@@ -192,7 +202,8 @@ class EventReservationService extends AbstractReservationService
 
         $limitPerCustomerEvents = $settingsDS->getSetting('roles', 'limitPerCustomerEvent');
 
-        if (!empty($limitPerCustomerEvents) &&
+        if (
+            !empty($limitPerCustomerEvents) &&
             $limitPerCustomerEvents['enabled'] &&
             empty($eventData['isBackendOrCabinet'])
         ) {
@@ -221,7 +232,8 @@ class EventReservationService extends AbstractReservationService
             $reservation->getLoggedInUser() &&
             $reservation->getLoggedInUser()->getType() === AbstractUser::USER_ROLE_PROVIDER;
 
-        if ($reservation->hasAvailabilityValidation()->getValue() &&
+        if (
+            $reservation->hasAvailabilityValidation()->getValue() &&
             $isCustomer &&
             !$isProvider &&
             !$this->isBookable($event, $booking, DateTimeService::getNowDateTimeObject())
@@ -234,10 +246,10 @@ class EventReservationService extends AbstractReservationService
 
         $booking->setAggregatedPrice(new BooleanValueObject($event->getAggregatedPrice() ? $event->getAggregatedPrice()->getValue() : true));
 
-        $paymentAmount = $this->getPaymentAmount($booking, $event);
+        $paymentAmount = $this->getPaymentAmount($booking, $event)['price'];
 
         $applyDeposit =
-            $eventData['bookings'][0]['deposit'] && $eventData['payment']['gateway'] !== PaymentType::ON_SITE;
+            !empty($eventData['bookings'][0]['deposit']) && $eventData['payment']['gateway'] !== PaymentType::ON_SITE;
 
         if ($applyDeposit) {
             $personsCount = $booking->getPersons()->getValue();
@@ -314,6 +326,21 @@ class EventReservationService extends AbstractReservationService
 
             $booking->setId(new Id($bookingId));
 
+            // BEGIN QR Codes generation for event booking
+            if ($settingsDS->isFeatureEnabled('eTickets')) {
+                /** @var QrCodeApplicationService $qrCodeApplicationService */
+                $qrCodeApplicationService = $this->container->get('application.qrcode.service');
+
+                $qrCodes = $qrCodeApplicationService->createQrCodeEventData($event, $booking);
+
+
+                if (!empty($qrCodes)) {
+                    $booking->setQrCodes(new Json(json_encode($qrCodes)));
+                    $bookingRepository->update($bookingId, $booking);
+                }
+            }
+            // END QR Codes generation
+
             /** @var Payment $payment */
             $payment = $this->addPayment(
                 $booking->getId()->getValue(),
@@ -383,6 +410,14 @@ class EventReservationService extends AbstractReservationService
         if ($booking->getCustomer()) {
             $reservation->setCustomer($booking->getCustomer());
         }
+
+        /** @var Collection $bookings */
+        $bookings = new Collection();
+
+        $bookings->addItem($booking);
+
+        $event->setBookings($bookings);
+
         $reservation->setBookable($event);
         $reservation->setBooking($booking);
         $reservation->setReservation($event);
@@ -394,6 +429,7 @@ class EventReservationService extends AbstractReservationService
     /**
      * @param CustomerBooking $booking
      * @param string          $requestedStatus
+     * @param bool            $inspectCancellationTime
      *
      * @return array
      *
@@ -403,17 +439,17 @@ class EventReservationService extends AbstractReservationService
      * @throws QueryExecutionException
      * @throws BookingCancellationException
      */
-    public function updateStatus($booking, $requestedStatus)
+    public function updateStatus($booking, $requestedStatus, $inspectCancellationTime = true)
     {
         /** @var CustomerBookingRepository $bookingRepository */
         $bookingRepository = $this->container->get('domain.booking.customerBooking.repository');
         /** @var SettingsService $settingsDS */
         $settingsDS = $this->container->get('domain.settings.service');
 
-        /** @var Event $reservation */
+        /** @var Event $event */
         $event = $this->getReservationByBookingId($booking->getId()->getValue());
 
-        if ($requestedStatus === BookingStatus::CANCELED) {
+        if ($requestedStatus === BookingStatus::CANCELED && $inspectCancellationTime) {
              $minimumCancelTimeInSeconds = $settingsDS
                 ->getEntitySettings($event->getSettings())
                 ->getGeneralSettings()
@@ -548,7 +584,9 @@ class EventReservationService extends AbstractReservationService
                         'lastName'        => $customer->getLastName()->getValue(),
                         'phone'           => $customer->getPhone()->getValue(),
                         'countryPhoneIso' => $customer->getCountryPhoneIso() ?
-                            $customer->getCountryPhoneIso()->getValue() : null
+                            $customer->getCountryPhoneIso()->getValue() : null,
+                        'customFields'    => $customer->getCustomFields() ?
+                            json_decode($customer->getCustomFields()->getValue(), true) : null,
                     ],
                     'info'         => $booking->getInfo()->getValue(),
                     'persons'      => $booking->getPersons()->getValue(),
@@ -790,7 +828,8 @@ class EventReservationService extends AbstractReservationService
 
                     /** @var CustomerBookingEventTicket $ticketBooking */
                     foreach ($newBooking->getTicketsBooking()->getItems() as $ticketBooking) {
-                        if ($ticketBooking->getEventTicketId()->getValue() === $ticketId &&
+                        if (
+                            $ticketBooking->getEventTicketId()->getValue() === $ticketId &&
                             $ticketBooking->getPersons() &&
                             $ticketBooking->getPersons()->getValue() &&
                             (!$ticketCapacity || !$ticket->getEnabled()->getValue())
@@ -804,7 +843,7 @@ class EventReservationService extends AbstractReservationService
                     $hasCapacity = $hasCapacity || $ticketCapacity;
                 }
             }
-        } else if ($reservation->getMaxCustomCapacity()) {
+        } elseif ($reservation->getMaxCustomCapacity()) {
             $availableTicketsSpots = $reservation->getMaxCustomCapacity()->getValue();
             $reservedTicketsSpots  = 0;
             /** @var CustomerBooking $booking */
@@ -825,7 +864,6 @@ class EventReservationService extends AbstractReservationService
             }
 
             $hasCapacity = ($newBooking ? $reservedTicketsSpots <= $availableTicketsSpots : $reservedTicketsSpots < $availableTicketsSpots);
-
         } else {
             $persons = 0;
 
@@ -855,10 +893,9 @@ class EventReservationService extends AbstractReservationService
 
         /** @var SettingsService $settingsDS */
         $settingsDS          = $this->container->get('domain.settings.service');
-        $waitingListSettings = $settingsDS->getSetting('appointments', 'waitingListEvents');
 
         if (
-            $waitingListSettings['enabled'] && $eventSettings && !empty($eventSettings['waitingList']) &&
+            $settingsDS->isFeatureEnabled('waitingList') && $eventSettings && !empty($eventSettings['waitingList']) &&
             $eventSettings['waitingList']['enabled']
         ) {
             $waitingCustomers = 0;
@@ -889,7 +926,6 @@ class EventReservationService extends AbstractReservationService
                 if ($reservation->getMaxCustomCapacity()) {
                     $hasWaitingList = $eventSettings['waitingList']['maxCapacity'] > $waitingCustomers;
                 }
-
             } else {
                 $hasWaitingList = $eventSettings['waitingList']['maxCapacity'] > $waitingCustomers;
             }
@@ -901,20 +937,20 @@ class EventReservationService extends AbstractReservationService
 
         return $dateTime > $bookingOpens &&
             $dateTime < $bookingCloses &&
-            ($hasCapacity || $hasWaitingList) &&
+            ($hasCapacity || ($hasWaitingList && $newBooking && $newBooking->getStatus()->getValue() === BookingStatus::WAITING)) &&
             in_array($reservation->getStatus()->getValue(), [BookingStatus::APPROVED, BookingStatus::PENDING], true);
     }
 
     /**
      * @param CustomerBooking $booking
      * @param Event           $bookable
-     * @param string|null     $reduction
+     * @param bool            $invoice
      *
-     * @return float
+     * @return array
      *
      * @throws InvalidArgumentException
      */
-    public function getPaymentAmount($booking, $bookable, $reduction = null)
+    public function getPaymentAmount($booking, $bookable, $invoice = false)
     {
         /** @var TaxApplicationService $taxApplicationService */
         $taxApplicationService = $this->container->get('application.tax.service');
@@ -922,10 +958,18 @@ class EventReservationService extends AbstractReservationService
         /** @var Tax $eventTax */
         $eventTax = $this->getTax($booking->getTax());
 
-        $price = (float)$bookable->getPrice()->getValue() *
-            ($this->isAggregatedPrice($bookable) ? $booking->getPersons()->getValue() : 1);
+        $persons = $booking->getPersons()->getValue();
 
-        if ($booking->getTicketsBooking() &&
+        $unitPrice = (float)$bookable->getPrice()->getValue();
+
+        $price = $unitPrice * ($this->isAggregatedPrice($bookable) ? $persons : 1);
+
+        $taxAmount = 0;
+
+        $ticketsTax = [];
+
+        if (
+            $booking->getTicketsBooking() &&
             $booking->getTicketsBooking()->length() &&
             $bookable->getCustomPricing() &&
             $bookable->getCustomPricing()->getValue()
@@ -947,17 +991,36 @@ class EventReservationService extends AbstractReservationService
                 $ticketPrice = $ticket->getDateRangePrice() ?
                     $ticket->getDateRangePrice()->getValue() : $ticket->getPrice()->getValue();
 
-                $ticketSumPrice += $bookingToEventTicket->getPersons() ?
+                $ticketPersons = $bookingToEventTicket->getPersons() ?
                     ($booking->getAggregatedPrice()->getValue() ? $bookingToEventTicket->getPersons()->getValue() : 1)
-                    * $ticketPrice : 0;
+                    : 0;
+
+                $ticketSubtotal = $ticketPersons * $ticketPrice;
+
+                $ticketSumPrice += $ticketSubtotal;
+
+                if ($bookingToEventTicket->getId()) {
+                    if ($eventTax && $eventTax->getExcluded()->getValue()) {
+                        $ticketsTax[$bookingToEventTicket->getId()->getValue()] = $this->getTaxAmount($eventTax, $ticketSubtotal);
+                    } elseif ($eventTax && !$eventTax->getExcluded()->getValue()) {
+                        $ticketsTax[$bookingToEventTicket->getId()->getValue()] =
+                            $this->getTaxAmount($eventTax, $taxApplicationService->getBasePrice($ticketSubtotal, $eventTax));
+                    } else {
+                        $ticketsTax[$bookingToEventTicket->getId()->getValue()] = 0;
+                    }
+                }
             }
 
             $price = $ticketSumPrice;
         }
 
-        if ($eventTax && !$eventTax->getExcluded()->getValue() && $booking->getCoupon()) {
+        if ($eventTax && !$eventTax->getExcluded()->getValue() && ($booking->getCoupon() || $invoice)) {
             $price = $taxApplicationService->getBasePrice($price, $eventTax);
         }
+
+        $priceWithoutCoupon = $price;
+
+        $subtotalPrice = $price;
 
         $subtraction = 0;
 
@@ -976,15 +1039,39 @@ class EventReservationService extends AbstractReservationService
             $price = max($price - $subtraction, 0);
         }
 
-        if ($eventTax && ($eventTax->getExcluded()->getValue() || $subtraction)) {
-            $price += $this->getTaxAmount($eventTax, $price);
+        if ($eventTax && ($eventTax->getExcluded()->getValue() || $subtraction || $invoice)) {
+            $taxAmount = $this->getTaxAmount($eventTax, $price);
+            $price    += $taxAmount;
+            $priceWithoutCoupon += $taxAmount;
         }
 
         $price = (float)max(round($price, 2), 0);
 
-        return $reduction === null ?
-            apply_filters('amelia_modify_payment_amount', $price, $booking)
-            : $reductionAmount[$reduction];
+        if (!$price) {
+            foreach ($ticketsTax as $ticketId => $ticketTax) {
+                $ticketsTax[$ticketId] = 0;
+            }
+        }
+
+        return [
+            'price'        => apply_filters('amelia_modify_payment_amount', $price, $booking),
+            'discount'     => $reductionAmount['discount'],
+            'deduction'    => $reductionAmount['deduction'],
+            'total'        => $priceWithoutCoupon,
+            'unit_price'   => $unitPrice,
+            'qty'          => $this->isAggregatedPrice($bookable) ? $persons : 1,
+            'bookable'     => $subtotalPrice,
+            'subtotal'     => $subtotalPrice,
+            'tax'          => $eventTax ? $this->getTaxAmount($eventTax, $subtotalPrice) : 0,
+            'total_tax'    => $taxAmount,
+            'tax_rate'     => $eventTax ? $this->getTaxRate($eventTax) : '',
+            'tax_type'     => $eventTax ? $eventTax->getType()->getValue() : '',
+            'tax_excluded' => $eventTax ? $eventTax->getExcluded()->getValue() : false,
+            'tickets_tax'  => $ticketsTax,
+            'full_discount' =>
+                $this->getCouponDiscountAmount($booking->getCoupon(), $priceWithoutCoupon) +
+                ($booking->getCoupon() && $booking->getCoupon()->getDeduction() ? (float)$booking->getCoupon()->getDeduction()->getValue() : 0)
+        ];
     }
 
     /**
@@ -1002,7 +1089,7 @@ class EventReservationService extends AbstractReservationService
         /** @var Event $bookable */
         $bookable = $reservation->getBookable();
 
-        $paymentAmount = $this->getPaymentAmount($reservation->getBooking(), $bookable);
+        $paymentAmount = $this->getPaymentAmount($reservation->getBooking(), $bookable)['price'];
 
         if ($reservation->getApplyDeposit()->getValue()) {
             $personsCount = $reservation->getBooking()->getPersons()->getValue();
@@ -1029,17 +1116,18 @@ class EventReservationService extends AbstractReservationService
 
     /**
      * @param Reservation $reservation
+     * @param bool        $usePayment
      *
      * @return array
      *
      * @throws InvalidArgumentException
      */
-    public function getProvidersPaymentAmount($reservation)
+    public function getProvidersPaymentAmount($reservation, $usePayment = true)
     {
         $amountData = [];
 
         /** @var Payment $payment */
-        $payment = $reservation->getBooking()->getPayments()->getItem(0);
+        $payment = $usePayment ? $reservation->getBooking()->getPayments()->getItem(0) : null;
 
         /** @var Event $event */
         $event = $reservation->getBookable();
@@ -1047,7 +1135,7 @@ class EventReservationService extends AbstractReservationService
         /** @var Provider $provider */
         foreach ($event->getProviders()->getItems() as $provider) {
             $amountData[$provider->getId()->getValue()][] = [
-                'paymentId' => $payment->getId()->getValue(),
+                'paymentId' => $payment ? $payment->getId()->getValue() : null,
                 'amount'    => $this->getReservationPaymentAmount($reservation),
             ];
         }
@@ -1062,7 +1150,6 @@ class EventReservationService extends AbstractReservationService
      * @return CommandResult
      * @throws InvalidArgumentException
      * @throws Exception
-     * @throws \Interop\Container\Exception\ContainerException
      */
     public function getReservationByPayment($payment, $fromLink = false)
     {
@@ -1118,10 +1205,11 @@ class EventReservationService extends AbstractReservationService
                 'paymentId'                => $payment->getId()->getValue(),
                 'packageCustomerId'        => null,
                 'payment'                  => [
-                    'id'           => $payment->getId()->getValue(),
-                    'amount'       => $payment->getAmount()->getValue(),
-                    'gateway'      => $payment->getGateway()->getName()->getValue(),
-                    'gatewayTitle' => $payment->getGatewayTitle() ? $payment->getGatewayTitle()->getValue() : '',
+                    'id'            => $payment->getId()->getValue(),
+                    'amount'        => $payment->getAmount()->getValue(),
+                    'gateway'       => $payment->getGateway()->getName()->getValue(),
+                    'gatewayTitle'  => $payment->getGatewayTitle() ? $payment->getGatewayTitle()->getValue() : '',
+                    'invoiceNumber' => $payment->getInvoiceNumber() ? $payment->getInvoiceNumber()->getValue() : '',
                 ],
             ]
         );
@@ -1135,7 +1223,6 @@ class EventReservationService extends AbstractReservationService
      * @return CommandResult
      * @throws InvalidArgumentException
      * @throws Exception
-     * @throws \Interop\Container\Exception\ContainerException
      */
     public function getBookingResultByBookingId($bookingId)
     {
@@ -1210,9 +1297,7 @@ class EventReservationService extends AbstractReservationService
         /** @var SettingsService $settingsService */
         $settingsService = $this->container->get('domain.settings.service');
 
-        $taxesSettings = $settingsService->getSetting('payments', 'taxes');
-
-        if ($taxesSettings['enabled']) {
+        if ($settingsService->isFeatureEnabled('tax')) {
             /** @var Collection $taxes */
             $taxes = $taxAS->getAll();
 
@@ -1222,5 +1307,74 @@ class EventReservationService extends AbstractReservationService
                 $taxes
             );
         }
+    }
+
+    /**
+     * @param int $bookingId
+     *
+     * @return array
+     *
+     * @throws AccessDeniedException
+     * @throws InvalidArgumentException
+     * @throws QueryExecutionException
+     */
+    public function deleteBooking($bookingId)
+    {
+        /** @var CustomerBookingRepository $customerBookingRepository */
+        $customerBookingRepository = $this->container->get('domain.booking.customerBooking.repository');
+
+        /** @var EventApplicationService $eventApplicationService */
+        $eventApplicationService = $this->container->get('application.booking.event.service');
+
+        /** @var CustomerBooking $customerBooking */
+        $customerBooking = $customerBookingRepository->getById((int)$bookingId);
+
+        if (!$customerBooking) {
+            throw new \Exception('Booking not found');
+        }
+
+        $customerBookingRepository->beginTransaction();
+
+        if (!$eventApplicationService->deleteEventBooking($customerBooking)) {
+            $customerBookingRepository->rollback();
+            throw new \Exception('Could not delete booking');
+        }
+
+        $customerBookingRepository->commit();
+
+        return [];
+    }
+
+    /**
+     * @param array $data
+     * @param bool  $invoices
+     *
+     * @return array
+     * @throws InvalidArgumentException
+     */
+    public function getPaymentSummary($data, $invoices)
+    {
+        /** @var Event $bookable */
+        $bookable = EventFactory::create(
+            [
+                'price'           => $data['bookedPrice'] * ($data['aggregatedPrice'] ? $data['persons'] : 1),
+                'aggregatedPrice' => $data['aggregatedPrice'],
+                'customPricing'   => false,
+                'customTickets'   => [],
+            ]
+        );
+
+        /** @var CustomerBooking $booking */
+        $booking = CustomerBookingFactory::create(
+            [
+                'persons'         => 1,
+                'aggregatedPrice' => $data['aggregatedPrice'],
+                'ticketsData'     => null,
+                'coupon'          => $data['coupon'],
+                'tax'             => $data['bookedTax'],
+            ]
+        );
+
+        return $this->getCommonPaymentSummary($booking, $bookable, $data, $invoices);
     }
 }

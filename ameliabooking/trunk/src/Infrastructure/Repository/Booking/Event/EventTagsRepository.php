@@ -17,13 +17,12 @@ use AmeliaBooking\Infrastructure\Repository\AbstractRepository;
  */
 class EventTagsRepository extends AbstractRepository implements EventRepositoryInterface
 {
-
-    const FACTORY = EventTagFactory::class;
+    public const FACTORY = EventTagFactory::class;
 
     /**
      * @param EventTag $entity
      *
-     * @return bool
+     * @return int
      * @throws QueryExecutionException
      */
     public function add($entity)
@@ -99,7 +98,7 @@ class EventTagsRepository extends AbstractRepository implements EventRepositoryI
     }
 
     /**
-     * @param int eventId
+     * @param int $eventId
      *
      * @return bool
      * @throws QueryExecutionException
@@ -125,14 +124,14 @@ class EventTagsRepository extends AbstractRepository implements EventRepositoryI
     public function getAllDistinctByCriteria($criteria)
     {
         $params = [];
-        $where = [];
+        $where  = [];
 
         if (!empty($criteria['eventIds'])) {
             $queryIds = [];
 
             foreach ((array)$criteria['eventIds'] as $index => $value) {
-                $param = ':id' . $index;
-                $queryIds[] = $param;
+                $param          = ':id' . $index;
+                $queryIds[]     = $param;
                 $params[$param] = $value;
             }
 

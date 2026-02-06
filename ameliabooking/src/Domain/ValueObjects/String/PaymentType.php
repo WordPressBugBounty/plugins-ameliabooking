@@ -23,15 +23,15 @@ final class PaymentType
 
     public const SQUARE = 'square';
 
+    public const BARION = 'barion';
+
     /**
      * @var string
      */
     private $status;
 
     /**
-     * Status constructor.
-     *
-     * @param int $status
+     * @param string $status
      */
     public function __construct($status)
     {

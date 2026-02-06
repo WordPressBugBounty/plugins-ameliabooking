@@ -1,5 +1,6 @@
 <template>
   <AmSelect
+    v-if="!activeBooking"
     v-model="timeZoneSelection"
     :filterable="true"
     :placeholder="useCurrentTimeZone()"
@@ -7,23 +8,23 @@
     :size="props.size"
     custom-class="am-ctz"
     prefix-icon="globe-watch"
+    :filter-method="filterTimeZone"
     @clear="returnToDefault"
     @change="timeZoneChanged"
   >
     <AmOption
-      v-for="(timeZone, index) in timeZones"
+      v-for="(timeZone, index) in filteredTimeZones"
       :key="index"
-      :value="timeZone"
       :label="timeZone"
-    >
-      {{ timeZone }}
-    </AmOption>
+      :value="timeZone"
+    />
   </AmSelect>
 </template>
 
 <script setup>
 // * Import from Vue
 import {
+  ref,
   computed,
   inject
 } from 'vue'
@@ -71,9 +72,25 @@ let timeZoneSelection = computed({
   }
 })
 
+let activeBooking = computed(() => store.getters['appointment/getActive'] || store.getters['event/getActive'] || store.getters['attendee/getActive'])
+
 const adminTimeZone = inject('timeZone')
 
 const timeZones = inject('timeZones')
+
+let queryLower = ref('')
+function filterTimeZone (query) {
+  queryLower.value = query.toLowerCase()
+}
+
+let filteredTimeZones = computed(() => {
+  if (queryLower.value) {
+    return timeZones.filter(item => {
+      return item.toLowerCase().includes(queryLower.value)
+    })
+  }
+  return timeZones
+})
 
 function returnToDefault () {
   let initialTimeZone

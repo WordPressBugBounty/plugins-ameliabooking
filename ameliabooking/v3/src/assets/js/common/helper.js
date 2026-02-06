@@ -113,6 +113,62 @@ function useDescriptionVisibility (text) {
 
   return false
 }
+function mapAddressComponentsForXML(components) {
+  const result = {};
+
+  components.forEach(component => {
+    const types = component.types;
+
+    if (types.includes('street_number')) {
+      result.BuildingNumber = component.long_name;
+    }
+
+    if (types.includes('route')) {
+      result.StreetName = component.long_name;
+    }
+
+    if (types.includes('postal_code')) {
+      result.PostalZone = component.long_name;
+    }
+
+    if (types.includes('locality')) {
+      result.CityName = component.long_name;
+    }
+
+    if (types.includes('administrative_area_level_1')) {
+      result.CountrySubentity = component.long_name;
+    }
+
+    if (types.includes('administrative_area_level_2') && !result.CountrySubentity) {
+      result.CountrySubentity = component.long_name;
+    }
+
+    if (types.includes('country')) {
+      result.CountryCode = component.short_name;
+    }
+
+    if (types.includes('premise')) {
+      result.Premise = component.long_name;
+    }
+
+    if (types.includes('sublocality') || types.includes('neighborhood')) {
+      result.AdditionalStreetName = component.long_name;
+    }
+  });
+
+  return result;
+}
+
+function createFileUrlFromResponse (response, format = 'pdf') {
+  const byteCharacters = atob(response.data)
+  const byteNumbers = new Array(byteCharacters.length)
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i)
+  }
+  const byteArray = new Uint8Array(byteNumbers)
+  const file = new Blob([byteArray], { type: `application/${format};base64` })
+  return URL.createObjectURL(file)
+}
 
 export {
   useRemoveUrlParameter,
@@ -122,5 +178,7 @@ export {
   useUrlQueryParam,
   useCurrentTimeZone,
   useSortedTimeStrings,
-  useDescriptionVisibility
+  useDescriptionVisibility,
+  createFileUrlFromResponse,
+  mapAddressComponentsForXML
 }

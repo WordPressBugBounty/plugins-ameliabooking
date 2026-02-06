@@ -13,6 +13,7 @@
     <AmAddressInput
       :id="props.itemName"
       v-model="model"
+      @address-selected="(address) => emits('address-selected', address)"
     />
     <!-- /Address Field -->
   </el-form-item>
@@ -55,7 +56,7 @@ let props = defineProps({
 })
 
 // * Define Emits
-const emits = defineEmits(['update:modelValue'])
+const emits = defineEmits(['update:modelValue', 'address-selected'])
 
 // * Component model
 let { modelValue } = toRefs(props)

@@ -35,6 +35,24 @@
       </div>
     </div>
 
+    <!-- Social Buttons -->
+    <div v-if="(settings.socialLogin.googleLoginEnabled && settings.general.googleClientId) || (settings.socialLogin.facebookLoginEnabled && settings.socialLogin.facebookCredentialsEnabled)">
+      <div class="am-asi__social-wrapper">
+        <am-social-button
+            :provider="socialProvider"
+            @social-action="onSignupSocial"
+        />
+      </div>
+
+      <!-- Social Divider -->
+      <div class="am-asi__social-divider">
+        <span class="par-sm">{{ amLabels.or_enter_details_below }}</span>
+      </div>
+      <!-- /Social Divider -->
+
+    </div>
+    <!-- /Social Buttons -->
+
     <el-form
       ref="authFormRef"
       :model="infoFormData"
@@ -70,6 +88,22 @@
         {{ amLabels.reset_password }}
       </span>
     </div>
+
+    <div
+      v-if="amSettings.general.googleRecaptcha.enabled && amSettings.roles[cabinetType + 'Cabinet'].googleRecaptcha"
+      id="am-recaptcha"
+      class="am-recaptcha-holder"
+    >
+      <vue-recaptcha
+        ref="recaptchaRef"
+        :size="amSettings.general.googleRecaptcha.invisible ? 'invisible' : null"
+        :load-recaptcha-script="true"
+        :sitekey="amSettings.general.googleRecaptcha.siteKey"
+        @verify="onRecaptchaVerify"
+        @expired="onRecaptchaExpired"
+      >
+      </vue-recaptcha>
+    </div>
   </div>
   <Skeleton
     v-else
@@ -90,6 +124,8 @@ import {
   markRaw,
   onBeforeMount,
 } from 'vue'
+import VueAuthenticate from 'vue-authenticate'
+import {VueRecaptcha} from 'vue-recaptcha'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -103,6 +139,13 @@ import { useResponsiveClass } from '../../../../../../assets/js/common/responsiv
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 import { useRemoveUrlParameter, useUrlQueryParams, useUrlQueryParam } from '../../../../../../assets/js/common/helper'
 import { useDisableAuthorizationHeader } from '../../../../../../assets/js/public/panel'
+import { SocialAuthOptions } from '../../../../../../assets/js/admin/socialAuthOptions'
+import {
+  useParsedCustomPricing,
+  useFrontendEmployee,
+  useFrontendEmployeeServiceList,
+  useFeaturesAndIntegrations,
+} from '../../../../../../assets/js/common/employee'
 
 // * Components
 import { formFieldsTemplates } from '../../../../../../assets/js/common/formFieldsTemplates'
@@ -110,6 +153,16 @@ import AmButton from '../../../../../_components/button/AmButton.vue'
 import Skeleton from './Skeleton'
 import AmAlert from '../../../../../_components/alert/AmAlert.vue'
 import IconComponent from "../../../../../_components/icons/IconComponent.vue";
+import { useGoogleSync } from "../../../../../../assets/js/common/integrationGoogle";
+import { useOutlookSync } from "../../../../../../assets/js/common/integrationOutlook";
+import { useZoomUsers } from "../../../../../../assets/js/common/integrationZoom";
+import { useStripeSync } from "../../../../../../assets/js/common/integrationStripe";
+import { useAppleSync } from "../../../../../../assets/js/common/integrationApple";
+import AmSocialButton from "../../../../../common/FormFields/AmSocialButton.vue";
+import {settings} from "../../../../../../plugins/settings";
+
+// * Plugin Licence
+let licence = inject('licence')
 
 // * Vars
 let store = useStore()
@@ -159,6 +212,134 @@ let passwordIcon = {
   template: `<IconComponent icon="password"></IconComponent>`
 }
 
+let socialProvider = ref('')
+const VueAuthenticateInstance = VueAuthenticate.factory(httpClient, SocialAuthOptions)
+
+/********
+ * Google Sign in *
+ ********/
+function onSignupSocial({ provider, credentials }) {
+  store.commit('setLoading', true)
+  const socialCheckUrl = `/users/authentication/${provider}`
+  const data = {}
+  socialProvider = provider
+  data.cabinetType = cabinetType.value
+
+  if (provider === 'facebook') {
+    data.redirectUri = VueAuthenticateInstance.options.providers[provider].redirectUri
+    VueAuthenticateInstance.options.providers[provider].url = `${socialCheckUrl}`
+    store.commit('setLoading', false)
+    VueAuthenticateInstance.authenticate(provider, data).then((response) => {
+      infoFormData.value.email = response.data.data.user.email
+      setResponseData(response, true)
+    }).catch((error) => {
+      if (!VueAuthenticateInstance.isAuthenticated()) {
+        authError.value = true
+        authErrorMessage.value = 'User is not authenticated.'
+        store.commit('setLoading', false)
+      }
+      if (error.response?.data) {
+        authError.value = true
+        authErrorMessage.value = error.response.data.message
+      }
+      store.commit('setLoading', false)
+    })
+  }
+
+  if (provider === 'google') {
+    data.code = credentials
+    httpClient.post(`${socialCheckUrl}`, data).then(response => {
+      infoFormData.value.email = response.data.data.user.email
+      setResponseData(response, true)
+    }).catch((error) => {
+      if (!('data' in error.response.data) && 'message' in error.response.data) {
+        authError.value = true
+        authErrorMessage.value = error.response.data.message
+        return
+      }
+
+      if ('invalid_credentials' in error.response.data.data) {
+        authError.value = true
+        authErrorMessage.value = amLabels.value.invalid_credentials
+      }
+    }).finally(() => {
+      store.commit('setLoading', false)
+    })
+  }
+}
+
+function setResponseData(response, authenticate) {
+  if ('token' in response.data.data) {
+    const secureCookie = window.location.protocol === 'https:'
+    vueCookies.set('ameliaToken', response.data.data.token, amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'], null, null, secureCookie)
+    vueCookies.set('ameliaUserEmail', response.data.data.user.email, amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'], null, null, secureCookie)
+
+    store.commit('auth/setToken', response.data.data.token)
+  }
+
+  if ('user' in response.data.data && response.data.data.user.type === 'provider') {
+    setEmployee(response)
+  }
+
+  store.commit('auth/setProfile', response.data.data.user)
+
+  if (response.data.data.user.timeZone) {
+    store.commit('cabinet/setTimeZone', response.data.data.user.timeZone)
+  }
+
+  if (!response.data.data.user.countryPhoneIso && amSettings.general.phoneDefaultCountryCode && amSettings.general.phoneDefaultCountryCode !== 'auto') {
+    store.commit('auth/setProfileCountryPhoneIso', amSettings.general.phoneDefaultCountryCode)
+  }
+
+  if (authenticate) {
+    store.commit('auth/setAuthenticated', authenticate)
+  }
+
+  let tokenValidTime = cabinetType.value === 'customer'
+      ? amSettings.roles.customerCabinet.tokenValidTime * 1000
+      : amSettings.roles.providerCabinet.tokenValidTime * 1000
+
+  if (tokenValidTime > 0 && tokenValidTime < 1814400000) {
+    setTimeout(
+        () => {
+          store.dispatch('auth/logout')
+        },
+        tokenValidTime
+    )
+  }
+
+  if (window?.ameliaBooking?.cabinet?.userLoggedIn) {
+    window.ameliaBooking.cabinet.userLoggedIn(response.data.data.user)
+  }
+}
+
+/*************
+ * Recaptcha *
+ ************/
+
+let recaptchaRef = ref(null)
+
+let recaptchaValid = ref(false)
+
+let recaptchaResponse = ref(null)
+
+function onRecaptchaExpired () {
+  recaptchaValid.value = false
+
+  authError.value = true
+  authErrorMessage.value = amLabels.value.recaptcha_invalid_error
+}
+
+function onRecaptchaVerify (response) {
+  recaptchaValid.value = true
+
+  recaptchaResponse.value = response
+
+  if (amSettings.general.googleRecaptcha.invisible) {
+    continueWithAuthenticate()
+  }
+}
+
 /********
  * Form *
  ********/
@@ -206,7 +387,7 @@ let signInFormConstruction = ref({
     props: {
       itemName: 'email',
       label: amLabels.value.email_or_username,
-      iconStart: markRaw(emailIcon),
+      prefixIcon: markRaw(emailIcon),
       placeholder: '',
       class: 'am-asi__item'
     }
@@ -218,7 +399,7 @@ let signInFormConstruction = ref({
       itemType: 'password',
       showPassword: true,
       label: amLabels.value.password,
-      iconStart: markRaw(passwordIcon),
+      prefixIcon: markRaw(passwordIcon),
       placeholder: '',
       class: 'am-asi__item'
     }
@@ -254,8 +435,98 @@ function useAuthenticateUser (cookieToken, changePass) {
   }
 }
 
+function setEmployee (response) {
+  let employee = {
+    id: response.data.data.user.id,
+    firstName: response.data.data.user.firstName,
+    lastName: response.data.data.user.lastName,
+    email: response.data.data.user.email,
+    phone: response.data.data.user.phone,
+    countryPhoneIso: response.data.data.user.countryPhoneIso,
+    googleCalendar: {
+      id: 'id' in response.data.data.user.googleCalendar ? response.data.data.user.googleCalendar.id : null,
+      calendarId: response.data.data.user.googleCalendar.calendarId ? response.data.data.user.googleCalendar.calendarId : '',
+      token: 'token' in response.data.data.user.googleCalendar ? response.data.data.user.googleCalendar.token : null,
+    },
+    outlookCalendar: {
+      id: 'id' in response.data.data.user.outlookCalendar ? response.data.data.user.outlookCalendar.id : null,
+      calendarId: response.data.data.user.outlookCalendar.calendarId ? response.data.data.user.outlookCalendar.calendarId : '',
+      token: 'token' in response.data.data.user.outlookCalendar ? response.data.data.user.outlookCalendar.token : null,
+    },
+    appleCalendarId: response.data.data.user.appleCalendarId ? response.data.data.user.appleCalendarId : '',
+    googleCalendarId: response.data.data.user.googleCalendarId ? response.data.data.user.googleCalendarId : '',
+    stripeConnect: response.data.data.user.stripeConnect,
+    zoomUserId: response.data.data.user.zoomUserId ? response.data.data.user.zoomUserId : '',
+    locationId: response.data.data.user.locationId,
+    pictureFullPath: response.data.data.user.pictureFullPath,
+    pictureThumbPath: response.data.data.user.pictureThumbPath,
+    description: response.data.data.user.description,
+    weekDayList: response.data.data.user.weekDayList,
+    specialDayList: response.data.data.user.specialDayList,
+    dayOffList: response.data.data.user.dayOffList,
+    serviceList: response.data.data.user.serviceList,
+  }
+
+  employee.serviceList.forEach((employeeService) => {
+    useFeaturesAndIntegrations(employeeService, true)
+  })
+
+  store.commit('employee/setSavedSpecialDayList', JSON.parse(JSON.stringify(response.data.data.user.specialDayList)))
+
+  store.commit('employee/setSavedDayOffList', JSON.parse(JSON.stringify(response.data.data.user.dayOffList)))
+
+  employee.serviceList.forEach(employeeService => {
+    useParsedCustomPricing(employeeService)
+  })
+
+  if (store.getters['entities/getReady']) {
+    store.commit('entities/setEmployees', [JSON.parse(JSON.stringify(employee))])
+
+    employee.serviceList = useFrontendEmployeeServiceList(store, employee.serviceList)
+  }
+
+  store.commit('employee/setEmployee', useFrontendEmployee(store, employee))
+
+  store.commit(
+      'auth/setOutlookCalendars',
+      response.data.data.user.outlookCalendar?.calendarList ? response.data.data.user.outlookCalendar.calendarList : []
+  )
+
+  store.commit(
+      'auth/setGoogleCalendars',
+      response.data.data.user.googleCalendar?.calendarList ? response.data.data.user.googleCalendar.calendarList : []
+  )
+
+  if (amSettings.appleCalendar &&
+      !licence.isLite &&
+      !licence.isStarter
+  ) {
+    useAppleSync(store)
+  }
+
+  if (amSettings.payments.stripe.enabled &&
+      amSettings.payments.stripe.connect.enabled &&
+      !licence.isLite &&
+      !licence.isStarter &&
+      !licence.isBasic
+  ) {
+    useStripeSync(store)
+  }
+
+  if (amSettings.zoom.enabled &&
+      !licence.isLite &&
+      !licence.isStarter
+  ) {
+    useZoomUsers(store)
+  }
+}
+
 function useAuthenticate (tokenValue, isUrlToken, checkIfWpUser, changePass) {
   let params = {cabinetType: cabinetType.value, changePass: changePass}
+
+  if (recaptchaResponse.value !== null) {
+    params.recaptcha = recaptchaResponse.value
+  }
 
   if (checkIfWpUser) {
     params.checkIfWpUser = true
@@ -287,18 +558,11 @@ function useAuthenticate (tokenValue, isUrlToken, checkIfWpUser, changePass) {
       return
     }
 
-    if ('token' in response.data.data) {
-      vueCookies.set('ameliaToken', response.data.data.token, amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'], null, null, true)
-      vueCookies.set('ameliaUserEmail', response.data.data.user.email, amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'], null, null, true)
-
-      store.commit('auth/setToken', response.data.data.token)
-    }
+    setResponseData(response, false)
 
     if (useUrlQueryParam('token')) {
       window.history.replaceState(null, null, useRemoveUrlParameter(window.location.href, 'token'))
     }
-
-    store.commit('auth/setProfile', response.data.data.user)
 
     if ('set_password' in response.data.data && response.data.data.set_password) {
       pageKey.value = 'setPassword'
@@ -318,6 +582,11 @@ function useAuthenticate (tokenValue, isUrlToken, checkIfWpUser, changePass) {
       authError.value = true
       authErrorMessage.value = amLabels.value.invalid_credentials
     }
+
+    if ('recaptcha_error' in error.response.data.data) {
+      authError.value = true
+      authErrorMessage.value = amLabels.value.recaptcha_error
+    }
   }).finally(() => {
     store.commit('setLoading', false)
   })
@@ -327,13 +596,37 @@ function useAuthenticate (tokenValue, isUrlToken, checkIfWpUser, changePass) {
 function submitForm() {
   authFormRef.value.validate((valid) => {
     if (valid) {
-      store.commit('setLoading', true)
+      if (amSettings.general.googleRecaptcha.enabled && amSettings.roles[cabinetType.value + 'Cabinet'].googleRecaptcha) {
+        if (amSettings.general.googleRecaptcha.invisible) {
+          recaptchaRef.value.execute()
+        } else if (!recaptchaValid.value) {
+          authError.value = true
+          authErrorMessage.value = amLabels.value.recaptcha_error
 
-      useAuthenticate(null, false, false, false)
+          return false
+        } else {
+          continueWithAuthenticate()
+        }
+      } else {
+        continueWithAuthenticate()
+      }
     } else {
       return false
     }
   })
+}
+
+function continueWithAuthenticate () {
+  store.commit('setLoading', true)
+
+  useAuthenticate(null, false, false, false)
+}
+
+function authenticate () {
+  useAuthenticateUser(
+    vueCookies.get('ameliaToken'),
+    'changePass' in useUrlQueryParams(window.location.href)
+  )
 }
 
 onBeforeMount(() => {
@@ -342,15 +635,22 @@ onBeforeMount(() => {
 
 onMounted(() => {
   if (!store.getters['auth/getLoggedOut']) {
-    useAuthenticateUser(
-        vueCookies.get('ameliaToken'),
-        'changePass' in useUrlQueryParams(window.location.href)
-    )
+    let queryParams = useUrlQueryParams(window.location.href)
+
+    if (amSettings.googleCalendar.enabled && cabinetType.value === 'provider' && queryParams && queryParams['code'] && queryParams['scope']) {
+      useGoogleSync(queryParams['code'], authenticate)
+    } else if (amSettings.outlookCalendar.enabled && cabinetType.value === 'provider' && queryParams && queryParams['code'] && queryParams['state']) {
+      useOutlookSync(queryParams['code'], authenticate)
+    } else {
+      authenticate()
+    }
   } else {
-    useAuthenticateUser()
+    if (!amSettings.roles[cabinetType.value + 'Cabinet']['loginEnabled']) {
+      pageKey.value = 'sendAccessLink'
+    }
+    store.commit('setLoading', false)
   }
 })
-
 /*************
  * Customize *
  *************/
@@ -415,9 +715,59 @@ export default {
     margin: 0 auto;
     font-family: var(--am-font-family), sans-serif;
 
+    .am-recaptcha-holder {
+      justify-items: center;
+    }
+
     * {
       font-family: var(--am-font-family), sans-serif;
       box-sizing: border-box;
+    }
+
+    &__social-wrapper {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      width: 100%;
+      margin: 8px 0 24px;
+      gap: 8px;
+
+      .am-social-signin {
+        &__google {
+          #g_id_onload {
+            display: none;
+          }
+          .g_id_signin {
+            width: 64px;
+          }
+        }
+      }
+    }
+
+    &__social-divider {
+      align-items: center;
+      display: flex;
+      margin-bottom: 24px;
+
+      // Before & After
+      &:before,
+      &:after {
+        background: var(--shade-250, #D1D5D7);
+        content: '';
+        height: 1px;
+        width: 100%;
+      }
+
+      span {
+        flex: none;
+        font-size: 15px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 24px;
+        color: var(--shade-500, #808A90);
+        margin-left: 8px;
+        margin-right: 8px;
+      }
     }
 
     &__top {
@@ -527,24 +877,6 @@ export default {
         line-height: 1.6;
         color: var(--am-c-primary);
         cursor: pointer;
-      }
-    }
-
-    .am-input-wrapper .am-input__default.is-icon-start {
-      .el-input {
-        &__prefix {
-          left: 8px;
-
-          i {
-            font-size: 30px;
-          }
-        }
-
-        &__suffix {
-          i {
-            font-size: 18px;
-          }
-        }
       }
     }
   }

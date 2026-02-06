@@ -2,12 +2,19 @@ import { reactive } from "vue";
 
 const globalLabels = reactive(window.wpAmeliaLabels)
 
+// * sbsNew - step by step new
+// * cbf    - catalog booking form
+// * elf    - events list form
+// * ecf    - events calendar form
+// * capc   - cabinet panel customer
+// * cape   - cabinet panel employee
+
 let defaultCustomizeSettings = {
   fonts: {
     fontFamily: 'Amelia Roboto, sans-serif',
     fontUrl: '',
     customFontFamily: '',
-    customFontSelected: false
+    customFontSelected: false,
   },
   sbsNew: {
     colors: {
@@ -29,135 +36,253 @@ let defaultCustomizeSettings = {
       colorMainText: '#1A2C37',
       colorCalCell: '#265CF2',
       colorCalCellText: '#1246D6',
+      colorCalCellLow: '#265CF2',
+      colorCalCellLowText: '#1246D6',
+      colorCalCellHigh: '#265CF2',
+      colorCalCellHighText: '#1246D6',
+      colorCalCellWaiting: 'rgba(26, 44, 55, 0.04)',
+      colorCalCellWaitingText: '#1A2C37',
       colorCalCellSelected: '#1246D6',
       colorCalCellSelectedText: '#FFFFFF',
-      colorCalCellDisabled: 'rgba(180, 25, 15, 0.05)',
+      colorCalCellDisabled: 'rgba(87, 88, 139, 0.05)',
       colorCalCellDisabledText: '#8C959A',
       colorBtnPrim: '#265CF2',
       colorBtnPrimText: '#FFFFFF',
       colorBtnSec: '#1A2C37',
       colorBtnSecText: '#FFFFFF',
     },
+    order: [
+      {
+        id: 'ServiceStep',
+      },
+      {
+        id: 'EmployeeStep',
+      },
+      {
+        id: 'LocationStep',
+      },
+    ],
     initStep: {
       options: {
         service: {
           name: globalLabels.service_input_field,
-          filterable: true
+          filterable: true,
         },
         tax: {
           name: globalLabels.tax_visibility,
-          visibility: true
+          visibility: true,
         },
         location: {
           name: globalLabels.location_input_field,
           required: false,
           visibility: true,
-          filterable: true
+          filterable: true,
         },
         employee: {
           name: globalLabels.employee_input_field,
           required: false,
           visibility: true,
-          filterable: true
+          filterable: true,
         },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
-        }
+          typeOptions: ['filled', 'plain', 'text'],
+        },
       },
       order: [
         {
           name: globalLabels.service,
-          id: 'service'
+          id: 'service',
         },
         {
           name: globalLabels.employee,
-          id: 'employee'
+          id: 'employee',
         },
         {
           name: globalLabels.location,
-          id: 'location'
-        }
+          id: 'location',
+        },
       ],
+      translations: null,
+    },
+    serviceStep: {
+      options: {
+        search: {
+          name: globalLabels.search_input_field,
+          visibility: true,
+        },
+        category: {
+          name: globalLabels.category_input_field,
+          visibility: true,
+          filterable: true,
+        },
+        price: {
+          name: globalLabels.service_price,
+          visibility: true,
+        },
+        tax: {
+          name: globalLabels.tax_visibility,
+          visibility: true,
+        },
+        serviceCategory: {
+          name: globalLabels.service_category,
+          visibility: true,
+        },
+        serviceDuration: {
+          name: globalLabels.service_duration,
+          visibility: true,
+        },
+        serviceCapacity: {
+          name: globalLabels.service_capacity,
+          visibility: true,
+        },
+        serviceLocation: {
+          name: globalLabels.service_location,
+          visibility: true,
+        },
+        moreBtn: {
+          name: globalLabels.learn_more_button,
+          visibility: true,
+        },
+        packagesBtn: {
+          name: globalLabels.view_in_package_buttons,
+          visibility: true,
+        },
+        primaryFooterButton: {
+          name: globalLabels.continue_button_type,
+          buttonType: 'filled',
+          typeOptions: ['filled', 'plain', 'text'],
+        },
+      },
+      translations: null,
+    },
+    employeeStep: {
+      options: {
+        employee: {
+          name: globalLabels.employee_selection,
+          required: false,
+          visibility: true,
+        },
+        price: {
+          name: globalLabels.employee_price,
+          visibility: true,
+        },
+        moreBtn: {
+          name: globalLabels.learn_more_button,
+          visibility: true,
+        },
+        primaryFooterButton: {
+          name: globalLabels.continue_button_type,
+          buttonType: 'filled',
+          typeOptions: ['filled', 'plain', 'text'],
+        },
+      },
+      translations: null,
+    },
+    locationStep: {
+      options: {
+        location: {
+          name: globalLabels.location_selection,
+          required: false,
+          visibility: true,
+        },
+        address: {
+          name: globalLabels.location_address,
+          visibility: true,
+        },
+        moreBtn: {
+          name: globalLabels.learn_more_button,
+          visibility: true,
+        },
+        primaryFooterButton: {
+          name: globalLabels.continue_button_type,
+          buttonType: 'filled',
+          typeOptions: ['filled', 'plain', 'text'],
+        },
+      },
       translations: null,
     },
     bringingAnyone: {
       options: {
         heading: {
           name: globalLabels.heading,
-          visibility: true
+          visibility: true,
         },
         info: {
           name: globalLabels.info,
+          visibility: true,
+        },
+        bringingPrice: {
+          name: globalLabels.bringing_price,
           visibility: true
         },
         primaryButton: {
           name: globalLabels.primary_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secondaryButton: {
           name: globalLabels.secondary_button_type,
           buttonType: 'text',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
-        }
+          typeOptions: ['filled', 'plain', 'text'],
+        },
       },
-      translations: null
+      translations: null,
     },
     packageStep: {
       options: {
         heading: {
           name: globalLabels.popup_heading,
-          visibility: true
+          visibility: true,
         },
         tax: {
           name: globalLabels.tax_visibility,
-          visibility: true
+          visibility: true,
         },
         primaryButton: {
           name: globalLabels.primary_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
-        }
+          typeOptions: ['filled', 'plain', 'text'],
+        },
       },
-      translations: null
+      translations: null,
     },
     packageInfoStep: {
       options: {
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         tax: {
           name: globalLabels.tax_visibility,
-          visibility: true
-        }
+          visibility: true,
+        },
       },
-      translations: null
+      translations: null,
     },
     packageAppointmentsStep: {
       options: {
         employee: {
           name: globalLabels.employee_input_field,
           required: false,
-          visibility: true
+          visibility: true,
         },
         location: {
           name: globalLabels.location_input_field,
           required: false,
-          visibility: true
+          visibility: true,
         },
         endTimeVisibility: {
           name: globalLabels.calendar_slot_end_time,
@@ -165,57 +290,57 @@ let defaultCustomizeSettings = {
         },
         timeZoneVisibility: {
           name: globalLabels.calendar_time_zone,
-          visibility: true
+          visibility: true,
         },
         busyTimeSlotsVisibility: {
           name: globalLabels.show_busy_slots,
-          visibility: false
+          visibility: false,
         },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
-        }
+          typeOptions: ['filled', 'plain', 'text'],
+        },
       },
-      translations: null
+      translations: null,
     },
     packageAppointmentsListStep: {
       options: {
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         tax: {
           name: globalLabels.tax_visibility,
-          visibility: true
-        }
+          visibility: true,
+        },
       },
-      translations: null
+      translations: null,
     },
     extrasStep: {
       options: {
         heading: {
           name: globalLabels.extras_heading,
-          visibility: true
+          visibility: true,
         },
         description: {
           name: globalLabels.extras_description,
-          visibility: true
+          visibility: true,
         },
         tax: {
           name: globalLabels.tax_visibility,
-          visibility: true
+          visibility: true,
         },
         duration: {
           name: globalLabels.extras_duration,
-          visibility: true
+          visibility: true,
         },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
-        }
+          typeOptions: ['filled', 'plain', 'text'],
+        },
       },
       translations: null,
     },
@@ -227,76 +352,92 @@ let defaultCustomizeSettings = {
         },
         timeZoneVisibility: {
           name: globalLabels.calendar_time_zone,
+          visibility: true,
+        },
+        estimatedPricingVisibility: {
+          name: globalLabels.show_estimated_pricing,
+          visibility: false
+        },
+        slotPricingVisibility: {
+          name: globalLabels.show_slot_pricing,
+          visibility: false
+        },
+        indicatorPricingVisibility: {
+          name: globalLabels.show_indicator_pricing,
+          visibility: false
+        },
+        peopleWaitingVisibility: {
+          name: globalLabels.show_people_waiting,
           visibility: true
         },
         busyTimeSlotsVisibility: {
           name: globalLabels.show_busy_slots,
-          visibility: false
+          visibility: false,
         },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
-        }
+          typeOptions: ['filled', 'plain', 'text'],
+        },
       },
-      translations: null
+      translations: null,
     },
     cartStep: {
       options: {
         addToCart: {
           name: globalLabels.add_to_cart_button_type,
           buttonType: 'text',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         backToCart: {
           name: globalLabels.back_to_cart_button_type,
           buttonType: 'text',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         tax: {
           name: globalLabels.tax_visibility,
-          visibility: true
+          visibility: true,
         },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
-        }
+          typeOptions: ['filled', 'plain', 'text'],
+        },
       },
-      translations: null
+      translations: null,
     },
     recurringPopup: {
       options: {
         content: {
           name: globalLabels.popup_content,
-          visibility: true
+          visibility: true,
         },
         primaryButton: {
           name: globalLabels.primary_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secondaryButton: {
           name: globalLabels.secondary_button_type,
           buttonType: 'text',
-          typeOptions: ['filled', 'plain', 'text']
-        }
+          typeOptions: ['filled', 'plain', 'text'],
+        },
       },
-      translations: null
+      translations: null,
     },
     recurringStep: {
       options: {
         heading: {
           name: globalLabels.heading_content,
-          visibility: true
+          visibility: true,
         },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
-        }
+          typeOptions: ['filled', 'plain', 'text'],
+        },
       },
-      translations: null
+      translations: null,
     },
     recurringSummary: {
       options: {
@@ -306,113 +447,125 @@ let defaultCustomizeSettings = {
         },
         timeZoneVisibility: {
           name: globalLabels.calendar_time_zone,
-          visibility: true
+          visibility: true,
+        },
+        estimatedPricingVisibility: {
+          name: globalLabels.show_estimated_pricing,
+          visibility: false
+        },
+        slotPricingVisibility: {
+          name: globalLabels.show_slot_pricing,
+          visibility: false
+        },
+        indicatorPricingVisibility: {
+          name: globalLabels.show_indicator_pricing,
+          visibility: false
         },
         busyTimeSlotsVisibility: {
           name: globalLabels.show_busy_slots,
-          visibility: false
+          visibility: false,
         },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
-        }
+          typeOptions: ['filled', 'plain', 'text'],
+        },
       },
-      translations: null
+      translations: null,
     },
     infoStep: {
       order: [
         {
           name: globalLabels.first_name,
-          id: 'firstName'
+          id: 'firstName',
         },
         {
           name: globalLabels.last_name,
-          id: 'lastName'
+          id: 'lastName',
         },
         {
           name: globalLabels.email,
-          id: 'email'
+          id: 'email',
         },
         {
           name: globalLabels.phone,
-          id: 'phone'
-        }
+          id: 'phone',
+        },
       ],
       options: {
         lastName: {
           name: globalLabels.last_name_input_field,
           required: true,
-          visibility: true
+          visibility: true,
         },
         email: {
           name: globalLabels.email_input_field,
           required: false,
-          visibility: true
+          visibility: true,
         },
         phone: {
           name: globalLabels.phone_input_field,
           required: false,
-          visibility: true
+          visibility: true,
         },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
-        }
+          typeOptions: ['filled', 'plain', 'text'],
+        },
       },
-      translations: null
+      translations: null,
     },
     paymentStep: {
       options: {
         coupon: {
           name: globalLabels.coupon_input_field,
-          required: false
+          required: false,
         },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
-        }
+          typeOptions: ['filled', 'plain', 'text'],
+        },
       },
-      translations: null
+      translations: null,
     },
     congratulations: {
       options: {
         primaryFooterButton: {
           name: globalLabels.finish_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secondaryFooterButton: {
           name: globalLabels.panel_button_type,
           buttonType: 'text',
-          typeOptions: ['filled', 'plain', 'text']
-        }
+          typeOptions: ['filled', 'plain', 'text'],
+        },
       },
-      translations: null
+      translations: null,
     },
     sidebar: {
       options: {
         self: {
           name: globalLabels.sidebar_visibility,
-          visibility: true
+          visibility: true,
         },
         supportHeading: {
           name: globalLabels.support_heading,
-          visibility: true
+          visibility: true,
         },
         companyPhone: {
           name: globalLabels.company_phone,
-          visibility: true
+          visibility: true,
         },
         companyEmail: {
           name: globalLabels.company_email,
-          visibility: true
+          visibility: true,
         },
       },
-      translations: null
-    }
+      translations: null,
+    },
   },
   cbf: {
     colors: {
@@ -436,7 +589,7 @@ let defaultCustomizeSettings = {
       colorCalCellText: '#1246D6',
       colorCalCellSelected: '#1246D6',
       colorCalCellSelectedText: '#FFFFFF',
-      colorCalCellDisabled: 'rgba(180, 25, 15, 0.05)',
+      colorCalCellDisabled: 'rgba(87, 88, 139, 0.05)',
       colorCalCellDisabledText: '#8C959A',
       colorCardBgr: '#FFFFFF',
       colorCardBorder: '#D1D5D7',
@@ -450,25 +603,25 @@ let defaultCustomizeSettings = {
       options: {
         cardSideColor: {
           name: globalLabels.cl_side_color,
-          visibility: true
+          visibility: true,
         },
         cardColor: {
           name: globalLabels.cl_color,
-          visibility: false
+          visibility: false,
         },
         cardButton: {
           name: globalLabels.card_button_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         services: {
           name: globalLabels.card_services_number,
-          visibility: true
+          visibility: true,
         },
         packages: {
           name: globalLabels.card_packages_number,
-          visibility: true
-        }
+          visibility: true,
+        },
       },
       translations: null,
     },
@@ -477,132 +630,132 @@ let defaultCustomizeSettings = {
         backBtn: {
           name: globalLabels.back_btn_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         filterMenuBtn: {
           name: globalLabels.cil_filter_menu_btn,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         searchInput: {
           name: globalLabels.cil_filter_input,
-          visibility: true
+          visibility: true,
         },
         filterEmployee: {
           name: globalLabels.cil_filter_employee,
-          visibility: true
+          visibility: true,
         },
         filterLocation: {
           name: globalLabels.cil_filter_location,
-          visibility: true
+          visibility: true,
         },
         filterButtons: {
           name: globalLabels.cil_filter_buttons,
-          visibility: true
+          visibility: true,
         },
         sidebar: {
           name: globalLabels.cil_sidebar,
-          visibility: true
+          visibility: true,
         },
         cardColor: {
           name: globalLabels.cli_item_color,
-          visibility: false
+          visibility: false,
         },
         packageBadge: {
           name: globalLabels.package_badge,
-          visibility: true
-        } ,
+          visibility: true,
+        },
         packagePrice: {
           name: globalLabels.package_price,
           visibility: true,
         },
         tax: {
           name: globalLabels.tax_visibility,
-          visibility: true
+          visibility: true,
         },
         packageCategory: {
           name: globalLabels.package_category,
-          visibility: true
+          visibility: true,
         },
         packageDuration: {
           name: globalLabels.package_duration,
-          visibility: true
+          visibility: true,
         },
         packageCapacity: {
           name: globalLabels.package_capacity,
-          visibility: true
+          visibility: true,
         },
         packageLocation: {
           name: globalLabels.package_location,
-          visibility: true
+          visibility: true,
         },
         packageServices: {
           name: globalLabels.package_services_list,
-          visibility: true
+          visibility: true,
         },
         serviceBadge: {
           name: globalLabels.service_badge,
-          visibility: true
-        } ,
+          visibility: true,
+        },
         servicePrice: {
           name: globalLabels.service_price,
           visibility: true,
         },
         serviceCategory: {
           name: globalLabels.service_category,
-          visibility: true
+          visibility: true,
         },
         serviceDuration: {
           name: globalLabels.service_duration,
-          visibility: true
+          visibility: true,
         },
         serviceCapacity: {
           name: globalLabels.service_capacity,
-          visibility: true
+          visibility: true,
         },
         serviceLocation: {
           name: globalLabels.service_location,
-          visibility: true
+          visibility: true,
         },
         cardEmployeeBtn: {
           name: globalLabels.employee_btn_type,
           visibility: true,
           buttonType: 'text',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         dialogEmployeeBtn: {
           name: globalLabels.book_employee_btn_type,
           visibility: true,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         cardContinueBtn: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         pageScroll: {
           name: globalLabels.page_scroll_visibility,
-          visibility: true
-        }
+          visibility: true,
+        },
       },
-      translations: null
+      translations: null,
     },
     categoryService: {
       options: {
         backBtn: {
           name: globalLabels.back_btn_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         bookingBtn: {
           name: globalLabels.booking_btn_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         serviceBadge: {
           name: globalLabels.service_badge,
-          visibility: true
+          visibility: true,
         },
         servicePrice: {
           name: globalLabels.service_price,
@@ -610,39 +763,39 @@ let defaultCustomizeSettings = {
         },
         tax: {
           name: globalLabels.tax_visibility,
-          visibility: true
+          visibility: true,
         },
         serviceCategory: {
           name: globalLabels.service_category,
-          visibility: true
+          visibility: true,
         },
         serviceDuration: {
           name: globalLabels.service_duration,
-          visibility: true
+          visibility: true,
         },
         serviceCapacity: {
           name: globalLabels.service_capacity,
-          visibility: true
+          visibility: true,
         },
         serviceLocation: {
           name: globalLabels.service_location,
-          visibility: true
+          visibility: true,
         },
         serviceDescription: {
           name: globalLabels.service_about,
-          visibility: true
+          visibility: true,
         },
         serviceEmployees: {
           name: globalLabels.service_employees,
-          visibility: true
+          visibility: true,
         },
         serviceEmployeePrice: {
           name: globalLabels.employee_price,
-          visibility: true
+          visibility: true,
         },
         servicePackages: {
           name: globalLabels.package_block,
-          visibility: true
+          visibility: true,
         },
         packagePrice: {
           name: globalLabels.package_price,
@@ -650,46 +803,46 @@ let defaultCustomizeSettings = {
         },
         packageCategory: {
           name: globalLabels.package_category,
-          visibility: true
+          visibility: true,
         },
         packageDuration: {
           name: globalLabels.package_duration,
-          visibility: true
+          visibility: true,
         },
         packageCapacity: {
           name: globalLabels.package_capacity,
-          visibility: true
+          visibility: true,
         },
         packageLocation: {
           name: globalLabels.package_location,
-          visibility: true
+          visibility: true,
         },
         packageServices: {
           name: globalLabels.package_services_list,
-          visibility: true
+          visibility: true,
         },
         pageScroll: {
           name: globalLabels.page_scroll_visibility,
-          visibility: true
-        }
+          visibility: true,
+        },
       },
-      translations: null
+      translations: null,
     },
     categoryPackage: {
       options: {
         backBtn: {
           name: globalLabels.back_btn_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         bookingBtn: {
           name: globalLabels.booking_btn_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         packageBadge: {
           name: globalLabels.package_badge,
-          visibility: true
+          visibility: true,
         },
         packagePrice: {
           name: globalLabels.package_price,
@@ -697,43 +850,43 @@ let defaultCustomizeSettings = {
         },
         tax: {
           name: globalLabels.tax_visibility,
-          visibility: true
+          visibility: true,
         },
         packageCategory: {
           name: globalLabels.package_category,
-          visibility: true
+          visibility: true,
         },
         packageDuration: {
           name: globalLabels.package_duration,
-          visibility: true
+          visibility: true,
         },
         packageCapacity: {
           name: globalLabels.package_capacity,
-          visibility: true
+          visibility: true,
         },
         packageLocation: {
           name: globalLabels.package_location,
-          visibility: true
+          visibility: true,
         },
         packageDescription: {
           name: globalLabels.package_about,
-          visibility: true
+          visibility: true,
         },
         packageEmployees: {
           name: globalLabels.package_employees,
-          visibility: true
+          visibility: true,
         },
         packageServices: {
           name: globalLabels.package_services_list,
-          visibility: true
+          visibility: true,
         },
         pageScroll: {
           name: globalLabels.page_scroll_visibility,
-          visibility: true
-        }
+          visibility: true,
+        },
       },
       translations: null,
-    }
+    },
   },
   elf: {
     colors: {
@@ -755,7 +908,7 @@ let defaultCustomizeSettings = {
       colorCalCellText: '#1246D6',
       colorCalCellSelected: '#1246D6',
       colorCalCellSelectedText: '#FFFFFF',
-      colorCalCellDisabled: 'rgba(180, 25, 15, 0.05)',
+      colorCalCellDisabled: 'rgba(87, 88, 139, 0.05)',
       colorCalCellDisabledText: '#8C959A',
       colorCardBgr: '#FFFFFF',
       colorCardBorder: '#D1D5D7',
@@ -765,238 +918,238 @@ let defaultCustomizeSettings = {
       colorBtnSec: '#1A2C37',
       colorBtnSecText: '#FFFFFF',
       colorBtnWaiting: '#CCA20C',
-      colorBtnWaitingText: '#FFFFFF'
+      colorBtnWaitingText: '#FFFFFF',
     },
     list: {
       options: {
         header: {
           name: globalLabels.step_title,
-          visibility: true
+          visibility: true,
         },
         filters: {
           name: globalLabels.step_filters,
-          visibility: true
+          visibility: true,
         },
         imgTab: {
           name: globalLabels.event_tab_img,
-          visibility: true
+          visibility: true,
         },
         location: {
           name: globalLabels.event_location,
-          visibility: true
+          visibility: true,
         },
         slots: {
           name: globalLabels.event_slots_capacity,
-          visibility: true
+          visibility: true,
         },
         price: {
           name: globalLabels.event_price,
-          visibility: true
+          visibility: true,
         },
         tax: {
           name: globalLabels.tax_visibility,
-          visibility: true
+          visibility: true,
         },
         status: {
           name: globalLabels.event_status,
-          visibility: true
+          visibility: true,
         },
         filterBtn: {
           name: globalLabels.filters_button_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         bookingBtn: {
           name: globalLabels.read_more_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         infoBtn: {
           name: globalLabels.learn_more_button_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         waitingBtn: {
           name: globalLabels.booking_waiting_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     info: {
       options: {
         gallery: {
           name: globalLabels.event_gallery,
-          visibility: true
+          visibility: true,
         },
         location: {
           name: globalLabels.event_location,
-          visibility: true
+          visibility: true,
         },
         slots: {
           name: globalLabels.event_slots_capacity,
-          visibility: true
+          visibility: true,
         },
         price: {
           name: globalLabels.event_price,
-          visibility: true
+          visibility: true,
         },
         tax: {
           name: globalLabels.tax_visibility,
-          visibility: true
+          visibility: true,
         },
         status: {
           name: globalLabels.event_status,
-          visibility: true
+          visibility: true,
         },
         eventDescription: {
           name: globalLabels.event_description,
-          visibility: true
+          visibility: true,
         },
         eventOrganizer: {
           name: globalLabels.event_organizer,
-          visibility: true
+          visibility: true,
         },
         eventEmployees: {
           name: globalLabels.event_employees,
-          visibility: true
+          visibility: true,
         },
         primBtn: {
           name: globalLabels.booking_event_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secBtn: {
           name: globalLabels.close_event_btn,
           visibility: true,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         waitingBtn: {
           name: globalLabels.booking_waiting_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     bringingAnyone: {
       options: {
         primBtn: {
           name: globalLabels.booking_event_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secBtn: {
           name: globalLabels.close_event_btn,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     tickets: {
       options: {
         primBtn: {
           name: globalLabels.booking_event_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secBtn: {
           name: globalLabels.close_event_btn,
           visibility: true,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     customerInfo: {
       order: [
         {
           name: globalLabels.first_name,
-          id: 'firstName'
+          id: 'firstName',
         },
         {
           name: globalLabels.last_name,
-          id: 'lastName'
+          id: 'lastName',
         },
         {
           name: globalLabels.email,
-          id: 'email'
+          id: 'email',
         },
         {
           name: globalLabels.phone,
-          id: 'phone'
-        }
+          id: 'phone',
+        },
       ],
       options: {
         lastName: {
           name: globalLabels.last_name_input_field,
           required: true,
-          visibility: true
+          visibility: true,
         },
         email: {
           name: globalLabels.email_input_field,
           required: false,
-          visibility: true
+          visibility: true,
         },
         phone: {
           name: globalLabels.phone_input_field,
           required: false,
-          visibility: true
+          visibility: true,
         },
         primBtn: {
           name: globalLabels.booking_event_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secBtn: {
           name: globalLabels.close_event_btn,
           visibility: true,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     payment: {
       options: {
         coupon: {
           name: globalLabels.coupon_input_field,
-          required: false
+          required: false,
         },
         primBtn: {
           name: globalLabels.booking_event_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secBtn: {
           name: globalLabels.close_event_btn,
           visibility: true,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     congrats: {
       options: {
         primBtn: {
           name: globalLabels.finish_event_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secBtn: {
           name: globalLabels.customer_panel_btn,
           visibility: true,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
-    }
+      translations: null,
+    },
   },
   capc: {
     colors: {
@@ -1018,9 +1171,13 @@ let defaultCustomizeSettings = {
       colorMainText: '#1A2C37',
       colorCalCell: '#265CF2',
       colorCalCellText: '#1246D6',
+      colorCalCellLow: '#265CF2',
+      colorCalCellLowText: '#1246D6',
+      colorCalCellHigh: '#265CF2',
+      colorCalCellHighText: '#1246D6',
       colorCalCellSelected: '#1246D6',
       colorCalCellSelectedText: '#FFFFFF',
-      colorCalCellDisabled: 'rgba(180, 25, 15, 0.05)',
+      colorCalCellDisabled: 'rgba(87, 88, 139, 0.05)',
       colorCalCellDisabledText: '#8C959A',
       colorBtnPrim: '#265CF2',
       colorBtnPrimText: '#FFFFFF',
@@ -1033,127 +1190,139 @@ let defaultCustomizeSettings = {
       options: {
         toggle: {
           name: globalLabels.toggled_sidebar,
-          visibility: false
+          visibility: false,
         },
       },
-      translations: null
+      translations: null,
     },
     profile: {
       order: [
         {
           name: globalLabels.first_name,
-          id: 'firstName'
+          id: 'firstName',
         },
         {
           name: globalLabels.last_name,
-          id: 'lastName'
+          id: 'lastName',
         },
         {
           name: globalLabels.email,
-          id: 'email'
+          id: 'email',
         },
         {
           name: globalLabels.phone,
-          id: 'phone'
+          id: 'phone',
         },
         {
           name: globalLabels.birthday,
-          id: 'birthday'
-        }
+          id: 'birthday',
+        },
       ],
       options: {
         lastName: {
           name: globalLabels.last_name_input_field,
           required: true,
-          visibility: true
+          visibility: true,
         },
         email: {
           name: globalLabels.email_input_field,
           required: false,
-          visibility: true
+          visibility: true,
         },
         phone: {
           name: globalLabels.phone_input_field,
           required: false,
-          visibility: true
+          visibility: true,
         },
         birthday: {
           name: globalLabels.birthday_input_field,
           required: false,
-          visibility: true
+          visibility: true,
         },
         deleteFooterButton: {
           name: globalLabels.delete_profile_button_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         saveFooterButton: {
           name: globalLabels.save_changes_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         passFooterButton: {
           name: globalLabels.change_pass_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     deleteProfile: {
       options: {
         closeBtn: {
           name: globalLabels.close_button_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         confirmBtn: {
           name: globalLabels.confirm_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     appointments: {
       options: {
         timeZone: {
           name: globalLabels.time_zone,
-          visibility: true
+          visibility: true,
         },
         servicesFilter: {
           name: globalLabels.csb_cust_filter_service,
-          visibility: true
+          visibility: true,
         },
         providersFilter: {
           name: globalLabels.csb_cust_filter_employee,
-          visibility: true
+          visibility: true,
         },
         locationsFilter: {
           name: globalLabels.csb_cust_filter_location,
-          visibility: true
+          visibility: true,
         },
         filterBtn: {
           name: globalLabels.filters_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         employee: {
           name: globalLabels.csb_cust_appointment_employee,
-          visibility: true
+          visibility: true,
         },
         price: {
           name: globalLabels.appointment_price,
-          visibility: true
-        }
+          visibility: true,
+        },
       },
-      translations: null
+      translations: null,
     },
     rescheduleAppointment: {
       options: {
         timeZoneVisibility: {
           name: globalLabels.calendar_time_zone,
-          visibility: true
+          visibility: true,
+        },
+        estimatedPricingVisibility: {
+          name: globalLabels.show_estimated_pricing,
+          visibility: false
+        },
+        slotPricingVisibility: {
+          name: globalLabels.show_slot_pricing,
+          visibility: false
+        },
+        indicatorPricingVisibility: {
+          name: globalLabels.show_indicator_pricing,
+          visibility: false
         },
         endTimeVisibility: {
           name: globalLabels.calendar_slot_end_time,
@@ -1162,142 +1331,142 @@ let defaultCustomizeSettings = {
         cancelBtn: {
           name: globalLabels.cancel_button_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         continueBtn: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     cancelAppointment: {
       options: {
         cancelBtn: {
           name: globalLabels.cancel_button_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         confirmBtn: {
           name: globalLabels.confirm_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     events: {
       options: {
         timeZone: {
           name: globalLabels.time_zone,
-          visibility: true
+          visibility: true,
         },
         eventsFilter: {
           name: globalLabels.csb_cust_filter_event,
-          visibility: true
+          visibility: true,
         },
         providersFilter: {
           name: globalLabels.csb_cust_filter_employee,
-          visibility: true
+          visibility: true,
         },
         locationsFilter: {
           name: globalLabels.csb_cust_filter_location,
-          visibility: true
+          visibility: true,
         },
         filterBtn: {
           name: globalLabels.filters_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         employee: {
           name: globalLabels.csb_cust_event_employee,
-          visibility: true
+          visibility: true,
         },
         price: {
           name: globalLabels.event_price,
-          visibility: true
-        }
+          visibility: true,
+        },
       },
-      translations: null
+      translations: null,
     },
     cancelEvent: {
       options: {
         cancelBtn: {
           name: globalLabels.cancel_button_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         confirmBtn: {
           name: globalLabels.confirm_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     packagesList: {
       options: {
         timeZone: {
           name: globalLabels.time_zone,
-          visibility: true
+          visibility: true,
         },
         packagesFilter: {
           name: globalLabels.csb_cust_filter_packages,
-          visibility: true
+          visibility: true,
         },
         servicesFilter: {
           name: globalLabels.csb_cust_filter_service,
-          visibility: true
+          visibility: true,
         },
         providersFilter: {
           name: globalLabels.csb_cust_filter_employee,
-          visibility: true
+          visibility: true,
         },
         locationsFilter: {
           name: globalLabels.csb_cust_filter_location,
-          visibility: true
+          visibility: true,
         },
         filterBtn: {
           name: globalLabels.filters_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     packageAppointmentsList: {
       options: {
         backBtn: {
           name: globalLabels.go_back_btn_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         cancelBtn: {
           name: globalLabels.cancel_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         payBtn: {
           name: globalLabels.pay_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         bookBtn: {
           name: globalLabels.book_now_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         employee: {
           name: globalLabels.csb_cust_appointment_employee,
-          visibility: true
+          visibility: true,
         },
         price: {
           name: globalLabels.appointment_price,
-          visibility: true
-        }
+          visibility: true,
+        },
       },
-      translations: null
+      translations: null,
     },
     bookAppointment: {
       options: {
@@ -1305,17 +1474,17 @@ let defaultCustomizeSettings = {
           name: globalLabels.employee_input_field,
           required: false,
           visibility: true,
-          filterable: true
+          filterable: true,
         },
         location: {
           name: globalLabels.location_input_field,
           required: false,
           visibility: true,
-          filterable: true
+          filterable: true,
         },
         timeZoneVisibility: {
           name: globalLabels.calendar_time_zone,
-          visibility: true
+          visibility: true,
         },
         endTimeVisibility: {
           name: globalLabels.calendar_slot_end_time,
@@ -1324,64 +1493,226 @@ let defaultCustomizeSettings = {
         cancelBtn: {
           name: globalLabels.cancel_button_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         continueBtn: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     cancelPackage: {
       options: {
         cancelBtn: {
           name: globalLabels.cancel_button_type,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         confirmBtn: {
           name: globalLabels.confirm_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     signIn: {
       options: {
         signInBtn: {
           name: globalLabels.sign_in_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     accessLink: {
       options: {
         sendBtn: {
           name: globalLabels.send_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     accessLinkSuccess: {
-      translations: null
+      translations: null,
     },
     setPass: {
       options: {
         newPassBtn: {
           name: globalLabels.new_pass_button_type,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
-    }
+      translations: null,
+    },
+  },
+  cape: {
+    colors: {
+      colorPrimary: '#1246D6',
+      colorSuccess: '#019719',
+      colorError: '#B4190F',
+      colorWarning: '#CCA20C',
+      colorInpBgr: '#FFFFFF',
+      colorInpBorder: '#D1D5D7',
+      colorInpText: '#1A2C37',
+      colorInpPlaceHolder: '#808A90',
+      colorDropBgr: '#FFFFFF',
+      colorDropBorder: '#FFFFFF',
+      colorDropText: '#0E1920',
+      colorSbBgr: '#17295A',
+      colorSbText: '#FFFFFF',
+      colorMainBgr: '#FFFFFF',
+      colorMainHeadingText: '#33434C',
+      colorMainText: '#1A2C37',
+      colorBtnPrim: '#265CF2',
+      colorBtnPrimText: '#FFFFFF',
+      colorBtnSec: '#1A2C37',
+      colorBtnSecText: '#FFFFFF',
+      colorBtnDanger: '#B4190F',
+      colorBtnDangerText: '#FFFFFF',
+    },
+    sidebar: {
+      options: {
+        toggle: {
+          name: globalLabels.toggled_sidebar,
+          visibility: false,
+        },
+      },
+      translations: null,
+    },
+    appointments: {
+      options: {
+        timeZone: {
+          name: globalLabels.time_zone,
+          visibility: true,
+        },
+        servicesFilter: {
+          name: globalLabels.csb_cust_filter_service,
+          visibility: true,
+        },
+        customersFilter: {
+          name: globalLabels.csb_cust_filter_customer,
+          visibility: true,
+        },
+        locationsFilter: {
+          name: globalLabels.csb_cust_filter_location,
+          visibility: true,
+        },
+        filterBtn: {
+          name: globalLabels.filters_button_type,
+          buttonType: 'filled',
+          typeOptions: ['filled', 'plain', 'text'],
+        },
+        newAppBtn: {
+          name: globalLabels.new_app_button_type,
+          buttonType: 'filled',
+          typeOptions: ['filled', 'plain', 'text'],
+        },
+        customer: {
+          name: globalLabels.csb_cust_appointment_customer,
+          visibility: true,
+        },
+        customerPhone: {
+          name: globalLabels.csb_cust_appointment_customer_phone,
+          visibility: true,
+        },
+        customerEmail: {
+          name: globalLabels.csb_cust_appointment_customer_email,
+          visibility: true,
+        },
+        price: {
+          name: globalLabels.appointment_price,
+          visibility: true,
+        },
+      },
+      translations: null,
+    },
+    events: {
+      options: {
+        timeZone: {
+          name: globalLabels.time_zone,
+          visibility: true,
+        },
+        eventsFilter: {
+          name: globalLabels.csb_cust_filter_event,
+          visibility: true,
+        },
+        customersFilter: {
+          name: globalLabels.csb_cust_filter_customer,
+          visibility: true,
+        },
+        locationsFilter: {
+          name: globalLabels.csb_cust_filter_location,
+          visibility: true,
+        },
+        filterBtn: {
+          name: globalLabels.filters_button_type,
+          buttonType: 'filled',
+          typeOptions: ['filled', 'plain', 'text'],
+        },
+        scanQrCodeBtn: {
+          name: globalLabels.qr_etickets_evt_button,
+          visibility: true,
+        },
+        newEvtBtn: {
+          name: globalLabels.new_evt_button_type,
+          buttonType: 'filled',
+          typeOptions: ['filled', 'plain', 'text'],
+        },
+        customerPhone: {
+          name: globalLabels.csb_cust_event_customer_phone,
+          visibility: true,
+        },
+        customerEmail: {
+          name: globalLabels.csb_cust_event_customer_email,
+          visibility: true,
+        },
+        price: {
+          name: globalLabels.event_price,
+          visibility: true,
+        },
+      },
+      translations: null,
+    },
+    signIn: {
+      options: {
+        signInBtn: {
+          name: globalLabels.sign_in_button_type,
+          buttonType: 'filled',
+          typeOptions: ['filled', 'plain', 'text'],
+        },
+      },
+      translations: null,
+    },
+    accessLink: {
+      options: {
+        sendBtn: {
+          name: globalLabels.send_button_type,
+          buttonType: 'filled',
+          typeOptions: ['filled', 'plain', 'text'],
+        },
+      },
+      translations: null,
+    },
+    accessLinkSuccess: {
+      translations: null,
+    },
+    setPass: {
+      options: {
+        newPassBtn: {
+          name: globalLabels.new_pass_button_type,
+          buttonType: 'filled',
+          typeOptions: ['filled', 'plain', 'text'],
+        },
+      },
+      translations: null,
+    },
   },
   ecf: {
     colors: {
@@ -1409,219 +1740,219 @@ let defaultCustomizeSettings = {
       colorBtnSec: '#1A2C37',
       colorBtnSecText: '#FFFFFF',
       colorBtnWaiting: '#CCA20C',
-      colorBtnWaitingText: '#FFFFFF'
+      colorBtnWaitingText: '#FFFFFF',
     },
     calendar: {
       options: {
         upcomingBlock: {
           name: globalLabels.upcoming_events_block,
-          visibility: true
+          visibility: true,
         },
         search: {
           name: globalLabels.step_search,
-          visibility: true
+          visibility: true,
         },
         filters: {
           name: globalLabels.step_filters,
-          visibility: true
+          visibility: true,
         },
         capacity: {
           name: globalLabels.event_slots_capacity,
-          visibility: true
+          visibility: true,
         },
         price: {
           name: globalLabels.event_price,
-          visibility: true
+          visibility: true,
         },
         tax: {
           name: globalLabels.tax_visibility,
-          visibility: true
+          visibility: true,
         },
         location: {
           name: globalLabels.event_location,
-          visibility: true
+          visibility: true,
         },
         status: {
           name: globalLabels.event_status,
-          visibility: true
-        }
+          visibility: true,
+        },
       },
-      translations: null
+      translations: null,
     },
     info: {
       options: {
         gallery: {
           name: globalLabels.event_gallery,
-          visibility: true
+          visibility: true,
         },
         location: {
           name: globalLabels.event_location,
-          visibility: true
+          visibility: true,
         },
         slots: {
           name: globalLabels.event_slots_capacity,
-          visibility: true
+          visibility: true,
         },
         price: {
           name: globalLabels.event_price,
-          visibility: true
+          visibility: true,
         },
         tax: {
           name: globalLabels.tax_visibility,
-          visibility: true
+          visibility: true,
         },
         status: {
           name: globalLabels.event_status,
-          visibility: true
+          visibility: true,
         },
         eventDescription: {
           name: globalLabels.event_description,
-          visibility: true
+          visibility: true,
         },
         eventOrganizer: {
           name: globalLabels.event_organizer,
-          visibility: true
+          visibility: true,
         },
         eventEmployees: {
           name: globalLabels.event_employees,
-          visibility: true
+          visibility: true,
         },
         primBtn: {
           name: globalLabels.booking_event_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         waitingBtn: {
           name: globalLabels.booking_waiting_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secBtn: {
           name: globalLabels.close_event_btn,
           visibility: true,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     bringingAnyone: {
       options: {
         primBtn: {
           name: globalLabels.booking_event_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secBtn: {
           name: globalLabels.close_event_btn,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     tickets: {
       options: {
         primBtn: {
           name: globalLabels.booking_event_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secBtn: {
           name: globalLabels.close_event_btn,
           visibility: true,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     customerInfo: {
       order: [
         {
           name: globalLabels.first_name,
-          id: 'firstName'
+          id: 'firstName',
         },
         {
           name: globalLabels.last_name,
-          id: 'lastName'
+          id: 'lastName',
         },
         {
           name: globalLabels.email,
-          id: 'email'
+          id: 'email',
         },
         {
           name: globalLabels.phone,
-          id: 'phone'
-        }
+          id: 'phone',
+        },
       ],
       options: {
         lastName: {
           name: globalLabels.last_name_input_field,
           required: true,
-          visibility: true
+          visibility: true,
         },
         email: {
           name: globalLabels.email_input_field,
           required: false,
-          visibility: true
+          visibility: true,
         },
         phone: {
           name: globalLabels.phone_input_field,
           required: false,
-          visibility: true
+          visibility: true,
         },
         primBtn: {
           name: globalLabels.booking_event_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secBtn: {
           name: globalLabels.close_event_btn,
           visibility: true,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     payment: {
       options: {
         coupon: {
           name: globalLabels.coupon_input_field,
-          required: false
+          required: false,
         },
         primBtn: {
           name: globalLabels.booking_event_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secBtn: {
           name: globalLabels.close_event_btn,
           visibility: true,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
+      translations: null,
     },
     congrats: {
       options: {
         primBtn: {
           name: globalLabels.finish_event_btn,
           buttonType: 'filled',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
         secBtn: {
           name: globalLabels.customer_panel_btn,
           visibility: true,
           buttonType: 'plain',
-          typeOptions: ['filled', 'plain', 'text']
+          typeOptions: ['filled', 'plain', 'text'],
         },
       },
-      translations: null
-    }
-  }
+      translations: null,
+    },
+  },
 }
 
 let defaultTranslations = {
@@ -1671,6 +2002,102 @@ let defaultTranslations = {
         }
       }
     },
+    serviceStep: {
+      header: {
+        name: globalLabels.step_title,
+        labels: {
+          service_selection: null
+        }
+      },
+      filter: {
+        name: globalLabels.step_filters,
+        labels: {
+          filter_input: null,
+          select_service_category: null,
+          dropdown_empty: null,
+          no_results_found: null,
+        }
+      },
+      card: {
+        name: globalLabels.card_field,
+        labels: {
+          free: null,
+          total_tax_colon: null,
+          incl_tax:null,
+          multiple_locations: null,
+          learn_more: null,
+          view_in_package: null,
+        }
+      },
+      popup: {
+        name: globalLabels.popup_content,
+        labels: {
+          service_information: null,
+          employees: null,
+          locations: null,
+        }
+      },
+      footer: {
+        name: globalLabels.footer_buttons,
+        labels: {
+          continue: null
+        }
+      },
+    },
+    employeeStep: {
+      header: {
+        name: globalLabels.step_title,
+        labels: {
+          employee_selection: null
+        }
+      },
+      card: {
+        name: globalLabels.card_field,
+        labels: {
+          any_employee: null,
+          learn_more: null,
+        }
+      },
+      popup: {
+        name: globalLabels.popup_content,
+        labels: {
+          employee_information: null,
+        }
+      },
+      footer: {
+        name: globalLabels.footer_buttons,
+        labels: {
+          continue: null
+        }
+      },
+    },
+    locationStep: {
+      header: {
+        name: globalLabels.step_title,
+        labels: {
+          location_selection: null
+        }
+      },
+      card: {
+        name: globalLabels.card_field,
+        labels: {
+          any_location: null,
+          learn_more: null,
+        }
+      },
+      popup: {
+        name: globalLabels.popup_content,
+        labels: {
+          location_information: null,
+        }
+      },
+      footer: {
+        name: globalLabels.footer_buttons,
+        labels: {
+          continue: null
+        }
+      }
+    },
     bringingAnyone: {
       header: {
         name: globalLabels.step_title,
@@ -1689,6 +2116,7 @@ let defaultTranslations = {
         labels: {
           bringing_people: null,
           add_people: null,
+          bringing_price: null,
           bringing_people_total: null,
           add_people_total: null
         }
@@ -1893,7 +2321,8 @@ let defaultTranslations = {
         labels: {
           date_time_slots_selected: null,
           total_tax_colon: null,
-          incl_tax:null
+          incl_tax:null,
+          waiting_list: null
         }
       },
       footer: {
@@ -2052,6 +2481,19 @@ let defaultTranslations = {
           info_step: null
         }
       },
+      social: {
+        name: globalLabels.social_login,
+        labels: {
+          auto_fill_your_details: null,
+          or_enter_details_below: null,
+        }
+      },
+      subscribe: {
+        name: globalLabels.mailchimp,
+        labels: {
+          subscribe_to_mailing_list: null,
+        }
+      },
       input: {
         name: globalLabels.input_fields,
         labels: {
@@ -2133,7 +2575,9 @@ let defaultTranslations = {
         name: globalLabels.heading_title,
         labels: {
           congratulations: null,
-          appointment_id: null
+          appointment_id: null,
+          your_position_on_waiting_list: null,
+          appointment_waiting_list_notify_message: null
         }
       },
       content: {
@@ -2476,6 +2920,19 @@ let defaultTranslations = {
           event_customer_info: null
         }
       },
+      social: {
+        name: globalLabels.social_login,
+        labels: {
+          auto_fill_your_details: null,
+          or_enter_details_below: null
+        }
+      },
+      subscribe: {
+        name: globalLabels.mailchimp,
+        labels: {
+          subscribe_to_mailing_list: null,
+        }
+      },
       input: {
         name: globalLabels.input_fields,
         labels: {
@@ -2714,9 +3171,12 @@ let defaultTranslations = {
           pay_now_btn: null,
           paid: null,
           reschedule: null,
+          preview_invoice: null,
+          download_invoice: null,
           cancel: null,
           provider_profile: null,
           google_meet_link: null,
+          microsoft_teams_link: null,
           zoom_link: null,
           lesson_space_link: null,
           extras: null,
@@ -2820,16 +3280,20 @@ let defaultTranslations = {
           pay_now_btn: null,
           paid: null,
           cancel: null,
+          preview_invoice: null,
+          download_invoice: null,
           event_organizer: null,
           event_staff: null,
           provider_profile: null,
           event_timetable: null,
           google_meet_link: null,
+          microsoft_teams_link: null,
           zoom_link: null,
           lesson_space_link: null,
           custom_fields: null,
           event_tickets: null,
-          event_ticket: null
+          event_ticket: null,
+          e_tickets: null,
         }
       },
       messages: {
@@ -2890,6 +3354,8 @@ let defaultTranslations = {
           package_book_expire: null,
           package_book_expiration: null,
           package_book_unlimited: null,
+          preview_invoice: null,
+          download_invoice: null,
           appointments_booked: null,
           appointment_booked: null,
           package_deal_expire_in: null,
@@ -2939,8 +3405,11 @@ let defaultTranslations = {
         name: globalLabels.page_card,
         labels: {
           reschedule: null,
+          preview_invoice: null,
+          download_invoice: null,
           cancel: null,
           google_meet_link: null,
+          microsoft_teams_link: null,
           zoom_link: null,
           lesson_space_link: null,
           extras: null,
@@ -3032,6 +3501,115 @@ let defaultTranslations = {
         labels: {
           welcome_back: null,
           enter_credentials: null
+        }
+      },
+      social: {
+        name: globalLabels.social_login,
+        labels: {
+          or_enter_details_below: null,
+        }
+      },
+      input: {
+        name: globalLabels.input_fields,
+        labels: {
+          email_or_username: null,
+          enter_email_or_username_warning: null,
+          password: null,
+          enter_password_warning: null
+        }
+      },
+      footer: {
+        name: globalLabels.footer_content,
+        labels: {
+          sign_in: null,
+          forgot_your_password: null,
+          reset_password: null,
+        }
+      }
+    },
+    accessLink: {
+      heading: {
+        name: globalLabels.heading_title,
+        labels: {
+          access_link_send: null,
+          access_link_send_description: null
+        }
+      },
+      input: {
+        name: globalLabels.input_fields,
+        labels: {
+          email: null,
+          enter_email_warning: null
+        }
+      },
+      footer: {
+        name: globalLabels.footer_content,
+        labels: {
+          send: null,
+          sign_in: null
+        }
+      }
+    },
+    accessLinkSuccess: {
+      heading: {
+        name: globalLabels.heading_title,
+        labels: {
+          access_link_send_check: null,
+          access_link_send_click: null
+        }
+      },
+      footer: {
+        name: globalLabels.footer_content,
+        labels: {
+          access_link_send_inbox: null,
+          access_link_send_retry: null
+        }
+      }
+    },
+    setPass: {
+      heading: {
+        name: globalLabels.heading_title,
+        labels: {
+          new_password_set: null,
+          new_password_set_description: null
+        }
+      },
+      input: {
+        name: globalLabels.input_fields,
+        labels: {
+          new_password_colon: null,
+          new_password_required: null,
+          new_password_length: null,
+          new_password_colon_retype: null
+        }
+      },
+      footer: {
+        name: globalLabels.footer_content,
+        labels: {
+          new_password_set_action: null
+        }
+      }
+    }
+  },
+  cape: {
+    signIn: {
+      alert: {
+        name: globalLabels.alert_message,
+        labels: {
+          profile_deleted: null
+        }
+      },
+      heading: {
+        name: globalLabels.heading_title,
+        labels: {
+          welcome_back: null,
+          enter_credentials: null
+        }
+      },
+      social: {
+        name: globalLabels.social_login,
+        labels: {
+          or_enter_details_below: null,
         }
       },
       input: {
@@ -3267,6 +3845,19 @@ let defaultTranslations = {
         name: globalLabels.step_title,
         labels: {
           event_customer_info: null
+        }
+      },
+      social: {
+        name: globalLabels.social_login,
+        labels: {
+          auto_fill_your_details: null,
+          or_enter_details_below: null,
+        }
+      },
+      subscribe: {
+        name: globalLabels.mailchimp,
+        labels: {
+          subscribe_to_mailing_list: null,
         }
       },
       input: {

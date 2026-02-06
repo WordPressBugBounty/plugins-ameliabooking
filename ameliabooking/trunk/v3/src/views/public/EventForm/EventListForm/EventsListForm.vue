@@ -9,9 +9,8 @@
     ref="ameliaContainer"
     class="am-elf"
     :style="cssVars"
+    role="main"
   >
-
-    <template v-if="ready">
       <!-- Events List -->
       <EventsList />
       <!-- /Events List -->
@@ -24,6 +23,7 @@
         :align-center="true"
         :close-on-click-modal="false"
         :close-on-press-escape="false"
+        :show-close="ready && !loading"
         modal-class="amelia-v2-booking am-dialog-el"
         :custom-styles="cssVars"
         @close="onCloseEventDialog"
@@ -39,6 +39,7 @@
               <EventListHeader
                 :ready="ready"
                 :loading="loading"
+                :loading-upcoming="false"
                 :customized-labels="customizedStepLabels"
               />
             </div>
@@ -48,8 +49,10 @@
               global-class="am-dialog-el__main-container"
             ></component>
             <EventListFooter
+              :ready="ready"
               :loading="loading"
-              :second-button-show="secondBtnVisibility && secBtnShow && amSettings.roles.customerCabinet.enabled && amSettings.roles.customerCabinet.pageUrl !== null"
+              :loading-upcoming="false"
+              :second-button-show="secBtnShow && customerCabinetButton"
               :payment-gateway="store.getters['payment/getPaymentGateway']"
               :customized-labels="customizedStepLabels"
               :primary-footer-button-type="isWaitingList && stepsArray[stepIndex].name === 'EventInfo' ? waitingButtonTypeEnabled : customizedStepOptions.primBtn.buttonType"
@@ -59,11 +62,6 @@
           </div>
         </template>
       </AmDialog>
-    </template>
-    <EventListSkeleton
-      v-else
-      :display-number="amSettings.general.itemsPerPage"
-    ></EventListSkeleton>
   </div>
   <BackLink/>
 </template>
@@ -95,7 +93,6 @@ import { useScrollTo } from "../../../../assets/js/common/scrollElements";
 import { useWaitingListAvailability } from "../../../../assets/js/public/events";
 
 // * Parts
-import EventListSkeleton from './Parts/EventListSkeleton.vue'
 import BackLink from '../../Parts/BackLink'
 
 // * Structure Components
@@ -120,11 +117,13 @@ const eventCustomerInfo = markRaw(EventCustomerInfo)
 const eventPayment = markRaw(EventPayment)
 const eventCongratulations = markRaw(EventCongratulations)
 
-// * Emits
-const emits = defineEmits(['isRestored'])
+// * Dynamic height
+let dynamicVh = ref(0)
+function updateVH() {
+  dynamicVh.value = window.visualViewport.height
+}
 
-// * Global flag for determination when component is fully loaded (used for Amelia popup)
-let isMounted = inject('isMounted')
+window.addEventListener('resize', updateVH)
 
 // * Popup Visibility
 const popupVisible = ref(false)
@@ -260,9 +259,17 @@ provide('bringingAnyoneVisibility', bringingAnyoneVisibility)
 let footerButtonClicked = ref(false)
 let footerBtnDisabled = ref(false)
 
-let secondBtnVisibility = computed(() => {
+let ifBookedCustomerCabinetUrl = computed(() => {
   if (booked.value !== null) {
     return booked.value.customerCabinetUrl.length > 0
+  }
+
+  return true
+})
+
+let customerCabinetButton = computed(() => {
+  if (stepsArray.value[stepIndex.value].name === 'CongratulationsStep') {
+    return amSettings.roles.customerCabinet.pageUrl !== null && ifBookedCustomerCabinetUrl.value
   }
 
   return true
@@ -343,10 +350,19 @@ store.dispatch(
       'customFields',
       'taxes',
     ],
-    loadEntities: !shortcodeData.value.trigger ? (window.ameliaShortcodeData.filter(i => !i.hasApiCall).length === window.ameliaShortcodeData.length
-      ? true : shortcodeData.value.hasApiCall) : true
+    loadEntities: shortcodeData.value.hasApiCall || shortcodeData.value.trigger,
   }
 )
+
+const loadDialogCounter = inject('loadDialogCounter', ref(null))
+
+watch(loadDialogCounter, () => {
+  if (shortcodeData.value.in_dialog && store.getters['eventEntities/getEventsDisplay']) {
+    store.dispatch('eventEntities/requestEvents', store.getters['eventEntities/getEventsDisplay'])
+  } else if (shortcodeData.value.in_dialog) {
+    store.dispatch('eventEntities/requestEvents')
+  }
+})
 
 onMounted(() => {
   document.getElementById(
@@ -371,12 +387,11 @@ onMounted(() => {
 
   useAction(store, {containerWidth}, 'ContainerWidth', 'event', null, null)
 
-  isMounted.value = true
+  updateVH()
 })
 
 function onCloseEventDialog () {
   if (stepsArray.value[stepIndex.value].name === 'CongratulationsStep') {
-    store.commit('setReady', false)
     window.location.reload()
   }
 
@@ -391,6 +406,7 @@ function onClosedEventDialog () {
     store.dispatch('coupon/resetCoupon')
     store.dispatch('tickets/resetCustomTickets')
     store.dispatch('eventWaitingListOptions/resetWaitingOptions')
+    store.dispatch('payment/resetPaymentData')
   })
 }
 
@@ -402,8 +418,7 @@ function onOpenedEventDialog () {
   })
 }
 
-watch(ready, (current) => {
-  if (current) {
+onMounted(() => {
     let restore = useRestore(store, shortcodeData.value)
 
     if (restore) {
@@ -442,8 +457,6 @@ watch(ready, (current) => {
         stepIndex.value++
       })
 
-      store.commit('setLoading', false)
-
       let index = -1
 
       if (restore.result === 'success') {
@@ -454,10 +467,7 @@ watch(ready, (current) => {
 
       stepIndex.value = index
       popupVisible.value = true
-
-      emits('isRestored', true)
     }
-  }
 })
 
 // * Customized data form
@@ -548,6 +558,9 @@ let cssVars = computed(() => {
     '--am-c-skeleton-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
     '--am-font-family': amFonts.value.fontFamily,
 
+    // -dvh- dynamic height
+    '--am-dvh': dynamicVh.value ? `${dynamicVh.value}px` : '100dvh',
+
     // -mw- max width
     '--am-mw-main': '792px',
     // -hd- height dialog
@@ -555,7 +568,7 @@ let cssVars = computed(() => {
     '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
     '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
 
-    '--am-rad-input': '6px',
+    '--am-rad-inp': '6px',
 
     // -mb- margin bottom
     '--am-mb-dialog': '300px'
@@ -631,9 +644,9 @@ export default {
   // -h- height
   // -fs- font size
   // -rad- border radius
-  --am-h-input: 40px;
-  --am-fs-input: 15px;
-  --am-rad-input: 6px;
+  --am-h-inp: 40px;
+  --am-fs-inp: 15px;
+  --am-rad-inp: 6px;
   --am-fs-label: 15px;
   --am-fs-btn: 15px;
 
@@ -644,56 +657,77 @@ export default {
 .amelia-v2-booking {
   /* Event list dialog */
   // el - event list
-  &.am-dialog-el {
+  &.am-dialog-el.am-dialog-popup {
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 99999999 !important;
 
     .el-dialog {
-      // am - amelia
-      // mb - margin bottom
-      margin-bottom: var(--am-mb-dialog);
-      border-radius: 8px;
-      overflow: hidden;
-      background-color: var(--am-c-main-bgr);
-
-      * {
-        box-sizing: border-box;
-        font-family: var(--am-font-family);
-        word-break: break-word;
+      @media only screen and (max-width: 768px) {
+        margin-top: 0;
       }
 
-      &__header {
-        padding: 0;
+      #amelia-container {
+        background-color: var(--am-c-main-bgr);
       }
 
-      &__headerbtn {
-        top: 8px;
-        right: 12px;
-        background: transparent !important;
-        padding: 0;
-      }
+      .el-dialog {
+        // am - amelia
+        // mb - margin bottom
+        margin-bottom: var(--am-mb-dialog);
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: var(--am-c-main-bgr);
 
-      &__close {
-        width: 12px;
-        height: 12px;
-
-        .am-icon-close:before {
-          color: var(--am-c-main-text);
+        * {
+          box-sizing: border-box;
+          font-family: var(--am-font-family), sans-serif;
+          word-break: break-word;
         }
-      }
 
-      &__body {
-        padding: 0;
-      }
+        &__header {
+          padding: 0;
+        }
 
-      &__footer {
-        display: none;
-        padding: 0;
+        &__headerbtn {
+          top: 8px;
+          right: 12px;
+          background: transparent !important;
+          padding: 0;
+
+          &:active {
+            position: absolute;
+            border: none;
+            outline: 0;
+          }
+        }
+
+        &__close {
+          width: 12px;
+          height: 12px;
+
+          .am-icon-close:before {
+            color: var(--am-c-main-text);
+          }
+        }
+
+        &__body {
+          padding: 0;
+        }
+
+        &__footer {
+          display: none;
+          padding: 0;
+        }
       }
     }
   }
 
   #amelia-container {
+    .el-skeleton {
+      width: 100%;
+      padding: 16px 32px;
+    }
+
     // am - amelia
     // elf - events list form
     &.am-elf {
@@ -705,7 +739,7 @@ export default {
     }
 
     * {
-      font-family: var(--am-font-family);
+      font-family: var(--am-font-family), sans-serif;
       box-sizing: border-box;
       word-break: break-word;
     }
@@ -717,6 +751,15 @@ export default {
         display: block;
         overflow-x: hidden;
         padding: 16px 24px 24px;
+
+        @media only screen and (max-width: 768px) {
+          max-height: unset;
+          height: calc(var(--am-dvh, 100vh) - 128px);
+
+          &.am-eli {
+            height: calc(var(--am-dvh, 100vh) - 68px);
+          }
+        }
 
         &::-webkit-scrollbar {
           width: 6px;

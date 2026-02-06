@@ -9,9 +9,9 @@ namespace AmeliaBooking\Domain\ValueObjects\String;
  */
 final class AmountType
 {
-    const FIXED = 'fixed';
+    public const FIXED = 'fixed';
 
-    const PERCENTAGE = 'percentage';
+    public const PERCENTAGE = 'percentage';
     /**
      * @var string
      */
@@ -20,7 +20,7 @@ final class AmountType
     /**
      * Status constructor.
      *
-     * @param int $value
+     * @param string $value
      */
     public function __construct($value)
     {

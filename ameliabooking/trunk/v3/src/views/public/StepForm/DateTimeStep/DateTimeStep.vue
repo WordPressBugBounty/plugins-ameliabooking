@@ -3,6 +3,7 @@
     ref="dateTimeRef"
     class="am-fs-dt__calendar"
     :class="[props.globalClass, {'am-oxvisible': (recurringPopupVisibility || packagesVisibility)}]"
+    tabindex="0"
   >
     <div v-if="limitPerEmployeeError" ref="limitError" class="am-fs__payments-error" >
       <AmAlert
@@ -21,6 +22,10 @@
       :end-time="amCustomize.dateTimeStep.options.endTimeVisibility.visibility"
       :time-zone="amCustomize.dateTimeStep.options.timeZoneVisibility.visibility"
       :show-busy-slots="busyTimeSlotsVisibility"
+      :show-estimated-pricing="estimatedPricingVisibility"
+      :show-indicator-pricing="indicatorPricingVisibility"
+      :show-slot-pricing="slotPricingVisibility"
+      :show-people-waiting="peopleWaitingVisibility"
       :label-slots-selected="amLabels.date_time_slots_selected"
       :fetched-slots="null"
       :service-id="cartItem ? cartItem.serviceId : 0"
@@ -29,6 +34,7 @@
       :tax-visibility="taxVisibility"
       :tax-label="amLabels.total_tax_colon"
       :tax-label-incl="amLabels.incl_tax"
+      :is-package="false"
     ></Calendar>
 
     <!-- Recurring Appointment -->
@@ -116,6 +122,10 @@ let props = defineProps({
   globalClass: {
     type: String,
     default: ''
+  },
+  showCart: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -131,6 +141,42 @@ let busyTimeSlotsVisibility = computed(() => {
   }
 
   return defaultCustomizeSettings.sbsNew.dateTimeStep.options.busyTimeSlotsVisibility.visibility
+})
+
+// * Estimated Pricing Visibility
+let estimatedPricingVisibility = computed(() => {
+  if ('estimatedPricingVisibility' in amCustomize.dateTimeStep.options) {
+    return amCustomize.dateTimeStep.options.estimatedPricingVisibility.visibility
+  }
+
+  return defaultCustomizeSettings.sbsNew.dateTimeStep.options.estimatedPricingVisibility.visibility
+})
+
+// * Indicator Pricing Visibility
+let indicatorPricingVisibility = computed(() => {
+  if ('indicatorPricingVisibility' in amCustomize.dateTimeStep.options) {
+    return amCustomize.dateTimeStep.options.indicatorPricingVisibility.visibility
+  }
+
+  return defaultCustomizeSettings.sbsNew.dateTimeStep.options.indicatorPricingVisibility.visibility
+})
+
+// * Slot Pricing Visibility
+let slotPricingVisibility = computed(() => {
+  if ('slotPricingVisibility' in amCustomize.dateTimeStep.options) {
+    return amCustomize.dateTimeStep.options.slotPricingVisibility.visibility
+  }
+
+  return defaultCustomizeSettings.sbsNew.dateTimeStep.options.slotPricingVisibility.visibility
+})
+
+// * Waiting List - Show People Waiting
+let peopleWaitingVisibility = computed(() => {
+  if ('peopleWaitingVisibility' in amCustomize.dateTimeStep.options) {
+    return amCustomize.dateTimeStep.options.peopleWaitingVisibility.visibility
+  }
+
+  return defaultCustomizeSettings.sbsNew.dateTimeStep.options.peopleWaitingVisibility.visibility
 })
 
 const store = useStore()
@@ -260,7 +306,10 @@ watchEffect(() => {
 
     usePaymentError(store, '')
 
-    if (service.recurringCycle !== 'disabled' && service.recurringCycle !== null && notLastDay.value && cart.length <= 1) {
+    if (
+      service.recurringCycle !== 'disabled' && service.recurringCycle !== null && notLastDay.value && cart.length <= 1
+      && !store.getters['appointmentWaitingListOptions/getIsWaitingListSlot']
+    ) {
       recurringPopupVisibility.value = true
     } else {
       let bookingFailed = useFillAppointments(store)
@@ -282,7 +331,7 @@ watchEffect(() => {
 
 watchEffect(() => {
   footerBtnDisabledUpdater(!date.value || !time.value)
-})
+}, { flush: 'post' })
 
 
 /*****************
@@ -354,6 +403,14 @@ function recurringStep (repeat) {
   if (repeat) {
     goToRecurringStep()
   } else {
+    if (cartItem.value &&
+      'serviceId' in cartItem.value &&
+      cartItem.value.serviceId in cartItem.value.services &&
+      cartItem.value.services[cartItem.value.serviceId].list.length > 1
+    ) {
+      store.commit('booking/unsetRecurringItems')
+    }
+
     limitPerEmployeeError.value = ''
     let bookingFailed = useFillAppointments(store)
 
@@ -366,7 +423,7 @@ function recurringStep (repeat) {
 }
 
 function setDurationsPrices (service, durations) {
-  if (service.customPricing.enabled) {
+  if (service.customPricing.enabled === 'duration') {
     Object.keys(service.customPricing.durations).forEach((duration) => {
       if (!(duration in durations)) {
         durations[parseInt(duration)] = []
@@ -425,6 +482,10 @@ function getDurations () {
 }
 
 onMounted(() => {
+  if (props.showCart && !store.getters['booking/getShownCart']) {
+    return
+  }
+
   service = store.getters['entities/getService'](
     cartItem.value.serviceId
   )
@@ -450,7 +511,10 @@ onMounted(() => {
 
   let hasItem = index in items
 
-  if (hasItem && cartItem.value.services[cartItem.value.serviceId].list.length > 1) {
+  if (
+    (hasItem && cartItem.value.services[cartItem.value.serviceId].list.length > 1) ||
+    store.getters['appointmentWaitingListOptions/getIsWaitingListSlot']
+  ) {
     removeRecurringStep()
   }
 

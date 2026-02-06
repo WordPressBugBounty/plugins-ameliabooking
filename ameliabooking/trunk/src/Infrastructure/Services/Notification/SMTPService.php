@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -9,7 +10,7 @@ namespace AmeliaBooking\Infrastructure\Services\Notification;
 use AmeliaBooking\Domain\Services\Notification\AbstractMailService;
 use AmeliaBooking\Domain\Services\Notification\MailServiceInterface;
 use Exception;
-use AmeliaPHPMailer\PHPMailer\PHPMailer;
+use AmeliaVendor\PHPMailer\PHPMailer\PHPMailer;
 
 /**
  * Class SMTPService
@@ -19,7 +20,7 @@ class SMTPService extends AbstractMailService implements MailServiceInterface
     /** @var string */
     private $host;
 
-    /** @var string */
+    /** @var int */
     private $port;
 
     /** @var string */
@@ -37,17 +38,18 @@ class SMTPService extends AbstractMailService implements MailServiceInterface
      * @param        $from
      * @param        $fromName
      * @param string $host
-     * @param string $port
+     * @param int    $port
      * @param string $secure
      * @param string $username
      * @param string $password
+     * @param        $replyTo
      */
-    public function __construct($from, $fromName, $host, $port, $secure, $username, $password)
+    public function __construct($from, $fromName, $host, $port, $secure, $username, $password, $replyTo)
     {
-        parent::__construct($from, $fromName);
-        $this->host = $host;
-        $this->port = $port;
-        $this->secure = $secure;
+        parent::__construct($from, $fromName, $replyTo);
+        $this->host     = $host;
+        $this->port     = $port;
+        $this->secure   = $secure;
         $this->username = $username;
         $this->password = $password;
     }
@@ -71,31 +73,33 @@ class SMTPService extends AbstractMailService implements MailServiceInterface
         try {
             //Server settings
             $mail->isSMTP();
-            $mail->SMTPAuth = true;
+            $mail->SMTPAuth   = true;
             $mail->SMTPSecure = $this->secure;
-            $mail->Host = $this->host;
-            $mail->Port = $this->port;
-            $mail->Username = $this->username;
-            $mail->Password = $this->password;
+            $mail->Host       = $this->host;
+            $mail->Port       = $this->port;
+            $mail->Username   = $this->username;
+            $mail->Password   = $this->password;
 
             //Recipients
             $mail->setFrom($this->from, $this->fromName);
             $mail->addAddress($to);
-            $mail->addReplyTo($this->from);
+            $mail->addReplyTo(!empty($this->replyTo) ? $this->replyTo : $this->from);
 
             foreach ($bccEmails as $bccEmail) {
                 $mail->addBCC($bccEmail);
             }
 
             foreach ($attachments as $attachment) {
-                $mail->addStringAttachment($attachment['content'], $attachment['name'], 'base64', $attachment['type']);
+                if (!empty($attachment['content'])) {
+                    $mail->addStringAttachment($attachment['content'], $attachment['name'], 'base64', $attachment['type']);
+                }
             }
 
             //Content
             $mail->CharSet = 'UTF-8';
             $mail->isHTML();
             $mail->Subject = $subject;
-            $mail->Body = $body;
+            $mail->Body    = $body;
 
             $mail->send();
         } catch (Exception $e) {

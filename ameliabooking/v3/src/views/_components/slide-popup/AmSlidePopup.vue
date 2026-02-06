@@ -127,6 +127,10 @@ let cssVars = computed(() => {
     background-color: var(--am-c-spb-text-op10);
     z-index: 1000;
 
+    * {
+      box-sizing: border-box;
+    }
+
     &-header {
       display: flex;
       align-items: center;

@@ -27,7 +27,6 @@ class UpdateCategoryCommandHandler extends CommandHandler
      * @throws \Slim\Exception\ContainerValueNotFoundException
      * @throws AccessDeniedException
      * @throws QueryExecutionException
-     * @throws \Interop\Container\Exception\ContainerException
      * @throws InvalidArgumentException
      */
     public function handle(UpdateCategoryCommand $command)
@@ -61,9 +60,11 @@ class UpdateCategoryCommandHandler extends CommandHandler
 
             $result->setResult(CommandResult::RESULT_SUCCESS);
             $result->setMessage('Successfully updated bookable category.');
-            $result->setData([
+            $result->setData(
+                [
                 Entities::CATEGORY => $category->toArray()
-            ]);
+                ]
+            );
         }
 
         return $result;

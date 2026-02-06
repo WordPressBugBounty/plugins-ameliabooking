@@ -25,6 +25,7 @@
       :show-estimated-pricing="estimatedPricingVisibility"
       :show-indicator-pricing="indicatorPricingVisibility"
       :show-slot-pricing="slotPricingVisibility"
+      :show-people-waiting="peopleWaitingVisibility"
       :label-slots-selected="amLabels.date_time_slots_selected"
       :fetched-slots="null"
       :service-id="cartItem ? cartItem.serviceId : 0"
@@ -169,6 +170,15 @@ let slotPricingVisibility = computed(() => {
   return defaultCustomizeSettings.sbsNew.dateTimeStep.options.slotPricingVisibility.visibility
 })
 
+// * Waiting List - Show People Waiting
+let peopleWaitingVisibility = computed(() => {
+  if ('peopleWaitingVisibility' in amCustomize.dateTimeStep.options) {
+    return amCustomize.dateTimeStep.options.peopleWaitingVisibility.visibility
+  }
+
+  return defaultCustomizeSettings.sbsNew.dateTimeStep.options.peopleWaitingVisibility.visibility
+})
+
 const store = useStore()
 
 // * Amelia Settings
@@ -296,7 +306,10 @@ watchEffect(() => {
 
     usePaymentError(store, '')
 
-    if (service.recurringCycle !== 'disabled' && service.recurringCycle !== null && notLastDay.value && cart.length <= 1) {
+    if (
+      service.recurringCycle !== 'disabled' && service.recurringCycle !== null && notLastDay.value && cart.length <= 1
+      && !store.getters['appointmentWaitingListOptions/getIsWaitingListSlot']
+    ) {
       recurringPopupVisibility.value = true
     } else {
       let bookingFailed = useFillAppointments(store)
@@ -498,7 +511,10 @@ onMounted(() => {
 
   let hasItem = index in items
 
-  if (hasItem && cartItem.value.services[cartItem.value.serviceId].list.length > 1) {
+  if (
+    (hasItem && cartItem.value.services[cartItem.value.serviceId].list.length > 1) ||
+    store.getters['appointmentWaitingListOptions/getIsWaitingListSlot']
+  ) {
     removeRecurringStep()
   }
 

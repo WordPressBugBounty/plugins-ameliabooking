@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -27,6 +28,11 @@ class Settings
 
     /** @var GoogleMeetSettings */
     private $googleMeetSettings;
+
+    /** @var MicrosoftTeamsSettings */
+    private $microsoftTeamsSettings;
+
+    private $featuresIntegrationsSettings;
 
     /**
      * @return GeneralSettings
@@ -106,6 +112,22 @@ class Settings
     public function setGoogleMeetSettings($googleMeetSettings)
     {
         $this->googleMeetSettings = $googleMeetSettings;
+    }
+
+    /**
+     * @return MicrosoftTeamsSettings
+     */
+    public function getMicrosoftTeamsSettings()
+    {
+        return $this->microsoftTeamsSettings;
+    }
+
+    /**
+     * @param MicrosoftTeamsSettings $microsoftTeamsSettings
+     */
+    public function setMicrosoftTeamsSettings($microsoftTeamsSettings)
+    {
+        $this->microsoftTeamsSettings = $microsoftTeamsSettings;
     }
 
     /**

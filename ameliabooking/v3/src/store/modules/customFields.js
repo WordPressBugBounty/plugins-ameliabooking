@@ -35,6 +35,10 @@ export default {
       state.customFields = payload
     },
 
+    setCustomField (state, payload) {
+      state.customFields[payload.key] = payload
+    },
+
     setCustomFieldValue (state, payload) {
       state.customFields[payload.key].value = payload.value
     },

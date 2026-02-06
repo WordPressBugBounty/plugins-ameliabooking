@@ -1,11 +1,9 @@
 <?php
 
-namespace AmeliaStripe\Exception\OAuth;
+namespace AmeliaVendor\Stripe\Exception\OAuth;
 
 /**
  * UnsupportedGrantTypeException is thrown when an unuspported grant type
  * parameter is specified.
  */
-class UnsupportedGrantTypeException extends OAuthErrorException
-{
-}
+class UnsupportedGrantTypeException extends OAuthErrorException {}

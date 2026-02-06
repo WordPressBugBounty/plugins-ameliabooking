@@ -52,6 +52,9 @@ let props = defineProps({
   }
 })
 
+// * Features
+let features = inject('features')
+
 function imagePlaceholder (label) {
   let shortLabel = ''
 
@@ -73,9 +76,11 @@ let servicePrice = computed(() => {
 
 let extrasPrice = computed(() => {
   let price = 0
-  props.data.extras.forEach((extra) => {
-    price += extra.price * extra.quantity * props.data.service.persons
-  })
+  if (features.value.extras) {
+    props.data.extras.forEach((extra) => {
+      price += extra.price * extra.quantity * props.data.service.persons
+    })
+  }
 
   return price
 })

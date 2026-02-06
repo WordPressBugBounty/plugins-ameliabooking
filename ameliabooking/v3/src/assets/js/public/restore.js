@@ -75,7 +75,6 @@ function useRestore (store, shortcodeData) {
     const navType = navEntries && navEntries.length > 0 ? navEntries[0].type : performance.navigation.type;
     if (savedData && JSON.parse(savedData) && (navType === 'back_forward' || navType === 2)) {
       data = JSON.parse(savedData)
-      sessionStorage.setItem("ameliaCacheData", null)
       userClickedBack = true
     } else {
       if (savedData) {
@@ -84,6 +83,8 @@ function useRestore (store, shortcodeData) {
       return null
     }
   }
+
+  sessionStorage.removeItem("ameliaCacheData")
 
   try {
     window.history.replaceState(
@@ -131,7 +132,6 @@ function useRestore (store, shortcodeData) {
   } else {
     store.state.booking = {...data.request.state }
   }
-
 
   if (userClickedBack) {
     if ((data.paymentMethod === 'mollie' || data.paymentMethod === 'barion') && data.bookings) {

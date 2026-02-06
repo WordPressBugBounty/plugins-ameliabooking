@@ -11,7 +11,7 @@ use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
  */
 final class Email
 {
-    const MAX_LENGTH = 255;
+    public const MAX_LENGTH = 255;
     /**
      * @var string
      */
@@ -26,7 +26,11 @@ final class Email
      */
     public function __construct($email)
     {
-        if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (empty($email)) {
+            $email = null;
+        }
+
+        if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL, FILTER_FLAG_EMAIL_UNICODE)) {
             throw new InvalidArgumentException("Email '$email' is not a valid email");
         }
         if ($email && strlen($email) > static::MAX_LENGTH) {

@@ -55,14 +55,14 @@
               <el-form-item
                 v-if="props.employees.length && employeeVisibility && props.customizedOptions.employee.visibility"
                 :class="[{'am-csd__filter-full': !(props.locations.length && locationVisibility && props.customizedOptions.location.visibility)}, responsiveClass]"
-                :label="`${amLabels.package_appointment_employee}:`"
+                :label="`${labels.package_appointment_employee}:`"
                 :prop="'employee'"
               >
                 <AmSelect
                   v-model="packageFormData.employee"
                   clearable
                   :filterable="props.customizedOptions.employee.filterable"
-                  :placeholder="`${amLabels.package_select_employee}...`"
+                  :placeholder="`${labels.package_select_employee}...`"
                   :fit-input-width="true"
                   :popper-class="'am-csd__filter-employees'"
                   :disabled="slotsAreLoading"
@@ -81,8 +81,8 @@
                       :price="0"
                       :image-thumb="provider.pictureThumbPath"
                       :description="provider.description"
-                      :dialog-title="amLabels.employee_information_package"
-                      :dialog-button-text="amLabels.select_this_employee_package"
+                      :dialog-title="labels.employee_information_package"
+                      :dialog-button-text="labels.select_this_employee_package"
                       :badge="provider.badge"
                       @click="selectEmployee"
                     ></AmOptionTemplate2>
@@ -93,14 +93,14 @@
               <el-form-item
                 v-if="props.locations.length && locationVisibility && props.customizedOptions.location.visibility"
                 :class="[{'am-csd__filter-full': !(props.employees.length && employeeVisibility && props.customizedOptions.employee.visibility)}, responsiveClass]"
-                :label="`${amLabels.package_appointment_location}:`"
+                :label="`${labels.package_appointment_location}:`"
                 :prop="'location'"
               >
                 <AmSelect
                   v-model="packageFormData.location"
                   clearable
                   :filterable="props.customizedOptions.location.filterable"
-                  :placeholder="`${amLabels.package_select_location}...`"
+                  :placeholder="`${labels.package_select_location}...`"
                   :fit-input-width="true"
                   :disabled="slotsAreLoading"
                   :filter-method="filterLocation"
@@ -404,14 +404,14 @@ let rules = computed(() => {
       employee: [
         {
           required: 'employee' in props.customizedOptions ? props.customizedOptions.employee.required : false,
-          message: amLabels.value.please_select_employee,
+          message: props.labels.please_select_employee,
           trigger: 'submit',
         }
       ],
       location: [
         {
           required: 'location' in props.customizedOptions ? props.customizedOptions.location.required : false,
-          message: amLabels.value.please_select_location,
+          message: props.labels.please_select_location,
           trigger: 'submit',
         }
       ]
@@ -546,7 +546,7 @@ function rescheduleBooking () {
   }
 
   httpClient.post(
-    '/bookings/reassign/' + props.appointment.bookings.filter(i => i.status === 'approved' || i.status === 'pending')[0].id,
+    '/bookings/reassign/' + props.appointment.bookings.filter(i => i.status === 'approved' || i.status === 'pending' || i.status === 'waiting')[0].id,
       bookingData,
     Object.assign(useAuthorizationHeaderObject(store), {params: {source: 'cabinet-' + cabinetType.value}})
   ).then(() => {

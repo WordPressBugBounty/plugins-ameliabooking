@@ -1,7 +1,7 @@
 <template>
   <AmButton
     :size="props.btnSize"
-    :suffix="arrowDown "
+    :suffix="arrowDown"
     class="am-button-single"
     :class="props.class"
   >
@@ -11,45 +11,44 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject,
-  defineComponent,
-} from "vue";
+import { computed, inject, defineComponent } from 'vue'
 
 // * Components
-import AmButton from "../../../../../../_components/button/AmButton.vue";
-import IconComponent from "../../../../../../_components/icons/IconComponent.vue";
+import AmButton from '../../../../../../_components/button/AmButton.vue'
+import IconComponent from '../../../../../../_components/icons/IconComponent.vue'
+
+// * Composables
+import { useReactiveCustomize } from '../../../../../../../assets/js/admin/useReactiveCustomize.js'
 
 let props = defineProps({
   reservation: {
     type: Object,
-    default: () => {}
+    default: () => {},
   },
   bookable: {
     type: Object,
-    default: () => {}
+    default: () => {},
   },
   btnSize: {
     type: String,
-    default: 'mini'
+    default: 'mini',
   },
   class: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 let arrowDown = defineComponent({
-  components: {IconComponent},
-  template: `<IconComponent icon="arrow-down"></IconComponent>`
+  components: { IconComponent },
+  template: `<IconComponent icon="arrow-down"></IconComponent>`,
 })
 
 /*************
  * Customize *
  *************/
 // * Customize
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Labels
 let langKey = inject('langKey')
@@ -59,12 +58,19 @@ let pageRenderKey = inject('pageRenderKey')
 let stepName = inject('stepName')
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepName.value].translations
-    && amCustomize.value[pageRenderKey.value][stepName.value].translations[label]
-    && amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepName.value]
+      .translations &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[
+        label
+      ] &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[
+        label
+      ][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[
+          label
+        ][langKey.value]
       : amLabels[label]
   })
 
@@ -74,10 +80,8 @@ function labelsDisplay (label) {
 
 <script>
 export default {
-  name: 'PaymentButton'
+  name: 'PaymentButton',
 }
 </script>
 
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>

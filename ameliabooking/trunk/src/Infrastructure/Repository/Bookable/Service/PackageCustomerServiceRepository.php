@@ -11,6 +11,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Connection;
 use AmeliaBooking\Infrastructure\Repository\AbstractRepository;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Bookable\PackagesCustomersTable;
+use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Bookable\PackagesTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\CustomerBookingsTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Payment\PaymentsTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\User\UsersTable;
@@ -22,7 +23,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\User\UsersTable;
  */
 class PackageCustomerServiceRepository extends AbstractRepository
 {
-    const FACTORY = PackageCustomerServiceFactory::class;
+    public const FACTORY = PackageCustomerServiceFactory::class;
 
     /** @var string */
     protected $packagesCustomersTable;
@@ -94,6 +95,7 @@ class PackageCustomerServiceRepository extends AbstractRepository
     public function getByCriteria($criteria, $empty = false)
     {
         $bookingsTable = CustomerBookingsTable::getTableName();
+        $packagesTable = PackagesTable::getTableName();
 
         $params = [];
 
@@ -113,8 +115,22 @@ class PackageCustomerServiceRepository extends AbstractRepository
             $where[] = 'pcs.id IN (' . implode(', ', $queryIds) . ')';
         }
 
+        if (!empty($criteria['packageCustomerIds'])) {
+            $queryIds = [];
+
+            foreach ($criteria['packageCustomerIds'] as $index => $value) {
+                $param = ':id' . $index;
+
+                $queryIds[] = $param;
+
+                $params[$param] = $value;
+            }
+
+            $where[] = 'pc.id IN (' . implode(', ', $queryIds) . ')';
+        }
+
         if (!empty($criteria['purchased'])) {
-            $where[] = "(DATE_FORMAT(pc.purchased, '%Y-%m-%d %H:%i:%s') BETWEEN :purchasedFrom AND :purchasedTo)";
+            $where[] = "(pc.purchased BETWEEN :purchasedFrom AND :purchasedTo)";
 
             $params[':purchasedFrom'] = DateTimeService::getCustomDateTimeInUtc($criteria['purchased'][0]);
 
@@ -122,11 +138,7 @@ class PackageCustomerServiceRepository extends AbstractRepository
         }
 
         if (!empty($criteria['dates'])) {
-            $where[] = "((:from1 >= DATE_FORMAT(pc.start, '%Y-%m-%d %H:%i:%s') AND
-            :from2 <= DATE_FORMAT(pc.end, '%Y-%m-%d %H:%i:%s')
-            ) OR (
-            :from3 <= DATE_FORMAT(pc.start, '%Y-%m-%d %H:%i:%s') AND
-            :to1 >= DATE_FORMAT(pc.start, '%Y-%m-%d %H:%i:%s'))) ";
+            $where[] = "((:from1 >= pc.start AND :from2 <= pc.end) OR (:from3 <= pc.start AND :to1 >= pc.start)) ";
 
             $params[':from1'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]);
             $params[':from2'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]);
@@ -135,10 +147,32 @@ class PackageCustomerServiceRepository extends AbstractRepository
             $params[':to1'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][1]);
         }
 
-        if (!empty($criteria['customerId'])) {
-            $params[':customerId'] = $criteria['customerId'];
+        if (!empty($criteria['customers'])) {
+            $queryCustomers = [];
 
-            $where[] = 'pc.customerId = :customerId';
+            foreach ($criteria['customers'] as $index => $value) {
+                $param = ':customer' . $index;
+
+                $queryCustomers[] = $param;
+
+                $params[$param] = $value;
+            }
+
+            $where[] = 'cu.id IN (' . implode(', ', $queryCustomers) . ')';
+        }
+
+        if (!empty($criteria['status'])) {
+            $queryStatus = [];
+
+            foreach ($criteria['status'] as $index => $value) {
+                $param = ':status' . $index;
+
+                $queryStatus[] = $param;
+
+                $params[$param] = $value;
+            }
+
+            $where[] = 'pc.status IN (' . implode(', ', $queryStatus) . ')';
         }
 
         if (!empty($criteria['services'])) {
@@ -206,6 +240,8 @@ class PackageCustomerServiceRepository extends AbstractRepository
                     pc.bookingsCount AS package_customer_bookingsCount,
                     pc.couponId AS package_customer_couponId,
                     
+                    pa.name as package_name,
+                    
                     pcs.id AS package_customer_service_id,
                     pcs.serviceId AS package_customer_service_serviceId,
                     pcs.providerId AS package_customer_service_providerId,
@@ -223,13 +259,17 @@ class PackageCustomerServiceRepository extends AbstractRepository
                     p.data AS payment_data,
                     p.wcOrderId AS payment_wcOrderId,
                     p.wcOrderItemId AS payment_wcOrderItemId,
-                    
+                    p.invoiceNumber AS payment_invoiceNumber,
+                    p.created AS payment_created,
+                
                     cu.firstName AS customer_firstName,
                     cu.lastName AS customer_lastName,
                     cu.email AS customer_email,
-                    cu.phone AS customer_phone
+                    cu.phone AS customer_phone,
+                    cu.status AS customer_status
                 FROM {$this->table} pcs
                 INNER JOIN {$this->packagesCustomersTable} pc ON pcs.packageCustomerId = pc.id
+                INNER JOIN {$packagesTable} pa ON pa.id = pc.packageId
                 INNER JOIN {$usersTable} cu ON cu.id = pc.customerId
                 LEFT JOIN {$this->paymentsTable} p ON p.packageCustomerId = pc.id
                 {$where}"
@@ -243,5 +283,46 @@ class PackageCustomerServiceRepository extends AbstractRepository
         }
 
         return call_user_func([static::FACTORY, 'createCollection'], $rows);
+    }
+
+    /**
+     * Get available service IDs for a package customer
+     *
+     * @param int $packageCustomerId
+     * @return array
+     * @throws QueryExecutionException
+     */
+    public function getAvailableServiceIds($packageCustomerId)
+    {
+        $bookingsTable = CustomerBookingsTable::getTableName();
+
+        try {
+            $statement = $this->connection->prepare(
+                "SELECT 
+                    pcs.id,
+                    pcs.serviceId
+                FROM {$this->table} pcs
+                LEFT JOIN (
+                    SELECT packageCustomerServiceId, COUNT(*) as booking_count
+                    FROM {$bookingsTable}
+                    GROUP BY packageCustomerServiceId
+                ) cb ON cb.packageCustomerServiceId = pcs.id
+                WHERE pcs.packageCustomerId = :packageCustomerId
+                AND (cb.booking_count IS NULL OR cb.booking_count < pcs.bookingsCount)"
+            );
+
+            $params = [
+                ':packageCustomerId' => $packageCustomerId
+            ];
+
+            $statement->execute($params);
+
+            $results = $statement->fetchAll();
+
+            // Convert results to associative array with id as key and serviceId as value
+            return array_column($results, 'serviceId', 'id');
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to get available service ids in ' . __CLASS__, $e->getCode(), $e);
+        }
     }
 }

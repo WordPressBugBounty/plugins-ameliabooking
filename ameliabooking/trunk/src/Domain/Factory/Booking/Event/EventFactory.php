@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -12,6 +13,7 @@ use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\Gallery\GalleryImage;
 use AmeliaBooking\Domain\Factory\Booking\Appointment\CustomerBookingFactory;
 use AmeliaBooking\Domain\Factory\Coupon\CouponFactory;
+use AmeliaBooking\Domain\Factory\Location\LocationFactory;
 use AmeliaBooking\Domain\Factory\User\ProviderFactory;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
@@ -38,9 +40,8 @@ use AmeliaBooking\Infrastructure\Licence;
  */
 class EventFactory
 {
-
     /**
-     * @param $data
+     * @param array $data
      *
      * @return Event
      * @throws InvalidArgumentException
@@ -121,6 +122,10 @@ class EventFactory
 
         if (!empty($data['locationId'])) {
             $event->setLocationId(new Id($data['locationId']));
+        }
+
+        if (!empty($data['location'])) {
+            $event->setLocation(LocationFactory::create($data['location']));
         }
 
         if (!empty($data['customLocation'])) {
@@ -273,15 +278,21 @@ class EventFactory
             $providerList = $data['providers'];
 
             foreach ($providerList as $providerKey => $provider) {
+                $provider['type'] = 'provider';
                 $providers->addItem(ProviderFactory::create($provider), $providerKey);
             }
         }
+
+        $event->setProviders($providers);
 
         if (!empty($data['organizerId'])) {
             $event->setOrganizerId(new Id($data['organizerId']));
         }
 
-        $event->setProviders($providers);
+        if (!empty($data['organizer'])) {
+            $data['organizer']['type'] = 'provider';
+            $event->setOrganizer(ProviderFactory::create($data['organizer']));
+        }
 
         if (!empty($data['zoomUserId'])) {
             $event->setZoomUserId(new Name($data['zoomUserId']));
@@ -289,6 +300,10 @@ class EventFactory
 
         if (!empty($data['translations'])) {
             $event->setTranslations(new Json($data['translations']));
+        }
+
+        if (!empty($data['pictureFullPath']) && !empty($data['pictureThumbPath'])) {
+            $event->setPicture(new Picture($data['pictureFullPath'], $data['pictureThumbPath']));
         }
 
         return $event;
@@ -305,17 +320,19 @@ class EventFactory
         $events = [];
 
         foreach ($rows as $row) {
-            $eventId = $row['event_id'];
-            $eventPeriodId = isset($row['event_periodId']) ? $row['event_periodId'] : null;
-            $galleryId = isset($row['gallery_id']) ? $row['gallery_id'] : null;
-            $customerId = isset($row['customer_id']) ? $row['customer_id'] : null;
-            $bookingId = isset($row['booking_id']) ? $row['booking_id'] : null;
+            $eventId         = $row['event_id'];
+            $eventPeriodId   = isset($row['event_periodId']) ? $row['event_periodId'] : null;
+            $galleryId       = isset($row['gallery_id']) ? $row['gallery_id'] : null;
+            $customerId      = isset($row['customer_id']) ? $row['customer_id'] : null;
+            $bookingId       = isset($row['booking_id']) ? $row['booking_id'] : null;
             $bookingTicketId = isset($row['booking_ticket_id']) ? $row['booking_ticket_id'] : null;
-            $paymentId = isset($row['payment_id']) ? $row['payment_id'] : null;
-            $tagId = isset($row['event_tagId']) ? $row['event_tagId'] : null;
-            $ticketId = isset($row['ticket_id']) ? $row['ticket_id'] : null;
-            $providerId = isset($row['provider_id']) ? $row['provider_id'] : null;
-            $couponId = isset($row['coupon_id']) ? $row['coupon_id'] : null;
+            $paymentId       = isset($row['payment_id']) ? $row['payment_id'] : null;
+            $tagId           = isset($row['event_tagId']) ? $row['event_tagId'] : null;
+            $ticketId        = isset($row['ticket_id']) ? $row['ticket_id'] : null;
+            $providerId      = isset($row['provider_id']) ? $row['provider_id'] : null;
+            $organizerId     = isset($row['organizer_id']) ? $row['organizer_id'] : null;
+            $locationId      = isset($row['location_id']) ? $row['location_id'] : null;
+            $couponId        = isset($row['coupon_id']) ? $row['coupon_id'] : null;
 
             if (!array_key_exists($eventId, $events)) {
                 $events[$eventId] = [
@@ -374,14 +391,16 @@ class EventFactory
                     'closeAfterMin'         => isset($row['event_closeAfterMin']) ? $row['event_closeAfterMin'] : null,
                     'closeAfterMinBookings' => isset($row['event_closeAfterMinBookings']) ? $row['event_closeAfterMinBookings'] : null,
                     'aggregatedPrice'       => isset($row['event_aggregatedPrice']) ? $row['event_aggregatedPrice'] : null,
+                    'pictureFullPath'       => !empty($row['event_pictureFullPath']) ? $row['event_pictureFullPath'] : null,
+                    'pictureThumbPath'      => !empty($row['event_pictureThumbPath']) ? $row['event_pictureThumbPath'] : null,
                 ];
             }
 
             if ($galleryId) {
                 $events[$eventId]['gallery'][$galleryId]['id'] = $row['gallery_id'];
-                $events[$eventId]['gallery'][$galleryId]['pictureFullPath'] = $row['gallery_picture_full'];
+                $events[$eventId]['gallery'][$galleryId]['pictureFullPath']  = $row['gallery_picture_full'];
                 $events[$eventId]['gallery'][$galleryId]['pictureThumbPath'] = $row['gallery_picture_thumb'];
-                $events[$eventId]['gallery'][$galleryId]['position'] = $row['gallery_position'];
+                $events[$eventId]['gallery'][$galleryId]['position']         = $row['gallery_position'];
             }
 
             if ($providerId) {
@@ -391,6 +410,7 @@ class EventFactory
                         'firstName'        => $row['provider_firstName'],
                         'lastName'         => $row['provider_lastName'],
                         'email'            => $row['provider_email'],
+                        'badgeId'          => !empty($row['provider_badgeId']) ? $row['provider_badgeId'] : null,
                         'note'             => $row['provider_note'],
                         'description'      => $row['provider_description'],
                         'phone'            => $row['provider_phone'],
@@ -407,13 +427,34 @@ class EventFactory
                         'translations'     => $row['provider_translations'],
                         'timeZone'         => isset($row['provider_timeZone']) ? $row['provider_timeZone'] : null,
                         'outlookCalendar'  => [
-                            'id'         =>  isset($row['outlook_calendar_id']) ? $row['outlook_calendar_id']: null,
+                            'id'         =>  isset($row['outlook_calendar_id']) ? $row['outlook_calendar_id'] : null,
                             'token'      =>  isset($row['outlook_calendar_token']) ? $row['outlook_calendar_token'] : null,
                             'calendarId' =>  isset($row['outlook_calendar_calendar_id']) ? $row['outlook_calendar_calendar_id'] : null
                         ],
                     ];
             }
 
+            if ($organizerId) {
+                $events[$eventId]['organizer'] =
+                    [
+                        'id'               => $organizerId,
+                        'firstName'        => $row['organizer_firstName'],
+                        'lastName'         => $row['organizer_lastName'],
+                        'email'            => $row['organizer_email'],
+                        'badgeId'          => !empty($row['organizer_badgeId']) ? $row['organizer_badgeId'] : null,
+                        'pictureThumbPath' => isset($row['organizer_pictureThumbPath']) ? $row['organizer_pictureThumbPath'] : null,
+                        'pictureFullPath'  => isset($row['organizer_pictureFullPath']) ? $row['organizer_pictureFullPath'] : null,
+                        'type'             => 'provider',
+                    ];
+            }
+
+            if ($locationId) {
+                $events[$eventId]['location'] =
+                    [
+                        'id'   => $locationId,
+                        'name' => $row['location_name'],
+                    ];
+            }
 
             if ($eventPeriodId && !isset($events[$eventId]['periods'][$eventPeriodId])) {
                 $zoomMeetingJson = !empty($row['event_periodZoomMeeting']) ?
@@ -429,15 +470,19 @@ class EventFactory
                         'startUrl' => $zoomMeetingJson ? $zoomMeetingJson['startUrl'] : null,
                         'joinUrl'  => $zoomMeetingJson ? $zoomMeetingJson['joinUrl'] : null,
                     ],
-                    'lessonSpace'    => !empty($row['event_periodLessonSpace']) ?
+                    'lessonSpace'            => !empty($row['event_periodLessonSpace']) ?
                         $row['event_periodLessonSpace'] : null,
-                    'bookings'       => [],
-                    'googleCalendarEventId' => !empty($row['event_googleCalendarEventId']) ?
+                    'bookings'               => [],
+                    'googleCalendarEventId'  => !empty($row['event_googleCalendarEventId']) ?
                         $row['event_googleCalendarEventId'] : null,
-                    'googleMeetUrl'     => !empty($row['event_googleMeetUrl']) ?
+                    'googleMeetUrl'          => !empty($row['event_googleMeetUrl']) ?
                         $row['event_googleMeetUrl'] : null,
                     'outlookCalendarEventId' => !empty($row['event_outlookCalendarEventId']) ?
-                        $row['event_outlookCalendarEventId'] : null
+                        $row['event_outlookCalendarEventId'] : null,
+                    'microsoftTeamsUrl'     => !empty($row['event_microsoftTeamsUrl']) ?
+                        $row['event_microsoftTeamsUrl'] : null,
+                    'appleCalendarEventId'   => !empty($row['event_appleCalendarEventId']) ?
+                        $row['event_appleCalendarEventId'] : null
                 ];
             }
 
@@ -522,6 +567,7 @@ class EventFactory
                         'wcOrderId'         => !empty($row['payment_wcOrderId']) ? $row['payment_wcOrderId'] : null,
                         'wcOrderItemId'     => !empty($row['payment_wcOrderItemId']) ?
                             $row['payment_wcOrderItemId'] : null,
+                        'invoiceNumber'     => !empty($row['payment_invoiceNumber']) ? $row['payment_invoiceNumber'] : null,
                     ];
             }
 
@@ -541,23 +587,23 @@ class EventFactory
             }
 
             if ($bookingId && $couponId) {
-                $events[$eventId]['bookings'][$bookingId]['coupon']['id'] = $couponId;
-                $events[$eventId]['bookings'][$bookingId]['coupon']['code'] = $row['coupon_code'];
-                $events[$eventId]['bookings'][$bookingId]['coupon']['discount'] = $row['coupon_discount'];
-                $events[$eventId]['bookings'][$bookingId]['coupon']['deduction'] = $row['coupon_deduction'];
-                $events[$eventId]['bookings'][$bookingId]['coupon']['limit'] = $row['coupon_limit'];
+                $events[$eventId]['bookings'][$bookingId]['coupon']['id']            = $couponId;
+                $events[$eventId]['bookings'][$bookingId]['coupon']['code']          = $row['coupon_code'];
+                $events[$eventId]['bookings'][$bookingId]['coupon']['discount']      = $row['coupon_discount'];
+                $events[$eventId]['bookings'][$bookingId]['coupon']['deduction']     = $row['coupon_deduction'];
+                $events[$eventId]['bookings'][$bookingId]['coupon']['limit']         = $row['coupon_limit'];
                 $events[$eventId]['bookings'][$bookingId]['coupon']['customerLimit'] = $row['coupon_customerLimit'];
-                $events[$eventId]['bookings'][$bookingId]['coupon']['status'] = $row['coupon_status'];
+                $events[$eventId]['bookings'][$bookingId]['coupon']['status']        = $row['coupon_status'];
             }
 
             if ($couponId) {
-                $events[$eventId]['coupons'][$couponId]['id'] = $couponId;
-                $events[$eventId]['coupons'][$couponId]['code'] = $row['coupon_code'];
-                $events[$eventId]['coupons'][$couponId]['discount'] = $row['coupon_discount'];
-                $events[$eventId]['coupons'][$couponId]['deduction'] = $row['coupon_deduction'];
-                $events[$eventId]['coupons'][$couponId]['limit'] = $row['coupon_limit'];
+                $events[$eventId]['coupons'][$couponId]['id']            = $couponId;
+                $events[$eventId]['coupons'][$couponId]['code']          = $row['coupon_code'];
+                $events[$eventId]['coupons'][$couponId]['discount']      = $row['coupon_discount'];
+                $events[$eventId]['coupons'][$couponId]['deduction']     = $row['coupon_deduction'];
+                $events[$eventId]['coupons'][$couponId]['limit']         = $row['coupon_limit'];
                 $events[$eventId]['coupons'][$couponId]['customerLimit'] = $row['coupon_customerLimit'];
-                $events[$eventId]['coupons'][$couponId]['status'] = $row['coupon_status'];
+                $events[$eventId]['coupons'][$couponId]['status']        = $row['coupon_status'];
             }
         }
 

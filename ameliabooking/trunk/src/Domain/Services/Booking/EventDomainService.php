@@ -17,6 +17,8 @@ use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\IntegerValue;
 use AmeliaBooking\Domain\ValueObjects\Recurring;
 use AmeliaBooking\Domain\ValueObjects\String\Cycle;
+use AmeliaBooking\Infrastructure\Common\Container;
+use DateTime as DateTime;
 
 /**
  * Class EventDomainService
@@ -25,6 +27,19 @@ use AmeliaBooking\Domain\ValueObjects\String\Cycle;
  */
 class EventDomainService
 {
+    /**
+     * @param DateTime $periodStart
+     * @param DateTime $periodEnd
+     *
+     * @return void
+     */
+    public function fixPeriod($periodStart, $periodEnd)
+    {
+        if ($periodStart->format('Y-m-d H:i') === $periodEnd->format('Y-m-d H:i')) {
+            $periodEnd->modify('60 minutes');
+        }
+    }
+
     /**
      * @param Recurring  $recurring
      * @param Collection $eventPeriods
@@ -41,7 +56,7 @@ class EventDomainService
             return $recurringPeriods;
         }
 
-        $dateNew         = null;
+        $recurringMonthDate = false;
         $modifyCycle     = 'days';
         $modifyBaseValue = $recurring->getCycleInterval()->getValue();
 
@@ -52,14 +67,14 @@ class EventDomainService
 
             case (Cycle::WEEKLY):
                 $modifyCycle     = 'days';
-                $modifyBaseValue = 7*$modifyBaseValue;
+                $modifyBaseValue = 7 * $modifyBaseValue;
                 break;
 
             case (Cycle::MONTHLY):
                 if ($recurring->getMonthlyRepeat() === 'on') {
                     $repeatPeriod = $recurring->getMonthlyOnRepeat() . ' ' . $recurring->getMonthlyOnDay();
                 } else {
-                    $dateNew = $recurring->getMonthDate();
+                    $recurringMonthDate = true;
                 }
                 $modifyCycle = 'months';
                 break;
@@ -83,8 +98,11 @@ class EventDomainService
             $periodStartDate0 = DateTimeService::getCustomDateTimeObject($eventPeriods->getItem(0)->getPeriodStart()->getValue()->format('Y-m-d H:i:s'));
             $periodEndDate0   = DateTimeService::getCustomDateTimeObject($eventPeriods->getItem(0)->getPeriodEnd()->getValue()->format('Y-m-d H:i:s'));
 
+            $periodStart0  = null;
+            $dayDifference = null;
+
             if (isset($repeatPeriod)) {
-                $periodStart0  = $this->getNextPeriodStartDate($periodStartDate0, $modifyValue, $repeatPeriod);
+                $periodStart0 = $this->getNextPeriodStartDate($periodStartDate0, $modifyValue, $repeatPeriod);
                 if ($periodStart0 === null) {
                     if ($periodStart0 > $recurring->getUntil()->getValue()) {
                         break;
@@ -94,9 +112,6 @@ class EventDomainService
                     continue;
                 }
                 $dayDifference = $periodStartDate0->diff($periodStart0);
-            } else if ($dateNew) {
-                $periodStartNew = DateTimeService::getCustomDateTimeObject($dateNew->getValue()->format('Y-m-d H:i:s'));
-                $dayDifference  = $periodStartDate0->diff($periodStartNew);
             }
 
             for ($i = 0; $i < count($eventPeriods->getItems()); $i++) {
@@ -112,11 +127,16 @@ class EventDomainService
                         $periodEnd   = $periodEndDate->add($dayDifference);
                     }
                 } else {
+                    $originalDate = clone $periodStartDate;
                     $periodStart = $periodStartDate->modify("+{$modifyValue} {$modifyCycle}");
                     $periodEnd   = $periodEndDate->modify("+{$modifyValue} {$modifyCycle}");
-                    if ($dateNew) {
-                        $periodStart = $periodStart->add($dayDifference);
-                        $periodEnd   = $periodEnd->add($dayDifference);
+                    if (
+                        $i === 0 && $recurringMonthDate &&
+                        $originalDate && $originalDate->format('d') != $periodStart->format('d')
+                    ) {
+                        $day = $originalDate->format('j');
+                        $originalDate->modify("first day of +{$modifyValue} month");
+                        $periodStart = $originalDate->modify('+' . (min($day, $originalDate->format('t')) - 1) . ' days');
                     }
                 }
 
@@ -213,7 +233,6 @@ class EventDomainService
      * @return boolean
      *
      * @throws \Slim\Exception\ContainerValueNotFoundException
-     * @throws \Interop\Container\Exception\ContainerException
      * @throws \AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException
      */
     public function buildFollowingEvent($followingEvent, $originEvent, $clonedOriginEventPeriods)
@@ -233,6 +252,10 @@ class EventDomainService
         $followingEvent->setAggregatedPrice($originEvent->getAggregatedPrice());
         $followingEvent->setMaxExtraPeople($originEvent->getMaxExtraPeople());
         $followingEvent->setNotifyParticipants($originEvent->isNotifyParticipants());
+
+        if ($originEvent->getPicture()) {
+            $followingEvent->setPicture($originEvent->getPicture());
+        }
 
         if ($originEvent->getCustomPricing() && $originEvent->getCustomPricing()->getValue() && $followingEvent->getBookings()->length() === 0) {
             $newEventTickets = new Collection();
@@ -259,8 +282,6 @@ class EventDomainService
             }
             $followingEvent->setCustomTickets($newEventTickets);
         }
-
-
 
         if ($originEvent->getTranslations()) {
             $followingEvent->setTranslations($originEvent->getTranslations());
@@ -340,7 +361,7 @@ class EventDomainService
 
         $modifyCycle     = 'days';
         $modifyBaseValue = $originEvent->getRecurring()->getCycleInterval()->getValue();
-        $dateNew         = null;
+        $recurringMonthDate = false;
 
         switch ($originEvent->getRecurring()->getCycle()->getValue()) {
             case (Cycle::DAILY):
@@ -349,14 +370,14 @@ class EventDomainService
 
             case (Cycle::WEEKLY):
                 $modifyCycle     = 'days';
-                $modifyBaseValue = 7*$modifyBaseValue;
+                $modifyBaseValue = 7 * $modifyBaseValue;
                 break;
 
             case (Cycle::MONTHLY):
                 if ($followingEvent->getRecurring()->getMonthlyRepeat() === 'on') {
                     $repeatPeriod = $followingEvent->getRecurring()->getMonthlyOnRepeat() . ' ' . $followingEvent->getRecurring()->getMonthlyOnDay();
                 } else {
-                    $dateNew = $followingEvent->getRecurring()->getMonthDate();
+                    $recurringMonthDate = true;
                 }
                 $modifyCycle = 'months';
                 break;
@@ -368,22 +389,21 @@ class EventDomainService
 
         $modifyValue = $modifyBaseValue * ($followingEvent->getRecurring()->getOrder()->getValue() - 1);
 
-        $periodStartDate0 = DateTimeService::getCustomDateTimeObject($clonedOriginEventPeriods->getItem(0)->getPeriodStart()->getValue()->format('Y-m-d H:i:s'));
-        $periodEndDate0   = DateTimeService::getCustomDateTimeObject($clonedOriginEventPeriods->getItem(0)->getPeriodEnd()->getValue()->format('Y-m-d H:i:s'));
+        $periodStartDate0 =
+            DateTimeService::getCustomDateTimeObject($clonedOriginEventPeriods->getItem(0)->getPeriodStart()->getValue()->format('Y-m-d H:i:s'));
+        $periodEndDate0   =
+            DateTimeService::getCustomDateTimeObject($clonedOriginEventPeriods->getItem(0)->getPeriodEnd()->getValue()->format('Y-m-d H:i:s'));
 
+        $periodStart0   = null;
+        $dayDifference  = null;
         if (isset($repeatPeriod)) {
-            $periodStart0  = $this->getNextPeriodStartDate($periodStartDate0, $modifyValue, $repeatPeriod);
+            $periodStart0 = $this->getNextPeriodStartDate($periodStartDate0, $modifyValue, $repeatPeriod);
             if ($periodStart0 === null) {
                 // for added events
                 return false;
             }
             $dayDifference = $periodStartDate0->diff($periodStart0);
-        } else if ($dateNew) {
-            $thisPeriodStart = DateTimeService::getCustomDateTimeObject($originEvent->getPeriods()->getItem(0)->getPeriodStart()->getValue()->format('Y-m-d H:i:s'));
-            $periodStartNew  = DateTimeService::getCustomDateTimeObject($dateNew->getValue()->format('Y-m-d H:i:s'));
-            $dayDifference   = $thisPeriodStart->diff($periodStartNew);
         }
-
 
         /** @var EventPeriod $followingEventPeriod */
         foreach ($followingEvent->getPeriods()->getItems() as $key => $followingEventPeriod) {
@@ -403,13 +423,16 @@ class EventDomainService
                         $periodEnd   = $periodEndDate->add($dayDifference);
                     }
                 } else {
+                    $periodStartDateCloned = clone $periodStartDate;
                     $periodStart = $periodStartDate->modify("+{$modifyValue} {$modifyCycle}");
                     $periodEnd   = $periodEndDate->modify("+{$modifyValue} {$modifyCycle}");
-                    $toEndTime   = $periodStart->diff($periodEnd);
-                    if ($dateNew) {
-                        $periodStart      = DateTimeService::getCustomDateTimeObject($periodStart->format('Y-m-'. $periodStartNew->format('d') .' H:i:s'));
-                        $periodStartClone = clone $periodStart;
-                        $periodEnd        = $periodStartClone->add($toEndTime);
+                    if (
+                        $key === 0 && $recurringMonthDate &&
+                        $periodStartDateCloned && $periodStartDateCloned->format('d') != $periodStart->format('d')
+                    ) {
+                        $day = $periodStartDateCloned->format('j');
+                        $periodStartDateCloned->modify("first day of +{$modifyValue} month");
+                        $periodStart = $periodStartDateCloned->modify('+' . (min($day, $periodStartDateCloned->format('t')) - 1) . ' days');
                     }
                 }
 
@@ -439,13 +462,16 @@ class EventDomainService
                     $periodStart = $newPeriodStart->add($dayDifference);
                     $periodEnd   = $newPeriodEnd->add($dayDifference);
                 } else {
+                    $periodStartDateCloned = clone $newPeriodStart;
                     $periodStart = $newPeriodStart->modify("+{$modifyValue} {$modifyCycle}");
                     $periodEnd   = $newPeriodEnd->modify("+{$modifyValue} {$modifyCycle}");
-                    $toEndTime   = $periodStart->diff($periodEnd);
-                    if ($dateNew && $dayDifference && $dayDifference->format('%a') !== '0') {
-                        $periodStart      = $periodStart->add($dayDifference);
-                        $periodStartClone = clone $periodStart;
-                        $periodEnd        = $periodStartClone->add($toEndTime);
+                    if (
+                        $key === 0 && $recurringMonthDate &&
+                        $periodStartDateCloned && $periodStartDateCloned->format('d') != $periodStart->format('d')
+                    ) {
+                        $day = $periodStartDateCloned->format('j');
+                        $periodStartDateCloned->modify("first day of +{$modifyValue} month");
+                        $periodStart = $periodStartDateCloned->modify('+' . (min($day, $periodStartDateCloned->format('t')) - 1) . ' days');
                     }
                 }
 
@@ -463,10 +489,10 @@ class EventDomainService
     }
 
     /**
-     * @param Collection $eventPeriods
-     * @param bool       $setId
+     * @param Container $container
+     * @param array $events
      *
-     * @return Collection
+     * @return array
      *
      * @throws \AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException
      */
@@ -477,7 +503,7 @@ class EventDomainService
         $settingsService = $container->get('domain.settings.service');
         $dateFormat      = $settingsService->getSetting('wordpress', 'dateFormat');
 
-        for ($i=0; $i < count($events); $i++) {
+        for ($i = 0; $i < count($events); $i++) {
             $dateString = explode(" ", $events[$i]['periods'][0]['periodStart'])[0];
             $newDate    = date_i18n($dateFormat, strtotime($dateString));
             $events[$i]['formattedPeriodStart'] = $newDate;
@@ -502,7 +528,7 @@ class EventDomainService
 
         $year  += floor($month / 12);
         $month -= 12 * floor($month / 12);
-        $time   = (int)$periodStartDate0->format('H')*60 + (int)$periodStartDate0->format('i');
+        $time   = (int)$periodStartDate0->format('H') * 60 + (int)$periodStartDate0->format('i');
 
         $periodStart0 = DateTimeService::getCustomDateTimeObject($repeatPeriod . " of $year-$month");
         return explode(' ', $repeatPeriod)[0] === 'fifth'

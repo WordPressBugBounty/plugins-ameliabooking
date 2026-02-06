@@ -3,11 +3,13 @@
     v-if="!empty"
     ref="ameliaContainer"
     class="am-fcl"
+    role="main"
     :style="cssVars"
   >
     <template v-for="category in categoriesList" :key="category.id">
       <div
         class="am-fcl__item"
+        role="group"
         :class="itemWidth"
       >
         <div class="am-fcl__item-inner">
@@ -79,7 +81,10 @@
     ref="ameliaContainer"
     class="am-empty"
   >
-    <img :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/am-empty-booking.svg'">
+    <img
+      :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/am-empty-booking.svg'"
+      :alt="preselected.show !== 'packages' ? amLabels.no_services_employees : amLabels.no_package_services"
+    >
     <div class="am-empty__heading">
       {{ amLabels.oops }}
     </div>
@@ -116,7 +121,6 @@ import {
   ref,
   computed,
   inject,
-  nextTick,
   reactive, onMounted
 } from "vue";
 
@@ -125,9 +129,7 @@ import { useStore } from "vuex";
 
 // * Composables
 import {
-  useAvailableServiceIdsInCategory,
-  useDisabledPackageService,
-  usePackageAvailabilityByEmployeeAndLocation
+  useAvailableServiceIdsInCategory
 } from '../../../../assets/js/public/catalog.js'
 import {
   useColorTransparency
@@ -202,43 +204,7 @@ const shortcodeData = inject('shortcodeData')
 const preselected = computed(() => store.getters['entities/getPreselected'])
 
 let availableCategories = inject('availableCategories')
-let categoriesList = computed(() => {
-  let arr = []
-  amEntities.value.categories.forEach(category => {
-    let serviceIdsInCategory = useAvailableServiceIdsInCategory(shortcodeData.value, category, amEntities.value)
-    /* Packages in category */
-    category.packageList = []
-    amEntities.value.packages.forEach(pack => {
-      serviceIdsInCategory.forEach(service => {
-        if (
-          pack.bookable.filter(a => a.service.id === service).length
-          && !category.packageList.filter(b => b === pack.id).length
-          && pack.available
-          && pack.status === 'visible'
-          && !useDisabledPackageService(amEntities.value, pack)
-          && usePackageAvailabilityByEmployeeAndLocation(amEntities.value, pack, shortcodeData.value)
-        ) {
-          category.packageList.push(pack.id)
-        }
-      })
-    })
-
-    if (
-      category.status === 'visible'
-      && category.serviceList.length
-      && !!serviceIdsInCategory.length
-      && (preselected.value.show === 'packages' ? !!category.packageList.length : true)
-    ) {
-      arr.push(category)
-    }
-  })
-
-  nextTick(() => {
-    availableCategories.value = JSON.parse(JSON.stringify(arr))
-  })
-
-  return arr
-})
+let categoriesList = computed(() => availableCategories.value)
 
 let categorySelected = inject('categorySelected')
 function chooseCategory (id) {

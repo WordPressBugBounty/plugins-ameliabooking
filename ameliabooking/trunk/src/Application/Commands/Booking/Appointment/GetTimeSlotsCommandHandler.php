@@ -15,6 +15,7 @@ use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\PositiveDuration;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
+use AmeliaBooking\Infrastructure\Services\Apple\AbstractAppleCalendarService;
 use AmeliaBooking\Infrastructure\Services\Google\AbstractGoogleCalendarService;
 use AmeliaBooking\Infrastructure\Services\Outlook\AbstractOutlookCalendarService;
 use DateTimeZone;
@@ -65,6 +66,7 @@ class GetTimeSlotsCommandHandler extends CommandHandler
             'serviceId'            => $command->getField('serviceId'),
             'providerIds'          => $command->getField('providerIds'),
             'locationId'           => $command->getField('locationId'),
+            'locationIds'          => $command->getField('locationIds'),
             'extras'               => $command->getField('extras'),
             'excludeAppointmentId' => $command->getField('excludeAppointmentId'),
             'personsCount'         => $command->getField('group') ? $command->getField('persons') : null,
@@ -75,7 +77,8 @@ class GetTimeSlotsCommandHandler extends CommandHandler
             'startDateTime'        => $command->getField('startDateTime'),
             'endDateTime'          => $command->getField('endDateTime'),
             'queryTimeZone'        => $command->getField('queryTimeZone'),
-            'timeZone'             => $command->getField('timeZone')
+            'timeZone'             => $command->getField('timeZone'),
+            'structured'           => $command->getField('structured'),
 
         ];
 
@@ -165,8 +168,6 @@ class GetTimeSlotsCommandHandler extends CommandHandler
             $isFrontEndBooking,
             $maximumBookingTimeInDays
         );
-
-        $maximumDateTime->setTimezone(new DateTimeZone($timeZone));
 
         if ($isFrontEndBooking) {
             $startDateTime = $startDateTime < $minimumDateTime ? $minimumDateTime : $startDateTime;
@@ -271,6 +272,8 @@ class GetTimeSlotsCommandHandler extends CommandHandler
 
                 AbstractOutlookCalendarService::$providersOutlookEvents = [];
 
+                AbstractAppleCalendarService::$providersAppleEvents = [];
+
                 $freeSlots = $applicationTimeSlotService->getSlotsByProps(
                     $settings,
                     array_merge(
@@ -283,10 +286,15 @@ class GetTimeSlotsCommandHandler extends CommandHandler
                     $filteredSlotEntities
                 );
 
-                if ($endDateTime->format('Y-m-d H:i') === $maximumDateTime->format('Y-m-d H:i') ||
-                    ($endDateTime->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i') ===
-                        $maximumDateTime->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i')) ||
-                    ($endDateTime > $maximumDateTime)
+                $endDateTimeCopy = clone $endDateTime;
+
+                $maximumDateTimeCopy = clone $maximumDateTime;
+
+                if (
+                    $endDateTimeCopy->format('Y-m-d H:i') === $maximumDateTimeCopy->format('Y-m-d H:i') ||
+                    ($endDateTimeCopy->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i') ===
+                        $maximumDateTimeCopy->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i')) ||
+                    ($endDateTimeCopy > $maximumDateTimeCopy)
                 ) {
                     break;
                 }
@@ -313,6 +321,8 @@ class GetTimeSlotsCommandHandler extends CommandHandler
 
                     AbstractOutlookCalendarService::$providersOutlookEvents = [];
 
+                    AbstractAppleCalendarService::$providersAppleEvents = [];
+
                     $freeSlots = $applicationTimeSlotService->getSlotsByProps(
                         $settings,
                         array_merge(
@@ -331,24 +341,12 @@ class GetTimeSlotsCommandHandler extends CommandHandler
         $busyness = [];
 
         foreach ($freeSlots['available'] as $slotDate => $slotTimes) {
-            if (!empty($freeSlots['continuousAppointments'][$slotDate]) && !empty($freeSlots['occupied'][$slotDate])) {
-                $freeSlots['occupied'][$slotDate] =
-                    array_merge(
-                        $freeSlots['occupied'][$slotDate],
-                        $freeSlots['continuousAppointments'][$slotDate]
-                    );
-
-                foreach ($freeSlots['occupied'][$slotDate] as $key => $timeKey) {
-                    $freeSlots['occupied'][$slotDate][$key] =
-                        [0 => reset($freeSlots['occupied'][$slotDate])[0]];
-                }
-            }
-
             $busyness[$slotDate] = round(
                 count(!empty($freeSlots['occupied'][$slotDate]) ? $freeSlots['occupied'][$slotDate] : []) /
                 (count(!empty($freeSlots['available'][$slotDate]) ? $freeSlots['available'][$slotDate] : []) +
                     count(!empty($freeSlots['occupied'][$slotDate]) ? $freeSlots['occupied'][$slotDate] : []))
-                * 100);
+                * 100
+            );
         }
 
         $converted = ['available' => [], 'occupied' => []];
@@ -398,7 +396,8 @@ class GetTimeSlotsCommandHandler extends CommandHandler
             )->format('Y-m-d H:i') : $maximumDateTime->format('Y-m-d H:i'),
           'busyness' => $busyness,
           'lastBookedProviderId' => $lastBookedProviderId,
-          'appCount' => $freeSlots['appCount']
+          'appCount' => $freeSlots['appCount'],
+          'duration' => $freeSlots['duration'],
         ];
 
 
@@ -417,7 +416,8 @@ class GetTimeSlotsCommandHandler extends CommandHandler
                 'occupied'  => $resultData['occupied'],
                 'busyness'  => $resultData['busyness'],
                 'lastProvider' => $resultData['lastBookedProviderId'],
-                'appCount' => $resultData['appCount']
+                'appCount' => $resultData['appCount'],
+                'duration' => $resultData['duration'],
             ]
         );
 

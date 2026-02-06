@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -9,9 +10,11 @@ namespace AmeliaBooking\Application\Commands\Payment;
 use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
+use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Payment\Payment;
 use AmeliaBooking\Domain\Entity\Entities;
+use AmeliaBooking\Domain\Services\Reservation\ReservationServiceInterface;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Payment\PaymentRepository;
@@ -31,7 +34,6 @@ class GetPaymentCommandHandler extends CommandHandler
      * @throws NotFoundException
      * @throws InvalidArgumentException
      * @throws AccessDeniedException
-     * @throws \Interop\Container\Exception\ContainerException
      */
     public function handle(GetPaymentCommand $command)
     {
@@ -46,20 +48,35 @@ class GetPaymentCommandHandler extends CommandHandler
         /** @var PaymentRepository $paymentRepository */
         $paymentRepository = $this->container->get('domain.payment.repository');
 
+        /** @var PaymentApplicationService $paymentAS */
+        $paymentAS = $this->container->get('application.payment.service');
+
+        /** @var Payment $payment */
         $payment = $paymentRepository->getById($command->getArg('id'));
 
-        if (!$payment instanceof Payment) {
-            $result->setResult(CommandResult::RESULT_ERROR);
-            $result->setMessage('Could not get payment payment.');
-
-            return $result;
-        }
-
         $paymentArray = $payment->toArray();
+
+        /** @var ReservationServiceInterface $reservationService */
+        $reservationService = $this->container->get('application.reservation.service')->get(
+            $payment->getEntity()->getValue()
+        );
+
+        $paymentsData = $paymentAS->getPaymentsData(
+            [
+                'ids'      => [$payment->getId()->getValue()],
+                'invoices' => false,
+            ]
+        );
+
+        $paymentArray['summary'] = $reservationService->getPaymentSummary(
+            $paymentsData[$payment->getId()->getValue()],
+            false
+        );
 
         $paymentArray = apply_filters('amelia_get_payment_filter', $paymentArray);
 
         do_action('amelia_get_payment', $paymentArray);
+
 
         $result->setResult(CommandResult::RESULT_SUCCESS);
         $result->setMessage('Successfully retrieved payment.');

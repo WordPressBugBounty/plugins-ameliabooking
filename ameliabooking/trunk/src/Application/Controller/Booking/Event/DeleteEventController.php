@@ -21,7 +21,7 @@ class DeleteEventController extends Controller
      * @var array
      */
     public $allowedFields = [
-        'applyGlobally'
+        'applyGlobally',
     ];
 
     /**
@@ -35,7 +35,7 @@ class DeleteEventController extends Controller
      */
     protected function instantiateCommand(Request $request, $args)
     {
-        $command = new DeleteEventCommand($args);
+        $command     = new DeleteEventCommand($args);
         $requestBody = $request->getParsedBody();
         $this->setCommandFields($command, $requestBody);
 

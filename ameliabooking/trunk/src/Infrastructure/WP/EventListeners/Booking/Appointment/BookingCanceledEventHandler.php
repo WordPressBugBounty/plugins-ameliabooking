@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -8,6 +9,11 @@ namespace AmeliaBooking\Infrastructure\WP\EventListeners\Booking\Appointment;
 
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Services\Booking\BookingApplicationService;
+use AmeliaBooking\Application\Services\Integration\ApplicationIntegrationService;
+use AmeliaBooking\Application\Services\Notification\ApplicationNotificationService;
+use AmeliaBooking\Application\Services\WaitingList\WaitingListService;
+use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
+use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Application\Services\Notification\EmailNotificationService;
 use AmeliaBooking\Application\Services\Notification\SMSNotificationService;
 use AmeliaBooking\Application\Services\Notification\AbstractWhatsAppNotificationService;
@@ -20,9 +26,6 @@ use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
-use AmeliaBooking\Infrastructure\Services\Google\AbstractGoogleCalendarService;
-use AmeliaBooking\Application\Services\Zoom\AbstractZoomApplicationService;
-use AmeliaBooking\Infrastructure\Services\Outlook\AbstractOutlookCalendarService;
 use Exception;
 use Interop\Container\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
@@ -35,7 +38,7 @@ use Slim\Exception\ContainerValueNotFoundException;
 class BookingCanceledEventHandler
 {
     /** @var string */
-    const BOOKING_CANCELED = 'bookingCanceled';
+    public const BOOKING_CANCELED = 'bookingCanceled';
 
     /**
      * @param CommandResult $commandResult
@@ -50,10 +53,8 @@ class BookingCanceledEventHandler
      */
     public static function handle($commandResult, $container)
     {
-        /** @var AbstractGoogleCalendarService $googleCalendarService */
-        $googleCalendarService = $container->get('infrastructure.google.calendar.service');
-        /** @var AbstractOutlookCalendarService $outlookCalendarService */
-        $outlookCalendarService = $container->get('infrastructure.outlook.calendar.service');
+        /** @var ApplicationIntegrationService $applicationIntegrationService */
+        $applicationIntegrationService = $container->get('application.integration.service');
         /** @var EmailNotificationService $emailNotificationService */
         $emailNotificationService = $container->get('application.emailNotification.service');
         /** @var SMSNotificationService $smsNotificationService */
@@ -66,8 +67,7 @@ class BookingCanceledEventHandler
         $webHookService = $container->get('application.webHook.service');
         /** @var BookingApplicationService $bookingApplicationService */
         $bookingApplicationService = $container->get('application.booking.booking.service');
-        /** @var AbstractZoomApplicationService $zoomService */
-        $zoomService = $container->get('application.zoom.service');
+
 
         $appointment = $commandResult->getData()[$commandResult->getData()['type']];
 
@@ -76,34 +76,18 @@ class BookingCanceledEventHandler
 
             $bookingApplicationService->setReservationEntities($reservationObject);
 
-            if ($zoomService) {
-                $zoomService->handleAppointmentMeeting($reservationObject, self::BOOKING_CANCELED);
+            $applicationIntegrationService->handleAppointment(
+                $reservationObject,
+                $appointment,
+                ApplicationIntegrationService::BOOKING_CANCELED,
+                [
+                    ApplicationIntegrationService::SKIP_LESSON_SPACE => true,
+                ]
+            );
 
-                if ($reservationObject->getZoomMeeting()) {
-                    $appointment['zoomMeeting'] = $reservationObject->getZoomMeeting()->toArray();
-                }
-            }
-
-            try {
-                $googleCalendarService->handleEvent($reservationObject, self::BOOKING_CANCELED);
-            } catch (Exception $e) {
-            }
-
-            if ($reservationObject->getGoogleCalendarEventId() !== null) {
-                $appointment['googleCalendarEventId'] = $reservationObject->getGoogleCalendarEventId()->getValue();
-            }
-            if ($reservationObject->getGoogleMeetUrl() !== null) {
-                $appointment['googleMeetUrl'] = $reservationObject->getGoogleMeetUrl();
-            }
-
-            try {
-                $outlookCalendarService->handleEvent($reservationObject, self::BOOKING_CANCELED);
-            } catch (Exception $e) {
-            }
-
-            if ($reservationObject->getOutlookCalendarEventId() !== null) {
-                $appointment['outlookCalendarEventId'] = $reservationObject->getOutlookCalendarEventId()->getValue();
-            }
+            /** @var WaitingListService $waitingListService */
+            $waitingListService = $container->get('application.waitingList.service');
+            $waitingListService->sendAvailableSpotNotifications($reservationObject);
         }
 
         $booking = $commandResult->getData()[Entities::BOOKING];
@@ -130,17 +114,16 @@ class BookingCanceledEventHandler
             $eventRepository   = $container->get('domain.booking.event.repository');
             $reservationObject = $eventRepository->getById($appointment['id']);
 
-            try {
-                $googleCalendarService->handleEventPeriodsChange($reservationObject, self::BOOKING_CANCELED, $reservationObject->getPeriods());
-            } catch (Exception $e) {
-            }
-
-            if ($outlookCalendarService) {
-                try {
-                    $outlookCalendarService->handleEventPeriod($reservationObject, self::BOOKING_CANCELED, $reservationObject->getPeriods());
-                } catch (Exception $e) {
-                }
-            }
+            $applicationIntegrationService->handleEvent(
+                $reservationObject,
+                $reservationObject->getPeriods(),
+                $reservation,
+                ApplicationIntegrationService::BOOKING_CANCELED,
+                [
+                    ApplicationIntegrationService::SKIP_ZOOM_MEETING => true,
+                    ApplicationIntegrationService::SKIP_LESSON_SPACE => true,
+                ]
+            );
 
             $booking['isChangedStatus'] = true;
 

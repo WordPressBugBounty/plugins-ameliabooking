@@ -15,8 +15,12 @@
           `am-position-${position}`
         ]"
       >
+        <div v-if="popupHeaderVisibility" class="am-slide-popup__block-header">
+          <slot name="header"></slot>
+          <span class="am-icon-close" @click="emits('update:visibility', false)" />
+        </div>
         <slot></slot>
-        <div class="am-slide-popup__block-footer">
+        <div v-if="props.footerVisibility" class="am-slide-popup__block-footer">
           <slot name="footer"></slot>
         </div>
       </div>
@@ -29,6 +33,7 @@
 import {
   inject,
   computed,
+  useSlots
 } from 'vue';
 
 // * Import from Libraries
@@ -62,11 +67,17 @@ let props = defineProps({
   customCss: {
     type: Object,
     default: () => {}
+  },
+  footerVisibility: {
+    type: Boolean,
+    default: true
   }
 })
 
 // * Compomnets Emits
 let emits = defineEmits(['click-outside', 'update:visibility'])
+
+const slots = useSlots()
 
 // * Click outside of menu
 function onClickOutside () {
@@ -79,6 +90,10 @@ function onClickOutside () {
 // * Container Width
 let cWidth = inject('containerWidth', 0)
 let checkScreen = computed(() => cWidth.value < 460 || (cWidth.value > 560 && cWidth.value - 240 < 460))
+
+let popupHeaderVisibility = computed(() => {
+  return !!slots.header?.()
+})
 
 // * Components Colors
 let amColors = inject('amColors');
@@ -112,14 +127,32 @@ let cssVars = computed(() => {
     background-color: var(--am-c-spb-text-op10);
     z-index: 1000;
 
+    * {
+      box-sizing: border-box;
+    }
+
+    &-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0 24px;
+      background: var(--am-c-spb-bgr);
+      color: var(--am-c-spb-text);
+      padding: 0;
+
+      .am-icon-close {
+        color: var(--am-c-spb-text);
+        font-size: 20px;
+        cursor: pointer;
+        flex: 0 0 auto;
+      }
+    }
+
     &-footer {
       display: flex;
       align-items: center;
       justify-content: flex-end;
-
-      .am-button--secondary {
-        margin: 0 8px 0 0;
-      }
+      gap: 0 8px;
 
       .am-fs__ps-popup__btn-mobile {
         width: 100%;

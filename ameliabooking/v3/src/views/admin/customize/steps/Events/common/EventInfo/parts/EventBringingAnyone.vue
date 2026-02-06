@@ -1,19 +1,10 @@
 <template>
-  <div
-    class="am-elf__bringing"
-    :style="cssVars"
-  >
-    <div
-      class="am-elf__bringing-main"
-      :class="responsiveClass"
-    >
+  <div class="am-elf__bringing" :style="cssVars">
+    <div class="am-elf__bringing-main" :class="responsiveClass">
       <div class="am-elf__bringing-heading">
         {{ labelsDisplay('event_bringing') }}
       </div>
-      <div
-        class="am-elf__bringing-content"
-        :class="responsiveClass"
-      >
+      <div class="am-elf__bringing-content" :class="responsiveClass">
         <AmInputNumber
           v-model="persons"
           :min="options.min"
@@ -30,15 +21,12 @@
 import AmInputNumber from '../../../../../../../_components/input-number/AmInputNumber.vue'
 
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject
-} from "vue";
+import { ref, computed, inject } from 'vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../../../../assets/js/common/colorManipulation";
-import { useResponsiveClass } from "../../../../../../../../assets/js/common/responsive";
+import { useColorTransparency } from '../../../../../../../../assets/js/common/colorManipulation'
+import { useResponsiveClass } from '../../../../../../../../assets/js/common/responsive'
+import { useReactiveCustomize } from '../../../../../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Responsive
 let cWidth = inject('containerWidth')
@@ -46,22 +34,28 @@ let responsiveClass = computed(() => {
   return useResponsiveClass(cWidth.value)
 })
 
-let langKey = inject('langKey')
+let langKey =inject('langKey')
 let amLabels = inject('labels')
 
 // * Customize
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Form string recognition
 let pageRenderKey = inject('pageRenderKey')
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value].bringingAnyone.translations
-    && amCustomize.value[pageRenderKey.value].bringingAnyone.translations[label]
-    && amCustomize.value[pageRenderKey.value].bringingAnyone.translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value].bringingAnyone.translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value].bringingAnyone.translations &&
+      amCustomize.value[pageRenderKey.value].bringingAnyone.translations[
+        label
+      ] &&
+      amCustomize.value[pageRenderKey.value].bringingAnyone.translations[label][
+        langKey.value
+      ]
+      ? amCustomize.value[pageRenderKey.value].bringingAnyone.translations[
+          label
+        ][langKey.value]
       : amLabels[label]
   })
 
@@ -74,19 +68,24 @@ function labelsDisplay (label) {
  */
 let options = ref({
   min: 1,
-  max: 5
+  max: 5,
 })
-let persons = ref( 1)
-
+let persons = ref(1)
 
 // * Global colors
-let amColors = inject('amColors');
+let amColors = inject('amColors')
 
 // * Css Variables
 let cssVars = computed(() => {
   return {
-    '--am-bringing-color-border': useColorTransparency(amColors.value.colorMainText, 0.25),
-    '--am-bringing-color-text-opacity60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-bringing-color-border': useColorTransparency(
+      amColors.value.colorMainText,
+      0.25
+    ),
+    '--am-bringing-color-text-opacity60': useColorTransparency(
+      amColors.value.colorMainText,
+      0.6
+    ),
   }
 })
 </script>
@@ -94,7 +93,7 @@ let cssVars = computed(() => {
 <script>
 export default {
   name: 'BringingAnyone',
-  key: 'bringingAnyone'
+  key: 'bringingAnyone',
 }
 </script>
 

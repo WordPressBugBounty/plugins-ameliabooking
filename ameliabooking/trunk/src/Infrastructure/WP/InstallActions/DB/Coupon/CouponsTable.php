@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -16,8 +17,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\AbstractDatabaseTable;
  */
 class CouponsTable extends AbstractDatabaseTable
 {
-
-    const TABLE = 'coupons';
+    public const TABLE = 'coupons';
 
     /**
      * @return string
@@ -38,6 +38,10 @@ class CouponsTable extends AbstractDatabaseTable
                    `notificationInterval` INT(11) NOT NULL DEFAULT 0,
                    `notificationRecurring` TINYINT(1) NOT NULL DEFAULT 0,
                    `expirationDate` DATETIME NULL,
+                   `startDate` DATETIME NULL,
+                   `allServices` TINYINT(1) NOT NULL DEFAULT 0,
+                   `allEvents` TINYINT(1) NOT NULL DEFAULT 0,
+                   `allPackages` TINYINT(1) NOT NULL DEFAULT 0,
                     PRIMARY KEY (`id`)
                 ) DEFAULT CHARSET=utf8 COLLATE utf8_general_ci";
     }

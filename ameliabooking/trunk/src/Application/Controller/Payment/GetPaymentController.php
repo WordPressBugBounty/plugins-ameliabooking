@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -28,7 +29,7 @@ class GetPaymentController extends Controller
      */
     protected function instantiateCommand(Request $request, $args)
     {
-        $command = new GetPaymentCommand($args);
+        $command     = new GetPaymentCommand($args);
         $requestBody = $request->getParsedBody();
         $this->setCommandFields($command, $requestBody);
 

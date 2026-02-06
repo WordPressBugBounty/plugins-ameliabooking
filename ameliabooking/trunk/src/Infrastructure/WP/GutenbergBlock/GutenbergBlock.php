@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -12,6 +13,7 @@ use AmeliaBooking\Application\Services\Booking\EventApplicationService;
 use AmeliaBooking\Application\Services\Location\AbstractLocationApplicationService;
 use AmeliaBooking\Application\Services\User\ProviderApplicationService;
 use AmeliaBooking\Domain\Collection\Collection;
+use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
 use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Factory\Bookable\Service\ServiceFactory;
 use AmeliaBooking\Domain\Services\Booking\EventDomainService;
@@ -19,11 +21,9 @@ use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\CategoryRepository;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ServiceRepository;
-use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventTagsRepository;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use Exception;
-use Interop\Container\Exception\ContainerException;
 
 /**
  * Class GutenbergBlock
@@ -35,23 +35,47 @@ class GutenbergBlock
     /** @var Container $container */
     private static $container;
 
+    /** @var  Collection */
+    private static $entities;
+
     /**
      * Register WP Ajax actions.
      */
     public static function init()
     {
         if (is_admin() && function_exists('register_block_type')) {
-            if (substr($_SERVER['PHP_SELF'], '-8') == 'post.php' ||
+            if (
+                substr($_SERVER['PHP_SELF'], '-8') == 'post.php' ||
                 substr($_SERVER['PHP_SELF'], '-12') == 'post-new.php'
             ) {
                 if (self::isGutenbergActive()) {
                     $class = get_called_class();
-                    add_action('enqueue_block_editor_assets', function () use ($class) {
-                        $class::registerBlockType();
-                    });
+                    add_action(
+                        'enqueue_block_editor_assets',
+                        function () use ($class) {
+                            $class::registerBlockType();
+                        }
+                    );
                 }
-
             }
+        }
+    }
+
+    /**
+     * Enqueue shared Amelia block icon script
+     */
+    public static function enqueueSharedIcon()
+    {
+        static $enqueued = false;
+
+        if (!$enqueued) {
+            wp_enqueue_script(
+                'amelia_block_icon',
+                AMELIA_URL . 'public/js/gutenberg/amelia-block-icon.js',
+                array('wp-element'),
+                AMELIA_VERSION
+            );
+            $enqueued = true;
         }
     }
 
@@ -60,7 +84,6 @@ class GutenbergBlock
      */
     public static function registerBlockType()
     {
-
     }
 
     /**
@@ -81,7 +104,7 @@ class GutenbergBlock
         }
 
         if (self::isClassicEditorPluginActive()) {
-            $editor_option = get_option('classic-editor-replace');
+            $editor_option       = get_option('classic-editor-replace');
             $block_editor_active = array('no-replace', 'block');
 
             return in_array($editor_option, $block_editor_active, true);
@@ -119,12 +142,10 @@ class GutenbergBlock
     {
 
         if (!function_exists('is_plugin_active')) {
-
             include_once ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
         if (is_plugin_active('classic-editor/classic-editor.php')) {
-
             return true;
         }
 
@@ -146,7 +167,7 @@ class GutenbergBlock
      */
     public static function getEntitiesData()
     {
-        return (new self)->getAllEntitiesForGutenbergBlocks();
+        return (new self())->getAllEntitiesForGutenbergBlocks();
     }
 
     /**
@@ -154,6 +175,10 @@ class GutenbergBlock
      */
     public function getAllEntitiesForGutenbergBlocks()
     {
+        if (!empty(self::$entities)) {
+            return self::$entities;
+        }
+
         try {
             self::setContainer(require AMELIA_PATH . '/src/Infrastructure/ContainerConfig/container.php');
 
@@ -186,16 +211,18 @@ class GutenbergBlock
             $providerAS = self::$container->get('application.user.provider.service');
 
             /** @var Collection $providers */
-            $providers = $providerRepository->getWithSchedule([]);
+            $providers = $providerRepository->getByFieldValue('type', 'provider');
 
             $providerServicesData = $providerRepository->getProvidersServices();
 
             foreach ((array)$providerServicesData as $providerKey => $providerServices) {
+                /** @var Provider $provider */
                 $provider = $providers->getItem($providerKey);
 
                 $providerServiceList = new Collection();
 
                 foreach ((array)$providerServices as $serviceKey => $providerService) {
+                    /** @var Service $service */
                     $service = $services->getItem($serviceKey);
 
                     if ($service && $provider) {
@@ -219,35 +246,19 @@ class GutenbergBlock
 
             $finalData = self::getOnlyCatSerLocEmp($resultData);
 
-            /** @var EventRepository $eventRepository */
-            $eventRepository = self::$container->get('domain.booking.event.repository');
-
             /** @var EventApplicationService $eventAS */
             $eventAS = self::$container->get('application.booking.event.service');
 
-            $filteredEventIds = $eventRepository->getFilteredIds(
-                ['dates' => [DateTimeService::getNowDateTime()]],
+            /** @var Collection $events */
+            $events = $eventAS->getEventsByCriteria(
+                [
+                    'dates' => [DateTimeService::getNowDateTime()],
+                ],
+                [
+                    'fetchEventsPeriods' => true,
+                ],
                 100
             );
-
-            $eventsIds = array_column($filteredEventIds, 'id');
-
-            /** @var Collection $events */
-            $events = $eventsIds ? $eventAS->getEventsByIds(
-                $eventsIds,
-                [
-                    'fetchEventsPeriods'    => true,
-                    'fetchEventsTickets'    => false,
-                    'fetchEventsTags'       => false,
-                    'fetchEventsProviders'  => false,
-                    'fetchEventsImages'     => false,
-                    'fetchBookingsTickets'  => false,
-                    'fetchBookingsCoupons'  => false,
-                    'fetchApprovedBookings' => false,
-                    'fetchBookingsPayments' => false,
-                    'fetchBookingsUsers'    => false,
-                ]
-            ) : new Collection();
 
             $finalData['events'] = $events->toArray();
 
@@ -273,19 +284,10 @@ class GutenbergBlock
 
             $finalData['tags'] = $tags->toArray();
 
-            return ['data' => $finalData];
+            self::$entities = ['data' => $finalData];
 
+            return self::$entities;
         } catch (Exception $exception) {
-            return ['data' => [
-                'categories'   => [],
-                'servicesList' => [],
-                'locations'    => [],
-                'employees'    => [],
-                'events'       => [],
-                'tags'         => [],
-                'packages'     => [],
-            ]];
-        } catch (ContainerException $e) {
             return ['data' => [
                 'categories'   => [],
                 'servicesList' => [],
@@ -343,6 +345,10 @@ class GutenbergBlock
 
         if ($resultData['employees'] !== []) {
             for ($i = 0; $i < count($resultData['employees']); $i++) {
+                if (!$resultData['employees'][$i]['show']) {
+                    continue;
+                }
+
                 $data['employees'][] = [
                     'id'        => $resultData['employees'][$i]['id'],
                     'firstName' => $resultData['employees'][$i]['firstName'],

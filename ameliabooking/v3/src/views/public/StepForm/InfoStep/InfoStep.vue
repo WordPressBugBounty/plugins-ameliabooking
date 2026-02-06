@@ -5,7 +5,7 @@
     :class="props.globalClass"
   >
     <div v-show="!loading">
-      <div v-if="paymentError && instantBooking" class="am-fs__info-error">
+  <div v-if="paymentError && (instantBooking || isWaitingListBooking)" class="am-fs__info-error">
         <AmAlert
           type="error"
           :title="paymentError"
@@ -65,7 +65,11 @@
       </template>
 
       <el-form-item
-          v-if="settings.mailchimp.subscribeFieldVisible && amCustomize.infoStep.options.email.visibility"
+          v-if="
+            settings.featuresIntegrations.mailchimp.enabled &&
+            settings.mailchimp.subscribeFieldVisible &&
+            amCustomize.infoStep.options.email.visibility
+          "
           class="am-subscribe"
       >
         <AmCheckBox
@@ -104,14 +108,7 @@
                   ? 'am-custom-required-as-html'
                   : ''
               "
-              v-html="
-                cf.label
-                  ? '<label class=' +
-                    '\'am-fs__info-form__label\'>' +
-                    cf.label +
-                    '</label>'
-                  : ''
-              "
+              v-html="cf.label ? cf.label : ''"
             >
             </span>
             <span v-else class="am-fs__info-form__label">
@@ -135,6 +132,7 @@
             <AmAddressInput
               :id="`amelia-address-autocomplete-${cf.id}`"
               v-model="infoFormData['cf' + cf.id]"
+              @address-selected="(address) => addressSelected(address, cf.id)"
             />
           </template>
           <!-- /Address Field -->
@@ -220,14 +218,14 @@
     </el-form>
 
     <PaymentOnSite
-      v-if="instantBooking && (settings.payments.wc.enabled ? settings.payments.wc.onSiteIfFree || !wcEntityEnabled : true)"
+      v-if="isWaitingListBooking || (instantBooking && (settings.payments.wc.enabled ? settings.payments.wc.onSiteIfFree || !wcEntityEnabled : true))"
       ref="refOnSiteBooking"
       :instant-booking="instantBooking"
       @payment-error="callPaymentError"
     />
 
     <PaymentWc
-      v-if="instantBooking && settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled"
+      v-if="instantBooking && !isWaitingListBooking && settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled"
       ref="refWcBooking"
       :instant-booking="instantBooking"
       @payment-error="callPaymentError"
@@ -277,7 +275,6 @@ import VueAuthenticate from "vue-authenticate";
 import { settings } from "../../../../plugins/settings";
 import { usePrepaidPrice, usePaymentError } from "../../../../assets/js/common/appointments";
 import { useScrollTo } from "../../../../assets/js/common/scrollElements";
-import { saveStats, useAppointmentBookingData } from "../../../../assets/js/public/booking";
 import { useCustomFields } from "../../../../assets/js/public/customFields";
 import useAction from "../../../../assets/js/public/actions";
 import { useElementSize } from "@vueuse/core";
@@ -285,6 +282,7 @@ import { useCartHasItems } from "../../../../assets/js/public/cart";
 import httpClient from "../../../../plugins/axios";
 import AmSocialButton from "../../../common/FormFields/AmSocialButton.vue";
 import {SocialAuthOptions} from "../../../../assets/js/admin/socialAuthOptions";
+import {mapAddressComponentsForXML} from "../../../../assets/js/common/helper";
 
 let props = defineProps({
   globalClass: {
@@ -339,7 +337,7 @@ const {
 })
 
 watch(headerButtonPreviousClicked, () => {
-  if (instantBooking.value) {
+  if (instantBooking.value && !isWaitingListBooking.value) {
     addPaymentsStep()
   }
 })
@@ -367,8 +365,16 @@ let infoFormRef = ref(null)
 let isRtl = computed(() => store.getters['getIsRtl'])
 
 let phoneError = ref(false)
+let refreshPhoneComponent = ref(0)
 let loggedInUser = computed(() => (store.getters['booking/getCustomerId'] && store.getters['booking/getCustomerEmail'])
   || (!!window.ameliaUser && window.ameliaUser.type == 'admin'))
+
+// * Watch for logged in user to refresh phone component
+watch(loggedInUser, (newValue) => {
+  if (newValue) {
+    refreshPhoneComponent.value++
+  }
+})
 
 // * Form data
 let infoFormData = ref({
@@ -427,7 +433,8 @@ let formFields = ref({
     props: {
       class: computed(() => isRtl.value ? 'am-rtl' : ''),
       phoneError: computed(() => phoneError.value),
-      loggedInUser: computed(() => !!loggedInUser.value)
+      loggedInUser: computed(() => !!loggedInUser.value),
+      refreshTrigger: computed(() => refreshPhoneComponent.value)
     },
     handlers: {
       countryPhoneIsoUpdated: (val) => {
@@ -495,6 +502,8 @@ let loading = computed(() => store.getters['booking/getLoading'])
 
 let instantBooking = ref(usePrepaidPrice(store) === 0)
 
+let isWaitingListBooking = computed(() => store.getters['appointmentWaitingListOptions/getIsWaitingListSlot'])
+
 allCustomFields.value.forEach((customField) => {
   if (customField.id in availableCustomFields.value) {
     rules.value['cf' + customField.id] = [{
@@ -527,6 +536,12 @@ function onRemoveFile (a) {
   infoFormData.value['cf' + a.id] = a.raw
 }
 
+function addressSelected (addressComponents, cfId) {
+  if (addressComponents && store.state.booking.appointment.bookings[0].customFields[cfId]) {
+    store.state.booking.appointment.bookings[0].customFields[cfId].components = mapAddressComponentsForXML(addressComponents)
+  }
+}
+
 let customFieldsAllowedExtensions = ref('')
 
 /**
@@ -551,17 +566,30 @@ function submitForm() {
   infoFormRef.value.validate((valid) => {
     if (valid) {
       phoneError.value = false
-      if (!instantBooking.value) {
+      if (!instantBooking.value && !isWaitingListBooking.value) {
         nextStep()
       } else {
-        if (settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled.value) {
-          store.commit('booking/setPaymentGateway', 'wc')
-
-          refWcBooking.value.continueWithBooking()
-        } else {
+        // For waiting list bookings always use onSite gateway.
+        if (isWaitingListBooking.value) {
           store.commit('booking/setPaymentGateway', 'onSite')
-
-          refOnSiteBooking.value.continueWithBooking()
+          if (refOnSiteBooking.value && typeof refOnSiteBooking.value.continueWithBooking === 'function') {
+            refOnSiteBooking.value.continueWithBooking()
+          } else {
+            // Fallback: remove payment step already, just proceed to next step if exposed
+            nextStep()
+          }
+        } else {
+          if (settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled.value) {
+            store.commit('booking/setPaymentGateway', 'wc')
+            refWcBooking.value.continueWithBooking()
+          } else {
+            store.commit('booking/setPaymentGateway', 'onSite')
+            if (refOnSiteBooking.value && typeof refOnSiteBooking.value.continueWithBooking === 'function') {
+              refOnSiteBooking.value.continueWithBooking()
+            } else {
+              nextStep()
+            }
+          }
         }
       }
     } else {
@@ -635,22 +663,41 @@ function checkCustomerCustomFieldVisibility (cf) {
   if (cf.saveType === 'customer' && loggedInUser.value && store.state.booking.appointment.bookings[0].customer.customFields) {
     let customerCustomFields = store.state.booking.appointment.bookings[0].customer.customFields
 
-    if (!(cf.id in JSON.parse(customerCustomFields))) {
+    try {
+      let parsedCustomerCF = JSON.parse(customerCustomFields)
+      let af = availableCustomFields.value[cf.id]
+      let currentValue = af ? af.value : undefined
+      let alreadyFlagged = Object.prototype.hasOwnProperty.call(visibilityFlags.value, cf.id)
+
+      if (!(cf.id in parsedCustomerCF)) {
+        return true
+      }
+
+       if (alreadyFlagged) {
+        return visibilityFlags.value[cf.id]
+      }
+
+      // Always show when saveFirstChoice is false
+      if (!cf.saveFirstChoice) {
+        visibilityFlags.value[cf.id] = true
+        return true
+      }
+
+      // When saveFirstChoice is true, show if saved value is empty
+      let visible
+      switch (cf.type) {
+        case 'checkbox':
+        case 'file':
+          visible = Array.isArray(currentValue) ? currentValue.length === 0 : (currentValue == null)
+          break
+        default:
+          visible = currentValue == null || currentValue === ''
+      }
+
+      visibilityFlags.value[cf.id] = visible
+      return visible
+    } catch (e) {
       return true
-    }
-
-    if (visibilityFlags.value[cf.id]) {
-      return visibilityFlags.value[cf.id]
-    }
-
-    switch (cf.type) {
-      case 'checkbox':
-      case 'file':
-        visibilityFlags.value[cf.id] = !cf.saveFirstChoice && availableCustomFields.value[cf.id].value !== []
-        return visibilityFlags.value[cf.id]
-      default:
-        visibilityFlags.value[cf.id] = !cf.saveFirstChoice && availableCustomFields.value[cf.id].value !== ''
-        return visibilityFlags.value[cf.id]
     }
   }
 
@@ -711,7 +758,7 @@ onMounted(() => {
     }
   })
 
-  if (instantBooking.value) {
+  if (instantBooking.value || isWaitingListBooking.value) {
     removePaymentsStep()
   }
 
@@ -723,17 +770,6 @@ onMounted(() => {
     })
     allFieldsRefs.value.push.apply(allFieldsRefs.value, customFieldsRefs.value)
   })
-
-  // add stats
-  if (store.getters['booking/getBookableType'] === 'appointment') {
-    let statsData = useAppointmentBookingData(store)[0]
-
-    saveStats({
-      locationId: statsData.locationId !== null ? statsData.locationId : null,
-      providerId: statsData.providerId,
-      serviceId: statsData.serviceId,
-    })
-  }
 
   useAction(
       store,

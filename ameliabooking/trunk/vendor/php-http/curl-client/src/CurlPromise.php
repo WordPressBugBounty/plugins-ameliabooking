@@ -9,7 +9,7 @@ use AmeliaHttp\Promise\Promise;
  * in future. It acts like a proxy to the actual response.
  *
  * This interface is an extension of the promises/a+ specification https://promisesaplus.com/
- * Value is replaced by an object where its class implement a AmeliaPsr\Http\Message\RequestInterface.
+ * Value is replaced by an object where its class implement a AmeliaVendor\Psr\Http\Message\RequestInterface.
  * Reason is replaced by an object where its class implement a AmeliaHttp\Client\Exception.
  *
  * @license http://opensource.org/licenses/MIT MIT
@@ -88,9 +88,9 @@ class CurlPromise implements Promise
      *
      * @param bool $unwrap Whether to return resolved value / throw reason or not
      *
-     * @return \AmeliaPsr\Http\Message\ResponseInterface|null Resolved value, null if $unwrap is set to false
+     * @return \AmeliaVendor\Psr\Http\Message\ResponseInterface|null Resolved value, null if $unwrap is set to false
      *
-     * @throws \Http\Client\Exception The rejection reason
+     * @throws \AmeliaHttp\Client\Exception The rejection reason
      */
     public function wait($unwrap = true)
     {

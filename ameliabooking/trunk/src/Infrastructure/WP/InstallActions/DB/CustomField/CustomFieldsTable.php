@@ -12,8 +12,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\AbstractDatabaseTable;
  */
 class CustomFieldsTable extends AbstractDatabaseTable
 {
-
-    const TABLE = 'custom_fields';
+    public const TABLE = 'custom_fields';
 
     /**
      * @return string
@@ -25,7 +24,7 @@ class CustomFieldsTable extends AbstractDatabaseTable
 
         return "CREATE TABLE {$table} (
                    `id` INT(11) NOT NULL AUTO_INCREMENT,
-                   `label` TEXT NOT NULL DEFAULT '',
+                   `label` TEXT DEFAULT NULL,
                    `type` ENUM('text', 'text-area', 'select', 'checkbox', 'radio', 'content', 'file', 'datepicker', 'address') NOT NULL DEFAULT 'text',
                    `required` TINYINT(1) NOT NULL DEFAULT 0,
                    `position` int(11) NOT NULL,
@@ -34,6 +33,9 @@ class CustomFieldsTable extends AbstractDatabaseTable
                    `allEvents` TINYINT(1) NULL DEFAULT NULL,
                    `useAsLocation` TINYINT(1) NULL DEFAULT NULL,
                    `width` INT(11) NOT NULL DEFAULT 50,
+                   `saveType` ENUM('bookings', 'customer') NOT NULL DEFAULT 'bookings',
+                   `saveFirstChoice` TINYINT(1) NULL DEFAULT NULL,
+                   `includeInInvoice` TINYINT(1) NULL DEFAULT NULL,
                     PRIMARY KEY (`id`)
                 ) DEFAULT CHARSET=utf8 COLLATE utf8_general_ci";
     }

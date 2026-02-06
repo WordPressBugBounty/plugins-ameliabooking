@@ -26,6 +26,7 @@ class UpdateAppointmentController extends Controller
         'removedBookings',
         'bookingStart',
         'notifyParticipants',
+        'createPaymentLinks',
         'internalNotes',
         'serviceId',
         'providerId',
@@ -56,6 +57,10 @@ class UpdateAppointmentController extends Controller
         $command->setToken($request);
 
         $params = (array)$request->getQueryParams();
+
+        if (!empty($params)) {
+            $command->setField('params', $params);
+        }
 
         if (isset($params['source'])) {
             $command->setPage($params['source']);

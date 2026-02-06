@@ -4,23 +4,29 @@
     :style="cssVars"
   >
     <div
-      v-if="customizedOptions.header.visibility && !onlyOneEvent"
+      v-if="ready && !loading ? customizedOptions.header.visibility && !onlyOneEvent : false"
       class="am-els__available"
     >
       {{`${total} ${total === 1 ? amLabels.event_available : amLabels.events_available }`}}
     </div>
+
+    <EventListHeaderSkeleton v-if="!ready || loading"></EventListHeaderSkeleton>
 
     <!-- Events Filters -->
     <div
       v-if="customizedOptions.filters.visibility && !onlyOneEvent"
       class="am-els__filters"
     >
-      <div class="am-els__filters-top">
-        <div class="am-els__filters-search">
+      <div v-if="ready" class="am-els__filters-top">
+        <div
+          class="am-els__filters-search"
+          role="search"
+        >
           <AmInput
             v-model="eventSearch"
+            :aria-label="amLabels.event_search"
             :placeholder="`${amLabels.event_search}...`"
-            :icon-start="iconSearch"
+            :prefix-icon="iconSearch"
           />
         </div>
         <div class="am-els__filters-menu__btn">
@@ -29,6 +35,7 @@
             :icon-only="cWidth <= 500"
             custom-class="am-els__filters-menu__btn-inner"
             category="secondary"
+            :aria-label="amLabels.event_filters"
             :type="customizedOptions.filterBtn.buttonType"
             @click="filtersMenuVisibility = !filtersMenuVisibility"
           >
@@ -37,6 +44,7 @@
           </AmButton>
         </div>
       </div>
+      <EventListFiltersSkeleton v-else></EventListFiltersSkeleton>
 
       <Transition name="am-slide-fade">
         <div
@@ -53,11 +61,14 @@
               v-model="tagFilter"
               filterable
               clearable
+              :aria-label="amLabels.event_type"
               :placeholder="amLabels.event_type"
+              :filter-method="filterQueryTag"
             >
               <AmOption
-                v-for="(tag, index) in tags"
+                v-for="(tag, index) in filteredTags"
                 :key="index"
+                :class="`am-els-tag__${tag.name.replace(/\s+/g, '')}`"
                 :value="tag.name"
                 :label="tag.name"
               >
@@ -74,10 +85,13 @@
               filterable
               clearable
               :placeholder="amLabels.event_location"
+              :aria-label="amLabels.event_location"
+              :filter-method="filterQueryLocation"
             >
               <AmOption
-                v-for="location in locations"
+                v-for="location in filteredLocations"
                 :key="location.id"
+                :class="`am-els-location__${location.id}`"
                 :value="location.id"
                 :label="location.name"
               >
@@ -93,7 +107,7 @@
               :presistant="false"
               :disabled="false"
               @selected-date="(dateString) => {store.commit('params/setDates', [dateString])}"
-            ></AmDatePickerFull>
+            />
           </div>
         </div>
       </Transition>
@@ -145,7 +159,7 @@
       <!-- /Events Pagination -->
     </template>
 
-    <EmptyState v-if="empty" />
+    <EmptyState v-if="ready && !loading && empty" />
 
   </div>
 </template>
@@ -158,11 +172,13 @@ import AmOption from '../../../../_components/select/AmOption.vue'
 import AmInput from '../../../../_components/input/AmInput.vue'
 import AmDatePickerFull from '../../../../_components/date-picker-full/AmDatePickerFull.vue'
 import IconComponent from '../../../../_components/icons/IconComponent.vue'
-import AmPagination from '../../../../_components/pagination/AmPagintaion.vue'
+import AmPagination from '../../../../_components/pagination/AmPagination.vue'
 
 // * Dedicated Components
 import EventCard from '../../Common/Parts/EventCard.vue'
 import EventListSkeleton from '../Parts/EventListSkeleton.vue'
+import EventListFiltersSkeleton from '../Parts/EventListFiltersSkeleton.vue'
+import EventListHeaderSkeleton from '../Parts/EventListHeaderSkeleton.vue'
 import EmptyState from "../../Common/Parts/EmptyState.vue";
 
 // * Import from Vue
@@ -171,8 +187,8 @@ import {
   watch,
   inject,
   computed,
-  reactive, onMounted,
-} from "vue"
+  reactive,
+} from 'vue'
 
 // * Import from vuex
 import { useStore } from "vuex";
@@ -201,15 +217,22 @@ let onlyOneEvent = computed (() => {
   return shortcodeEvents.length === 1 || urlEvents.length === 1
 })
 
-onMounted(() => {
-  let urlParams = useUrlQueryParams(window.location.href)
-  if (urlParams && urlParams.ameliaEventPopup) {
+// * Ready state
+let ready = computed(() => store.getters['getReady'])
+
+// * Load state
+let loading = computed(() => store.getters['getLoading'])
+
+let urlParams = useUrlQueryParams(window.location.href)
+watch(ready, (readyState) => {
+  if (readyState &&
+    urlParams &&
+    urlParams.ameliaEventPopup &&
+    store.getters['eventEntities/getEvents'].filter(i => i.id === parseInt(urlParams.ameliaEventPopup)).length
+  ) {
     selectEvent(parseInt(urlParams.ameliaEventPopup))
   }
 })
-
-// * Load state
-let loading = computed(() => store.getters["getLoading"])
 
 // * Container width
 let cWidth = inject('containerWidth')
@@ -254,7 +277,7 @@ let amLabels = computed(() => {
 let events = computed(() => store.getters['eventEntities/getEvents'])
 
 // * Empty state
-let empty = computed(() => events.value.length === 0)
+let empty = computed(() => store.getters['getReady'] && !store.getters['getLoading'] ? events.value.length === 0 : false)
 
 // * Events Pagination
 let currentPage = computed({
@@ -359,6 +382,21 @@ let tagFilter = computed({
   }
 })
 
+let queryTags = ref('')
+function filterQueryTag (query) {
+  queryTags.value = query.toLowerCase()
+}
+
+let filteredTags = computed(() => {
+  if (queryTags.value) {
+    return tags.value.filter((tag) => {
+      return tag.name.toLowerCase().includes(queryTags.value)
+    })
+  }
+
+  return tags.value
+})
+
 let locationFilter = computed({
   get: () => {
     return store.getters['params/getLocationIdParam']
@@ -368,12 +406,33 @@ let locationFilter = computed({
   }
 })
 
+let queryLocation = ref('')
+function filterQueryLocation (query) {
+  queryLocation.value = query.toLowerCase()
+}
+
+let filteredLocations = computed(() => {
+  if (queryLocation.value) {
+    return locations.value.filter((location) => {
+      return location.name.toLowerCase().includes(queryLocation.value)
+    })
+  }
+
+  return locations.value
+})
+
 let dateFilter = computed(() => {
   return store.getters['params/getDates'][0]
 })
 
 let typingInSearch = ref(null)
 watch([eventSearch, tagFilter, locationFilter, dateFilter], () => {
+  if (store.getters['getRestoring'] && !store.getters['getRestored']) {
+    store.commit('setRestored', true)
+
+    return
+  }
+
   store.commit('setLoading', true)
   // * Need to set events api for search param
   clearTimeout(typingInSearch.value)

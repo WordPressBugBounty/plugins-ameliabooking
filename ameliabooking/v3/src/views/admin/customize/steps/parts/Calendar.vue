@@ -6,7 +6,7 @@
       :slots="calendarEvents"
       :calendar-minimum-date="moment().format('YYYY-MM-DD hh:mm')"
       :calendar-maximum-date="moment().add(1,'year').format('YYYY-MM-DD hh:mm')"
-      :time-zone="amCustomize[pageRenderKey][stepRecognition].options.timeZoneVisibility.visibility"
+      :time-zone="features.timeZones && amCustomize[pageRenderKey][stepRecognition].options.timeZoneVisibility.visibility"
       :end-time="amCustomize[pageRenderKey][stepRecognition].options.endTimeVisibility.visibility"
       :show-estimated-pricing="stepRecognition === 'rescheduleAppointment' ? amCustomize[pageRenderKey][stepRecognition].options.estimatedPricingVisibility.visibility : false"
       :show-indicator-pricing="stepRecognition === 'rescheduleAppointment' ? amCustomize[pageRenderKey][stepRecognition].options.indicatorPricingVisibility.visibility : false"
@@ -25,20 +25,19 @@
 import moment from 'moment'
 
 // * Import from Vue
-import {
-  ref,
-  provide,
-  inject,
-  computed,
-  watchEffect,
-  onMounted
-} from "vue";
+import { ref, provide, inject, computed, watchEffect, onMounted } from 'vue'
+
+// * Import composables
+import { useReactiveCustomize } from '../../../../../assets/js/admin/useReactiveCustomize.js'
 
 //  * Dedicated component
-import AmAdvancedSlotCalendar from "../../../../_components/advanced-slot-calendar/AmAdvancedSlotCalendar";
+import AmAdvancedSlotCalendar from '../../../../_components/advanced-slot-calendar/AmAdvancedSlotCalendar'
 
 // * Customize
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
+
+// * Features
+let features = inject('features')
 
 // * Languages
 let langKey = inject('langKey')
@@ -152,23 +151,26 @@ let calendarEventSlots = ref([])
 
 let calendarEventBusySlots = ref()
 
-watchEffect (() => {
-  calendarEventBusySlots.value = 'busyTimeSlotsVisibility' in customOptions.value && customOptions.value.busyTimeSlotsVisibility.visibility ?
-    ['08:00', '08:30', '09:30', '12:30', '14:00'] : []
+watchEffect(() => {
+  calendarEventBusySlots.value =
+    'busyTimeSlotsVisibility' in customOptions.value &&
+    customOptions.value.busyTimeSlotsVisibility.visibility
+      ? ['08:00', '08:30', '09:30', '12:30', '14:00']
+      : []
 })
 
 let today = moment().format('YYYY-MM-DD')
 
 for (let i = 0; i <= 31; i++) {
   let block = {
-    display: "background",
+    display: 'background',
     extendedProps: {
-      slots: {'09:00': [7, 3]},
+      slots: { '09:00': [7, 3] },
       slotsAvailable: 1,
-      slotsTotal: 100
+      slotsTotal: 100,
     },
     start: moment(today).add(i, 'd').format('YYYY-MM-DD'),
-    title: "e"
+    title: 'e',
   }
 
   calendarEvents.value.push(block)
@@ -191,12 +193,16 @@ let calendarSlotDuration = 1800
 provide('calendarSlotDuration', calendarSlotDuration)
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepRecognition.value].translations
-    && amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label]
-    && amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepRecognition.value]
+      .translations &&
+      amCustomize.value[pageRenderKey.value][stepRecognition.value]
+        .translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepRecognition.value]
+        .translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepRecognition.value]
+          .translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -217,7 +223,6 @@ function setSelectedDate (value) {
       calendarEventSlots.value.push(`${i < 10 ? '0'+i:i}:00`)
       calendarEventSlots.value.push(`${i < 10 ? '0'+i:i}:30`)
     }
-
   }
 
   if (calendarEventSlots.value.length) {
@@ -227,9 +232,12 @@ function setSelectedDate (value) {
   calendarEventDate.value = value
 }
 
-function unselectDate () {
-  calendarEventBusySlots.value = 'busyTimeSlotsVisibility' in customOptions.value && customOptions.value.busyTimeSlotsVisibility.visibility ?
-    ['08:00', '08:30', '09:30', '12:30', '14:00'] : []
+function unselectDate() {
+  calendarEventBusySlots.value =
+    'busyTimeSlotsVisibility' in customOptions.value &&
+    customOptions.value.busyTimeSlotsVisibility.visibility
+      ? ['08:00', '08:30', '09:30', '12:30', '14:00']
+      : []
 
   calendarEventSlots.value = []
 
@@ -238,8 +246,7 @@ function unselectDate () {
   calendarEventDate.value = ''
 }
 
-function setSelectedTime (value) {
-
+function setSelectedTime(value) {
   calendarEventSlot.value = value
 }
 </script>
@@ -279,7 +286,6 @@ export default {
 
   // Skeleton
   .am-skeleton-slots {
-
     &-mobile {
       padding: 0;
 

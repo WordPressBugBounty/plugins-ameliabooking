@@ -8,6 +8,7 @@ use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Services\Entity\EntityApplicationService;
 use AmeliaBooking\Application\Services\User\ProviderApplicationService;
 use AmeliaBooking\Application\Services\User\UserApplicationService;
+use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
@@ -18,8 +19,11 @@ use AmeliaBooking\Domain\ValueObjects\String\Password;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use AmeliaBooking\Infrastructure\Services\Apple\AbstractAppleCalendarService;
+use Exception;
 use Interop\Container\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
+use AmeliaBooking\Domain\ValueObjects\String\Name;
+use AmeliaBooking\Domain\ValueObjects\String\Phone;
 
 /**
  * Class UpdateProviderCommandHandler
@@ -37,6 +41,7 @@ class UpdateProviderCommandHandler extends CommandHandler
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
      * @throws ContainerException
+     * @throws Exception
      */
     public function handle(UpdateProviderCommand $command)
     {
@@ -49,6 +54,9 @@ class UpdateProviderCommandHandler extends CommandHandler
 
         /** @var ProviderApplicationService $providerAS */
         $providerAS = $this->container->get('application.user.provider.service');
+
+        /** @var SettingsService $settingsDS */
+        $settingsDS = $this->container->get('domain.settings.service');
 
         $userId = (int)$command->getArg('id');
 
@@ -70,7 +78,10 @@ class UpdateProviderCommandHandler extends CommandHandler
         ) {
             $oldUser = $userAS->getAuthenticatedUser($command->getToken(), false, 'providerCabinet');
 
-            if ($oldUser === null) {
+            if (
+                $oldUser === null ||
+                ($command->getField('externalId') && (!$oldUser->getExternalId() || $oldUser->getExternalId()->getValue() !== $command->getField('externalId')))
+            ) {
                 $result->setResult(CommandResult::RESULT_ERROR);
                 $result->setMessage('Could not retrieve user');
                 $result->setData(
@@ -95,14 +106,22 @@ class UpdateProviderCommandHandler extends CommandHandler
             $providerData['stripeConnect'] = null;
         }
 
+        if (!isset($providerData['zoomUserId'])) {
+            $providerData['zoomUserId'] = null;
+        }
+
+        if (!isset($providerData['appleCalendarId'])) {
+            $providerData['appleCalendarId'] = null;
+        }
+
         if (!isset($providerData['employeeAppleCalendar'])) {
             $providerData['employeeAppleCalendar'] = null;
         } else {
             /** @var AbstractAppleCalendarService $appleCalendarService */
             $appleCalendarService = $this->container->get('infrastructure.apple.calendar.service');
 
-            $appleId       = $providerData['employeeAppleCalendar'] ['iCloudId'];
-            $applePassword = $providerData['employeeAppleCalendar'] ['appSpecificPassword'];
+            $appleId       = $providerData['employeeAppleCalendar']['iCloudId'];
+            $applePassword = $providerData['employeeAppleCalendar']['appSpecificPassword'];
 
             $credentials = $appleCalendarService->handleAppleCredentials($appleId, $applePassword);
 
@@ -120,6 +139,10 @@ class UpdateProviderCommandHandler extends CommandHandler
             $providerData['badgeId'] = null;
         }
 
+        if ($oldUser->getTimeZone() && $settingsDS->isFeatureEnabled('timezones') === false) {
+            $providerData['timeZone'] = $oldUser->getTimeZone()->getValue();
+        }
+
         $newUserData = array_merge($oldUser->toArray(), $providerData);
 
         $newUserData = apply_filters('amelia_before_provider_updated_filter', $newUserData, $oldUser->toArray());
@@ -127,17 +150,33 @@ class UpdateProviderCommandHandler extends CommandHandler
         /** @var Provider $newUser */
         $newUser = UserFactory::create($newUserData);
 
-        if (!($newUser instanceof AbstractUser)) {
-            $result->setResult(CommandResult::RESULT_ERROR);
-            $result->setMessage('Could not update user.');
-
-            return $result;
+        // If the phone is not set and the old phone is set, set the phone and country phone iso to null
+        if (!$providerData['phone'] && $oldUser->getPhone() && $oldUser->getPhone()->getValue()) {
+            $newUser->setPhone(new Phone(null));
+            $newUser->setCountryPhoneIso(new Name(null));
         }
 
-        if ($command->getUserApplicationService()->checkProviderPermissions($currentUser, $command->getToken())) {
-            /** @var SettingsService $settingsDS */
-            $settingsDS = $this->container->get('domain.settings.service');
+        $newUser->setDayOffList(
+            $providerAS->getModifiedDayList(
+                $newUser->getDayOffList(),
+                $oldUser->getDayOffList(),
+                !empty($newUserData['removedDayOffList'])
+                    ? UserFactory::createDayOffList($newUserData['removedDayOffList'])
+                    : new Collection()
+            )
+        );
 
+        $newUser->setSpecialDayList(
+            $providerAS->getModifiedDayList(
+                $newUser->getSpecialDayList(),
+                $oldUser->getSpecialDayList(),
+                !empty($newUserData['removedSpecialDayList'])
+                    ? UserFactory::createSpecialDayList($newUserData['removedSpecialDayList'])
+                    : new Collection()
+            )
+        );
+
+        if ($command->getUserApplicationService()->checkProviderPermissions($currentUser, $command->getToken())) {
             $rolesSettings = $settingsDS->getCategorySettings('roles');
 
             if (!$rolesSettings['allowConfigureServices']) {
@@ -228,9 +267,10 @@ class UpdateProviderCommandHandler extends CommandHandler
         $result->setData(
             array_merge(
                 $result->getData(),
-                ['sendEmployeePanelAccessEmail' =>
-                     $command->getField('password') && $command->getField('sendEmployeePanelAccessEmail'),
-                 'password'                     => $command->getField('password')
+                [
+                    'sendEmployeePanelAccessEmail' =>
+                    $command->getField('password') && $command->getField('sendEmployeePanelAccessEmail'),
+                    'password'                     => $command->getField('password')
                 ]
             )
         );

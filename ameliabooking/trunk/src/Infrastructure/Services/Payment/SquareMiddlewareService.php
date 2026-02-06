@@ -1,16 +1,35 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
 namespace AmeliaBooking\Infrastructure\Services\Payment;
+
+use AmeliaBooking\Domain\Services\Settings\SettingsService;
 
 /**
  * Class SquareMiddlewareService
  */
 class SquareMiddlewareService
 {
+    /**
+     * @var string
+     */
+    private $middlewareApiUrl;
+
+    /**
+     * SquareMiddlewareService constructor.
+     *
+     * @param SettingsService $settingsService
+     */
+    public function __construct(SettingsService $settingsService)
+    {
+        $squareSettings         = $settingsService->getCategorySettings('payments')['square'];
+        $this->middlewareApiUrl = $squareSettings['testMode'] ?
+            'https://middleware-dev.wpamelia.com/' : AMELIA_MIDDLEWARE_URL;
+    }
 
     /**
      *
@@ -20,7 +39,7 @@ class SquareMiddlewareService
      */
     public function decrypt($savedAccessToken)
     {
-        $ch = curl_init(AMELIA_MIDDLEWARE_API_URL . 'square/decrypt');
+        $ch = curl_init($this->middlewareApiUrl . 'square/decrypt');
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -39,7 +58,11 @@ class SquareMiddlewareService
 
         if ($response && curl_getinfo($ch, CURLINFO_HTTP_CODE) === 200) {
             $response = json_decode($response, true);
-            set_transient('amelia_square_access_token', ['access_token' => $response['result']['access_token'], 'refresh_token' => $response['result']['refresh_token']], 604800);
+            set_transient(
+                'amelia_square_access_token',
+                ['access_token' => $response['result']['access_token'], 'refresh_token' => $response['result']['refresh_token']],
+                604800
+            );
         } else {
             $response = null;
         }
@@ -74,7 +97,7 @@ class SquareMiddlewareService
     {
         $accessToken = $this->getAccessToken($savedAccessToken);
 
-        $ch = curl_init(AMELIA_MIDDLEWARE_API_URL . 'square/revoke?testMode=' . $testMode);
+        $ch = curl_init($this->middlewareApiUrl . 'square/revoke?testMode=' . $testMode);
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -98,10 +121,10 @@ class SquareMiddlewareService
 
     /**
      *
-     * @param string $authCode
-     * @param string $state
+     * @param string $savedAccessToken
+     * @param bool $testMode
      *
-     * @return boolean
+     * @return array|null
      *
      * @throws \Exception
      */
@@ -109,7 +132,7 @@ class SquareMiddlewareService
     {
         $accessToken = $this->getAccessToken($savedAccessToken);
 
-        $ch = curl_init(AMELIA_MIDDLEWARE_API_URL . 'square/refresh?testMode=' . $testMode);
+        $ch = curl_init($this->middlewareApiUrl . 'square/refresh?testMode=' . $testMode);
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -139,7 +162,7 @@ class SquareMiddlewareService
     public function getAuthUrl($testMode)
     {
         $ch = curl_init(
-            AMELIA_MIDDLEWARE_API_URL . 'square/authorization/url?testMode=' . $testMode . '&admin_ajax_url=' . urlencode(admin_url('admin-ajax.php', ''))
+            $this->middlewareApiUrl . 'square/authorization/url?testMode=' . $testMode . '&admin_ajax_url=' . urlencode(admin_url('admin-ajax.php', ''))
         );
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -15,7 +16,7 @@ use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
  */
 final class PaymentData
 {
-    const MAX_LENGTH = 4095;
+    public const MAX_LENGTH = 4095;
     /**
      * @var string
      */

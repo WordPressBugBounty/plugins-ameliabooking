@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -12,7 +13,7 @@ use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Entities;
-use AmeliaBooking\Domain\Services\Settings\SettingsService;
+use AmeliaBooking\Domain\Services\Reservation\ReservationServiceInterface;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Payment\PaymentRepository;
 
@@ -31,7 +32,6 @@ class GetPaymentsCommandHandler extends CommandHandler
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      * @throws AccessDeniedException
-     * @throws \Interop\Container\Exception\ContainerException
      */
     public function handle(GetPaymentsCommand $command)
     {
@@ -46,9 +46,6 @@ class GetPaymentsCommandHandler extends CommandHandler
         /** @var PaymentRepository $paymentRepository */
         $paymentRepository = $this->container->get('domain.payment.repository');
 
-        /** @var SettingsService $settingsService */
-        $settingsService = $this->container->get('domain.settings.service');
-
         /** @var PaymentApplicationService $paymentAS */
         $paymentAS = $this->container->get('application.payment.service');
 
@@ -59,9 +56,37 @@ class GetPaymentsCommandHandler extends CommandHandler
             $params['dates'][1] .= ' 23:59:59';
         }
 
-        $paymentsData = $paymentAS->getPaymentsData($params, $settingsService->getSetting('general', 'itemsPerPageBackEnd'));
+        if (!empty($params['sort'])) {
+            $sort = $params['sort'];
+            $isDescending   = substr($sort, 0, 1) === '-';
+            $params['sort'] = [
+                'field' => $isDescending ? substr($sort, 1) : $sort,
+                'order' => $isDescending ? 'DESC' : 'ASC',
+            ];
+        }
 
-        $payments = array_values($paymentsData);
+        $paymentsData = $paymentAS->getPaymentsData(
+            $params,
+            $params['limit'] ?? 10
+        );
+
+        $isInvoicePage = !empty($params['invoices']) && filter_var($params['invoices'], FILTER_VALIDATE_BOOLEAN);
+
+        $payments = [];
+
+        foreach ($paymentsData as $paymentId => $payment) {
+            /** @var ReservationServiceInterface $reservationService */
+            $reservationService = $this->container->get('application.reservation.service')->get(
+                $payment['type']
+            );
+
+            $paymentsData[$paymentId]['summary'] = $reservationService->getPaymentSummary(
+                $payment,
+                $isInvoicePage
+            );
+
+            $payments[] = $paymentsData[$paymentId];
+        }
 
         $payments = apply_filters('amelia_get_payments_filter', $payments);
 
@@ -72,8 +97,13 @@ class GetPaymentsCommandHandler extends CommandHandler
         $result->setData(
             [
                 Entities::PAYMENTS => $payments,
-                'filteredCount'    => (int)$paymentRepository->getCount($params),
-                'totalCount'       => (int)$paymentRepository->getCount([]),
+                'filteredCount'    => (int)$paymentRepository->getFilteredIdsCount($params, $isInvoicePage),
+                'totalCount'       => (int)$paymentRepository->getFilteredIdsCount(
+                    [
+                        'separateRows' => !empty($params['separateRows']),
+                    ],
+                    $isInvoicePage
+                ),
             ]
         );
 

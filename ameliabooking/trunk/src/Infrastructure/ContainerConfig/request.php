@@ -21,13 +21,6 @@ $entries['request'] = function (AmeliaBooking\Infrastructure\Common\Container $c
         $newRoute
     );
 
-    // fix callback url for square payment
-    $newRoute = str_replace(
-        '__payment__square__notify',
-        '/payment/square/notify',
-        $newRoute
-    );
-
     $newRoute = str_replace(
         ['XDEBUG_SESSION_START=PHPSTORM&' . AMELIA_ACTION_SLUG, AMELIA_ACTION_SLUG],
         '',
@@ -45,12 +38,12 @@ $entries['request'] = function (AmeliaBooking\Infrastructure\Common\Container $c
         strpos($newRoute, '&') + 1
     ) : '';
 
-   $request = Request::createFromEnvironment($c->get('environment'))
-       ->withUri(
-           $curUri
+    $request = Request::createFromEnvironment($c->get('environment'))
+    ->withUri(
+        $curUri
                ->withPath($newPath)
                ->withQuery($newQuery)
-       );
+    );
 
     if (method_exists($request, 'getParam') && $request->getParam('showAmeliaErrors')) {
         ini_set('display_errors', 1);

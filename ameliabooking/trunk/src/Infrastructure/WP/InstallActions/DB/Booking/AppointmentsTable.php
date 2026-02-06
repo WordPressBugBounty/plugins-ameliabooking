@@ -13,8 +13,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\AbstractDatabaseTable;
  */
 class AppointmentsTable extends AbstractDatabaseTable
 {
-
-    const TABLE = 'appointments';
+    public const TABLE = 'appointments';
 
     /**
      * @return string
@@ -32,6 +31,7 @@ class AppointmentsTable extends AbstractDatabaseTable
                    `bookingStart` DATETIME NOT NULL,
                    `bookingEnd` DATETIME NOT NULL,
                    `notifyParticipants` TINYINT(1) NOT NULL,
+                   `createPaymentLinks` TINYINT(1) DEFAULT 1,
                    `serviceId` INT(11) NOT NULL,
                    `packageId` INT(11) DEFAULT NULL,
                    `providerId` INT(11) NOT NULL,
@@ -40,9 +40,12 @@ class AppointmentsTable extends AbstractDatabaseTable
                    `googleCalendarEventId` VARCHAR(255) NULL,
                    `googleMeetUrl` VARCHAR(255) NULL,
                    `outlookCalendarEventId` VARCHAR(255) NULL,
+                   `microsoftTeamsUrl` VARCHAR(255) NULL,
+                   `appleCalendarEventId` VARCHAR(255) NULL,
                    `zoomMeeting` TEXT({$description}) NULL,
                    `lessonSpace` TEXT({$description}) NULL,
                    `parentId` INT(11) NULL,
+                   `error` TEXT({$description}) DEFAULT NULL,
                     PRIMARY KEY (`id`)
                 ) DEFAULT CHARSET=utf8 COLLATE utf8_general_ci";
     }

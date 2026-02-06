@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -14,16 +15,15 @@ use AmeliaBooking\Domain\Services\Notification\MailServiceInterface;
  */
 class WpMailService extends AbstractMailService implements MailServiceInterface
 {
-
     /**
      * WpMailService constructor.
      *
      * @param        $from
      * @param        $fromName
      */
-    public function __construct($from, $fromName)
+    public function __construct($from, $fromName, $replyTo)
     {
-        parent::__construct($from, $fromName);
+        parent::__construct($from, $fromName, $replyTo);
     }
 
     /** @noinspection MoreThanThreeArgumentsInspection */
@@ -40,7 +40,11 @@ class WpMailService extends AbstractMailService implements MailServiceInterface
 
     public function send($to, $subject, $body, $bccEmails = [], $attachments = [])
     {
-        $content = ['Content-Type: text/html; charset=UTF-8','From: '  . $this->fromName . ' <' . $this->from . '>'];
+        $content = [
+            'Content-Type: text/html; charset=UTF-8',
+            'From: '  . $this->fromName . ' <' . $this->from . '>',
+            'Reply-To: ' . (!empty($this->replyTo) ? $this->replyTo : $this->from)
+        ];
 
         if ($bccEmails) {
             $content[] = 'Bcc:' . implode(', ', $bccEmails);
@@ -49,12 +53,17 @@ class WpMailService extends AbstractMailService implements MailServiceInterface
         $attachmentsLocations = [];
 
         foreach ($attachments as $attachment) {
-            if (!empty($attachment['content']) &&
-                ($tmpFile = tempnam(sys_get_temp_dir(), 'cal_')) !== false &&
-                file_put_contents($tmpFile, $attachment['content']) !== false &&
-                @rename($tmpFile, $tmpFile .= '.ics') !== false
-            ) {
-                $attachmentsLocations[] = $tmpFile;
+            if (!empty($attachment['content'])) {
+                $extension = pathinfo($attachment['name'], PATHINFO_EXTENSION);
+                $fileName = pathinfo($attachment['name'], PATHINFO_FILENAME);
+                $tmpFile = tempnam(sys_get_temp_dir(), $fileName . '_');
+                if (
+                    $tmpFile &&
+                    file_put_contents($tmpFile, $attachment['content']) !== false &&
+                    @rename($tmpFile, $tmpFile .= '.' . $extension) !== false
+                ) {
+                    $attachmentsLocations[] = $tmpFile;
+                }
             }
         }
 

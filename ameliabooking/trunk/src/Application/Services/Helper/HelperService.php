@@ -6,7 +6,9 @@ use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\LoginType;
 use AmeliaBooking\Infrastructure\Common\Container;
-use AmeliaFirebase\JWT\JWT;
+use AmeliaVendor\Firebase\JWT\JWT;
+use AmeliaVendor\phpseclib3\Crypt\PublicKeyLoader;
+use AmeliaVendor\phpseclib3\Crypt\RSA;
 use Interop\Container\Exception\ContainerException;
 use DateTime;
 use Exception;
@@ -118,7 +120,7 @@ class HelperService
             $data['exp'] = $expireTimeStamp;
         }
 
-        return JWT::encode($data, $secret);
+        return JWT::encode($data, $secret, 'HS256');
     }
 
     /**
@@ -150,7 +152,8 @@ class HelperService
         );
 
         if ($cabinetURL) {
-            $tokenParam = $type === 'email' ? (strpos($cabinetURL, '?') === false ? '?token=' : '&token=') .
+            $tokenParam = $type === 'email' || $type === 'whatsapp' ?
+                (strpos($cabinetURL, '?') === false ? '?token=' : '&token=') .
                 $this->getGeneratedJWT(
                     $email,
                     $cabinetSettings['urlJwtSecret'],
@@ -180,7 +183,7 @@ class HelperService
      * @param string $type
      * @param string $dateStartString
      * @param string $dateEndString
-     * @param string $locale
+     * @param bool $changePass
      *
      * @return string
      *
@@ -226,7 +229,7 @@ class HelperService
      * @param string $entityTranslation
      * @param string $type
      *
-     * @return array
+     * @return array|null
      */
     public function getBookingTranslation($locale, $entityTranslation, $type)
     {

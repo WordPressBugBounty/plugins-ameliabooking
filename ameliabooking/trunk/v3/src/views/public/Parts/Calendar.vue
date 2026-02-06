@@ -1,5 +1,10 @@
 <template>
-  <div v-if="!calendarSlotsLoading" class="am-fs-dt__calendar">
+  <div
+    v-if="!calendarSlotsLoading"
+    class="am-fs-dt__calendar"
+    @pointerdown.capture="onCalendarPointerDown"
+    @click.capture="onCalendarClick"
+  >
     <AmAdvancedSlotCalendar
       :id="props.id"
       :slots="calendarEvents"
@@ -9,20 +14,27 @@
       :end-time="props.endTime"
       :time-zone="props.timeZone"
       :show-busy-slots="props.showBusySlots"
+      :show-estimated-pricing="props.showEstimatedPricing"
+      :show-indicator-pricing="props.showIndicatorPricing"
+      :show-slot-pricing="props.showSlotPricing"
+      :show-people-waiting="props.showPeopleWaiting"
       :nested-item="nested"
       :label-slots-selected="props.labelSlotsSelected"
+      :label-waiting-list="props.labelWaitingList"
       :busyness="busyness"
       :date="props.date"
       :service-id="props.serviceId"
       :tax-visibility="props.taxVisibility"
       :tax-label="props.taxLabel"
       :tax-label-incl="props.taxLabelIncl"
+      :period-pricing="periodPricing"
       @selected-date="setSelectedDate"
       @selected-time="setSelectedTime"
       @changed-month="changeMonth"
       @rendered-month="renderedMonth"
       @unselect-date="unselectDate"
       @selected-duration="setSelectedDuration"
+      @waiting-list-slot="setWaitingListSlot"
     ></AmAdvancedSlotCalendar>
   </div>
 
@@ -50,7 +62,6 @@ import {
   provide,
   inject,
   computed,
-  watch,
   nextTick
 } from "vue";
 
@@ -62,13 +73,21 @@ import AmAdvancedSlotCalendar from "../../_components/advanced-slot-calendar/AmA
 
 // * Composables
 import {
+  useCartHasItems,
   useCartItem,
+  useCartStep,
 } from "../../../assets/js/public/cart.js";
 import {
   useCalendarEvents,
   useDuration,
 } from "../../../assets/js/common/appointments.js";
-import { useAppointmentSlots } from "../../../assets/js/public/slots";
+import {
+  useAppointmentSlots,
+  useSlotsPricing,
+} from "../../../assets/js/public/slots";
+
+// * Plugin Licence
+let licence = inject('licence')
 
 // * Component props
 const props = defineProps({
@@ -112,6 +131,10 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  labelWaitingList: {
+    type: String,
+    default: ''
+  },
   fetchedSlots: {
     type: Object,
     default: () => {}
@@ -121,6 +144,26 @@ const props = defineProps({
     default: false
   },
   showBusySlots: {
+    type: Boolean,
+    default: false
+  },
+  showEstimatedPricing: {
+    type: Boolean,
+    default: false
+  },
+  showIndicatorPricing: {
+    type: Boolean,
+    default: false
+  },
+  showPeopleWaiting: {
+    type: Boolean,
+    default: true,
+  },
+  showSlotPricing: {
+    type: Boolean,
+    default: false
+  },
+  isPackage: {
     type: Boolean,
     default: false
   },
@@ -135,6 +178,10 @@ const props = defineProps({
   taxLabelIncl: {
     type: String,
     default: ''
+  },
+  disableWaitingList: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -190,9 +237,16 @@ let calendarSlotsLoading = ref(true)
 
 let calendarEvents = ref([])
 
+let calendarEventDate = ref('')
+
 let calendarEventSlots = ref([])
 
 let calendarEventBusySlots = ref([])
+
+// All waiting list slots returned from backend (date->time->providers array)
+let calendarWaitingListSlots = ref({})
+// Waiting list times for currently selected date (array of time strings)
+let calendarWaitingListTimes = ref([])
 
 let calendarEventSlot = ref('')
 
@@ -211,12 +265,25 @@ let useBusySlots = inject('useBusySlots')
 let useSelectedTime = inject('useSelectedTime')
 let useDeselectedDate = inject('useDeselectedDate')
 let useRange = inject('useRange')
+// Cart step controls (optional injections - not needed in customer panel)
+const injectedAddCartStep = inject('addCartStep', null)
+const injectedRemoveCartStep = inject('removeCartStep', null)
+// Steps data (to verify if CartStep exists before add/remove)
+const stepsArray = inject('stepsArray', null)
+// Origin key to detect context (capc = customer panel, cape = employee panel)
+const originKey = inject('originKey', null)
 
 provide('calendarEvents', calendarEvents)
+
+provide('calendarEventDate', calendarEventDate)
 
 provide('calendarEventSlots', calendarEventSlots)
 
 provide('calendarEventBusySlots', calendarEventBusySlots)
+
+provide('calendarWaitingListTimes', calendarWaitingListTimes)
+
+provide('calendarWaitingListSlots', calendarWaitingListSlots)
 
 provide('calendarEventSlot', calendarEventSlot)
 
@@ -224,10 +291,102 @@ provide('calendarStartDate', calendarStartDate)
 
 provide('calendarChangeSideBar', calendarChangeSideBar)
 
+// Capture DOM clicks inside calendar to compare real day-number clicks vs. gap/padding
+function onCalendarClick (e) {
+  if (iOS()) return
+  let target = e.target
+  let cell = target && typeof target.closest === 'function'
+    ? target.closest('td[data-date],td.fc-day,td.fc-daygrid-day')
+    : null
+  if (!cell) return
+
+  let dateAttr = (cell.dataset && cell.dataset.date) || cell.getAttribute('data-date')
+  if (!dateAttr) return
+
+  const classList = cell.classList ? Array.from(cell.classList) : []
+  const isDisabledCell = classList.some(cls => cls && cls.toLowerCase().includes('disabled'))
+  if (isDisabledCell) {
+    return
+  }
+
+  // Toggle off when clicking the already selected date
+  if (dateAttr === calendarEventDate.value) {
+    unselectDate()
+    if (typeof e.stopPropagation === 'function') e.stopPropagation()
+    if (typeof e.preventDefault === 'function') e.preventDefault()
+    return
+  }
+
+  // Always treat day-cell click as selecting that date
+  setSelectedDate(dateAttr)
+  if (typeof e.stopPropagation === 'function') e.stopPropagation()
+  if (typeof e.preventDefault === 'function') e.preventDefault()
+}
+
+// Stop early pointer/mouse events from reaching the inner calendar when they would toggle unselect
+function onCalendarPointerDown (e) {
+  if (iOS()) return
+  let target = e.target
+  let cell = target && typeof target.closest === 'function'
+    ? target.closest('td[data-date],td.fc-day,td.fc-daygrid-day')
+    : null
+  if (!cell) return
+
+  const classList = cell.classList ? Array.from(cell.classList) : []
+  const isDisabledCell = classList.some(cls => cls && cls.toLowerCase().includes('disabled'))
+  if (isDisabledCell) {
+    return
+  }
+}
+// iOS detection helper
+function iOS() {
+  return (
+    [
+      'iPad Simulator',
+      'iPhone Simulator',
+      'iPod Simulator',
+      'iPad',
+      'iPhone',
+      'iPod',
+    ].includes(navigator.platform) ||
+    // iPad on iOS 13 detection
+    (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
+  )
+}
+// Helper: prune waiting list times using backend minimumDateTime and current time (today)
+function filterWaitingListTimes (dateStr, timesArray, minimumDateTime) {
+  if (!Array.isArray(timesArray) || !timesArray.length) return []
+  const todayStr = new Date().toISOString().slice(0,10)
+  let minTimeForDate = null
+  if (minimumDateTime) {
+    const parts = minimumDateTime.split(' ')
+    if (parts.length === 2) {
+      const [minDate, minTime] = parts
+      if (minDate === dateStr) {
+        minTimeForDate = minTime.slice(0,5) // HH:mm
+      }
+    }
+  }
+  if (dateStr === todayStr) {
+    const now = new Date()
+    const nowTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+    if (!minTimeForDate || nowTime.localeCompare(minTimeForDate) > 0) {
+      minTimeForDate = nowTime
+    }
+  }
+  let filtered = timesArray
+  if (minTimeForDate) {
+    filtered = filtered.filter(t => t.localeCompare(minTimeForDate) > 0)
+  }
+  return filtered.sort((a,b) => a.localeCompare(b))
+}
+
 
 /*********
  * Other *
  ********/
+
+let periodPricing = ref({})
 
 function setSelectedDuration (value) {
   store.commit('booking/setBookingDuration', value)
@@ -259,9 +418,18 @@ function setSelectedDate (value) {
 
   calendarEventBusySlots.value = useBusySlots(store)
 
+  // Derive waiting list times for the selected date
+  if (!skipWaitingListSlots() && value && (value in calendarWaitingListSlots.value)) {
+    calendarWaitingListTimes.value = filterWaitingListTimes(value, Object.keys(calendarWaitingListSlots.value[value] || {}), calendarMinimumDate.value)
+  } else {
+    calendarWaitingListTimes.value = []
+  }
+
   if (props.preselectSlot && calendarEventSlots.value.length) {
     setSelectedTime(calendarEventSlots.value[0])
   }
+
+  calendarEventDate.value = value
 }
 
 function setSelectedTime (value) {
@@ -270,12 +438,54 @@ function setSelectedTime (value) {
   calendarEventSlot.value = value
 }
 
+function setWaitingListSlot (isWaiting, peopleWaiting) {
+  store.commit('appointmentWaitingListOptions/setIsWaitingListSlot', !!isWaiting)
+  store.commit('appointmentWaitingListOptions/setPeopleWaiting', peopleWaiting)
+  // Determine if CartStep currently present
+  let hasCartStep = false
+  if (stepsArray && Array.isArray(stepsArray.value)) {
+    hasCartStep = stepsArray.value.some(s => s && s.name === 'CartStep')
+  }
+  if (isWaiting) {
+    // Remove cart step only if it exists
+    if (hasCartStep && injectedRemoveCartStep && typeof injectedRemoveCartStep.removeCartStep === 'function') {
+      injectedRemoveCartStep.removeCartStep()
+    }
+  } else {
+    // Re-add cart step only if missing and cart feature enabled
+    if (
+      !props.disableWaitingList && !props.isPackage && !hasCartStep && useCartStep(store)
+      && injectedAddCartStep && typeof injectedAddCartStep.addCartStep === 'function'
+    ) {
+      injectedAddCartStep.addCartStep()
+      // Retry once on next tick in case steps array mutates asynchronously
+      nextTick(() => {
+        let existsAfter = stepsArray && Array.isArray(stepsArray.value) && stepsArray.value.some(s => s && s.name === 'CartStep')
+        if (!existsAfter) {
+          if (useCartStep(store)) {
+            injectedAddCartStep.addCartStep()
+          }
+        }
+      })
+    }
+  }
+}
+
+// Skip waiting list slots for: recurring / cart / package / customer panel (capc)
+function skipWaitingListSlots () {
+  return props.disableWaitingList || props.isPackage || useCartHasItems(store) || (originKey && originKey.value === 'capc')
+}
+
 function unselectDate () {
   useDeselectedDate(store)
 
   calendarEventSlots.value = []
 
   calendarEventSlot.value = ''
+
+  calendarEventDate.value = ''
+
+  calendarEventBusySlots.value = []
 }
 
 function changeMonth (yearMonth) {
@@ -290,11 +500,13 @@ function renderedMonth (data) {
   searchEnd.value = data.end
 }
 
-function getSlotsCallback (slots, occupied, minimumDateTime, maximumDateTime, busyness, appCount, lastBookedProviderId, customCallback) {
+function getSlotsCallback (slots, occupied, minimumDateTime, maximumDateTime, busyness, appCount, lastBookedProviderId, customCallback, waitingListSlots = {}) {
   calendarMinimumDate.value = minimumDateTime
   calendarMaximumDate.value = maximumDateTime
 
   calendarEvents.value = useCalendarEvents(slots)
+
+  calendarWaitingListSlots.value = waitingListSlots || {}
 
   let result = useSlotsCallback(
     store,
@@ -309,6 +521,16 @@ function getSlotsCallback (slots, occupied, minimumDateTime, maximumDateTime, bu
     searchEnd
   )
 
+  if (props.serviceId) {
+    let service = store.getters['entities/getService'](props.serviceId)
+
+    let periodPricingResult = !props.isPackage && service.customPricing.enabled === 'period' && !licence.isLite && !licence.isStarter && !licence.isBasic
+      ? useSlotsPricing(store, slots, service.id)
+      : null
+
+    periodPricing.value = periodPricingResult ? periodPricingResult : null
+  }
+
   if ('calendarStartDate' in result) {
     calendarStartDate.value = selectedYearMonth.value ? selectedYearMonth.value + '-01' : result.calendarStartDate
   }
@@ -319,6 +541,26 @@ function getSlotsCallback (slots, occupied, minimumDateTime, maximumDateTime, bu
 
   if ('calendarEventSlots' in result) {
     calendarEventSlots.value = result.calendarEventSlots
+  }
+
+  if ('calendarEventDate' in result) {
+    calendarEventDate.value = result.calendarEventDate
+  }
+
+  calendarEventBusySlots.value = calendarEventDate.value ? useBusySlots(store) : []
+
+  // Refresh waiting list times for currently selected date (clear if none)
+  if (!skipWaitingListSlots()) {
+    const selectedDate = store.getters['booking/getMultipleAppointmentsDate']
+    if (selectedDate && calendarWaitingListSlots.value[selectedDate]) {
+      calendarWaitingListTimes.value = filterWaitingListTimes(selectedDate, Object.keys(
+        calendarWaitingListSlots.value[selectedDate] || {}
+      ), minimumDateTime)
+    } else {
+      calendarWaitingListTimes.value = []
+    }
+  } else {
+    calendarWaitingListTimes.value = []
   }
 
   nextTick(() => {
@@ -345,7 +587,8 @@ function getSlots (customCallback) {
     ),
     props.fetchedSlots,
     getSlotsCallback,
-    customCallback
+    customCallback,
+    store.getters['appointmentWaitingListOptions/getOptions']
   )
 }
 

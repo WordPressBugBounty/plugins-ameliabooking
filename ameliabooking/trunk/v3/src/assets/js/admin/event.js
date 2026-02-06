@@ -35,6 +35,10 @@ function useParsedEvents (events, timeZone, store) {
       })
     }
 
+    if (event.recurring && event.recurring.until) {
+      event.recurring.until = event.recurring.until.split(' ')[0]
+    }
+
     if (!(dateString in eventsDay)) {
       eventsDay[dateString] = {
         date: dateString,
@@ -42,19 +46,31 @@ function useParsedEvents (events, timeZone, store) {
       }
     }
 
+    let isWaiting = event.bookings.some(booking => booking.status === 'waiting')
+
     if (event.full && event.status === 'approved') {
       event.status = 'full'
     } else if (event.upcoming && event.status === 'approved') {
       event.status = 'upcoming'
     }
 
-    event.bookings.forEach((booking) => {
+    if (isWaiting) {
+      event.status = 'waiting'
+    }
+
+    if (store.getters['auth/getProfile'].type === 'provider') {
       let clonedEvent = JSON.parse(JSON.stringify(event))
 
-      clonedEvent.bookings = [booking]
-
       eventsDay[dateString].events.push(clonedEvent)
-    })
+    } else {
+      event.bookings.forEach((booking) => {
+        let clonedEvent = JSON.parse(JSON.stringify(event))
+
+        clonedEvent.bookings = [booking]
+
+        eventsDay[dateString].events.push(clonedEvent)
+      })
+    }
   })
 
   return eventsDay
@@ -72,7 +88,7 @@ function useEventBookingsPrice (event) {
           subTotal += booking.ticketsData[i].persons * booking.ticketsData[i].price
         }
       } else {
-        subTotal += event.price
+        subTotal += event.price * booking.persons
       }
 
       let amountData = useAmount(
@@ -123,6 +139,7 @@ function usePeriodsData(connectedPeriods) {
         zoomLink: connectedPeriods.length > 1 && period.zoomMeeting ? period.zoomMeeting.joinUrl : '',
         lessonSpaceLink: connectedPeriods.length > 1 && period.lessonSpace ? period.lessonSpace : '',
         googleMeetLink: connectedPeriods.length > 1 && period.googleMeetUrl ? period.googleMeetUrl : '',
+        microsoftTeamsLink: connectedPeriods.length > 1 && period.microsoftTeamsUrl ? period.microsoftTeamsUrl : '',
       })
     })
   })
@@ -131,16 +148,20 @@ function usePeriodsData(connectedPeriods) {
 }
 
 function useTicketsData(event) {
-  let result = []
+  let result = {}
 
   event.bookings.forEach((booking) => {
     if (['approved', 'pending'].includes(booking.status) && booking.ticketsData && booking.ticketsData.length) {
       booking.ticketsData.forEach((ticketData) => {
-        result.push({
-          persons: ticketData.persons,
-          price: ticketData.price,
-          name: event.customTickets.find(i => i.id === ticketData.eventTicketId).name,
-        })
+        if (!(ticketData.eventTicketId in result)) {
+          result[ticketData.eventTicketId] = {
+            persons: 0,
+            price: ticketData.price,
+            name: event.customTickets.find(i => i.id === ticketData.eventTicketId).name,
+          }
+        }
+
+        result[ticketData.eventTicketId].persons = result[ticketData.eventTicketId].persons + ticketData.persons
       })
     }
   })
@@ -164,10 +185,32 @@ function useEventLocation (store, event) {
   return null
 }
 
+function useEventQrCodes (event) {
+  let qrCodesArr = []
+
+  event.bookings.forEach((booking) => {
+    if (['approved', 'pending'].includes(booking.status) && booking.qrCodes) {
+      let arr = JSON.parse(booking.qrCodes)
+      arr = arr.map(qr => {
+        return {
+          ...qr,
+          bookingId: booking.id,
+          eventId: event.id
+        }
+      })
+
+      qrCodesArr = qrCodesArr.concat(arr)
+    }
+  })
+
+  return qrCodesArr
+}
+
 export {
   useParsedEvents,
   useEventBookingsPrice,
   usePeriodsData,
   useTicketsData,
   useEventLocation,
+  useEventQrCodes
 }

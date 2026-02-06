@@ -9,9 +9,10 @@ namespace AmeliaBooking\Domain\ValueObjects\String;
  */
 final class Status
 {
-    const HIDDEN = 'hidden';
-    const VISIBLE = 'visible';
-    const DISABLED = 'disabled';
+    public const HIDDEN   = 'hidden';
+    public const VISIBLE  = 'visible';
+    public const DISABLED = 'disabled';
+    public const BLOCKED  = 'blocked';
     /**
      * @var string
      */

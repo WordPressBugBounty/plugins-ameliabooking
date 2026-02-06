@@ -29,9 +29,18 @@ function useCustomFieldsData(bookings, userType) {
     }
   })
 
-  return userType === 'customer'
-    ? result
-    : [... new Set(result.filter(i => i.value).map(i => i.label))].map(i => new Object({label: i}))
+  if (userType === 'customer') {
+    return result
+  }
+
+  // For employee view, keep unique custom fields with their values
+  const uniqueFields = new Map()
+  result.filter(i => i.value).forEach(item => {
+    if (!uniqueFields.has(item.label)) {
+      uniqueFields.set(item.label, item)
+    }
+  })
+  return Array.from(uniqueFields.values())
 }
 
 function useExtrasData(bookings, bookable) {

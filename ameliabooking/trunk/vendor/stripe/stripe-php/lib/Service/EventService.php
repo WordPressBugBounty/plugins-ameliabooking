@@ -2,23 +2,28 @@
 
 // File generated from our OpenAPI spec
 
-namespace AmeliaStripe\Service;
+namespace AmeliaVendor\Stripe\Service;
 
-class EventService extends \AmeliaStripe\Service\AbstractService
+/**
+ * @phpstan-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ *
+ * @psalm-import-type RequestOptionsArray from \Stripe\Util\RequestOptions
+ */
+class EventService extends AbstractService
 {
     /**
      * List events, going back up to 30 days. Each event data is rendered according to
      * Stripe API version at its creation time, specified in <a
-     * href="/docs/api/events/object">event object</a> <code>api_version</code>
-     * attribute (not according to your current Stripe API version or
-     * <code>Stripe-Version</code> header).
+     * href="https://docs.stripe.com/api/events/object">event object</a>
+     * <code>api_version</code> attribute (not according to your current Stripe API
+     * version or <code>Stripe-Version</code> header).
      *
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{created?: array|int, delivery_success?: bool, ending_before?: string, expand?: string[], limit?: int, starting_after?: string, type?: string, types?: string[]} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Collection<\AmeliaVendor\Stripe\Event>
      *
-     * @return \AmeliaStripe\Collection<\AmeliaStripe\Event>
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function all($params = null, $opts = null)
     {
@@ -26,16 +31,16 @@ class EventService extends \AmeliaStripe\Service\AbstractService
     }
 
     /**
-     * Retrieves the details of an event. Supply the unique identifier of the event,
-     * which you might have received in a webhook.
+     * Retrieves the details of an event if it was created in the last 30 days. Supply
+     * the unique identifier of the event, which you might have received in a webhook.
      *
      * @param string $id
-     * @param null|array $params
-     * @param null|array|\AmeliaStripe\Util\RequestOptions $opts
+     * @param null|array{expand?: string[]} $params
+     * @param null|RequestOptionsArray|\AmeliaVendor\Stripe\Util\RequestOptions $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Event
      *
-     * @return \AmeliaStripe\Event
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public function retrieve($id, $params = null, $opts = null)
     {

@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -58,6 +59,9 @@ class Reservation
 
     /** @var array */
     private $uploadedCustomFieldFilesInfo;
+
+    /** @var array */
+    private $uploadedCustomerCustomFieldFilesInfo;
 
     /** @var Collection  */
     private $recurring;
@@ -353,6 +357,22 @@ class Reservation
     public function setUploadedCustomFieldFilesInfo(array $uploadedCustomFieldFilesInfo)
     {
         $this->uploadedCustomFieldFilesInfo = $uploadedCustomFieldFilesInfo;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUploadedCustomerCustomFieldFilesInfo()
+    {
+        return $this->uploadedCustomerCustomFieldFilesInfo;
+    }
+
+    /**
+     * @param array $uploadedCustomerCustomFieldFilesInfo
+     */
+    public function setUploadedCustomerCustomFieldFilesInfo(array $uploadedCustomerCustomFieldFilesInfo)
+    {
+        $this->uploadedCustomerCustomFieldFilesInfo = $uploadedCustomerCustomFieldFilesInfo;
     }
 
     /**

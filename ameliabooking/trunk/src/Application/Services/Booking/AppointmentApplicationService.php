@@ -2,12 +2,14 @@
 
 namespace AmeliaBooking\Application\Services\Booking;
 
+use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Services\Bookable\BookableApplicationService;
 use AmeliaBooking\Application\Services\Bookable\AbstractPackageApplicationService;
 use AmeliaBooking\Application\Services\CustomField\AbstractCustomFieldApplicationService;
 use AmeliaBooking\Application\Services\Deposit\AbstractDepositApplicationService;
 use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Application\Services\TimeSlot\TimeSlotService as ApplicationTimeSlotService;
+use AmeliaBooking\Application\Services\Zoom\AbstractZoomApplicationService;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\BookingUnavailableException;
 use AmeliaBooking\Domain\Common\Exceptions\CustomerBookedException;
@@ -19,12 +21,15 @@ use AmeliaBooking\Domain\Entity\Booking\Appointment\CustomerBooking;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\CustomerBookingExtra;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\Payment\Payment;
+use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Factory\Booking\Appointment\CustomerBookingFactory;
 use AmeliaBooking\Domain\Services\Booking\AppointmentDomainService;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
+use AmeliaBooking\Domain\Services\Interval\IntervalService;
 use AmeliaBooking\Domain\Services\Reservation\ReservationServiceInterface;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
+use AmeliaBooking\Domain\Services\User\ProviderService;
 use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
 use AmeliaBooking\Domain\ValueObjects\PositiveDuration;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
@@ -36,7 +41,6 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Infrastructure\Common\Container;
-use AmeliaBooking\Infrastructure\Repository\Bookable\Service\PackageCustomerRepository;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\PackageCustomerServiceRepository;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ServiceRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
@@ -48,11 +52,14 @@ use AmeliaBooking\Domain\ValueObjects\Number\Float\Price;
 use AmeliaBooking\Infrastructure\Repository\Payment\PaymentRepository;
 use AmeliaBooking\Infrastructure\Repository\User\CustomerRepository;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
+use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
+use AmeliaBooking\Infrastructure\WP\EventListeners\Booking\Appointment\AppointmentStatusUpdatedEventHandler;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
 use DateTime;
 use Exception;
 use Interop\Container\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
+use AmeliaBooking\Infrastructure\Licence;
 
 /**
  * Class AppointmentApplicationService
@@ -78,7 +85,7 @@ class AppointmentApplicationService
     /**
      * @param array $data
      *
-     * @return array|null
+     * @return void
      * @throws Exception
      */
     public function convertTime(&$data)
@@ -109,12 +116,20 @@ class AppointmentApplicationService
         /** @var AppointmentDomainService $appointmentDS */
         $appointmentDS = $this->container->get('domain.booking.appointment.service');
 
+        /** @var UserRepository $userRepository */
+        $userRepository = $this->container->get('domain.users.repository');
+
         $data['bookingEnd'] = $data['bookingStart'];
 
         /** @var Appointment $appointment */
         $appointment = AppointmentFactory::create($data);
 
         $includedExtrasIds = [];
+
+        /** @var Provider $provider */
+        $provider = $this->isPeriodCustomPricing($service)
+            ? $userRepository->getById($data['providerId'])
+            : null;
 
         /** @var CustomerBooking $customerBooking */
         foreach ($appointment->getBookings()->getItems() as $customerBooking) {
@@ -130,14 +145,20 @@ class AppointmentApplicationService
                 }
 
                 $customerBookingExtra->setPrice(new Price($extra->getPrice()->getValue()));
-                $customerBookingExtra->setAggregatedPrice(new BooleanValueObject($extra->getAggregatedPrice()->getValue()));
+                $customerBookingExtra->setAggregatedPrice(
+                    new BooleanValueObject($extra->getAggregatedPrice() ?
+                        $extra->getAggregatedPrice()->getValue() :
+                        $service->getAggregatedPrice()->getValue())
+                );
             }
 
             $customerBooking->setPrice(
                 new Price(
-                    $this->getBookingPriceForServiceDuration(
+                    $this->getBookingPriceForService(
                         $service,
-                        $customerBooking->getDuration() ? $customerBooking->getDuration()->getValue() : null
+                        $customerBooking,
+                        $provider,
+                        $appointment->getBookingStart()->getValue()->format('Y-m-d H:i:s')
                     )
                 )
             );
@@ -155,17 +176,31 @@ class AppointmentApplicationService
     }
 
     /**
-     * @param array $appointmentData
-     * @param array $statuses
+     * @param array   $appointmentData
+     * @param bool    $isFrontEndBooking
+     * @param Service $service
      *
      * @return Appointment|null
      * @throws QueryExecutionException
-     * @throws InvalidArgumentException
      */
-    public function getAlreadyBookedAppointment($appointmentData, $statuses)
+    public function getAlreadyBookedAppointment($appointmentData, $isFrontEndBooking, $service)
     {
         /** @var AppointmentRepository $appointmentRepo */
         $appointmentRepo = $this->container->get('domain.booking.appointment.repository');
+
+        /** @var SettingsService $settingsDS */
+        $settingsDS = $this->container->get('domain.settings.service');
+
+        /** @var BookingApplicationService $bookingAS */
+        $bookingAS = $this->container->get('application.booking.booking.service');
+
+        $bookIfPending = $isFrontEndBooking && $settingsDS->getSetting('appointments', 'allowBookingIfPending');
+
+        $personsCount = 0;
+
+        foreach ($appointmentData['bookings'] as $bookingData) {
+            $personsCount += $bookingData['persons'];
+        }
 
         /** @var Collection $existingAppointments */
         $existingAppointments = $appointmentRepo->getFiltered(
@@ -180,22 +215,41 @@ class AppointmentApplicationService
         );
 
         if ($existingAppointments->length()) {
-            $freeAppointmentId = null;
-
             /** @var Appointment $existingAppointment */
             foreach ($existingAppointments->getItems() as $existingAppointment) {
-                $freeAppointmentId = $existingAppointment->getId()->getValue();
+                $persons = 0;
 
-                /** @var CustomerBooking $existingAppointmentBooking */
-                foreach ($existingAppointment->getBookings()->getItems() as $existingAppointmentBooking) {
-                    if (in_array($existingAppointmentBooking->getStatus()->getValue(), $statuses)) {
-                        return null;
-                    }
+                /** @var CustomerBooking $booking */
+                foreach ($existingAppointment->getBookings()->getItems() as $booking) {
+                    $persons += $bookingAS->isBookingApprovedOrPending($booking->getStatus()->getValue())
+                        ? $booking->getPersons()->getValue()
+                        : 0;
                 }
-            }
 
-            if ($freeAppointmentId) {
-                return $existingAppointments->getItem($freeAppointmentId);
+                $status = $existingAppointment->getStatus()->getValue();
+
+                $hasLocation = true;
+
+                if (
+                    !empty($appointmentData['locationId']) &&
+                    $existingAppointment->getLocationId() &&
+                    $existingAppointment->getLocationId()->getValue() !== (int)$appointmentData['locationId']
+                ) {
+                    $hasLocation = false;
+                }
+
+                $hasCapacity =
+                    ($persons + $personsCount) <= $service->getMaxCapacity()->getValue() &&
+                    !($existingAppointment->isFull() ? $existingAppointment->isFull()->getValue() : false);
+
+                if (
+                    ($status === BookingStatus::APPROVED && $hasCapacity && $hasLocation) ||
+                    ($status === BookingStatus::PENDING && ($bookIfPending || $hasCapacity) && $hasLocation) ||
+                    ($status === BookingStatus::CANCELED || $status === BookingStatus::REJECTED || $status === BookingStatus::NO_SHOW) ||
+                    ($appointmentData['bookings'][0]['status'] === BookingStatus::WAITING && !$hasCapacity)
+                ) {
+                    return $existingAppointment;
+                }
             }
         }
 
@@ -206,7 +260,7 @@ class AppointmentApplicationService
      * @param Appointment $appointment
      * @param Appointment $oldAppointment
      * @param Service     $service
-     * @param array       $newBookingsArray
+     * @param array       $appointmentData
      * @param array       $paymentData
      *
      * @return void
@@ -215,16 +269,25 @@ class AppointmentApplicationService
      * @throws ContainerException
      * @throws CustomerBookedException
      * @throws BookingUnavailableException
+     * @throws NotFoundException
      */
     public function addOrEditAppointment(
         $appointment,
         $oldAppointment,
         $service,
-        $newBookingsArray,
+        $appointmentData,
         $paymentData
     ) {
         /** @var BookingApplicationService $bookingAS */
         $bookingAS = $this->container->get('application.booking.booking.service');
+
+        /** @var UserRepository $userRepository */
+        $userRepository = $this->container->get('domain.users.repository');
+
+        /** @var Provider $provider */
+        $provider = $this->isPeriodCustomPricing($service)
+            ? $userRepository->getById($appointment->getProviderId()->getValue())
+            : null;
 
         $appointmentStatusChanged = false;
 
@@ -232,7 +295,24 @@ class AppointmentApplicationService
             /** @var AppointmentDomainService $appointmentDS */
             $appointmentDS = $this->container->get('domain.booking.appointment.service');
 
-            foreach ($newBookingsArray as $bookingArray) {
+            if (!empty($appointmentData['locationId'])) {
+                $resetLocation = true;
+
+                /** @var CustomerBooking $booking */
+                foreach ($oldAppointment->getBookings()->getItems() as $booking) {
+                    if ($bookingAS->isBookingApprovedOrPending($booking->getStatus()->getValue())) {
+                        $resetLocation = false;
+
+                        break;
+                    }
+                }
+
+                if ($resetLocation) {
+                    $appointment->setLocationId(new Id($appointmentData['locationId']));
+                }
+            }
+
+            foreach ($appointmentData['bookings'] as $bookingArray) {
                 /** @var CustomerBooking $newBooking */
                 $newBooking = CustomerBookingFactory::create($bookingArray);
 
@@ -249,9 +329,11 @@ class AppointmentApplicationService
 
                 $newBooking->setPrice(
                     new Price(
-                        $this->getBookingPriceForServiceDuration(
+                        $this->getBookingPriceForService(
                             $service,
-                            $newBooking->getDuration() ? $newBooking->getDuration()->getValue() : null
+                            $newBooking,
+                            $provider,
+                            $appointment->getBookingStart()->getValue()->format('Y-m-d H:i:s')
                         )
                     )
                 );
@@ -316,49 +398,61 @@ class AppointmentApplicationService
 
         $personsCount = 0;
 
-        /** @var CustomerBooking $booking */
-        foreach ($appointment->getBookings()->getItems() as $booking) {
-            $personsCount += $bookingAS->isBookingApprovedOrPending($booking->getStatus()->getValue())
-                ? $booking->getPersons()->getValue()
-                : 0;
-        }
-
-        /** @var ApplicationTimeSlotService $applicationTimeSlotService */
-        $applicationTimeSlotService = $this->container->get('application.timeSlot.service');
-
         $selectedExtras = [];
 
         /** @var CustomerBooking $booking */
-        foreach ($appointment->getBookings() as $booking) {
+        foreach ($appointment->getBookings()->getItems() as $booking) {
+            $personsCount +=
+                (!$booking->getId() || !$booking->getId()->getValue()) &&
+                $bookingAS->isBookingApprovedOrPending($booking->getStatus()->getValue())
+                    ? $booking->getPersons()->getValue()
+                    : 0;
+
             /** @var CustomerBookingExtra $customerBookingExtra */
-            foreach ($booking->getExtras() as $customerBookingExtra) {
+            foreach ($booking->getExtras()->getItems() as $customerBookingExtra) {
                 $selectedExtras[] = [
                     'id'       => $customerBookingExtra->getExtraId()->getValue(),
                     'quantity' => $customerBookingExtra->getQuantity()->getValue(),
                 ];
             }
+
+            if (
+                $booking->getPackageCustomerService() && $booking->getPackageCustomerService()->getId() === null
+                && $booking->getPackageCustomerService()->getPackageCustomer() && $booking->getPackageCustomerService()->getPackageCustomer()->getId()
+            ) {
+                /** @var PackageCustomerServiceRepository $packageCustomerServiceRepository */
+                $packageCustomerServiceRepository = $this->container->get('domain.bookable.packageCustomerService.repository');
+
+                $packageCustomerService = $packageCustomerServiceRepository->getByCriteria(
+                    [
+                        'packagesCustomers' => [$booking->getPackageCustomerService()->getPackageCustomer()->getId()->getValue()],
+                        'services'          => [$service->getId()->getValue()]
+                    ]
+                );
+
+                if ($packageCustomerService->length()) {
+                    $booking->getPackageCustomerService()->setId(new Id($packageCustomerService->toArray()[0]['id']));
+                }
+            }
         }
 
-        /** @var CustomerBookingExtra $customerBookingExtra */
-        foreach ($booking->getExtras() as $customerBookingExtra) {
-            $selectedExtras[] = [
-                'id'       => $customerBookingExtra->getExtraId()->getValue(),
-                'quantity' => $customerBookingExtra->getQuantity()->getValue(),
-            ];
-        }
+        /** @var ApplicationTimeSlotService $applicationTimeSlotService */
+        $applicationTimeSlotService = $this->container->get('application.timeSlot.service');
 
-        if (!$applicationTimeSlotService->isSlotFree(
-            $service,
-            $appointment->getBookingStart()->getValue(),
-            $appointment->getBookingStart()->getValue(),
-            $appointment->getBookingStart()->getValue(),
-            $appointment->getProviderId()->getValue(),
-            $appointment->getLocationId() ? $appointment->getLocationId()->getValue() : null,
-            $selectedExtras,
-            null,
-            $personsCount,
-            false
-        )) {
+        if (
+            !$applicationTimeSlotService->isSlotFree(
+                $service,
+                $appointment->getBookingStart()->getValue(),
+                $appointment->getBookingStart()->getValue(),
+                $appointment->getBookingStart()->getValue(),
+                $appointment->getProviderId()->getValue(),
+                $appointment->getLocationId() ? $appointment->getLocationId()->getValue() : null,
+                $selectedExtras,
+                null,
+                $personsCount,
+                false
+            )
+        ) {
             throw new BookingUnavailableException(FrontendStrings::getCommonStrings()['time_slot_unavailable']);
         }
 
@@ -405,8 +499,8 @@ class AppointmentApplicationService
         $appointmentId = $appointmentRepository->add($appointment);
         $appointment->setId(new Id($appointmentId));
 
-        /** @var CustomerBooking $customerBooking */
         foreach ($appointment->getBookings()->keys() as $customerBookingKey) {
+            /** @var CustomerBooking $customerBooking */
             $customerBooking = $appointment->getBookings()->getItem($customerBookingKey);
 
             $customerBooking->setAppointmentId($appointment->getId());
@@ -414,10 +508,11 @@ class AppointmentApplicationService
             $customerBooking->setToken(new Token());
             $customerBooking->setActionsCompleted(new BooleanValueObject($isBackendBooking));
             $customerBooking->setCreated(new DateTimeValue(DateTimeService::getNowDateTimeObject()));
+
             $customerBookingId = $bookingRepository->add($customerBooking);
 
-            /** @var CustomerBookingExtra $customerBookingExtra */
             foreach ($customerBooking->getExtras()->keys() as $cbExtraKey) {
+                /** @var CustomerBookingExtra $customerBookingExtra */
                 $customerBookingExtra = $customerBooking->getExtras()->getItem($cbExtraKey);
 
                 /** @var Extra $serviceExtra */
@@ -440,9 +535,10 @@ class AppointmentApplicationService
             $customerBooking->setId(new Id($customerBookingId));
 
             if ($paymentData) {
-                $paymentAmount = $reservationService->getPaymentAmount($customerBooking, $service);
+                $paymentAmount = $reservationService->getPaymentAmount($customerBooking, $service)['price'];
 
-                if ($customerBooking->getDeposit() &&
+                if (
+                    $customerBooking->getDeposit() &&
                     $customerBooking->getDeposit()->getValue() &&
                     $paymentData['gateway'] !== PaymentType::ON_SITE
                 ) {
@@ -455,6 +551,17 @@ class AppointmentApplicationService
                     $paymentData['deposit'] = $paymentAmount !== $paymentDeposit;
 
                     $paymentAmount = $paymentDeposit;
+                }
+
+                if ($customerBooking->getCustomerId()) {
+                    if (!empty($paymentData['customerPaymentParentId'][$customerBooking->getCustomerId()->getValue()])) {
+                        $paymentData['parentId'] =
+                            $paymentData['customerPaymentParentId'][$customerBooking->getCustomerId()->getValue()];
+                    }
+                    if (!empty($paymentData['customerPaymentInvoiceNumber'][$customerBooking->getCustomerId()->getValue()])) {
+                        $paymentData['invoiceNumber'] =
+                            $paymentData['customerPaymentInvoiceNumber'][$customerBooking->getCustomerId()->getValue()];
+                    }
                 }
 
                 /** @var Payment $payment */
@@ -532,10 +639,22 @@ class AppointmentApplicationService
                     /** @var CustomerBooking $oldBooking */
                     $oldBooking = $oldAppointment->getBookings()->getItem($newBooking->getId()->getValue());
 
-                    $oldDuration = $oldBooking->getDuration()
-                        ? $oldBooking->getDuration()->getValue() : $service->getDuration()->getValue();
+                    if (
+                        $this->isDurationPricingType($service) &&
+                        $newBooking->getDuration() &&
+                        $newBooking->getDuration()->getValue() !== (
+                            $oldBooking->getDuration()
+                            ? $oldBooking->getDuration()->getValue()
+                            : $service->getDuration()->getValue()
+                        )
+                    ) {
+                        $bookingRepository->updatePrice($newBooking->getId()->getValue(), $newBooking);
+                    }
 
-                    if ($newBooking->getDuration() && $newBooking->getDuration()->getValue() !== $oldDuration) {
+                    if (
+                        $this->isPersonPricingType($service) &&
+                        $newBooking->getPersons()->getValue() !== $oldBooking->getPersons()->getValue()
+                    ) {
                         $bookingRepository->updatePrice($newBooking->getId()->getValue(), $newBooking);
                     }
                 }
@@ -552,9 +671,10 @@ class AppointmentApplicationService
                 $newBooking->setId(new Id($newBookingId));
 
                 if ($paymentData) {
-                    $paymentAmount = $reservationService->getPaymentAmount($newBooking, $service);
+                    $paymentAmount = $reservationService->getPaymentAmount($newBooking, $service)['price'];
 
-                    if ($newBooking->getDeposit() &&
+                    if (
+                        $newBooking->getDeposit() &&
                         $newBooking->getDeposit()->getValue() &&
                         $paymentData['gateway'] !== PaymentType::ON_SITE
                     ) {
@@ -567,6 +687,17 @@ class AppointmentApplicationService
                         $paymentData['deposit'] = $paymentAmount !== $paymentDeposit;
 
                         $paymentAmount = $paymentDeposit;
+                    }
+
+                    if ($newBooking->getCustomerId()) {
+                        if (!empty($paymentData['customerPaymentParentId'][$newBooking->getCustomerId()->getValue()])) {
+                            $paymentData['parentId'] =
+                                $paymentData['customerPaymentParentId'][$newBooking->getCustomerId()->getValue()];
+                        }
+                        if (!empty($paymentData['customerPaymentInvoiceNumber'][$newBooking->getCustomerId()->getValue()])) {
+                            $paymentData['invoiceNumber'] =
+                                $paymentData['customerPaymentInvoiceNumber'][$newBooking->getCustomerId()->getValue()];
+                        }
                     }
 
                     /** @var Payment $payment */
@@ -638,23 +769,15 @@ class AppointmentApplicationService
 
         /** @var CustomerBooking $removedBooking */
         foreach ($removedBookings->getItems() as $removedBooking) {
-            /** @var CustomerBookingExtra $removedExtra */
-            foreach ($removedBooking->getExtras()->getItems() as $removedExtra) {
-                $customerBookingExtraRepository->delete($removedExtra->getId()->getValue());
-            }
-
-            /** @var Collection $removedPayments */
-            $removedPayments = $paymentRepository->getByEntityId(
+            $customerBookingExtraRepository->deleteByEntityId(
                 $removedBooking->getId()->getValue(),
                 'customerBookingId'
             );
 
-            /** @var Payment $payment */
-            foreach ($removedPayments->getItems() as $payment) {
-                if (!$paymentAS->delete($payment)) {
-                    return false;
-                }
-            }
+            $paymentRepository->deleteByEntityId(
+                $removedBooking->getId()->getValue(),
+                'customerBookingId'
+            );
 
             $bookingRepository->delete($removedBooking->getId()->getValue());
         }
@@ -681,7 +804,8 @@ class AppointmentApplicationService
 
         /** @var CustomerBooking $booking */
         foreach ($appointment->getBookings()->getItems() as $booking) {
-            if ($appointment->getId() &&
+            if (
+                $appointment->getId() &&
                 $appointment->getId()->getValue() &&
                 $booking->getId() &&
                 $booking->getId()->getValue() &&
@@ -692,7 +816,8 @@ class AppointmentApplicationService
             }
         }
 
-        if ($appointment->getId() &&
+        if (
+            $appointment->getId() &&
             $appointment->getId()->getValue() &&
             empty($ignoredIds[$appointment->getId()->getValue()]) &&
             !$appointmentRepository->delete($appointment->getId()->getValue())
@@ -734,6 +859,24 @@ class AppointmentApplicationService
     }
 
     /**
+     * @param Appointment $appointment
+     * @param int         $bookingId
+     *
+     * @return CustomerBooking|null
+     */
+    public function getAppointmentBooking($appointment, $bookingId)
+    {
+        /** @var CustomerBooking $booking */
+        foreach ($appointment->getBookings()->getItems() as $booking) {
+            if ($booking->getId()->getValue() === $bookingId) {
+                return $booking;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Return required time for the appointment in seconds
      * and extras.
      *
@@ -750,7 +893,8 @@ class AppointmentApplicationService
         foreach ($appointment->getBookings()->getItems() as $booking) {
             $bookingDuration = $this->getBookingLengthTime($booking, $service);
 
-            if ($bookingDuration > $requiredTime &&
+            if (
+                $bookingDuration > $requiredTime &&
                 (
                     $booking->getStatus()->getValue() === BookingStatus::APPROVED ||
                     $booking->getStatus()->getValue() === BookingStatus::PENDING
@@ -977,13 +1121,14 @@ class AppointmentApplicationService
 
             $paymentRepository->updateFieldById(
                 $payment->getId()->getValue(),
-                $reservationService->getPaymentAmount($booking, $service) > $payment->getAmount()->getValue() ?
+                $reservationService->getPaymentAmount($booking, $service)['price'] > $payment->getAmount()->getValue() ?
                     PaymentStatus::PARTIALLY_PAID : PaymentStatus::PAID,
                 'status'
             );
         }
 
-        if ($defaultBookingStatus === BookingStatus::APPROVED &&
+        if (
+            $defaultBookingStatus === BookingStatus::APPROVED &&
             $booking->getStatus()->getValue() === BookingStatus::PENDING
         ) {
             $oldBookingsCount = $appointmentDS->getBookingsStatusesCount($appointment);
@@ -1088,10 +1233,11 @@ class AppointmentApplicationService
 
             /** @var CustomerBooking $booking */
             foreach ($appointment->getBookings()->getItems() as $booking) {
-                if ((
-                    $booking->getStatus()->getValue() === BookingStatus::APPROVED &&
-                    $appointment->getStatus()->getValue() === BookingStatus::PENDING
-                )
+                if (
+                    (
+                        $booking->getStatus()->getValue() === BookingStatus::APPROVED &&
+                        $appointment->getStatus()->getValue() === BookingStatus::PENDING
+                    )
                 ) {
                     $booking->setChangedStatus(new BooleanValueObject(true));
                 }
@@ -1184,7 +1330,7 @@ class AppointmentApplicationService
      * @param CustomerBooking $booking
      * @param Collection      $ignoredBookings
      * @param int             $serviceId
-     * @param array           $paymentData
+     * @param array|null      $paymentData
      *
      * @return boolean
      * @throws InvalidArgumentException
@@ -1201,7 +1347,8 @@ class AppointmentApplicationService
         /** @var AbstractPackageApplicationService $packageApplicationService */
         $packageApplicationService = $this->container->get('application.bookable.package');
 
-        if ((!$booking->getId() || !$ignoredBookings->keyExists($booking->getId()->getValue())) &&
+        if (
+            (!$booking->getId() || !$ignoredBookings->keyExists($booking->getId()->getValue())) &&
             $booking->getPackageCustomerService() &&
             $booking->getPackageCustomerService()->getPackageCustomer() &&
             $booking->getPackageCustomerService()->getPackageCustomer()->getId()
@@ -1223,7 +1370,8 @@ class AppointmentApplicationService
                 }
             }
 
-            if (!$newPackageCustomerService ||
+            if (
+                !$newPackageCustomerService ||
                 !$packageApplicationService->isBookingAvailableForPurchasedPackage(
                     $newPackageCustomerService->getId()->getValue(),
                     $booking->getCustomerId()->getValue(),
@@ -1259,8 +1407,10 @@ class AppointmentApplicationService
      */
     public function appointmentDetailsChanged($newAppointment, $oldAppointment)
     {
-        if (($oldAppointment->getLocationId() ? $oldAppointment->getLocationId()->getValue() : null) !==
-            ($newAppointment->getLocationId() ? $newAppointment->getLocationId()->getValue() : null)) {
+        if (
+            ($oldAppointment->getLocationId() ? $oldAppointment->getLocationId()->getValue() : null) !==
+            ($newAppointment->getLocationId() ? $newAppointment->getLocationId()->getValue() : null)
+        ) {
             return true;
         }
         if ($oldAppointment->getLessonSpace() !== $newAppointment->getLessonSpace()) {
@@ -1282,8 +1432,10 @@ class AppointmentApplicationService
         if ($oldBooking->getPersons()->getValue() !== $newBooking->getPersons()->getValue()) {
             return true;
         }
-        if (($oldBooking->getDuration() ? $oldBooking->getDuration()->getValue() : null) !==
-            ($newBooking->getDuration() ? $newBooking->getDuration()->getValue() : null)) {
+        if (
+            ($oldBooking->getDuration() ? $oldBooking->getDuration()->getValue() : null) !==
+            ($newBooking->getDuration() ? $newBooking->getDuration()->getValue() : null)
+        ) {
             return true;
         }
         if ($newBooking->getExtras()->length() !== $oldBooking->getExtras()->length()) {
@@ -1303,14 +1455,20 @@ class AppointmentApplicationService
             json_decode($oldBooking->getCustomFields()->getValue(), true) : null;
 
         if ($newCustomFields) {
-            $newCustomFields = array_filter($newCustomFields, function($k) {
-                return !empty($k['value']);
-            });
+            $newCustomFields = array_filter(
+                $newCustomFields,
+                function ($k) {
+                    return !empty($k['value']);
+                }
+            );
         }
         if ($oldCustomFields) {
-            $oldCustomFields = array_filter($oldCustomFields, function($k) {
-                return !empty($k['value']);
-            });
+            $oldCustomFields = array_filter(
+                $oldCustomFields,
+                function ($k) {
+                    return !empty($k['value']);
+                }
+            );
         }
 
         if (($newCustomFields ? count($newCustomFields) : null) !== ($oldCustomFields ? count($oldCustomFields) : null)) {
@@ -1346,22 +1504,170 @@ class AppointmentApplicationService
 
     /**
      * @param Service $service
-     * @param int     $duration
      *
-     * @return float
+     * @return bool
      *
      * @throws ContainerValueNotFoundException
      */
-    public function getBookingPriceForServiceDuration($service, $duration)
+    public function isDurationPricingType($service)
     {
-        if ($duration && $service->getCustomPricing()) {
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+
+        if ($settingsService->isFeatureEnabled('customPricing') && $service->getCustomPricing()) {
             $customPricing = json_decode($service->getCustomPricing()->getValue(), true);
 
-            if ($customPricing !== null &&
-                $customPricing['enabled'] &&
-                array_key_exists($duration, $customPricing['durations'])
+            if (
+                $customPricing !== null &&
+                ($customPricing['enabled'] === true || $customPricing['enabled'] === 'duration')
             ) {
-                return $customPricing['durations'][$duration]['price'];
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param Service $service
+     *
+     * @return bool
+     *
+     * @throws ContainerValueNotFoundException
+     */
+    public function isPersonPricingType($service)
+    {
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+
+        if ($settingsService->isFeatureEnabled('customPricing') && $service->getCustomPricing()) {
+            $customPricing = json_decode($service->getCustomPricing()->getValue(), true);
+
+            if (
+                $customPricing !== null &&
+                $customPricing['enabled'] === 'person' &&
+                $customPricing['persons']
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param Service $service
+     *
+     * @return boolean
+     */
+    public function isPeriodCustomPricing($service)
+    {
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+
+        if ($settingsService->isFeatureEnabled('customPricing') && $service->getCustomPricing()) {
+            $customPricing = json_decode($service->getCustomPricing()->getValue(), true);
+
+            if (
+                Licence\Licence::getLicence() !== 'Lite' &&
+                Licence\Licence::getLicence() !== 'Starter' &&
+                $customPricing !== null &&
+                $customPricing['enabled'] === 'period' &&
+                $customPricing['periods']
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** @noinspection MoreThanThreeArgumentsInspection */
+    /**
+     * @param Service              $service
+     * @param CustomerBooking|null $booking
+     * @param Provider             $provider
+     * @param string               $bookingStart
+     *
+     * @return float
+     */
+    public function getBookingPriceForService($service, $booking, $provider, $bookingStart)
+    {
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+
+        if ($settingsService->isFeatureEnabled('customPricing') && $service->getCustomPricing()) {
+            $customPricing = json_decode($service->getCustomPricing()->getValue(), true);
+
+            if (
+                $customPricing !== null &&
+                $booking &&
+                $booking->getDuration() &&
+                $booking->getDuration()->getValue() &&
+                ($customPricing['enabled'] === true || $customPricing['enabled'] === 'duration') &&
+                array_key_exists($booking->getDuration()->getValue(), $customPricing['durations'])
+            ) {
+                return $customPricing['durations'][$booking->getDuration()->getValue()]['price'];
+            } elseif (
+                $customPricing !== null &&
+                $customPricing['enabled'] === 'person' &&
+                $customPricing['persons'] &&
+                $booking &&
+                $booking->getPersons() &&
+                $booking->getPersons()->getValue()
+            ) {
+                ksort($customPricing['persons'], SORT_NUMERIC);
+
+                $filteredRanges = array_filter(
+                    array_keys($customPricing['persons']),
+                    function ($i) use ($booking) {
+                        return $booking->getPersons()->getValue() >= $i;
+                    }
+                );
+
+                $item = !$filteredRanges
+                    ? ['price' => $service->getPrice()->getValue()]
+                    : $customPricing['persons'][array_pop($filteredRanges)];
+
+                return $item['price'];
+            } elseif (
+                Licence\Licence::getLicence() !== 'Lite' &&
+                Licence\Licence::getLicence() !== 'Starter' &&
+                $customPricing !== null &&
+                $customPricing['enabled'] === 'period' &&
+                $customPricing['periods']
+            ) {
+                /** @var ProviderService $providerService */
+                $providerService = $this->container->get('domain.user.provider.service');
+
+                /** @var IntervalService $intervalService */
+                $intervalService = $this->container->get('domain.interval.service');
+
+                $start = DateTimeService::getCustomDateTimeObject(
+                    $bookingStart
+                )->setTimezone(
+                    DateTimeService::createTimeZone(
+                        $provider->getTimeZone()
+                            ? $provider->getTimeZone()->getValue()
+                            : DateTimeService::getTimeZone()->getName()
+                    )
+                );
+
+                $price = $providerService->getDateTimePrice(
+                    $providerService->getCustomPricing(
+                        $service,
+                        $provider->getTimeZone()
+                            ? $provider->getTimeZone()->getValue()
+                            : DateTimeService::getTimeZone()->getName()
+                    ),
+                    $start->format('Y-m-d'),
+                    $intervalService->getSeconds($start->format('H:i:s')),
+                    $provider->getTimeZone()
+                        ? $provider->getTimeZone()->getValue()
+                        : DateTimeService::getTimeZone()->getName()
+                );
+
+                return $price !== null ? $price : $service->getPrice()->getValue();
             }
         }
 
@@ -1382,7 +1688,8 @@ class AppointmentApplicationService
 
         /** @var CustomerBooking $booking */
         foreach ($appointment->getBookings()->getItems() as $booking) {
-            if ((
+            if (
+                (
                     $booking->getStatus()->getValue() === BookingStatus::APPROVED ||
                     $booking->getStatus()->getValue() === BookingStatus::PENDING
                 ) &&
@@ -1398,18 +1705,16 @@ class AppointmentApplicationService
     }
 
     /**
-     * @param int $paymentId
-     *
+     * @param int $bookingId
      *
      * @throws ContainerValueNotFoundException
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
+     * @throws NotFoundException
+     * @throws ContainerException
      */
-    public function updateBookingStatus($paymentId, $newStatus = BookingStatus::APPROVED)
+    public function approveBooking($bookingId)
     {
-        /** @var PaymentRepository $paymentRepository */
-        $paymentRepository = $this->container->get('domain.payment.repository');
-
         /** @var AppointmentRepository $appointmentRepository */
         $appointmentRepository = $this->container->get('domain.booking.appointment.repository');
 
@@ -1419,40 +1724,292 @@ class AppointmentApplicationService
         /** @var AppointmentDomainService $appointmentDS */
         $appointmentDS = $this->container->get('domain.booking.appointment.service');
 
-        /** @var Payment $payment */
-        $payment = $paymentRepository->getById($paymentId);
+        /** @var BookableApplicationService $bookableAS */
+        $bookableAS = $this->container->get('application.bookable.service');
 
-        if ($payment->getCustomerBookingId() && $payment->getEntity()->getValue() === Entities::APPOINTMENT) {
-            $id = $payment->getCustomerBookingId()->getValue();
-            $bookingRepository->updateFieldById($id, $newStatus, 'status');
+        /** @var Appointment $appointment **/
+        $appointment = $appointmentRepository->getByBookingId($bookingId);
 
-            $appointments = $appointmentRepository->getFiltered(
+        $bookingRepository->updateFieldById($bookingId, BookingStatus::APPROVED, 'status');
+
+        /** @var CustomerBooking $booking **/
+        $booking = $appointment->getBookings()->getItem($bookingId);
+
+        $booking->setStatus(new BookingStatus(BookingStatus::APPROVED));
+
+        $booking->setChangedStatus(new BooleanValueObject(true));
+
+        $appointmentStatus = $appointmentDS->getAppointmentStatusWhenEditAppointment(
+            $bookableAS->getAppointmentService(
+                $appointment->getServiceId()->getValue(),
+                $appointment->getProviderId()->getValue()
+            ),
+            $appointmentDS->getBookingsStatusesCount($appointment)
+        );
+
+        $appointmentRepository->updateFieldById($appointment->getId()->getValue(), $appointmentStatus, 'status');
+
+        if (
+            $appointment->getStatus()->getValue() !== $appointmentStatus &&
+            $appointmentStatus === BookingStatus::APPROVED
+        ) {
+            $appointment->setStatus(new BookingStatus(BookingStatus::APPROVED));
+
+            $bookingsWithChangedStatus = [];
+
+            /** @var CustomerBooking $booking */
+            foreach ($appointment->getBookings()->getItems() as $booking) {
+                if ($booking->getStatus()->getValue() === BookingStatus::APPROVED) {
+                    $booking->setChangedStatus(new BooleanValueObject(true));
+
+                    $bookingsWithChangedStatus[] = $booking->toArray();
+                }
+            }
+
+            $result = new CommandResult();
+
+            $result->setData(
                 [
-                    'bookingId' => $id,
-                    'skipCustomers' => true,
-                    'skipPayments' => true,
-                    'skipExtras' => true,
-                    'skipCoupons' => true
+                    Entities::APPOINTMENT       => $appointment->toArray(),
+                    'bookingsWithChangedStatus' => $bookingsWithChangedStatus,
+                    'oldStatus'                 => null,
+                    'createPaymentLink'         => false,
                 ]
             );
 
-            /** @var Appointment $appointment **/
-            $appointment = $appointments->getItem($appointments->keys()[0]);
+            AppointmentStatusUpdatedEventHandler::handle($result, $this->container);
+        }
+    }
 
-            if ($appointment instanceof Appointment) {
-                $appointmentStatus = $appointmentDS->getAppointmentStatusWhenEditAppointment(
-                    $appointment->getService(),
-                    $appointmentDS->getBookingsStatusesCount($appointment)
-                );
+    /**
+     * @param int $providerId
+     * @param int $oldProviderId
+     *
+     * @return array
+     * @throws QueryExecutionException
+     */
+    public function getUserConnectionChanges($providerId, $oldProviderId)
+    {
+        /** @var ProviderRepository $providerRepository */
+        $providerRepository = $this->container->get('domain.users.providers.repository');
 
-                $appointmentRepository->updateFieldById($appointment->getId()->getValue(), $appointmentStatus, 'status');
+        /** @var AbstractZoomApplicationService $zoomService */
+        $zoomService = $this->container->get('application.zoom.service');
+
+        $appointmentEmployeeChanged = null;
+
+        $appointmentZoomUserChanged = false;
+
+        $appointmentZoomUsersLicenced = false;
+
+        if ($providerId !== $oldProviderId) {
+            $appointmentEmployeeChanged = $oldProviderId;
+
+            $provider = $providerRepository->getById($providerId);
+
+            $oldProvider = $providerRepository->getById($oldProviderId);
+
+            if (
+                $provider && $oldProvider && $provider->getZoomUserId() && $oldProvider->getZoomUserId() &&
+                $provider->getZoomUserId()->getValue() !== $oldProvider->getZoomUserId()->getValue()
+            ) {
+                $appointmentZoomUserChanged = true;
+
+                $zoomUserType = 0;
+
+                $zoomOldUserType = 0;
+
+                $zoomResult = $zoomService->getUsers();
+
+                if (
+                    !(isset($zoomResult['code']) && $zoomResult['code'] === 124) &&
+                    !($zoomResult['users'] === null && isset($zoomResult['message']))
+                ) {
+                    $zoomUsers = $zoomResult['users'];
+                    foreach ($zoomUsers as $key => $val) {
+                        if ($val['id'] === $provider->getZoomUserId()->getValue()) {
+                            $zoomUserType = $val['type'];
+                        }
+                        if ($val['id'] === $oldProvider->getZoomUserId()->getValue()) {
+                            $zoomOldUserType = $val['type'];
+                        }
+                    }
+                }
+                if ($zoomOldUserType > 1 && $zoomUserType > 1) {
+                    $appointmentZoomUsersLicenced = true;
+                }
             }
         }
-        if ($payment->getPackageCustomerId() && $payment->getEntity()->getValue() === Entities::APPOINTMENT) {
-            /** @var PackageCustomerRepository $packageCustomerRepository */
-            $packageCustomerRepository = $this->container->get('domain.bookable.packageCustomer.repository');
-            $id = $payment->getPackageCustomerId()->getValue();
-            $packageCustomerRepository->updateFieldById($id, $newStatus, 'status');
+
+        return [
+            'appointmentEmployeeChanged'   => $appointmentEmployeeChanged,
+            'appointmentZoomUserChanged'   => $appointmentZoomUserChanged,
+            'appointmentZoomUsersLicenced' => $appointmentZoomUsersLicenced,
+        ];
+    }
+
+    /** @noinspection MoreThanThreeArgumentsInspection */
+    /**
+     * @param Appointment          $appointment
+     * @param Service              $service
+     * @param CustomerBooking|null $booking
+     * @param string|null          $newBookingStatus
+     * @param string|null          $abandonedAppointmentStatus
+     *
+     * @return bool
+     * @throws InvalidArgumentException
+     */
+    public function manageAppointmentStatusByBooking(
+        $appointment,
+        $service,
+        $booking,
+        $newBookingStatus,
+        $abandonedAppointmentStatus
+    ) {
+        /** @var BookingApplicationService $bookingAS */
+        $bookingAS = $this->container->get('application.booking.booking.service');
+
+        /** @var AppointmentDomainService $appointmentDS */
+        $appointmentDS = $this->container->get('domain.booking.appointment.service');
+
+        $oldAppointmentStatus = $appointment->getStatus()->getValue();
+
+        $oldBookingStatus = null;
+
+        if ($booking) {
+            /** @var CustomerBooking $appointmentBooking */
+            $appointmentBooking = $this->getAppointmentBooking($appointment, $booking->getId()->getValue());
+
+            $oldBookingStatus = $booking->getStatus()->getValue();
+
+            $appointmentBooking->setStatus(new BookingStatus($newBookingStatus));
+
+            $booking->setStatus(new BookingStatus($newBookingStatus));
         }
+
+        $newAppointmentStatus = $appointmentDS->getAppointmentStatusWhenEditAppointment(
+            $service,
+            $appointmentDS->getBookingsStatusesCount($appointment)
+        );
+
+        if ($booking) {
+            $booking->setChangedStatus(
+                new BooleanValueObject(
+                    (
+                        $bookingAS->isBookingCanceledOrRejectedOrNoShow($oldBookingStatus) &&
+                        $bookingAS->isBookingApprovedOrPending($newBookingStatus)
+                    ) || (
+                        $bookingAS->isBookingCanceledOrRejectedOrNoShow($newBookingStatus) &&
+                        $bookingAS->isBookingApprovedOrPending($oldBookingStatus)
+                    ) || $bookingAS->isAppointmentStatusChangedForBooking(
+                        $newBookingStatus,
+                        $oldBookingStatus,
+                        $newAppointmentStatus,
+                        $abandonedAppointmentStatus !== null ? $abandonedAppointmentStatus : $oldAppointmentStatus
+                    )
+                )
+            );
+        }
+
+        $appointment->setStatus(
+            new BookingStatus(
+                $newAppointmentStatus
+            )
+        );
+
+        $appointmentStatusChanged = $newAppointmentStatus !== $oldAppointmentStatus;
+
+        /** @var CustomerBooking $customerBooking */
+        foreach ($appointment->getBookings()->getItems() as $customerBooking) {
+            if ($booking !== null && $booking->getId()->getValue() === $customerBooking->getId()->getValue()) {
+                $customerBooking->setStatus(new BookingStatus($booking->getStatus()->getValue()));
+
+                $customerBooking->setChangedStatus(new BooleanValueObject($booking->isChangedStatus()->getValue()));
+            } else {
+                $customerBooking->setChangedStatus(
+                    new BooleanValueObject(
+                        $appointmentStatusChanged &&
+                            $bookingAS->isAppointmentStatusChangedForBooking(
+                                $customerBooking->getStatus()->getValue(),
+                                $customerBooking->getStatus()->getValue(),
+                                $newAppointmentStatus,
+                                $oldAppointmentStatus
+                            )
+                    )
+                );
+            }
+        }
+
+        $appointment->setChangedStatus(new BooleanValueObject($appointmentStatusChanged));
+
+        return $appointmentStatusChanged;
+    }
+
+    /**
+     * @param Appointment  $appointment
+     * @param Service      $service
+     * @param AbstractUser $user
+     *
+     * @return bool
+     */
+    public function isReschedulable($appointment, $service, $user)
+    {
+        /** @var SettingsService $settingsDS */
+        $settingsDS = $this->container->get('domain.settings.service');
+
+        $reschedulable = true;
+
+        if ($user->getType() === Entities::CUSTOMER) {
+            $currentDateTime = DateTimeService::getNowDateTimeObject();
+
+            $minimumRescheduleTimeInSeconds = $settingsDS
+                ->getEntitySettings($service->getSettings())
+                ->getGeneralSettings()
+                ->getMinimumTimeRequirementPriorToRescheduling();
+
+            $minimumRescheduleTime = DateTimeService::getCustomDateTimeObject(
+                $appointment->getBookingStart()->getValue()->format('Y-m-d H:i:s')
+            )->modify("-{$minimumRescheduleTimeInSeconds} seconds");
+
+            $reschedulable =
+                $appointment->getBookingStart()->getValue() > $currentDateTime &&
+                $currentDateTime <= $minimumRescheduleTime;
+        }
+
+        return $reschedulable;
+    }
+
+    /**
+     * @param Appointment  $appointment
+     * @param Service      $service
+     * @param AbstractUser $user
+     *
+     * @return bool
+     */
+    public function isCancelable($appointment, $service, $user)
+    {
+        /** @var SettingsService $settingsDS */
+        $settingsDS = $this->container->get('domain.settings.service');
+
+        $cancelable = true;
+
+        if ($user->getType() === Entities::CUSTOMER) {
+            $currentDateTime = DateTimeService::getNowDateTimeObject();
+
+            $minimumCancelTimeInSeconds = $settingsDS
+                ->getEntitySettings($service->getSettings())
+                ->getGeneralSettings()
+                ->getMinimumTimeRequirementPriorToCanceling();
+
+            $minimumCancelTime = DateTimeService::getCustomDateTimeObject(
+                $appointment->getBookingStart()->getValue()->format('Y-m-d H:i:s')
+            )->modify("-{$minimumCancelTimeInSeconds} seconds");
+
+            $cancelable =
+                $appointment->getBookingStart()->getValue() > $currentDateTime &&
+                $currentDateTime <= $minimumCancelTime;
+        }
+
+        return $cancelable;
     }
 }

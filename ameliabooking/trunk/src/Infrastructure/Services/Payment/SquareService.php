@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -11,13 +12,16 @@ use AmeliaBooking\Domain\Services\Payment\AbstractPaymentService;
 use AmeliaBooking\Domain\Services\Payment\PaymentServiceInterface;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\Number\Float\Price;
+use Exception;
 use Square\Environment;
 use Square\Exceptions\ApiException;
 use Square\Http\ApiResponse;
 use Square\Models\Address;
 use Square\Models\CheckoutOptions;
 use Square\Models\CompletePaymentRequest;
+use Square\Models\CreateOrderRequest;
 use Square\Models\CreatePaymentLinkRequest;
+use Square\Models\CreatePaymentRequest;
 use Square\Models\Location;
 use Square\Models\Money;
 use Square\Models\Order;
@@ -25,6 +29,7 @@ use Square\Models\OrderLineItem;
 use Square\Models\PaymentLink;
 use Square\Models\PrePopulatedData;
 use Square\Models\RefundPaymentRequest;
+use Square\Models\RegisterDomainRequest;
 use Square\Models\UpdatePaymentLinkRequest;
 use Square\SquareClient;
 
@@ -33,7 +38,6 @@ use Square\SquareClient;
  */
 class SquareService extends AbstractPaymentService implements PaymentServiceInterface
 {
-
     /**
      * @var SquareMiddlewareService $middlewareService
      */
@@ -50,19 +54,25 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
         CurrencyService $currencyService
     ) {
         parent::__construct($settingsService, $currencyService);
-        $this->middlewareService = new SquareMiddlewareService();
+        $this->middlewareService = new SquareMiddlewareService($settingsService);
     }
 
     /**
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function getClient()
     {
         $squareSettings = $this->settingsService->getCategorySettings('payments')['square'];
         $accessToken    = $this->middlewareService->getAccessToken($squareSettings['accessToken']);
-        return new SquareClient(['accessToken' => $accessToken['access_token'], 'environment' => $squareSettings['testMode'] ? Environment::SANDBOX : Environment::PRODUCTION]);
+
+        return new SquareClient(
+            [
+                'accessToken' => $accessToken['access_token'],
+                'environment' => $squareSettings['testMode'] ? Environment::SANDBOX : Environment::PRODUCTION
+            ]
+        );
     }
 
     /**
@@ -71,7 +81,7 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
      * @param array $args
      *
      * @return ApiResponse
-     * @throws \Exception
+     * @throws Exception
      */
     private function getApiResponse($apiName, $functionName, $args)
     {
@@ -90,7 +100,7 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
     /**
      *
      * @return Location
-     * @throws \Exception
+     * @throws Exception
      */
     private function getLocation()
     {
@@ -101,12 +111,79 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
         return $apiResponse->isSuccess() ? $apiResponse->getResult()->getLocation() : null;
     }
 
+    public function preparePaymentRequest($data, $amount, $reservation, $additionalInformation)
+    {
+        $bookingId = $reservation->getBooking() && $reservation->getBooking()->getId() ?
+            $reservation->getBooking()->getId()->getValue() : '';
+
+        $customer = $reservation->getCustomer();
+        $customerEmail = '';
+        if ($customer && $customer->getEmail() && $customer->getEmail()->getValue()) {
+            $customerEmail = $customer->getEmail()->getValue();
+        }
+        $location = $this->getLocation();
+        if (!$location) {
+            return null;
+        }
+        $locationId = $location->getId();
+
+        $currency = $location->getCurrency();
+        $money = new Money();
+        $money->setCurrency($currency);
+        $money->setAmount((int)$amount);
+
+        $appointment = new OrderLineItem(1);
+        $appointment->setName(
+            $additionalInformation['description'] ?: $reservation->getBookable()->getName()->getValue()
+        );
+        $appointment->setBasePriceMoney($money);
+
+        $order = new Order($locationId);
+        $order->setReferenceId(" . $bookingId . ");
+        $order->setLineItems([$appointment]);
+
+        if (!empty($data['metaData'])) {
+            $order->setMetadata($data['metaData']);
+        }
+
+        $ordersApi = $this->getClient()->getOrdersApi();
+        $request = new CreateOrderRequest();
+        $request->setOrder($order);
+        $responseOrder = $ordersApi->createOrder($request);
+        $orderResponse = $responseOrder->getResult();
+
+        $address = new Address();
+        if ($customer->getFirstName() && $customer->getFirstName()->getValue()) {
+            $address->setFirstName($customer->getFirstName()->getValue());
+        }
+
+        if ($customer->getLastName() && $customer->getLastName()->getValue()) {
+            $address->setLastName($customer->getLastName()->getValue());
+        }
+
+        $client = $this->getClient();
+        $paymentsApi = $client->getPaymentsApi();
+        $paymentData = new CreatePaymentRequest($data['sourceId'], $data['idempotencyKey']);
+
+        $paymentData->setBillingAddress($address);
+        $paymentData->setBuyerEmailAddress($customerEmail);
+        $paymentData->setOrderId($orderResponse->getOrder()->getId());
+        $paymentData->setSourceId($data['sourceId']);
+        $paymentData->setIdempotencyKey($data['idempotencyKey']);
+        $paymentData->setAmountMoney($money);
+        $paymentData->setLocationId($locationId);
+        $paymentData->setAutocomplete(true);
+        $paymentData->setNote("Amelia - Booking " . $bookingId);
+
+        return $paymentsApi->createPayment($paymentData);
+    }
+
     /**
      * @param array $data
      * @param array $transfers
      *
-     * @return ApiResponse
-     * @throws \Exception
+     * @return ApiResponse|null
+     * @throws Exception
      */
     public function execute($data, &$transfers)
     {
@@ -114,7 +191,7 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
         // This amount is in cents
         // Set currency to the currency for the location
         $location = $this->getLocation();
-        if (empty($location)) {
+        if (!$location) {
             return null;
         }
         $currency = $location->getCurrency();
@@ -168,12 +245,12 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
      * @param PaymentLink $paymentLink
      * @param string $redirectUrl
      *
-     * @return ApiResponse
-     * @throws \Exception
+     * @return ApiResponse|null
+     * @throws Exception
      */
     public function updatePaymentLink($paymentLink, $redirectUrl, $paymentId)
     {
-        if (empty($paymentLink)) {
+        if (!$paymentLink) {
             return null;
         }
 
@@ -196,7 +273,7 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
      * @param $data
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getPaymentLink($data)
     {
@@ -204,7 +281,7 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
 
         $apiResponse = $this->execute($data, $transfers);
 
-        if (!empty($apiResponse) && $apiResponse->isSuccess() && $apiResponse->getResult() && $apiResponse->getResult()->getPaymentLink()) {
+        if ($apiResponse && $apiResponse->isSuccess() && $apiResponse->getResult() && $apiResponse->getResult()->getPaymentLink()) {
             /**@var PaymentLink $paymentLink */
             $paymentLink = $apiResponse->getResult()->getPaymentLink();
 
@@ -230,7 +307,7 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
      * @return ApiResponse
      *
      * @throws ApiException
-     * @throws \Exception
+     * @throws Exception
      */
     public function getOrderResponse($orderId)
     {
@@ -243,7 +320,7 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
      * @return ApiResponse
      *
      * @throws ApiException
-     * @throws \Exception
+     * @throws Exception
      */
     public function completePayment($paymentId)
     {
@@ -254,7 +331,7 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
      * @param array $data
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function refund($data)
     {
@@ -278,7 +355,7 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
      * @param ApiResponse $response
      * @return string
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getErrorMessage($response)
     {
@@ -294,24 +371,17 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
 
     /**
      *
-     * @param string $authCode
-     * @param string $state
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getLocations()
     {
         $apiResponse = $this->getApiResponse('getLocationsApi', 'listLocations', []);
 
         $result = $apiResponse->isSuccess() ? $apiResponse->getResult() : null;
-        return $result ? array_filter(
-            $result->getLocations(),
-            function ($location) {
-                return $location->getStatus() === 'ACTIVE' && in_array('CREDIT_CARD_PROCESSING', $location->getCapabilities());
-            }
-        ) : [];
+        return $result ? $result->getLocations() : [];
     }
 
 
@@ -320,14 +390,14 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
      * @param array|null $transfers
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     public function getTransactionAmount($id, $transfers)
     {
         $apiResponse = $this->getApiResponse('getPaymentsApi', 'getPayment', [$id]);
 
         if ($apiResponse->isSuccess() && $apiResponse->getResult()) {
-            return $apiResponse->getResult()->getPayment()->getAmountMoney()->getAmount()/100;
+            return $apiResponse->getResult()->getPayment()->getAmountMoney()->getAmount() / 100;
         }
 
         return null;
@@ -337,7 +407,7 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
      *
      * @return boolean
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function disconnectAccount($fromSquare = false)
     {
@@ -355,6 +425,13 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
         return true;
     }
 
+    /**
+     *
+     * @param array $accessToken
+     * @return boolean
+     *
+     * @throws Exception
+     */
     public function isAccessTokenExpired($accessToken)
     {
         return DateTimeService::getNowDateTimeObject() >= DateTimeService::getCustomDateTimeObject($accessToken['expires_at']);
@@ -362,12 +439,9 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
 
     /**
      *
-     * @param string $authCode
-     * @param string $state
+     * @return boolean|null
      *
-     * @return boolean
-     *
-     * @throws \Exception
+     * @throws Exception
      */
     public function refreshAccessToken()
     {
@@ -382,7 +456,14 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
         if ($response) {
             $accessToken = $response['result'];
 
-            set_transient('amelia_square_access_token', ['access_token' => $accessToken['decrypted_access_token'], 'refresh_token' => $accessToken['decrypted_refresh_token']], 604800);
+            set_transient(
+                'amelia_square_access_token',
+                [
+                    'access_token' => $accessToken['decrypted_access_token'],
+                    'refresh_token' => $accessToken['decrypted_refresh_token']
+                ],
+                604800
+            );
 
             unset($accessToken['decrypted_access_token']);
             unset($accessToken['decrypted_refresh_token']);
@@ -394,10 +475,45 @@ class SquareService extends AbstractPaymentService implements PaymentServiceInte
         return true;
     }
 
+    /**
+     *
+     * @return string
+     *
+     * @throws Exception
+     */
     public function getAuthUrl()
     {
         $squareSettings = $this->settingsService->getCategorySettings('payments')['square'];
 
         return $this->middlewareService->getAuthUrl($squareSettings['testMode']);
+    }
+
+    //create method to get country from location by locationId
+
+    /**
+     * @throws Exception
+     */
+    public function getCountryCodeByLocationId($locationId)
+    {
+        $apiResponse = $this->getApiResponse('getLocationsApi', 'retrieveLocation', [$locationId]);
+
+        if ($apiResponse->isSuccess() && $apiResponse->getResult()) {
+            $location = $apiResponse->getResult()->getLocation();
+            return $location ? $location->getCountry() : null;
+        }
+
+        return null;
+    }
+
+    /**
+     * @return ApiResponse
+     */
+    public function registerDomainForApplePay()
+    {
+        return $this->getApiResponse(
+            'getApplePayApi',
+            'registerDomain',
+            [new RegisterDomainRequest(str_replace(['http://', 'https://'], '', AMELIA_SITE_URL))]
+        );
     }
 }

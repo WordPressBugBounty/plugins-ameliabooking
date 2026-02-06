@@ -79,6 +79,7 @@
                   v-if="cf.id in customFieldsForm"
                   v-model="customFieldsForm[cf.id]"
                   v-bind="cfFormConstruction[cf.id]?.props"
+                  @address-selected="(address) => addressSelected(address, cf.id)"
                 />
               </template>
             </el-form>
@@ -188,6 +189,7 @@ import { formFieldsTemplates } from "../../../../../assets/js/common/formFieldsT
 
 // * Import from Vuex
 import { useStore } from "vuex";
+import {mapAddressComponentsForXML} from "../../../../../assets/js/common/helper";
 let store = useStore()
 
 // * Loading state
@@ -608,6 +610,17 @@ function logout () {
   store.dispatch('auth/logout')
 }
 
+function addressSelected (addressComponents, cfId) {
+  if (addressComponents) {
+    for (const key in customFields) {
+      if (customFields[key].id === cfId) {
+        customFields[key].components = mapAddressComponentsForXML(addressComponents)
+        break;
+      }
+    }
+  }
+}
+
 function deleteProfile () {
   store.commit('setLoading', true)
 
@@ -714,16 +727,20 @@ function setInitCustomerCustomFields() {
   allFields
     .filter(field => field.saveType === 'customer' && field.type !== 'content')
     .sort((a, b) => a.position - b.position)
-    .forEach(field => {
-      const { position, id } = field
+    .forEach((field, index) => {
+      const { id } = field
       const savedValue = savedCustomFields[id]?.value
 
-      customFields[position] = {
+      customFields[index] = {
         ...field,
         value: savedValue ?? (field.type === 'checkbox' || field.type === 'file' ? [] : ''),
       }
 
-      setCustomerCustomFieldsFormData(field, id, customFields[position].value)
+      if (field.type === 'address' && savedCustomFields[id]?.components) {
+        customFields[index].components = savedCustomFields[id]?.components
+      }
+
+      setCustomerCustomFieldsFormData(field, id, customFields[index].value)
       setCustomerCustomFieldsFormConstruction(field, id)
       setCustomerCustomFieldsFormRules(field)
     })
@@ -743,6 +760,9 @@ function saveCustomerCustomFields() {
           label: field.label,
           type: field.type,
           value: typeof value === 'string' ? value.trim() : value,
+        }
+        if (field.type === 'address' && field.components) {
+          customFieldData[field.id].components = field.components
         }
       }
 

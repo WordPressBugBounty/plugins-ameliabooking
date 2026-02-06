@@ -1,4 +1,5 @@
-<template>description
+<template>
+  description
   <AmSlidePopup
     :visibility="props.visibility"
     custom-class="am-csd am-csd__cancel"
@@ -25,14 +26,20 @@
         <AmButton
           category="secondary"
           :size="cWidth <= 360 ? 'small' : 'default'"
-          :type="amCustomize[pageRenderKey][stepRecognition].options.cancelBtn.buttonType"
+          :type="
+            amCustomize[pageRenderKey][stepRecognition].options.cancelBtn
+              .buttonType
+          "
         >
           {{ labelsDisplay('close') }}
         </AmButton>
         <AmButton
           category="danger"
           :size="cWidth <= 360 ? 'small' : 'default'"
-          :type="amCustomize[pageRenderKey][stepRecognition].options.confirmBtn.buttonType"
+          :type="
+            amCustomize[pageRenderKey][stepRecognition].options.confirmBtn
+              .buttonType
+          "
         >
           {{ labelsDisplay('confirm') }}
         </AmButton>
@@ -43,15 +50,15 @@
 
 <script setup>
 // * import from Vue
-import {
-  computed,
-  inject,
-} from "vue";
+import { computed, inject } from 'vue'
 
 // * _components
-import AmSlidePopup from "../../../../../../_components/slide-popup/AmSlidePopup.vue";
-import IconComponent from "../../../../../../_components/icons/IconComponent.vue";
-import AmButton from "../../../../../../_components/button/AmButton.vue";
+import AmSlidePopup from '../../../../../../_components/slide-popup/AmSlidePopup.vue'
+import IconComponent from '../../../../../../_components/icons/IconComponent.vue'
+import AmButton from '../../../../../../_components/button/AmButton.vue'
+
+// * Composables
+import { useReactiveCustomize } from '../../../../../../../assets/js/admin/useReactiveCustomize.js'
 
 /********
  * Form *
@@ -63,12 +70,12 @@ let props = defineProps({
   },
   titleKey: {
     type: String,
-    required: true
+    required: true,
   },
   contentKey: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 })
 
 let cWidth = inject('containerWidth')
@@ -83,7 +90,7 @@ let amLabels = inject('labels')
 let stepName = inject('stepName')
 let subStepName = inject('subStepName')
 let pageRenderKey = inject('pageRenderKey')
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 let stepRecognition = computed(() => {
   if (subStepName.value) return subStepName.value
@@ -91,12 +98,16 @@ let stepRecognition = computed(() => {
 })
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepRecognition.value].translations
-    && amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label]
-    && amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepRecognition.value]
+      .translations &&
+      amCustomize.value[pageRenderKey.value][stepRecognition.value]
+        .translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepRecognition.value]
+        .translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepRecognition.value]
+          .translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -120,7 +131,7 @@ let cssDialogVars = computed(() => {
 
 <script>
 export default {
-  name: 'CancelBooking'
+  name: 'CancelBooking',
 }
 </script>
 
@@ -161,7 +172,8 @@ export default {
       }
     }
 
-    &__inner {}
+    &__inner {
+    }
 
     &__header {
       display: flex;
@@ -182,7 +194,7 @@ export default {
     }
 
     &__content {
-      padding: 0  24px;
+      padding: 0 24px;
     }
 
     &__footer {
@@ -207,7 +219,8 @@ export default {
         height: 25px;
       }
 
-      .el-skeleton-item, .el-skeleton-item-wrapper-title {
+      .el-skeleton-item,
+      .el-skeleton-item-wrapper-title {
         padding: 6px 0;
       }
     }

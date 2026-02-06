@@ -144,6 +144,7 @@ import {
   useParsedCustomPricing,
   useFrontendEmployee,
   useFrontendEmployeeServiceList,
+  useFeaturesAndIntegrations,
 } from '../../../../../../assets/js/common/employee'
 
 // * Components
@@ -230,7 +231,7 @@ function onSignupSocial({ provider, credentials }) {
     store.commit('setLoading', false)
     VueAuthenticateInstance.authenticate(provider, data).then((response) => {
       infoFormData.value.email = response.data.data.user.email
-      setResponseData(response)
+      setResponseData(response, true)
     }).catch((error) => {
       if (!VueAuthenticateInstance.isAuthenticated()) {
         authError.value = true
@@ -249,7 +250,7 @@ function onSignupSocial({ provider, credentials }) {
     data.code = credentials
     httpClient.post(`${socialCheckUrl}`, data).then(response => {
       infoFormData.value.email = response.data.data.user.email
-      setResponseData(response)
+      setResponseData(response, true)
     }).catch((error) => {
       if (!('data' in error.response.data) && 'message' in error.response.data) {
         authError.value = true
@@ -267,10 +268,11 @@ function onSignupSocial({ provider, credentials }) {
   }
 }
 
-function setResponseData(response) {
+function setResponseData(response, authenticate) {
   if ('token' in response.data.data) {
-    vueCookies.set('ameliaToken', response.data.data.token, amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'], null, null, true)
-    vueCookies.set('ameliaUserEmail', response.data.data.user.email, amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'], null, null, true)
+    const secureCookie = window.location.protocol === 'https:'
+    vueCookies.set('ameliaToken', response.data.data.token, amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'], null, null, secureCookie)
+    vueCookies.set('ameliaUserEmail', response.data.data.user.email, amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'], null, null, secureCookie)
 
     store.commit('auth/setToken', response.data.data.token)
   }
@@ -278,11 +280,21 @@ function setResponseData(response) {
   if ('user' in response.data.data && response.data.data.user.type === 'provider') {
     setEmployee(response)
   }
+
   store.commit('auth/setProfile', response.data.data.user)
+
   if (response.data.data.user.timeZone) {
     store.commit('cabinet/setTimeZone', response.data.data.user.timeZone)
   }
-  store.commit('auth/setAuthenticated', true)
+
+  if (!response.data.data.user.countryPhoneIso && amSettings.general.phoneDefaultCountryCode && amSettings.general.phoneDefaultCountryCode !== 'auto') {
+    store.commit('auth/setProfileCountryPhoneIso', amSettings.general.phoneDefaultCountryCode)
+  }
+
+  if (authenticate) {
+    store.commit('auth/setAuthenticated', authenticate)
+  }
+
   let tokenValidTime = cabinetType.value === 'customer'
       ? amSettings.roles.customerCabinet.tokenValidTime * 1000
       : amSettings.roles.providerCabinet.tokenValidTime * 1000
@@ -294,6 +306,10 @@ function setResponseData(response) {
         },
         tokenValidTime
     )
+  }
+
+  if (window?.ameliaBooking?.cabinet?.userLoggedIn) {
+    window.ameliaBooking.cabinet.userLoggedIn(response.data.data.user)
   }
 }
 
@@ -438,6 +454,7 @@ function setEmployee (response) {
       token: 'token' in response.data.data.user.outlookCalendar ? response.data.data.user.outlookCalendar.token : null,
     },
     appleCalendarId: response.data.data.user.appleCalendarId ? response.data.data.user.appleCalendarId : '',
+    googleCalendarId: response.data.data.user.googleCalendarId ? response.data.data.user.googleCalendarId : '',
     stripeConnect: response.data.data.user.stripeConnect,
     zoomUserId: response.data.data.user.zoomUserId ? response.data.data.user.zoomUserId : '',
     locationId: response.data.data.user.locationId,
@@ -449,6 +466,14 @@ function setEmployee (response) {
     dayOffList: response.data.data.user.dayOffList,
     serviceList: response.data.data.user.serviceList,
   }
+
+  employee.serviceList.forEach((employeeService) => {
+    useFeaturesAndIntegrations(employeeService, true)
+  })
+
+  store.commit('employee/setSavedSpecialDayList', JSON.parse(JSON.stringify(response.data.data.user.specialDayList)))
+
+  store.commit('employee/setSavedDayOffList', JSON.parse(JSON.stringify(response.data.data.user.dayOffList)))
 
   employee.serviceList.forEach(employeeService => {
     useParsedCustomPricing(employeeService)
@@ -533,29 +558,10 @@ function useAuthenticate (tokenValue, isUrlToken, checkIfWpUser, changePass) {
       return
     }
 
-    if ('token' in response.data.data) {
-      vueCookies.set('ameliaToken', response.data.data.token, amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'], null, null, true)
-      vueCookies.set('ameliaUserEmail', response.data.data.user.email, amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'], null, null, true)
-
-      store.commit('auth/setToken', response.data.data.token)
-    }
-
-    if ('user' in response.data.data && response.data.data.user.type === 'provider') {
-      setEmployee(response)
-    }
+    setResponseData(response, false)
 
     if (useUrlQueryParam('token')) {
       window.history.replaceState(null, null, useRemoveUrlParameter(window.location.href, 'token'))
-    }
-
-    store.commit('auth/setProfile', response.data.data.user)
-
-    if (!response.data.data.user.countryPhoneIso && amSettings.general.phoneDefaultCountryCode && amSettings.general.phoneDefaultCountryCode !== 'auto') {
-      store.commit('auth/setProfileCountryPhoneIso', amSettings.general.phoneDefaultCountryCode)
-    }
-
-    if (response.data.data.user.timeZone) {
-      store.commit('cabinet/setTimeZone', response.data.data.user.timeZone)
     }
 
     if ('set_password' in response.data.data && response.data.data.set_password) {
@@ -564,19 +570,6 @@ function useAuthenticate (tokenValue, isUrlToken, checkIfWpUser, changePass) {
       pageKey.value = 'setPassword'
     } else {
       store.commit('auth/setAuthenticated', true)
-    }
-
-    let tokenValidTime = cabinetType.value === 'customer'
-      ? amSettings.roles.customerCabinet.tokenValidTime * 1000
-      : amSettings.roles.providerCabinet.tokenValidTime * 1000
-
-    if (tokenValidTime > 0 && tokenValidTime < 1814400000) {
-      setTimeout(
-        () => {
-          store.dispatch('auth/logout')
-        },
-        tokenValidTime
-      )
     }
   }).catch((error) => {
     if (!('data' in error.response.data) && 'message' in error.response.data) {

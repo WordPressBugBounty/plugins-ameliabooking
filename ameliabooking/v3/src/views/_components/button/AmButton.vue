@@ -461,6 +461,7 @@ const cssVars = computed(() => {
       // Disabled
       &.is-disabled {
         opacity: 0.7;
+        cursor: not-allowed;
       }
 
       &--waiting-list { // TODO

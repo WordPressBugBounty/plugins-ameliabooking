@@ -2,9 +2,11 @@
 
 // File generated from our OpenAPI spec
 
-namespace AmeliaStripe\FinancialConnections;
+namespace AmeliaVendor\Stripe\FinancialConnections;
 
 /**
+ * Describes an owner of an account.
+ *
  * @property string $id Unique identifier for the object.
  * @property string $object String representing the object's type. Objects of the same type share the same value.
  * @property null|string $email The email address of the owner.
@@ -14,7 +16,7 @@ namespace AmeliaStripe\FinancialConnections;
  * @property null|string $raw_address The raw physical address of the owner.
  * @property null|int $refreshed_at The timestamp of the refresh that updated this owner.
  */
-class AccountOwner extends \AmeliaStripe\ApiResource
+class AccountOwner extends \AmeliaVendor\Stripe\ApiResource
 {
     const OBJECT_NAME = 'financial_connections.account_owner';
 }

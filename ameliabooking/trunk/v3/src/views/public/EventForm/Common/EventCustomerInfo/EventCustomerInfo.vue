@@ -4,9 +4,9 @@
     class="am-elfci"
     :class="props.globalClass"
   >
-    <template v-if="!loading">
+    <div v-show="!loading">
       <div
-        v-if="paymentError && instantBooking"
+        v-if="(paymentError && instantBooking) || (paymentError && isWaitingAvailable)"
         class="am-elfci__error"
       >
         <AmAlert
@@ -17,6 +17,37 @@
         >
         </AmAlert>
       </div>
+
+      <div v-if="authError" class="am-elfci__error">
+        <AmAlert
+            type="error"
+            :title="authErrorMessage"
+            :show-icon="true"
+            :closable="true"
+        >
+        </AmAlert>
+      </div>
+
+      <!-- Social Buttons -->
+      <div v-if="(settings.socialLogin.googleLoginEnabled && settings.general.googleClientId && !store.getters['customerInfo/getLoggedUser']) || (settings.socialLogin.facebookLoginEnabled && settings.socialLogin.facebookCredentialsEnabled && !store.getters['customerInfo/getLoggedUser'])">
+        <div class="am-elfci__social-wrapper">
+          <div class="am-elfci__social-wrapper__label">
+            {{amLabels.auto_fill_your_details}}
+          </div>
+          <am-social-button
+            :provider="socialProvider"
+            @social-action="onSignupSocial"
+          />
+        </div>
+
+        <!-- Social Divider -->
+        <div class="am-elfci__social-divider">
+          <span class="par-sm">{{ amLabels.or_enter_details_below }}</span>
+        </div>
+        <!-- /Social Divider -->
+
+      </div>
+      <!-- /Social Buttons -->
 
       <el-form
         ref="infoFormRef"
@@ -37,28 +68,45 @@
           ></component>
         </template>
 
+        <el-form-item
+          v-if="
+            amSettings.featuresIntegrations.mailchimp.enabled &&
+            amSettings.mailchimp.subscribeFieldVisible &&
+            customizedOptions.email.visibility
+          "
+          class="am-elfci__item am-subscribe"
+        >
+          <AmCheckbox
+            v-model="subscribeToMailchimp"
+            :label="amLabels.subscribe_to_mailing_list"
+          >
+          </AmCheckbox>
+        </el-form-item>
+
         <!-- Custom Fields -->
         <template v-for="(item, index) in eventCustomFieldsArray" :key="index">
           <component
             :is="infoFormConstruction[`cf${item.id}`].template"
+            v-if="checkCustomerCustomFieldVisibility(item)"
             ref="customFieldsCollectorRefs"
             v-model="infoFormData[`cf${item.id}`]"
             v-bind="infoFormConstruction[`cf${item.id}`].props"
+            @address-selected="(address) => addressSelected(address, item.id)"
           ></component>
         </template>
       </el-form>
-    </template>
+    </div>
 
     <div v-show="!loading">
       <PaymentOnSite
-        v-if="instantBooking && (amSettings.payments.wc.enabled ? amSettings.payments.wc.onSiteIfFree : true)"
+        v-if="isWaitingAvailable || (instantBooking && (amSettings.payments.wc.enabled ? amSettings.payments.wc.onSiteIfFree || !wcEventEnabled : true))"
         ref="refOnSiteBooking"
         :instant-booking="instantBooking"
         @payment-error="callPaymentError"
       />
 
       <PaymentWc
-        v-if="instantBooking && amSettings.payments.wc.enabled && !amSettings.payments.wc.onSiteIfFree"
+        v-if="instantBooking && amSettings.payments.wc.enabled && !amSettings.payments.wc.onSiteIfFree && wcEventEnabled"
         ref="refWcBooking"
         :instant-booking="instantBooking"
         @payment-error="callPaymentError"
@@ -84,7 +132,9 @@ import {
   onMounted,
   nextTick,
   watchEffect,
+  watch
 } from 'vue'
+import VueAuthenticate from 'vue-authenticate'
 
 // * Form Fields Templates
 import { formFieldsTemplates } from '../../../../../assets/js/common/formFieldsTemplates.js'
@@ -96,16 +146,16 @@ import { useStore } from 'vuex'
 import { useScrollTo } from '../../../../../assets/js/common/scrollElements.js'
 import { useResponsiveClass } from "../../../../../assets/js/common/responsive.js";
 import { usePrepaidPrice } from "../../../../../assets/js/common/appointments";
-import {
-  useBookingData,
-  useCreateBooking,
-  useCreateBookingError,
-  useCreateBookingSuccess
-} from "../../../../../assets/js/public/booking";
 
 // * _components
 import AmAlert from "../../../../_components/alert/AmAlert.vue";
 import useAction from "../../../../../assets/js/public/actions";
+import {settings} from "../../../../../plugins/settings";
+import httpClient from "../../../../../plugins/axios";
+import AmSocialButton from "../../../../common/FormFields/AmSocialButton.vue";
+import {SocialAuthOptions} from "../../../../../assets/js/admin/socialAuthOptions";
+import AmCheckbox from "../../../../_components/checkbox/AmCheckbox.vue";
+import {mapAddressComponentsForXML} from "../../../../../assets/js/common/helper";
 
 let props = defineProps({
   globalClass: {
@@ -125,6 +175,24 @@ const store = useStore()
 store.dispatch('customerInfo/requestCurrentUserData')
 // filter custom fields
 store.dispatch('customFields/filterEventCustomFields')
+
+watch(
+    () => store.getters['customerInfo/getLoggedUser'],
+    (newValue, oldValue) => {
+      if (newValue) {
+        let customer = store.getters['customerInfo/getCustomer']
+
+        store.commit('customFields/populateCustomerCustomFields', customer)
+
+        if (customer.customFields.includes('datepicker')) {
+          refreshDatePickerValue.value = true
+        }
+        
+        // Force phone component to re-render with new value
+        refreshPhoneComponent.value++
+      }
+    }
+)
 
 // * Loading State
 let loading = computed(() => store.getters['getLoading'])
@@ -184,6 +252,8 @@ let {
   }
 })
 
+let selectedEvent = computed(() => store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId']))
+
 // * Custom Fields Array
 let eventCustomFieldsArray = computed(() => store.getters['customFields/getFilteredCustomFieldsArray'])
 
@@ -225,6 +295,12 @@ let refCFPlaceholders = ref({})
 
 // * InitInfoStep hook - adding coupon
 let couponCode = ref('')
+
+// * Form field date picker needs refresh
+let refreshDatePickerValue = ref(false)
+
+// * Form field phone needs refresh
+let refreshPhoneComponent = ref(0)
 
 // * Form data
 let infoFormData = ref({
@@ -304,7 +380,10 @@ let infoFormConstruction = ref({
       itemName: 'phone',
       label: amLabels.value.phone_colon,
       placeholder: amLabels.value.enter_phone,
-      defaultCode: amSettings.general.phoneDefaultCountryCode === 'auto' ? '' : amSettings.general.phoneDefaultCountryCode.toLowerCase(),
+      defaultCode: computed(() => {
+        const savedCountry = store.getters['customerInfo/getCustomerCountryPhoneIso']
+        return savedCountry || (amSettings.general.phoneDefaultCountryCode === 'auto' ? '' : amSettings.general.phoneDefaultCountryCode.toLowerCase())
+      }),
       phoneError: false,
       whatsAppLabel: amLabels.value.whatsapp_opt_in_text,
       isWhatsApp: amSettings.notifications.whatsAppEnabled
@@ -314,7 +393,8 @@ let infoFormConstruction = ref({
       class: 'am-elfci__item',
       disabled: computed(() => {
         return !!(store.getters['customerInfo/getCustomerPhone'] && store.getters['customerInfo/getLoggedUser'])
-      })
+      }),
+      refreshTrigger: computed(() => refreshPhoneComponent.value)
     }
   },
 })
@@ -352,6 +432,13 @@ let infoFormRules = ref({
   ],
 })
 
+let subscribeToMailchimp = computed({
+  get: () => store.getters['customerInfo/getCustomerSubscribe'],
+  set: (val) => {
+    store.commit('customerInfo/setCustomerSubscribe', val)
+  }
+})
+
 Object.keys(customFields.value).forEach((fieldKey) => {
   // * Form Model
   infoFormData.value[fieldKey] = computed({
@@ -376,12 +463,21 @@ Object.keys(customFields.value).forEach((fieldKey) => {
   infoFormConstruction.value[fieldKey] = {
     template: formFieldsTemplates[customFields.value[fieldKey].type],
     props: {
-      id: customFields.value[fieldKey].id,
+      id: 'am-cf-' + customFields.value[fieldKey].id,
       itemName: fieldKey,
       label: customFields.value[fieldKey].label,
       options: customFields.value[fieldKey].options,
       class: `am-elfci__item am-cf-width-${customFields.value[fieldKey].width}`
     }
+  }
+
+  if (customFields.value[fieldKey].type === 'checkbox' || customFields.value[fieldKey].type === 'radio') {
+    infoFormConstruction.value[fieldKey].props.options = infoFormConstruction.value[fieldKey].props.options.map((option) => {
+      return {
+        ...option,
+        value: option.label
+      }
+    })
   }
 
   if (customFields.value[fieldKey].type === 'text-area') {
@@ -401,12 +497,21 @@ Object.keys(customFields.value).forEach((fieldKey) => {
   if (customFields.value[fieldKey].type === 'datepicker') {
     infoFormConstruction.value[fieldKey].props = {
       ...infoFormConstruction.value[fieldKey].props,
-      ...{weekStartsFromDay: amSettings.wordpress.startOfWeek}
+      ...{weekStartsFromDay: amSettings.wordpress.startOfWeek},
+      refreshValue: refreshDatePickerValue
     }
   }
 })
 
+let wcEventEnabled = ref(false)
+
 onMounted(() => {
+  let eventPayments = selectedEvent && selectedEvent.value.settings ? JSON.parse(selectedEvent.value.settings)['payments'] : null
+
+  wcEventEnabled.value = eventPayments && 'wc' in eventPayments
+    ? !('enabled' in eventPayments.wc) || eventPayments.wc.enabled
+    : settings.payments.wc.enabled
+
   if (isWaitingAvailable.value) {
     if (eventFluidStepKey.value.indexOf('eventPayment') !== -1) {
       let index = eventFluidStepKey.value.indexOf('eventPayment')
@@ -477,7 +582,7 @@ onMounted(() => {
 
 // * Submit Form
 function submitForm() {
-  store.commit('setLoading', true)
+  // store.commit('setLoading', true)
   footerButtonReset()
 
   // Trim inputs
@@ -498,39 +603,13 @@ function submitForm() {
     if (valid) {
       if (isWaitingAvailable.value) {
         store.commit('payment/setPaymentGateway', 'onSite')
-        let bookingData = useBookingData(
-          store,
-          null,
-          false,
-          {},
-          null
-        )
 
-        useCreateBooking(
-          store,
-          bookingData,
-          response => {
-            useCreateBookingSuccess(
-              store,
-              response,
-              () => {
-                nextStep()
-              }
-            )
-          },
-          error => {
-            useCreateBookingError(
-              store,
-              error.response.data,
-              () => {}
-            )
-          }
-        )
+        refOnSiteBooking.value.continueWithBooking()
       } else {
         if (!instantBooking.value) {
           nextStep()
         } else {
-          if (amSettings.payments.wc.enabled && !amSettings.payments.wc.onSiteIfFree) {
+          if (amSettings.payments.wc.enabled && !amSettings.payments.wc.onSiteIfFree && wcEventEnabled.value) {
             store.commit('payment/setPaymentGateway', 'wc')
 
             refWcBooking.value.continueWithBooking()
@@ -542,19 +621,20 @@ function submitForm() {
         }
       }
     } else {
-      store.commit('setLoading', false)
+      // store.commit('setLoading', false)
       let fieldElement
-      allFieldsRefs.value.some(el => {
-        if (el.shouldShowError === true) {
-          fieldElement = el.formItemRef
-          return el.shouldShowError === true
+
+      infoFormRef.value.fields.some(el => {
+        if (el.validateState === 'error') {
+          fieldElement = el.$el
+          return el.validateState === 'error'
         }
       })
 
-      let phoneField = allFieldsRefs.value.find(el => el.prop === 'phone')
+      let phoneField = infoFormRef.value.fields.find(el => el.prop === 'phone')
+      infoFormConstruction.value.phone.props.phoneError = !!(phoneField && phoneField.validateState === 'error')
 
-      infoFormConstruction.value.phone.props.phoneError = !!(phoneField && phoneField.shouldShowError && phoneField.validateMessage)
-
+      // * Scroll to first error
       useScrollTo(infoFormWrapperRef.value, fieldElement, 0, 300)
       return false
     }
@@ -574,6 +654,42 @@ function callPaymentError (msg) {
   store.commit('payment/setError', msg)
 }
 
+let visibilityFlags = ref({})
+
+function checkCustomerCustomFieldVisibility (cf) {
+  if (cf.saveType === 'customer') {
+    let customerCustomFields = store.getters['customerInfo/getCustomer'].customFields
+
+    if (!customerCustomFields || !(cf.id in JSON.parse(customerCustomFields))) {
+      return true
+    }
+
+    if (visibilityFlags.value[cf.id]) {
+      return visibilityFlags.value[cf.id]
+    }
+
+    switch (cf.type) {
+      case 'checkbox':
+      case 'file':
+        visibilityFlags.value[cf.id] = !cf.saveFirstChoice && customFields.value['cf' + cf.id].value !== []
+        return visibilityFlags.value[cf.id]
+      default:
+        visibilityFlags.value[cf.id] = !cf.saveFirstChoice && customFields.value['cf' + cf.id].value !== ''
+        return visibilityFlags.value[cf.id]
+    }
+  }
+
+  return true
+}
+
+function addressSelected (addressComponents, cfId) {
+  if (addressComponents && store.getters['customFields/getCustomFields']['cf' + cfId]) {
+    const cf = store.getters['customFields/getCustomFields']['cf' + cfId]
+    cf.components = mapAddressComponentsForXML(addressComponents)
+    store.commit('customFields/setCustomField', cf)
+  }
+}
+
 // * Responsive - Container Width
 let cWidth = inject('containerWidth')
 let dWidth = inject('dialogWidth')
@@ -583,6 +699,43 @@ let componentWidth = computed(() => {
 })
 
 let responsiveClass = computed(() => useResponsiveClass(componentWidth.value))
+
+let socialProvider = ref('')
+const VueAuthenticateInstance = VueAuthenticate.factory(httpClient, SocialAuthOptions)
+// * Facebook Sign in error alert
+let authError = ref(false)
+let authErrorMessage = ref('')
+
+function onSignupSocial({ provider, credentials }) {
+  const socialCheckUrl = `/users/authentication/${provider}`
+  const data = {}
+  socialProvider = provider
+
+  if (provider === 'google') {
+    data.code = credentials
+    httpClient.post(`${socialCheckUrl}`, data).then(response => {
+      setDataFromSocialLogin(response.data.data.user)
+    })
+  }
+  if (provider === 'facebook') {
+    VueAuthenticateInstance.options.providers[provider].url = `${socialCheckUrl}`
+    VueAuthenticateInstance.authenticate(provider, data).then((response) => {
+      setDataFromSocialLogin(response.data.data.user)
+    }).catch((error) => {
+      if (!VueAuthenticateInstance.isAuthenticated()) {
+        authError.value = true
+        authErrorMessage.value = 'User is not authenticated.'
+        store.commit('setLoading', false)
+      }
+    })
+  }
+}
+
+function setDataFromSocialLogin(data) {
+  infoFormData.value.firstName = data.firstName
+  infoFormData.value.lastName = data.lastName
+  infoFormData.value.email = data.email
+}
 </script>
 
 <script>
@@ -601,6 +754,79 @@ export default {
     * {
       box-sizing: border-box;
       word-break: break-word;
+    }
+
+    &__social-wrapper {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      width: 100%;
+      margin: 8px 0 24px;
+      gap: 24px;
+
+      .am-social-signin {
+        &__google {
+          #g_id_onload {
+            display: none;
+          }
+          .g_id_signin {
+            width: 64px;
+          }
+        }
+      }
+
+      &__label {
+        font-weight: 500;
+        font-size: 15px;
+        color: var(--black, #04080B);
+      }
+
+      &-button {
+        display: flex;
+        gap: 8px;
+        padding: 8px;
+        justify-content: center;
+        align-items: center;
+        border-radius: 6px;
+        flex: 1 1 0;
+        height: 40px;
+        box-sizing: border-box;
+        border: 1px solid $shade-250;
+        background: var(--white, #FFF);
+        cursor: pointer;
+        width: 100%;
+        max-width: 100%;
+        box-shadow: 0 2px 2px 0 rgba(14, 25, 32, 0.03);
+        color: var(--black, #04080B);
+        font-size: 15px;
+        font-weight: 500;
+      }
+    }
+
+    &__social-divider {
+      align-items: center;
+      display: flex;
+      margin-bottom: 24px;
+
+      // Before & After
+      &:before,
+      &:after {
+        background: var(--shade-250, #D1D5D7);
+        content: '';
+        height: 1px;
+        width: 100%;
+      }
+
+      span {
+        flex: none;
+        font-size: 15px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 24px;
+        color: var(--shade-500, #808A90);
+        margin-left: 8px;
+        margin-right: 8px;
+      }
     }
 
     &__main {
@@ -647,6 +873,22 @@ export default {
 
         &.am-cf-width-100 {
           width: 100%;
+        }
+
+        &.am-subscribe {
+          width: 100%;
+          .el-checkbox {
+            &__input {
+              height: 32px;
+              line-height: 32px;
+              align-items: center;
+            }
+
+            &__label {
+              line-height: 32px;
+              align-items: center;
+            }
+          }
         }
 
         .el-form-item {

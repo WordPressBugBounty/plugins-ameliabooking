@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -8,6 +9,7 @@ namespace AmeliaBooking\Infrastructure\WP\EventListeners\Booking\Event;
 
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Services\Booking\BookingApplicationService;
+use AmeliaBooking\Application\Services\Integration\ApplicationIntegrationService;
 use AmeliaBooking\Application\Services\Notification\EmailNotificationService;
 use AmeliaBooking\Application\Services\Notification\SMSNotificationService;
 use AmeliaBooking\Application\Services\Notification\AbstractWhatsAppNotificationService;
@@ -16,9 +18,7 @@ use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Factory\Booking\Event\EventFactory;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Infrastructure\Common\Container;
-use AmeliaBooking\Application\Services\Zoom\AbstractZoomApplicationService;
-use AmeliaBooking\Infrastructure\Services\Google\AbstractGoogleCalendarService;
-use AmeliaBooking\Infrastructure\Services\Outlook\AbstractOutlookCalendarService;
+use Microsoft\Graph\Exception\GraphException;
 
 /**
  * Class EventStatusUpdatedEventHandler
@@ -28,7 +28,7 @@ use AmeliaBooking\Infrastructure\Services\Outlook\AbstractOutlookCalendarService
 class EventStatusUpdatedEventHandler
 {
     /** @var string */
-    const EVENT_STATUS_UPDATED = 'eventStatusUpdated';
+    public const EVENT_STATUS_UPDATED = 'eventStatusUpdated';
 
     /**
      * @param CommandResult $commandResult
@@ -36,12 +36,14 @@ class EventStatusUpdatedEventHandler
      *
      * @throws \Slim\Exception\ContainerValueNotFoundException
      * @throws \AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException
-     * @throws \Interop\Container\Exception\ContainerException
      * @throws \AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException
      * @throws \AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException
+     * @throws GraphException
      */
     public static function handle($commandResult, $container)
     {
+        /** @var ApplicationIntegrationService $applicationIntegrationService */
+        $applicationIntegrationService = $container->get('application.integration.service');
         /** @var EmailNotificationService $emailNotificationService */
         $emailNotificationService = $container->get('application.emailNotification.service');
         /** @var SMSNotificationService $smsNotificationService */
@@ -50,14 +52,8 @@ class EventStatusUpdatedEventHandler
         $whatsAppNotificationService = $container->get('application.whatsAppNotification.service');
         /** @var SettingsService $settingsService */
         $settingsService = $container->get('domain.settings.service');
-        /** @var AbstractZoomApplicationService $zoomService */
-        $zoomService = $container->get('application.zoom.service');
         /** @var BookingApplicationService $bookingApplicationService */
         $bookingApplicationService = $container->get('application.booking.booking.service');
-        /** @var AbstractGoogleCalendarService $googleCalendarService */
-        $googleCalendarService = $container->get('infrastructure.google.calendar.service');
-        /** @var AbstractOutlookCalendarService $outlookCalendarService */
-        $outlookCalendarService = $container->get('infrastructure.outlook.calendar.service');
 
         $events = $commandResult->getData()[Entities::EVENTS];
 
@@ -67,25 +63,15 @@ class EventStatusUpdatedEventHandler
 
             $bookingApplicationService->setReservationEntities($reservationObject);
 
-            if ($zoomService) {
-                $zoomService->handleEventMeeting($reservationObject, $reservationObject->getPeriods(), self::EVENT_STATUS_UPDATED);
-
-                $events['periods'] = $reservationObject->getPeriods()->toArray();
-            }
-
-            if ($googleCalendarService) {
-                try {
-                    $googleCalendarService->handleEventPeriodsChange($reservationObject, self::EVENT_STATUS_UPDATED, $reservationObject->getPeriods());
-                } catch (\Exception $e) {
-                }
-            }
-
-            if ($outlookCalendarService) {
-                try {
-                    $outlookCalendarService->handleEventPeriod($reservationObject, self::EVENT_STATUS_UPDATED, $reservationObject->getPeriods());
-                } catch (\Exception $e) {
-                }
-            }
+            $applicationIntegrationService->handleEvent(
+                $reservationObject,
+                $reservationObject->getPeriods(),
+                $event,
+                ApplicationIntegrationService::EVENT_STATUS_UPDATED,
+                [
+                    ApplicationIntegrationService::SKIP_LESSON_SPACE => true,
+                ]
+            );
 
             $emailNotificationService->sendAppointmentStatusNotifications($event, false, true);
 

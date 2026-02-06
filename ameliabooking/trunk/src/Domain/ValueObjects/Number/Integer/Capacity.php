@@ -6,10 +6,10 @@ use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 
 final class Capacity
 {
-    const MIN = 1;
-    const MAX = 10;
+    public const MIN = 1;
+    public const MAX = 10;
     /**
-     * @var string
+     * @var int
      */
     private $capacity;
 
@@ -23,8 +23,10 @@ final class Capacity
     public function __construct($capacity)
     {
         if (!filter_var($capacity, FILTER_VALIDATE_INT)) {
-            throw new InvalidArgumentException("Capacity '$capacity' must be whole number between " .
-                self::MIN . ' and ' . self::MAX);
+            throw new InvalidArgumentException(
+                "Capacity '$capacity' must be whole number between " .
+                self::MIN . ' and ' . self::MAX
+            );
         }
         $this->capacity = (int)$capacity;
     }

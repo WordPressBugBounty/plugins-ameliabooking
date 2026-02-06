@@ -247,10 +247,15 @@ class TimeSlotService
 
             if ($app->getServiceId()->getValue() === $serviceId) {
                 $persons = 0;
+                $personsWaiting = 0;
 
                 /** @var CustomerBooking $booking */
                 foreach ($app->getBookings()->getItems() as $booking) {
-                    $persons += $booking->getPersons()->getValue();
+                    if ($booking->getStatus()->getValue() !== BookingStatus::WAITING) {
+                        $persons += $booking->getPersons()->getValue();
+                    } else {
+                        $personsWaiting += $booking->getPersons()->getValue();
+                    }
                 }
 
                 $status = $app->getStatus()->getValue();
@@ -301,6 +306,7 @@ class TimeSlotService
                             'end'        => $app->getBookingEnd()->getValue()->format('Y-m-d H:i:s'),
                             'serviceId'  => $app->getServiceId()->getValue(),
                             'duration'   => ($duration->days * 24 * 60) + ($duration->h * 60) + $duration->i,
+                            'waiting'    => $personsWaiting,
                         ];
                 }
             } elseif ($app->getServiceId()->getValue()) {
@@ -767,12 +773,15 @@ class TimeSlotService
                     }
 
                     if ($timePeriod[1] === 86400) {
-                        $nextDateString = DateTimeService::getDateTimeObjectInTimeZone(
+                        $nextDate = DateTimeService::getDateTimeObjectInTimeZone(
                             $dateKey . ' 00:00:00',
                             $timeZone
-                        )->modify('+1 days')->format('Y-m-d');
+                        )->modify('+1 days');
+
+                        $nextDateString = $nextDate->format('Y-m-d');
 
                         if (
+                            $nextDate->format('j') !== '1' &&
                             isset($freeIntervals[$nextDateString][$providerKey]['intervals'][0]) &&
                             $freeIntervals[$nextDateString][$providerKey]['intervals'][0][0] === 0
                         ) {
@@ -924,7 +933,7 @@ class TimeSlotService
                         $time = sprintf('%02d', floor($timeSlot / 3600)) . ':'
                             . sprintf('%02d', floor(($timeSlot / 60) % 60));
 
-                        if ($time !== '24:00') {
+                        if ($timeSlot <= 86400) {
                             if (!$structured) {
                                 $availableResult[$dateKey][$time] = $data;
                             } else {
@@ -1064,6 +1073,7 @@ class TimeSlotService
                         'c' => $appointmentData['places'],
                         's' => $appointmentData['serviceId'],
                         'd' => $appointmentData['duration'],
+                        'w' => $appointmentData['waiting'] ?? 0,
                     ];
                 }
 
@@ -1312,6 +1322,10 @@ class TimeSlotService
 
             $freeSlots['appCount'][$providerKey] = $providerSlots['appCount'];
 
+            if (!empty($settings['allowAdminBookOverApp']) && !$props['isFrontEndBooking'] && $props['structured']) {
+                $this->setBookedTimeSlots($providerSlots);
+            }
+
             foreach (['available', 'occupied'] as $type) {
                 if ($provider->getTimeZone()) {
                     $providerSlots[$type] = $this->getSlotsInMainTimeZoneFromTimeZone(
@@ -1343,5 +1357,70 @@ class TimeSlotService
         }
 
         return $freeSlots;
+    }
+
+    /**
+     * @param array  $freeSlots
+     *
+     * @throws Exception
+     */
+    private function setBookedTimeSlots(&$freeSlots)
+    {
+        foreach (['available', 'occupied'] as $type) {
+            foreach ($freeSlots[$type] as $dateString => $timeSlots) {
+                foreach ($timeSlots as $timeString => $slots) {
+                    foreach ($slots as $slot) {
+                        if (isset($slot['d'])) {
+                            $appointmentStart = $this->intervalService->getSeconds($timeString . ':00') / 60;
+
+                            $isSameDay = $appointmentStart + $slot['d'] <= 1440;
+
+                            $appointmentEnd = $isSameDay
+                                ? $appointmentStart + $slot['d']
+                                : $appointmentStart + $slot['d'] - 1440;
+
+                            if (isset($freeSlots['available'][$dateString])) {
+                                foreach ($freeSlots['available'][$dateString] as $inspectedTimeString => $inspectedSlotData) {
+                                    $inspectedSlot = $this->intervalService->getSeconds($inspectedTimeString . ':00') / 60;
+
+                                    if (
+                                        $inspectedSlot > $appointmentStart &&
+                                        $inspectedSlot < ($isSameDay ? $appointmentEnd : 1440)
+                                    ) {
+                                        foreach ($inspectedSlotData as $inspectedIndex => $inspectedSlot) {
+                                            if ($slot['e'] === $inspectedSlot['e']) {
+                                                $freeSlots['available'][$dateString][$inspectedTimeString][$inspectedIndex]['i'] = true;
+
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (!$isSameDay) {
+                                $nextDateString = (
+                                new \DateTime($dateString, DateTimeService::getTimeZone())
+                                )->modify('+1 day')->format('Y-m-d');
+
+                                if (isset($freeSlots['available'][$nextDateString])) {
+                                    foreach ($freeSlots['available'][$nextDateString] as $inspectedTimeString => $inspectedSlotData) {
+                                        $inspectedSlot = $this->intervalService->getSeconds($inspectedTimeString . ':00') / 60;
+
+                                        if ($inspectedSlot < $appointmentEnd) {
+                                            foreach ($inspectedSlotData as $inspectedIndex => $inspectedSlot) {
+                                                if ($slot['e'] === $inspectedSlot['e']) {
+                                                    $freeSlots['available'][$nextDateString][$inspectedTimeString][$inspectedIndex] = true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -17,25 +17,37 @@
       </span>
 
       <div
-        v-if="item.googleMeetLink || item.zoomLink || item.lessonSpaceLink"
+        v-if="
+          (amSettings.featuresIntegrations.googleCalendar.enabled && item.googleMeetLink) ||
+          (amSettings.featuresIntegrations.zoom.enabled && item.zoomLink) ||
+          (amSettings.featuresIntegrations.lessonSpace.enabled && item.lessonSpaceLink) ||
+          (amSettings.featuresIntegrations.outlookCalendar.enabled && item.microsoftTeamsLink)
+        "
         class="am-cc__periods-link__list"
       >
         <!-- GoogleMeet Link -->
-        <a v-if="item.googleMeetLink" class="am-cc__periods-link" :href="item.googleMeetLink" target="_blank">
+        <a v-if="amSettings.featuresIntegrations.googleCalendar.enabled && item.googleMeetLink" class="am-cc__periods-link" :href="item.googleMeetLink" target="_blank">
           <span class="am-icon-link"></span>
           {{ amLabels.google_meet_link }}
         </a>
         <!-- /GoogleMeet link -->
 
+        <!-- Microsoft Teams Link -->
+        <a v-if="amSettings.featuresIntegrations.outlookCalendar.enabled && item.microsoftTeamsLink" class="am-cc__periods-link" :href="item.microsoftTeamsLink" target="_blank">
+          <span class="am-icon-link"></span>
+          {{ amLabels.microsoft_teams_link }}
+        </a>
+        <!-- /Microsoft Teams link -->
+
         <!-- Zoom Link -->
-        <a v-if="item.zoomLink" class="am-cc__periods-link" :href="item.zoomLink" target="_blank">
+        <a v-if="amSettings.featuresIntegrations.zoom.enabled && item.zoomLink" class="am-cc__periods-link" :href="item.zoomLink" target="_blank">
           <span class="am-icon-link"></span>
           {{ amLabels.zoom_link }}
         </a>
         <!-- /Zoom link -->
 
         <!-- Lesson Space Link -->
-        <a v-if="item.lessonSpaceLink" class="am-cc__periods-link" :href="item.lessonSpaceLink" target="_blank">
+        <a v-if="amSettings.featuresIntegrations.lessonSpace.enabled && item.lessonSpaceLink" class="am-cc__periods-link" :href="item.lessonSpaceLink" target="_blank">
           <span class="am-icon-link"></span>
           {{ amLabels.lesson_space_link }}
         </a>
@@ -58,6 +70,9 @@ import { getFrontedFormattedDate, getFrontedFormattedTime } from "../../../../..
 
 // * Vars
 const amLabels = inject('amLabels')
+
+// * Settings
+const amSettings = inject('settings')
 
 let props = defineProps({
   data: {

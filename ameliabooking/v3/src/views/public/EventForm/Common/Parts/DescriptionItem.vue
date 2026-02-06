@@ -11,15 +11,13 @@
     </p>
     <p
       v-if="showMore && props.description.replace(/<[^>]*>?/gm, '').length > props.limit"
-      class="am-eli__description-text"
-      :class="{'ql-description': props.description.includes('<!-- Content -->')}"
+      class="am-eli__description-text ql-description"
       v-html="props.description.slice(0, props.limit) + '...'"
     >
     </p>
     <p
       v-else
-      class="am-eli__description-text"
-      :class="{'ql-description': props.description.includes('<!-- Content -->')}"
+      class="am-eli__description-text ql-description"
       v-html="props.description"
     >
     </p>

@@ -7,6 +7,7 @@ use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Services\Bookable\BookableApplicationService;
 use AmeliaBooking\Application\Services\Bookable\AbstractPackageApplicationService;
+use AmeliaBooking\Application\Services\Booking\EventApplicationService;
 use AmeliaBooking\Application\Services\Coupon\AbstractCouponApplicationService;
 use AmeliaBooking\Application\Services\CustomField\AbstractCustomFieldApplicationService;
 use AmeliaBooking\Application\Services\Helper\HelperService;
@@ -18,9 +19,11 @@ use AmeliaBooking\Application\Services\User\UserApplicationService;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\AuthorizationException;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
+use AmeliaBooking\Domain\Entity\Bookable\Service\Package;
 use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
 use AmeliaBooking\Domain\Entity\Booking\Event\Event;
 use AmeliaBooking\Domain\Entity\Coupon\Coupon;
+use AmeliaBooking\Domain\Entity\CustomField\CustomField;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Entity\User\Customer;
@@ -44,27 +47,18 @@ use AmeliaBooking\Infrastructure\Repository\Coupon\CouponRepository;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use AmeliaBooking\Infrastructure\Services\LessonSpace\AbstractLessonSpaceService;
+use AmeliaBooking\Infrastructure\Services\Mailchimp\AbstractMailchimpService;
 use AmeliaBooking\Infrastructure\Services\Payment\SquareService;
-use Interop\Container\Exception\ContainerException;
 
-/**
- * Class GetEntitiesCommandHandler
- *
- * @package AmeliaBooking\Application\Commands\Entities
- */
 class GetEntitiesCommandHandler extends CommandHandler
 {
     /**
-     * @param GetEntitiesCommand $command
-     *
-     * @return CommandResult
      * @throws AccessDeniedException
-     * @throws ContainerException
      * @throws InvalidArgumentException
      * @throws NotFoundException
      * @throws QueryExecutionException
      */
-    public function handle(GetEntitiesCommand $command)
+    public function handle(GetEntitiesCommand $command): CommandResult
     {
         /** @var UserApplicationService $userAS */
         $userAS = $this->container->get('application.user.service');
@@ -99,47 +93,40 @@ class GetEntitiesCommandHandler extends CommandHandler
 
         $params = $command->getField('params');
 
+        $params['types'] = !empty($params['types']) ? $params['types'] : [];
+
         $result = new CommandResult();
 
         $this->checkMandatoryFields($command);
 
-        /** @var Collection $allServices */
         $allServices = new Collection();
-
-        /** @var Collection $services */
         $services = new Collection();
-
-        /** @var Collection $locations */
         $locations = new Collection();
-
-        /** @var Collection $categories */
         $categories = new Collection();
-
-        /** @var Collection $events */
         $events = new Collection();
 
         $resultData = [];
 
-
+        /** @var SettingsService $settingsDS */
+        $settingsDS = $this->container->get('domain.settings.service');
 
         /** Events */
         if (in_array(Entities::EVENTS, $params['types'], true)) {
-            /** @var EventRepository $eventRepository */
-            $eventRepository = $this->container->get('domain.booking.event.repository');
+            /** @var EventApplicationService $eventAS */
+            $eventAS = $this->container->get('application.booking.event.service');
 
-            $dateFilter = ['dates' => [DateTimeService::getNowDateTime()], 'itemsPerPage' => 10000, 'page' => 1];
+            $events = $eventAS->getEventsByCriteria(
+                [
+                    'dates' => [DateTimeService::getNowDateTime()],
+                    'page'  => 1,
+                ],
+                [
+                    'fetchEventsPeriods' => true,
+                ],
+                $settingsDS->getSetting('general', 'eventsFilterLimit') ?: 1000
+            );
 
-            /** @var Collection $events */
-            $events = $eventRepository->getFiltered($dateFilter);
-
-            /** @var Event $event */
-            foreach ($events->getItems() as $event) {
-                $event->setBookings(new Collection());
-            }
-
-            $resultData['events'] = $events->toArray();
-
-            $resultData['events'] = $eventDS->getShortcodeForEventList($this->container, $resultData['events']);
+            $resultData['events'] = $eventDS->getShortcodeForEventList($this->container, $events->toArray());
         }
 
         /** Event Tags */
@@ -147,7 +134,6 @@ class GetEntitiesCommandHandler extends CommandHandler
             /** @var EventTagsRepository $eventTagsRepository */
             $eventTagsRepository = $this->container->get('domain.booking.event.tag.repository');
 
-            /** @var Collection $eventsTags */
             $eventsTags = $eventTagsRepository->getAllDistinctByCriteria(
                 $events->length() ? ['eventIds' => array_column($events->toArray(), 'id')] : []
             );
@@ -155,10 +141,10 @@ class GetEntitiesCommandHandler extends CommandHandler
             $resultData['tags'] = $eventsTags->toArray();
         }
 
-        if (in_array(Entities::LOCATIONS, $params['types'], true) ||
+        if (
+            in_array(Entities::LOCATIONS, $params['types'], true) ||
             in_array(Entities::EMPLOYEES, $params['types'], true)
         ) {
-            /** @var Collection $locations */
             $locations = $locationAS->getAllOrderedByName();
         }
 
@@ -167,7 +153,8 @@ class GetEntitiesCommandHandler extends CommandHandler
             $resultData['locations'] = $locations->toArray();
         }
 
-        if (in_array(Entities::CATEGORIES, $params['types'], true) ||
+        if (
+            in_array(Entities::CATEGORIES, $params['types'], true) ||
             in_array(Entities::EMPLOYEES, $params['types'], true) ||
             in_array(Entities::COUPONS, $params['types'], true)
         ) {
@@ -178,20 +165,23 @@ class GetEntitiesCommandHandler extends CommandHandler
             /** @var BookableApplicationService $bookableAS */
             $bookableAS = $this->container->get('application.bookable.service');
 
-            /** @var Collection $allServices */
             $allServices = $serviceRepository->getAllArrayIndexedById();
 
             /** @var Service $service */
             foreach ($allServices->getItems() as $service) {
-                if ($service->getStatus()->getValue() === Status::VISIBLE ||
-                    Licence::$premium ||
+                if ($settingsDS->isFeatureEnabled('customPricing') === false) {
+                    $service->setCustomPricing(null);
+                }
+
+                if (
+                    $service->getStatus()->getValue() === Status::VISIBLE ||
+                    Licence::isPremium() ||
                     ($currentUser && $currentUser->getType() === AbstractUser::USER_ROLE_ADMIN)
                 ) {
                     $services->addItem($service, $service->getId()->getValue());
                 }
             }
 
-            /** @var Collection $categories */
             $categories = $categoryRepository->getAllIndexedById();
 
             $bookableAS->addServicesToCategories($categories, $services);
@@ -202,8 +192,6 @@ class GetEntitiesCommandHandler extends CommandHandler
             $resultData['categories'] = $categories->toArray();
         }
 
-        /** @var SettingsService $settingsDS */
-        $settingsDS = $this->container->get('domain.settings.service');
 
         $resultData['customers'] = [];
 
@@ -239,15 +227,22 @@ class GetEntitiesCommandHandler extends CommandHandler
                 }
             }
 
-            $noShowTagEnabled = $settingsDS->getSetting('roles', 'enableNoShowTag');
+            $noShowTagEnabled = $settingsDS->isFeatureEnabled('noShowTag');
 
             if ($noShowTagEnabled && $resultData['customers']) {
                 /** @var CustomerBookingRepository $bookingRepository */
                 $bookingRepository = $this->container->get('domain.booking.customerBooking.repository');
 
-                $usersIds = array_map(function ($user) { return $user['id']; }, $resultData['customers']);
+                $usersIds = array_map(
+                    function ($user) {
+                        return $user['id'];
+                    },
+                    $resultData['customers']
+                );
 
                 $customersNoShowCount =  $bookingRepository->countByNoShowStatus($usersIds);
+
+                $customersNoShowCount = $customersNoShowCount ? array_values($customersNoShowCount) : [];
 
                 foreach ($resultData['customers'] as $key => $customer) {
                     $resultData['customers'][$key]['noShowCount'] = $customersNoShowCount[$key]['count'];
@@ -260,15 +255,22 @@ class GetEntitiesCommandHandler extends CommandHandler
             /** @var ProviderRepository $providerRepository */
             $providerRepository = $this->container->get('domain.users.providers.repository');
 
-            /** @var Collection $testProviders */
-            $providers = $providerRepository->getWithSchedule([]);
+            $providers = $providerRepository->getWithSchedule(
+                [
+                    'dates' => !empty($params['dates']) ? $params['dates'] : [
+                        DateTimeService::getNowDateTimeObject()->modify('-1 days')->format('Y-m-d H:i:s')
+                    ],
+                    'fetchCalendars' => $currentUser && $currentUser->getType() === AbstractUser::USER_ROLE_ADMIN,
+                ]
+            );
 
             /** @var Provider $provider */
             foreach ($providers->getItems() as $provider) {
                 $providerService->setProviderServices($provider, $services, true);
             }
 
-            if (array_key_exists('page', $params) &&
+            if (
+                array_key_exists('page', $params) &&
                 in_array($params['page'], [Entities::CALENDAR, Entities::APPOINTMENTS]) &&
                 $userAS->isAdminAndAllowedToBookAtAnyTime()
             ) {
@@ -284,19 +286,41 @@ class GetEntitiesCommandHandler extends CommandHandler
                 }
             }
 
-
             $resultData['employees'] = $providerAS->removeAllExceptUser(
                 $providers->toArray(),
                 (array_key_exists('page', $params) && $params['page'] === Entities::BOOKING) ?
                     null : $currentUser
             );
 
-            if ($currentUser === null ||
+            // Add calendar list to each provider's Google Calendar data
+            $settingsDS->getSetting('general', 'googleCalendar');
+            $googleCalendar = $settingsDS->getSetting('googleCalendar', 'accessToken');
+            $calendarList = [];
+
+            if ($googleCalendar) {
+                $googleCalendarMiddlewareService = $this->container->get('infrastructure.google.calendar.middleware.service');
+
+                $accessToken = json_decode($googleCalendar, true);
+                $calendarList = $googleCalendarMiddlewareService->getCalendarList($accessToken);
+            }
+
+            foreach ($resultData['employees'] as &$employee) {
+                if ($employee['googleCalendar'] && $employee['googleCalendar']['token']) {
+                    continue;
+                }
+
+                $employee['googleCalendarList'] = $calendarList;
+            }
+
+            if (
+                $currentUser === null ||
                 $currentUser->getType() === AbstractUser::USER_ROLE_CUSTOMER ||
                 !$command->getPermissionService()->currentUserCanRead(Entities::EMPLOYEES)
             ) {
                 foreach ($resultData['employees'] as &$employee) {
                     unset(
+                        $employee['appleCalendarId'],
+                        $employee['googleCalendarId'],
                         $employee['googleCalendar'],
                         $employee['outlookCalendar'],
                         $employee['stripeConnect'],
@@ -304,7 +328,8 @@ class GetEntitiesCommandHandler extends CommandHandler
                         $employee['email'],
                         $employee['externalId'],
                         $employee['phone'],
-                        $employee['note']
+                        $employee['note'],
+                        $employee['employeeAppleCalendar'],
                     );
 
                     if (isset($params['page']) && $params['page'] !== Entities::CALENDAR) {
@@ -339,7 +364,6 @@ class GetEntitiesCommandHandler extends CommandHandler
             /** @var AppointmentRepository $appointmentRepo */
             $appointmentRepo = $this->container->get('domain.booking.appointment.repository');
 
-            /** @var Collection $appointments */
             $appointments = $appointmentRepo->getFiltered($userParams);
 
             $resultData[Entities::APPOINTMENTS] = [
@@ -348,10 +372,10 @@ class GetEntitiesCommandHandler extends CommandHandler
         }
 
         /** Custom Fields */
-        if (in_array(Entities::CUSTOM_FIELDS, $params['types'], true) ||
+        if (
+            in_array(Entities::CUSTOM_FIELDS, $params['types'], true) ||
             in_array('customFields', $params['types'], true)
         ) {
-            /** @var Collection $customFields */
             $customFields = $customFieldAS->getAll();
 
             if (!empty($params['lite'])) {
@@ -389,10 +413,10 @@ class GetEntitiesCommandHandler extends CommandHandler
         }
 
         /** Coupons */
-        if (in_array(Entities::COUPONS, $params['types'], true) &&
+        if (
+            in_array(Entities::COUPONS, $params['types'], true) &&
             $this->getContainer()->getPermissionsService()->currentUserCanRead(Entities::COUPONS)
         ) {
-            /** @var Collection $coupons */
             $coupons = $couponAS->getAll();
 
             /** @var CouponRepository $couponRepository */
@@ -409,36 +433,53 @@ class GetEntitiesCommandHandler extends CommandHandler
                     /** @var Coupon $coupon */
                     $coupon = $coupons->getItem($ids['couponId']);
 
+                    if ($coupon->getAllServices() && $coupon->getAllServices()->getValue()) {
+                        $coupon->setServiceList(new Collection($allServices->getItems()));
+                        continue;
+                    }
+
                     $coupon->getServiceList()->addItem(
                         $allServices->getItem($ids['serviceId']),
                         $ids['serviceId']
                     );
                 }
 
-                /** @var Collection $allEvents */
                 $allEvents = $eventRepository->getAllIndexedById();
 
                 foreach ($couponRepository->getCouponsEventsIds($coupons->keys()) as $ids) {
                     /** @var Coupon $coupon */
                     $coupon = $coupons->getItem($ids['couponId']);
 
-                    $coupon->getEventList()->addItem(
-                        $allEvents->getItem($ids['eventId']),
-                        $ids['eventId']
-                    );
+                    if ($coupon->getAllEvents() && $coupon->getAllEvents()->getValue()) {
+                        $coupon->setEventList(new Collection($allEvents->getItems()));
+                        continue;
+                    }
+
+                    if ($allEvents->keyExists($ids['eventId'])) {
+                        $coupon->getEventList()->addItem(
+                            $allEvents->getItem($ids['eventId']),
+                            $ids['eventId']
+                        );
+                    }
                 }
 
-                /** @var Collection $allPackages */
                 $allPackages = $packageRepository->getAllIndexedById();
 
                 foreach ($couponRepository->getCouponsPackagesIds($coupons->keys()) as $ids) {
                     /** @var Coupon $coupon */
                     $coupon = $coupons->getItem($ids['couponId']);
 
-                    $coupon->getPackageList()->addItem(
-                        $allPackages->getItem($ids['packageId']),
-                        $ids['packageId']
-                    );
+                    if ($coupon->getAllPackages() && $coupon->getAllPackages()->getValue()) {
+                        $coupon->setPackageList(new Collection($allPackages->getItems()));
+                        continue;
+                    }
+
+                    if ($allPackages->keyExists($ids['packageId'])) {
+                        $coupon->getPackageList()->addItem(
+                            $allPackages->getItem($ids['packageId']),
+                            $ids['packageId']
+                        );
+                    }
                 }
             }
 
@@ -510,13 +551,36 @@ class GetEntitiesCommandHandler extends CommandHandler
             $daysOff = $settingsAS->getDaysOff();
 
             $squareLocations = [];
-            if (!empty($settingsDS->getSetting('payments', 'square')['accessToken']['access_token'])
-                && in_array('squareLocations', $params['types'])) {
+            if (
+                !empty($settingsDS->getSetting('payments', 'square')['accessToken']['access_token'])
+                && in_array('squareLocations', $params['types'])
+            ) {
                 /** @var SquareService $squareService */
                 $squareService = $this->container->get('infrastructure.payment.square.service');
 
                 try {
                     $squareLocations = $squareService->getLocations();
+                } catch (\Exception $e) {
+                }
+            }
+
+            $mailchimpLists = [];
+            if (
+                $settingsDS->isFeatureEnabled('mailchimp') &&
+                !empty($settingsDS->getSetting('mailchimp', 'accessToken')) &&
+                in_array('mailchimpLists', $params['types'])
+            ) {
+                /** @var AbstractMailchimpService $mailchimpService */
+                $mailchimpService = $this->container->get('infrastructure.mailchimp.service');
+
+                try {
+                    $mailchimpLists = $mailchimpService->getLists();
+
+                    $mailchimpSettings = $settingsDS->getCategorySettings('mailchimp');
+                    if (!empty($mailchimpLists) && !$mailchimpSettings['list']) {
+                        $mailchimpSettings['list'] = $mailchimpLists[0];
+                        $settingsDS->setCategorySettings('mailchimp', $mailchimpSettings);
+                    }
                 } catch (\Exception $e) {
                 }
             }
@@ -527,7 +591,8 @@ class GetEntitiesCommandHandler extends CommandHandler
                 ],
                 'languages' => $languagesSorted,
                 'daysOff'   => $daysOff,
-                'squareLocations' => $squareLocations
+                'squareLocations' => $squareLocations,
+                'mailchimpLists' => $mailchimpLists,
             ];
         }
 
@@ -544,7 +609,6 @@ class GetEntitiesCommandHandler extends CommandHandler
             /** @var AbstractResourceApplicationService $resourceApplicationService */
             $resourceApplicationService = $this->container->get('application.resource.service');
 
-            /** @var Collection $resources */
             $resources = $resourceApplicationService->getAll([]);
 
             $resultData['resources'] = $resources->toArray();
@@ -555,14 +619,16 @@ class GetEntitiesCommandHandler extends CommandHandler
             /** @var TaxApplicationService $taxApplicationService */
             $taxApplicationService = $this->container->get('application.tax.service');
 
-            /** @var Collection $taxes */
             $taxes = $taxApplicationService->getAll();
 
             $resultData['taxes'] = $taxes->toArray();
         }
 
         /** Lesson Spaces */
-        if (in_array('lessonSpace_spaces', $params['types'], true)) {
+        if (
+            in_array('lessonSpace_spaces', $params['types'], true) ||
+            in_array('spaces', $params['types'], true)
+        ) {
             $lessonSpaceApiKey    = $settingsDS->getSetting('lessonSpace', 'apiKey');
             $lessonSpaceEnabled   = $settingsDS->getSetting('lessonSpace', 'enabled');
             $lessonSpaceCompanyId = $settingsDS->getSetting('lessonSpace', 'companyId');

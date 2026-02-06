@@ -229,8 +229,7 @@
               class="am-fcis__info-content"
             >
               <div
-                class="am-fcis__info-service__desc"
-                :class="{'ql-description': service.description.includes('<!-- Content -->')}"
+                class="am-fcis__info-service__desc ql-description"
                 v-html="service.description"
               ></div>
             </div>
@@ -283,8 +282,7 @@
                   <template #default>
                     <div
                       v-if="useDescriptionVisibility(employee.description)"
-                      class="am-fcis__info-employee__description"
-                      :class="{'ql-description': employee.description.includes('<!-- Content -->')}"
+                      class="am-fcis__info-employee__description ql-description"
                       v-html="employee.description"
                     ></div>
                   </template>
@@ -505,7 +503,8 @@ import {
   computed,
   onMounted,
   reactive,
-  provide
+  provide,
+  watch
 } from "vue";
 
 // * Vuex
@@ -855,6 +854,40 @@ function durationTypeLabel(duration, type) {
 let empty = computed(() => {
   return Object.keys(service.value).length === 0 || serviceEmployees.value.length === 0
 })
+
+// * Appointment Waiting List: populate module on service selection
+watch(() => store.getters['booking/getServiceId'], (newServiceId) => {
+  // Reset first
+  store.dispatch('appointmentWaitingListOptions/resetWaitingOptions')
+
+  if (!newServiceId) return
+
+  let globalEnabled = !!(amSettings.featuresIntegrations?.waitingListAppointments?.enabled)
+  if (!globalEnabled) return
+
+  let service = store.getters['entities/getService'](newServiceId)
+  if (!service || !service.settings) return
+
+  let serviceSettings = null
+  try {
+    serviceSettings = JSON.parse(service.settings)
+  } catch (e) {
+    serviceSettings = null
+  }
+  if (!serviceSettings || !serviceSettings.waitingList || !serviceSettings.waitingList.enabled) return
+
+  const wl = serviceSettings.waitingList
+  // Backend may not yet supply peopleWaiting for appointments; default 0
+  let waitingPayload = {
+    enabled: !!wl.enabled,
+    maxCapacity: wl.maxCapacity || 0,
+    maxExtraPeople: wl.maxExtraPeople || 0,
+    maxExtraPeopleEnabled: !!wl.maxExtraPeopleEnabled,
+    peopleWaiting: wl.peopleWaiting || 0,
+    isWaitingListSlot: false
+  }
+  store.commit('appointmentWaitingListOptions/setAllData', waitingPayload)
+}, { immediate: true })
 
 // * Colors
 let amColors = inject('amColors')

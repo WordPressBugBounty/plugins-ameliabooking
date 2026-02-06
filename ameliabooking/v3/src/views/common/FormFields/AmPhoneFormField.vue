@@ -12,10 +12,11 @@
       <span class="am-ff__item-label" v-html="props.label" />
     </template>
     <AmInputPhone
+      :key="`phone-${localDefaultCode}-${props.refreshTrigger}`"
       v-model="model"
       :name="props.itemName"
       :placeholder="props.placeholder"
-      :default-code="props.defaultCode"
+      :default-code="localDefaultCode"
       :disabled="props.disabled"
       style="position: relative"
       @country-phone-iso-updated="countryPhoneIsoUpdated"
@@ -39,7 +40,9 @@ import {
   inject,
   ref,
   toRefs,
-  onMounted
+  onMounted,
+  watch,
+  nextTick
 } from "vue";
 
 // * Composables
@@ -91,6 +94,10 @@ let props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  refreshTrigger: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -106,11 +113,30 @@ let model = computed({
   }
 })
 
+// * Local ref for default code to handle reactivity
+let localDefaultCode = ref(props.defaultCode)
+
 function countryPhoneIsoUpdated (val) {
   emits('update:countryPhoneIso', val)
 }
 
+// * Watch for refresh trigger to update country code
+watch(() => props.refreshTrigger, () => {
+  nextTick(() => {
+    localDefaultCode.value = props.defaultCode
+    if (props.defaultCode) {
+      emits('update:countryPhoneIso', props.defaultCode.toLowerCase())
+    }
+  })
+})
+
+// * Watch for defaultCode changes
+watch(() => props.defaultCode, (newVal) => {
+  localDefaultCode.value = newVal
+})
+
 onMounted(() => {
+  localDefaultCode.value = props.defaultCode
   if (props.defaultCode) {
     emits('update:countryPhoneIso', props.defaultCode.toLowerCase())
   }

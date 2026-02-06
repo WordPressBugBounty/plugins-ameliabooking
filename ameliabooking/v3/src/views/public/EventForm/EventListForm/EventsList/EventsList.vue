@@ -225,7 +225,11 @@ let loading = computed(() => store.getters['getLoading'])
 
 let urlParams = useUrlQueryParams(window.location.href)
 watch(ready, (readyState) => {
-  if (readyState && urlParams && urlParams.ameliaEventPopup) {
+  if (readyState &&
+    urlParams &&
+    urlParams.ameliaEventPopup &&
+    store.getters['eventEntities/getEvents'].filter(i => i.id === parseInt(urlParams.ameliaEventPopup)).length
+  ) {
     selectEvent(parseInt(urlParams.ameliaEventPopup))
   }
 })

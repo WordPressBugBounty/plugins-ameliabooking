@@ -62,6 +62,7 @@ import { useStore } from "vuex";
 
 // * Composables
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation.js'
+import useAction from '../../../../../assets/js/public/actions'
 
 let props = defineProps({
   globalClass: {
@@ -127,8 +128,20 @@ let isWaitingList = computed(() => store.getters['eventWaitingListOptions/getAva
 
 // * Event Tickets
 let tickets = computed(() => {
-  let arr = store.getters['tickets/getTicketsData']
-  return arr.sort((a, b) => a.price - b.price)
+  const sorted = [...(store.getters['tickets/getTicketsData'] || [])].sort((a, b) => a.price - b.price)
+  if (window?.ameliaActions?.EventTickets) {
+    let override
+    useAction(
+      store,
+      { tickets: sorted, setTickets: arr => { if (Array.isArray(arr)) override = arr } },
+      'EventTickets',
+      'event',
+      null,
+      null
+    )
+    return Array.isArray(override) ? override : sorted
+  }
+  return sorted
 })
 
 // * Event Max Capacity

@@ -6,8 +6,8 @@
       </span>
     </template>
     <input
-      :name="field.label"
       v-model="infoFormRule.customFields"
+      :name="field.label"
       size="default"
       :type="field.type"
     />

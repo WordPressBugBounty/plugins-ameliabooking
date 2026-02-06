@@ -244,8 +244,7 @@
             class="am-fcip__info-content"
           >
             <div
-              class="am-fcip__info-service__desc"
-              :class="{'ql-description': pack.description.includes('<!-- Content -->')}"
+              class="am-fcip__info-service__desc ql-description"
               v-html="pack.description"
             ></div>
           </div>
@@ -287,8 +286,7 @@
                 <template #default>
                   <div
                     v-if="useDescriptionVisibility(employee.description)"
-                    class="am-fcip__info-employee__description"
-                    :class="{'ql-description': employee.description.includes('<!-- Content -->')}"
+                    class="am-fcip__info-employee__description ql-description"
                     v-html="employee.description"
                   ></div>
                 </template>
@@ -339,8 +337,7 @@
                 </span>
                 <template v-if="useDescriptionVisibility(book.service.description)">
                   <div
-                    class="am-fcip__include-service__info-description"
-                    :class="{'ql-description': book.service.description.includes('<!-- Content -->')}"
+                    class="am-fcip__include-service__info-description ql-description"
                     v-html="book.service.description"
                   ></div>
                 </template>

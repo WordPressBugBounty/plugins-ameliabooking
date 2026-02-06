@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -41,8 +42,8 @@ class SpecialDay
         DateTimeValue $endDate,
         Collection $periodList
     ) {
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
+        $this->startDate  = $startDate;
+        $this->endDate    = $endDate;
         $this->periodList = $periodList;
     }
 

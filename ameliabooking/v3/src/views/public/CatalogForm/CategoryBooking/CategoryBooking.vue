@@ -176,7 +176,7 @@
       </template>
       <template #footer>
         <MainContentFooter
-          :second-button-show="stepsArray[stepIndex] === congratulationsStep && amSettings.roles.customerCabinet.enabled && amSettings.roles.customerCabinet.pageUrl !== null"
+          :second-button-show="stepsArray[stepIndex] === congratulationsStep && amSettings.roles.customerCabinet.pageUrl !== null"
           :add-to-cart-button-show="useCartStep(store) && stepsArray[stepIndex] === cartStep"
           :back-to-cart-button-show="useCartStep(store) && cart.length > 1 && stepsArray[stepIndex] !== cartStep && stepsArray[stepIndex] !== infoStep && stepsArray[stepIndex] !== paymentStep && stepsArray[stepIndex] !== congratulationsStep"
           :booked="booked"
@@ -886,6 +886,10 @@ watch(stepIndex, (currStepIndex, prevStepIndex) => {
 let goBackToPackageBooking = ref(false)
 provide('goBackToPackageBooking', goBackToPackageBooking)
 
+// Provide cart step controls for nested components (e.g., Calendar). Bind current step index.
+provide('addCartStep', { addCartStep: () => addCartStep(stepIndex.value) })
+provide('removeCartStep', { removeCartStep })
+
 /**
  * Move to previous Form Step
  */
@@ -1273,6 +1277,8 @@ function addCartStep (index) {
     [],
     index
   )
+
+  sidebarDataUpdate()
 }
 
 function removeCartStep () {
@@ -1289,11 +1295,22 @@ function removeCartStep () {
     [],
     stepIndex.value
   )
+
+  sidebarDataUpdate()
 }
 
 let keepPaymentStep = computed(() => useCart(store).length ? usePrepaidPrice(store) !== 0 : useCheckingIfAllNotFree(store))
 
+// Appointment waiting list flag
+const isWaitingListBooking = computed(() => store.getters['appointmentWaitingListOptions/getIsWaitingListSlot'])
+
 watchEffect(() => {
+  // If waiting list, remove payment step
+  if (isWaitingListBooking.value) {
+    removePaymentsStep()
+    return
+  }
+
   let cart = useCart(store)
 
   if (!cart[0].serviceId && Object.keys(cart[0].services).length === 0) {

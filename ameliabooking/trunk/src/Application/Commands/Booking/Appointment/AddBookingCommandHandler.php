@@ -63,7 +63,8 @@ class AddBookingCommandHandler extends CommandHandler
 
         $validateCoupon = true;
 
-        if ($command->getField('validateCoupon') === false &&
+        if (
+            $command->getField('validateCoupon') === false &&
             $this->getContainer()->getPermissionsService()->currentUserCanWrite(Entities::COUPONS)
         ) {
             $validateCoupon = false;
@@ -79,7 +80,8 @@ class AddBookingCommandHandler extends CommandHandler
         /** @var UserApplicationService $userAS */
         $userAS = $this->container->get('application.user.service');
 
-        if ($command->getToken() &&
+        if (
+            $command->getToken() &&
             $command->getPage() === 'cabinet' &&
             $command->getCabinetType() === Entities::PROVIDER
         ) {
@@ -142,7 +144,7 @@ class AddBookingCommandHandler extends CommandHandler
             /** @var AbstractUser $user */
             $user = $this->container->get('logged.in.user');
 
-            if ($user->getType() === AbstractUser::USER_ROLE_ADMIN) {
+            if ($user && $user->getType() === AbstractUser::USER_ROLE_ADMIN) {
                 $appointmentData['payment'] = null;
 
                 $appointmentData['isCabinetBooking'] = true;
@@ -180,6 +182,10 @@ class AddBookingCommandHandler extends CommandHandler
                     $reservation->getLocale() ? $reservation->getLocale()->getValue() : '',
                     $reservation->isNewUser()->getValue()
                 );
+
+                if (!empty($appointmentData['packageBookingFromBackend'])) {
+                    $data['packageBookingFromBackend'] = $appointmentData['packageBookingFromBackend'];
+                }
 
                 $result->setData($data);
             }

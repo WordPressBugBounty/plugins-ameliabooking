@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -36,7 +37,7 @@ class TimeOut
         DateTimeValue $endTime
     ) {
         $this->startTime = $startTime;
-        $this->endTime = $endTime;
+        $this->endTime   = $endTime;
     }
 
     /**

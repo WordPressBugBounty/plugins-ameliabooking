@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -34,4 +35,12 @@ abstract class AbstractRecaptchaService
      * @return boolean
      */
     abstract public function verify($value);
+
+    /**
+     * @param string $value
+     * @param string $cabinetType
+     *
+     * @return boolean
+     */
+    abstract public function process($value, $cabinetType);
 }

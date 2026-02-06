@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -25,8 +26,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\AppointmentsTable;
  */
 class ServiceRepository extends AbstractRepository implements ServiceRepositoryInterface
 {
-
-    const FACTORY = ServiceFactory::class;
+    public const FACTORY = ServiceFactory::class;
 
     /** @var string */
     protected $providerServicesTable;
@@ -58,19 +58,35 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
     ) {
         parent::__construct($connection, $table);
         $this->providerServicesTable = $providerServicesTable;
-        $this->extrasTable = $extrasTable;
-        $this->serviceViewsTable = $serviceViewsTable;
-        $this->galleriesTable = $galleriesTable;
+        $this->extrasTable           = $extrasTable;
+        $this->serviceViewsTable     = $serviceViewsTable;
+        $this->galleriesTable        = $galleriesTable;
     }
 
     /**
      * @return Collection
      * @throws QueryExecutionException
      */
-    public function getAllArrayIndexedById()
+    public function getAllArrayIndexedById($ids = [])
     {
+        $where  = '';
+        $params = [];
+        if (!empty($ids)) {
+            $query = [];
+
+            foreach ((array)$ids as $index => $value) {
+                $param = ':id' . $index;
+
+                $query[] = $param;
+
+                $params[$param] = $value;
+            }
+
+            $where = 'WHERE s.id IN (' . implode(', ', $query) . ')';
+        }
+
         try {
-            $statement = $this->connection->query("SELECT
+            $statement = $this->connection->prepare("SELECT
                 s.id AS service_id,
                 s.name AS service_name,
                 s.description AS service_description,
@@ -121,7 +137,11 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
               FROM {$this->table} s
               LEFT JOIN {$this->extrasTable} e ON e.serviceId = s.id
               LEFT JOIN {$this->galleriesTable} g ON g.entityId = s.id AND g.entityType = 'service'
+              {$where}
               ORDER BY s.position, s.name ASC, e.position ASC, g.position ASC");
+
+            $statement->execute($params);
+
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
             throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
@@ -143,7 +163,7 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
     /**
      * @param Service $entity
      *
-     * @return bool
+     * @return int
      * @throws QueryExecutionException
      */
     public function add($entity)
@@ -167,7 +187,7 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
             ':pictureThumbPath' => $data['pictureThumbPath'],
             ':position'         => $data['position'],
             ':mandatoryExtra'   => $data['mandatoryExtra'] ? 1 : 0,
-            ':minSelectedExtras'=> $data['minSelectedExtras'],
+            ':minSelectedExtras' => $data['minSelectedExtras'],
         ];
 
         $additionalData = Licence\DataModifier::getServiceRepositoryData($data);
@@ -257,7 +277,7 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
             ':pictureThumbPath' => $data['pictureThumbPath'],
             ':position'         => $data['position'],
             ':mandatoryExtra'   => $data['mandatoryExtra'] ? 1 : 0,
-            ':minSelectedExtras'=> $data['minSelectedExtras'],
+            ':minSelectedExtras' => $data['minSelectedExtras'],
             ':id'               => $id
         ];
 
@@ -323,38 +343,66 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
             switch ($criteria['sort']) {
                 case ('nameAsc'):
                     $orderColumn = 's.name';
-
                     $orderDirection = 'ASC';
-
                     break;
 
                 case ('nameDesc'):
                     $orderColumn = 's.name';
-
                     $orderDirection = 'DESC';
-
                     break;
 
                 case ('priceAsc'):
                     $orderColumn = 's.price';
-
                     $orderDirection = 'ASC';
-
                     break;
 
                 case ('priceDesc'):
                     $orderColumn = 's.price';
-
                     $orderDirection = 'DESC';
+                    break;
 
+                case ('durationAsc'):
+                    $orderColumn = 's.duration';
+                    $orderDirection = 'ASC';
+                    break;
+
+                case ('durationDesc'):
+                    $orderColumn = 's.duration';
+                    $orderDirection = 'DESC';
+                    break;
+
+                case ('idAsc'):
+                    $orderColumn = 's.id';
+                    $orderDirection = 'ASC';
+                    break;
+
+                case ('idDesc'):
+                    $orderColumn = 's.id';
+                    $orderDirection = 'DESC';
                     break;
 
                 case ('custom'):
                     $orderColumn = 's.position, s.id';
-
                     $orderDirection = 'ASC';
-
                     break;
+            }
+        }
+
+        if (!empty($criteria['search'])) {
+            $terms = preg_split('/\s+/', trim($criteria['search']));
+            $termIndex = 0;
+
+            foreach ($terms as $term) {
+                $param = ":search{$termIndex}";
+                $params[$param] = "%{$term}%";
+
+                $where[] = "(
+                        s.name LIKE {$param}
+                        OR s.description LIKE {$param}
+                        OR s.id LIKE {$param}
+                    )";
+
+                $termIndex++;
             }
         }
 
@@ -410,6 +458,24 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
 
         $where = [];
 
+        if (!empty($criteria['search'])) {
+            $terms = preg_split('/\s+/', trim($criteria['search']));
+            $termIndex = 0;
+
+            foreach ($terms as $term) {
+                $param = ":search{$termIndex}";
+                $params[$param] = "%{$term}%";
+
+                $where[] = "(
+                        s.name LIKE {$param}
+                        OR s.description LIKE {$param}
+                        OR s.id LIKE {$param}
+                    )";
+
+                $termIndex++;
+            }
+        }
+
         if (!empty($criteria['categoryId'])) {
             $params[':categoryId'] = $criteria['categoryId'];
 
@@ -446,7 +512,8 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
     public function getProviderServicesWithExtras($serviceId, $userId)
     {
         try {
-            $statement = $this->connection->prepare("SELECT
+            $statement = $this->connection->prepare(
+                "SELECT
                 s.id AS service_id,
                 s.name AS service_name,
                 s.description AS service_description,
@@ -485,7 +552,8 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
               FROM {$this->table} s
               INNER JOIN {$this->providerServicesTable} ps ON s.id = ps.serviceId
               LEFT JOIN {$this->extrasTable} e ON e.serviceId = s.id
-              WHERE ps.userId = :userId AND ps.serviceId = :serviceId");
+              WHERE ps.userId = :userId AND ps.serviceId = :serviceId"
+            );
 
             $statement->bindParam(':userId', $userId);
             $statement->bindParam(':serviceId', $serviceId);
@@ -509,32 +577,42 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
     public function getByCriteria($criteria)
     {
         $params = [];
-        $where = [];
+        $where  = [];
 
         $order = 'ORDER BY s.name ASC';
         if (isset($criteria['sort'])) {
             if ($criteria['sort'] === '') {
                 $order = 'ORDER BY s.position';
             } else {
-                $orderColumn = strpos($criteria['sort'], 'name') !== false ? 's.name' : 's.price';
+                $orderColumn    = strpos($criteria['sort'], 'name') !== false ? 's.name' : 's.price';
                 $orderDirection = $criteria['sort'][0] === '-' ? 'DESC' : 'ASC';
-                $order = "ORDER BY {$orderColumn} {$orderDirection}";
+                $order          = "ORDER BY {$orderColumn} {$orderDirection}";
             }
         }
 
         if (!empty($criteria['search'])) {
-            $params[':search'] = "%{$criteria['search']}%";
+            $terms = preg_split('/\s+/', trim($criteria['search']));
+            $termIndex = 0;
 
-            $where[] = 's.name LIKE :search';
+            foreach ($terms as $term) {
+                $param = ":search{$termIndex}";
+                $params[$param] = "%{$term}%";
+
+                $where[] = "(
+                        s.name LIKE {$param}
+                    )";
+
+                $termIndex++;
+            }
         }
 
         if (!empty($criteria['services'])) {
             $queryServices = [];
 
             foreach ((array)$criteria['services'] as $index => $value) {
-                $param = ':service' . $index;
+                $param           = ':service' . $index;
                 $queryServices[] = $param;
-                $params[$param] = $value;
+                $params[$param]  = $value;
             }
 
             $where[] = 's.id IN (' . implode(', ', $queryServices) . ')';
@@ -546,7 +624,7 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
             foreach ((array)$criteria['categories'] as $index => $value) {
                 $param = ':category' . $index;
                 $queryCategories[] = $param;
-                $params[$param] = $value;
+                $params[$param]    = $value;
             }
 
             $where[] = 's.categoryId IN (' . implode(', ', $queryCategories) . ')';
@@ -556,9 +634,9 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
             $queryProviders = [];
 
             foreach ((array)$criteria['providers'] as $index => $value) {
-                $param = ':provider' . $index;
+                $param            = ':provider' . $index;
                 $queryProviders[] = $param;
-                $params[$param] = $value;
+                $params[$param]   = $value;
             }
 
             $where[] = 'ps.userId IN (' . implode(', ', $queryProviders) . ')';
@@ -802,40 +880,6 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
     }
 
     /**
-     * @param $serviceId
-     * @param $status
-     *
-     * @return bool
-     * @throws QueryExecutionException
-     */
-    public function updateStatusById($serviceId, $status)
-    {
-        $params = [
-            ':id'     => $serviceId,
-            ':status' => $status
-        ];
-
-        try {
-            $statement = $this->connection->prepare(
-                "UPDATE {$this->table}
-                SET
-                `status` = :status
-                WHERE id = :id"
-            );
-
-            $res = $statement->execute($params);
-
-            if (!$res) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
-            }
-
-            return $res;
-        } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
-        }
-    }
-
-    /**
      * Return an array of services with the number of appointments for the given date period.
      * Keys of the array are Services IDs.
      *
@@ -850,30 +894,32 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
         $appointmentTable = AppointmentsTable::getTableName();
 
         $params = [];
-        $where = [];
+        $where  = [];
 
         if ($criteria['dates']) {
-            $where[] = "(DATE_FORMAT(a.bookingStart, '%Y-%m-%d %H:%i:%s') BETWEEN :bookingFrom AND :bookingTo)";
+            $where[] = "(a.bookingStart BETWEEN :bookingFrom AND :bookingTo)";
             $params[':bookingFrom'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]);
-            $params[':bookingTo'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][1]);
+            $params[':bookingTo']   = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][1]);
         }
 
         if (isset($criteria['status'])) {
-            $where[] = 's.status = :status';
+            $where[]           = 's.status = :status';
             $params[':status'] = $criteria['status'];
         }
 
         $where = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         try {
-            $statement = $this->connection->prepare("SELECT
+            $statement = $this->connection->prepare(
+                "SELECT
                 s.id,
                 s.name,
                 COUNT(a.providerId) AS appointments
             FROM {$this->table} s
             INNER JOIN {$appointmentTable} a ON s.id = a.serviceId
             $where
-            GROUP BY serviceId");
+            GROUP BY serviceId"
+            );
 
             $statement->execute($params);
 
@@ -903,30 +949,36 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
     public function getAllNumberOfViews($criteria)
     {
         $params = [];
+
         $where = [];
 
         if ($criteria['dates']) {
-            $where[] = "(DATE_FORMAT(sv.date, '%Y-%m-%d %H:%i:%s') BETWEEN :bookingFrom AND :bookingTo)";
-            $params[':bookingFrom'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]);
-            $params[':bookingTo'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][1]);
+            $where[] = "(sv.date BETWEEN :bookingFrom AND :bookingTo)";
+
+            $params[':bookingFrom'] = explode(' ', $criteria['dates'][0])[0];
+
+            $params[':bookingTo'] = explode(' ', $criteria['dates'][1])[0];
         }
 
         if (isset($criteria['status'])) {
             $where[] = 's.status = :status';
+
             $params[':status'] = $criteria['status'];
         }
 
         $where = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         try {
-            $statement = $this->connection->prepare("SELECT
+            $statement = $this->connection->prepare(
+                "SELECT
             s.id,
             s.name,
             SUM(sv.views) AS views
             FROM {$this->table} s
             INNER JOIN {$this->serviceViewsTable} sv ON sv.serviceId = s.id 
             $where
-            GROUP BY s.id");
+            GROUP BY s.id"
+            );
 
             $statement->execute($params);
 
@@ -947,7 +999,7 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
     /**
      * @param $serviceId
      *
-     * @return string
+     * @return bool
      * @throws QueryExecutionException
      */
     public function addViewStats($serviceId)

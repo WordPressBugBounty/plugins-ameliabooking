@@ -120,7 +120,7 @@ function continueWithBooking () {
 
   let bookingData = useBookingData(
     store,
-    gateway === 'mollie' || gateway === 'square' ? formData : null,
+    gateway === 'mollie' || gateway === 'barion' ? formData : null,
     false,
     {},
     null
@@ -134,19 +134,15 @@ function continueWithBooking () {
         '/payment/mollie',
         bookingData,
         function (response) {
+          const bookings = response.data.data.bookings
+          if (sessionStorage.getItem('ameliaCacheData')) {
+            const ameliaCacheData = JSON.parse(sessionStorage.getItem('ameliaCacheData'))
+            ameliaCacheData.bookings = bookings
+            ameliaCacheData.packageCustomer = response.data.data.packageCustomer
+            sessionStorage.setItem('ameliaCacheData', JSON.stringify(ameliaCacheData))
+          }
           window.location = response.data.data.redirectUrl
         }
-      )
-
-      break
-
-    case ('square'):
-      payment(
-          '/payment/square',
-          bookingData,
-          function (response) {
-            window.location = response.data.data.redirectUrl
-          }
       )
 
       break
@@ -172,6 +168,24 @@ function continueWithBooking () {
 
           razorpay.open()
         }
+      )
+
+      break
+
+    case ('barion'):
+      payment(
+          '/payment/barion',
+          bookingData,
+          function (response) {
+            const bookings = response.data.data.bookings
+            if (sessionStorage.getItem('ameliaCacheData')) {
+              const ameliaCacheData = JSON.parse(sessionStorage.getItem('ameliaCacheData'))
+              ameliaCacheData.bookings = bookings
+              ameliaCacheData.packageCustomer = response.data.data.packageCustomer
+              sessionStorage.setItem('ameliaCacheData', JSON.stringify(ameliaCacheData))
+            }
+            window.location = response.data.data.redirectUrl
+          }
       )
 
       break

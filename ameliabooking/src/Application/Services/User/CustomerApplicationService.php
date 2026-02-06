@@ -32,7 +32,6 @@ use AmeliaBooking\Infrastructure\Repository\Payment\PaymentRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use AmeliaBooking\Infrastructure\Services\Mailchimp\AbstractMailchimpService;
 use Exception;
-use Interop\Container\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
 
 /**
@@ -42,13 +41,9 @@ use Slim\Exception\ContainerValueNotFoundException;
  */
 class CustomerApplicationService extends UserApplicationService
 {
-    private $container;
+    private Container $container;
 
     /**
-     * CustomerApplicationService constructor.
-     *
-     * @param Container $container
-     *
      * @throws \InvalidArgumentException
      */
     public function __construct(Container $container)
@@ -70,16 +65,8 @@ class CustomerApplicationService extends UserApplicationService
 
         $user = UserFactory::create($fields);
 
-        if (!$user instanceof AbstractUser) {
-            $result->setResult(CommandResult::RESULT_ERROR);
-            $result->setMessage('Could not create a new user entity.');
-
-            return $result;
-        }
-
         /** @var UserRepository $userRepository */
         $userRepository = $this->container->get('domain.users.repository');
-
 
         if ($oldUser = $userRepository->getByEmail($user->getEmail()->getValue())) {
             $result->setResult(CommandResult::RESULT_CONFLICT);
@@ -198,6 +185,14 @@ class CustomerApplicationService extends UserApplicationService
             ) {
                 $result->setResult(CommandResult::RESULT_ERROR);
                 $result->setData($userWithSameMail ? ['emailError' => true] : ['phoneError' => true]);
+            } elseif (
+                empty($userWithSameValue->getEmail()->getValue()) && !empty($user->getEmail())
+            ) {
+                $userRepository->updateFieldById(
+                    $userWithSameValue->getId()->getValue(),
+                    $user->getEmail()->getValue(),
+                    'email'
+                );
             }
 
             return $userWithSameValue;
@@ -237,7 +232,6 @@ class CustomerApplicationService extends UserApplicationService
      * @param bool     $isNewCustomer
      *
      * @return void
-     * @throws ContainerException
      */
     public function setWPUserForCustomer($customer, $isNewCustomer)
     {
@@ -312,7 +306,9 @@ class CustomerApplicationService extends UserApplicationService
         /** @var AbstractMailchimpService $mailchimpService */
         $mailchimpService = $this->container->get('infrastructure.mailchimp.service');
 
-        /** @var Collection $appointments */
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+
         $appointments = $appointmentRepository->getFiltered(
             [
                 'customerId' => $customer->getId()->getValue()
@@ -415,7 +411,10 @@ class CustomerApplicationService extends UserApplicationService
             }
         }
 
-        if ($customer->getEmail() && $customer->getEmail()->getValue()) {
+        if (
+            $settingsService->isFeatureEnabled('mailchimp') &&
+            $customer->getEmail() && $customer->getEmail()->getValue()
+        ) {
             $mailchimpService->deleteSubscriber($customer->getEmail()->getValue());
         }
 

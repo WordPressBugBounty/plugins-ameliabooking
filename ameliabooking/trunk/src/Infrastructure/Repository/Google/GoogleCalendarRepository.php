@@ -15,13 +15,13 @@ use AmeliaBooking\Infrastructure\Repository\AbstractRepository;
  */
 class GoogleCalendarRepository extends AbstractRepository
 {
-    const FACTORY = GoogleCalendarFactory::class;
+    public const FACTORY = GoogleCalendarFactory::class;
 
     /**
      * @param GoogleCalendar $googleCalendar
      * @param int            $userId
      *
-     * @return string
+     * @return int
      * @throws QueryExecutionException
      */
     public function add($googleCalendar, $userId)

@@ -5,14 +5,10 @@ namespace AmeliaBooking\Application\Commands;
 use AmeliaBooking\Application\Commands\Booking\Appointment\AddBookingCommand;
 use AmeliaBooking\Application\Commands\Booking\Appointment\DeleteBookingRemotelyCommand;
 use AmeliaBooking\Application\Commands\Booking\Appointment\SuccessfulBookingCommand;
-use AmeliaBooking\Application\Commands\Notification\GetSMSNotificationsHistoryCommand;
 use AmeliaBooking\Application\Commands\Notification\UpdateSMSNotificationHistoryCommand;
 use AmeliaBooking\Application\Commands\Payment\CalculatePaymentAmountCommand;
 use AmeliaBooking\Application\Commands\Square\DisconnectFromSquareAccountCommand;
-use AmeliaBooking\Application\Commands\Square\FetchAccessTokenSquareCommand;
 use AmeliaBooking\Application\Commands\Square\SquareRefundWebhookCommand;
-use AmeliaBooking\Application\Commands\Square\SquarePaymentCommand;
-use AmeliaBooking\Application\Commands\Stats\AddStatsCommand;
 use AmeliaBooking\Application\Services\User\UserApplicationService;
 use AmeliaBooking\Domain\Services\Permissions\PermissionsService;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
@@ -178,7 +174,7 @@ abstract class Command
 
     /**
      * @param $request
-     * @return string|null
+     * @return int|boolean
      */
     public function validateNonce($request)
     {
@@ -187,14 +183,10 @@ abstract class Command
             !self::getToken() &&
             !($this instanceof CalculatePaymentAmountCommand) &&
             !($this instanceof AddBookingCommand) &&
-            !($this instanceof AddStatsCommand) &&
             !($this instanceof DeleteBookingRemotelyCommand) &&
-            !($this instanceof SquarePaymentCommand) &&
             !($this instanceof SquareRefundWebhookCommand) &&
             !($this instanceof DisconnectFromSquareAccountCommand) &&
             !($this instanceof SuccessfulBookingCommand) &&
-            !($this instanceof FetchAccessTokenSquareCommand) &&
-            !($this instanceof GetSMSNotificationsHistoryCommand) &&
             !($this instanceof UpdateSMSNotificationHistoryCommand)
         ) {
             $queryParams = $request->getQueryParams();

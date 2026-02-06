@@ -1,5 +1,10 @@
 <template>
-  <div ref="paymentStepRef" :class="props.globalClass" :style="cssVars">
+  <div
+    ref="paymentStepRef"
+    :class="props.globalClass"
+    :style="cssVars"
+    tabindex="0"
+  >
     <div v-show="ready && !loading" class="am-fs__payments">
       <div class="am-fs__payments-heading">
         <div v-if="paymentError" class="am-fs__payments-error">
@@ -36,7 +41,7 @@
         {{ amLabels.payment_method }}
       </p>
       <div class="am-fs__payments-main">
-        <div class="am-fs__payments-main-cards" :class="{'am-fs__payments-main-cards-wrap':wrapCards}">
+        <div class="am-fs__payments-main-cards">
           <template v-for="(available, gateway) in availablePayments">
             <div
               v-if="available && Object.keys(availablePayments).filter(item => availablePayments[item]).length > 1"
@@ -47,6 +52,7 @@
               <img
                 v-if="available"
                 :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/' + paymentsBtn.find(item => item.key === gateway).value.name"
+                :alt="gateway"
               >
               <div>
                 <p>{{ paymentsBtn.find(item => item.key === gateway).value.text }}</p>
@@ -100,6 +106,7 @@ import PaymentPayPal from '../../Parts/Payment/PaymentPayPal.vue'
 import PaymentOnSite from '../../Parts/Payment/PaymentOnSite.vue'
 import PaymentWc from '../../Parts/Payment/PaymentWc.vue'
 import PaymentCommon from '../../Parts/Payment/PaymentCommon.vue'
+import PaymentSquare from '../../Parts/Payment/PaymentSquare.vue'
 import BookingSkeleton from "../../Parts/BookingSkeleton.vue";
 import PackageInfo from './parts/PackageInfo'
 import { settings } from "../../../../plugins/settings";
@@ -158,8 +165,6 @@ const componentTypes = {
   cart: markRaw(CartInfo)
 }
 
-const shortcodeData = inject('shortcodeData')
-
 let paymentError = computed(() => store.getters['booking/getError'])
 
 // * Step Functions
@@ -188,7 +193,8 @@ const paymentTypes = {
   razorpay: markRaw(PaymentCommon),
   mollie: markRaw(PaymentCommon),
   wc: markRaw(PaymentWc),
-  square: markRaw(PaymentCommon)
+  square: markRaw(PaymentSquare),
+  barion: markRaw(PaymentCommon)
 }
 
 let ready = computed(() => store.getters['entities/getReady'])
@@ -210,7 +216,11 @@ let hasDeposit = computed(() => {
       let depositPayment = false
 
       useCart(store).filter(i => 'services' in i && Object.keys(i.services).length).forEach((item) => {
-        let service = store.getters['entities/getService'](item.serviceId)
+        let service = store.getters['entities/getCategories'].find(
+          i => i.serviceList.filter(j => j.id === item.serviceId).length
+        ).serviceList.find(
+          i => i.id === item.serviceId
+        )
 
         if (service.depositPayment!== 'disabled') {
           depositPayment = true
@@ -238,7 +248,11 @@ let fullAmount = computed(() => {
   let fullAmountPayment = false
 
   useCart(store).filter(i => 'services' in i && Object.keys(i.services).length).forEach((item) => {
-    let service = store.getters['entities/getService'](item.serviceId)
+    let service = store.getters['entities/getCategories'].find(
+      i => i.serviceList.filter(j => j.id === item.serviceId).length
+    ).serviceList.find(
+      i => i.id === item.serviceId
+    )
 
     if (service.fullPayment) {
       fullAmountPayment = true
@@ -286,6 +300,7 @@ let availablePayments = computed(() => {
         mollie: false,
         square: false,
         razorpay: false,
+        barion: false,
       }
     }
 
@@ -318,6 +333,7 @@ let availablePayments = computed(() => {
       mollie: settings.payments.mollie.enabled,
       square: settings.payments.square.enabled,
       razorpay: settings.payments.razorpay.enabled,
+      barion: settings.payments.barion.enabled,
     } : {
       onSite: 'onSite' in entityPayments ? entityPayments.onSite && settings.payments.onSite : settings.payments.onSite,
       stripe: 'stripe' in entityPayments ? entityPayments.stripe.enabled && settings.payments.stripe.enabled : settings.payments.stripe.enabled,
@@ -326,6 +342,7 @@ let availablePayments = computed(() => {
       mollie: 'mollie' in entityPayments ? entityPayments.mollie.enabled && settings.payments.mollie.enabled : settings.payments.mollie.enabled,
       razorpay: 'razorpay' in entityPayments ? entityPayments.razorpay.enabled && settings.payments.razorpay.enabled : settings.payments.razorpay.enabled,
       square: 'square' in entityPayments ? entityPayments.square.enabled && settings.payments.square.enabled : settings.payments.square.enabled,
+      barion: 'barion' in entityPayments ? entityPayments.barion.enabled && settings.payments.barion.enabled && ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode) : settings.payments.barion.enabled && ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode),
     }
 
     if (!payments.onSite &&
@@ -334,7 +351,8 @@ let availablePayments = computed(() => {
         !payments.wc &&
         !payments.mollie &&
         !payments.square &&
-        !payments.razorpay
+        !payments.razorpay &&
+        !payments.barion
     ) {
       payments = {
         onSite: settings.payments.onSite,
@@ -344,6 +362,7 @@ let availablePayments = computed(() => {
         mollie: settings.payments.mollie.enabled,
         square: settings.payments.square.enabled,
         razorpay: settings.payments.razorpay.enabled,
+        barion: settings.payments.barion.enabled,
       }
     }
 
@@ -434,10 +453,14 @@ function getPaymentBtn (key) {
       return {text: amLabels.value['stripe'], name: 'stripe.svg'}
     case 'razorpay':
       return {text: amLabels.value['razorpay'], name: 'razorpay.svg'}
-    case 'mollie': case 'wc':
-      return {text: amLabels.value['on_line'], name: 'stripe.svg'}
+    case 'mollie':
+      return {text: amLabels.value['mollie'], name: 'mollie.svg'}
+    case 'wc':
+      return {text: amLabels.value['on_line'], name: 'online.svg'}
     case 'square':
       return {text: amLabels.value['square'], name: 'square.svg'}
+    case 'barion':
+      return {text: amLabels.value['barion'], name: 'barion.svg'}
     default:
       return ''
   }
@@ -445,12 +468,8 @@ function getPaymentBtn (key) {
 
 function getPaymentSentence () {
   return paymentGateway.value === 'onSite' && !mandatoryOnSitePayment.value ? amLabels.value.payment_onsite_sentence :
-    (paymentGateway.value === 'mollie' || paymentGateway.value === 'wc' || paymentGateway.value === 'square') ? amLabels.value.payment_wc_mollie_sentence : ''
+    (paymentGateway.value === 'mollie' || paymentGateway.value === 'wc' || paymentGateway.value === 'barion') ? amLabels.value.payment_wc_mollie_sentence : ''
 }
-
-// responsive
-let cWidth = inject('containerWidth', 0)
-let wrapCards = computed(() => cWidth.value < 450 || (cWidth.value > 560 && (cWidth.value - 240 < 450)))
 
 </script>
 
@@ -568,23 +587,16 @@ export default {
     &-main {
       &-cards {
         display: flex;
-        //gap: 6px;
+        gap: 6px;
         justify-items: center;
-
-        & > div {
-          margin: 0 6px 6px 0;
-        }
-
-        &-wrap {
-          flex-wrap: wrap;
-        }
+        flex-wrap: wrap;
       }
 
       &-button {
         display: flex;
         align-items: center;
         gap: 2px;
-        width: 108px;
+        min-width: 108px;
         border: 1px solid var(--am-c-ps-text-op25);
         border-radius: 8px;
         box-shadow: 0 1px 1px var(--am-c-ps-text-op06);
@@ -598,6 +610,13 @@ export default {
         img {
           height: 24px;
           width: 24px;
+        }
+
+        &-barion {
+          img {
+            height: 24px;
+            width: 50px;
+          }
         }
 
         div {

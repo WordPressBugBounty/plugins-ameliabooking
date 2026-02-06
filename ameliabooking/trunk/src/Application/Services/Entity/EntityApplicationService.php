@@ -83,7 +83,7 @@ class EntityApplicationService
             $data['organizerId'] = null;
         }
 
-        foreach ($data['providers'] as $index => $item) {
+        foreach (!empty($data['providers']) ? $data['providers'] : [] as $index => $item) {
             if (!in_array((int)$item['id'], $existingProvidersIds)) {
                 unset($data['providers'][$index]);
             }
@@ -101,7 +101,7 @@ class EntityApplicationService
 
         $ticketsIds = [];
 
-        foreach ($data['customTickets'] as $item) {
+        foreach (!empty($data['customTickets']) ? $data['customTickets'] : [] as $item) {
             if (!empty($item['id'])) {
                 $ticketsIds[] = $item['id'];
             }
@@ -111,7 +111,7 @@ class EntityApplicationService
 
         $existingTicketsIds = $ticketsIds ? $eventTicketRepository->getIds(['id' => $ticketsIds]) : [];
 
-        foreach ($data['customTickets'] as $index => $item) {
+        foreach (!empty($data['customTickets']) ? $data['customTickets'] : [] as $index => $item) {
             if (!empty($item['id']) && !in_array((int)$item['id'], $existingTicketsIds)) {
                 unset($data['customTickets'][$index]);
             }
@@ -181,7 +181,8 @@ class EntityApplicationService
 
 
         foreach ($data['entityIds'] as $index => $id) {
-            if (($data['entity'] === 'appointment' && !in_array((int)$id, $existingServicesIds)) ||
+            if (
+                ($data['entity'] === 'appointment' && !in_array((int)$id, $existingServicesIds)) ||
                 ($data['entity'] === 'event' && !in_array((int)$id, $existingEventsIds))
             ) {
                 unset($data['entityIds'][$index]);
@@ -520,6 +521,9 @@ class EntityApplicationService
         $extrasIds = [];
 
         foreach ($data['bookings'] as $item) {
+            if (empty($item['extras'])) {
+                continue;
+            }
             $extrasIds = self::getUniqueIds(
                 $extrasIds,
                 array_column($item['extras'], 'extraId')
@@ -529,6 +533,9 @@ class EntityApplicationService
         $existingExtrasIds = $extrasIds ? $extraRepository->getIds(['id' => $extrasIds]) : [];
 
         foreach ($data['bookings'] as $bookingIndex => $bookingItem) {
+            if (empty($bookingItem['extras'])) {
+                continue;
+            }
             foreach ($bookingItem['extras'] as $extraIndex => $extraItem) {
                 if (!in_array((int)$extraItem['extraId'], $existingExtrasIds)) {
                     unset($data['bookings'][$bookingIndex]['extras'][$extraIndex]);
@@ -542,7 +549,7 @@ class EntityApplicationService
         $existingCouponsIds = $couponsIds ? $couponRepository->getIds(['id' => $couponsIds]) : [];
 
         foreach ($data['bookings'] as $index => $item) {
-            if (!empty($item['coupon']) && !in_array((int)$item['coupon']['id'], $existingCouponsIds)) {
+            if (!empty($item['coupon']) && !empty($item['coupon']['id']) && !in_array((int)$item['coupon']['id'], $existingCouponsIds)) {
                 $data['bookings'][$index]['coupon'] = null;
             }
         }
@@ -592,6 +599,9 @@ class EntityApplicationService
         $extrasIds = [];
 
         foreach ($data['bookings'] as $item) {
+            if (empty($item['extras'])) {
+                continue;
+            }
             $extrasIds = self::getUniqueIds(
                 $extrasIds,
                 array_column($item['extras'], 'extraId')
@@ -601,6 +611,9 @@ class EntityApplicationService
         $existingExtrasIds = $extrasIds ? $extraRepository->getIds(['id' => $extrasIds]) : [];
 
         foreach ($data['bookings'] as $bookingItem) {
+            if (empty($bookingItem['extras'])) {
+                continue;
+            }
             foreach ($bookingItem['extras'] as $extraItem) {
                 if (!in_array((int)$extraItem['extraId'], $existingExtrasIds)) {
                     return Entities::EXTRA;
@@ -614,7 +627,7 @@ class EntityApplicationService
         $existingCouponsIds = $couponsIds ? $couponRepository->getIds(['id' => $couponsIds]) : [];
 
         foreach ($data['bookings'] as $item) {
-            if (!empty($item['coupon']) && !in_array((int)$item['coupon']['id'], $existingCouponsIds)) {
+            if (!empty($item['coupon']) && !empty($item['coupon']['id']) && !in_array((int)$item['coupon']['id'], $existingCouponsIds)) {
                 return Entities::COUPON;
             }
         }

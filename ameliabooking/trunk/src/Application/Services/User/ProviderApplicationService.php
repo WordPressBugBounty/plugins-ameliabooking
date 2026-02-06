@@ -4,6 +4,7 @@ namespace AmeliaBooking\Application\Services\User;
 
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Services\Booking\AppointmentApplicationService;
+use AmeliaBooking\Application\Services\Booking\EventApplicationService;
 use AmeliaBooking\Application\Services\Entity\EntityApplicationService;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
@@ -32,6 +33,7 @@ use AmeliaBooking\Domain\Repository\User\UserRepositoryInterface;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\Services\Interval\IntervalService;
 use AmeliaBooking\Domain\Services\Location\LocationService;
+use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\Services\User\ProviderService;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\String\Password;
@@ -45,6 +47,7 @@ use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ResourceEntitiesRep
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ServiceRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventProvidersRepository;
+use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
 use AmeliaBooking\Infrastructure\Repository\Google\GoogleCalendarRepository;
 use AmeliaBooking\Infrastructure\Repository\Location\ProviderLocationRepository;
 use AmeliaBooking\Infrastructure\Repository\Outlook\OutlookCalendarRepository;
@@ -339,7 +342,7 @@ class ProviderApplicationService
             [
                 Entities::USER                 => $user->toArray(),
                 'sendEmployeePanelAccessEmail' =>
-                    !empty($fields['password']) && $fields['sendEmployeePanelAccessEmail'],
+                !empty($fields['password']) && $fields['sendEmployeePanelAccessEmail'],
                 'password'                     => !empty($fields['password']) ? $fields['password'] : null,
             ]
         );
@@ -382,6 +385,67 @@ class ProviderApplicationService
         }
 
         return true;
+    }
+
+    /**
+     * Creating the modified day list of the copied saved day list
+     * by adding new days, removing deleted days and replacing existing days with the new day list days
+     *
+     * @param Collection $newDayList
+     * @param Collection $savedDayList
+     * @param Collection $removedDayList
+     *
+     * @return Collection
+     * @throws ContainerValueNotFoundException
+     * @throws InvalidArgumentException
+     */
+    public function getModifiedDayList(
+        Collection $newDayList,
+        Collection $savedDayList,
+        Collection $removedDayList
+    ): Collection {
+        /** @var Collection $modifiedDayList */
+        $modifiedDayList = clone $savedDayList;
+
+        $newDayListIndexesById = [];
+
+        /** @var DayOff|SpecialDay $item */
+        foreach ($newDayList->getItems() as $index => $item) {
+            if ($item->getId()) {
+                $newDayListIndexesById[$item->getId()->getValue()] = $index;
+            }
+        }
+
+        $removedDayIds = [];
+
+        /** @var DayOff|SpecialDay $item */
+        foreach ($removedDayList->getItems() as $item) {
+            if ($item->getId()) {
+                $removedDayIds[$item->getId()->getValue()] = true;
+            }
+        }
+
+        /** @var DayOff|SpecialDay $item */
+        foreach ($modifiedDayList->getItems() as $index => $item) {
+            if (isset($removedDayIds[$item->getId()->getValue()])) {
+                $modifiedDayList->deleteItem($index);
+            } elseif (isset($newDayListIndexesById[$item->getId()->getValue()])) {
+                $modifiedDayList->placeItem(
+                    $newDayList->getItem($newDayListIndexesById[$item->getId()->getValue()]),
+                    $index,
+                    true
+                );
+            }
+        }
+
+        /** @var DayOff|SpecialDay $item */
+        foreach ($newDayList->getItems() as $item) {
+            if (!$item->getId() || !$item->getId()->getValue()) {
+                $modifiedDayList->addItem($item);
+            }
+        }
+
+        return $modifiedDayList;
     }
 
     /**
@@ -573,7 +637,8 @@ class ProviderApplicationService
                             $periodService->setId(new Id($periodServiceId));
                         }
 
-                        $existingPeriodServicesIds[$newWeekDay->getId()->getValue()][$newPeriod->getId()->getValue()][$periodService->getId()->getValue()] = true;
+                        $existingPeriodServicesIds[$newWeekDay->getId()->getValue()][$newPeriod->getId()->getValue()][$periodService->getId()->getValue()]
+                            = true;
                     }
 
                     $existingPeriodLocationsIds[$newWeekDay->getId()->getValue()][$newPeriod->getId()->getValue()] = [];
@@ -591,7 +656,8 @@ class ProviderApplicationService
                             $periodLocation->setId(new Id($periodLocationId));
                         }
 
-                        $existingPeriodLocationsIds[$newWeekDay->getId()->getValue()][$newPeriod->getId()->getValue()][$periodLocation->getId()->getValue()] = true;
+                        $existingPeriodLocationsIds[$newWeekDay->getId()->getValue()][$newPeriod->getId()->getValue()][$periodLocation->getId()->getValue()]
+                            = true;
                     }
                 }
 
@@ -750,9 +816,7 @@ class ProviderApplicationService
                 if ($newPeriod->getId() && $newPeriod->getId()->getValue()) {
                     $specialDayPeriodRepository->update($newPeriod, $newPeriod->getId()->getValue());
 
-                    $existingSpecialDayPeriodServicesIds
-                    [$newSpecialDay->getId()->getValue()]
-                    [$newPeriod->getId()->getValue()] = [];
+                    $existingSpecialDayPeriodServicesIds[$newSpecialDay->getId()->getValue()][$newPeriod->getId()->getValue()] = [];
 
                     foreach ((array)$newPeriod->getPeriodServiceList()->keys() as $periodServiceKey) {
                         /** @var SpecialDayPeriodService $periodService */
@@ -768,13 +832,10 @@ class ProviderApplicationService
                         }
 
                         $existingSpecialDayPeriodServicesIds
-                        [$newSpecialDay->getId()->getValue()]
-                        [$newPeriod->getId()->getValue()][$periodService->getId()->getValue()] = true;
+                            [$newSpecialDay->getId()->getValue()][$newPeriod->getId()->getValue()][$periodService->getId()->getValue()] = true;
                     }
 
-                    $existingSpecialDayPeriodLocationsIds
-                    [$newSpecialDay->getId()->getValue()]
-                    [$newPeriod->getId()->getValue()] = [];
+                    $existingSpecialDayPeriodLocationsIds[$newSpecialDay->getId()->getValue()][$newPeriod->getId()->getValue()] = [];
 
                     foreach ((array)$newPeriod->getPeriodLocationList()->keys() as $periodLocationKey) {
                         /** @var SpecialDayPeriodLocation $periodLocation */
@@ -790,8 +851,7 @@ class ProviderApplicationService
                         }
 
                         $existingSpecialDayPeriodLocationsIds
-                        [$newSpecialDay->getId()->getValue()]
-                        [$newPeriod->getId()->getValue()][$periodLocation->getId()->getValue()] = true;
+                            [$newSpecialDay->getId()->getValue()][$newPeriod->getId()->getValue()][$periodLocation->getId()->getValue()] = true;
                     }
                 }
 
@@ -886,7 +946,7 @@ class ProviderApplicationService
             /** @var AppointmentRepository $appointmentRepo */
             $appointmentRepo = $this->container->get('domain.booking.appointment.repository');
 
-            $providerTimeZones = [];
+            $providerTimeZones  = [];
             $availableProviders = [];
 
             $WPtimeZone = DateTimeService::getTimeZone()->getName();
@@ -899,9 +959,9 @@ class ProviderApplicationService
                 $availableProviders += $providerRepository->getAvailable((int)date('w'), $providerTimeZone);
             }
 
-            $onBreakProviders = $providerRepository->getOnBreak((int)date('w'));
+            $onBreakProviders    = $providerRepository->getOnBreak((int)date('w'));
             $onVacationProviders = $providerRepository->getOnVacation();
-            $busyProviders = $appointmentRepo->getCurrentAppointments();
+            $busyProviders       = $appointmentRepo->getCurrentAppointments();
             $specialDayProviders = $providerRepository->getOnSpecialDay();
 
             foreach ($providers as &$provider) {
@@ -947,8 +1007,10 @@ class ProviderApplicationService
 
         $dayOff = false;
         foreach ((array)$companyDaysOff as $companyDayOff) {
-            if ($currentDate >= DateTimeService::getCustomDateTimeObject($companyDayOff['startDate']) &&
-                $currentDate <= DateTimeService::getCustomDateTimeObject($companyDayOff['endDate'])) {
+            if (
+                $currentDate >= DateTimeService::getCustomDateTimeObject($companyDayOff['startDate']) &&
+                $currentDate <= DateTimeService::getCustomDateTimeObject($companyDayOff['endDate'])
+            ) {
                 $dayOff = true;
                 break;
             }
@@ -966,7 +1028,8 @@ class ProviderApplicationService
      */
     public function removeAllExceptUser($providers, $currentUser)
     {
-        if ($currentUser !== null &&
+        if (
+            $currentUser !== null &&
             $currentUser->getType() === AbstractUser::USER_ROLE_PROVIDER &&
             !$this->container->getPermissionsService()->currentUserCanReadOthers(Entities::APPOINTMENTS)
         ) {
@@ -1034,17 +1097,21 @@ class ProviderApplicationService
         $providerLocationRepo = $this->container->get('domain.bookable.service.providerLocation.repository');
 
         if ($oldUser->getLocationId() && $newUser->getLocationId()) {
-            $providerLocation = ProviderLocationFactory::create([
-                'userId'     => $newUser->getId()->getValue(),
-                'locationId' => $newUser->getLocationId()->getValue()
-            ]);
+            $providerLocation = ProviderLocationFactory::create(
+                [
+                    'userId'     => $newUser->getId()->getValue(),
+                    'locationId' => $newUser->getLocationId()->getValue()
+                ]
+            );
 
             $providerLocationRepo->update($providerLocation);
         } elseif ($newUser->getLocationId()) {
-            $providerLocation = ProviderLocationFactory::create([
-                'userId'     => $newUser->getId()->getValue(),
-                'locationId' => $newUser->getLocationId()->getValue()
-            ]);
+            $providerLocation = ProviderLocationFactory::create(
+                [
+                    'userId'     => $newUser->getId()->getValue(),
+                    'locationId' => $newUser->getLocationId()->getValue()
+                ]
+            );
 
             $providerLocationRepo->add($providerLocation);
         } elseif ($oldUser->getLocationId()) {
@@ -1159,10 +1226,11 @@ class ProviderApplicationService
      *
      * @param Collection $periodList
      * @param Collection $timeOutList
+     * @param Provider   $provider
      *
      * @return array
      */
-    public function getProviderScheduleIntervals($periodList, $timeOutList)
+    public function getProviderScheduleIntervals($periodList, $timeOutList, $provider)
     {
         /** @var IntervalService $intervalService */
         $intervalService = $this->container->get('domain.interval.service');
@@ -1218,7 +1286,7 @@ class ProviderApplicationService
                         $interval[0],
                         $interval[1]
                     ],
-                    'services' => $periodServices
+                    'services' => $periodServices ?: $provider->getServiceList()->keys(),
                 ];
             }
         }
@@ -1245,11 +1313,25 @@ class ProviderApplicationService
         /** @var ServiceRepository $serviceRepository */
         $serviceRepository = $this->container->get('domain.bookable.service.repository');
 
+        /** @var EventApplicationService $eventAS */
+        $eventAS = $this->container->get('application.booking.event.service');
+
         /** @var ProviderService $providerService */
         $providerService = $this->container->get('domain.user.provider.service');
 
         /** @var Collection $services */
         $services = $serviceRepository->getAllArrayIndexedById();
+
+        $events = $eventAS->getEventsByCriteria(
+            [
+                'providers' => [$providerId],
+                'dates' => [DateTimeService::getNowDateTime()],
+                'status' => 'approved',
+                'page' => 1
+            ],
+            ['fetchEventsPeriods' => true],
+            15
+        );
 
         /** @var Collection $providers */
         $providers = $providerRepository->getWithSchedule(
@@ -1263,6 +1345,8 @@ class ProviderApplicationService
         $provider = $providers->getItem($providerId);
 
         $providerService->setProviderServices($provider, $services, true);
+
+        $provider->setEventList($events);
 
         return $provider;
     }
@@ -1300,7 +1384,7 @@ class ProviderApplicationService
                 $hasVisibleLocations
             );
 
-            if ($providerLocation && !$availablePeriodLocations->keyExists($providerLocation->getId()->getValue())) {
+            if ($providerLocation && $availablePeriodLocations->length() === 0) {
                 $availablePeriodLocations->addItem($providerLocation, $providerLocation->getId()->getValue());
             }
 
@@ -1404,7 +1488,8 @@ class ProviderApplicationService
 
         foreach ($data as $serviceId => $serviceLocations) {
             /** @var Service $service */
-            if ($services->keyExists($serviceId) &&
+            if (
+                $services->keyExists($serviceId) &&
                 ($service = $services->getItem($serviceId)) &&
                 $service->getStatus()->getValue() === Status::VISIBLE
             ) {
@@ -1423,12 +1508,14 @@ class ProviderApplicationService
      * @throws InvalidArgumentException
      * @throws ContainerValueNotFoundException
      * @throws QueryExecutionException
-     * @throws ContainerException
      */
     public function delete($provider)
     {
         /** @var AppointmentRepository $appointmentRepository */
         $appointmentRepository = $this->container->get('domain.booking.appointment.repository');
+
+        /** @var EventRepository $eventRepository */
+        $eventRepository = $this->container->get('domain.booking.event.repository');
 
         /** @var ProviderRepository $providerRepository */
         $providerRepository = $this->container->get('domain.users.providers.repository');
@@ -1462,6 +1549,10 @@ class ProviderApplicationService
 
         /** @var CustomerApplicationService $customerApplicationService */
         $customerApplicationService = $this->container->get('application.user.customer.service');
+
+        /** @var EventRepository $eventRepository */
+        $eventRepository = $this->container->get('domain.booking.event.repository');
+
 
         /** @var Collection $appointments */
         $appointments = $appointmentRepository->getFiltered(
@@ -1498,6 +1589,7 @@ class ProviderApplicationService
             $googleCalendarRepository->deleteByEntityId($provider->getId()->getValue(), 'userId') &&
             $outlookCalendarRepository->deleteByEntityId($provider->getId()->getValue(), 'userId') &&
             $eventProvidersRepository->deleteByEntityId($provider->getId()->getValue(), 'userId') &&
+            $eventRepository->updateByEntityId($provider->getId()->getValue(), null, 'organizerId') &&
             $packageServiceProviderRepository->deleteByEntityId($provider->getId()->getValue(), 'userId') &&
             $packageCustomerServiceRepository->updateByEntityId($provider->getId()->getValue(), null, 'providerId') &&
             $providerRepository->deleteViewStats($provider->getId()->getValue()) &&
@@ -1524,9 +1616,12 @@ class ProviderApplicationService
         $customers = $userRepository->getAllWithAllowedBooking();
 
         // user_can added here, because currentUser is null in logged.in.user service for cabinet
-        if (!$this->container->getPermissionsService()->currentUserCanReadOthers(Entities::CUSTOMERS) &&
+        if (
+            $currentUser !== null &&
+            $currentUser->getType() === Entities::PROVIDER &&
+            !$this->container->getPermissionsService()->currentUserCanReadOthers(Entities::CUSTOMERS) &&
             !(
-                $currentUser !== null && $currentUser->getExternalId() !== null &&
+                $currentUser->getExternalId() !== null &&
                 user_can($currentUser->getExternalId()->getValue(), 'amelia_read_others_customers')
             )
         ) {
@@ -1587,5 +1682,32 @@ class ProviderApplicationService
         $providerServiceRepository = $this->container->get('domain.bookable.service.providerService.repository');
 
         return $providerServiceRepository->getMandatoryServicesIdsForProvider($providerId);
+    }
+
+
+    /**
+     * @param int $badgeId
+     *
+     * @return array
+     */
+    public function getBadge($badgeId)
+    {
+        /** @var SettingsService $settingsDS */
+        $settingsDS = $this->container->get('domain.settings.service');
+
+        $badges = $settingsDS->isFeatureEnabled('employeeBadge')
+            ? $settingsDS->getSetting('roles', 'providerBadges')
+            : [];
+
+        $badge = !empty($badges['badges']) ?
+            array_filter(
+                $badges['badges'],
+                function ($badge) use ($badgeId) {
+                    return (int)$badge['id'] === $badgeId;
+                }
+            )
+            : null;
+
+        return !empty($badge) ? array_values($badge)[0] : null;
     }
 }

@@ -22,13 +22,50 @@ function useEmployeeService (store, serviceId, employeeId) {
   )
 }
 
-function useAppointmentServicePrice (employeeService, duration) {
-  return employeeService.customPricing.enabled && (duration in employeeService.customPricing.durations)
-    ? employeeService.customPricing.durations[duration].price : employeeService.price
+function useChangedBookingPrice (appointment, savedAppointment, booking, service) {
+  let isChangedBookingService =
+    savedAppointment &&
+    savedAppointment.serviceId !== appointment.serviceId
+
+  let savedBooking = savedAppointment && booking.id
+    ? savedAppointment.bookings.find(i => i.id === booking.id)
+    : null
+
+  let isChangedBookingPersons =
+    savedBooking &&
+    savedBooking.persons !== booking.persons &&
+    service.customPricing.enabled === 'person'
+
+  let isChangedBookingDuration =
+    savedBooking &&
+    (booking.duration === null ? service.duration : booking.duration) !== savedBooking.duration &&
+    service.customPricing.enabled === 'duration'
+
+  return isChangedBookingService || isChangedBookingPersons || isChangedBookingDuration
 }
 
-function useAppointmentServiceAmount (employeeService, persons, duration) {
-  return useAppointmentServicePrice(employeeService, duration) * (employeeService.aggregatedPrice ? persons : 1)
+function useAppointmentServicePrice (service, persons, duration, price = null) {
+  if (service.customPricing.enabled === 'duration' &&
+    (duration in service.customPricing.durations)
+  ) {
+    return service.customPricing.durations[duration].price
+  } else if (service.customPricing.enabled === 'person') {
+    let lastRange = Object.keys(service.customPricing.persons)[Object.keys(service.customPricing.persons).length - 1]
+
+    for (let range in service.customPricing.persons) {
+      if (persons >= service.customPricing.persons[range].from && (range !== lastRange ? persons <= parseInt(range) : true)) {
+        return service.customPricing.persons[range].price
+      }
+    }
+  } else if (price !== null && service.customPricing.enabled === 'period') {
+    return price
+  }
+
+  return service.price
+}
+
+function useAppointmentServiceAmount (employeeService, persons, duration, price) {
+  return useAppointmentServicePrice(employeeService, persons, duration, price) * (employeeService.aggregatedPrice ? persons : 1)
 }
 
 function useAppointmentAmountData (store, item, coupon, couponLimit) {
@@ -85,7 +122,7 @@ function useAppointmentAmountData (store, item, coupon, couponLimit) {
     let amountData = useAppointmentBookingAmountData(
       store,
       {
-        price: useAppointmentServicePrice(employeeService, appointment.duration),
+        price: useAppointmentServicePrice(employeeService, appointment.persons, appointment.duration, appointment.price),
         persons: appointment.persons,
         aggregatedPrice: service.aggregatedPrice,
         extras: appointment.extras,
@@ -113,7 +150,7 @@ function useAppointmentAmountData (store, item, coupon, couponLimit) {
 
     let appointmentDepositAmount = 0
 
-    let servicePrice = useAppointmentServicePrice(employeeService, appointment.duration)
+    let servicePrice = useAppointmentServicePrice(employeeService, appointment.persons, appointment.duration, appointment.price)
 
     servicesPrices[servicePrice] = !(servicePrice in servicesPrices) ? 1 : servicesPrices[servicePrice] + 1
 
@@ -396,32 +433,9 @@ function useAppointmentBookingAmountData (store, appointment, includedTaxInTotal
     total: appointmentTotalAmount,
     bookable: appointmentServiceAmount,
     discount: appointmentDiscountAmount,
-    tax: appointmentTaxAmount
+    tax: appointmentTaxAmount,
+    wcTax: appointment.wcTax,
   }
-}
-
-function useTaxLabel (store, label) {
-  let taxes = {}
-
-  useCart(store).forEach((item) => {
-    item.services[item.serviceId].list.forEach((appointment) => {
-      let serviceTax = useEntityTax(store, item.serviceId, 'service')
-
-      if (serviceTax) {
-        taxes[serviceTax.id] = serviceTax.name
-      }
-
-      appointment.extras.forEach((selectedExtra) => {
-        let extraTax = useEntityTax(store, selectedExtra.extraId, 'extra')
-
-        if (extraTax) {
-          taxes[extraTax.id] = extraTax.name
-        }
-      })
-    })
-  })
-
-  return Object.keys(taxes).length === 1 ? Object.values(taxes)[0] : label
 }
 
 function useAppointmentsAmountInfo (store) {
@@ -703,11 +717,36 @@ function useFillAppointments (store) {
     let booking = cartItem.services[cartItem.serviceId].list[0]
 
     if (!booking.providerId && booking.date && booking.time) {
-      let employeesIds = cartItem.services[cartItem.serviceId].slots[booking.date][booking.time].map(
-        i => i[0]
-      ).filter(
-        (v, i, a) => a.indexOf(v) === i
-      )
+      // Derive employeesIds. If a waiting list slot is selected (not present in regular slots),
+      // pull provider data from occupied structure instead of slots.
+      let isWaitingListSlot = store.getters['appointmentWaitingListOptions/getIsWaitingListSlot']
+
+      let slotDataArray = null
+
+      if (
+        isWaitingListSlot &&
+        booking.date && booking.time &&
+        (
+          !(booking.date in cartItem.services[cartItem.serviceId].slots) ||
+          !(booking.time in cartItem.services[cartItem.serviceId].slots[booking.date])
+        ) &&
+        booking.date in cartItem.services[cartItem.serviceId].occupied &&
+        booking.time in cartItem.services[cartItem.serviceId].occupied[booking.date]
+      ) {
+        // Waiting list slot: use occupied data (fully booked original appointment rows)
+        slotDataArray = cartItem.services[cartItem.serviceId].occupied[booking.date][booking.time]
+      } else if (
+        booking.date && booking.time &&
+        booking.date in cartItem.services[cartItem.serviceId].slots &&
+        booking.time in cartItem.services[cartItem.serviceId].slots[booking.date]
+      ) {
+        // Regular slot
+        slotDataArray = cartItem.services[cartItem.serviceId].slots[booking.date][booking.time]
+      } else {
+        slotDataArray = []
+      }
+
+      let employeesIds = slotDataArray.map(i => i.e).filter((v, i, a) => a.indexOf(v) === i)
 
       if (settings.roles.limitPerEmployee.enabled) {
         let chosenEmployees = store.getters['booking/getAllMultipleAppointments'].map(a => Object.values(a.services)[0].list[0])
@@ -728,38 +767,63 @@ function useFillAppointments (store) {
     }
 
     if (!booking.locationId && booking.date && booking.time) {
-      let locationsIds = cartItem.services[cartItem.serviceId].slots[booking.date][booking.time].filter(
-        i => i[0] === booking.providerId
-      ).map(i => i[1])
+      let isWaitingListSlot = store.getters['appointmentWaitingListOptions/getIsWaitingListSlot']
+
+      let slotRows = null
+      if (
+        isWaitingListSlot &&
+        (
+          !(booking.date in cartItem.services[cartItem.serviceId].slots) ||
+          !(booking.time in cartItem.services[cartItem.serviceId].slots[booking.date])
+        ) &&
+        booking.date in cartItem.services[cartItem.serviceId].occupied &&
+        booking.time in cartItem.services[cartItem.serviceId].occupied[booking.date]
+      ) {
+        // Waiting list slot: derive possible locations from occupied data
+        slotRows = cartItem.services[cartItem.serviceId].occupied[booking.date][booking.time]
+      } else if (
+        booking.date in cartItem.services[cartItem.serviceId].slots &&
+        booking.time in cartItem.services[cartItem.serviceId].slots[booking.date]
+      ) {
+        slotRows = cartItem.services[cartItem.serviceId].slots[booking.date][booking.time]
+      } else {
+        slotRows = []
+      }
+
+      let locationsIds = slotRows.filter(r => r.e === booking.providerId).map(r => r.l)
 
       booking.locationId = locationsIds.length ? getPreferredEntityId(
-        cartItem.services[cartItem.serviceId].slots[booking.date],
+        cartItem.services[cartItem.serviceId].slots[booking.date] || {},
         booking.date in cartItem.services[cartItem.serviceId].occupied
           ? cartItem.services[cartItem.serviceId].occupied[booking.date] : {},
         booking.time,
         booking.providerId,
         locationsIds,
-        1
+        'l'
       ) : null
     }
 
     let slots = store.getters['booking/getMultipleAppointmentsSlots']
 
-    let existingApp = booking.date in slots && booking.time in slots[booking.date] &&  slots[booking.date][booking.time].length > 0 ?
-      slots[booking.date][booking.time].find(s => s[0] === booking.providerId) : null
+    let existingApp = booking.date in slots && booking.time in slots[booking.date] && slots[booking.date][booking.time].length > 0 ?
+      slots[booking.date][booking.time].find(s => s.e === booking.providerId) : null
 
-    store.commit('booking/setMultipleAppointmentsExistingApp', existingApp && existingApp[2] && existingApp[2] > 0)
+    store.commit('booking/setMultipleAppointmentsExistingApp', existingApp && existingApp.c && existingApp.c > 0)
+
+    booking.price = existingApp && 'p' in existingApp ? existingApp.p : null
   } else {
     let chosenEmployees = []
+
     for (let serviceId of Object.keys(cartItem.services)) {
       if (cartItem.services[serviceId].list.length &&
           cartItem.services[serviceId].list.filter(i => i.date && i.time).length
       ) {
         let bookingFailed = setPreferredEntitiesData(cartItem.services[serviceId], store, serviceId, chosenEmployees)
+
         if (bookingFailed !== null) {
           return {booking: bookingFailed, serviceId: parseInt(serviceId)}
         }
-        chosenEmployees = chosenEmployees.concat(cartItem.services[serviceId].list.map((l) => { return { date: l.date, providerId: l.providerId, serviceId: serviceId, existingApp: l.existingApp} }))
+        chosenEmployees = chosenEmployees.concat(cartItem.services[serviceId].list.map((l) => { return { date: l.date, providerId: l.providerId, serviceId: serviceId, existingApp: 'existingApp' in l && l.existingApp, price: l.price} }))
       }
     }
   }
@@ -770,7 +834,7 @@ function useFillAppointments (store) {
     if (activeItemServices[serviceId].list.filter(i => i.date && i.time).length) {
       activeItemServices[serviceId].list.forEach((booking) => {
         if (booking.date && booking.time) {
-          setProviderServicePrice(store, booking.providerId, serviceId)
+          setProviderServicePrice(store, booking.providerId, serviceId, booking.persons)
         }
       })
     }
@@ -779,18 +843,18 @@ function useFillAppointments (store) {
   return null
 }
 
-function setProviderServicePrice (store, employeeId, serviceId) {
+function setProviderServicePrice (store, employeeId, serviceId, persons) {
   let employee = store.getters['entities/getUnfilteredEmployee'](employeeId)
 
   let service = employee.serviceList.find(i => i.id === parseInt(serviceId))
 
-  let duration = store.getters['booking/getDuration']
+  service.duration = store.getters['booking/getDuration']
 
-  if (store.getters['booking/getDuration'] in service.customPricing.durations) {
-    service.duration = duration
-
-    service.price = service.customPricing.durations[duration].price
-  }
+  service.price = useAppointmentServicePrice(
+    service,
+    persons,
+    store.getters['booking/getDuration']
+  )
 }
 
 function useAppointmentsAmount (store, service, appointments) {
@@ -800,7 +864,8 @@ function useAppointmentsAmount (store, service, appointments) {
     amount += useAppointmentServiceAmount(
       useEmployeeService(store, service.id, appointment.providerId),
       appointment.persons,
-      appointment.duration
+      appointment.duration,
+      appointment.price
     )
   })
 
@@ -862,9 +927,9 @@ function useAppointmentsPayments (store, serviceId, appointments) {
 }
 
 function setPreferredEntitiesData (bookings, store, serviceId, chosenEmployees) {
-  let employeesIds = getAllEntitiesIds(bookings, 0)
+  let employeesIds = getAllEntitiesIds(bookings, 'e')
 
-  let locationsIds = getAllEntitiesIds(bookings, 1)
+  let locationsIds = getAllEntitiesIds(bookings, 'l')
 
   let isSingleEmployee = employeesIds.length === 1
 
@@ -894,7 +959,7 @@ function setPreferredEntitiesData (bookings, store, serviceId, chosenEmployees) 
 
         for (let i = 0; i < employeesIds.length; i++) {
           for (let j = 0; j < bookings.slots[booking.date][booking.time].length; j++) {
-            if (bookings.slots[booking.date][booking.time][j][0] === employeesIds[i]) {
+            if (bookings.slots[booking.date][booking.time][j].e === employeesIds[i]) {
               booking.providerId = employeesIds[i]
 
               break
@@ -914,7 +979,7 @@ function setPreferredEntitiesData (bookings, store, serviceId, chosenEmployees) 
           booking.time,
           booking.providerId,
           locationsIds,
-          1
+          'l'
         )
       } else if (isSingleLocation && !isSingleEmployee) {
         booking.locationId = locationsIds[0]
@@ -925,7 +990,7 @@ function setPreferredEntitiesData (bookings, store, serviceId, chosenEmployees) 
           booking.time,
           booking.locationId,
           employeesIds,
-          0
+          'e'
         )
       } else {
         let setEntities = false
@@ -955,8 +1020,8 @@ function setPreferredEntitiesData (bookings, store, serviceId, chosenEmployees) 
           outsideLoop2: for (let j = 0; j < employeesIds.length; j++) {
             for (let i = 0; i < locationsIds.length; i++) {
               for (let k = 0; k < bookings.slots[booking.date][booking.time].length; k++) {
-                if (bookings.slots[booking.date][booking.time][k][0] === employeesIds[j] &&
-                    bookings.slots[booking.date][booking.time][k][1] === locationsIds[i]
+                if (bookings.slots[booking.date][booking.time][k].e === employeesIds[j] &&
+                    bookings.slots[booking.date][booking.time][k].l === locationsIds[i]
                 ) {
                   booking.providerId = employeesIds[j]
 
@@ -970,13 +1035,18 @@ function setPreferredEntitiesData (bookings, store, serviceId, chosenEmployees) 
         }
       }
 
+      store.commit('booking/setMultipleAppointmentsServiceProvider', booking.providerId)
+
       let slots = store.getters['booking/getMultipleAppointmentsSlots']
+
       let existingApp = booking.date in slots && booking.time in slots[booking.date] &&  slots[booking.date][booking.time].length > 0 ?
-          slots[booking.date][booking.time].find(s => s[0] === booking.providerId) : null
-      bookings.list[bookingIndex].existingApp = existingApp && existingApp[2] && existingApp[2] > 0
+          slots[booking.date][booking.time].find(s => s.e === booking.providerId) : null
+
+      bookings.list[bookingIndex].existingApp = existingApp && existingApp.c && existingApp.c > 0
 
       store.commit('booking/setLastBookedProviderId', {providerId: booking.providerId, fromBackend: false})
 
+      bookings.list[bookingIndex].price = existingApp && 'p' in existingApp ? existingApp.p : null
     }
   }
 
@@ -1012,7 +1082,7 @@ function getAllEntitiesIds (bookings, index) {
 }
 
 function getPreferredEntityId (availableSlots, occupiedSlots, timeString, selectedId, allIds, targetIndex) {
-  let searchIndex = targetIndex ? 0 : 1
+  let searchIndex = targetIndex === 'e' ? 'l' : 'e'
 
   let appointmentsStarts = {}
 
@@ -1026,7 +1096,7 @@ function getPreferredEntityId (availableSlots, occupiedSlots, timeString, select
 
   Object.keys(availableSlots).forEach((time) => {
     availableSlots[time].forEach((slotData) => {
-      if (slotData.length >= 3 && slotData[searchIndex] === selectedId) {
+      if (Object.keys(slotData).length >= 3 && slotData[searchIndex] === selectedId) {
         appointmentsStarts[useTimeInSeconds(time)] = slotData[targetIndex]
       }
     })
@@ -1034,7 +1104,15 @@ function getPreferredEntityId (availableSlots, occupiedSlots, timeString, select
 
   let availableIds = []
 
-  availableSlots[timeString].forEach((slotData) => {
+  // Collect ids from available slots for the specific time; if time not in availableSlots (e.g., waiting list slot),
+  // fall back to occupied slots data to derive potential ids.
+  let timeRows = (timeString in availableSlots && Array.isArray(availableSlots[timeString])) ? availableSlots[timeString] : []
+
+  if (!timeRows.length && (timeString in occupiedSlots) && Array.isArray(occupiedSlots[timeString])) {
+    timeRows = occupiedSlots[timeString]
+  }
+
+  timeRows.forEach((slotData) => {
     if (slotData[searchIndex] === selectedId) {
       availableIds.push(slotData[targetIndex])
     }
@@ -1053,23 +1131,23 @@ function getPreferredEntityId (availableSlots, occupiedSlots, timeString, select
   }
 
   for (let i = 0; i < allIds.length; i++) {
-    for (let j = 0; j < availableSlots[timeString].length; j++) {
-      if (availableSlots[timeString][j][searchIndex] === selectedId &&
-        allIds[i] === availableSlots[timeString][j][targetIndex]
+    for (let j = 0; j < timeRows.length; j++) {
+      if (timeRows[j][searchIndex] === selectedId &&
+        allIds[i] === timeRows[j][targetIndex]
       ) {
-        return availableSlots[timeString][j][targetIndex]
+        return timeRows[j][targetIndex]
       }
     }
   }
 
-  return null
+  return targetIndex === 'e' ? availableSlots[timeString][0][targetIndex] : null
 }
 
 function isPreferredLocationAndEmployee (slotsData, occupiedData, timeString, locationId, employeeId) {
   let isEmployeeLocation = false
 
   slotsData[timeString].forEach((slotData) => {
-    if (slotData[0] === employeeId && slotData[1] === locationId) {
+    if (slotData.e === employeeId && slotData.l === locationId) {
       isEmployeeLocation = true
     }
   })
@@ -1086,20 +1164,20 @@ function isPreferredLocationAndEmployee (slotsData, occupiedData, timeString, lo
 
   Object.keys(occupiedData).forEach((time) => {
     occupiedData[time].forEach((slotData) => {
-      if (slotData[0] === employeeId && slotData[1] === locationId) {
-        appointmentStarts.onLocation[useTimeInSeconds(time)] = slotData[1]
-      } else if (slotData[0] === employeeId) {
-        appointmentStarts.offLocation[useTimeInSeconds(time)] = slotData[1]
+      if (slotData.e === employeeId && slotData.l === locationId) {
+        appointmentStarts.onLocation[useTimeInSeconds(time)] = slotData.l
+      } else if (slotData.e === employeeId) {
+        appointmentStarts.offLocation[useTimeInSeconds(time)] = slotData.l
       }
     })
   })
 
   Object.keys(slotsData).forEach((time) => {
     slotsData[time].forEach((slotData) => {
-      if (slotData.length >= 3 && slotData[0] === employeeId && slotData[1] === locationId) {
-        appointmentStarts.onLocation[useTimeInSeconds(time)] = slotData[1]
-      } else if (slotData.length >= 3 && slotData[0] === employeeId) {
-        appointmentStarts.offLocation[useTimeInSeconds(time)] = slotData[1]
+      if ('p' in slotData && slotData.e === employeeId && slotData.l === locationId) {
+        appointmentStarts.onLocation[useTimeInSeconds(time)] = slotData.l
+      } else if ('p' in slotData && slotData.e === employeeId) {
+        appointmentStarts.offLocation[useTimeInSeconds(time)] = slotData.l
       }
     })
   })
@@ -1123,6 +1201,92 @@ function isPreferredLocationAndEmployee (slotsData, occupiedData, timeString, lo
   return locationId === appointmentStarts[closestTime]
 }
 
+function  useCheckingIfAllNotFree (store) {
+  let preselected = store.getters['entities/getPreselected']
+
+  if (preselected.show === 'packages') {
+    let packages = store.getters['booking/getPackageId']
+      ? [store.getters['entities/getPackage'](store.getters['booking/getPackageId'])]
+      : store.getters['entities/getPackages']
+
+    return packages.length > 0 && packages.filter(p => p.price > 0).length === packages.length
+  }
+
+  if (!store.getters['booking/getPackageId']) {
+    let services = store.getters['booking/getServiceId']
+      ? [store.getters['entities/getService'](store.getters['booking/getServiceId'])]
+      : store.getters['entities/getServices']
+
+    let nonFreeServices = 0
+    for (let service of services) {
+      let employees = store.getters['booking/getEmployeeId']
+        ? (
+          store.getters['entities/getEmployee'](store.getters['booking/getEmployeeId'])
+            ? [store.getters['entities/getEmployee'](store.getters['booking/getEmployeeId'])]
+            : []
+        )
+        : store.getters['entities/getEmployees']
+
+      let duration = store.getters['booking/getBookingDuration']
+
+      let persons = store.getters['booking/getBookingPersons']
+
+      let providers = employees.filter(
+        eS => eS.serviceList.find(s =>
+          s.id === service.id &&
+          (
+            s.price > 0 ||
+            (
+              s.customPricing &&
+              (
+                (
+                  s.customPricing.enabled === 'duration' &&
+                  (
+                    Object.values(s.customPricing.durations).length === Object.values(s.customPricing.durations).filter(cp => cp.price > 0).length ||
+                    (
+                      duration &&
+                      s.customPricing.durations[duration].price > 0
+                    )
+                  )
+                ) || (
+                  s.customPricing.enabled === 'person' &&
+                  (
+                    s.customPricing.persons.length === s.customPricing.persons.filter(cp => cp.price > 0).length ||
+                    (
+                      persons &&
+                      (
+                        s.customPricing.persons.filter(cp => cp.range >= persons).length
+                          ? s.customPricing.persons.filter(cp => cp.range >= persons)[0].price > 0
+                          : s.customPricing.persons[s.customPricing.persons.length - 1].price > 0
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+
+      if (providers.length === employees.filter(eS => eS.serviceList.find(s => s.id === service.id)).length) {
+        nonFreeServices++
+      } else {
+        let extras = store.getters['booking/getSelectedExtras'].length
+          ? store.getters['booking/getSelectedExtras']
+          : []
+
+        if (extras.length > 0 && extras.reduce((partialSum, a) => partialSum + a.price, 0) > 0) {
+          nonFreeServices++
+        }
+      }
+    }
+
+    return services.length > 0 && nonFreeServices === services.length
+  }
+
+  return store.getters['entities/getPackage'](store.getters['booking/getPackageId']).price > 0
+}
+
 export {
   useCapacity,
   useAvailableSlots,
@@ -1141,6 +1305,8 @@ export {
   usePaymentError,
   useServices,
   useEmployeeService,
-  useTaxLabel,
   useAppointmentBookingAmountData,
+  useCheckingIfAllNotFree,
+  useAppointmentServicePrice,
+  useChangedBookingPrice,
 }

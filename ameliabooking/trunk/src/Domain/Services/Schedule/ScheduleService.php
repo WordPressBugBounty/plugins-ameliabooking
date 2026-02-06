@@ -34,7 +34,7 @@ class ScheduleService
     /** @var ProviderService */
     private $providerService;
 
-    /** @var ProviderService */
+    /** @var LocationService */
     private $locationService;
 
     /**
@@ -110,7 +110,8 @@ class ScheduleService
                     $hasVisibleLocations
                 );
 
-                if (($hasVisibleLocations && !$availablePeriodLocations->length()) ||
+                if (
+                    ($hasVisibleLocations && !$availablePeriodLocations->length()) ||
                     ($hasVisibleLocations && $locationId && !$availablePeriodLocations->keyExists($locationId))
                 ) {
                     continue;
@@ -166,7 +167,8 @@ class ScheduleService
         $hasVisibleLocations = $this->locationService->hasVisibleLocations($locations);
 
         /** @var Location $providerLocation */
-        $providerLocation = $provider->getLocationId() && $locations->length() ?
+        $providerLocation = $provider->getLocationId() && $locations->length()
+            && $locations->keyExists($provider->getLocationId()->getValue()) ?
             $locations->getItem($provider->getLocationId()->getValue()) : null;
 
         $providerLocationId = $providerLocation ? $providerLocation->getId()->getValue() : null;
@@ -198,7 +200,8 @@ class ScheduleService
                     $hasVisibleLocations
                 );
 
-                if (($hasVisibleLocations && !$availablePeriodLocations->length()) ||
+                if (
+                    ($hasVisibleLocations && !$availablePeriodLocations->length()) ||
                     ($hasVisibleLocations && $locationId && !$availablePeriodLocations->keyExists($locationId))
                 ) {
                     continue;

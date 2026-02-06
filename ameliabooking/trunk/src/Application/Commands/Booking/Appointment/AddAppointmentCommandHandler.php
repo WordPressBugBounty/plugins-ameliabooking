@@ -17,6 +17,7 @@ use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\CustomerBooking;
 use AmeliaBooking\Domain\Entity\Entities;
+use AmeliaBooking\Domain\Entity\Payment\Payment;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Services\Reservation\ReservationServiceInterface;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
@@ -102,7 +103,7 @@ class AddAppointmentCommandHandler extends CommandHandler
         }
 
         if ($userAS->isCustomer($user)) {
-            throw new AccessDeniedException('You are not allowed to update appointment');
+            throw new AccessDeniedException('You are not allowed to add appointment');
         }
 
         if ($userAS->isProvider($user) && !$settingsDS->getSetting('roles', 'allowWriteAppointments')) {
@@ -142,7 +143,7 @@ class AddAppointmentCommandHandler extends CommandHandler
         $ignoredData = [];
 
         /** @var Appointment $existingAppointment */
-        $existingAppointment = $appointmentAS->getAlreadyBookedAppointment($appointmentData, []);
+        $existingAppointment = $appointmentAS->getAlreadyBookedAppointment($appointmentData, false, $service);
 
         /** @var Appointment $appointment */
         $appointment = $appointmentAS->build(
@@ -150,8 +151,9 @@ class AddAppointmentCommandHandler extends CommandHandler
             $service
         );
 
-        if ($existingAppointment && $appointmentData['internalNotes']) {
-            if ($existingAppointment->getInternalNotes() &&
+        if ($existingAppointment && !empty($appointmentData['internalNotes'])) {
+            if (
+                $existingAppointment->getInternalNotes() &&
                 $existingAppointment->getInternalNotes()->getValue()
             ) {
                 $appointment->setInternalNotes(
@@ -176,10 +178,12 @@ class AddAppointmentCommandHandler extends CommandHandler
                 $appointment,
                 $existingAppointment,
                 $service,
-                $appointmentData['bookings'],
+                $appointmentData,
                 $paymentData
             );
         } catch (CustomerBookedException $e) {
+            $appointmentRepo->rollback();
+
             $result->setResult(CommandResult::RESULT_ERROR);
             $result->setMessage($e->getMessage());
             $result->setData(
@@ -190,6 +194,8 @@ class AddAppointmentCommandHandler extends CommandHandler
 
             return $result;
         } catch (BookingUnavailableException $e) {
+            $appointmentRepo->rollback();
+
             $result->setResult(CommandResult::RESULT_ERROR);
             $result->setMessage($e->getMessage());
             $result->setData(
@@ -201,9 +207,37 @@ class AddAppointmentCommandHandler extends CommandHandler
             return $result;
         }
 
+        foreach ($appointmentData['bookings'] as $bookingData) {
+            $paymentData['customerPaymentParentId'][(int)$bookingData['customerId']] = null;
+            $paymentData['customerPaymentInvoiceNumber'][(int)$bookingData['customerId']] = null;
+        }
+
+        /** @var CustomerBooking $booking */
+        foreach ($appointment->getBookings()->getItems() as $booking) {
+            if (
+                $booking->getCustomerId() &&
+                $booking->getCustomerId()->getValue() &&
+                $booking->getPayments() &&
+                $booking->getPayments()->keyExists(0)
+            ) {
+                /** @var Payment $payment */
+                $payment = $booking->getPayments()->getItem(0);
+
+                if (array_key_exists($booking->getCustomerId()->getValue(), $paymentData['customerPaymentParentId'])) {
+                    $paymentData['customerPaymentParentId'][$booking->getCustomerId()->getValue()]
+                        = $payment->getId()->getValue();
+                }
+
+                if (array_key_exists($booking->getCustomerId()->getValue(), $paymentData['customerPaymentInvoiceNumber'])) {
+                    $paymentData['customerPaymentInvoiceNumber'][$booking->getCustomerId()->getValue()]
+                        = $payment->getInvoiceNumber() ? $payment->getInvoiceNumber()->getValue() : null;
+                }
+            }
+        }
+
         if ($existingAppointment !== null) {
             $existingAppointmentId = $existingAppointment->getId()->getValue();
-            
+
             $ignoredData[$existingAppointmentId] = [
                 'status'      => $existingAppointment->getStatus()->getValue(),
                 'bookingsIds' => [],
@@ -229,19 +263,14 @@ class AddAppointmentCommandHandler extends CommandHandler
                 ]
             );
 
-            if ($appointment->getBookings() &&
-                $appointment->getBookings()->keyExists(0) &&
-                $appointment->getBookings()->getItem(0)->getPayments() &&
-                $appointment->getBookings()->getItem(0)->getPayments()->keyExists(0)
-            ) {
-                $paymentData['parentId'] =
-                    $appointment->getBookings()->getItem(0)->getPayments()->getItem(0)->getId()->getValue();
-            }
-
             $appointmentAS->convertTime($recurringAppointmentData);
 
             /** @var Appointment $existingRecurringAppointment */
-            $existingRecurringAppointment = $appointmentAS->getAlreadyBookedAppointment($recurringAppointmentData, []);
+            $existingRecurringAppointment = $appointmentAS->getAlreadyBookedAppointment(
+                $recurringAppointmentData,
+                false,
+                $service
+            );
 
             /** @var Appointment $recurringAppointment */
             $recurringAppointment = $appointmentAS->build(
@@ -250,7 +279,8 @@ class AddAppointmentCommandHandler extends CommandHandler
             );
 
             if ($existingRecurringAppointment && $recurringAppointmentData['internalNotes']) {
-                if ($existingRecurringAppointment->getInternalNotes() &&
+                if (
+                    $existingRecurringAppointment->getInternalNotes() &&
                     $existingRecurringAppointment->getInternalNotes()->getValue()
                 ) {
                     $recurringAppointment->setInternalNotes(
@@ -275,10 +305,12 @@ class AddAppointmentCommandHandler extends CommandHandler
                     $recurringAppointment,
                     $existingRecurringAppointment,
                     $service,
-                    $recurringAppointmentData['bookings'],
+                    $recurringAppointmentData,
                     $paymentData
                 );
             } catch (CustomerBookedException $e) {
+                $appointmentRepo->rollback();
+
                 $result->setResult(CommandResult::RESULT_ERROR);
                 $result->setMessage($e->getMessage());
                 $result->setData(
@@ -289,6 +321,8 @@ class AddAppointmentCommandHandler extends CommandHandler
 
                 $error = true;
             } catch (BookingUnavailableException $e) {
+                $appointmentRepo->rollback();
+
                 $result->setResult(CommandResult::RESULT_ERROR);
                 $result->setMessage($e->getMessage());
                 $result->setData(
@@ -303,7 +337,8 @@ class AddAppointmentCommandHandler extends CommandHandler
             if ($error) {
                 $appointmentAS->delete($appointment, $ignoredData);
 
-                if ($appointment->getId() &&
+                if (
+                    $appointment->getId() &&
                     $appointment->getId()->getValue() &&
                     !empty($ignoredData[$appointment->getId()->getValue()])
                 ) {
@@ -334,7 +369,7 @@ class AddAppointmentCommandHandler extends CommandHandler
 
             if ($existingRecurringAppointment !== null) {
                 $existingAppointmentId = $existingRecurringAppointment->getId()->getValue();
-                
+
                 $ignoredData[$existingAppointmentId] = [
                     'status'      => $existingRecurringAppointment->getStatus()->getValue(),
                     'bookingsIds' => [],

@@ -5,7 +5,7 @@
     :class="props.globalClass"
   >
     <div v-show="!loading">
-      <div v-if="paymentError && instantBooking" class="am-fs__info-error">
+  <div v-if="paymentError && (instantBooking || isWaitingListBooking)" class="am-fs__info-error">
         <AmAlert
           type="error"
           :title="paymentError"
@@ -14,6 +14,36 @@
         >
         </AmAlert>
       </div>
+
+      <div v-if="authError" class="am-fs__info-error">
+        <AmAlert
+            type="error"
+            :title="authErrorMessage"
+            :show-icon="true"
+            :closable="true"
+        >
+        </AmAlert>
+      </div>
+
+      <!-- Social Buttons -->
+      <div v-if="(settings.socialLogin.googleLoginEnabled && settings.general.googleClientId && !loggedInUser) || (settings.socialLogin.facebookLoginEnabled && settings.socialLogin.facebookCredentialsEnabled && !loggedInUser)">
+        <div class="am-fs__info-social-wrapper">
+          <div class="am-fs__info-social-wrapper__label">
+            {{amLabels.auto_fill_your_details}}
+          </div>
+          <am-social-button
+              :provider="socialProvider"
+              @social-action="onSignupSocial"
+          />
+        </div>
+
+        <!-- Social Divider -->
+        <div class="am-fs__info-social-divider">
+          <span class="par-sm">{{ amLabels.or_enter_details_below }}</span>
+        </div>
+        <!-- /Social Divider -->
+      </div>
+      <!-- /Social Buttons -->
     <el-form
       ref="infoFormRef"
       :model="infoFormData"
@@ -26,30 +56,64 @@
       ]"
     >
       <template v-for="item in amCustomize.infoStep.order" :key="item.id">
-        <component :is="formFields[item.id]" ref="primeCollectorRef" :phone-error="phoneError" :logged-in-user="loggedInUser"></component>
+        <component
+          :is="formFields[item.id].template"
+          ref="primeCollectorRef"
+          v-bind="formFields[item.id].props"
+          v-on="'handlers' in formFields[item.id] ? formFields[item.id].handlers : {}"
+        ></component>
       </template>
+
+      <el-form-item
+          v-if="
+            settings.featuresIntegrations.mailchimp.enabled &&
+            settings.mailchimp.subscribeFieldVisible &&
+            amCustomize.infoStep.options.email.visibility
+          "
+          class="am-subscribe"
+      >
+        <AmCheckBox
+          v-model="subscribeToMailchimp"
+          :label="amLabels.subscribe_to_mailing_list"
+        >
+        </AmCheckBox>
+      </el-form-item>
+
 
       <!-- Custom Fields TODO - validation for custom fields isn't set-->
       <template v-if="availableCustomFields && allCustomFields">
         <el-form-item
           v-for="(cf, index) in allCustomFields"
-          v-show="cf.id in availableCustomFields"
+          v-show="cf.id in availableCustomFields && checkCustomerCustomFieldVisibility(cf)"
+          :id="'am-cf-' + cf.id"
           :ref="el => customFieldsRefs[index] = el"
           :key="index"
           class="am-fs__info-form__item"
-          :class="[{'is-required': cf.type === 'file' && cf.required}, `am-cf-width-${cf.width}`]"
+          :class="[
+            { 'is-required': cf.type === 'file' && cf.required },
+            `am-cf-width-${cf.width}`,
+            {'am-rtl': isRtl}
+          ]"
           label-position="top"
           :prop="cf.required && cf.type !== 'content' ? 'cf' + cf.id : 'inputFile'"
         >
           <!-- ####### LABEL ####### -->
           <template v-if="cf.type !== 'content'" #label>
-          <span
-            v-if="(cf.type === 'checkbox' || cf.type === 'radio') && cf.label" :class="(cf.type === 'checkbox' || cf.type === 'radio') && cf.required ? 'am-custom-required-as-html' : ''"
-            v-html="cf.label ? '<label class=' + '\'am-fs__info-form__label\'>' + cf.label + '</label>' : ''">
-          </span>
+            <span
+              v-if="
+                (cf.type === 'checkbox' || cf.type === 'radio') && cf.label
+              "
+              :class="
+                (cf.type === 'checkbox' || cf.type === 'radio') && cf.required
+                  ? 'am-custom-required-as-html'
+                  : ''
+              "
+              v-html="cf.label ? cf.label : ''"
+            >
+            </span>
             <span v-else class="am-fs__info-form__label">
-            {{cf.label}}
-          </span>
+              {{cf.label}}
+            </span>
           </template>
           <!-- ####### /LABEL ####### -->
 
@@ -64,27 +128,13 @@
           <!-- /types - [input, text-area] -->
 
           <!-- Address Field -->
-          <div v-if="cf.type === 'address'" :class="{'am-input-wrapper' : googleMapsLoaded}">
-            <div v-if="googleMapsLoaded()">
-              <div class="el-input el-input--default am-input am-input__default">
-                  <vue-google-autocomplete
-                    :id="'amelia-address-autocomplete-'+cf.id"
-                    ref="addressCustomFields"
-                    classname="el-input__inner"
-                    types=""
-                    placeholder=""
-                    @change="setAddressCF($event, cf.id)"
-                  >
-                  </vue-google-autocomplete>
-              </div>
-            </div>
-            <AmInput
-              v-else
+          <template v-if="cf.type === 'address'">
+            <AmAddressInput
+              :id="`amelia-address-autocomplete-${cf.id}`"
               v-model="infoFormData['cf' + cf.id]"
-              placeholder=""
-            >
-            </AmInput>
-          </div>
+              @address-selected="(address) => addressSelected(address, cf.id)"
+            />
+          </template>
           <!-- /Address Field -->
 
           <!-- type - date-picker-full -->
@@ -121,7 +171,7 @@
               v-for="(option, i) in cf.options"
               :key="i"
               :label="option.label"
-              :value="option.id"
+              :value="option.label"
             />
           </AmRadioGroup>
           <!-- /type - radio -->
@@ -135,7 +185,7 @@
               v-for="(option, i) in cf.options"
               :key="i"
               :label="option.label"
-              :value="option.id"
+              :value="option.label"
             />
           </AmCheckBoxGroup>
           <!-- /type - checkbox -->
@@ -146,6 +196,7 @@
             :id="cf.id"
             v-model="infoFormData['cf' + cf.id]"
             :auto-upload="false"
+            :accept="customFieldsAllowedExtensions"
             @change="onAddFile"
             @remove="onRemoveFile"
           >
@@ -159,7 +210,7 @@
           <!-- ####### INPUT ####### -->
         </el-form-item>
       </template>
-      <div v-if="instantBooking && settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree" class="am-fs__payments-sentence">
+      <div v-if="instantBooking && settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled" class="am-fs__payments-sentence">
         <p>
           {{amLabels.payment_wc_mollie_sentence}}
         </p>
@@ -167,14 +218,14 @@
     </el-form>
 
     <PaymentOnSite
-      v-if="instantBooking && (settings.payments.wc.enabled ? settings.payments.wc.onSiteIfFree : true)"
+      v-if="isWaitingListBooking || (instantBooking && (settings.payments.wc.enabled ? settings.payments.wc.onSiteIfFree || !wcEntityEnabled : true))"
       ref="refOnSiteBooking"
       :instant-booking="instantBooking"
       @payment-error="callPaymentError"
     />
 
     <PaymentWc
-      v-if="instantBooking && settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree"
+      v-if="instantBooking && !isWaitingListBooking && settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled"
       ref="refWcBooking"
       :instant-booking="instantBooking"
       @payment-error="callPaymentError"
@@ -201,6 +252,7 @@ import AmRadio from "../../../_components/radio/AmRadio.vue";
 import AmDatePickerFull from "../../../_components/date-picker-full/AmDatePickerFull.vue";
 import AmSelect from "../../../_components/select/AmSelect.vue";
 import AmOption from "../../../_components/select/AmOption.vue";
+import AmAddressInput from "../../../_components/address-input/AmAddressInput.vue";
 
 import PaymentOnSite from "../../Parts/Payment/PaymentOnSite.vue";
 import PaymentWc from "../../Parts/Payment/PaymentWc.vue";
@@ -219,14 +271,18 @@ import {
   nextTick
 } from "vue";
 import { useStore } from "vuex";
+import VueAuthenticate from "vue-authenticate";
 import { settings } from "../../../../plugins/settings";
 import { usePrepaidPrice, usePaymentError } from "../../../../assets/js/common/appointments";
 import { useScrollTo } from "../../../../assets/js/common/scrollElements";
-import { saveStats, useAppointmentBookingData } from "../../../../assets/js/public/booking";
 import { useCustomFields } from "../../../../assets/js/public/customFields";
-import VueGoogleAutocomplete from 'vue-google-autocomplete'
 import useAction from "../../../../assets/js/public/actions";
 import { useElementSize } from "@vueuse/core";
+import { useCartHasItems } from "../../../../assets/js/public/cart";
+import httpClient from "../../../../plugins/axios";
+import AmSocialButton from "../../../common/FormFields/AmSocialButton.vue";
+import {SocialAuthOptions} from "../../../../assets/js/admin/socialAuthOptions";
+import {mapAddressComponentsForXML} from "../../../../assets/js/common/helper";
 
 let props = defineProps({
   globalClass: {
@@ -281,7 +337,7 @@ const {
 })
 
 watch(headerButtonPreviousClicked, () => {
-  if (instantBooking.value) {
+  if (instantBooking.value && !isWaitingListBooking.value) {
     addPaymentsStep()
   }
 })
@@ -298,16 +354,6 @@ function callPaymentError (msg) {
   usePaymentError(store, msg)
 }
 
-function googleMapsLoaded () {
-  return window.google && settings.general.gMapApiKey
-}
-
-function setAddressCF (input, cfId) {
-  if (typeof input === 'string') {
-    infoFormData.value['cf' + cfId] = input
-  }
-}
-
 let paymentError = computed(() => store.getters['booking/getError'])
 
 /**
@@ -315,6 +361,20 @@ let paymentError = computed(() => store.getters['booking/getError'])
  */
 // * Form reference
 let infoFormRef = ref(null)
+
+let isRtl = computed(() => store.getters['getIsRtl'])
+
+let phoneError = ref(false)
+let refreshPhoneComponent = ref(0)
+let loggedInUser = computed(() => (store.getters['booking/getCustomerId'] && store.getters['booking/getCustomerEmail'])
+  || (!!window.ameliaUser && window.ameliaUser.type == 'admin'))
+
+// * Watch for logged in user to refresh phone component
+watch(loggedInUser, (newValue) => {
+  if (newValue) {
+    refreshPhoneComponent.value++
+  }
+})
 
 // * Form data
 let infoFormData = ref({
@@ -347,10 +407,48 @@ provide('infoFormData', infoFormData)
 
 // * Form Fields Object
 let formFields = ref({
-  firstName: markRaw(FirstNameFormField),
-  lastName: markRaw(LastNameFormField),
-  email: markRaw(EmailFormField),
-  phone: markRaw(PhoneFormField)
+  firstName: {
+    template: markRaw(FirstNameFormField),
+    props: {
+      class: computed(() => isRtl.value ? 'am-rtl' : ''),
+      loggedInUser: computed(() => !!loggedInUser.value)
+    }
+  },
+  lastName: {
+    template: markRaw(LastNameFormField),
+    props: {
+      class: computed(() => isRtl.value ? 'am-rtl' : ''),
+      loggedInUser: computed(() => !!loggedInUser.value)
+    }
+  },
+  email: {
+    template: markRaw(EmailFormField),
+    props: {
+      class: computed(() => isRtl.value ? 'am-rtl' : ''),
+      loggedInUser: computed(() => !!loggedInUser.value)
+    }
+  },
+  phone: {
+    template: markRaw(PhoneFormField),
+    props: {
+      class: computed(() => isRtl.value ? 'am-rtl' : ''),
+      phoneError: computed(() => phoneError.value),
+      loggedInUser: computed(() => !!loggedInUser.value),
+      refreshTrigger: computed(() => refreshPhoneComponent.value)
+    },
+    handlers: {
+      countryPhoneIsoUpdated: (val) => {
+        store.commit('booking/setCustomerCountryPhoneIso', val ? val.toLowerCase() : "")
+      }
+    }
+  }
+})
+
+let subscribeToMailchimp = computed({
+  get: () => store.getters['booking/getCustomerSubscribe'],
+  set: (val) => {
+    store.commit('booking/setCustomerSubscribe', val)
+  }
 })
 
 // * Form validation rules
@@ -404,6 +502,8 @@ let loading = computed(() => store.getters['booking/getLoading'])
 
 let instantBooking = ref(usePrepaidPrice(store) === 0)
 
+let isWaitingListBooking = computed(() => store.getters['appointmentWaitingListOptions/getIsWaitingListSlot'])
+
 allCustomFields.value.forEach((customField) => {
   if (customField.id in availableCustomFields.value) {
     rules.value['cf' + customField.id] = [{
@@ -436,10 +536,14 @@ function onRemoveFile (a) {
   infoFormData.value['cf' + a.id] = a.raw
 }
 
-let phoneError = ref(false)
+function addressSelected (addressComponents, cfId) {
+  if (addressComponents && store.state.booking.appointment.bookings[0].customFields[cfId]) {
+    store.state.booking.appointment.bookings[0].customFields[cfId].components = mapAddressComponentsForXML(addressComponents)
+  }
+}
 
-let loggedInUser = computed(() => (store.getters['booking/getCustomerId'] && store.getters['booking/getCustomerEmail'])
-    || (!!window.ameliaUser && window.ameliaUser.type == 'admin'))
+let customFieldsAllowedExtensions = ref('')
+
 /**
  * Submit Form Function
  */
@@ -459,39 +563,91 @@ function submitForm() {
       null,
       null
   )
-
   infoFormRef.value.validate((valid) => {
     if (valid) {
       phoneError.value = false
-      if (!instantBooking.value) {
+      if (!instantBooking.value && !isWaitingListBooking.value) {
         nextStep()
       } else {
-        if (settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree) {
-          store.commit('booking/setPaymentGateway', 'wc')
-
-          refWcBooking.value.continueWithBooking()
-        } else {
+        // For waiting list bookings always use onSite gateway.
+        if (isWaitingListBooking.value) {
           store.commit('booking/setPaymentGateway', 'onSite')
-
-          refOnSiteBooking.value.continueWithBooking()
+          if (refOnSiteBooking.value && typeof refOnSiteBooking.value.continueWithBooking === 'function') {
+            refOnSiteBooking.value.continueWithBooking()
+          } else {
+            // Fallback: remove payment step already, just proceed to next step if exposed
+            nextStep()
+          }
+        } else {
+          if (settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled.value) {
+            store.commit('booking/setPaymentGateway', 'wc')
+            refWcBooking.value.continueWithBooking()
+          } else {
+            store.commit('booking/setPaymentGateway', 'onSite')
+            if (refOnSiteBooking.value && typeof refOnSiteBooking.value.continueWithBooking === 'function') {
+              refOnSiteBooking.value.continueWithBooking()
+            } else {
+              nextStep()
+            }
+          }
         }
       }
     } else {
+      // * Scroll to the first error field
       let fieldElement
-      allFieldsRefs.value.some(el => {
-        if (el.shouldShowError === true) {
-          fieldElement = el.formItemRef
-          return el.shouldShowError === true
+
+      infoFormRef.value.fields.some((el) => {
+        if (el.validateState === 'error') {
+          fieldElement = el.$el
+          return el.validateState === 'error'
         }
       })
 
-      let phoneField = allFieldsRefs.value.find(el => el.prop === 'phone')
-      phoneError.value = !!(phoneField && phoneField.shouldShowError && phoneField.validateMessage)
+      let phoneField = infoFormRef.value.fields.find(el => el.prop === 'phone')
+      phoneError.value = !!(phoneField && phoneField.validateState === 'error')
 
       useScrollTo(infoFormWrapperRef.value, fieldElement, 20, 300)
       return false
     }
   })
+}
+
+let socialProvider = ref('')
+const VueAuthenticateInstance = VueAuthenticate.factory(httpClient, SocialAuthOptions)
+
+// * Facebook Sign in error alert
+let authError = ref(false)
+let authErrorMessage = ref('')
+
+function onSignupSocial({ provider, credentials }) {
+  const socialCheckUrl = `/users/authentication/${provider}`
+  const data = {}
+  socialProvider = provider
+
+  if (provider === 'google') {
+    data.code = credentials
+    httpClient.post(`${socialCheckUrl}`, data).then(response => {
+      setDataFromSocialLogin(response.data.data.user)
+    })
+  }
+  if (provider === 'facebook') {
+    VueAuthenticateInstance.options.providers[provider].url = `${socialCheckUrl}`
+    VueAuthenticateInstance.authenticate(provider, data).then((response) => {
+     setDataFromSocialLogin(response.data.data.user)
+    }).catch((error) => {
+      if (!VueAuthenticateInstance.isAuthenticated()) {
+        authError.value = true
+        authErrorMessage.value = 'User is not authenticated.'
+        store.commit('setLoading', false)
+      }
+    })
+  }
+}
+
+function setDataFromSocialLogin(data) {
+  infoFormData.value.firstName = data.firstName
+  infoFormData.value.lastName = data.lastName
+  infoFormData.value.email = data.email
 }
 
 // * Watching when footer button was clicked
@@ -501,9 +657,86 @@ watchEffect(() => {
   }
 })
 
+let visibilityFlags = ref({})
+
+function checkCustomerCustomFieldVisibility (cf) {
+  if (cf.saveType === 'customer' && loggedInUser.value && store.state.booking.appointment.bookings[0].customer.customFields) {
+    let customerCustomFields = store.state.booking.appointment.bookings[0].customer.customFields
+
+    try {
+      let parsedCustomerCF = JSON.parse(customerCustomFields)
+      let af = availableCustomFields.value[cf.id]
+      let currentValue = af ? af.value : undefined
+      let alreadyFlagged = Object.prototype.hasOwnProperty.call(visibilityFlags.value, cf.id)
+
+      if (!(cf.id in parsedCustomerCF)) {
+        return true
+      }
+
+       if (alreadyFlagged) {
+        return visibilityFlags.value[cf.id]
+      }
+
+      // Always show when saveFirstChoice is false
+      if (!cf.saveFirstChoice) {
+        visibilityFlags.value[cf.id] = true
+        return true
+      }
+
+      // When saveFirstChoice is true, show if saved value is empty
+      let visible
+      switch (cf.type) {
+        case 'checkbox':
+        case 'file':
+          visible = Array.isArray(currentValue) ? currentValue.length === 0 : (currentValue == null)
+          break
+        default:
+          visible = currentValue == null || currentValue === ''
+      }
+
+      visibilityFlags.value[cf.id] = visible
+      return visible
+    } catch (e) {
+      return true
+    }
+  }
+
+  return true
+}
+
 let addressCustomFields = ref([])
 
+let wcEntityEnabled = ref(false)
+
 onMounted(() => {
+  let entity = null
+
+  switch (store.getters['booking/getBookableType']) {
+    case ('appointment'):
+      entity = useCartHasItems(store) === 1 ? store.getters['entities/getBookableFromBookableEntities'](
+        store.getters['booking/getSelection']
+      ) : null
+
+      break
+
+    case ('package'):
+      entity = store.getters['entities/getPackage'](
+        store.getters['booking/getPackageId']
+      )
+
+      break
+  }
+
+  let entityPayments = entity && entity.settings ? JSON.parse(entity.settings)['payments'] : null
+
+  wcEntityEnabled.value = entityPayments && 'wc' in entityPayments
+    ? !('enabled' in entityPayments.wc) || entityPayments.wc.enabled
+    : settings.payments.wc.enabled
+
+  if (settings.general.customFieldsAllowedExtensions) {
+    customFieldsAllowedExtensions.value = Object.keys(settings.general.customFieldsAllowedExtensions).join(', ')
+  }
+
   Object.keys(availableCustomFields.value).forEach((id) => {
     infoFormData.value['cf' + id] = computed({
       get: () => store.state.booking.appointment.bookings[0].customFields[id].value,
@@ -525,7 +758,7 @@ onMounted(() => {
     }
   })
 
-  if (instantBooking.value) {
+  if (instantBooking.value || isWaitingListBooking.value) {
     removePaymentsStep()
   }
 
@@ -537,17 +770,6 @@ onMounted(() => {
     })
     allFieldsRefs.value.push.apply(allFieldsRefs.value, customFieldsRefs.value)
   })
-
-  // add stats
-  if (store.getters['booking/getBookableType'] === 'appointment') {
-    let statsData = useAppointmentBookingData(store)[0]
-
-    saveStats({
-      locationId: statsData.locationId !== null ? statsData.locationId : null,
-      providerId: statsData.providerId,
-      serviceId: statsData.serviceId,
-    })
-  }
 
   useAction(
       store,
@@ -575,7 +797,7 @@ export default {
     stepSelectedData: [],
     finished: false,
     selected: false,
-  }
+  },
 }
 </script>
 
@@ -594,9 +816,61 @@ export default {
 
     &__info {
       &-error {
-        animation: 600ms cubic-bezier(.45,1,.4,1.2) #{100}ms am-animation-slide-up;
+        animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{100}ms
+          am-animation-slide-up;
         animation-fill-mode: both;
         margin-bottom: 10px;
+      }
+
+      &-social-wrapper {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: 24px;
+        gap: 24px;
+
+        .am-social-signin {
+          &__google {
+            #g_id_onload {
+              display: none;
+            }
+            .g_id_signin {
+              width: 64px;
+            }
+          }
+        }
+
+        &__label {
+          font-weight: 500;
+          font-size: 15px;
+        }
+      }
+
+      &-social-divider {
+        align-items: center;
+        display: flex;
+        margin-bottom: 24px;
+
+        // Before & After
+        &:before,
+        &:after {
+          background: var(--shade-250, #D1D5D7);
+          content: '';
+          height: 1px;
+          width: 100%;
+        }
+
+        span {
+          flex: none;
+          font-size: 15px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 24px;
+          color: var(--shade-500, #808A90);
+          margin-left: 8px;
+          margin-right: 8px;
+        }
       }
 
       &-form {
@@ -608,7 +882,11 @@ export default {
           $count: 100;
           @for $i from 0 through $count {
             &:nth-child(#{$i + 1}) {
-              animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+              animation: 600ms
+                cubic-bezier(0.45, 1, 0.4, 1.2)
+                #{$i *
+                100}ms
+                am-animation-slide-up;
               animation-fill-mode: both;
             }
           }
@@ -624,6 +902,22 @@ export default {
           &.am-cf-width-100 {
             width: 100%;
           }
+
+          &.am-subscribe {
+            width: 100%;
+            .el-checkbox {
+              &__input {
+                height: 32px;
+                line-height: 32px;
+                align-items: center;
+              }
+
+              &__label {
+                line-height: 32px;
+                align-items: center;
+              }
+            }
+          }
         }
 
         &-mobile {
@@ -632,7 +926,7 @@ export default {
             width: 100%;
           }
           &-s {
-            gap: 0px
+            gap: 0px;
           }
         }
 

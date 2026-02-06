@@ -6,11 +6,11 @@ use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
-use AmeliaBooking\Domain\Entity\Booking\Appointment\CustomerBooking;
 use AmeliaBooking\Domain\Entity\Location\Location;
 use AmeliaBooking\Domain\Entity\Schedule\DayOff;
 use AmeliaBooking\Domain\Entity\Schedule\Period;
 use AmeliaBooking\Domain\Entity\Schedule\PeriodLocation;
+use AmeliaBooking\Domain\Entity\Schedule\PeriodService;
 use AmeliaBooking\Domain\Entity\Schedule\SpecialDay;
 use AmeliaBooking\Domain\Entity\Schedule\SpecialDayPeriod;
 use AmeliaBooking\Domain\Entity\Schedule\SpecialDayPeriodLocation;
@@ -19,16 +19,20 @@ use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Factory\Bookable\Service\ServiceFactory;
 use AmeliaBooking\Domain\Factory\Booking\Appointment\AppointmentFactory;
 use AmeliaBooking\Domain\Factory\Schedule\PeriodFactory;
+use AmeliaBooking\Domain\Factory\Schedule\PeriodLocationFactory;
 use AmeliaBooking\Domain\Factory\Schedule\WeekDayFactory;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\Services\Interval\IntervalService;
 use AmeliaBooking\Domain\ValueObjects\DateTime\DateTimeValue;
 use AmeliaBooking\Domain\ValueObjects\Duration;
 use AmeliaBooking\Domain\ValueObjects\String\Status;
+use DateInterval;
+use DatePeriod;
 use DateTime;
 use DateTimeZone;
 use Exception;
 use Slim\Exception\ContainerValueNotFoundException;
+use AmeliaBooking\Infrastructure\Licence;
 
 /**
  * Class ProviderService
@@ -57,123 +61,45 @@ class ProviderService
      * @return void
      * @throws InvalidArgumentException
      */
-    private function makePeriodsAvailable($day)
+    private function makePeriodsAvailable($day, $removeBreaks)
     {
-        $periodsInSeconds = [];
+        $locations = [];
+
+        if ($removeBreaks) {
+            $day->setTimeOutList(new Collection());
+        }
 
         /** @var Period $period */
-        foreach ($day->getPeriodList()->getItems() as $key => $period) {
-            if ($period->getLocationId()) {
-                $startInSeconds = $this->intervalService->getSeconds(
-                    $period->getStartTime()->getValue()->format('H:i:s')
+        foreach ($day->getPeriodList()->getItems() as $period) {
+            if ($period->getLocationId() && empty($locations[$period->getLocationId()->getValue()])) {
+                $locations[$period->getLocationId()->getValue()] = PeriodLocationFactory::create(
+                    ['locationId' => $period->getLocationId()->getValue()]
                 );
+            }
 
-                $periodsInSeconds[$startInSeconds] = $this->intervalService->getSeconds(
-                    $period->getEndTime()->getValue()->format('H:i:s')
-                );
+            /** @var PeriodLocation $periodLocation */
+            foreach ($period->getPeriodLocationList()->getItems() as $periodLocation) {
+                if (empty($locations[$periodLocation->getLocationId()->getValue()])) {
+                    $locations[$periodLocation->getLocationId()->getValue()] = PeriodLocationFactory::create(
+                        ['locationId' => $periodLocation->getLocationId()->getValue()]
+                    );
+                }
             }
         }
 
-        if (!$periodsInSeconds) {
-            $day->getPeriodList()->addItem(
-                PeriodFactory::create(
-                    [
-                        'startTime'          => '00:00:00',
-                        'endTime'            => '24:00:00',
-                        'periodServiceList'  => [],
-                        'periodLocationList' => [],
-                    ]
-                )
-            );
+        $day->setPeriodList(new Collection());
 
-            return;
-        }
-
-
-        $periodsStartTimes = array_keys($periodsInSeconds);
-
-        sort($periodsStartTimes);
-
-        $sortedPeriodsInSeconds = [];
-
-        foreach ($periodsStartTimes as $seconds) {
-            $sortedPeriodsInSeconds[$seconds] = $periodsInSeconds[$seconds];
-        }
-
-        $periodsInSeconds = $sortedPeriodsInSeconds;
-
-        $extraPeriods = [];
-
-        $i = 0;
-
-        $periodsCount = sizeof($periodsInSeconds);
-
-        $periodsStarts = array_keys($periodsInSeconds);
-
-        foreach ($periodsInSeconds as $secondsStart => $secondsEnd) {
-            if ($i === 0) {
-                if ($secondsStart !== 0) {
-                    $extraPeriods[0] = $secondsStart;
-                }
-
-                if (!empty($periodsStarts[$i + 1]) && $periodsStarts[$i + 1] !== $secondsEnd) {
-                    $extraPeriods[$secondsEnd] = $periodsStarts[$i + 1];
-                }
-
-                if ($periodsCount === 1 && $secondsEnd !== 86400) {
-                    $extraPeriods[$secondsEnd] = 86400;
-                }
-            } elseif ($i === $periodsCount - 1) {
-                if ($secondsEnd !== 86400) {
-                    $extraPeriods[$secondsEnd] = 86400;
-                }
-            } else {
-                if ($periodsStarts[$i + 1] !== $secondsEnd) {
-                    $extraPeriods[$secondsEnd] = $periodsStarts[$i + 1];
-                }
-            }
-
-            $i++;
-        }
-
-        foreach ($extraPeriods as $extraPeriodStart => $extraPeriodEnd) {
-            $day->getPeriodList()->addItem(
-                PeriodFactory::create(
-                    [
-                        'startTime'          => sprintf('%02d', floor($extraPeriodStart / 3600)) . ':'
-                            . sprintf('%02d', floor(($extraPeriodStart / 60) % 60)) . ':00',
-                        'endTime'            => sprintf('%02d', floor($extraPeriodEnd / 3600)) . ':'
-                            . sprintf('%02d', floor(($extraPeriodEnd / 60) % 60)) . ':00',
-                        'periodServiceList'  => [],
-                        'periodLocationList' => [],
-                    ]
-                )
-            );
-        }
-
-        /** @var Collection $sortedPeriods */
-        $sortedPeriods = new Collection();
-
-        $allPeriodsInSeconds = [];
-
-        /** @var Period $period */
-        foreach ($day->getPeriodList()->getItems() as $key => $period) {
-            $startInSeconds = $this->intervalService->getSeconds(
-                $period->getStartTime()->getValue()->format('H:i:s')
-            );
-
-            $allPeriodsInSeconds[$startInSeconds] = $key;
-        }
-
-        $allPeriodsInSecondsKeys = array_keys($allPeriodsInSeconds);
-
-        sort($allPeriodsInSecondsKeys);
-
-        foreach ($allPeriodsInSecondsKeys as $periodStart) {
-            $sortedPeriods->addItem($day->getPeriodList()->getItem($allPeriodsInSeconds[$periodStart]));
-        }
-
-        $day->setPeriodList($sortedPeriods);
+        $day->getPeriodList()->addItem(
+            PeriodFactory::create(
+                [
+                    'startTime'          => '00:00:00',
+                    'endTime'            => '24:00:00',
+                    'locationId'         => sizeof($locations) === 1 ? array_keys($locations)[0] : null,
+                    'periodServiceList'  => [],
+                    'periodLocationList' => sizeof($locations) > 1 ? array_values($locations) : [],
+                ]
+            )
+        );
     }
 
     /**
@@ -191,6 +117,15 @@ class ProviderService
             /** @var WeekDay $weekDay */
             foreach ($provider->getWeekDayList()->getItems() as $weekDay) {
                 $providerWeekDayIndexes[] = $weekDay->getDayIndex()->getValue();
+            }
+
+            /** @var WeekDay $weekDay */
+            foreach ($provider->getWeekDayList()->getItems() as $index => $weekDay) {
+                $weekDay->getStartTime()->getValue()->setTime(0, 0);
+                $weekDay->getEndTime()->getValue()->modify('+1 day');
+                $weekDay->getEndTime()->getValue()->setTime(0, 0);
+
+                $this->makePeriodsAvailable($weekDay, true);
             }
 
             for ($i = 1; $i <= 7; $i++) {
@@ -215,19 +150,14 @@ class ProviderService
                 }
             }
 
-            /** @var WeekDay $weekDay */
-            foreach ($provider->getWeekDayList()->getItems() as $index => $weekDay) {
-                $this->makePeriodsAvailable($weekDay);
-            }
-
             /** @var SpecialDay $specialDay */
             foreach ($provider->getSpecialDayList()->getItems() as $specialDay) {
-                $this->makePeriodsAvailable($specialDay);
+                $this->makePeriodsAvailable($specialDay, false);
             }
 
             $provider->setDayOffList(new Collection());
 
-            /** @var Collection $sortedPeriods */
+            /** @var Collection $sortedWeekDays */
             $sortedWeekDays = new Collection();
 
             $allWeekDaysIndexes = [];
@@ -269,7 +199,8 @@ class ProviderService
         if ($period->getPeriodLocationList()->length()) {
             /** @var PeriodLocation|SpecialDayPeriodLocation $periodLocation */
             foreach ($period->getPeriodLocationList()->getItems() as $periodLocation) {
-                if ($providerLocation &&
+                if (
+                    $providerLocation &&
                     $periodLocation->getLocationId()->getValue() === $providerLocation->getId()->getValue() &&
                     ($hasVisibleLocations ? $providerLocation->getStatus()->getValue() === Status::VISIBLE : true)
                 ) {
@@ -283,9 +214,10 @@ class ProviderService
                 $availableLocation = $locations->keyExists($periodLocation->getLocationId()->getValue()) ?
                     $locations->getItem($periodLocation->getLocationId()->getValue()) : null;
 
-                if ($availableLocation &&
+                if (
+                    $availableLocation &&
                     (
-                    $providerLocation ?
+                        $providerLocation ?
                         $periodLocation->getLocationId()->getValue() !== $providerLocation->getId()->getValue() : true
                     ) &&
                     ($hasVisibleLocations ? $availableLocation->getStatus()->getValue() === Status::VISIBLE : true)
@@ -298,12 +230,14 @@ class ProviderService
             $availableLocation = $locations->keyExists($period->getLocationId()->getValue()) ?
                 $locations->getItem($period->getLocationId()->getValue()) : null;
 
-            if ($availableLocation &&
+            if (
+                $availableLocation &&
                 ($hasVisibleLocations ? $availableLocation->getStatus()->getValue() === Status::VISIBLE : true)
             ) {
                 $availablePeriodLocations->addItem($availableLocation, $availableLocation->getId()->getValue());
             }
-        } elseif ($providerLocation &&
+        } elseif (
+            $providerLocation &&
             ($hasVisibleLocations ? $providerLocation->getStatus()->getValue() === Status::VISIBLE : true)
         ) {
             $availablePeriodLocations->addItem($providerLocation, $providerLocation->getId()->getValue());
@@ -366,89 +300,11 @@ class ProviderService
      */
     public function addAppointmentsToAppointmentList($providers, $appointments, $isGloballyBusySlot)
     {
-        $appointmentsDateData = [];
-
-        $appointmentsIdOrder = [];
-
         /** @var Appointment $appointment */
-        foreach ($appointments->getItems() as $appointmentId => $appointment) {
-            $providerId = $appointment->getProviderId()->getValue();
-
-            $appointmentStart = $appointment->getBookingStart()->getValue()->format('Y-m-d H:i:s');
-
-            $appointmentEnd = $appointment->getBookingEnd()->getValue()->format('Y-m-d H:i:s');
-
-            if (!array_key_exists($providerId, $appointmentsDateData)) {
-                $appointmentsDateData[$providerId] = [
-                ];
-            }
-
-            $appointmentsIdOrder[] = $appointmentId;
-
-            $lastIndex = sizeof($appointmentsIdOrder) - 1;
-
-            if (!array_key_exists($appointmentStart, $appointmentsDateData[$providerId])) {
-                $appointmentsDateData[$providerId][$appointmentStart] = [
-                    'id'    => $appointmentId,
-                    'end'   => $appointmentEnd,
-                    'index' => $lastIndex
-                ];
-            } else if ($appointmentsDateData[$providerId][$appointmentStart]['end'] !== $appointmentEnd &&
-                DateTimeService::getCustomDateTimeObject($appointmentEnd) >
-                DateTimeService::getCustomDateTimeObject($appointmentsDateData[$providerId][$appointmentStart]['end'])
-            ) {
-                $appointmentsIdOrder[$appointmentsDateData[$providerId][$appointmentStart]['index']] = $appointmentId;
-
-                $appointmentsIdOrder[$lastIndex] = $appointmentsDateData[$providerId][$appointmentStart]['id'];
-            }
-        }
-
-        $providerStarts = [];
-
-        foreach ($appointmentsIdOrder as $index) {
-            /** @var Appointment $appointment */
-            $appointment = $appointments->getItem($index);
-
-            /** @var Provider $provider */
-            foreach ($providers->getItems() as $provider) {
-                if (!array_key_exists($provider->getId()->getValue(), $providerStarts)) {
-                    $providerStarts[$provider->getId()->getValue()] = [];
-                }
-
-                $appointmentStartString = $appointment->getBookingStart()->getValue()->format('Y-m-d H:i:s');
-
-                if ($appointment->getProviderId()->getValue() === $provider->getId()->getValue() &&
-                    array_key_exists($appointmentStartString, $providerStarts[$provider->getId()->getValue()])
-                ) {
-                    /** @var Appointment $duplicatedAppointment */
-                    foreach ($provider->getAppointmentList()->getItems() as $duplicatedAppointment) {
-                        if ($duplicatedAppointment->getId() &&
-                            in_array(
-                                $duplicatedAppointment->getId()->getValue(),
-                                $providerStarts[$provider->getId()->getValue()][$appointmentStartString]
-                            )
-                        ) {
-                            /** @var CustomerBooking $booking */
-                            foreach ($appointment->getBookings()->getItems() as $booking) {
-                                $duplicatedAppointment->getBookings()->addItem($booking, $booking->getId()->getValue());
-                            }
-                        }
-                    }
-
-                    continue;
-                }
-
-                if ($appointment->getProviderId()->getValue() === $provider->getId()->getValue()) {
-                    $providerStarts[$provider->getId()->getValue()][$appointmentStartString][] = $appointment->getId()->getValue();
-
-                    $provider->getAppointmentList()->addItem($appointment);
-
-                    if (!$isGloballyBusySlot) {
-                        break;
-                    }
-                } else if ($isGloballyBusySlot) {
-                    $providerStarts[$provider->getId()->getValue()][$appointmentStartString][] = $appointment->getId()->getValue();
-
+        foreach ($appointments->getItems() as $appointment) {
+            if ($isGloballyBusySlot) {
+                /** @var Provider $provider */
+                foreach ($providers->getItems() as $provider) {
                     /** @var Appointment $fakeAppointment */
                     $fakeAppointment = AppointmentFactory::create(
                         array_merge(
@@ -467,6 +323,11 @@ class ProviderService
 
                     $provider->getAppointmentList()->addItem($fakeAppointment);
                 }
+            } elseif ($providers->keyExists($appointment->getProviderId()->getValue())) {
+                /** @var Provider $provider */
+                $provider = $providers->getItem($appointment->getProviderId()->getValue());
+
+                $provider->getAppointmentList()->addItem($appointment);
             }
         }
     }
@@ -537,6 +398,8 @@ class ProviderService
 
         $yearsDiff = $startDateTime->diff($endDateTime)->format('%y');
 
+        $yearsDiff = $yearsDiff === '0' ? '1' : $yearsDiff;
+
         $startYear = $startDateTime->format('Y');
 
         /** @var Collection $fakeAppointments */
@@ -605,6 +468,205 @@ class ProviderService
         /** @var Appointment $fakeAppointment */
         foreach ($fakeAppointments->getItems() as $fakeAppointment) {
             $provider->getAppointmentList()->addItem($fakeAppointment);
+        }
+    }
+
+    /**
+     * @param Service $service
+     * @param string  $timeZone
+     *
+     * @return array
+     */
+    public function getCustomPricing($service, $timeZone)
+    {
+        if ($service->getCustomPricing()) {
+            $customPricing = json_decode($service->getCustomPricing()->getValue(), true);
+
+            if (
+                $customPricing &&
+                $customPricing['enabled'] === 'period' &&
+                Licence\Licence::getLicence() !== 'Lite' &&
+                Licence\Licence::getLicence() !== 'Starter'
+            ) {
+                foreach ($customPricing['periods']['default'] as &$item) {
+                    $ranges = [];
+
+                    foreach ($item['ranges'] as $range) {
+                        $ranges[] = [
+                            'from'  => $this->intervalService->getSeconds($range['from'] . ':00'),
+                            'to'    => $this->intervalService->getSeconds($range['to'] . ':00'),
+                            'price' => $range['price'],
+                        ];
+                    }
+
+                    $item['ranges'] = $ranges;
+                }
+
+                foreach ($customPricing['periods']['custom'] as &$item) {
+                    $days = new DatePeriod(
+                        DateTimeService::getCustomDateTimeObjectInTimeZone(
+                            $item['dates']['start'] . ' 00:00:00',
+                            $timeZone
+                        ),
+                        new DateInterval('P1D'),
+                        DateTimeService::getCustomDateTimeObjectInTimeZone(
+                            $item['dates']['end'] . ' 23:59:59',
+                            $timeZone
+                        )
+                    );
+
+                    $dates = [];
+
+                    /** @var DateTime $day */
+                    foreach ($days as $day) {
+                        $dates[$day->format('Y-m-d')] = true;
+                    }
+
+                    $ranges = [];
+
+                    foreach ($item['ranges'] as $range) {
+                        $ranges[] = [
+                            'from'  => $this->intervalService->getSeconds($range['from'] . ':00'),
+                            'to'    => $this->intervalService->getSeconds($range['to'] . ':00'),
+                            'price' => $range['price'],
+                        ];
+                    }
+
+                    $item['dates'] = $dates;
+
+                    $item['ranges'] = $ranges;
+                }
+
+                return $customPricing;
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * @param array  $customPricing
+     * @param string $dateString
+     * @param string $timeInSeconds
+     * @param string $timeZone
+     *
+     * @return float|null
+     */
+    public function getDateTimePrice($customPricing, $dateString, $timeInSeconds, $timeZone)
+    {
+        foreach ($customPricing['periods']['custom'] as $item) {
+            if (array_key_exists($dateString, $item['dates'])) {
+                foreach ($item['ranges'] as $range) {
+                    if ($timeInSeconds >= $range['from'] && $timeInSeconds < $range['to']) {
+                        return $range['price'];
+                    }
+                }
+            }
+        }
+
+        $appStart = DateTimeService::getCustomDateTimeObjectInTimeZone($dateString, $timeZone);
+
+        $dayIndex = (int)$appStart->format('N') - 1;
+
+        foreach ($customPricing['periods']['default'] as $item) {
+            if (in_array($dayIndex, $item['days'])) {
+                foreach ($item['ranges'] as $range) {
+                    if ($timeInSeconds >= $range['from'] && $timeInSeconds < $range['to']) {
+                        return $range['price'];
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param Collection $providers
+     * @param array      $criteria
+     *
+     * @return void
+     * @throws InvalidArgumentException
+     */
+    public function filterProvidersAndScheduleByCriteria($providers, $criteria)
+    {
+        if (!empty($criteria['providers'])) {
+            foreach ($providers->getItems() as $providerId => $provider) {
+                if (!in_array($provider->getId()->getValue(), $criteria['providers'])) {
+                    $providers->deleteItem($providerId);
+                }
+            }
+        }
+
+        if (!empty($criteria['services']) || !empty($criteria['locations'])) {
+            /** @var Provider $provider */
+            foreach ($providers->getItems() as $provider) {
+                $this->filterScheduleByCriteria($provider->getWeekDayList(), $criteria);
+
+                $this->filterScheduleByCriteria($provider->getSpecialDayList(), $criteria);
+            }
+        }
+    }
+
+    /**
+     * @param Collection $dayList
+     * @param array      $criteria
+     *
+     * @return void
+     * @throws InvalidArgumentException
+     */
+    private function filterScheduleByCriteria($dayList, $criteria)
+    {
+        /** @var WeekDay|SpecialDay $day */
+        foreach ($dayList->getItems() as $weekDayIndex => $day) {
+            $hasPeriods = $day->getPeriodList()->length() > 0;
+
+            /** @var Period $period */
+            foreach ($day->getPeriodList()->getItems() as $periodIndex => $period) {
+                if ($period->getLocationId() && $period->getPeriodLocationList()->length() > 0) {
+                    $period->setLocationId(null);
+                }
+
+                $hasPeriodServices = $period->getPeriodServiceList()->length() > 0;
+
+                $hasPeriodLocations = $period->getPeriodLocationList()->length() > 0;
+
+                /** @var PeriodService $periodService */
+                foreach ($period->getPeriodServiceList()->getItems() as $periodServiceIndex => $periodService) {
+                    if (
+                        !empty($criteria['services']) &&
+                        !in_array($periodService->getServiceId()->getValue(), $criteria['services'])
+                    ) {
+                        $period->getPeriodServiceList()->deleteItem($periodServiceIndex);
+                    }
+                }
+
+                /** @var PeriodLocation $periodLocation */
+                foreach ($period->getPeriodLocationList()->getItems() as $periodLocationIndex => $periodLocation) {
+                    if (
+                        !empty($criteria['locations']) &&
+                        !in_array($periodLocation->getLocationId()->getValue(), $criteria['locations'])
+                    ) {
+                        $period->getPeriodLocationList()->deleteItem($periodLocationIndex);
+                    }
+                }
+
+                if (
+                    ($hasPeriodServices && $period->getPeriodServiceList()->length() === 0) ||
+                    ($hasPeriodLocations && $period->getPeriodLocationList()->length() === 0) ||
+                    (
+                        !empty($criteria['locations']) &&
+                        $period->getLocationId() &&
+                        !in_array($period->getLocationId()->getValue(), $criteria['locations'])
+                    )
+                ) {
+                    $day->getPeriodList()->deleteItem($periodIndex);
+                }
+            }
+
+            if ($hasPeriods && $day->getPeriodList()->length() === 0) {
+                $dayList->deleteItem($weekDayIndex);
+            }
         }
     }
 }

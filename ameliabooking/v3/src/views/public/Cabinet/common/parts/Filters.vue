@@ -5,11 +5,11 @@
     :style="cssVars"
   >
     <div v-if="cWidth <= 480 && customizedOptions.timeZone.visibility && props.stepKey !== 'packages'" class="am-capf__zone">
-      <TimeZoneSelect size="small"/>
+      <TimeZoneSelect v-if="amSettings.featuresIntegrations.timezones.enabled" size="small"/>
     </div>
     <div class="am-capf__menu">
       <TimeZoneSelect
-        v-if="cWidth <= 480 && customizedOptions.timeZone.visibility && props.stepKey === 'packages'"
+        v-if="amSettings.featuresIntegrations.timezones.enabled && cWidth <= 480 && customizedOptions.timeZone.visibility && props.stepKey === 'packages'"
         size="small"
       />
       <AmDatePicker
@@ -354,6 +354,9 @@ function searchCustomers(val = '', customers = []) {
   )
 }
 
+// * Cabinet type
+const cabinetType = inject('cabinetType')
+
 function searchEvents(val = '', events = []) {
   loadingInput.value.events = true
   if (events.length) {
@@ -371,8 +374,9 @@ function searchEvents(val = '', events = []) {
           timeZone: store.getters['cabinet/getTimeZone'],
           group: true,
           page: 1,
-          limit: amSettings.general.itemsPerPageBackEnd,
+          limit: amSettings.general.itemsPerPage,
           search: val,
+          source: 'cabinet-' + cabinetType.value
         },
         (result) => {
           store.dispatch(

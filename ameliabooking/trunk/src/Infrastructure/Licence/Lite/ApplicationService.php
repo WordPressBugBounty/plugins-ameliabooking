@@ -139,4 +139,24 @@ class ApplicationService
     {
         return new ApplicationServices\Notification\BasicWhatsAppNotificationService($c, 'whatsapp');
     }
+
+    /**
+     * @param Container $c
+     *
+     * @return ApplicationServices\Invoice\AbstractInvoiceApplicationService
+     */
+    public static function getInvoiceService($c)
+    {
+        return new ApplicationServices\Invoice\StarterInvoiceApplicationService($c);
+    }
+
+    /**
+     * @param Container $c
+     *
+     * @return ApplicationServices\QrCode\AbstractQrCodeApplicationService
+     */
+    public static function getQrCodeService($c)
+    {
+        return new ApplicationServices\QrCode\StarterQrCodeApplicationService($c);
+    }
 }

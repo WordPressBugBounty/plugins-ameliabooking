@@ -36,6 +36,8 @@ import Extras from "./templates/Extras.vue";
 import Tickets from "./templates/Tickets.vue";
 import CustomFields from "./templates/CustomFields.vue";
 import Employee from "./templates/Employee.vue";
+import Customers from "./templates/Customers.vue";
+import QrCode from "./templates/QrCode.vue"
 
 // * Import from Vue
 import {
@@ -68,7 +70,9 @@ let templates = ref({
   extras: markRaw(Extras),
   ticket: markRaw(Tickets),
   customField: markRaw(CustomFields),
-  employee: markRaw(Employee)
+  employee: markRaw(Employee),
+  customers: markRaw(Customers),
+  qrCode: markRaw(QrCode)
 })
 
 // * Fonts
@@ -83,6 +87,8 @@ let cssVars = computed(() => {
     '--am-c-cc-primary-op70': useColorTransparency(amColors.value.colorPrimary, 0.7),
     '--am-c-cc-success': amColors.value.colorSuccess,
     '--am-c-cc-success-op15': useColorTransparency(amColors.value.colorSuccess, 0.15),
+    '--am-c-cc-error': amColors.value.colorError,
+    '--am-c-cc-error-op15': useColorTransparency(amColors.value.colorError, 0.15),
     '--am-c-cc-bgr': amColors.value.colorMainBgr,
     '--am-c-cc-text': amColors.value.colorMainText,
     '--am-c-cc-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
@@ -95,8 +101,8 @@ let cssVars = computed(() => {
     '--am-font-family': amFonts.value.fontFamily,
 
     // css properties
-    '--am-rad-input': '6px',
-    '--am-fs-input': '15px',
+    '--am-rad-inp': '6px',
+    '--am-fs-inp': '15px',
   }
 })
 </script>
@@ -122,8 +128,6 @@ export default {
   }
 
   .am-cc__popover {
-    &-inner {}
-
     &-heading {
       font-size: 15px;
       font-weight: 600;
@@ -131,8 +135,6 @@ export default {
       color: var(--am-c-cc-text);
       margin: 0 0 16px;
     }
-
-    &-content {}
   }
 }
 

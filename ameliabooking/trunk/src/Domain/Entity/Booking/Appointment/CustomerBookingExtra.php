@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -44,15 +45,11 @@ class CustomerBookingExtra
      * CustomerBookingExtra constructor.
      *
      * @param Id              $extraId
-     * @param PositiveInteger $quantity
      */
     public function __construct(
-        Id $extraId,
-        PositiveInteger $quantity
+        Id $extraId
     ) {
         $this->extraId = $extraId;
-
-        $this->quantity = $quantity;
     }
 
     /**

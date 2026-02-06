@@ -18,8 +18,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\AbstractDatabaseTable;
  */
 class LocationsTable extends AbstractDatabaseTable
 {
-
-    const TABLE = 'locations';
+    public const TABLE = 'locations';
 
     /**
      * @return string
@@ -29,12 +28,12 @@ class LocationsTable extends AbstractDatabaseTable
     {
         $table = self::getTableName();
 
-        $name = Name::MAX_LENGTH;
+        $name        = Name::MAX_LENGTH;
         $description = Description::MAX_LENGTH;
-        $address = Address::MAX_LENGTH;
-        $phone = Phone::MAX_LENGTH;
-        $picture = Picture::MAX_LENGTH;
-        $url = Url::MAX_LENGTH;
+        $address     = Address::MAX_LENGTH;
+        $phone       = Phone::MAX_LENGTH;
+        $picture     = Picture::MAX_LENGTH;
+        $url         = Url::MAX_LENGTH;
 
         return "CREATE TABLE {$table} (
                     `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -49,6 +48,7 @@ class LocationsTable extends AbstractDatabaseTable
                     `pictureThumbPath` varchar ({$picture}) NULL,
                     `pin` varchar ({$url}) NULL,
                     `translations` TEXT NULL DEFAULT NULL,
+                    `countryPhoneIso` varchar(2) DEFAULT NULL,
                     PRIMARY KEY (`id`)
                 ) DEFAULT CHARSET=utf8 COLLATE utf8_general_ci";
     }

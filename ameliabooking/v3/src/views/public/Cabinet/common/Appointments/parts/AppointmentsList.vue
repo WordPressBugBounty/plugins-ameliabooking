@@ -282,12 +282,17 @@ function appointmentCustomers(appointment) {
   return appointment.bookings
     .filter((b) => b.status !== 'rejected' && b.status !== 'canceled')
     .map((b) => {
+      let customer
       if ('info' in b && b.info) {
-        let customer = 'customer' in b ? b.customer : {}
-        return Object.assign(customer, JSON.parse(b.info))
+        customer = 'customer' in b ? b.customer : {}
+        customer = Object.assign(customer, JSON.parse(b.info))
       } else {
-        return b.customer
+        customer = b.customer
       }
+      
+      // Add booking status to customer data
+      customer.bookingStatus = b.status
+      return customer
     })
 }
 

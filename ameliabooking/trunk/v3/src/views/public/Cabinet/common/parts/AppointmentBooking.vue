@@ -55,21 +55,22 @@
               <el-form-item
                 v-if="props.employees.length && employeeVisibility && props.customizedOptions.employee.visibility"
                 :class="[{'am-csd__filter-full': !(props.locations.length && locationVisibility && props.customizedOptions.location.visibility)}, responsiveClass]"
-                :label="`${amLabels.package_appointment_employee}:`"
+                :label="`${labels.package_appointment_employee}:`"
                 :prop="'employee'"
               >
                 <AmSelect
                   v-model="packageFormData.employee"
                   clearable
                   :filterable="props.customizedOptions.employee.filterable"
-                  :placeholder="`${amLabels.package_select_employee}...`"
+                  :placeholder="`${labels.package_select_employee}...`"
                   :fit-input-width="true"
                   :popper-class="'am-csd__filter-employees'"
                   :disabled="slotsAreLoading"
+                  :filter-method="filterEmployee"
                   @change="changeFilter"
                 >
                   <AmOption
-                    v-for="provider in props.employees"
+                    v-for="provider in filteredEmployees"
                     :key="provider.id"
                     :value="provider.id"
                     :label="`${provider.firstName} ${provider.lastName}`"
@@ -80,8 +81,8 @@
                       :price="0"
                       :image-thumb="provider.pictureThumbPath"
                       :description="provider.description"
-                      :dialog-title="amLabels.employee_information_package"
-                      :dialog-button-text="amLabels.select_this_employee_package"
+                      :dialog-title="labels.employee_information_package"
+                      :dialog-button-text="labels.select_this_employee_package"
                       :badge="provider.badge"
                       @click="selectEmployee"
                     ></AmOptionTemplate2>
@@ -92,20 +93,21 @@
               <el-form-item
                 v-if="props.locations.length && locationVisibility && props.customizedOptions.location.visibility"
                 :class="[{'am-csd__filter-full': !(props.employees.length && employeeVisibility && props.customizedOptions.employee.visibility)}, responsiveClass]"
-                :label="`${amLabels.package_appointment_location}:`"
+                :label="`${labels.package_appointment_location}:`"
                 :prop="'location'"
               >
                 <AmSelect
                   v-model="packageFormData.location"
                   clearable
                   :filterable="props.customizedOptions.location.filterable"
-                  :placeholder="`${amLabels.package_select_location}...`"
+                  :placeholder="`${labels.package_select_location}...`"
                   :fit-input-width="true"
                   :disabled="slotsAreLoading"
+                  :filter-method="filterLocation"
                   @change="changeFilter"
                 >
                   <AmOption
-                    v-for="location in props.locations"
+                    v-for="location in filteredLocations"
                     :key="location.id"
                     :value="location.id"
                     :label="location.name"
@@ -124,9 +126,13 @@
           :load-counter="loadCounter"
           :end-time="props.customizedOptions.endTimeVisibility.visibility"
           :time-zone="props.customizedOptions.timeZoneVisibility.visibility"
+          :show-estimated-pricing="props.appointment.id && 'estimatedPricingVisibility' in props.customizedOptions ? props.customizedOptions.estimatedPricingVisibility.visibility : false"
+          :show-indicator-pricing="props.appointment.id && 'indicatorPricingVisibility' in props.customizedOptions ? props.customizedOptions.indicatorPricingVisibility.visibility : false"
+          :show-slot-pricing="props.appointment.id && 'slotPricingVisibility' in props.customizedOptions ? props.customizedOptions.slotPricingVisibility.visibility : false"
           :label-slots-selected="labels.date_time_slots_selected"
           :fetched-slots="null"
-          :service-id="0"
+          :service-id="parseInt(props.appointment.serviceId)"
+          :is-package="props.appointment.bookings[0].packageCustomerService !== null"
           :date="props.appointment && props.appointment.bookingStart ? props.appointment.bookingStart.split(' ')[0] : ''"
           :slots-params="slotsProps"
         ></Calendar>
@@ -236,6 +242,10 @@ let props = defineProps({
     type: Object,
     default: () => {}
   },
+  isPackage: {
+    type: Boolean,
+    default: false
+  },
   labels: {
     type: Object,
     required: true
@@ -244,6 +254,34 @@ let props = defineProps({
     type: Object,
     required: true
   }
+})
+
+// * Filter Employees and Locations
+let queryEmployeeLower = ref('')
+function filterEmployee (query) {
+  queryEmployeeLower.value = query.toLowerCase()
+}
+let filteredEmployees = computed(() => {
+  if (queryEmployeeLower.value) {
+    return props.employees.filter(item => {
+      const fullName = `${item.firstName} ${item.lastName}`.toLowerCase()
+      return fullName.includes(queryEmployeeLower.value) && item.show
+    })
+  }
+  return props.employees.filter(e => e.show)
+})
+
+let queryLocationLower = ref('')
+function filterLocation (query) {
+  queryLocationLower.value = query.toLowerCase()
+}
+let filteredLocations = computed(() => {
+  if (queryLocationLower.value) {
+    return props.locations.filter(item => {
+      return item.name.toLowerCase().includes(queryLocationLower.value)
+    })
+  }
+  return props.locations
 })
 
 let amLabels = inject('amLabels')
@@ -366,14 +404,14 @@ let rules = computed(() => {
       employee: [
         {
           required: 'employee' in props.customizedOptions ? props.customizedOptions.employee.required : false,
-          message: amLabels.value.please_select_employee,
+          message: props.labels.please_select_employee,
           trigger: 'submit',
         }
       ],
       location: [
         {
           required: 'location' in props.customizedOptions ? props.customizedOptions.location.required : false,
-          message: amLabels.value.please_select_location,
+          message: props.labels.please_select_location,
           trigger: 'submit',
         }
       ]
@@ -473,7 +511,7 @@ function processBooking () {
 }
 
 function getDateTimeData (useUtc) {
-  let timeZone = store.getters['cabinet/getTimeZone'] ? store.getters['cabinet/getTimeZone'] : 'UTC'
+  let timeZone = useUtc ? 'UTC' : store.getters['cabinet/getTimeZone']
 
   let localBookingStart = appointmentDate.value + ' ' + appointmentTime.value
 
@@ -508,7 +546,7 @@ function rescheduleBooking () {
   }
 
   httpClient.post(
-    '/bookings/reassign/' + props.appointment.bookings.filter(i => i.status === 'approved' || i.status === 'pending')[0].id,
+    '/bookings/reassign/' + props.appointment.bookings.filter(i => i.status === 'approved' || i.status === 'pending' || i.status === 'waiting')[0].id,
       bookingData,
     Object.assign(useAuthorizationHeaderObject(store), {params: {source: 'cabinet-' + cabinetType.value}})
   ).then(() => {
@@ -520,6 +558,14 @@ function rescheduleBooking () {
       if (!('data' in error.response.data) && 'message' in error.response.data) {
         alertVisibility.value = true
         alertMessage.value = error.response.data.message
+        setTimeout(function () {
+          useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
+        }, 500)
+      }
+
+      if ('data' in error.response && 'data' in error.response.data && 'customerAlreadyBooked' in error.response.data.data) {
+        alertVisibility.value = true
+        alertMessage.value = props.labels.customer_already_booked_app
         setTimeout(function () {
           useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
         }, 500)
@@ -556,13 +602,18 @@ function rescheduleBooking () {
 function packageBookingApp () {
   calendarRef.value.calendarSlotsLoading = true
 
-  let bookingDateTimeData = getDateTimeData(useCurrentTimeZone() === store.getters['cabinet/getTimeZone'])
+  let bookingDateTimeData = getDateTimeData(
+    amSettings.general.showClientTimeZone &&
+    store.getters['cabinet/getTimeZone'] === useCurrentTimeZone()
+  )
 
   let data = JSON.parse(JSON.stringify(props.appointment))
 
   data.bookingStart = bookingDateTimeData.bookingStart
 
   data.bookings[0].utcOffset = bookingDateTimeData.utcOffset
+
+  data.bookings[0].timeZone = bookingDateTimeData.timeZone
 
   data.providerId = parseInt(appointmentProviderId.value)
 
@@ -598,6 +649,14 @@ function packageBookingApp () {
       if ('packageBookingUnavailable' in error.response.data.data && error.response.data.data.packageBookingUnavailable === true) {
         alertVisibility.value = true
         alertMessage.value = props.labels.package_booking_unavailable
+        setTimeout(function () {
+          useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
+        }, 500)
+      }
+
+      if ('customerBlocked' in error.response.data.data && error.response.data.data.customerBlocked === true) {
+        alertVisibility.value = true
+        alertMessage.value = props.labels.customer_blocked
         setTimeout(function () {
           useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
         }, 500)
@@ -642,6 +701,7 @@ function useSlotsCallback(
     return {
       calendarStartDate: dates[0],
       calendarEventSlots: [],
+      calendarEventDate: dates[0],
       calendarEventSlot: null,
     }
   }
@@ -651,6 +711,7 @@ function useSlotsCallback(
   return {
     calendarStartDate: bookingStartParts[0],
     calendarEventSlots: bookingStartParts[0] in slots ? Object.keys(slots[bookingStartParts[0]]) : [],
+    calendarEventDate: bookingStartParts[0],
     calendarEventSlot: bookingStartParts[1].slice(0, 5),
   }
 }
@@ -681,13 +742,13 @@ function setBookingData () {
   if (slots.length) {
     appointmentProviderId.value =
         appointmentTime.value && dateSlots.value[appointmentDate.value][appointmentTime.value] ?
-            dateSlots.value[appointmentDate.value][appointmentTime.value][0][0]
-            : dateSlots.value[appointmentDate.value][slots[0]][0][0]
+            dateSlots.value[appointmentDate.value][appointmentTime.value][0].e
+            : dateSlots.value[appointmentDate.value][slots[0]][0].e
 
     appointmentLocationId.value =
         appointmentTime.value && dateSlots.value[appointmentDate.value][appointmentTime.value] ?
-            dateSlots.value[appointmentDate.value][appointmentTime.value][0][1]
-            : dateSlots.value[appointmentDate.value][slots[0]][0][1]
+            dateSlots.value[appointmentDate.value][appointmentTime.value][0].l
+            : dateSlots.value[appointmentDate.value][slots[0]][0].l
   }
 }
 
@@ -936,7 +997,7 @@ export default {
               align-items: center;
               flex: 1;
               position: relative;
-              font-size: var(--am-fs-input);
+              font-size: var(--am-fs-inp);
               min-width: 0;
             }
 

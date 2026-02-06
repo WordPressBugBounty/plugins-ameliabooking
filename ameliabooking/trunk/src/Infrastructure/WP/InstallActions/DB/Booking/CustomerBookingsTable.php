@@ -13,8 +13,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\AbstractDatabaseTable;
  */
 class CustomerBookingsTable extends AbstractDatabaseTable
 {
-
-    const TABLE = 'customer_bookings';
+    public const TABLE = 'customer_bookings';
 
     /**
      * @return string
@@ -44,6 +43,7 @@ class CustomerBookingsTable extends AbstractDatabaseTable
                     `duration` int(11) DEFAULT NULL,
                     `created` DATETIME NULL,
                     `actionsCompleted` TINYINT(1) NULL,
+                    `qrCodes` TEXT NULL,
                     PRIMARY KEY (`id`)
                 ) DEFAULT CHARSET=utf8 COLLATE utf8_general_ci";
     }

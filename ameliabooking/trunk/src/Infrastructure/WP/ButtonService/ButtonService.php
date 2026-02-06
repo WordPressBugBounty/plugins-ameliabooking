@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -23,6 +24,12 @@ class ButtonService
      */
     public static function renderButton()
     {
+        global $pagenow;
+
+        if (is_admin() && isset($pagenow) && 'customize.php' === $pagenow) {
+            return;
+        }
+
         if (!current_user_can('edit_posts') && !current_user_can('edit_pages')) {
             return;
         }
@@ -70,6 +77,8 @@ class ButtonService
     public static function exportVars()
     {
         HelperService::exportJSVar('wpAmeliaPluginURL', AMELIA_URL);
+        HelperService::exportJSVar('wpAmeliaSiteURL', AMELIA_SITE_URL);
+        HelperService::exportJSVar('wpAmeliaPluginStoreURL', AMELIA_STORE_API_URL);
 
         wp_enqueue_script('wp-deactivation-amelia', AMELIA_URL . 'public/js/plugins/delete-plugin.js', []);
 
@@ -91,10 +100,7 @@ class ButtonService
 
         HelperService::exportJSVar(
             'wpAmeliaLabels',
-            array_merge(
-                BackendStrings::getCommonStrings(),
-                BackendStrings::getWordPressStrings()
-            )
+            BackendStrings::getAllStrings(),
         );
 
         HelperService::printJSVars();

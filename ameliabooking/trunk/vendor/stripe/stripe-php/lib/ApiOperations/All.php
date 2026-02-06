@@ -1,6 +1,6 @@
 <?php
 
-namespace AmeliaStripe\ApiOperations;
+namespace AmeliaVendor\Stripe\ApiOperations;
 
 /**
  * Trait for listable resources. Adds a `all()` static method to the class.
@@ -13,25 +13,14 @@ trait All
      * @param null|array $params
      * @param null|array|string $opts
      *
-     * @throws \AmeliaStripe\Exception\ApiErrorException if the request fails
+     * @return \AmeliaVendor\Stripe\Collection of ApiResources
      *
-     * @return \AmeliaStripe\Collection of ApiResources
+     * @throws \AmeliaVendor\Stripe\Exception\ApiErrorException if the request fails
      */
     public static function all($params = null, $opts = null)
     {
-        self::_validateParams($params);
         $url = static::classUrl();
 
-        list($response, $opts) = static::_staticRequest('get', $url, $params, $opts);
-        $obj = \AmeliaStripe\Util\Util::convertToStripeObject($response->json, $opts);
-        if (!($obj instanceof \AmeliaStripe\Collection)) {
-            throw new \AmeliaStripe\Exception\UnexpectedValueException(
-                'Expected type ' . \AmeliaStripe\Collection::class . ', got "' . \get_class($obj) . '" instead.'
-            );
-        }
-        $obj->setLastResponse($response);
-        $obj->setFilters($params);
-
-        return $obj;
+        return static::_requestPage($url, \AmeliaVendor\Stripe\Collection::class, $params, $opts);
     }
 }

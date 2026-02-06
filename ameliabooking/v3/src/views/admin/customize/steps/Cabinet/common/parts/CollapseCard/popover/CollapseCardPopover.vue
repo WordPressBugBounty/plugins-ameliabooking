@@ -36,6 +36,7 @@ import Extras from "./templates/Extras.vue";
 import Tickets from "./templates/Tickets.vue";
 import CustomFields from "./templates/CustomFields.vue";
 import Employee from "./templates/Employee.vue";
+import QrCode from "./templates/QrCode.vue";
 
 // * Import from Vue
 import {
@@ -68,7 +69,8 @@ let templates = ref({
   extras: markRaw(Extras),
   ticket: markRaw(Tickets),
   customField: markRaw(CustomFields),
-  employee: markRaw(Employee)
+  employee: markRaw(Employee),
+  qrCode: markRaw(QrCode),
 })
 
 // * Fonts
@@ -106,7 +108,7 @@ export default {
 
 <style lang="scss">
 @mixin card-popover {
-  &.am-cc__popover {
+  &.am-cc__popover.el-popper {
     padding: 16px;
     background-color: var(--am-c-cc-bgr);
     border-color: var(--am-c-cc-bgr);

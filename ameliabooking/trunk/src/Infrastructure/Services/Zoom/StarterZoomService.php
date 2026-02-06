@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -22,6 +23,7 @@ class StarterZoomService extends AbstractZoomService
      */
     public function __construct(SettingsService $settingsService)
     {
+        $this->settingsService = $settingsService;
     }
 
     /**

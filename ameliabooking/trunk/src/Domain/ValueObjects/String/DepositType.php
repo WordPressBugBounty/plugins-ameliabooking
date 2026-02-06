@@ -9,20 +9,18 @@ namespace AmeliaBooking\Domain\ValueObjects\String;
  */
 final class DepositType
 {
-    const DISABLED = 'disabled';
+    public const DISABLED = 'disabled';
 
-    const FIXED = 'fixed';
+    public const FIXED = 'fixed';
 
-    const PERCENTAGE = 'percentage';
+    public const PERCENTAGE = 'percentage';
     /**
      * @var string
      */
     private $status;
 
     /**
-     * Status constructor.
-     *
-     * @param int $status
+     * @param string $status
      */
     public function __construct($status)
     {

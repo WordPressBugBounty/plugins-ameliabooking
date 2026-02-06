@@ -4,110 +4,146 @@
     class="am-capi"
     :style="cssVars"
   >
-    <AmAlert
-      v-if="alertVisibility"
-      type="success"
-      :show-border="true"
-      :close-after="5000"
-      custom-class="am-capi__alert"
-      @close="closeAlert"
-      @trigger-close="closeAlert"
-    >
-      <template #title>
-        <span class="am-icon-checkmark-circle-full"></span> {{ successMessage }}
-      </template>
-    </AmAlert>
-
-    <el-tabs
-      v-model="activeTab"
-      class="am-capi__tabs"
-      @tab-click="tabClick"
-    >
-      <el-tab-pane
-        class="am-capi__tabs-item"
-        :label="amLabels.personal_info"
-        name="first"
+    <div class="am-capi__inner">
+      <AmAlert
+        v-if="alertVisibility"
+        type="success"
+        :show-border="true"
+        :close-after="5000"
+        custom-class="am-capi__alert"
+        @close="closeAlert"
+        @trigger-close="closeAlert"
       >
-        <template v-if="!loading">
-          <el-form
-            v-if="store.getters['auth/getProfile']"
-            ref="infoFormRef"
-            :model="infoFormData"
-            :rules="infoFormRules"
-            label-position="top"
-            class="am-capi__form"
-            :class="responsiveClass"
-          >
-            <template v-for="item in amCustomize.profile.order" :key="item.id">
-              <component
-                :is="infoFormConstruction[item.id].template"
-                v-if="customizedOptions[item.id] ? customizedOptions[item.id].visibility : true"
-                ref="customerCollectorRef"
-                v-model="infoFormData[item.id]"
-                v-model:countryPhoneIso="infoFormConstruction[item.id].countryPhoneIso"
-                v-bind="infoFormConstruction[item.id].props"
-              ></component>
-            </template>
-          </el-form>
+        <template #title>
+          <span class="am-icon-checkmark-circle-full"></span> {{ successMessage }}
         </template>
-        <ProfileSkeleton
-          v-else
-          :count="5"
-          :page-width="pageWidth"
-        ></ProfileSkeleton>
-      </el-tab-pane>
+      </AmAlert>
 
-      <el-tab-pane
-        class="am-capi__tabs-item"
-        :label="amLabels.password_tab"
-        name="second"
+      <el-tabs
+        v-model="activeTab"
+        class="am-capi__tabs"
+        @tab-click="tabClick"
       >
-        <template v-if="!loading">
-          <el-form
-            ref="passFormRef"
-            :model="passFormData"
-            :rules="passFormRules"
-            label-position="top"
-            class="am-capi__form"
-            :class="responsiveClass"
-          >
-            <template v-for="(item, key) in passFormConstruction" :key="item.props.itemName">
-              <component
-                :is="item.template"
-                ref="customerPassCollectorRef"
-                v-model="passFormData[key]"
-                v-bind="item.props"
-              ></component>
-            </template>
-          </el-form>
-        </template>
+        <el-tab-pane
+          class="am-capi__tabs-item"
+          :label="amLabels.personal_info"
+          name="first"
+        >
+          <template v-if="!loading">
+            <el-form
+              v-if="store.getters['auth/getProfile']"
+              ref="infoFormRef"
+              :model="infoFormData"
+              :rules="infoFormRules"
+              label-position="top"
+              class="am-capi__form"
+              :class="responsiveClass"
+            >
+              <template v-for="item in amCustomize.profile.order" :key="item.id">
+                <component
+                  :is="infoFormConstruction[item.id].template"
+                  v-if="customizedOptions[item.id] ? customizedOptions[item.id].visibility : true"
+                  ref="customerCollectorRef"
+                  v-model="infoFormData[item.id]"
+                  v-model:countryPhoneIso="infoFormConstruction[item.id].countryPhoneIso"
+                  v-bind="infoFormConstruction[item.id].props"
+                ></component>
+              </template>
+            </el-form>
+          </template>
+          <ProfileSkeleton
+            v-else
+            :count="5"
+            :page-width="pageWidth"
+          ></ProfileSkeleton>
+        </el-tab-pane>
 
-        <ProfileSkeleton
-          v-else
-          :item-direction="'column'"
-          :count="2"
-          :page-width="pageWidth"
-        ></ProfileSkeleton>
-      </el-tab-pane>
-    </el-tabs>
+        <!-- Customer Custom Fields -->
+        <el-tab-pane
+          v-if="Object.keys(customFields).length"
+          :label="amLabels.custom_fields"
+          name="third"
+        >
+          <template v-if="!loading">
+            <el-form
+              ref="customFieldsFormRef"
+              :model="customFieldsForm"
+              :rules="customFieldsFormRules"
+              label-position="top"
+              class="am-capei-att-cf__form"
+              :class="responsiveClass"
+            >
+              <template v-for="cf in Object.values(customFields)" :key="cf.id">
+                <component
+                  :is="cfFormConstruction[cf.id]?.template"
+                  v-if="cf.id in customFieldsForm"
+                  v-model="customFieldsForm[cf.id]"
+                  v-bind="cfFormConstruction[cf.id]?.props"
+                  @address-selected="(address) => addressSelected(address, cf.id)"
+                />
+              </template>
+            </el-form>
+          </template>
+          <ProfileSkeleton
+            v-else
+            :count="Object.keys(customFields).length"
+            :page-width="pageWidth"
+          ></ProfileSkeleton>
+        </el-tab-pane>
+        <!-- /Customer Custom Fields -->
 
-    <DeleteProfile
-      :visibility="deleteProfileDialog"
-      :customized-labels="customizedStepLabels('deleteProfile')"
-      :customized-options="amCustomize.deleteProfile.options"
-      @close="deleteProfileDialog = false"
-      @delete-profile="deleteProfile"
-    />
+        <el-tab-pane
+          class="am-capi__tabs-item"
+          :label="amLabels.password_tab"
+          name="second"
+        >
+          <template v-if="!loading">
+            <el-form
+              ref="passFormRef"
+              :model="passFormData"
+              :rules="passFormRules"
+              label-position="top"
+              class="am-capi__form"
+              :class="responsiveClass"
+            >
+              <template v-for="(item, key) in passFormConstruction" :key="item.props.itemName">
+                <component
+                  :is="item.template"
+                  ref="customerPassCollectorRef"
+                  v-model="passFormData[key]"
+                  v-bind="item.props"
+                ></component>
+              </template>
+            </el-form>
+          </template>
 
-    <MainProfileFooter
-      :loading="loading"
-      :display="activeTab"
-      :parent-width="pageWidth"
-      :customized-labels="amLabels"
-      :save-footer-button="customizedOptions.saveFooterButton.buttonType"
-      :delete-footer-type="customizedOptions.deleteFooterButton.buttonType"
-      :pass-footer-button="customizedOptions.passFooterButton.buttonType"
-    />
+          <ProfileSkeleton
+            v-else
+            :item-direction="'column'"
+            :count="2"
+            :page-width="pageWidth"
+          ></ProfileSkeleton>
+        </el-tab-pane>
+      </el-tabs>
+
+      <DeleteProfile
+        :visibility="deleteProfileDialog"
+        :customized-labels="customizedStepLabels('deleteProfile')"
+        :customized-options="amCustomize.deleteProfile.options"
+        @close="deleteProfileDialog = false"
+        @delete-profile="deleteProfile"
+      />
+
+      <MainProfileFooter
+        :loading="loading"
+        :display="activeTab"
+        :parent-width="pageWidth"
+        :customized-labels="amLabels"
+        :save-footer-button="customizedOptions.saveFooterButton.buttonType"
+        :delete-footer-type="customizedOptions.deleteFooterButton.buttonType"
+        :pass-footer-button="customizedOptions.passFooterButton.buttonType"
+      />
+    </div>
   </div>
 </template>
 
@@ -153,6 +189,7 @@ import { formFieldsTemplates } from "../../../../../assets/js/common/formFieldsT
 
 // * Import from Vuex
 import { useStore } from "vuex";
+import {mapAddressComponentsForXML} from "../../../../../assets/js/common/helper";
 let store = useStore()
 
 // * Loading state
@@ -193,6 +230,7 @@ onMounted(() => {
   nextTick(() => {
     pageWidth.value = pageContainer.value.offsetWidth
   })
+  setInitCustomerCustomFields()
 })
 
 let responsiveClass = computed(() => {
@@ -362,7 +400,7 @@ let infoFormConstruction = ref({
       label: amLabels.value.date_of_birth,
       placeholder: amLabels.value.enter_date_of_birth,
       clearable: true,
-      readOnly: false,
+      readonly: false,
       class: computed(() => `am-capi__item am-capi__item-birthday ${responsiveClass.value}`),
     }
   }
@@ -540,16 +578,17 @@ function tabClick () {
 function changeProfilePassword() {
   passFormRef.value.validate((valid) => {
     if (valid) {
-      successMessage.value = 'Password changed Successfully'
       let user = store.getters['auth/getProfile']
 
       store.commit('setLoading', true)
 
       httpClient.post(
-        '/users/' + cabinetType.value + 's/' + user.id,
+        '/users/customers/' + user.id,
         {password: store.getters['auth/getNewPassword']},
         useAuthorizationHeaderObject(store)
       ).then(() => {
+        successMessage.value = amLabels.value.password_success
+
         store.commit('auth/setNewPassword', '')
         store.commit('auth/setConfirmPassword', '')
       }).catch(() => {
@@ -569,6 +608,17 @@ function logout () {
   deleteProfileDialog.value = false
   store.commit('auth/setProfileDeleted', true)
   store.dispatch('auth/logout')
+}
+
+function addressSelected (addressComponents, cfId) {
+  if (addressComponents) {
+    for (const key in customFields) {
+      if (customFields[key].id === cfId) {
+        customFields[key].components = mapAddressComponentsForXML(addressComponents)
+        break;
+      }
+    }
+  }
 }
 
 function deleteProfile () {
@@ -611,6 +661,134 @@ function deleteProfile () {
   })
 }
 
+/**
+ * * Customer custom fields form
+ */
+
+// Refs and reactive objects
+const customFieldsFormRef = ref(null)
+const customFieldsForm = reactive({})
+const customFieldsFormRules = reactive({})
+const cfFormConstruction = reactive({})
+const customFields = reactive({})
+
+function setCustomerCustomFieldsFormData(field, id, savedValue) {
+  customFieldsForm[id] = savedValue ?? ''
+}
+
+function setCustomerCustomFieldsFormConstruction(field, id) {
+  cfFormConstruction[id] = {
+    template: formFieldsTemplates[field.type],
+    props: {
+      id,
+      itemName: id.toString(),
+      label: field.label,
+      options: field.options,
+      class: `am-capei-att-cf__item am-cf-width-${field.width}`,
+    },
+  }
+
+  if (field.type === 'text-area') {
+    cfFormConstruction[id].props.itemType = 'textarea'
+  }
+
+  if (field.type === 'datepicker') {
+    cfFormConstruction[id].props.weekStartsFromDay = amSettings.wordpress.startOfWeek
+  }
+
+  if (field.type === 'file') {
+    let profileId =  store.getters['auth/getProfile'] ? store.getters['auth/getProfile'].id : null
+    cfFormConstruction[id].props = {
+      ...cfFormConstruction[id].props,
+      ...{
+        btnLabel: amLabels.value.upload_file_here,
+        isUpload: true,
+        bookingId: profileId,
+        source: 'cabinet-customer'
+      },
+    }
+  }
+}
+
+function setCustomerCustomFieldsFormRules(field) {
+  customFieldsFormRules[field.id] = [
+    {
+      message: amLabels.value.required_field,
+      required: field.required,
+      trigger: ['submit', 'change'],
+    },
+  ]
+}
+
+function setInitCustomerCustomFields() {
+  const allFields = store.getters['entities/getCustomFields']
+  const savedCustomFields = JSON.parse(store.getters['auth/getProfile'].customFields || '{}')
+
+  allFields
+    .filter(field => field.saveType === 'customer' && field.type !== 'content')
+    .sort((a, b) => a.position - b.position)
+    .forEach((field, index) => {
+      const { id } = field
+      const savedValue = savedCustomFields[id]?.value
+
+      customFields[index] = {
+        ...field,
+        value: savedValue ?? (field.type === 'checkbox' || field.type === 'file' ? [] : ''),
+      }
+
+      if (field.type === 'address' && savedCustomFields[id]?.components) {
+        customFields[index].components = savedCustomFields[id]?.components
+      }
+
+      setCustomerCustomFieldsFormData(field, id, customFields[index].value)
+      setCustomerCustomFieldsFormConstruction(field, id)
+      setCustomerCustomFieldsFormRules(field)
+    })
+}
+
+function saveCustomerCustomFields() {
+  customFieldsFormRef.value.validate((valid) => {
+    if (valid) {
+      const user = store.getters['auth/getProfile']
+      const customFieldData = {}
+
+      // Build full custom field data structure
+      for (const id in customFields) {
+        const field = customFields[id]
+        const value = customFieldsForm[field.id]
+        customFieldData[field.id] = {
+          label: field.label,
+          type: field.type,
+          value: typeof value === 'string' ? value.trim() : value,
+        }
+        if (field.type === 'address' && field.components) {
+          customFieldData[field.id].components = field.components
+        }
+      }
+
+      const updatedUser = {
+        ...user,
+        customFields: JSON.stringify(customFieldData),
+      }
+
+      store.commit('setLoading', true)
+
+      httpClient.post(
+          `/users/${cabinetType.value}s/${user.id}`,
+          updatedUser,
+          useAuthorizationHeaderObject(store)
+      ).finally(() => {
+        store.commit('setLoading', false)
+        successMessage.value = amLabels.value.profile_data_success
+        alertVisibility.value = true
+      })
+    } else {
+      return false
+    }
+  })
+}
+provide('saveCustomerCustomFields', saveCustomerCustomFields)
+
 // * Colors
 let amColors = inject('amColors')
 
@@ -636,54 +814,9 @@ export default {
   // capi - cabinet personal information
   // capp - cabinet personal password
   .am-capi {
-    .el-tabs {
-
-      &__header {
-        margin: 0 0 15px;
-      }
-
-      &__nav {
-        &-wrap {
-          &:after {
-            background-color: var(--am-c-capi-text-op10);
-          }
-        }
-      }
-
-      &__active-bar {
-        background-color: var(--am-c-capi-primary);
-      }
-
-      &__item {
-        padding: 0 20px;
-        line-height: 40px;
-
-        &:nth-child(2) {
-          padding-left: 0;
-        }
-
-        &:last-child {
-          padding-right: 0;
-        }
-
-        &.is-focus {
-          color: var(--am-c-capi-text);
-
-          &.is-active {
-            color: var(--am-c-capi-primary);
-
-            &:focus {
-              &:not(:active) {
-                box-shadow: none;
-              }
-            }
-          }
-        }
-      }
-
-      &__content {
-        overflow: unset;
-      }
+    &__inner {
+      display: block;
+      padding: 16px 32px;
     }
 
     &__form {
@@ -715,7 +848,7 @@ export default {
             &-birthday {
               .el-input__inner {
                 color: transparent !important;
-                text-shadow: 0 0 0 var(--am-input-c-text);
+                text-shadow: 0 0 0 var(--am-c-inp-text);
                 cursor: pointer;
               }
             }

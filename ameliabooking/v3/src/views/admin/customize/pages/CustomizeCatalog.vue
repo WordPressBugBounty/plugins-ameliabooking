@@ -1,10 +1,11 @@
 <template>
-  <template v-if="!amCustomize.fonts.customFontSelected">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" :href="`${baseUrls.wpAmeliaPluginURL}v3/src/assets/scss/common/fonts/font.css`" type="text/css" media="all">
-  </template>
-  <div id="amelia-container" ref="ameliaContainer" class="am-fc__wrapper" :style="cssVars">
+  <div
+    v-if="isLoaded"
+    id="amelia-container"
+    ref="ameliaContainer"
+    class="am-fc__wrapper"
+    :style="cssVars"
+  >
     <template v-if="stepsArray.length">
       <component :is="stepsArray[stepIndex]"></component>
     </template>
@@ -12,6 +13,26 @@
 </template>
 
 <script setup>
+// * Import from Vue
+import {
+  ref,
+  provide,
+  inject,
+  markRaw,
+  computed,
+  onBeforeMount,
+  onMounted,
+  watchEffect,
+  onUnmounted,
+  nextTick,
+} from 'vue'
+
+import { useElementSize } from '@vueuse/core'
+
+// * Import composables
+import { defaultCustomizeSettings } from '../../../../assets/js/common/defaultCustomize.js'
+import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
+
 // * Step components
 import CategoriesList from '../steps/CategoriesList.vue'
 import CategoryItemsList from '../steps/CategoryItemsList.vue'
@@ -23,33 +44,31 @@ const categoryItemsList = markRaw(CategoryItemsList)
 const categoryService = markRaw(CategoryService)
 const categoryPackage = markRaw(CategoryPackage)
 
-// * Import from Vue
-import {
-  ref,
-  provide,
-  inject,
-  markRaw,
-  watchEffect,
-  computed,
-  onBeforeMount,
-  onMounted
-} from "vue";
-
-// * Import composables
-import { usePopulateMultiDimensionalObject } from '../../../../assets/js/common/objectAndArrayManipulation.js'
-import { defaultCustomizeSettings } from '../../../../assets/js/common/defaultCustomize.js'
-
 // * Base Urls
 const baseUrls = inject('baseUrls')
 
+// * Features integrations
+let features = useReactiveCustomize().features
+provide('features', features)
+
+let langKey = useReactiveCustomize().langKey
+provide('langKey', langKey)
+
+// * Step index
+let stepIndex = useReactiveCustomize().stepIndex
+provide('stepIndex', stepIndex)
+
+// * Page render key
+let pageRenderKey = ref('cbf')
+provide('pageRenderKey', pageRenderKey)
+
+// * Step name
+let stepName = useReactiveCustomize().stepName
+provide('stepName', stepName)
+
 // * Customize data
-let amCustomize = inject('customize')
-
-// * Translations
-let amTranslations = inject('translations')
-
-let stepName = inject('stepName')
-let pageRenderKey = inject('pageRenderKey')
+const { amCustomize } = useReactiveCustomize()
+provide('customize', amCustomize)
 
 // * Fonts
 let amFonts = computed(() => {
@@ -61,54 +80,78 @@ let stepsArray = ref([
   categoriesList,
   categoryItemsList,
   categoryService,
-  categoryPackage
+  categoryPackage,
 ])
-
-// * Step index
-let stepIndex = inject('stepIndex')
-
-watchEffect( () => {
-  stepName.value = stepsArray.value[stepIndex.value].key
-})
-
-let { pageNameHandler } = inject('headerFunctionality', {
-  pageNameHandler: () => 'Step-by-Step Booking Form'
-})
-
-pageNameHandler('Catalog Booking Form')
-
-// * implementation of saved labels into amTranslation object
-let stepKey = ref('')
-function savedLabelsImplementation (labelObj) {
-  Object.keys(labelObj).forEach((labelKey) => {
-    if (labelKey in amCustomize.value[pageRenderKey.value][stepKey.value].translations) {
-      labelObj[labelKey] = {...labelObj[labelKey], ...amCustomize.value[pageRenderKey.value][stepKey.value].translations[labelKey]}
-    }
-  })
-}
 
 // * Component reference
 let ameliaContainer = ref(null)
 
 // * Plugin wrapper width
-let containerWidth = ref()
+let { width: containerWidth } = useElementSize(ameliaContainer)
 provide('containerWidth', containerWidth)
 
-// * window resize listener
-window.addEventListener('resize', resize);
-
-// * resize function
-function resize() {
-  if (ameliaContainer.value) {
-    containerWidth.value = ameliaContainer.value.offsetWidth
-  }
-}
+let isLoaded = ref(false)
 
 onMounted(() => {
-  if (ameliaContainer.value) {
-    containerWidth.value = ameliaContainer.value.offsetWidth
+  window.customizeComponentLoaded = true
+
+  if (typeof window.stylesInjectedV3 === 'function') {
+    if (window.v3.componentToMount === 'CustomizeCatalog') {
+      window.stylesInjectedV3 = () => {
+        nextTick().then(() => {
+          isLoaded.value = true
+        })
+      }
+    }
   }
 })
+
+// Clean up on unmount to prevent stale callbacks
+onUnmounted(() => {
+  window.customizeComponentLoaded = false
+  // Reset to no-op function
+  window.stylesInjectedV3 = async function () {}
+})
+
+watchEffect(() => {
+  if (amCustomize.value.fonts.customFontSelected) {
+    activateCustomFontStyles()
+  } else {
+    importDefaultFonts()
+  }
+})
+
+function activateCustomFontStyles() {
+  let head = document.head || document.getElementsByTagName('head')[0]
+  if (head.querySelector('#amCustomFont')) {
+    head.querySelector('#amCustomFont').remove()
+  }
+
+  if (head.querySelector('#amDefaultFontImport')) {
+    head.querySelector('#amDefaultFontImport').remove()
+  }
+
+  let css = `@font-face {font-family: '${amCustomize.value.fonts.fontFamily}'; src: url(${amCustomize.value.fonts.fontUrl});}`
+  let style = document.createElement('style')
+  head.appendChild(style)
+  style.setAttribute('type', 'text/css')
+  style.setAttribute('id', 'amCustomFont')
+  style.appendChild(document.createTextNode(css))
+}
+
+function importDefaultFonts() {
+  const head = document.head || document.getElementsByTagName('head')[0]
+  if (head.querySelector('#amDefaultFontImport')) {
+    return
+  }
+
+  const base = baseUrls.value.wpAmeliaPluginURL
+  const style = document.createElement('style')
+  style.setAttribute('type', 'text/css')
+  style.setAttribute('id', 'amDefaultFontImport')
+  style.textContent = `@import url("${base}v3/src/assets/scss/common/fonts/font.css");`
+  head.appendChild(style)
+}
 
 /**
  * Lifecycle Hooks
@@ -117,20 +160,17 @@ onBeforeMount(() => {
   window.scrollTo({
     top: 0,
     left: 0,
-    behavior: 'smooth'
-  })
-  Object.keys(amCustomize.value[pageRenderKey.value]).forEach(step => {
-    if (step !== 'colors' && amCustomize.value[pageRenderKey.value][step].translations) {
-      stepKey.value = step
-      usePopulateMultiDimensionalObject('labels', amTranslations[pageRenderKey.value][step], savedLabelsImplementation)
-    }
+    behavior: 'smooth',
   })
 })
 
 // * Colors
 // * Customize colors
 let amColors = computed(() => {
-  return amCustomize.value[pageRenderKey.value] ? amCustomize.value[pageRenderKey.value].colors : defaultCustomizeSettings[pageRenderKey.value].colors
+  // debugger
+  return amCustomize.value[pageRenderKey.value]
+    ? amCustomize.value[pageRenderKey.value].colors
+    : defaultCustomizeSettings[pageRenderKey.value].colors
 })
 
 provide('amColors', amColors)
@@ -169,15 +209,19 @@ let cssVars = computed(() => {
     // css properties
     // -mw- max width
     // -brad- border-radius
-    '--am-mw-main': amCustomize.value.sbsNew.sidebar.options.self.visibility ? '760px' : '520px',
-    '--am-brad-main': amCustomize.value.sbsNew.sidebar.options.self.visibility ? '0 0.5rem 0.5rem 0' : '0.5rem'
+    '--am-mw-main': amCustomize.value.sbsNew.sidebar.options.self.visibility
+      ? '760px'
+      : '520px',
+    '--am-brad-main': amCustomize.value.sbsNew.sidebar.options.self.visibility
+      ? '0 0.5rem 0.5rem 0'
+      : '0.5rem',
   }
 })
 </script>
 
 <script>
 export default {
-  name: "CustomizeCatalog"
+  name: 'CustomizeCatalog',
 }
 </script>
 
@@ -201,7 +245,7 @@ export default {
   --am-c-main-heading-text: #{$shade-800};
   --am-c-main-text: #{$shade-900};
   // sidebar container colors - left part of the form
-  --am-c-sb-bgr: #17295A;
+  --am-c-sb-bgr: #17295a;
   --am-c-sb-text: #{$am-white};
   // input global colors - usage input, textarea, checkbox, radio button, select input, adv select input
   --am-c-inp-bgr: #{$blue-900};
@@ -240,12 +284,6 @@ export default {
 // am -- amelia
 // fc -- form catalog
 #amelia-app-backend-new {
-  * {
-    font-family: var(--am-font-family);
-    font-style: initial;
-    box-sizing: border-box;
-  }
-
   #amelia-container {
     background-color: transparent;
 
@@ -253,6 +291,8 @@ export default {
       font-family: var(--am-font-family);
       font-style: initial;
       box-sizing: border-box;
+      word-break: break-word;
+      letter-spacing: normal;
     }
 
     &.am-fc {
@@ -347,7 +387,8 @@ export default {
             font-weight: 400;
           }
 
-          p, span {
+          p,
+          span {
             padding: 0;
           }
 

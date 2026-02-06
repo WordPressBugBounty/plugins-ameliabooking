@@ -3,10 +3,16 @@
     v-if="!props.loading"
     class="am-fs__main-footer"
     :class="[
-      {'am-fs__main-footer-cp' : props.secondButtonShow},
-      {'am-fs__main-footer-cp-mobile-s' : (mobileS && props.secondButtonShow)},
-      {'am-fs__main-footer__cart' : props.addToCartButtonShow || props.backToCartButtonShow},
-      {'am-fs__main-footer__cart-mobile-s' : (props.addToCartButtonShow || props.backToCartButtonShow) && mobileS},
+      { 'am-fs__main-footer-cp': props.secondButtonShow },
+      { 'am-fs__main-footer-cp-mobile-s': mobileS && props.secondButtonShow },
+      {
+        'am-fs__main-footer__cart':
+          props.addToCartButtonShow || props.backToCartButtonShow,
+      },
+      {
+        'am-fs__main-footer__cart-mobile-s':
+          (props.addToCartButtonShow || props.backToCartButtonShow) && mobileS,
+      },
     ]"
     :style="cssVars"
   >
@@ -17,7 +23,7 @@
         :type="props.secondaryFooterButtonType"
         @click="secondButtonClick"
       >
-        {{displayLabels('congrats_panel')}}
+        {{ displayLabels('congrats_panel') }}
       </AmButton>
       <AmButton
         v-if="props.addToCartButtonShow"
@@ -44,6 +50,7 @@
       <AmButton
         v-if="props.paymentGateway !== 'payPal' || isCongratzStep"
         class="am-button-continue"
+        :class="{ 'square-continue': props.paymentGateway === 'square' }"
         :disabled="isCongratzStep ? false : footerBtnDisabled"
         :type="props.primaryFooterButtonType"
         @click="continueClick"
@@ -63,7 +70,6 @@
       <!-- /Skeleton -->
     </template>
   </div>
-
 </template>
 
 <script setup>
@@ -74,54 +80,54 @@ import { useColorTransparency } from '../../../../../assets/js/common/colorManip
 let props = defineProps({
   loading: {
     type: Boolean,
-    default: false
+    default: false,
   },
   ready: {
     type: Boolean,
-    default: true
+    default: true,
   },
   customizedLabels: {
     type: Object,
     default: () => {
       return {}
-    }
+    },
   },
   primaryFooterButtonType: {
     type: String,
-    default: 'filled'
+    default: 'filled',
   },
   secondaryFooterButtonType: {
     type: String,
-    default: 'filled'
+    default: 'filled',
   },
   paymentGateway: {
     type: String,
-    default: ''
+    default: '',
   },
   secondButtonShow: {
     type: Boolean,
-    required: false
+    required: false,
   },
   addToCartButtonShow: {
     type: Boolean,
-    required: false
+    required: false,
   },
   addToCartButtonType: {
     type: String,
-    required: 'text'
+    required: 'text',
   },
   backToCartButtonShow: {
     type: Boolean,
-    required: false
+    required: false,
   },
   backToCartButtonType: {
     type: String,
-    required: 'text'
+    required: 'text',
   },
   backToCartLabel: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 const emits = defineEmits(['addToCart', 'backToCart'])
@@ -131,11 +137,14 @@ const { secondButtonClick } = inject('secondButton', {
   secondButtonClick: () => {},
 })
 
-const { footerButtonClick, footerBtnDisabled } = inject('changingStepsFunctions', {
-  footerButtonClick: () => {}
-})
+const { footerButtonClick, footerBtnDisabled } = inject(
+  'changingStepsFunctions',
+  {
+    footerButtonClick: () => {},
+  }
+)
 
-function removeFocusFromButton (e) {
+function removeFocusFromButton(e) {
   if (e.target.classList.value.split(' ').indexOf('am-button') === -1) {
     e.target.parentNode.blur()
   } else {
@@ -143,7 +152,7 @@ function removeFocusFromButton (e) {
   }
 }
 
-function continueClick (e) {
+function continueClick(e) {
   removeFocusFromButton(e)
   footerButtonClick()
 }
@@ -169,12 +178,18 @@ watch(stepIndex, (value) => {
   }
 })
 
-const shortcodeData = inject('shortcodeData', ref({
-  counter: 1000
-}))
+const shortcodeData = inject(
+  'shortcodeData',
+  ref({
+    counter: 1000,
+  })
+)
 
-function displayLabels (label) {
-  return Object.keys(props.customizedLabels).length && props.customizedLabels[label] ? props.customizedLabels[label] : amLabels[label]
+function displayLabels(label) {
+  return Object.keys(props.customizedLabels).length &&
+    props.customizedLabels[label]
+    ? props.customizedLabels[label]
+    : amLabels[label]
 }
 
 function addToCartButtonClick() {
@@ -186,32 +201,41 @@ function backToCartButtonClick() {
 }
 
 // * Colors
-let amColors = inject('amColors', ref({
-  colorPrimary: '#1246D6',
-  colorSuccess: '#019719',
-  colorError: '#B4190F',
-  colorWarning: '#CCA20C',
-  colorMainBgr: '#FFFFFF',
-  colorMainHeadingText: '#33434C',
-  colorMainText: '#1A2C37',
-  colorSbBgr: '#17295A',
-  colorSbText: '#FFFFFF',
-  colorInpBgr: '#FFFFFF',
-  colorInpBorder: '#D1D5D7',
-  colorInpText: '#1A2C37',
-  colorInpPlaceHolder: '#1A2C37',
-  colorDropBgr: '#FFFFFF',
-  colorDropBorder: '#D1D5D7',
-  colorDropText: '#0E1920',
-  colorBtnPrim: '#265CF2',
-  colorBtnPrimText: '#FFFFFF',
-  colorBtnSec: '#1A2C37',
-  colorBtnSecText: '#FFFFFF',
-}))
+let amColors = inject(
+  'amColors',
+  ref({
+    colorPrimary: '#1246D6',
+    colorSuccess: '#019719',
+    colorError: '#B4190F',
+    colorWarning: '#CCA20C',
+    colorMainBgr: '#FFFFFF',
+    colorMainHeadingText: '#33434C',
+    colorMainText: '#1A2C37',
+    colorSbBgr: '#17295A',
+    colorSbText: '#FFFFFF',
+    colorInpBgr: '#FFFFFF',
+    colorInpBorder: '#D1D5D7',
+    colorInpText: '#1A2C37',
+    colorInpPlaceHolder: '#1A2C37',
+    colorDropBgr: '#FFFFFF',
+    colorDropBorder: '#D1D5D7',
+    colorDropText: '#0E1920',
+    colorBtnPrim: '#265CF2',
+    colorBtnPrimText: '#FFFFFF',
+    colorBtnSec: '#1A2C37',
+    colorBtnSecText: '#FFFFFF',
+  })
+)
 let cssVars = computed(() => {
   return {
-    '--am-c-main-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15),
-    '--am-c-success-op20': useColorTransparency(amColors.value.colorSuccess, 0.2),
+    '--am-c-main-text-op15': useColorTransparency(
+      amColors.value.colorMainText,
+      0.15
+    ),
+    '--am-c-success-op20': useColorTransparency(
+      amColors.value.colorSuccess,
+      0.2
+    ),
   }
 })
 
@@ -221,7 +245,7 @@ let mobileS = computed(() => cWidth.value < 420)
 
 <script>
 export default {
-  name: "MainContentFooter"
+  name: 'MainContentFooter',
 }
 </script>
 
@@ -231,7 +255,6 @@ export default {
   // fs -- form steps
   // Amelia Form Steps
   .am-fs {
-
     // Main Container
     &__main {
       &-footer {
@@ -247,7 +270,8 @@ export default {
         box-shadow: 0 -2px 3px var(--am-c-main-text-op15);
 
         // cp - customer panel - button on congratulations page
-        &-cp, &-ba {
+        &-cp,
+        &-ba {
           display: flex;
           justify-content: space-between;
 
@@ -284,11 +308,11 @@ export default {
             height: 20px;
             border-radius: 50%;
             margin: 0 4px 0 0;
-             &:before {
-               width: 20px;
-               height: 20px;
-               line-height: 20px;
-             }
+            &:before {
+              width: 20px;
+              height: 20px;
+              line-height: 20px;
+            }
           }
         }
 
@@ -297,7 +321,7 @@ export default {
             padding: 0;
             &__item {
               width: 109px;
-              height: 40px
+              height: 40px;
             }
           }
         }

@@ -1,9 +1,5 @@
 <template>
-  <div
-    v-if="props.data"
-    class="am-fs__ci"
-    :style="cssVars"
-  >
+  <div v-if="props.data" class="am-fs__ci" :style="cssVars">
     <div class="am-fs__ci-main">
       <!-- Service -->
       <div class="am-fs__ci-block">
@@ -16,10 +12,16 @@
               {{ data.service.name }}
             </span>
             <span class="am-fs__ci-prod__title-price">
-              {{`(${useFormattedPrice(data.service.price)})`}}
+              {{ `(${useFormattedPrice(data.service.price)})` }}
             </span>
             <span class="am-fs__ci-prod__title-number">
-              {{ `x ${data.service.persons} ${data.service.persons === 1 ? labelsDisplay('summary_person', 'cartStep') : labelsDisplay('summary_persons', 'cartStep')}` }}
+              {{
+                `x ${data.service.persons} ${
+                  data.service.persons === 1
+                    ? labelsDisplay('summary_person', 'cartStep')
+                    : labelsDisplay('summary_persons', 'cartStep')
+                }`
+              }}
             </span>
           </div>
           <div class="am-fs__ci-prod__price">
@@ -38,7 +40,7 @@
       <!-- /Service -->
 
       <!-- Extras -->
-      <div class="am-fs__ci-block">
+      <div v-if="data.extras" class="am-fs__ci-block">
         <div class="am-fs__ci-title">
           {{ labelsDisplay('extras', 'cartStep') }}
         </div>
@@ -51,17 +53,20 @@
             <span class="am-fs__ci-prod__title-name">
               {{ extraData.name }}
             </span>
-            <span
-              v-if="extraData.price"
-              class="am-fs__ci-prod__title-price"
-            >
-              {{`(${useFormattedPrice(extraData.price)})`}}
+            <span v-if="extraData.price" class="am-fs__ci-prod__title-price">
+              {{ `(${useFormattedPrice(extraData.price)})` }}
             </span>
             <span class="am-fs__ci-prod__title-number">
               {{ ` x ${extraData.quantity}` }}
             </span>
             <span class="am-fs__ci-prod__title-number">
-              {{ ` x ${data.service.persons} ${data.service.persons === 1 ? labelsDisplay('summary_person', 'cartStep') : labelsDisplay('summary_persons', 'cartStep')}` }}
+              {{
+                ` x ${data.service.persons} ${
+                  data.service.persons === 1
+                    ? labelsDisplay('summary_person', 'cartStep')
+                    : labelsDisplay('summary_persons', 'cartStep')
+                }`
+              }}
             </span>
           </div>
           <div class="am-fs__ci-prod__price">
@@ -106,13 +111,21 @@
       <div class="am-fs__ci-info__el">
         <span class="am-icon-clock"></span>
         <span>
-          {{ `${getFrontedFormattedTime(props.data.service.time)} - ${getFrontedFormattedTime(addSeconds(props.data.service.time, duration))}` }}
+          {{
+            `${getFrontedFormattedTime(
+              props.data.service.time
+            )} - ${getFrontedFormattedTime(
+              addSeconds(props.data.service.time, duration)
+            )}`
+          }}
         </span>
       </div>
       <div class="am-fs__ci-info__el">
         <span class="am-icon-user"></span>
         <span>
-          {{ `${props.data.service.employee.firstName} ${props.data.service.employee.lastName}` }}
+          {{
+            `${props.data.service.employee.firstName} ${props.data.service.employee.lastName}`
+          }}
         </span>
       </div>
       <div class="am-fs__ci-info__el">
@@ -130,7 +143,9 @@
       <div class="am-fs__ci-info__el">
         <span class="am-icon-users-plus"></span>
         <span>
-          {{ `${props.data.service.persons} / ${props.data.service.maxCapacity}` }}
+          {{
+            `${props.data.service.persons} / ${props.data.service.maxCapacity}`
+          }}
         </span>
       </div>
     </div>
@@ -150,40 +165,40 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject,
-  ref
-} from "vue";
+import { computed, inject, ref } from 'vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
-import { useFormattedPrice } from "../../../../../assets/js/common/formatting";
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
+import { useFormattedPrice } from '../../../../../assets/js/common/formatting'
 import {
   addSeconds,
   useSecondsToDuration,
   getFrontedFormattedTime,
-  getFrontedFormattedDate
-} from "../../../../../assets/js/common/date";
+  getFrontedFormattedDate,
+} from '../../../../../assets/js/common/date'
+import { useReactiveCustomize } from '../../../../../assets/js/admin/useReactiveCustomize.js'
 
 let props = defineProps({
   data: {
     type: Object,
-    default: null
+    default: null,
   },
   index: {
     type: Number,
-    default: 0
+    default: 0,
   },
   size: {
     type: Number,
-    default: 0
+    default: 0,
   },
   globalClass: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
+
+// * Features
+let features = inject('features')
 
 // * Multi lingual
 let langKey = inject('langKey')
@@ -192,15 +207,19 @@ let langKey = inject('langKey')
 let amLabels = inject('labels')
 
 let pageRenderKey = inject('pageRenderKey')
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Label computed function
-function labelsDisplay (label, stepKey) {
+function labelsDisplay(label, stepKey) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepKey].translations
-    && amCustomize.value[pageRenderKey.value][stepKey].translations[label]
-    && amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepKey].translations &&
+      amCustomize.value[pageRenderKey.value][stepKey].translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepKey].translations[label][
+        langKey.value
+      ]
+      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][
+          langKey.value
+        ]
       : amLabels[label]
   })
 
@@ -215,12 +234,14 @@ let serviceAggregatedPrice = computed(() => {
   return props.data.service.price * props.data.service.persons
 })
 
-function extraAggregatedPrice (extra) {
+function extraAggregatedPrice(extra) {
   return extra.price * extra.quantity * props.data.service.persons
 }
 
 function extrasTotalPrice() {
   let price = 0
+  if (!features.extras) return price
+
   props.data.extras.forEach((extra) => {
     price += extraAggregatedPrice(extra)
   })
@@ -229,12 +250,10 @@ function extrasTotalPrice() {
 }
 
 let duration = ref(
-  props.data.service.duration + props.data.extras.reduce(
-    (accumulator, extra) => {
-      return accumulator + (extra.duration * extra.quantity)
-    },
-    0
-  )
+  props.data.service.duration +
+  (features.extras ? props.data.extras.reduce((accumulator, extra) => {
+      return accumulator + extra.duration * extra.quantity
+    }, 0) : 0)
 )
 
 let amColors = inject('amColors')
@@ -246,10 +265,22 @@ let cssVars = computed(() => {
     // ci - cart item
     // op - opacity
     '--am-c-ci-text': amColors.value.colorMainText,
-    '--am-c-ci-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
-    '--am-c-ci-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
-    '--am-c-ci-text-op30': useColorTransparency(amColors.value.colorMainText, 0.3),
-    '--am-c-ci-text-op05': useColorTransparency(amColors.value.colorMainText, 0.05),
+    '--am-c-ci-text-op80': useColorTransparency(
+      amColors.value.colorMainText,
+      0.8
+    ),
+    '--am-c-ci-text-op60': useColorTransparency(
+      amColors.value.colorMainText,
+      0.6
+    ),
+    '--am-c-ci-text-op30': useColorTransparency(
+      amColors.value.colorMainText,
+      0.3
+    ),
+    '--am-c-ci-text-op05': useColorTransparency(
+      amColors.value.colorMainText,
+      0.05
+    ),
     '--am-c-ci-success': amColors.value.colorSuccess,
     '--am-c-ci-primary': amColors.value.colorPrimary,
     '--am-c-ci-error': amColors.value.colorError,
@@ -259,7 +290,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: 'CartItemBody'
+  name: 'CartItemBody',
 }
 </script>
 
@@ -364,7 +395,7 @@ export default {
           line-height: 1.38462;
           color: var(--am-c-ci-text-op80);
 
-          &[class*="am-icon"] {
+          &[class*='am-icon'] {
             font-size: 24px;
             line-height: 1;
             color: var(--am-c-ci-primary);
@@ -394,7 +425,7 @@ export default {
         line-height: 1.42857;
         cursor: pointer;
 
-        &[class*="am-icon"] {
+        &[class*='am-icon'] {
           font-size: 24px;
           line-height: 1;
         }
@@ -409,7 +440,5 @@ export default {
       }
     }
   }
-
-
 }
 </style>

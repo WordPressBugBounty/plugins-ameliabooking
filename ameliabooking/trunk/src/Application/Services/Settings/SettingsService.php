@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -35,8 +36,7 @@ class SettingsService
 
     /**
      * @return array
-     * @throws \Exception
-     * @throws \Interop\Container\Exception\ContainerException +
+     * @throws \Exception +
      */
     public function getGlobalDaysOff()
     {
@@ -57,10 +57,10 @@ class SettingsService
             /** @var \DateTime $dayOffDate */
             foreach ($dayOffPeriod as $dayOffDate) {
                 if ($settingsDayOff['repeat']) {
-                    $dayOffDateFormatted = $dayOffDate->format('m-d');
+                    $dayOffDateFormatted           = $dayOffDate->format('m-d');
                     $daysOff[$dayOffDateFormatted] = $dayOffDateFormatted;
                 } else {
-                    $dayOffDateFormatted = $dayOffDate->format('Y-m-d');
+                    $dayOffDateFormatted           = $dayOffDate->format('Y-m-d');
                     $daysOff[$dayOffDateFormatted] = $dayOffDateFormatted;
                 }
             }
@@ -74,8 +74,7 @@ class SettingsService
      * @param array $daysOffNew
      *
      * @return array
-     * @throws \Exception
-     * @throws \Interop\Container\Exception\ContainerException +
+     * @throws \Exception +
      */
     public function getDaysOff($daysOffNew = null)
     {
@@ -103,8 +102,7 @@ class SettingsService
 
     /**
      * @return array
-     * @throws \Exception
-     * @throws \Interop\Container\Exception\ContainerException +
+     * @throws \Exception +
      */
     public function getBccEmails()
     {
@@ -118,8 +116,7 @@ class SettingsService
 
     /**
      * @return array
-     * @throws \Exception
-     * @throws \Interop\Container\Exception\ContainerException +
+     * @throws \Exception +
      */
     public function getEmptyPackageEmployees()
     {
@@ -147,8 +144,7 @@ class SettingsService
 
     /**
      * @return array
-     * @throws \Exception
-     * @throws \Interop\Container\Exception\ContainerException +
+     * @throws \Exception +
      */
     public function getBccSms()
     {

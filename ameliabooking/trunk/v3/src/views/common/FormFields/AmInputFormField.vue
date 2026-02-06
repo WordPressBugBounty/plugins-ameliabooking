@@ -14,14 +14,16 @@
       :name="props.itemName"
       :type="props.itemType"
       :clearable="props.clearable"
-      :read-only="props.readOnly"
+      :readonly="props.readonly"
       :show-password="props.showPassword"
       :placeholder="props.placeholder"
       :disabled="props.disabled"
-      :icon-start="props.iconStart"
-      :icon-end="props.iconEnd"
+      :prefix-icon="props.prefixIcon"
+      :prepend="props.prepend"
+      :append="props.append"
+      :suffix-icon="props.suffixIcon"
       @enter="emits('enter')"
-    ></AmInput>
+    />
   </el-form-item>
 </template>
 
@@ -76,15 +78,23 @@ let props = defineProps({
     type: Boolean,
     default: false
   },
-  readOnly: {
+  readonly: {
     type: Boolean,
     default: false
   },
-  iconStart: {
+  prefixIcon: {
     type: [String, Object],
     default: ''
   },
-  iconEnd: {
+  prepend: {
+    type: [String, Object],
+    default: ''
+  },
+  suffixIcon: {
+    type: [String, Object],
+    default: ''
+  },
+  append: {
     type: [String, Object],
     default: ''
   }

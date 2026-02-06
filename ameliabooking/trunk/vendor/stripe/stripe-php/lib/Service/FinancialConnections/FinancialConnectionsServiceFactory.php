@@ -2,15 +2,16 @@
 
 // File generated from our OpenAPI spec
 
-namespace AmeliaStripe\Service\FinancialConnections;
+namespace AmeliaVendor\Stripe\Service\FinancialConnections;
 
 /**
  * Service factory class for API resources in the FinancialConnections namespace.
  *
  * @property AccountService $accounts
  * @property SessionService $sessions
+ * @property TransactionService $transactions
  */
-class FinancialConnectionsServiceFactory extends \AmeliaStripe\Service\AbstractServiceFactory
+class FinancialConnectionsServiceFactory extends \AmeliaVendor\Stripe\Service\AbstractServiceFactory
 {
     /**
      * @var array<string, string>
@@ -18,6 +19,7 @@ class FinancialConnectionsServiceFactory extends \AmeliaStripe\Service\AbstractS
     private static $classMap = [
         'accounts' => AccountService::class,
         'sessions' => SessionService::class,
+        'transactions' => TransactionService::class,
     ];
 
     protected function getServiceClass($name)

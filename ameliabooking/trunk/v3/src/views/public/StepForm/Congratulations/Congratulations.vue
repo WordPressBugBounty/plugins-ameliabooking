@@ -4,10 +4,20 @@
     :style="cssVars"
     class="am-fs__main-content am-fs__congrats"
     :class="[{'am-fs-sb-atc' : checkScreen}, props.globalClass]"
+    tabindex="0"
   >
     <div class="am-fs__congrats-main">
-      <img :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/congratulations/congratulations.svg'">
-      <p class="am-fs__congrats-main-heading">
+      <img
+        :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/congratulations/congratulations.svg'"
+        :alt="amLabels.congratulations"
+      >
+      <div v-if="waitingListOptions.enabled && waitingListOptions.isWaitingListSlot" class="am-fs__congrats-main-waiting-list-block">
+        <p class="am-fs__congrats-main-heading">
+          {{amLabels.your_position_on_waiting_list}} {{ '#' + (waitingListOptions.peopleWaiting + 1)}}
+        </p>
+        <span>{{amLabels.appointment_waiting_list_notify_message}}</span>
+      </div>
+      <p v-else class="am-fs__congrats-main-heading">
         {{ amLabels.congratulations }}
       </p>
       <span v-if="booked && booked.data.length && bookedType === 'appointment'">{{amLabels.appointment_id}} #{{ booked.data[0].appointmentId  }}</span>
@@ -77,11 +87,12 @@ import AddToCalendar from './AddToCalendar'
 import CartInfoService from './parts/CartInfoService'
 import AppointmentInfoService from './parts/AppointmentInfoService'
 import PackageInfoService from './parts/PackageInfoService'
-import { computed, inject, provide, markRaw, watchEffect } from 'vue'
+import { computed, inject, provide, markRaw, watchEffect, onMounted } from 'vue'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
 import { useRandomIntFromInterval, useFormattedPrice } from '../../../../assets/js/common/formatting'
 import { useStore } from 'vuex'
 import { useCart } from '../../../../assets/js/public/cart'
+import { useRenderAction } from "../../../../assets/js/public/renderActions";
 
 let props = defineProps({
   globalClass: {
@@ -125,6 +136,8 @@ let customer = computed(() => {
     phone: store.getters['booking/getCustomerPhone'],
   }
 })
+
+let waitingListOptions = computed(() => store.getters['appointmentWaitingListOptions/getOptions'])
 
 /**************
  * Navigation *
@@ -215,6 +228,10 @@ const cssVars = computed(() => {
     }
   }
 })
+
+onMounted(() => {
+  useRenderAction('congratulationsLoaded')
+})
 </script>
 
 <script>
@@ -282,6 +299,12 @@ export default {
         font-weight: 400;
         font-size: 13px;
         line-height: 18px;
+      }
+
+      &-waiting-list-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
     }
     &-info-mobile {

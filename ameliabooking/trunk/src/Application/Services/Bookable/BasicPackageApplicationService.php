@@ -16,7 +16,6 @@ use Slim\Exception\ContainerValueNotFoundException;
  */
 class BasicPackageApplicationService extends AbstractPackageApplicationService
 {
-
     /** @noinspection MoreThanThreeArgumentsInspection */
     /**
      * @param Package $package
@@ -131,6 +130,14 @@ class BasicPackageApplicationService extends AbstractPackageApplicationService
     public function getPackageAvailability($appointments, $params)
     {
         return [];
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getPackages()
+    {
+        return new Collection();
     }
 
     /**

@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -69,6 +70,10 @@ class PaymentFactory
             $payment->setParentId(new Id($data['parentId']));
         }
 
+        if (!empty($data['invoiceNumber'])) {
+            $payment->setInvoiceNumber(new Id($data['invoiceNumber']));
+        }
+
         if (!empty($data['entity'])) {
             $payment->setEntity(new Name($data['entity']));
         }
@@ -82,7 +87,7 @@ class PaymentFactory
         }
 
         if (!empty($data['created'])) {
-            $payment->setCreated(new DateTimeValue(DateTimeService::getCustomDateTimeObject($data['created'])));
+            $payment->setCreated(new DateTimeValue(DateTimeService::getCustomDateTimeObjectFromUtc($data['created'])));
         }
 
         if (!empty($data['wcOrderId']) && WooCommerceService::isEnabled()) {

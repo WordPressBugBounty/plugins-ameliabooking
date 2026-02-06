@@ -188,6 +188,7 @@ import {
 import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
 import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
 import { useTaxVisibility } from "../../../../../assets/js/common/pricing";
+import useAction from '../../../../../assets/js/public/actions'
 import moment from "moment/moment";
 
 // * Components Properties
@@ -483,9 +484,22 @@ watchEffect(() => {
   }
 }, {flush: 'post'})
 
+// * Event Tickets
 let tickets = computed(() => {
-  let arr = store.getters['tickets/getTicketsData']
-  return arr.sort((a, b) => a.price - b.price)
+  const sorted = [...(store.getters['tickets/getTicketsData'] || [])].sort((a, b) => a.price - b.price)
+  if (window?.ameliaActions?.EventTickets) {
+    let override
+    useAction(
+      store,
+      { tickets: sorted, setTickets: arr => { if (Array.isArray(arr)) override = arr } },
+      'EventTickets',
+      'event',
+      null,
+      null
+    )
+    return Array.isArray(override) ? override : sorted
+  }
+  return sorted
 })
 
 // * Watching when footer button was clicked
@@ -548,6 +562,8 @@ export default {
 <style lang="scss">
 .amelia-v2-booking #amelia-container {
   // eli - event list info
+  --am-c-eli-bgr: var(--am-c-main-bgr);
+  background: var(--am-c-eli-bgr);
   .am-eli {
     * {
       font-family: var(--am-font-family);

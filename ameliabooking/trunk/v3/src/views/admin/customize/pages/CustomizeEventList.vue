@@ -1,14 +1,10 @@
 <template>
-  <template v-if="!amCustomize.fonts.customFontSelected">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" :href="`${baseUrls.wpAmeliaPluginURL}v3/src/assets/scss/common/fonts/font.css`" type="text/css" media="all">
-  </template>
   <div
+    v-if="isLoaded"
     id="amelia-container"
     ref="ameliaContainer"
     class="am-elf"
-    :class="{'am-elf-dialog': stepsArray[stepIndex].key !== 'list'}"
+    :class="{ 'am-elf-dialog': stepsArray[stepIndex].key !== 'list' }"
     :style="cssVars"
   >
     <component
@@ -32,7 +28,11 @@
       <EventListFooter
         v-if="stepsArray[stepIndex].key !== 'list'"
         :customized-labels="globalStepLabels()"
-        :primary-footer-button-type="isWaiting && stepsArray[stepIndex].name === 'EventInfo' ? waitingBtnType : primBtn"
+        :primary-footer-button-type="
+          isWaiting && stepsArray[stepIndex].name === 'EventInfo'
+            ? waitingBtnType
+            : primBtn
+        "
         :secondary-footer-button-type="secBtn"
         :second-button-show="!licence.isLite ? secBtnVisible : false"
         :is-waiting-list="isWaiting"
@@ -49,27 +49,32 @@ import {
   inject,
   provide,
   markRaw,
-  onMounted,
+  onBeforeMount,
   watchEffect,
-  onBeforeMount
+  onMounted,
+  onUnmounted,
+  nextTick,
 } from 'vue'
 
+// * Components Width and Height
+import { useElementSize } from '@vueuse/core'
+
 // * Import composables
-import { usePopulateMultiDimensionalObject } from '../../../../assets/js/common/objectAndArrayManipulation.js'
 import { defaultCustomizeSettings } from '../../../../assets/js/common/defaultCustomize.js'
-import { useColorTransparency } from "../../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
+import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Form Construction
-import EventListHeader from "../../../common/EventListFormConstruction/Header/Header.vue";
-import EventListFooter from "../../../common/EventListFormConstruction/Footer/Footer.vue";
+import EventListHeader from '../../../common/EventListFormConstruction/Header/Header.vue'
+import EventListFooter from '../../../common/EventListFormConstruction/Footer/Footer.vue'
 
 // * Step Components
-import EventsList from "../steps/Events/EventList/EventsList.vue";
-import EventInfo from "../steps/Events/common/EventInfo/EventInfo.vue";
-import EventTickets from "../steps/Events/common/EventTickets/EventTickets.vue";
-import EventCustomerInfo from "../steps/Events/common/EventCustomerInfo/EventCustomerInfo.vue";
-import EventPayment from "../steps/Events/common/EventPayment/EventPayment.vue";
-import EventCongratulations from "../steps/Events/common/Congratulations/EventCongratulations.vue";
+import EventsList from '../steps/Events/EventList/EventsList.vue'
+import EventInfo from '../steps/Events/common/EventInfo/EventInfo.vue'
+import EventTickets from '../steps/Events/common/EventTickets/EventTickets.vue'
+import EventCustomerInfo from '../steps/Events/common/EventCustomerInfo/EventCustomerInfo.vue'
+import EventPayment from '../steps/Events/common/EventPayment/EventPayment.vue'
+import EventCongratulations from '../steps/Events/common/Congratulations/EventCongratulations.vue'
 
 // * Form Component Collection
 const eventsList = markRaw(EventsList)
@@ -85,19 +90,41 @@ let amSettings = inject('settings')
 // * Plugin Licence
 let licence = inject('licence')
 
+// * Features
+let features = useReactiveCustomize().features
+provide('features', features)
+
 // * Base Urls
 const baseUrls = inject('baseUrls')
 
+// * Step index
+let stepIndex = useReactiveCustomize().stepIndex
+provide('stepIndex', stepIndex)
+
+// * Bookable Type
+const bookableType = ref('event')
+provide('bookableType', bookableType)
+
+// * Language Key
+let langKey = useReactiveCustomize().langKey
+provide('langKey', langKey)
+
+// * Page Render Key
+let pageRenderKey = ref('elf')
+provide('pageRenderKey', pageRenderKey)
+
+// * Step Name
+let stepName = useReactiveCustomize().stepName || 'list'
+provide('stepName', stepName)
+
+// * Customize Data
+const { amCustomize } = useReactiveCustomize()
+provide('customize', amCustomize)
+
 // * is waiting
 let isWaiting = computed(() => {
-  return amSettings.appointments.waitingListEvents.enabled && !licence.isBasic && !licence.isStarter && !licence.isLite
+  return features.value.waitingList
 })
-
-let amTranslations = inject('translations')
-let langKey = inject('langKey')
-let stepName = inject('stepName')
-let pageRenderKey = inject('pageRenderKey')
-let amCustomize = inject('customize')
 
 let amFonts = computed(() => {
   return amCustomize.value.fonts
@@ -106,47 +133,48 @@ provide('amFonts', amFonts)
 
 let primBtn = computed(() => {
   if (
-    amCustomize.value[pageRenderKey.value][stepName.value]
-    && 'primBtn' in amCustomize.value[pageRenderKey.value][stepName.value].options
+    amCustomize.value[pageRenderKey.value][stepName.value] &&
+    'primBtn' in amCustomize.value[pageRenderKey.value][stepName.value].options
   ) {
-    return amCustomize.value[pageRenderKey.value][stepName.value].options.primBtn.buttonType
+    return amCustomize.value[pageRenderKey.value][stepName.value].options
+      .primBtn.buttonType
   }
   return 'filled'
 })
 
 let secBtn = computed(() => {
   if (
-    amCustomize.value[pageRenderKey.value][stepName.value]
-    && 'secBtn' in amCustomize.value[pageRenderKey.value][stepName.value].options
+    amCustomize.value[pageRenderKey.value][stepName.value] &&
+    'secBtn' in amCustomize.value[pageRenderKey.value][stepName.value].options
   ) {
-    return amCustomize.value[pageRenderKey.value][stepName.value].options.secBtn.buttonType
+    return amCustomize.value[pageRenderKey.value][stepName.value].options.secBtn
+      .buttonType
   }
   return 'plain'
 })
 
 let secBtnVisible = computed(() => {
   if (
-    amCustomize.value[pageRenderKey.value][stepName.value]
-    && 'secBtn' in amCustomize.value[pageRenderKey.value][stepName.value].options
+    amCustomize.value[pageRenderKey.value][stepName.value] &&
+    'secBtn' in amCustomize.value[pageRenderKey.value][stepName.value].options
   ) {
-    return amCustomize.value[pageRenderKey.value][stepName.value].options.secBtn.visibility
+    return amCustomize.value[pageRenderKey.value][stepName.value].options.secBtn
+      .visibility
   }
   return true
 })
 
 let waitingBtnType = computed(() => {
   if (
-    amCustomize.value[pageRenderKey.value][stepName.value]
-    && 'waitingBtn' in amCustomize.value[pageRenderKey.value][stepName.value].options
+    amCustomize.value[pageRenderKey.value][stepName.value] &&
+    'waitingBtn' in
+      amCustomize.value[pageRenderKey.value][stepName.value].options
   ) {
-    return amCustomize.value[pageRenderKey.value][stepName.value].options.waitingBtn.buttonType
+    return amCustomize.value[pageRenderKey.value][stepName.value].options
+      .waitingBtn.buttonType
   }
   return 'filled'
 })
-
-// * Step index
-let stepIndex = inject('stepIndex')
-provide('stepIndex', stepIndex)
 
 let stepsArray = ref([
   eventsList,
@@ -154,60 +182,67 @@ let stepsArray = ref([
   eventTickets,
   eventCustomerInfo,
   eventPayment,
-  eventCongratulations
+  eventCongratulations,
 ])
 provide('stepsArray', stepsArray)
 
-watchEffect(() => {
-  stepName.value = stepsArray.value[stepIndex.value].key
+onMounted(() => {
+  if (!features.value.tickets) {
+    stepsArray.value = [
+      eventsList,
+      eventInfo,
+      eventCustomerInfo,
+      eventPayment,
+      eventCongratulations,
+    ]
+  }
 })
-
-let { pageNameHandler } = inject('headerFunctionality', {
-  pageNameHandler: () => 'Step-by-Step Booking Form'
-})
-
-pageNameHandler('Event List Booking Form')
-
-// * implementation of saved labels into amTranslation object
-let stepKey = ref('')
-
-function savedLabelsImplementation (labelObj) {
-  Object.keys(labelObj).forEach((labelKey) => {
-    if (labelKey in amCustomize.value[pageRenderKey.value][stepKey.value].translations) {
-      labelObj[labelKey] = {...labelObj[labelKey], ...amCustomize.value[pageRenderKey.value][stepKey.value].translations[labelKey]}
-    }
-  })
-}
 
 // * Component reference
 let ameliaContainer = ref(null)
 
-// * Plugin wrapper width
-let containerWidth = ref()
-provide('containerWidth', containerWidth)
-
-// * window resize listener
-window.addEventListener('resize', resize);
-
-// * resize function
-function resize() {
-  if (ameliaContainer.value) {
-    containerWidth.value = ameliaContainer.value.offsetWidth
-  }
-}
+let isLoaded = ref(false)
 
 onMounted(() => {
-  containerWidth.value = ameliaContainer.value.offsetWidth
+  window.customizeComponentLoaded = true
 
-  if (amCustomize.value.fonts.customFontSelected) {
-    activateCustomFontStyles()
+  if (typeof window.stylesInjectedV3 === 'function') {
+    if (window.v3.componentToMount === 'CustomizeEventList') {
+      window.stylesInjectedV3 = () => {
+        nextTick().then(() => {
+          isLoaded.value = true
+        })
+      }
+    }
   }
 })
 
-function activateCustomFontStyles () {
+onUnmounted(() => {
+  window.customizeComponentLoaded = false
+  // Reset to no-op function
+  window.stylesInjectedV3 = async function () {}
+})
+
+// * Plugin wrapper width
+const { width: containerWidth } = useElementSize(ameliaContainer)
+provide('containerWidth', containerWidth)
+
+watchEffect(() => {
+  if (amCustomize.value.fonts.customFontSelected) {
+    activateCustomFontStyles()
+  } else {
+    importDefaultFonts()
+  }
+})
+
+function activateCustomFontStyles() {
   let head = document.head || document.getElementsByTagName('head')[0]
   if (head.querySelector('#amCustomFont')) {
     head.querySelector('#amCustomFont').remove()
+  }
+
+  if (head.querySelector('#amDefaultFontImport')) {
+    head.querySelector('#amDefaultFontImport').remove()
   }
 
   let css = `@font-face {font-family: '${amCustomize.value.fonts.fontFamily}'; src: url(${amCustomize.value.fonts.fontUrl});}`
@@ -218,6 +253,20 @@ function activateCustomFontStyles () {
   style.appendChild(document.createTextNode(css))
 }
 
+function importDefaultFonts() {
+  const head = document.head || document.getElementsByTagName('head')[0]
+  if (head.querySelector('#amDefaultFontImport')) {
+    return
+  }
+
+  const base = baseUrls.value.wpAmeliaPluginURL
+  const style = document.createElement('style')
+  style.setAttribute('type', 'text/css')
+  style.setAttribute('id', 'amDefaultFontImport')
+  style.textContent = `@import url("${base}v3/src/assets/scss/common/fonts/font.css");`
+  head.appendChild(style)
+}
+
 /**
  * Lifecycle Hooks
  */
@@ -225,22 +274,22 @@ onBeforeMount(() => {
   window.scrollTo({
     top: 0,
     left: 0,
-    behavior: 'smooth'
-  })
-  Object.keys(amCustomize.value[pageRenderKey.value]).forEach(step => {
-    if (step !== 'colors' && amCustomize.value[pageRenderKey.value][step].translations) {
-      stepKey.value = step
-      usePopulateMultiDimensionalObject('labels', amTranslations[pageRenderKey.value][step], savedLabelsImplementation)
-    }
+    behavior: 'smooth',
   })
 })
 
-function globalStepLabels () {
+function globalStepLabels() {
   let stepLabels = {}
-  let customizedLabels = amCustomize.value[pageRenderKey.value][stepName.value].translations
+  let customizedLabels =
+    amCustomize.value[pageRenderKey.value][stepName.value].translations
   if (customizedLabels && Object.keys(customizedLabels)) {
-    Object.keys(amCustomize.value[pageRenderKey.value][stepName.value].translations).forEach(label => {
-      stepLabels[label] = amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
+    Object.keys(
+      amCustomize.value[pageRenderKey.value][stepName.value].translations
+    ).forEach((label) => {
+      stepLabels[label] =
+        amCustomize.value[pageRenderKey.value][stepName.value].translations[
+          label
+        ][langKey.value]
     })
   } else {
     stepLabels = {}
@@ -252,10 +301,12 @@ function globalStepLabels () {
 // * Colors
 // * Customize colors
 let amColors = computed(() => {
-  return amCustomize.value[pageRenderKey.value] ? amCustomize.value[pageRenderKey.value].colors : defaultCustomizeSettings[pageRenderKey.value].colors
+  return amCustomize.value[pageRenderKey.value]
+    ? amCustomize.value[pageRenderKey.value].colors
+    : defaultCustomizeSettings[pageRenderKey.value].colors
 })
 
-provide('amColors', amColors);
+provide('amColors', amColors)
 let cssVars = computed(() => {
   return {
     '--am-c-primary': amColors.value.colorPrimary,
@@ -280,26 +331,38 @@ let cssVars = computed(() => {
     '--am-c-btn-prim-text': amColors.value.colorBtnPrimText,
     '--am-c-btn-sec': amColors.value.colorBtnSec,
     '--am-c-btn-sec-text': amColors.value.colorBtnSecText,
-    '--am-c-skeleton-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
-    '--am-c-skeleton-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-skeleton-op20': useColorTransparency(
+      amColors.value.colorMainText,
+      0.2
+    ),
+    '--am-c-skeleton-op60': useColorTransparency(
+      amColors.value.colorMainText,
+      0.6
+    ),
     '--am-font-family': amFonts.value.fontFamily,
 
     // -mw- max width
     '--am-mw-main': '792px',
-    '--am-hd-main': stepIndex.value > 0 ? '592px' :'652px',
-    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
-    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
+    '--am-hd-main': stepIndex.value > 0 ? '592px' : '652px',
+    '--am-c-scroll-op30': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.3
+    ),
+    '--am-c-scroll-op10': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.1
+    ),
 
-    '--am-rad-input': '6px',
+    '--am-rad-inp': '6px',
 
-    '--am-mb-dialog': '300px'
+    '--am-mb-dialog': '300px',
   }
 })
 </script>
 
 <script>
 export default {
-  name: "CustomizeEventList"
+  name: 'CustomizeEventList',
 }
 </script>
 
@@ -321,7 +384,7 @@ export default {
   --am-c-main-heading-text: #{$shade-800};
   --am-c-main-text: #{$shade-900};
   // sidebar container colors - left part of the form
-  --am-c-sb-bgr: #17295A;
+  --am-c-sb-bgr: #17295a;
   --am-c-sb-text: #{$am-white};
   // input global colors - usage input, textarea, checkbox, radio button, select input, adv select input
   --am-c-inp-bgr: #{$am-white};
@@ -342,9 +405,9 @@ export default {
   // -h- height
   // -fs- font size
   // -rad- border radius
-  --am-h-input: 40px;
-  --am-fs-input: 15px;
-  --am-rad-input: 6px;
+  --am-h-inp: 40px;
+  --am-fs-inp: 15px;
+  --am-rad-inp: 6px;
   --am-fs-label: 15px;
   --am-fs-btn: 15px;
 
@@ -353,22 +416,30 @@ export default {
 }
 
 #amelia-app-backend-new #amelia-container {
+  * {
+    font-family: var(--am-font-family);
+    font-style: initial;
+    box-sizing: border-box;
+    word-break: break-word;
+    letter-spacing: normal;
+  }
+
   // am - amelia
   // elf - events list form
   &.am-elf {
-      margin: 24px auto 0;
-      max-width: var(--am-mw-main);
-      background-color: var(--am-c-main-bgr);
-      padding: 16px;
-      border-radius: 12px;
+    margin: 24px auto 0;
+    max-width: var(--am-mw-main);
+    background-color: var(--am-c-main-bgr);
+    padding: 16px;
+    border-radius: 12px;
 
-      &.am-elf-dialog {
-        max-width: 650px;
-        padding: 0;
-        border-radius: 8px;
-        position: relative;
-      }
+    &.am-elf-dialog {
+      max-width: 650px;
+      padding: 0;
+      border-radius: 8px;
+      position: relative;
     }
+  }
 
   .am-dialog-el {
     &__main {

@@ -1,5 +1,4 @@
 <template>
-
   <div class="am-checkbox-wrapper" :style="cssVars">
     <el-checkbox
       :id="props.id"

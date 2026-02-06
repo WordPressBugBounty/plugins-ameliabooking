@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -70,6 +71,9 @@ class CustomerBooking extends AbstractCustomerBooking
     private $actionsCompleted;
 
     /** @var  BooleanValueObject */
+    protected $isNew;
+
+    /** @var  BooleanValueObject */
     private $isUpdated;
 
     /** @var Json */
@@ -77,6 +81,12 @@ class CustomerBooking extends AbstractCustomerBooking
 
     /** @var Json */
     protected $info;
+
+    /** @var Json */
+    private $qrCodes;
+
+    /** @var array */
+    protected $icsFiles;
 
     /**
      * @return Id
@@ -320,6 +330,22 @@ class CustomerBooking extends AbstractCustomerBooking
     }
 
     /**
+     * @return BooleanValueObject
+     */
+    public function isNew()
+    {
+        return $this->isNew;
+    }
+
+    /**
+     * @param BooleanValueObject $isNew
+     */
+    public function setNew(BooleanValueObject $isNew)
+    {
+        $this->isNew = $isNew;
+    }
+
+    /**
      * @return BooleanValueObject|null
      */
     public function isUpdated()
@@ -344,7 +370,7 @@ class CustomerBooking extends AbstractCustomerBooking
     }
 
     /**
-     * @param Json $customFields
+     * @param Json|null $customFields
      */
     public function setCustomFields($customFields)
     {
@@ -365,6 +391,38 @@ class CustomerBooking extends AbstractCustomerBooking
     public function setInfo(Json $info)
     {
         $this->info = $info;
+    }
+
+    /**
+     * @return Json
+     */
+    public function getQrCodes()
+    {
+        return $this->qrCodes;
+    }
+
+    /**
+     * @param Json $qrCodes
+     */
+    public function setQrCodes(Json $qrCodes)
+    {
+        $this->qrCodes = $qrCodes;
+    }
+
+    /**
+     * @return array
+     */
+    public function getIcsFiles()
+    {
+        return $this->icsFiles;
+    }
+
+    /**
+     * @param array $icsFiles
+     */
+    public function setIcsFiles($icsFiles)
+    {
+        $this->icsFiles = $icsFiles;
     }
 
     /**
@@ -391,9 +449,12 @@ class CustomerBooking extends AbstractCustomerBooking
                 'duration'        => $this->getDuration() ? $this->getDuration()->getValue() : null,
                 'created'         => $this->getCreated() ? $this->getCreated()->getValue()->format('Y-m-d H:i:s') : null,
                 'actionsCompleted' => $this->getActionsCompleted() ? $this->getActionsCompleted()->getValue() : null,
+                'isNew'           => $this->isNew() ? $this->isNew()->getValue() : null,
                 'isUpdated'       => $this->isUpdated() ? $this->isUpdated()->getValue() : null,
                 'customFields'    => null !== $this->getCustomFields() ? $this->getCustomFields()->getValue() : null,
                 'info'            => null !== $this->getInfo() ? $this->getInfo()->getValue() : null,
+                'qrCodes'         => null !== $this->getQrCodes() ? $this->getQrCodes()->getValue() : null,
+                'icsFiles'        => null !== $this->getIcsFiles() ? $this->getIcsFiles() : null,
             ]
         );
     }

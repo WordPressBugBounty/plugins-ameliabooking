@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -16,7 +17,6 @@ use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
  */
 class CustomerBookingEventPeriodFactory
 {
-
     /**
      * @param $data
      *

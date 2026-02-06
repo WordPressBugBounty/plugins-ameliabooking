@@ -9,7 +9,7 @@ use Slim\Http\Request;
 /**
  * Class GetSquareAuthURLController
  *
- * @package AmeliaBooking\Application\Controller\Outlook
+ * @package AmeliaBooking\Application\Controller\Square
  */
 class GetSquareAuthURLController extends Controller
 {
@@ -23,7 +23,7 @@ class GetSquareAuthURLController extends Controller
      */
     protected function instantiateCommand(Request $request, $args)
     {
-        $command = new GetSquareAuthURLCommand($args);
+        $command     = new GetSquareAuthURLCommand($args);
         $requestBody = $request->getParsedBody();
         $this->setCommandFields($command, $requestBody);
 

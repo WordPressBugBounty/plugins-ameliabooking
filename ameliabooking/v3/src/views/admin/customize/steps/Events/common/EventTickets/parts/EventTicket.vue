@@ -97,8 +97,11 @@ let amSettings = inject('settings')
 // * Licence
 let licence = inject('licence')
 
+// * Features
+let features = inject('features')
+
 let isWaiting = computed(() => {
-  return amSettings.appointments.waitingListEvents.enabled && !licence.isBasic && !licence.isStarter && !licence.isLite
+  return features.value.waitingList
 })
 
 let spots = ref(0)

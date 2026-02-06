@@ -293,7 +293,9 @@ export default {
             {}
         )
 
-
+        if (window?.ameliaBooking?.cabinet?.userLoggedOut) {
+          window.ameliaBooking.cabinet.userLoggedOut()
+        }
       } catch (error) {
         console.log(error)
       }

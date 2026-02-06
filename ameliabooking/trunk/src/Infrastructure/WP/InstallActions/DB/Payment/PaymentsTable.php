@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -16,8 +17,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\AbstractDatabaseTable;
  */
 class PaymentsTable extends AbstractDatabaseTable
 {
-
-    const TABLE = 'payments';
+    public const TABLE = 'payments';
 
     /**
      * @return string
@@ -33,7 +33,7 @@ class PaymentsTable extends AbstractDatabaseTable
                    `amount` DOUBLE NOT NULL default 0,
                    `dateTime` datetime NULL,
                    `status` ENUM('paid', 'pending', 'partiallyPaid', 'refunded') NOT NULL,
-                   `gateway` ENUM('onSite', 'payPal', 'stripe', 'wc', 'mollie', 'razorpay', 'square') NOT NULL,
+                   `gateway` ENUM('onSite', 'payPal', 'stripe', 'wc', 'mollie', 'razorpay', 'square', 'barion') NOT NULL,
                    `gatewayTitle` varchar(255) NULL,
                    `data` text NULL,
                    `packageCustomerId` int(11) NULL,
@@ -46,6 +46,7 @@ class PaymentsTable extends AbstractDatabaseTable
                    `wcOrderItemId` bigint(20) NULL,
                    `transactionId` varchar(255) NULL,
                    `transfers` text NULL,
+                   `invoiceNumber` int(11) NULL,
                     PRIMARY KEY (`id`)
                 ) DEFAULT CHARSET=utf8 COLLATE utf8_general_ci";
     }

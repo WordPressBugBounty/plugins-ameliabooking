@@ -15,12 +15,13 @@
       </span>
     </template>
     <AmInputPhone
+      :key="`phone-${defaultCountryCode}-${props.refreshTrigger}`"
       v-model="infoFormData.phone"
       :placeholder="amLabels.enter_phone"
-      :default-code="settings.general.phoneDefaultCountryCode === 'auto' ? '' : settings.general.phoneDefaultCountryCode.toLowerCase()"
+      :default-code="defaultCountryCode"
       name="phone"
       style="position: relative"
-      @country-phone-iso-updated="countryPhoneIsoUpdated"
+      @country-phone-iso-updated="(val) => {emits('countryPhoneIsoUpdated', val)}"
     />
     <div v-if="whatsAppSetUp() && !props.phoneError" class="am-whatsapp-opt-in-text">
       {{ amLabels.whatsapp_opt_in_text }}
@@ -31,20 +32,50 @@
 
 <script setup>
 import AmInputPhone from '../../../../_components/input-phone/AmInputPhone.vue'
-import {settings} from "../../../../../plugins/settings";
+import { settings } from "../../../../../plugins/settings";
 
-import {computed, inject, ref} from "vue";
-import {useStore} from "vuex";
-import {useColorTransparency} from "../../../../../assets/js/common/colorManipulation";
+// * Vue
+import {
+  computed,
+  inject,
+  ref,
+  onMounted,
+  watch,
+  nextTick
+} from "vue";
 
-let store = useStore()
+// * Vuex
+import { useStore } from 'vuex'
 
+// * Composables
+import {
+  useColorTransparency
+} from "../../../../../assets/js/common/colorManipulation";
 
+// * Emits
+const emits = defineEmits([
+  'countryPhoneIsoUpdated',
+])
+
+// * Props
 let props = defineProps({
   phoneError: {
     type: Boolean,
     default: false
+  },
+  refreshTrigger: {
+    type: Number,
+    default: 0
   }
+})
+
+// * Store
+const store = useStore()
+
+// * Computed default country code - prioritize saved country ISO
+let defaultCountryCode = computed(() => {
+  const savedCountry = store.getters['booking/getCustomerCountryPhoneIso']
+  return savedCountry || (settings.general.phoneDefaultCountryCode === 'auto' ? '' : settings.general.phoneDefaultCountryCode.toLowerCase())
 })
 
 // * Colors
@@ -57,10 +88,6 @@ let cssVars = computed(() => {
   }
 })
 
-defineEmits([
-  'countryPhoneIsoUpdated',
-])
-
 let primeFieldRef = ref(null)
 
 // * Labels
@@ -72,13 +99,22 @@ let amCustomize = inject('amCustomize')
 // * Form field data
 let infoFormData = inject('infoFormData')
 
-function countryPhoneIsoUpdated (val) {
-  store.commit('booking/setCustomerCountryPhoneIso', val ? val.toLowerCase() : '')
-}
-
 function whatsAppSetUp () {
   return settings.notifications.whatsAppEnabled && settings.notifications.whatsAppAccessToken && settings.notifications.whatsAppBusinessID && settings.notifications.whatsAppPhoneID
 }
+
+onMounted(() => {
+  if (defaultCountryCode.value) {
+    emits('countryPhoneIsoUpdated', defaultCountryCode.value)
+  }
+})
+
+// * Watch for country code changes to emit updates
+watch(defaultCountryCode, (newVal) => {
+  if (newVal) {
+    emits('countryPhoneIsoUpdated', newVal)
+  }
+})
 
 defineExpose({
   primeFieldRef

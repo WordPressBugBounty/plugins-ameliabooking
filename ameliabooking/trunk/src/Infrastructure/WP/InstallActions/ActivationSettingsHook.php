@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Settings hook for activation
  */
@@ -7,7 +8,7 @@ namespace AmeliaBooking\Infrastructure\WP\InstallActions;
 
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\String\Token;
-use AmeliaBooking\Infrastructure\Services\Frontend\LessParserService;
+use AmeliaBooking\Infrastructure\Licence\Licence;
 use AmeliaBooking\Infrastructure\WP\SettingsService\SettingsStorage;
 use Exception;
 
@@ -45,8 +46,6 @@ class ActivationSettingsHook
 
         self::initActivationSettings();
 
-        self::initCustomizationSettings();
-
         self::initLabelsSettings();
 
         self::initRolesSettings();
@@ -68,6 +67,16 @@ class ActivationSettingsHook
         self::initGoogleAnalyticsSettings();
 
         self::initGoogleTagSettings();
+
+        self::initMailchimpSettings();
+
+        self::initAppleCalendarSettings();
+
+        self::initPageColumnSettings();
+
+        self::initSocialLoginSettings();
+
+        self::initFeaturesIntegrationsSettings();
     }
 
     /**
@@ -111,12 +120,13 @@ class ActivationSettingsHook
             'serviceDurationAsSlot'                  => false,
             'bufferTimeInSlot'                       => true,
             'defaultAppointmentStatus'               => 'approved',
+            'defaultEventStatus'                     => 'approved',
             'minimumTimeRequirementPriorToBooking'   => 0,
             'minimumTimeRequirementPriorToCanceling' => 0,
             'minimumTimeRequirementPriorToRescheduling' =>
-                isset($savedSettings['minimumTimeRequirementPriorToCanceling']) &&
+            isset($savedSettings['minimumTimeRequirementPriorToCanceling']) &&
                 !isset($savedSettings['minimumTimeRequirementPriorToRescheduling']) ?
-                    $savedSettings['minimumTimeRequirementPriorToCanceling'] : 0,
+                $savedSettings['minimumTimeRequirementPriorToCanceling'] : 0,
             'numberOfDaysAvailableForBooking'        => SettingsService::NUMBER_OF_DAYS_AVAILABLE_FOR_BOOKING,
             'backendSlotsDaysInFuture'               => SettingsService::NUMBER_OF_DAYS_AVAILABLE_FOR_BOOKING,
             'backendSlotsDaysInPast'                 => SettingsService::NUMBER_OF_DAYS_AVAILABLE_FOR_BOOKING,
@@ -125,11 +135,11 @@ class ActivationSettingsHook
             'requiredPhoneNumberField'               => false,
             'requiredEmailField'                     => true,
             'itemsPerPage'                           => 12,
-            'itemsPerPageBackEnd'                    => 30,
             'appointmentsPerPage'                    => 100,
             'eventsPerPage'                          => 100,
             'servicesPerPage'                        => 100,
             'customersFilterLimit'                   => 100,
+            'eventsFilterLimit'                      => 1000,
             'calendarEmployeesPreselected'           => 0,
             'gMapApiKey'                             => '',
             'addToCalendar'                          => true,
@@ -137,13 +147,26 @@ class ActivationSettingsHook
             'showClientTimeZone'                     => false,
             'redirectUrlAfterAppointment'            => '',
             'customFieldsUploadsPath'                => '',
+            'customFieldsAllowedExtensions'          => [
+                '.jpg'  => 'image/jpeg',
+                '.jpeg' => 'image/jpeg',
+                '.png'  => 'image/png',
+                '.mp3'  => 'audio/mpeg',
+                '.mpeg' => 'video/mpeg',
+                '.mp4'  => 'video/mp4',
+                '.txt'  => 'text/plain',
+                '.csv'  => 'text/plain',
+                '.xls'  => 'application/vnd.ms-excel',
+                '.pdf'  => 'application/pdf',
+                '.doc'  => 'application/msword',
+                '.docx' => 'application/msword'
+            ],
+            'customFieldsBackendValidation'          => false,
             'runInstantPostBookingActions'           => false,
             'sortingPackages'                        => 'nameAsc',
             'sortingServices'                        => 'nameAsc',
-            'calendarLocaleSubstitutes'              => [
-            ],
+            'calendarLocaleSubstitutes'              => [],
             'googleRecaptcha'                        => [
-                'enabled'   => false,
                 'invisible' => true,
                 'siteKey'   => '',
                 'secret'    => '',
@@ -181,22 +204,9 @@ class ActivationSettingsHook
      */
     private static function initDBSettings()
     {
-        $settings = [
-            'mysqliEnabled'      => false,
-            'pdoEmulatePrepares' => false,
-            'pdoBigSelect'       => false,
-            'ssl' => [
-                'enable'      => false,
-                'key'         => null,
-                'cert'        => null,
-                'ca'          => null,
-                'verify_cert' => null,
-            ],
-            'wpTablesPrefix'     => '',
-            'port'               => 3306
-        ];
-
-        self::initSettings('db', $settings);
+        self::initSettings('db', [
+            'wpTablesPrefix' => '',
+        ]);
     }
 
     /**
@@ -206,14 +216,17 @@ class ActivationSettingsHook
     {
 
         $settings = [
-            'pictureFullPath'  => '',
-            'pictureThumbPath' => '',
-            'name'             => '',
-            'address'          => '',
-            'phone'            => '',
-            'countryPhoneIso'  => '',
-            'website'          => '',
-            'translations'     => '',
+            'pictureFullPath'   => '',
+            'pictureThumbPath'  => '',
+            'name'              => '',
+            'address'           => '',
+            'addressComponents' => [],
+            'countryCode'       => '',
+            'phone'             => '',
+            'vat'               => '',
+            'countryPhoneIso'   => '',
+            'website'           => '',
+            'translations'      => '',
         ];
 
         self::initSettings('company', $settings);
@@ -222,14 +235,12 @@ class ActivationSettingsHook
     /**
      * Get Notification Settings
      *
-     * @param array $savedSettings
-     *
      * @return array
      */
-    public static function getDefaultNotificationsSettings($savedSettings)
+    public static function getDefaultNotificationsSettings()
     {
         return [
-            'mailService'          => 'php',
+            'mailService'          => '',
             'smtpHost'             => '',
             'smtpPort'             => '',
             'smtpSecure'           => 'ssl',
@@ -239,6 +250,7 @@ class ActivationSettingsHook
             'mailgunDomain'        => '',
             'mailgunEndpoint'      => '',
             'senderName'           => '',
+            'replyTo'              => '',
             'senderEmail'          => '',
             'notifyCustomers'      => true,
             'sendAllCF'            => true,
@@ -257,11 +269,8 @@ class ActivationSettingsHook
             'rejectErrorUrl'       => '',
             'breakReplacement'     => '<br>',
             'pendingReminder'      => false,
-            'whatsAppEnabled'      =>
-                $savedSettings &&
-                !empty($savedSettings['whatsAppPhoneID']) &&
-                !empty($savedSettings['whatsAppAccessToken']) &&
-                !empty($savedSettings['whatsAppBusinessID']),
+            'sendInvoice'          => false,
+            'invoiceFormat'        => 'pdf',
             'whatsAppPhoneID'      => '',
             'whatsAppAccessToken'  => '',
             'whatsAppBusinessID'   => '',
@@ -278,11 +287,7 @@ This message does not have an option for responding. If you need additional info
      */
     private static function initNotificationsSettings()
     {
-        $settingsService = new SettingsService(new SettingsStorage());
-
-        $savedSettings = $settingsService->getCategorySettings('notifications');
-
-        $settings = self::getDefaultNotificationsSettings($savedSettings);
+        $settings = self::getDefaultNotificationsSettings();
 
         self::initSettings('notifications', $settings);
     }
@@ -383,6 +388,8 @@ This message does not have an option for responding. If you need additional info
                     $savedSettings['eventDescription'] : '',
                 'event' => ''
             ],
+            'accessToken'                      => '',
+            'googleAccountData'                => null
         ];
 
         self::initSettings('googleCalendar', $settings);
@@ -406,10 +413,12 @@ This message does not have an option for responding. If you need additional info
             'sendEventInvitationEmail'         => false,
             'removeOutlookCalendarBusySlots'   => false,
             'maximumNumberOfEventsReturned'    => 50,
+            'ignoreAmeliaEvents'               => false,
             'eventTitle'                       => '%service_name%',
             'eventDescription'                 => '',
             'includeBufferTimeOutlookCalendar' => false,
-            'title'                           => [
+            'enableMicrosoftTeams'             => false,
+            'title'                            => [
                 'appointment' => $savedSettings && !empty($savedSettings['eventTitle']) ?
                     $savedSettings['eventTitle'] : '%service_name%',
                 'event' => '%event_name%'
@@ -419,9 +428,39 @@ This message does not have an option for responding. If you need additional info
                     $savedSettings['eventDescription'] : '',
                 'event' => ''
             ],
+            'mailEnabled'                      => false,
+            'token'                            => null,
         ];
 
         self::initSettings('outlookCalendar', $settings);
+    }
+
+    /**
+     * Init Apple Calendar Settings
+     */
+    private static function initAppleCalendarSettings()
+    {
+        $settings = [
+            'clientID'                        => '',
+            'clientSecret'                    => '',
+            'redirectURI'                     => AMELIA_SITE_URL . '/wp-admin/admin.php?page=wpamelia-employees',
+            'insertPendingAppointments'       => false,
+            'addAttendees'                    => false,
+            'removeAppleCalendarBusySlots'    => false,
+            'eventTitle'                      => '%service_name%',
+            'eventDescription'                => '',
+            'includeBufferTimeAppleCalendar' => false,
+            'title'                           => [
+                'appointment' => '%service_name%',
+                'event' => '%event_name%'
+            ],
+            'description'                      => [
+                'appointment' => '',
+                'event' => ''
+            ],
+        ];
+
+        self::initSettings('appleCalendar', $settings);
     }
 
     /**
@@ -429,10 +468,6 @@ This message does not have an option for responding. If you need additional info
      */
     private static function initZoomSettings()
     {
-        $settingsService = new SettingsService(new SettingsStorage());
-
-        $savedSettings = $settingsService->getCategorySettings('zoom');
-
         $settings = [
             'enabled'                     => true,
             'apiKey'                      => '',
@@ -440,7 +475,6 @@ This message does not have an option for responding. If you need additional info
             'meetingTitle'                => '%reservation_name%',
             'meetingAgenda'               => '%reservation_description%',
             'pendingAppointmentsMeetings' => false,
-            'maxUsersCount'               => 300,
             's2sEnabled'                  => true,
             'accountId'                   => '',
             'clientId'                    => '',
@@ -470,7 +504,6 @@ This message does not have an option for responding. If you need additional info
     private static function initLessonSpaceSettings()
     {
         $settings = [
-            'enabled'                     => true,
             'apiKey'                      => '',
             'spaceNameAppointments'       => '%reservation_name%',
             'spaceNameEvents'             => '%reservation_name%',
@@ -532,6 +565,1112 @@ This message does not have an option for responding. If you need additional info
         self::initSettings('googleTag', $settings);
     }
 
+
+    /**
+     * Init Mailchimp Settings
+     */
+    private static function initMailchimpSettings()
+    {
+        $settings = [
+            'accessToken'      => null,
+            'server'           => null,
+            'list'             => null,
+            'checkedByDefault' => false
+        ];
+
+        self::initSettings('mailchimp', $settings);
+    }
+
+    /**
+     * Init Page Column Settings
+     */
+    private static function initPageColumnSettings()
+    {
+        $settings = self::getDefaultPageColumnSettings();
+
+        self::initSettings('pageColumnSettings', $settings);
+
+        // Handle updates to existing page column settings
+        self::updatePageColumnSettings($settings);
+    }
+
+    /**
+     * Get Default Page Column Settings
+     *
+     * @return array
+     */
+    public static function getDefaultPageColumnSettings()
+    {
+        return [
+            "customersPage" => [
+                [
+                    "prop" => "id",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "id",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "name",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "name",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "phone",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "phone",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "email",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "email",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "note",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "note",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "lastBooking",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "last_booking",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "totalBookings",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "total_bookings",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "wordPressUser",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "wp_user",
+                    "sortable" => false
+                ]
+            ],
+
+            "employeesPage" => [
+                [
+                    "prop" => "id",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "id",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "name",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "name",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "status",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "visibility",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "availability",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "red_availability",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "phone",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "phone",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "email",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "email",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "actions",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "red_actions",
+                    "sortable" => false
+                ],
+            ],
+
+            "locationsPage" => [
+                [
+                    "prop" => "id",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "id",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "name",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "name",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "address",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "address",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "phone",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "phone",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "status",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "visibility",
+                    "sortable" => false
+                ]
+            ],
+
+            "bookingsAppointmentsPage" => [
+                [
+                    "prop" => "id",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "id",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "date",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "date",
+                    "sortable" => false,
+                    "required" => true
+                ],
+                [
+                    "prop" => "time",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "time",
+                    "sortable" => false,
+                    "required" => true
+                ],
+                [
+                    "prop" => "customer",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "customer",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "service",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "service",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "type",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "type",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "status",
+                    "visible" => true,
+                    "width" => 200,
+                    "label" => "status",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "employee",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "employee",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "location",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "location",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "duration",
+                    "visible" => false,
+                    "width" => 160,
+                    "label" => "duration",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "customerEmail",
+                    "visible" => false,
+                    "width" => 240,
+                    "label" => "customer_email",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "customerPhone",
+                    "visible" => false,
+                    "width" => 240,
+                    "label" => "customer_phone",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "booked",
+                    "visible" => false,
+                    "width" => 80,
+                    "label" => "booked",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "note",
+                    "visible" => false,
+                    "width" => 80,
+                    "label" => "note",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "paidPrice",
+                    "visible" => false,
+                    "width" => 160,
+                    "label" => "paid",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "payment",
+                    "visible" => false,
+                    "width" => 160,
+                    "label" => "payment",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "totalPrice",
+                    "visible" => false,
+                    "width" => 160,
+                    "label" => "total_price",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "hostLink",
+                    "visible" => false,
+                    "width" => 160,
+                    "label" => "red_host_link",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "joinLink",
+                    "visible" => false,
+                    "width" => 200,
+                    "label" => "red_join_link",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "bookingSource",
+                    "visible" => false,
+                    "width" => 64,
+                    "label" => "red_booking_source",
+                    "sortable" => false,
+                    "showLabel" => false
+                ],
+            ],
+
+            "bookingsPackagesPage" => [
+                [
+                    "prop" => "id",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "id",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "date",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "package_date_purchased",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "customer",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "customer",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "package",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "package",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "status",
+                    "visible" => true,
+                    "width" => 200,
+                    "label" => "status",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "appointments",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "appointments",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "employees",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "employees",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "expirationDate",
+                    "visible" => false,
+                    "width" => 240,
+                    "label" => "expiration_date",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "price",
+                    "visible" => false,
+                    "width" => 160,
+                    "label" => "price",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "paymentStatus",
+                    "visible" => false,
+                    "width" => 200,
+                    "label" => "payment_status",
+                    "sortable" => false
+                ]
+            ],
+
+            "bookingsEventsPage" => [
+                [
+                    "prop" => "code",
+                    "visible" => true,
+                    "width" => 120,
+                    "label" => "code",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "date",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "date",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "time",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "time",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "attendee",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "attendee",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "event",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "event",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "status",
+                    "visible" => true,
+                    "width" => 200,
+                    "label" => "status",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "spots",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "red_booked",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "organizer",
+                    "visible" => false,
+                    "width" => 240,
+                    "label" => "event_organizer",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "staff",
+                    "visible" => false,
+                    "width" => 240,
+                    "label" => "event_staff",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "price",
+                    "visible" => false,
+                    "width" => 160,
+                    "label" => "price",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "paymentStatus",
+                    "visible" => false,
+                    "width" => 200,
+                    "label" => "payment_status",
+                    "sortable" => false
+                ],
+            ],
+
+            "eventsPage" => [
+                [
+                    "prop" => "id",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "id",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "dateTime",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "date_time",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "name",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "name",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "status",
+                    "visible" => true,
+                    "width" => 200,
+                    "label" => "status",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "spots",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "red_booked",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "organizer",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "event_organizer",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "staff",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "event_staff",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "recurring",
+                    "visible" => true,
+                    "width" => 120,
+                    "label" => "recurring",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "waitingList",
+                    "visible" => true,
+                    "width" => 200,
+                    "label" => "waiting_list",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "bookingOpens",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "red_booking_opens",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "bookingCloses",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "red_booking_closes",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "visibility",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "visibility",
+                    "sortable" => false
+                ],
+            ],
+
+            "catalogServicesPage" => [
+                [
+                    "prop" => "id",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "id",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "service",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "service",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "duration",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "duration",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "price",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "price",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "employees",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "employees",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "visibility",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "visibility",
+                    "sortable" => false
+                ],
+            ],
+
+            "catalogPackagesPage" => [
+                [
+                    "prop" => "id",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "id",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "name",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "name",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "services",
+                    "visible" => true,
+                    "width" => 200,
+                    "label" => "services",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "price",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "price",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "duration",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "duration",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "employees",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "employees",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "status",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "visibility",
+                    "sortable" => false
+                ]
+            ],
+
+            "catalogResourcesPage" => [
+                [
+                    "prop" => "id",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "id",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "name",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "name",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "quantity",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "quantity",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "services",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "services",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "locations",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "locations",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "employees",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "employees",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "type",
+                    "visible" => true,
+                    "width" => 200,
+                    "label" => "type",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "status",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "visibility",
+                    "sortable" => false
+                ]
+            ],
+
+            "financePaymentsPage" => [
+                [
+                    "prop" => "id",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "id",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "dateTime",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "payment_date",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "customer",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "customer",
+                    "sortable" => false,
+                    "required" => true
+                ],
+                [
+                    "prop" => "employees",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "employees",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "booking",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "booking",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "status",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "status",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "amount",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "amount",
+                    "sortable" => false,
+                    "required" => true
+                ],
+                [
+                    "prop" => "payment_method",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "payment_method",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "location",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "location",
+                    "sortable" => false
+                ],
+            ],
+            "financeCouponsPage" => [
+                [
+                    "prop" => "code",
+                    "visible" => true,
+                    "width" => 120,
+                    "label" => "code",
+                    "sortable" => false,
+                    "required" => true
+                ],
+                [
+                    "prop" => "discount",
+                    "visible" => true,
+                    "width" => 120,
+                    "label" => "discount_amount",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "deduction",
+                    "visible" => true,
+                    "width" => 120,
+                    "label" => "deduction",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "status",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "visibility",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "start_date",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "start_date",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "expiration_date",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "expiration_date",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "service",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "services",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "event",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "events",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "package",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "packages",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "usage_limit",
+                    "visible" => false,
+                    "width" => 120,
+                    "label" => "usage_limit",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "limit_per_customer",
+                    "visible" => false,
+                    "width" => 120,
+                    "label" => "red_limit_per_customer",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "times_used",
+                    "visible" => false,
+                    "width" => 120,
+                    "label" => "times_used",
+                    "sortable" => true
+                ],
+            ],
+            "financeTaxesPage" => [
+                [
+                    "prop" => "name",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "name",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "type",
+                    "visible" => true,
+                    "width" => 120,
+                    "label" => "type",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "rate",
+                    "visible" => true,
+                    "width" => 80,
+                    "label" => "rate",
+                    "required" => true
+                ],
+                [
+                    "prop" => "status",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "visibility",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "service",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "services",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "event",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "events",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "package",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "packages",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "extra",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "extras",
+                    "sortable" => false
+                ],
+
+            ],
+            "financeInvoicesPage" => [
+                [
+                    "prop" => "invoiceNumber",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "red_invoice_number",
+                    "sortable" => true,
+                    "required" => true
+                ],
+                [
+                    "prop" => "customer",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "customer",
+                    "sortable" => false,
+                    "required" => true
+                ],
+                [
+                    "prop" => "dateTime",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "red_invoice_date",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "employees",
+                    "visible" => true,
+                    "width" => 240,
+                    "label" => "employees",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "booking",
+                    "visible" => true,
+                    "width" => 320,
+                    "label" => "booking",
+                    "sortable" => false
+                ],
+                [
+                    "prop" => "status",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "status",
+                    "sortable" => true
+                ],
+                [
+                    "prop" => "amount",
+                    "visible" => true,
+                    "width" => 160,
+                    "label" => "total",
+                    "sortable" => false
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Update Page Column Settings for existing installations
+     *
+     * @param array $defaultSettings
+     */
+    private static function updatePageColumnSettings($defaultSettings)
+    {
+        $settingsService = new SettingsService(new SettingsStorage());
+        $savedSettings = $settingsService->getCategorySettings('pageColumnSettings');
+
+        // If no saved settings exist, nothing to update
+        if (!$savedSettings) {
+            return;
+        }
+
+        $needsUpdate = false;
+        $updatedSettings = $savedSettings;
+
+        foreach ($defaultSettings as $pageKey => $defaultColumns) {
+            // If page doesn't exist in saved settings, add it
+            if (!isset($savedSettings[$pageKey])) {
+                $updatedSettings[$pageKey] = $defaultColumns;
+                $needsUpdate = true;
+                continue;
+            }
+
+            // Create a map of existing columns by prop for easy lookup, preserving user customizations
+            $existingColumnsByProp = [];
+            foreach ($savedSettings[$pageKey] as $column) {
+                if (isset($column['prop'])) {
+                    $existingColumnsByProp[$column['prop']] = $column;
+                }
+            }
+
+            // Rebuild the columns array in the default order, preserving user customizations
+            $mergedColumns = [];
+            $addedColumns = [];
+
+            // First, add columns in the default order
+            foreach ($defaultColumns as $defaultColumn) {
+                if (isset($existingColumnsByProp[$defaultColumn['prop']])) {
+                    // Use existing column but merge missing properties from defaults
+                    $existingColumn = $existingColumnsByProp[$defaultColumn['prop']];
+
+                    // Check if any properties from default are missing or different in existing column
+                    $columnNeedsUpdate = false;
+                    foreach ($defaultColumn as $key => $value) {
+                        if (!isset($existingColumn[$key])) {
+                            // Add missing property
+                            $existingColumn[$key] = $value;
+                            $columnNeedsUpdate = true;
+                        } elseif ($key === 'label' && $existingColumn[$key] !== $value) {
+                            // Update label if it has changed in defaults
+                            $existingColumn[$key] = $value;
+                            $columnNeedsUpdate = true;
+                        }
+                    }
+
+                    if ($columnNeedsUpdate) {
+                        $needsUpdate = true;
+                    }
+
+                    $mergedColumns[] = $existingColumn;
+                    $addedColumns[] = $defaultColumn['prop'];
+                } else {
+                    // Add new column from defaults
+                    $mergedColumns[] = $defaultColumn;
+                    $addedColumns[] = $defaultColumn['prop'];
+                    $needsUpdate = true;
+                }
+            }
+
+            // Then, add any existing columns that are not in defaults (user-added columns)
+            foreach ($existingColumnsByProp as $prop => $column) {
+                if (!in_array($prop, $addedColumns)) {
+                    $mergedColumns[] = $column;
+                }
+            }
+
+            // Check if the order or content changed
+            if ($mergedColumns !== $savedSettings[$pageKey]) {
+                $updatedSettings[$pageKey] = $mergedColumns;
+                $needsUpdate = true;
+            }
+        }
+
+        // Save updated settings if changes were made
+        if ($needsUpdate) {
+            $settingsService->setCategorySettings('pageColumnSettings', $updatedSettings);
+        }
+    }
+
+
     /**
      * Init Ics Settings
      */
@@ -575,8 +1714,6 @@ This message does not have an option for responding. If you need additional info
             'hideCurrencySymbolFrontend' => false,
             'defaultPaymentMethod'       => 'onSite',
             'onSite'                     => true,
-            'cart'                       => false,
-            'coupons'                    => true,
             'couponsCaseInsensitive'     => false,
             'paymentLinks'               => [
                 'enabled'              => false,
@@ -584,7 +1721,6 @@ This message does not have an option for responding. If you need additional info
                 'redirectUrl'          => AMELIA_SITE_URL
             ],
             'taxes'                      => [
-                'enabled'  => false,
                 'excluded' => true,
             ],
             'payPal'                     => [
@@ -627,10 +1763,11 @@ This message does not have an option for responding. If you need additional info
                 'manualCapture'   => false,
                 'returnUrl'       => '',
                 'connect'         => [
-                    'enabled' => false,
-                    'method'  => 'transfer',
-                    'amount'  => 0,
-                    'type'    => 'percentage',
+                    'enabled'      => false,
+                    'method'       => 'transfer',
+                    'amount'       => 0,
+                    'type'         => 'percentage',
+                    'capabilities' => ['card_payments', 'transfers'],
                 ],
             ],
             'wc'                         => [
@@ -657,8 +1794,15 @@ This message does not have an option for responding. If you need additional info
                 'redirectPage' => 1,
                 'bookMultiple' => false,
                 'bookUnpaid'   => empty($savedSettings['wc']),
-                'rules'        => [
+                'rules'        =>
+                isset($savedSettings['wc']['rules']) ? $savedSettings['wc']['rules'] : [
                     'appointment' => [
+                        [
+                            'order'   => 'pending',
+                            'booking' => 'pending',
+                            'payment' => 'pending',
+                            'update'  => false,
+                        ],
                         [
                             'order'   => 'on-hold',
                             'booking' => 'default',
@@ -675,6 +1819,18 @@ This message does not have an option for responding. If you need additional info
                             'order'   => 'completed',
                             'booking' => 'default',
                             'payment' => 'paid',
+                            'update'  => false,
+                        ],
+                        [
+                            'order'   => 'cancelled',
+                            'booking' => 'canceled',
+                            'payment' => 'pending',
+                            'update'  => false,
+                        ],
+                        [
+                            'order'   => 'failed',
+                            'booking' => 'canceled',
+                            'payment' => 'pending',
                             'update'  => false,
                         ],
                     ],
@@ -697,8 +1853,26 @@ This message does not have an option for responding. If you need additional info
                             'payment' => 'paid',
                             'update'  => false,
                         ],
+                        [
+                            'order'   => 'cancelled',
+                            'booking' => 'canceled',
+                            'payment' => 'pending',
+                            'update'  => false,
+                        ],
+                        [
+                            'order'   => 'failed',
+                            'booking' => 'canceled',
+                            'payment' => 'pending',
+                            'update'  => false,
+                        ],
                     ],
                     'event'       => [
+                        [
+                            'order'   => 'pending',
+                            'booking' => 'pending',
+                            'payment' => 'pending',
+                            'update'  => false,
+                        ],
                         [
                             'order'   => 'on-hold',
                             'booking' => 'approved',
@@ -715,6 +1889,18 @@ This message does not have an option for responding. If you need additional info
                             'order'   => 'completed',
                             'booking' => 'approved',
                             'payment' => 'paid',
+                            'update'  => false,
+                        ],
+                        [
+                            'order'   => 'cancelled',
+                            'booking' => 'canceled',
+                            'payment' => 'pending',
+                            'update'  => false,
+                        ],
+                        [
+                            'order'   => 'failed',
+                            'booking' => 'canceled',
+                            'payment' => 'pending',
                             'update'  => false,
                         ],
                     ],
@@ -771,17 +1957,41 @@ This message does not have an option for responding. If you need additional info
                     'cart'          => '',
                 ],
             ],
-            'square'                     => [
+            'square'               => [
                 'enabled'            => false,
                 'locationId'         => '',
                 'accessToken'        => '',
-                'testMode'           => AMELIA_MIDDLEWARE_IS_SANDBOX,
+                'testMode'           => false,
+                'clientLiveId'       => 'sq0idp-TtDyGP_2RfKYpFzrDqs0lw',
+                'clientTestId'       => 'sandbox-sq0idb-Wxnxasx1NMG_ZyvM--JV4Q',
+                'countryCode'        => '',
                 'description'        => [
                     'enabled'     => false,
                     'appointment' => '',
                     'package'     => '',
                     'event'       => '',
                     'cart'        => ''
+                ],
+                'metaData'           => [
+                    'enabled'     => false,
+                    'appointment' => null,
+                    'package'     => null,
+                    'event'       => null,
+                    'cart'        => null
+                ],
+            ],
+            'barion' => [
+                'enabled'         => false,
+                'sandboxMode'     => false,
+                'livePOSKey'      => '',
+                'sandboxPOSKey'   => '',
+                'payeeEmail'      => '',
+                'description'     => [
+                    'enabled'     => false,
+                    'appointment' => '',
+                    'package'     => '',
+                    'event'       => '',
+                    'cart'        => '',
                 ],
                 'metaData'           => [
                     'enabled'     => false,
@@ -811,6 +2021,7 @@ This message does not have an option for responding. If you need additional info
             'payments',
             [
                 ['stripe', 'connect'],
+                ['stripe', 'connect', 'capabilities'],
                 ['stripe', 'description'],
                 ['stripe', 'description', 'package'],
                 ['stripe', 'description', 'cart'],
@@ -853,6 +2064,10 @@ This message does not have an option for responding. If you need additional info
                 ['square', 'locationId'],
                 ['square', 'accessToken'],
                 ['square', 'testMode'],
+                ['square', 'clientLiveId'],
+                ['square', 'clientTestId'],
+                ['square', 'countryCode'],
+                ['barion', 'metaData'],
             ],
             $settings
         );
@@ -880,7 +2095,9 @@ This message does not have an option for responding. If you need additional info
             'showAmeliaSurvey'              => true,
             'stash'                         => false,
             'responseErrorAsConflict'       => $savedSettings ? false : true,
+            'hideTipsAndSuggestions'        => false,
             'hideUnavailableFeatures'       => false,
+            'licence'                       => '',
             'disableUrlParams'              => $savedSettings ? false : true,
             'enableThriveItems'             => false,
             'customUrl'                     => [
@@ -902,535 +2119,6 @@ This message does not have an option for responding. If you need additional info
         $savedSettings['isNewInstallation'] = $isNewInstallation;
 
         self::initSettings('activation', $savedSettings, true);
-    }
-
-    /**
-     * Init Customization Settings
-     *
-     * @throws Exception
-     */
-    private static function initCustomizationSettings()
-    {
-        $settingsService = new SettingsService(new SettingsStorage());
-
-        $settings = $settingsService->getCategorySettings('customization');
-        unset($settings['hash']);
-
-        $lessParserService = new LessParserService(
-            AMELIA_PATH . '/assets/less/frontend/amelia-booking.less',
-            AMELIA_UPLOADS_PATH . '/amelia/css',
-            $settingsService
-        );
-
-        if (!$settings) {
-            $settings = [
-                'primaryColor'                => '#1A84EE',
-                'primaryGradient1'            => '#1A84EE',
-                'primaryGradient2'            => '#0454A2',
-                'textColor'                   => '#354052',
-                'textColorOnBackground'       => '#FFFFFF',
-                'font'                        => 'Amelia Roboto',
-                'fontUrl'                     => '',
-                'customFontFamily'            => '',
-                'customFontSelected'          => 'unselected',
-                'useGenerated'                => false,
-            ];
-        }
-
-        if (!isset($settings['fontUrl'])) {
-            $settings = array_merge(
-                $settings,
-                [
-                    'fontUrl' => ''
-                ]
-            );
-        }
-
-        if (!isset($settings['customFontFamily'])) {
-            $settings = array_merge(
-                $settings,
-                [
-                    'customFontFamily' => ''
-                ]
-            );
-        }
-
-        if (!isset($settings['customFontSelected'])) {
-            $settings = array_merge(
-                $settings,
-                [
-                    'customFontSelected' => 'unselected'
-                ]
-            );
-        }
-
-        if (!isset($settings['useGlobalColors'])) {
-            $settings = array_merge(
-                $settings,
-                [
-                    'useGlobalColors' => [
-                        'stepByStepForm'    => false,
-                        'catalogForm'       => false,
-                        'eventListForm'     => false,
-                        'eventCalendarForm' => false,
-                    ]
-                ]
-            );
-        }
-
-        if (!isset($settings['globalColors'])) {
-            $settings = array_merge(
-                $settings,
-                [
-                    'globalColors' => [
-                        'primaryColor'          => $settings['primaryColor'],
-                        'formBackgroundColor'   => '#FFFFFF',
-                        'formTextColor'         => $settings['textColor'],
-                        'formInputColor'        => '#FFFFFF',
-                        'formInputTextColor'    => $settings['textColor'],
-                        'formDropdownColor'     => '#FFFFFF',
-                        'formDropdownTextColor' => $settings['textColor'],
-                        'formGradientColor1'    => $settings['primaryGradient1'],
-                        'formGradientColor2'    => $settings['primaryGradient2'],
-                        'formGradientAngle'     => 135,
-                        'formImageColor'        => $settings['primaryColor'],
-                        'textColorOnBackground' => $settings['textColorOnBackground'],
-                    ]
-                ]
-            );
-        }
-
-        if (empty($settings['primaryColor'])) {
-            $settings['primaryColor']= 'rgba(255,255,255,0)';
-            $settings['globalColors']['primaryColor'] = 'rgba(255,255,255,0)';
-            $settings['globalColors']['formImageColor'] = 'rgba(255,255,255,0)';
-        }
-
-        if (empty($settings['primaryGradient1'])) {
-            $settings['primaryGradient1']= 'rgba(255,255,255,0)';
-            $settings['globalColors']['formGradientColor1'] = 'rgba(255,255,255,0)';
-        }
-
-        if (empty($settings['primaryGradient2'])) {
-            $settings['primaryGradient2']= 'rgba(255,255,255,0)';
-            $settings['globalColors']['formGradientColor2'] = 'rgba(255,255,255,0)';
-        }
-
-        if (empty($settings['textColor'])) {
-            $settings['textColor']= 'rgba(255,255,255,0)';
-            $settings['globalColors']['formTextColor'] = 'rgba(255,255,255,0)';
-            $settings['globalColors']['formInputTextColor'] = 'rgba(255,255,255,0)';
-            $settings['globalColors']['formDropdownTextColor'] = 'rgba(255,255,255,0)';
-        }
-
-        if (empty($settings['textColorOnBackground'])) {
-            $settings['textColorOnBackground']= 'rgba(255,255,255,0)';
-            $settings['globalColors']['textColorOnBackground'] = 'rgba(255,255,255,0)';
-        }
-
-        $globalColors = $settings['globalColors'];
-
-        $settingsForm = [];
-
-        if (isset($settings['forms']['stepByStepForm'])) {
-            $useGlobalSbs = $settings['useGlobalColors']['stepByStepForm'];
-            $colorSbsSsf  = $settings['forms']['stepByStepForm']['selectServiceForm']['globalSettings'];
-            $colorSbsCf   = $settings['forms']['stepByStepForm']['calendarDateTimeForm']['globalSettings'];
-            $colorSbsRsf  = $settings['forms']['stepByStepForm']['recurringSetupForm']['globalSettings'];
-            $colorSbsRdf  = $settings['forms']['stepByStepForm']['recurringDatesForm']['globalSettings'];
-            $colorSbsCaf  = $settings['forms']['stepByStepForm']['confirmBookingForm']['appointment']['globalSettings'];
-            $colorSbsSpf  = $settings['forms']['stepByStepForm']['selectPackageForm']['globalSettings'];
-            $colorSbsPif  = $settings['forms']['stepByStepForm']['packageInfoForm']['globalSettings'];
-            $colorSbsPsf  = $settings['forms']['stepByStepForm']['packageSetupForm']['globalSettings'];
-            $colorSbsPlf  = $settings['forms']['stepByStepForm']['packageListForm']['globalSettings'];
-            $colorSbsCpf  = $settings['forms']['stepByStepForm']['confirmBookingForm']['package']['globalSettings'];
-            $colorSbsCoa = $settings['forms']['stepByStepForm']['congratulationsForm']['appointment']['globalSettings'];
-            $colorSbsCop  = $settings['forms']['stepByStepForm']['congratulationsForm']['package']['globalSettings'];
-            $settingsForm = array_merge(
-                $settingsForm,
-                [
-                    'sbs-ssf-bgr-color'           => $useGlobalSbs ? $globalColors['formBackgroundColor'] :$colorSbsSsf['formBackgroundColor'],
-                    'sbs-ssf-text-color'          => $useGlobalSbs ? $globalColors['formTextColor'] : $colorSbsSsf['formTextColor'],
-                    'sbs-ssf-input-color'         => $useGlobalSbs ? $globalColors['formInputColor'] : $colorSbsSsf['formInputColor'],
-                    'sbs-ssf-input-text-color'    => $useGlobalSbs ? $globalColors['formInputTextColor'] : $colorSbsSsf['formInputTextColor'],
-                    'sbs-ssf-dropdown-color'      => $useGlobalSbs ? $globalColors['formDropdownColor'] : $colorSbsSsf['formDropdownColor'],
-                    'sbs-ssf-dropdown-text-color' => $useGlobalSbs ? $globalColors['formDropdownTextColor'] : $colorSbsSsf['formDropdownTextColor'],
-                    'sbs-cf-gradient1'            => $useGlobalSbs ? $globalColors['formGradientColor1'] : $colorSbsCf['formGradientColor1'],
-                    'sbs-cf-gradient2'            => $useGlobalSbs ? $globalColors['formGradientColor2'] : $colorSbsCf['formGradientColor2'],
-                    'sbs-cf-gradient-angle'       => $useGlobalSbs ? $globalColors['formGradientAngle'].'deg' : $colorSbsCf['formGradientAngle'].'deg',
-                    'sbs-cf-text-color'           => $useGlobalSbs ? $globalColors['textColorOnBackground'] : $colorSbsCf['formTextColor'],
-                    'sbs-rsf-gradient1'           => $useGlobalSbs ? $globalColors['formGradientColor1'] : $colorSbsRsf['formGradientColor1'],
-                    'sbs-rsf-gradient2'           => $useGlobalSbs ? $globalColors['formGradientColor2'] : $colorSbsRsf['formGradientColor2'],
-                    'sbs-rsf-gradient-angle'      => $useGlobalSbs ? $globalColors['formGradientAngle'].'deg' : $colorSbsRsf['formGradientAngle'].'deg',
-                    'sbs-rsf-text-color'          => $useGlobalSbs ? $globalColors['textColorOnBackground'] : $colorSbsRsf['formTextColor'],
-                    'sbs-rsf-input-color'         => $useGlobalSbs ? $globalColors['formInputColor'] : $colorSbsRsf['formInputColor'],
-                    'sbs-rsf-input-text-color'    => $useGlobalSbs ? $globalColors['formInputTextColor'] : $colorSbsRsf['formInputTextColor'],
-                    'sbs-rsf-dropdown-color'      => $useGlobalSbs ? $globalColors['formDropdownColor'] : $colorSbsRsf['formDropdownColor'],
-                    'sbs-rsf-dropdown-text-color' => $useGlobalSbs ? $globalColors['formDropdownTextColor'] : $colorSbsRsf['formDropdownTextColor'],
-                    'sbs-rdf-bgr-color'           => $useGlobalSbs ? $globalColors['formBackgroundColor'] : $colorSbsRdf['formBackgroundColor'],
-                    'sbs-rdf-text-color'          => $useGlobalSbs ? $globalColors['formTextColor'] : $colorSbsRdf['formTextColor'],
-                    'sbs-rdf-input-color'         => $useGlobalSbs ? $globalColors['formInputColor'] : $colorSbsRdf['formInputColor'],
-                    'sbs-rdf-input-text-color'    => $useGlobalSbs ? $globalColors['formInputTextColor'] : $colorSbsRdf['formInputTextColor'],
-                    'sbs-rdf-dropdown-color'      => $useGlobalSbs ? $globalColors['formDropdownColor'] : $colorSbsRdf['formDropdownColor'],
-                    'sbs-rdf-dropdown-text-color' => $useGlobalSbs ? $globalColors['formDropdownTextColor'] : $colorSbsRdf['formDropdownTextColor'],
-                    'sbs-caf-bgr-color'           => $useGlobalSbs ? $globalColors['formBackgroundColor'] : $colorSbsCaf['formBackgroundColor'],
-                    'sbs-caf-text-color'          => $useGlobalSbs ? $globalColors['formTextColor'] : $colorSbsCaf['formTextColor'],
-                    'sbs-caf-input-color'         => $useGlobalSbs ? $globalColors['formInputColor'] : $colorSbsCaf['formInputColor'],
-                    'sbs-caf-input-text-color'    => $useGlobalSbs ? $globalColors['formInputTextColor'] : $colorSbsCaf['formInputTextColor'],
-                    'sbs-caf-dropdown-color'      => $useGlobalSbs ? $globalColors['formDropdownColor'] : $colorSbsCaf['formDropdownColor'],
-                    'sbs-caf-dropdown-text-color' => $useGlobalSbs ? $globalColors['formDropdownTextColor'] : $colorSbsCaf['formDropdownTextColor'],
-                    'sbs-spf-bgr-color'           => $useGlobalSbs ? $globalColors['formBackgroundColor'] : $colorSbsSpf['formBackgroundColor'],
-                    'sbs-spf-text-color'          => $useGlobalSbs ? $globalColors['formTextColor'] : $colorSbsSpf['formTextColor'],
-                    'sbs-spf-input-color'         => $useGlobalSbs ? $globalColors['formInputColor'] : $colorSbsSpf['formInputColor'],
-                    'sbs-spf-input-text-color'    => $useGlobalSbs ? $globalColors['formInputTextColor'] : $colorSbsSpf['formInputTextColor'],
-                    'sbs-spf-dropdown-color'      => $useGlobalSbs ? $globalColors['formDropdownColor'] : $colorSbsSpf['formDropdownColor'],
-                    'sbs-spf-dropdown-text-color' => $useGlobalSbs ? $globalColors['formDropdownTextColor'] : $colorSbsSpf['formDropdownTextColor'],
-                    'sbs-pif-bgr-color'           => $useGlobalSbs ? $globalColors['formBackgroundColor'] : $colorSbsPif['formBackgroundColor'],
-                    'sbs-pif-text-color'          => $useGlobalSbs ? $globalColors['formTextColor'] : $colorSbsPif['formTextColor'],
-                    'sbs-psf-gradient1'           => $useGlobalSbs ? $globalColors['formGradientColor1'] : $colorSbsPsf['formGradientColor1'],
-                    'sbs-psf-gradient2'           => $useGlobalSbs ? $globalColors['formGradientColor2'] : $colorSbsPsf['formGradientColor2'],
-                    'sbs-psf-gradient-angle'      => $useGlobalSbs ? $globalColors['formGradientAngle'].'deg' : $colorSbsPsf['formGradientAngle'].'deg',
-                    'sbs-psf-text-color'          => $useGlobalSbs ? $globalColors['textColorOnBackground'] : $colorSbsPsf['formTextColor'],
-                    'sbs-psf-input-color'         => $useGlobalSbs ? $globalColors['formInputColor'] : $colorSbsPsf['formInputColor'],
-                    'sbs-psf-input-text-color'    => $useGlobalSbs ? $globalColors['formInputTextColor'] : $colorSbsPsf['formInputTextColor'],
-                    'sbs-psf-dropdown-color'      => $useGlobalSbs ? $globalColors['formDropdownColor'] : $colorSbsPsf['formDropdownColor'],
-                    'sbs-psf-dropdown-text-color' => $useGlobalSbs ? $globalColors['formDropdownTextColor'] : $colorSbsPsf['formDropdownTextColor'],
-                    'sbs-plf-bgr-color'           => $useGlobalSbs ? $globalColors['formBackgroundColor'] : $colorSbsPlf['formBackgroundColor'],
-                    'sbs-plf-text-color'          => $useGlobalSbs ? $globalColors['formTextColor'] : $colorSbsPlf['formTextColor'],
-                    'sbs-cpf-bgr-color'           => $useGlobalSbs ? $globalColors['formBackgroundColor'] : $colorSbsCpf['formBackgroundColor'],
-                    'sbs-cpf-text-color'          => $useGlobalSbs ? $globalColors['formTextColor'] : $colorSbsCpf['formTextColor'],
-                    'sbs-cpf-input-color'         => $useGlobalSbs ? $globalColors['formInputColor'] : $colorSbsCpf['formInputColor'],
-                    'sbs-cpf-input-text-color'    => $useGlobalSbs ? $globalColors['formInputTextColor'] : $colorSbsCpf['formInputTextColor'],
-                    'sbs-cpf-dropdown-color'      => $useGlobalSbs ? $globalColors['formDropdownColor'] : $colorSbsCpf['formDropdownColor'],
-                    'sbs-cpf-dropdown-text-color' => $useGlobalSbs ? $globalColors['formDropdownTextColor'] : $colorSbsCpf['formDropdownTextColor'],
-                    'sbs-coa-bgr-color'           => $useGlobalSbs ? $globalColors['formBackgroundColor'] : $colorSbsCoa['formBackgroundColor'],
-                    'sbs-coa-text-color'          => $useGlobalSbs ? $globalColors['formTextColor'] : $colorSbsCoa['formTextColor'],
-                    'sbs-coa-input-color'         => $useGlobalSbs ? $globalColors['formInputColor'] : $colorSbsCoa['formInputColor'],
-                    'sbs-coa-input-text-color'    => $useGlobalSbs ? $globalColors['formInputTextColor'] : $colorSbsCoa['formInputTextColor'],
-                    'sbs-coa-dropdown-color'      => $useGlobalSbs ? $globalColors['formDropdownColor'] : $colorSbsCoa['formDropdownColor'],
-                    'sbs-coa-dropdown-text-color' => $useGlobalSbs ? $globalColors['formDropdownTextColor'] : $colorSbsCoa['formDropdownTextColor'],
-                    'sbs-cop-bgr-color'           => $useGlobalSbs ? $globalColors['formBackgroundColor'] : $colorSbsCop['formBackgroundColor'],
-                    'sbs-cop-text-color'          => $useGlobalSbs ? $globalColors['formTextColor'] : $colorSbsCop['formTextColor'],
-                    'sbs-cop-input-color'         => $useGlobalSbs ? $globalColors['formInputColor'] : $colorSbsCop['formInputColor'],
-                    'sbs-cop-input-text-color'    => $useGlobalSbs ? $globalColors['formInputTextColor'] : $colorSbsCop['formInputTextColor'],
-                    'sbs-cop-dropdown-color'      => $useGlobalSbs ? $globalColors['formDropdownColor'] : $colorSbsCop['formDropdownColor'],
-                    'sbs-cop-dropdown-text-color' => $useGlobalSbs ? $globalColors['formDropdownTextColor'] : $colorSbsCop['formDropdownTextColor'],
-                ]
-            );
-        } else {
-            $settingsForm = array_merge(
-                $settingsForm,
-                [
-                    'sbs-ssf-bgr-color'           => $globalColors['formBackgroundColor'],
-                    'sbs-ssf-text-color'          => $globalColors['formTextColor'],
-                    'sbs-ssf-input-color'         => $globalColors['formInputColor'],
-                    'sbs-ssf-input-text-color'    => $globalColors['formInputTextColor'],
-                    'sbs-ssf-dropdown-color'      => $globalColors['formDropdownColor'],
-                    'sbs-ssf-dropdown-text-color' => $globalColors['formDropdownTextColor'],
-                    'sbs-cf-gradient1'            => $globalColors['formGradientColor1'],
-                    'sbs-cf-gradient2'            => $globalColors['formGradientColor2'],
-                    'sbs-cf-gradient-angle'       => $globalColors['formGradientAngle'].'deg',
-                    'sbs-cf-text-color'           => $globalColors['textColorOnBackground'],
-                    'sbs-rsf-gradient1'           => $globalColors['formGradientColor1'],
-                    'sbs-rsf-gradient2'           => $globalColors['formGradientColor2'],
-                    'sbs-rsf-gradient-angle'      => $globalColors['formGradientAngle'].'deg',
-                    'sbs-rsf-text-color'          => $globalColors['textColorOnBackground'],
-                    'sbs-rsf-input-color'         => $globalColors['formInputColor'],
-                    'sbs-rsf-input-text-color'    => $globalColors['formInputTextColor'],
-                    'sbs-rsf-dropdown-color'      => $globalColors['formDropdownColor'],
-                    'sbs-rsf-dropdown-text-color' => $globalColors['formDropdownTextColor'],
-                    'sbs-rdf-bgr-color'           => $globalColors['formBackgroundColor'],
-                    'sbs-rdf-text-color'          => $globalColors['formTextColor'],
-                    'sbs-rdf-input-color'         => $globalColors['formInputColor'],
-                    'sbs-rdf-input-text-color'    => $globalColors['formInputTextColor'],
-                    'sbs-rdf-dropdown-color'      => $globalColors['formDropdownColor'],
-                    'sbs-rdf-dropdown-text-color' => $globalColors['formDropdownTextColor'],
-                    'sbs-caf-bgr-color'           => $globalColors['formBackgroundColor'],
-                    'sbs-caf-text-color'          => $globalColors['formTextColor'],
-                    'sbs-caf-input-color'         => $globalColors['formInputColor'],
-                    'sbs-caf-input-text-color'    => $globalColors['formInputTextColor'],
-                    'sbs-caf-dropdown-color'      => $globalColors['formDropdownColor'],
-                    'sbs-caf-dropdown-text-color' => $globalColors['formDropdownTextColor'],
-                    'sbs-spf-bgr-color'           => $globalColors['formBackgroundColor'],
-                    'sbs-spf-text-color'          => $globalColors['formTextColor'],
-                    'sbs-spf-input-color'         => $globalColors['formInputColor'],
-                    'sbs-spf-input-text-color'    => $globalColors['formInputTextColor'],
-                    'sbs-spf-dropdown-color'      => $globalColors['formDropdownColor'],
-                    'sbs-spf-dropdown-text-color' => $globalColors['formDropdownTextColor'],
-                    'sbs-pif-bgr-color'           => $globalColors['formBackgroundColor'],
-                    'sbs-pif-text-color'          => $globalColors['formTextColor'],
-                    'sbs-psf-gradient1'           => $globalColors['formGradientColor1'],
-                    'sbs-psf-gradient2'           => $globalColors['formGradientColor2'],
-                    'sbs-psf-gradient-angle'      => $globalColors['formGradientAngle'].'deg',
-                    'sbs-psf-text-color'          => $globalColors['textColorOnBackground'],
-                    'sbs-psf-input-color'         => $globalColors['formInputColor'],
-                    'sbs-psf-input-text-color'    => $globalColors['formInputTextColor'],
-                    'sbs-psf-dropdown-color'      => $globalColors['formDropdownColor'],
-                    'sbs-psf-dropdown-text-color' => $globalColors['formDropdownTextColor'],
-                    'sbs-plf-bgr-color'           => $globalColors['formBackgroundColor'],
-                    'sbs-plf-text-color'          => $globalColors['formTextColor'],
-                    'sbs-cpf-bgr-color'           => $globalColors['formBackgroundColor'],
-                    'sbs-cpf-text-color'          => $globalColors['formTextColor'],
-                    'sbs-cpf-input-color'         => $globalColors['formInputColor'],
-                    'sbs-cpf-input-text-color'    => $globalColors['formInputTextColor'],
-                    'sbs-cpf-dropdown-color'      => $globalColors['formDropdownColor'],
-                    'sbs-cpf-dropdown-text-color' => $globalColors['formDropdownTextColor'],
-                    'sbs-coa-bgr-color'           => $globalColors['formBackgroundColor'],
-                    'sbs-coa-text-color'          => $globalColors['formTextColor'],
-                    'sbs-coa-input-color'         => $globalColors['formInputColor'],
-                    'sbs-coa-input-text-color'    => $globalColors['formInputTextColor'],
-                    'sbs-coa-dropdown-color'      => $globalColors['formDropdownColor'],
-                    'sbs-coa-dropdown-text-color' => $globalColors['formDropdownTextColor'],
-                    'sbs-cop-bgr-color'           => $globalColors['formBackgroundColor'],
-                    'sbs-cop-text-color'          => $globalColors['formTextColor'],
-                    'sbs-cop-input-color'         => $globalColors['formInputColor'],
-                    'sbs-cop-input-text-color'    => $globalColors['formInputTextColor'],
-                    'sbs-cop-dropdown-color'      => $globalColors['formDropdownColor'],
-                    'sbs-cop-dropdown-text-color' => $globalColors['formDropdownTextColor'],
-                ]
-            );
-        }
-
-        if (isset($settings['forms']['catalogForm'])) {
-            $useGlobalCf = $settings['useGlobalColors']['catalogForm'];
-            $colorCfSsf  = $settings['forms']['catalogForm']['selectServiceForm']['globalSettings'];
-            $colorCfCf   = $settings['forms']['catalogForm']['calendarDateTimeForm']['globalSettings'];
-            $colorCfRsf  = $settings['forms']['catalogForm']['recurringSetupForm']['globalSettings'];
-            $colorCfRdf  = $settings['forms']['catalogForm']['recurringDatesForm']['globalSettings'];
-            $colorCfCaf  = $settings['forms']['catalogForm']['confirmBookingForm']['appointment']['globalSettings'];
-            $colorCfPsf  = $settings['forms']['catalogForm']['packageSetupForm']['globalSettings'];
-            $colorCfPlf  = $settings['forms']['catalogForm']['packageListForm']['globalSettings'];
-            $colorCfCpf  = $settings['forms']['catalogForm']['confirmBookingForm']['package']['globalSettings'];
-            $colorCfCoa  = $settings['forms']['catalogForm']['congratulationsForm']['appointment']['globalSettings'];
-            $colorCfCop  = $settings['forms']['catalogForm']['congratulationsForm']['package']['globalSettings'];
-            $settingsForm = array_merge(
-                $settingsForm,
-                [
-                    'cf-ssf-bgr-color'            => $useGlobalCf ? $globalColors['formBackgroundColor'] : $colorCfSsf['formBackgroundColor'],
-                    'cf-ssf-text-color'           => $useGlobalCf ? $globalColors['formTextColor'] : $colorCfSsf['formTextColor'],
-                    'cf-ssf-input-color'          => $useGlobalCf ? $globalColors['formInputColor'] : $colorCfSsf['formInputColor'],
-                    'cf-ssf-input-text-color'     => $useGlobalCf ? $globalColors['formInputTextColor'] : $colorCfSsf['formInputTextColor'],
-                    'cf-ssf-dropdown-color'       => $useGlobalCf ? $globalColors['formDropdownColor'] : $colorCfSsf['formDropdownColor'],
-                    'cf-ssf-dropdown-text-color'  => $useGlobalCf ? $globalColors['formDropdownTextColor'] : $colorCfSsf['formDropdownTextColor'],
-                    'cf-cf-gradient1'             => $useGlobalCf ? $globalColors['formGradientColor1'] : $colorCfCf['formGradientColor1'],
-                    'cf-cf-gradient2'             => $useGlobalCf ? $globalColors['formGradientColor2'] : $colorCfCf['formGradientColor2'],
-                    'cf-cf-gradient-angle'        => $useGlobalCf ? $globalColors['formGradientAngle'].'deg' : $colorCfCf['formGradientAngle'].'deg',
-                    'cf-cf-text-color'            => $useGlobalCf ? $globalColors['textColorOnBackground'] : $colorCfCf['formTextColor'],
-                    'cf-rsf-gradient1'            => $useGlobalCf ? $globalColors['formGradientColor1'] : $colorCfRsf['formGradientColor1'],
-                    'cf-rsf-gradient2'            => $useGlobalCf ? $globalColors['formGradientColor2'] : $colorCfRsf['formGradientColor2'],
-                    'cf-rsf-gradient-angle'       => $useGlobalCf ? $globalColors['formGradientAngle'].'deg' : $colorCfRsf['formGradientAngle'].'deg',
-                    'cf-rsf-text-color'           => $useGlobalCf ? $globalColors['formTextColor'] : $colorCfRsf['formTextColor'],
-                    'cf-rsf-input-color'          => $useGlobalCf ? $globalColors['formInputColor'] : $colorCfRsf['formInputColor'],
-                    'cf-rsf-input-text-color'     => $useGlobalCf ? $globalColors['formInputTextColor'] : $colorCfRsf['formInputTextColor'],
-                    'cf-rsf-dropdown-color'       => $useGlobalCf ? $globalColors['formDropdownColor'] : $colorCfRsf['formDropdownColor'],
-                    'cf-rsf-dropdown-text-color'  => $useGlobalCf ? $globalColors['formDropdownTextColor'] : $colorCfRsf['formDropdownTextColor'],
-                    'cf-rdf-bgr-color'            => $useGlobalCf ? $globalColors['formBackgroundColor'] : $colorCfRdf['formBackgroundColor'],
-                    'cf-rdf-text-color'           => $useGlobalCf ? $globalColors['formTextColor'] : $colorCfRdf['formTextColor'],
-                    'cf-rdf-input-color'          => $useGlobalCf ? $globalColors['formInputColor'] : $colorCfRdf['formInputColor'],
-                    'cf-rdf-input-text-color'     => $useGlobalCf ? $globalColors['formInputTextColor'] : $colorCfRdf['formInputTextColor'],
-                    'cf-rdf-dropdown-color'       => $useGlobalCf ? $globalColors['formDropdownColor'] : $colorCfRdf['formDropdownColor'],
-                    'cf-rdf-dropdown-text-color'  => $useGlobalCf ? $globalColors['formDropdownTextColor'] : $colorCfRdf['formDropdownTextColor'],
-                    'cf-caf-bgr-color'            => $useGlobalCf ? $globalColors['formBackgroundColor'] : $colorCfCaf['formBackgroundColor'],
-                    'cf-caf-text-color'           => $useGlobalCf ? $globalColors['formTextColor'] : $colorCfCaf['formTextColor'],
-                    'cf-caf-input-color'          => $useGlobalCf ? $globalColors['formInputColor'] : $colorCfCaf['formInputColor'],
-                    'cf-caf-input-text-color'     => $useGlobalCf ? $globalColors['formInputTextColor'] : $colorCfCaf['formInputTextColor'],
-                    'cf-caf-dropdown-color'       => $useGlobalCf ? $globalColors['formDropdownColor'] : $colorCfCaf['formDropdownColor'],
-                    'cf-caf-dropdown-text-color'  => $useGlobalCf ? $globalColors['formDropdownTextColor'] : $colorCfCaf['formDropdownTextColor'],
-                    'cf-psf-gradient1'            => $useGlobalCf ? $globalColors['formGradientColor1'] : $colorCfPsf['formGradientColor1'],
-                    'cf-psf-gradient2'            => $useGlobalCf ? $globalColors['formGradientColor2'] : $colorCfPsf['formGradientColor2'],
-                    'cf-psf-gradient-angle'       => $useGlobalCf ? $globalColors['formGradientAngle'].'deg' : $colorCfPsf['formGradientAngle'].'deg',
-                    'cf-psf-text-color'           => $useGlobalCf ? $globalColors['textColorOnBackground'] : $colorCfPsf['formTextColor'],
-                    'cf-psf-input-color'          => $useGlobalCf ? $globalColors['formInputColor'] : $colorCfPsf['formInputColor'],
-                    'cf-psf-input-text-color'     => $useGlobalCf ? $globalColors['formInputTextColor'] : $colorCfPsf['formInputTextColor'],
-                    'cf-psf-dropdown-color'       => $useGlobalCf ? $globalColors['formDropdownColor'] : $colorCfPsf['formDropdownColor'],
-                    'cf-psf-dropdown-text-color'  => $useGlobalCf ? $globalColors['formDropdownTextColor'] : $colorCfPsf['formDropdownTextColor'],
-                    'cf-plf-bgr-color'            => $useGlobalCf ? $globalColors['formBackgroundColor'] : $colorCfPlf['formBackgroundColor'],
-                    'cf-plf-text-color'           => $useGlobalCf ? $globalColors['formTextColor'] : $colorCfPlf['formTextColor'],
-                    'cf-cpf-bgr-color'            => $useGlobalCf ? $globalColors['formBackgroundColor'] : $colorCfCpf['formBackgroundColor'],
-                    'cf-cpf-text-color'           => $useGlobalCf ? $globalColors['formTextColor'] : $colorCfCpf['formTextColor'],
-                    'cf-cpf-input-color'          => $useGlobalCf ? $globalColors['formInputColor'] : $colorCfCpf['formInputColor'],
-                    'cf-cpf-input-text-color'     => $useGlobalCf ? $globalColors['formInputTextColor'] : $colorCfCpf['formInputTextColor'],
-                    'cf-cpf-dropdown-color'       => $useGlobalCf ? $globalColors['formDropdownColor'] : $colorCfCpf['formDropdownColor'],
-                    'cf-cpf-dropdown-text-color'  => $useGlobalCf ? $globalColors['formDropdownTextColor'] : $colorCfCpf['formDropdownTextColor'],
-                    'cf-coa-bgr-color'            => $useGlobalCf ? $globalColors['formBackgroundColor'] : $colorCfCoa['formBackgroundColor'],
-                    'cf-coa-text-color'           => $useGlobalCf ? $globalColors['formTextColor'] : $colorCfCoa['formTextColor'],
-                    'cf-coa-input-color'          => $useGlobalCf ? $globalColors['formInputColor'] : $colorCfCoa['formInputColor'],
-                    'cf-coa-input-text-color'     => $useGlobalCf ? $globalColors['formInputTextColor'] : $colorCfCoa['formInputTextColor'],
-                    'cf-coa-dropdown-color'       => $useGlobalCf ? $globalColors['formDropdownColor'] : $colorCfCoa['formDropdownColor'],
-                    'cf-coa-dropdown-text-color'  => $useGlobalCf ? $globalColors['formDropdownTextColor'] : $colorCfCoa['formDropdownTextColor'],
-                    'cf-cop-bgr-color'            => $useGlobalCf ? $globalColors['formBackgroundColor'] : $colorCfCop['formBackgroundColor'],
-                    'cf-cop-text-color'           => $useGlobalCf ? $globalColors['formTextColor'] : $colorCfCop['formTextColor'],
-                    'cf-cop-input-color'          => $useGlobalCf ? $globalColors['formInputColor'] : $colorCfCop['formInputColor'],
-                    'cf-cop-input-text-color'     => $useGlobalCf ? $globalColors['formInputTextColor'] : $colorCfCop['formInputTextColor'],
-                    'cf-cop-dropdown-color'       => $useGlobalCf ? $globalColors['formDropdownColor'] : $colorCfCop['formDropdownColor'],
-                    'cf-cop-dropdown-text-color'  => $useGlobalCf ? $globalColors['formDropdownTextColor'] : $colorCfCop['formDropdownTextColor'],
-                ]
-            );
-        } else {
-            $settingsForm = array_merge(
-                $settingsForm,
-                [
-                    'cf-ssf-bgr-color'            => $globalColors['formBackgroundColor'],
-                    'cf-ssf-text-color'           => $globalColors['formTextColor'],
-                    'cf-ssf-input-color'          => $globalColors['formInputColor'],
-                    'cf-ssf-input-text-color'     => $globalColors['formInputTextColor'],
-                    'cf-ssf-dropdown-color'       => $globalColors['formDropdownColor'],
-                    'cf-ssf-dropdown-text-color'  => $globalColors['formDropdownTextColor'],
-                    'cf-cf-gradient1'             => $globalColors['formGradientColor1'],
-                    'cf-cf-gradient2'             => $globalColors['formGradientColor2'],
-                    'cf-cf-gradient-angle'        => $globalColors['formGradientAngle'].'deg',
-                    'cf-cf-text-color'            => $globalColors['textColorOnBackground'],
-                    'cf-rsf-gradient1'            => $globalColors['formGradientColor1'],
-                    'cf-rsf-gradient2'            => $globalColors['formGradientColor2'],
-                    'cf-rsf-gradient-angle'       => $globalColors['formGradientAngle'].'deg',
-                    'cf-rsf-text-color'           => $globalColors['textColorOnBackground'],
-                    'cf-rsf-input-color'          => $globalColors['formInputColor'],
-                    'cf-rsf-input-text-color'     => $globalColors['formInputTextColor'],
-                    'cf-rsf-dropdown-color'       => $globalColors['formDropdownColor'],
-                    'cf-rsf-dropdown-text-color'  => $globalColors['formDropdownTextColor'],
-                    'cf-rdf-bgr-color'            => $globalColors['formBackgroundColor'],
-                    'cf-rdf-text-color'           => $globalColors['formTextColor'],
-                    'cf-rdf-input-color'          => $globalColors['formInputColor'],
-                    'cf-rdf-input-text-color'     => $globalColors['formInputTextColor'],
-                    'cf-rdf-dropdown-color'       => $globalColors['formDropdownColor'],
-                    'cf-rdf-dropdown-text-color'  => $globalColors['formDropdownTextColor'],
-                    'cf-caf-bgr-color'            => $globalColors['formBackgroundColor'],
-                    'cf-caf-text-color'           => $globalColors['formTextColor'],
-                    'cf-caf-input-color'          => $globalColors['formInputColor'],
-                    'cf-caf-input-text-color'     => $globalColors['formInputTextColor'],
-                    'cf-caf-dropdown-color'       => $globalColors['formDropdownColor'],
-                    'cf-caf-dropdown-text-color'  => $globalColors['formDropdownTextColor'],
-                    'cf-psf-gradient1'            => $globalColors['formGradientColor1'],
-                    'cf-psf-gradient2'            => $globalColors['formGradientColor2'],
-                    'cf-psf-gradient-angle'       => $globalColors['formGradientAngle'].'deg',
-                    'cf-psf-text-color'           => $globalColors['textColorOnBackground'],
-                    'cf-psf-input-color'          => $globalColors['formInputColor'],
-                    'cf-psf-input-text-color'     => $globalColors['formInputTextColor'],
-                    'cf-psf-dropdown-color'       => $globalColors['formDropdownColor'],
-                    'cf-psf-dropdown-text-color'  => $globalColors['formDropdownTextColor'],
-                    'cf-plf-bgr-color'            => $globalColors['formBackgroundColor'],
-                    'cf-plf-text-color'           => $globalColors['formTextColor'],
-                    'cf-cpf-bgr-color'            => $globalColors['formBackgroundColor'],
-                    'cf-cpf-text-color'           => $globalColors['formTextColor'],
-                    'cf-cpf-input-color'          => $globalColors['formInputColor'],
-                    'cf-cpf-input-text-color'     => $globalColors['formInputTextColor'],
-                    'cf-cpf-dropdown-color'       => $globalColors['formDropdownColor'],
-                    'cf-cpf-dropdown-text-color'  => $globalColors['formDropdownTextColor'],
-                    'cf-coa-bgr-color'            => $globalColors['formBackgroundColor'],
-                    'cf-coa-text-color'           => $globalColors['formTextColor'],
-                    'cf-coa-input-color'          => $globalColors['formInputColor'],
-                    'cf-coa-input-text-color'     => $globalColors['formInputTextColor'],
-                    'cf-coa-dropdown-color'       => $globalColors['formDropdownColor'],
-                    'cf-coa-dropdown-text-color'  => $globalColors['formDropdownTextColor'],
-                    'cf-cop-bgr-color'            => $globalColors['formBackgroundColor'],
-                    'cf-cop-text-color'           => $globalColors['formTextColor'],
-                    'cf-cop-input-color'          => $globalColors['formInputColor'],
-                    'cf-cop-input-text-color'     => $globalColors['formInputTextColor'],
-                    'cf-cop-dropdown-color'       => $globalColors['formDropdownColor'],
-                    'cf-cop-dropdown-text-color'  => $globalColors['formDropdownTextColor'],
-                ]
-            );
-        }
-
-        if (isset($settings['forms']['eventListForm'])) {
-            $useGlobaElf  = $settings['useGlobalColors']['eventListForm'];
-            $colorElf     = $settings['forms']['eventListForm']['globalSettings'];
-
-            $settingsForm = array_merge(
-                $settingsForm,
-                [
-                    'elf-bgr-color'           => $useGlobaElf ? $globalColors['formBackgroundColor'] : $colorElf['formBackgroundColor'],
-                    'elf-text-color'          => $useGlobaElf ? $globalColors['formTextColor'] : $colorElf['formTextColor'],
-                    'elf-input-color'         => $useGlobaElf ? $globalColors['formInputColor'] : $colorElf['formInputColor'],
-                    'elf-input-text-color'    => $useGlobaElf ? $globalColors['formInputTextColor'] : $colorElf['formInputTextColor'],
-                    'elf-dropdown-color'      => $useGlobaElf ? $globalColors['formDropdownColor'] : $colorElf['formDropdownColor'],
-                    'elf-dropdown-text-color' => $useGlobaElf ? $globalColors['formDropdownTextColor'] : $colorElf['formDropdownTextColor'],
-                ]
-            );
-        } else {
-            $settingsForm = array_merge(
-                $settingsForm,
-                [
-                    'elf-bgr-color'           => $globalColors['formBackgroundColor'],
-                    'elf-text-color'          => $globalColors['formTextColor'],
-                    'elf-input-color'         => $globalColors['formInputColor'],
-                    'elf-input-text-color'    => $globalColors['formInputTextColor'],
-                    'elf-dropdown-color'      => $globalColors['formDropdownColor'],
-                    'elf-dropdown-text-color' => $globalColors['formDropdownTextColor'],
-                ]
-            );
-        }
-
-        if (isset($settings['forms']['eventCalendarForm'])) {
-            $useGlobalEcf = $settings['useGlobalColors']['eventCalendarForm'];
-            $colorEcfCef  = $settings['forms']['eventCalendarForm']['confirmBookingForm']['event']['globalSettings'];
-            $colorEcfCoe  = $settings['forms']['eventCalendarForm']['congratulationsForm']['event']['globalSettings'];
-            $settingsForm = array_merge(
-                $settingsForm,
-                [
-                    'ecf-cef-bgr-color'           => $useGlobalEcf ? $globalColors['formBackgroundColor'] : $colorEcfCef['formBackgroundColor'],
-                    'ecf-cef-text-color'          => $useGlobalEcf ? $globalColors['formTextColor'] : $colorEcfCef['formTextColor'],
-                    'ecf-cef-input-color'         => $useGlobalEcf ? $globalColors['formInputColor'] : $colorEcfCef['formInputColor'],
-                    'ecf-cef-input-text-color'    => $useGlobalEcf ? $globalColors['formInputTextColor'] : $colorEcfCef['formInputTextColor'],
-                    'ecf-cef-dropdown-color'      => $useGlobalEcf ? $globalColors['formDropdownColor'] : $colorEcfCef['formDropdownColor'],
-                    'ecf-cef-dropdown-text-color' => $useGlobalEcf ? $globalColors['formDropdownTextColor'] : $colorEcfCef['formDropdownTextColor'],
-                    'ecf-coe-bgr-color'           => $useGlobalEcf ? $globalColors['formBackgroundColor'] : $colorEcfCoe['formBackgroundColor'],
-                    'ecf-coe-text-color'          => $useGlobalEcf ? $globalColors['formTextColor'] : $colorEcfCoe['formTextColor'],
-                    'ecf-coe-input-color'         => $useGlobalEcf ? $globalColors['formInputColor'] : $colorEcfCoe['formInputColor'],
-                    'ecf-coe-input-text-color'    => $useGlobalEcf ? $globalColors['formInputTextColor'] : $colorEcfCoe['formInputTextColor'],
-                    'ecf-coe-dropdown-color'      => $useGlobalEcf ? $globalColors['formDropdownColor'] : $colorEcfCoe['formDropdownColor'],
-                    'ecf-coe-dropdown-text-color' => $useGlobalEcf ? $globalColors['formDropdownTextColor'] : $colorEcfCoe['formDropdownTextColor'],
-                ]
-            );
-        } else {
-            $settingsForm = array_merge(
-                $settingsForm,
-                [
-                    'ecf-cef-bgr-color'           => $globalColors['formBackgroundColor'],
-                    'ecf-cef-text-color'          => $globalColors['formTextColor'],
-                    'ecf-cef-input-color'         => $globalColors['formInputColor'],
-                    'ecf-cef-input-text-color'    => $globalColors['formInputTextColor'],
-                    'ecf-cef-dropdown-color'      => $globalColors['formDropdownColor'],
-                    'ecf-cef-dropdown-text-color' => $globalColors['formDropdownTextColor'],
-                    'ecf-coe-bgr-color'           => $globalColors['formBackgroundColor'],
-                    'ecf-coe-text-color'          => $globalColors['formTextColor'],
-                    'ecf-coe-input-color'         => $globalColors['formInputColor'],
-                    'ecf-coe-input-text-color'    => $globalColors['formInputTextColor'],
-                    'ecf-coe-dropdown-color'      => $globalColors['formDropdownColor'],
-                    'ecf-coe-dropdown-text-color' => $globalColors['formDropdownTextColor'],
-                ]
-            );
-        }
-
-        if ($settingsService->getSetting('customization', 'useGenerated')) {
-            $hash = $lessParserService->compileAndSave(
-                array_merge(
-                    [
-                        'color-accent'         => $globalColors['primaryColor'],
-                        'color-white'          => $globalColors['textColorOnBackground'],
-                        'color-text-prime'     => $globalColors['formTextColor'],
-                        'color-text-second'    => $globalColors['formTextColor'],
-                        'color-bgr'            => $globalColors['formBackgroundColor'],
-                        'color-gradient1'      => $globalColors['formGradientColor1'],
-                        'color-gradient2'      => $globalColors['formGradientColor2'],
-                        'color-dropdown'       => $globalColors['formDropdownColor'],
-                        'color-dropdown-text'  => $globalColors['formDropdownTextColor'],
-                        'color-input'          => $globalColors['formInputColor'],
-                        'color-input-text'     => $globalColors['formInputTextColor'],
-                        'font'                 => !empty($settings['font']) ? $settings['font'] : '',
-                        'custom-font-selected' => $settings['customFontSelected'],
-                        'font-url'             => !empty($settings['fontUrl']) ? $settings['fontUrl'] : '',
-                    ],
-                    $settingsForm
-                )
-            );
-
-            $settings['hash'] = $hash;
-        }
-
-        $settingsService->fixCustomization($settings);
-
-        self::initSettings('customization', $settings, true);
     }
 
     /**
@@ -1462,18 +2150,18 @@ This message does not have an option for responding. If you need additional info
             'allowConfigureSpecialDays'   => false,
             'allowConfigureServices'      => false,
             'allowWriteAppointments'      => false,
-            'automaticallyCreateCustomer' => true,
+            'allowWriteCustomers'         => false,
+            'automaticallyCreateCustomer' => false,
             'inspectCustomerInfo'         => false,
             'allowCustomerReschedule'     => false,
             'allowCustomerCancelPackages' => true,
             'allowCustomerDeleteProfile'  => false,
             'allowWriteEvents'            => false,
             'allowAdminBookAtAnyTime'     => false,
+            'allowAdminBookOverApp'       => false,
             'adminServiceDurationAsSlot'  => false,
             'enabledHttpAuthorization'    => true,
-            'enableNoShowTag'             => true,
             'customerCabinet'             => [
-                'enabled'         => true,
                 'headerJwtSecret' => (new Token(null, 20))->getValue(),
                 'urlJwtSecret'    => (new Token(null, 20))->getValue(),
                 'tokenValidTime'  => 2592000,
@@ -1481,15 +2169,16 @@ This message does not have an option for responding. If you need additional info
                 'loginEnabled'    => true,
                 'filterDate'      => false,
                 'translations'    => [],
+                'googleRecaptcha' => false,
             ],
             'providerCabinet'             => [
-                'enabled'         => true,
                 'headerJwtSecret' => (new Token(null, 20))->getValue(),
                 'urlJwtSecret'    => (new Token(null, 20))->getValue(),
                 'tokenValidTime'  => 2592000,
                 'pageUrl'         => '',
                 'loginEnabled'    => true,
                 'filterDate'      => false,
+                'googleRecaptcha' => false,
             ],
             'urlAttachment'       => [
                 'enabled'         => true,
@@ -1532,17 +2221,17 @@ This message does not have an option for responding. If you need additional info
                     [
                         'id'      => 1,
                         'content' => 'Most Popular',
-                        'color'   => '#1246D6'
+                        'color'   => '#316bff'
                     ],
                     [
                         'id'      => 2,
                         'content' => 'Top Performer',
-                        'color'   => '#019719'
+                        'color'   => '#06a192'
                     ],
                     [
                         'id'      => 3,
                         'content' => 'Exclusive',
-                        'color'   => '#CCA20C'
+                        'color'   => '#facc15'
                     ],
                 ]
             ],
@@ -1565,8 +2254,10 @@ This message does not have an option for responding. If you need additional info
                 ['customerCabinet', 'translations'],
                 ['customerCabinet', 'headerJwtSecret'],
                 ['customerCabinet', 'urlJwtSecret'],
+                ['customerCabinet', 'googleRecaptcha'],
                 ['providerCabinet', 'headerJwtSecret'],
                 ['providerCabinet', 'urlJwtSecret'],
+                ['providerCabinet', 'googleRecaptcha'],
                 ['urlAttachment', 'headerJwtSecret'],
                 ['urlAttachment', 'urlJwtSecret'],
             ],
@@ -1616,9 +2307,16 @@ This message does not have an option for responding. If you need additional info
                 'groupEventPlaceholderSms'         => 'Name: %customer_full_name%',
             ],
             'waitingListEvents'                 => [
-                'enabled'                          => false,
                 'addingMethod'                     => 'Manually'
             ],
+            'qrCodeEvents'                      => [
+                'enabled'                          => false,
+            ],
+            'waitingListAppointments'           => [
+                'enabled'                          => false,
+                'redirectUrlDenied'                => ''
+            ],
+            'pastDaysEvents'                       => 0,
             'employeeSelection'                    => 'random',
             'bringingAnyoneLogic'                  => 'additional',
         ];
@@ -1716,12 +2414,197 @@ This message does not have an option for responding. If you need additional info
 
                 $current = &$current[$key];
 
-                $currentInit = &$initSettings[$key];
+                $currentInit = &$currentInit[$key];
             }
         }
 
         if ($setSettings) {
             self::initSettings($category, $savedSettings, true);
         }
+    }
+
+    /**
+     * Init Social Login Settings
+     */
+    private static function initSocialLoginSettings()
+    {
+        $settings = [
+            'facebookAppId'       => '',
+            'facebookAppSecret'   => '',
+        ];
+
+        self::initSettings('socialLogin', $settings);
+    }
+
+    /**
+     * Init Features and Integrations Settings
+     */
+    private static function initFeaturesIntegrationsSettings()
+    {
+        $settingsService = new SettingsService(new SettingsStorage());
+
+        $saved = $settingsService->getAllSettingsCategorized();
+
+        $old = empty($saved['activation']['isNewInstallation']);
+
+        $starterAndUp = Licence::getLicence() === 'Developer' ||
+            Licence::getLicence() === 'Pro' ||
+            Licence::getLicence() === 'Basic' ||
+            Licence::getLicence() === 'Starter';
+
+        $basicAndUp = Licence::getLicence() === 'Developer' || Licence::getLicence() === 'Pro' || Licence::getLicence() === 'Basic';
+
+        $proAndUp = Licence::getLicence() === 'Developer' || Licence::getLicence() === 'Pro';
+
+        $settings = [
+            'googleCalendar'        => [
+                'enabled' => $old &&
+                    $basicAndUp &&
+                    !empty($saved['googleCalendar']['calendarEnabled']),
+            ],
+            'appleCalendar'         => [
+                'enabled' => $old &&
+                    $basicAndUp &&
+                    !empty($saved['appleCalendar']['clientID']) &&
+                    !empty($saved['appleCalendar']['clientSecret']),
+            ],
+            'outlookCalendar'       => [
+                'enabled' => $old &&
+                    $basicAndUp &&
+                    !empty($saved['outlookCalendar']['calendarEnabled']),
+            ],
+            'zoom'                  => [
+                'enabled' => $old &&
+                    $basicAndUp &&
+                    !empty($saved['zoom']['accountId']) &&
+                    !empty($saved['zoom']['clientId']) &&
+                    !empty($saved['zoom']['clientSecret']),
+            ],
+            'webhooks'              => [
+                'enabled' => $basicAndUp,
+            ],
+            'facebookPixel'         => [
+                'enabled' => $old && $starterAndUp && !empty($saved['facebookPixel']['id']),
+            ],
+            'googleAnalytics'       => [
+                'enabled' => $old && $starterAndUp && !empty($saved['googleAnalytics']['id']),
+            ],
+            'lessonSpace'           => [
+                'enabled' => $old && $starterAndUp && !empty($saved['lessonSpace']['apiKey']),
+            ],
+            'recaptcha'             => [
+                'enabled' => $old &&
+                    $starterAndUp &&
+                    !empty($saved['general']['googleRecaptcha']['enabled']) &&
+                    !empty($saved['general']['googleRecaptcha']['siteKey']) &&
+                    !empty($saved['general']['googleRecaptcha']['secret']),
+            ],
+            'mollie'                => [
+                'enabled' => $old && $basicAndUp && !empty($saved['payments']['mollie']['enabled']),
+            ],
+            'wc'           => [
+                'enabled' => $old && $basicAndUp && !empty($saved['payments']['wc']['enabled']),
+            ],
+            'payPal'                => [
+                'enabled' => $old && $basicAndUp && !empty($saved['payments']['payPal']['enabled']),
+            ],
+            'stripe'                => [
+                'enabled' => $old && $basicAndUp && !empty($saved['payments']['stripe']['enabled']),
+            ],
+            'razorpay'              => [
+                'enabled' => $old && $basicAndUp && !empty($saved['payments']['razorpay']['enabled']),
+            ],
+            'square'                => [
+                'enabled' => $old && !empty($saved['payments']['square']['enabled']),
+            ],
+            'barion'                => [
+                'enabled' => $old && $basicAndUp && !empty($saved['payments']['barion']['enabled']),
+            ],
+            'packages'              => [
+                'enabled' => $proAndUp,
+            ],
+            'resources'             => [
+                'enabled' => $proAndUp,
+            ],
+            'customFields'          => [
+                'enabled' => $basicAndUp,
+            ],
+            'coupons'               => [
+                'enabled' => $old && $starterAndUp && !empty($saved['payments']['coupons']),
+            ],
+            'customNotifications'   => [
+                'enabled' => $basicAndUp,
+            ],
+            'tax'                   => [
+                'enabled' => $basicAndUp && (!$old || !empty($saved['payments']['taxes']['enabled'])),
+            ],
+            'invoices'              => [
+                'enabled' => $basicAndUp,
+            ],
+            'whatsapp'              => [
+                'enabled' => $old &&
+                    $proAndUp &&
+                    !empty($saved['notifications']['whatsAppEnabled']) &&
+                    !empty($saved['notifications']['whatsAppPhoneID']) &&
+                    !empty($saved['notifications']['whatsAppAccessToken']) &&
+                    !empty($saved['notifications']['whatsAppBusinessID']),
+            ],
+            'recurringEvents'       => [
+                'enabled' => $basicAndUp,
+            ],
+            'tickets'               => [
+                'enabled' => $basicAndUp,
+            ],
+            'waitingList'           => [
+                'enabled' => $proAndUp && (!$old || !empty($saved['appointments']['waitingListEvents']['enabled'])),
+            ],
+            'waitingListAppointments' => [
+                'enabled' => $proAndUp && (!$old || !empty($saved['appointments']['waitingListAppointments']['enabled'])),
+            ],
+            'customPricing'         => [
+                'enabled' => $basicAndUp,
+            ],
+            'recurringAppointments' => [
+                'enabled' => $basicAndUp,
+            ],
+            'extras'                => [
+                'enabled' => $starterAndUp,
+            ],
+            'cart'                  => [
+                'enabled' => $old && $proAndUp && !empty($saved['payments']['cart']),
+            ],
+            'timezones'             => [
+                'enabled' => $basicAndUp,
+            ],
+            'depositPayment'        => [
+                'enabled' => $basicAndUp,
+            ],
+            'noShowTag'             => [
+                'enabled' => $basicAndUp && (!$old || !empty($saved['roles']['enableNoShowTag'])),
+            ],
+            'apis'                  => [
+                'enabled' => Licence::getLicence() === 'Developer',
+            ],
+            'buddyboss'             => [
+                'enabled' => $basicAndUp && $old,
+            ],
+            'employeeBadge'         => [
+                'enabled' => $basicAndUp,
+            ],
+            'mailchimp'             => [
+                'enabled' => $old && $basicAndUp && !empty($saved['mailchimp']['accessToken']),
+            ],
+            'googleSocialLogin'     => [
+                'enabled' => $old && $basicAndUp && !empty($saved['socialLogin']['enableGoogleLogin']),
+            ],
+            'facebookSocialLogin'   => [
+                'enabled' => $old && $basicAndUp && !empty($saved['socialLogin']['enableFacebookLogin']),
+            ],
+            'eTickets'              => [
+                'enabled' => $proAndUp && (!$old || !empty($saved['appointments']['qrCodeEvents']['enabled'])),
+            ],
+        ];
+
+        self::initSettings('featuresIntegrations', $settings);
     }
 }

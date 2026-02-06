@@ -1,5 +1,13 @@
 <template>
   <div class="am-fs__payment-stripe" :style="cssVars">
+    <div v-if="supportsExpressCheckout" class="am-fs__payment-stripe__express-checkout">
+      <div :id="'am-stripe-prb-' + shortcodeData.counter" class="am-stripe-prb"></div>
+    </div>
+
+    <div v-if="paymentRequestAvailable" class="am-fs__payment-divider">
+      <span class="am-divider-text">{{ amLabels.payment_or_pay_with_card }}</span>
+    </div>
+
     <div v-if="amSettings.payments.stripe.address" class="am-fs__payment-stripe__card">
       <div :id="'am-stripe-address-' + shortcodeData.counter" class="am-stripe-address"></div>
     </div>
@@ -29,7 +37,7 @@
       <p>
         {{ amLabels.payment_protected_policy }}
       </p>
-      <img :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/icons/stripeLogo.svg'" alt="Stripe policy">
+      <img :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/icons/stripe.svg'" alt="Stripe policy">
       <span>
         {{ amLabels.stripe }}
       </span>
@@ -55,7 +63,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, inject, watchEffect, ref} from 'vue'
+import {computed, onMounted, inject, watchEffect, ref, watch, nextTick} from 'vue'
 import {
   usePaymentError,
   useBookingData,
@@ -70,6 +78,7 @@ import { useColorTransparency } from '../../../../../assets/js/common/colorManip
 import { useStore } from 'vuex'
 import {useScrollTo} from "../../../../../assets/js/common/scrollElements";
 import { VueRecaptcha } from "vue-recaptcha";
+import httpClient from "../../../../../plugins/axios"
 
 const store = useStore()
 
@@ -113,6 +122,133 @@ let recaptchaValid = ref(false)
 
 let recaptchaResponse = ref(null)
 
+// * Express Checkout
+let paymentRequest = null
+let paymentRequestButton = null
+let supportsExpressCheckout = ref(false)
+let paymentRequestAvailable = ref(false)
+
+async function initializeExpressCheckout(update = false) {
+  let checkoutPaymentData = null
+
+  await httpClient.post(
+    '/payments/amount',
+    useBookingData(
+      store,
+      null,
+      true,
+      {},
+      null
+    )['data']
+  ).then((response) => {
+    checkoutPaymentData = response.data.data
+  }).catch(e => {
+    const message = e?.response?.data?.message || e.message || 'Unknown error'
+    emits('payment-error', message)
+  })
+
+  if (!update) {
+    stripePaymentInit(
+      checkoutPaymentData?.transfers?.accounts &&
+      Object.keys(checkoutPaymentData.transfers.accounts).length === 1 &&
+      checkoutPaymentData?.transfers?.method === 'direct'
+        ? Object.keys(checkoutPaymentData.transfers.accounts)[0]
+        : null
+    )
+  }
+
+  if (!stripeObject) return
+
+  supportsExpressCheckout.value = true
+
+  const totalPriceParts = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: checkoutPaymentData.currency,
+  }).formatToParts(checkoutPaymentData.amount)
+
+  const IntegerPart = totalPriceParts.filter((part) => part.type === 'integer').map(part => part.value).join('')
+  const fractionPart = totalPriceParts.find((part) => part.type === 'fraction')?.value || ''
+  const totalPriceInMinorUnits = Number.parseInt(`${IntegerPart}${fractionPart}`)
+
+  paymentRequest = stripeObject.paymentRequest({
+    country: 'US',
+    currency: checkoutPaymentData.currency.toLowerCase(),
+    total: {
+      label: 'total',
+      amount: totalPriceInMinorUnits
+    },
+    requestPayerName: true,
+    requestPayerEmail: true
+  })
+
+  paymentRequest.canMakePayment().then(function (result) {
+    if (result) {
+      paymentRequestAvailable.value = true
+
+      paymentRequestButton = stripeObject.elements().create('paymentRequestButton', {
+        paymentRequest: paymentRequest,
+        style: {
+          paymentRequestButton: {
+            type: 'default',
+            theme: 'dark',
+            height: '40px',
+          },
+        },
+      })
+
+      paymentRequestButton.mount('#am-stripe-prb-' + shortcodeData.value.counter)
+
+      paymentRequest.on('paymentmethod', handleExpressCheckout)
+    } else {
+      paymentRequestAvailable.value = false
+    }
+  }).catch(error => {
+    console.error('Error checking payment capabilities:', error)
+    paymentRequestAvailable.value = false
+  })
+}
+
+async function handleExpressCheckout(event) {
+  try {
+    const { paymentMethod } = event
+    const addressResult = amSettings.payments.stripe.address
+        ? await address.getValue()
+        : null
+
+    useCreateBooking(
+      store,
+      useBookingData(
+        store,
+        null,
+        false,
+        {
+          paymentMethodId: paymentMethod.id,
+          address: addressResult ? addressResult.value : null,
+        },
+        recaptchaResponse.value
+      ),
+      function (response) {
+        if (response.data.data.requiresAction) {
+          stripePaymentActionRequired({
+            ...response.data.data,
+            expressCheckoutEvent: event
+          })
+          return
+        }
+        event.complete('success')
+        successBooking(response)
+      },
+      (response) => {
+        event.complete('fail')
+        errorBooking(response)
+      }
+    )
+  } catch (error) {
+    event.complete('fail')
+    emits('payment-error', error.message)
+  }
+}
+
 function onRecaptchaExpired () {
   recaptchaValid.value = false
 
@@ -126,13 +262,13 @@ function onRecaptchaVerify (response) {
 
   if (amSettings.general.googleRecaptcha.invisible) {
     stripePaymentCreate(
-        useBookingData(
-            store,
-            null,
-            false,
-            {},
-            recaptchaResponse.value
-        )
+      useBookingData(
+        store,
+        null,
+        false,
+        {},
+        recaptchaResponse.value
+      )
     )
 
     return false
@@ -153,9 +289,13 @@ let address = null
 let amColors = inject('amColors')
 let amFonts = inject('amFonts')
 
-function stripePaymentInit () {
+function stripePaymentInit (accountId) {
   const options = {
     locale: localLanguage.value.replace('_', '-')
+  }
+
+  if (accountId) {
+    options.stripeAccount = accountId
   }
 
   stripeObject = Stripe(
@@ -206,9 +346,11 @@ async function stripePaymentCreate () {
   stripeObject.createPaymentMethod(
     'card',
     cardNum,
-    addressResult ? {
-      billing_details: addressResult.value
-    } : {}
+    {
+      billing_details: {
+        ...(addressResult ? addressResult.value : {})
+      }
+    }
   ).then(
     function (result) {
       if (stripeError(result, addressResult)) {
@@ -217,31 +359,31 @@ async function stripePaymentCreate () {
       }
 
       useCreateBooking(
+        store,
+        useBookingData(
           store,
-          useBookingData(
-              store,
-              null,
-              false,
-              {
-                paymentMethodId: result.paymentMethod.id,
-                address: addressResult ? addressResult.value : null
-              },
-              recaptchaResponse.value
-          ),
-          function (response) {
-            if (response.data.data.requiresAction) {
-              stripePaymentActionRequired(response.data.data)
-
-              return
-            }
-
-            store.commit('setLoading', false)
-            successBooking(response)
+          null,
+          false,
+          {
+            paymentMethodId: result.paymentMethod.id,
+            address: addressResult ? addressResult.value : null
           },
-          (response) => {
-            store.commit('setLoading', false)
-            errorBooking(response)
+          recaptchaResponse.value
+        ),
+        function (response) {
+          if (response.data.data.requiresAction) {
+            stripePaymentActionRequired(response.data.data)
+
+            return
           }
+
+          store.commit('setLoading', false)
+          successBooking(response)
+        },
+        (response) => {
+          store.commit('setLoading', false)
+          errorBooking(response)
+        }
       )
 
 
@@ -250,16 +392,21 @@ async function stripePaymentCreate () {
 }
 
 function stripePaymentActionRequired (response) {
-  stripeObject.handleCardAction(
-    response.paymentIntentClientSecret
-  ).then(
+  const { expressCheckoutEvent } = response || {}
+
+  stripeObject.handleNextAction({
+    clientSecret: response.paymentIntentClientSecret
+  }).then(
     async function (result) {
       let addressResult = null
-      if (amSettings.payments.stripe.address && address) {
+      if (amSettings.payments.stripe.address && address && !expressCheckoutEvent) {
         addressResult = await address.getValue()
       }
 
       if (stripeError(result, addressResult)) {
+        if (expressCheckoutEvent) {
+          expressCheckoutEvent.complete('fail')
+        }
         return
       }
 
@@ -275,11 +422,26 @@ function stripePaymentActionRequired (response) {
           },
           null
         ),
-        successBooking,
-        errorBooking
+        function (response) {
+          if (expressCheckoutEvent) {
+            expressCheckoutEvent.complete('success')
+          }
+          successBooking(response)
+        },
+        function (error) {
+          if (expressCheckoutEvent) {
+            expressCheckoutEvent.complete('fail')
+          }
+          errorBooking(error)
+        }
       )
     }
-  )
+  ).catch((error) => {
+    if (expressCheckoutEvent) {
+      expressCheckoutEvent.complete('fail')
+    }
+    emits('payment-error', error.message || 'Authentication failed')
+  })
 }
 
 function stripeError (result, addressResult) {
@@ -288,7 +450,7 @@ function stripeError (result, addressResult) {
     usePaymentError(
       store,
       function () {
-        emits('payment-error', addressError ? amLabels.value.payment_address_error : result.error.message)
+        emits('payment-error', addressError ? amLabels.payment_address_error : result.error.message)
       }
     )
     return true
@@ -351,8 +513,27 @@ watchEffect(() => {
   }
 }, {flush: 'post'})
 
+// * Watch coupon and payment deposit changes and update paymentRequest amount
+watch(
+  [() => store.getters['coupon/getCoupon'], () => store.getters['payment/getPaymentDeposit']],
+  async (newValues, oldValues) => {
+    const [newCoupon, newDeposit] = newValues || []
+    const [oldCoupon, oldDeposit] = oldValues || []
+
+    if (paymentRequest && ((newCoupon.deduction || newCoupon.discount) || newDeposit !== oldDeposit)) {
+      if (paymentRequestButton) {
+        paymentRequestButton.unmount();
+        paymentRequestButton = null;
+      }
+      // Wait for next tick to ensure DOM is updated
+      await nextTick()
+      initializeExpressCheckout(true)
+    }
+  }
+)
+
 onMounted(() => {
-  stripePaymentInit()
+  initializeExpressCheckout(false)
 })
 
 // * Css variables
@@ -452,6 +633,45 @@ export default {
         & > div > div {
           position: absolute !important;
         }
+      }
+
+      .am-fs__payment-stripe__express-checkout {
+        margin-bottom: 20px;
+
+        .am-stripe-prb {
+          margin-bottom: 10px;
+        }
+
+        p {
+          color: var(--am-c-pay-text-op60);
+          font-size: 14px;
+        }
+      }
+
+      .am-fs__payment-divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        margin: 16px 0;
+        text-align: center;
+      }
+
+      .am-fs__payment-divider::before,
+      .am-fs__payment-divider::after {
+        content: "";
+        flex-grow: 1;
+        height: 1px;
+        background-color: var(--am-c-pay-text-op60);
+        margin: 0 8px;
+      }
+
+      .am-divider-text {
+        font-size: 14px;
+        color: var(--am-c-pay-text-op60);
+        text-transform: uppercase;
+        line-height: 1.33333;
+        font-weight: 500;
       }
     }
   }

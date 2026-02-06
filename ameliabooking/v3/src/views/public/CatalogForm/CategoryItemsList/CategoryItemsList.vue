@@ -504,8 +504,7 @@
                 <template #default>
                   <div
                     v-if="useDescriptionVisibility(employee.description)"
-                    class="am-fcil-employee__text"
-                    :class="{'ql-description': employee.description.includes('<!-- Content -->')}"
+                    class="am-fcil-employee__text ql-description"
                     v-html="employee.description"
                   ></div>
                 </template>

@@ -26,11 +26,40 @@ class InfrastructureService
     /**
      * @param Container $c
      *
+     * @return InfrastructureServices\Google\AbstractGoogleCalendarMiddlewareService
+     */
+    public static function getCalendarGoogleMiddlewareService($c)
+    {
+        return new InfrastructureServices\Google\StarterGoogleCalendarMiddlewareService($c);
+    }
+
+    /**
+     * @param Container $c
+     *
      * @return InfrastructureServices\Outlook\AbstractOutlookCalendarService
      */
     public static function getCalendarOutlookService($c)
     {
         return new InfrastructureServices\Outlook\StarterOutlookCalendarService($c);
+    }
+
+    /**
+     * @param $c
+     * @return InfrastructureServices\Apple\AbstractAppleCalendarService
+     */
+    public static function getAppleCalendarService($c)
+    {
+        return new InfrastructureServices\Apple\StarterAppleCalendarCalendarService($c);
+    }
+
+    /**
+     * @param Container $c
+     *
+     * @return InfrastructureServices\Mailchimp\AbstractMailchimpService
+     */
+    public static function getMailchimpService($c)
+    {
+        return new InfrastructureServices\Mailchimp\StarterMailchimpService($c);
     }
 
     /**
@@ -128,5 +157,34 @@ class InfrastructureService
                 $c->get('domain.settings.service')
             )
         );
+    }
+
+    public static function getBarionService($c)
+    {
+        return new InfrastructureServices\Payment\StarterPaymentService(
+            $c->get('domain.settings.service'),
+            new InfrastructureServices\Payment\CurrencyService(
+                $c->get('domain.settings.service')
+            )
+        );
+    }
+
+    /**
+     * @param $c
+     * @return InfrastructureServices\Authentication\AbstractSocialAuthenticationService
+     */
+    public static function getSocialAuthenticationService($c)
+    {
+        return new InfrastructureServices\Authentication\StarterSocialAuthenticationService($c);
+    }
+
+    /**
+     * @param Container $c
+     *
+     * @return InfrastructureServices\QrCode\AbstractQrCodeInfrastructureService
+     */
+    public static function getQrCodeService($c)
+    {
+        return new InfrastructureServices\QrCode\StarterQrCodeInfrastructureService($c);
     }
 }

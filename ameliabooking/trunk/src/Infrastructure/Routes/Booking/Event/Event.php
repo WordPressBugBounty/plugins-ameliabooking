@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See COPYING.md for license details.
  */
 
@@ -9,6 +10,9 @@ namespace AmeliaBooking\Infrastructure\Routes\Booking\Event;
 use AmeliaBooking\Application\Controller\Booking\Event\AddEventController;
 use AmeliaBooking\Application\Controller\Booking\Event\DeleteEventBookingController;
 use AmeliaBooking\Application\Controller\Booking\Event\DeleteEventController;
+use AmeliaBooking\Application\Controller\Booking\Event\DeleteEventsController;
+use AmeliaBooking\Application\Controller\Booking\Event\GetEventBookingController;
+use AmeliaBooking\Application\Controller\Booking\Event\GetEventBookingsController;
 use AmeliaBooking\Application\Controller\Booking\Event\GetEventController;
 use AmeliaBooking\Application\Controller\Booking\Event\GetEventDeleteEffectController;
 use AmeliaBooking\Application\Controller\Booking\Event\GetEventsController;
@@ -16,6 +20,7 @@ use AmeliaBooking\Application\Controller\Booking\Event\GetCalendarEventsControll
 use AmeliaBooking\Application\Controller\Booking\Event\UpdateEventBookingController;
 use AmeliaBooking\Application\Controller\Booking\Event\UpdateEventController;
 use AmeliaBooking\Application\Controller\Booking\Event\UpdateEventStatusController;
+use AmeliaBooking\Application\Controller\Booking\Event\UpdateEventVisibilityController;
 use Slim\App;
 
 /**
@@ -40,6 +45,8 @@ class Event
 
         $app->post('/events/delete/{id:[0-9]+}', DeleteEventController::class);
 
+        $app->post('/events/delete', DeleteEventsController::class);
+
         $app->post('/events/{id:[0-9]+}', UpdateEventController::class);
 
         $app->get('/events/effect/{id:[0-9]+}', GetEventDeleteEffectController::class);
@@ -50,6 +57,12 @@ class Event
 
         $app->post('/events/status/{id:[0-9]+}', UpdateEventStatusController::class);
 
+        $app->post('/events/visibility/{id:[0-9]+}', UpdateEventVisibilityController::class);
+
         $app->post('/events/calendar', GetCalendarEventsController::class);
+
+        $app->get('/bookings/events', GetEventBookingsController::class);
+
+        $app->get('/bookings/events/{id:[0-9]+}', GetEventBookingController::class);
     }
 }

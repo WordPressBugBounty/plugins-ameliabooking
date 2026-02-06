@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -57,6 +58,18 @@ class Appointment extends AbstractBooking
     /** @var Label */
     private $outlookCalendarEventId;
 
+    /** @var Label */
+    private $appleCalendarEventId;
+
+    /** @var string */
+    private $microsoftTeamsUrl;
+
+    /** @var DateTimeValue */
+    protected $initialBookingStart;
+
+    /** @var DateTimeValue */
+    protected $initialBookingEnd;
+
     /** @var DateTimeValue */
     protected $bookingStart;
 
@@ -80,6 +93,9 @@ class Appointment extends AbstractBooking
 
     /** @var  BooleanValueObject */
     protected $isFull;
+
+    /** @var  bool */
+    protected $createPaymentLinks;
 
     /**
      * Appointment constructor.
@@ -215,7 +231,7 @@ class Appointment extends AbstractBooking
     }
 
     /**
-     * @param Token $googleCalendarEventId
+     * @param Token|null $googleCalendarEventId
      */
     public function setGoogleCalendarEventId($googleCalendarEventId)
     {
@@ -247,11 +263,43 @@ class Appointment extends AbstractBooking
     }
 
     /**
-     * @param Label $outlookCalendarEventId
+     * @param Label|null $outlookCalendarEventId
      */
     public function setOutlookCalendarEventId($outlookCalendarEventId)
     {
         $this->outlookCalendarEventId = $outlookCalendarEventId;
+    }
+
+    /**
+     * @return Label
+     */
+    public function getAppleCalendarEventId()
+    {
+        return $this->appleCalendarEventId;
+    }
+
+    /**
+     * @param Label|null $appleCalendarEventId
+     */
+    public function setAppleCalendarEventId($appleCalendarEventId)
+    {
+        $this->appleCalendarEventId = $appleCalendarEventId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMicrosoftTeamsUrl()
+    {
+        return $this->microsoftTeamsUrl;
+    }
+
+    /**
+     * @param string $microsoftTeamsUrl
+     */
+    public function setMicrosoftTeamsUrl($microsoftTeamsUrl)
+    {
+        $this->microsoftTeamsUrl = $microsoftTeamsUrl;
     }
 
     /**
@@ -284,6 +332,38 @@ class Appointment extends AbstractBooking
     public function setBookingEnd(DateTimeValue $bookingEnd)
     {
         $this->bookingEnd = $bookingEnd;
+    }
+
+    /**
+     * @return DateTimeValue
+     */
+    public function getInitialBookingStart()
+    {
+        return $this->initialBookingStart;
+    }
+
+    /**
+     * @param DateTimeValue $initialBookingStart
+     */
+    public function setInitialBookingStart(DateTimeValue $initialBookingStart)
+    {
+        $this->initialBookingStart = $initialBookingStart;
+    }
+
+    /**
+     * @return DateTimeValue
+     */
+    public function getInitialBookingEnd()
+    {
+        return $this->initialBookingEnd;
+    }
+
+    /**
+     * @param DateTimeValue $initialBookingEnd
+     */
+    public function setInitialBookingEnd(DateTimeValue $initialBookingEnd)
+    {
+        $this->initialBookingEnd = $initialBookingEnd;
     }
 
     /**
@@ -406,6 +486,16 @@ class Appointment extends AbstractBooking
         $this->resources = $resources;
     }
 
+    public function isCreatePaymentLinks()
+    {
+        return $this->createPaymentLinks;
+    }
+
+    public function setCreatePaymentLinks($createPaymentLinks)
+    {
+        $this->createPaymentLinks = $createPaymentLinks;
+    }
+
     /**
      * @return array
      */
@@ -426,6 +516,9 @@ class Appointment extends AbstractBooking
                 'googleMeetUrl'          => null !== $this->getGoogleMeetUrl() ? $this->getGoogleMeetUrl() : null,
                 'outlookCalendarEventId' => null !== $this->getOutlookCalendarEventId() ?
                     $this->getOutlookCalendarEventId()->getValue() : null,
+                'microsoftTeamsUrl'      => null !== $this->getMicrosoftTeamsUrl() ? $this->getMicrosoftTeamsUrl() : null,
+                'appleCalendarEventId'   => null !== $this->getAppleCalendarEventId() ?
+                    $this->getAppleCalendarEventId()->getValue() : null,
                 'zoomMeeting'            => $this->getZoomMeeting() ? $this->getZoomMeeting()->toArray() : null,
                 'lessonSpace'            => $this->getLessonSpace() ?: null,
                 'bookingStart'           => $this->getBookingStart()->getValue()->format('Y-m-d H:i:s'),
@@ -435,6 +528,17 @@ class Appointment extends AbstractBooking
                 'isChangedStatus'        => $this->isChangedStatus() ? $this->isChangedStatus()->getValue() : null,
                 'isFull'                 => $this->isFull() ? $this->isFull()->getValue() : null,
                 'resources'              => $this->getResources()->toArray(),
+                'initialAppointmentDateTime' => $this->getInitialBookingStart() && $this->getInitialBookingEnd()
+                    ? [
+                        'bookingEnd' => $this->getInitialBookingStart()
+                            ? $this->getInitialBookingStart()->getValue()->format('Y-m-d H:i:s')
+                            : null,
+                        'bookingStart' => $this->getInitialBookingEnd()
+                            ? $this->getInitialBookingEnd()->getValue()->format('Y-m-d H:i:s')
+                            : null
+                    ]
+                    : null,
+                'createPaymentLinks' => $this->isCreatePaymentLinks(),
             ]
         );
     }

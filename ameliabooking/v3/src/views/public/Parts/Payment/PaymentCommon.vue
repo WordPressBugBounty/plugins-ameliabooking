@@ -96,7 +96,7 @@ function continueWithBooking () {
 
   let bookingData = useBookingData(
     store,
-    gateway === 'mollie' ? {
+    gateway === 'mollie' || gateway === 'barion' ? {
       shortcode: shortcodeData.value,
       steps: stepsArray.value.map(i => i.key),
       sidebar: sidebarSteps.value.map(i => Object.assign({key: i.key, data: i.stepSelectedData})),
@@ -127,17 +127,6 @@ function continueWithBooking () {
 
       break
 
-    case ('square'):
-      payment(
-          '/payment/square',
-          bookingData,
-          function (response) {
-            window.location = response.data.data.redirectUrl
-          }
-      )
-
-      break
-
     case ('razorpay'):
       payment(
         '/payment/razorpay',
@@ -158,6 +147,24 @@ function continueWithBooking () {
           let razorpay = new Razorpay(options)
 
           razorpay.open()
+        }
+      )
+
+      break
+
+    case ('barion'):
+      payment(
+        '/payment/barion',
+        bookingData,
+        function (response) {
+          const bookings = response.data.data.bookings
+          if (sessionStorage.getItem('ameliaCacheData')) {
+            const ameliaCacheData = JSON.parse(sessionStorage.getItem('ameliaCacheData'))
+            ameliaCacheData.bookings = bookings
+            ameliaCacheData.packageCustomer = response.data.data.packageCustomer
+            sessionStorage.setItem('ameliaCacheData', JSON.stringify(ameliaCacheData))
+          }
+          window.location = response.data.data.redirectUrl
         }
       )
 

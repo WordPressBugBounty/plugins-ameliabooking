@@ -6,7 +6,7 @@ import {
 } from "../../plugins/settings.js";
 import {useUrlParams, useUrlQueryParams} from "../../assets/js/common/helper";
 import { getBadgeTranslated, useTranslateEntities } from "../../assets/js/public/translation";
-import { useParsedCustomPricing } from "../../assets/js/common/employee";
+import { useFeaturesAndIntegrations, useParsedCustomPricing } from "../../assets/js/common/employee";
 
 function isEmployeeServiceLocation (relations, employeeId, serviceId, locationId = null) {
   if (locationId) {
@@ -103,7 +103,7 @@ function useStarterEntities (entities) {
   return entities
 }
 
-function setEntities ({ commit, rootState }, entities, types, licence, showHidden) {
+function setEntities ({ commit, rootState }, entities, types, licence, showHidden, isPanel) {
   commit('setShowHidden', showHidden)
 
   let availableTranslationsShort = settings.general.usedLanguages.map(
@@ -123,9 +123,17 @@ function setEntities ({ commit, rootState }, entities, types, licence, showHidde
   ) {
     useTranslateEntities(entities)
 
-    rootState.settings.roles.providerBadges.badges.forEach(badge => {
+    rootState.settings.roles.providerBadges.badges?.forEach(badge => {
       badge.content = getBadgeTranslated(badge)
     })
+  }
+
+  if (!isPanel && !settings.featuresIntegrations.customFields.enabled) {
+    entities['customFields'] = []
+  }
+
+  if (!isPanel && !settings.featuresIntegrations.packages.enabled) {
+    entities['packages'] = []
   }
 
   types.forEach(ent => {
@@ -143,6 +151,10 @@ function setEntities ({ commit, rootState }, entities, types, licence, showHidde
           category.serviceList.sort((a, b) => a.position - b.position)
         }
         category.serviceList.forEach((service, serviceIndex) => {
+          useFeaturesAndIntegrations(service, isPanel)
+
+          useFeaturesAndIntegrations(entities[ent][categoryIndex].serviceList[serviceIndex], isPanel)
+
           entities[ent][categoryIndex].serviceList[serviceIndex].customPricing = useParsedCustomPricing(service)
         })
       })
@@ -166,13 +178,19 @@ function setEntities ({ commit, rootState }, entities, types, licence, showHidde
           entities[ent][employeeIndex].serviceList[serviceIndex].minCapacity = employeeMinCapacity
           entities[ent][employeeIndex].serviceList[serviceIndex].maxCapacity = employeeMaxCapacity
 
+          useFeaturesAndIntegrations(entities[ent][employeeIndex].serviceList[serviceIndex], isPanel)
+
+          useFeaturesAndIntegrations(employeeService, isPanel)
+
+          useFeaturesAndIntegrations(service, isPanel)
+
           entities[ent][employeeIndex].serviceList[serviceIndex].customPricing = useParsedCustomPricing(
             employeeService.customPricing ? employeeService : service
           )
         })
 
         if (employee.badgeId) {
-          employee.badge = rootState.settings.roles.providerBadges.badges.find(badge => badge.id === employee.badgeId)
+          employee.badge = rootState.settings.roles.providerBadges.badges?.find(badge => badge.id === employee.badgeId)
         } else {
           employee.badge = null
         }
@@ -778,7 +796,7 @@ export default {
 
           let entities = JSON.parse(JSON.stringify(window.ameliaAppointmentEntities))
 
-          setEntities({ commit, rootState }, entities, types, payload.licence, payload.showHidden)
+          setEntities({ commit, rootState }, entities, types, payload.licence, payload.showHidden, payload.isPanel)
         })
       } else {
         let ameliaApiInterval = setInterval(
@@ -790,7 +808,7 @@ export default {
 
               let entities = JSON.parse(JSON.stringify(window[name]))
 
-              setEntities({ commit, rootState }, entities, types, payload.licence, payload.showHidden)
+              setEntities({ commit, rootState }, entities, types, payload.licence, payload.showHidden, payload.isPanel)
             }
           },
           1000

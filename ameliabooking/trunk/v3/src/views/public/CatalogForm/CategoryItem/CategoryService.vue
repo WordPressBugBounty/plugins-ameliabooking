@@ -16,6 +16,8 @@
           :back-btn-visibility="backBtnVisibility"
           :cart-btn-visibility="cartBtnVisibility"
           :cart-items-number="cartItemsNumber"
+          role="navigation"
+          aria-label="Navigation Controls"
           @go-back="goBack"
           @go-to-cart="goToCart"
         ></Header>
@@ -25,9 +27,15 @@
         <div
           :class="[{'am-tablet': pageWidth <= 678}, {'am-mobile': pageWidth < 450}]"
           class="am-fcis__header-top"
+          role="region"
+          aria-label="Service Information"
         >
           <div class="am-fcis__header-text">
-            <span class="am-fcis__header-name">
+            <span
+              class="am-fcis__header-name"
+              role="heading"
+              aria-level="1"
+            >
               {{service.name}}
             </span>
             <div
@@ -77,7 +85,7 @@
         >
           <div class="am-fcis__mini-info">
             <div
-              v-if="customizedOptions.serviceCategory.visibility"
+              v-if="customizedOptions.serviceCategory.visibility && category"
               class="am-fcis__mini-info__inner"
             >
               <span class="am-icon-folder"></span>
@@ -221,8 +229,7 @@
               class="am-fcis__info-content"
             >
               <div
-                class="am-fcis__info-service__desc"
-                :class="{'ql-description': service.description.includes('<!-- Content -->')}"
+                class="am-fcis__info-service__desc ql-description"
                 v-html="service.description"
               ></div>
             </div>
@@ -275,8 +282,7 @@
                   <template #default>
                     <div
                       v-if="useDescriptionVisibility(employee.description)"
-                      class="am-fcis__info-employee__description"
-                      :class="{'ql-description': employee.description.includes('<!-- Content -->')}"
+                      class="am-fcis__info-employee__description ql-description"
                       v-html="employee.description"
                     ></div>
                   </template>
@@ -364,7 +370,7 @@
                 </div>
                 <div class="am-fcis__include-info">
                   <div
-                    v-if="customizedOptions.packageCategory.visibility"
+                    v-if="customizedOptions.packageCategory.visibility && category"
                     class="am-fcis__include-info__inner"
                   >
                     <span class="am-icon-folder"></span>
@@ -445,7 +451,10 @@
       ref="ameliaContainer"
       class="am-empty"
     >
-      <img :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/am-empty-booking.svg'">
+      <img
+        :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/am-empty-booking.svg'"
+        :alt="preselected.show !== 'packages' ? amLabels.no_services_employees : amLabels.no_package_services"
+      >
       <div class="am-empty__heading">
         {{ amLabels.oops }}
       </div>
@@ -494,7 +503,8 @@ import {
   computed,
   onMounted,
   reactive,
-  provide
+  provide,
+  watch
 } from "vue";
 
 // * Vuex
@@ -621,8 +631,9 @@ let service = computed(() => {
 })
 
 function displayServiceLocationLabel (entities, id) {
-  if (useServiceLocation(entities, id).length === 1) {
-    return useServiceLocation(entities, id)[0].address ? useServiceLocation(entities, id)[0].address : useServiceLocation(entities, id)[0].name
+  let locations = useServiceLocation(entities, id)
+  if (locations.length === 1 || (locations.length && locations.every(location => location.id === locations[0].id))) {
+    return locations[0].address ? locations[0].address : locations[0].name
   }
   return amLabels.value.multiple_locations
 }
@@ -699,6 +710,8 @@ function goBack() {
 let showCart = ref(false)
 
 function goToCart () {
+  store.commit('booking/setShownCart', false)
+
   useRemoveLastCartItem(store)
 
   showCart.value = true
@@ -777,9 +790,7 @@ function selectServicePackage(pack) {
 // * Shortcode
 const preselected = computed(() => store.getters['entities/getPreselected'])
 
-let backBtnVisibility = computed(() => {
-  return amEntities.value.services.length !== 1 && preselected.value.service.length !== 1
-})
+let backBtnVisibility = ref(amEntities.value.services.length !== 1 && preselected.value.service.length !== 1)
 
 let stepName = ref('')
 provide('stepName', stepName)
@@ -843,6 +854,40 @@ function durationTypeLabel(duration, type) {
 let empty = computed(() => {
   return Object.keys(service.value).length === 0 || serviceEmployees.value.length === 0
 })
+
+// * Appointment Waiting List: populate module on service selection
+watch(() => store.getters['booking/getServiceId'], (newServiceId) => {
+  // Reset first
+  store.dispatch('appointmentWaitingListOptions/resetWaitingOptions')
+
+  if (!newServiceId) return
+
+  let globalEnabled = !!(amSettings.featuresIntegrations?.waitingListAppointments?.enabled)
+  if (!globalEnabled) return
+
+  let service = store.getters['entities/getService'](newServiceId)
+  if (!service || !service.settings) return
+
+  let serviceSettings = null
+  try {
+    serviceSettings = JSON.parse(service.settings)
+  } catch (e) {
+    serviceSettings = null
+  }
+  if (!serviceSettings || !serviceSettings.waitingList || !serviceSettings.waitingList.enabled) return
+
+  const wl = serviceSettings.waitingList
+  // Backend may not yet supply peopleWaiting for appointments; default 0
+  let waitingPayload = {
+    enabled: !!wl.enabled,
+    maxCapacity: wl.maxCapacity || 0,
+    maxExtraPeople: wl.maxExtraPeople || 0,
+    maxExtraPeopleEnabled: !!wl.maxExtraPeopleEnabled,
+    peopleWaiting: wl.peopleWaiting || 0,
+    isWaitingListSlot: false
+  }
+  store.commit('appointmentWaitingListOptions/setAllData', waitingPayload)
+}, { immediate: true })
 
 // * Colors
 let amColors = inject('amColors')
@@ -918,6 +963,7 @@ export default {
             .am-fcis__header-action {
               width: 100%;
               justify-content: space-between;
+              flex: unset;
             }
 
             &.am-mobile {
@@ -968,6 +1014,7 @@ export default {
           display: flex;
           align-items: center;
           justify-content: flex-end;
+          flex: 0 0 auto;
         }
 
         &-price {

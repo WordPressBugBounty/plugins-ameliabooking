@@ -1,14 +1,13 @@
 <template>
-  <template v-if="!amCustomize.fonts.customFontSelected">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" :href="`${baseUrls.wpAmeliaPluginURL}v3/src/assets/scss/common/fonts/font.css`" type="text/css" media="all">
-  </template>
   <div
+    v-if="isLoaded"
     id="amelia-container"
     ref="ameliaContainer"
     class="am-cap__wrapper"
-    :class="[{'am-collapsed': sidebarCollapsed}, {'am-auth': pagesType === 'auth'}]"
+    :class="[
+      { 'am-collapsed': sidebarCollapsed },
+      { 'am-auth': pagesType === 'auth' },
+    ]"
     :style="cssVars"
   >
     <template v-if="pagesType === 'auth'">
@@ -18,22 +17,30 @@
       <SideBar
         v-if="sidebarVisibility"
         class="am-fs-sb"
-        :class="{'am-collapsed': sidebarCollapsed}"
-        :style="{width: !sidebarCollapsed ? '240px' : '72px', paddingBottom: `${sidebarFooterHeight + 16}px` }"
+        :class="{ 'am-collapsed': sidebarCollapsed }"
+        :style="{
+          width: !sidebarCollapsed ? '240px' : '72px',
+          paddingBottom: `${sidebarFooterHeight + 16}px`,
+        }"
       >
         <template #step-list>
           <div class="am-fs-sb__page-wrapper">
-            <template
-              v-for="(step, index) in sidebarSteps"
-              :key="step.key"
-            >
+            <template v-for="(step, index) in sidebarSteps" :key="step.key">
               <div
                 class="am-fs-sb__page"
-                :class="[{'selected': stepName === step.key}, {'selected': (stepName === 'packagesList' || stepName === 'packageAppointmentsList') && step.key === 'packages'}]"
+                :class="[
+                  { selected: stepName === step.key },
+                  {
+                    selected:
+                      (stepName === 'packagesList' ||
+                        stepName === 'packageAppointmentsList') &&
+                      step.key === 'packages',
+                  },
+                ]"
               >
                 <div
                   class="am-fs-sb__page-inner"
-                  :class="{'am-collapsed': sidebarCollapsed}"
+                  :class="{ 'am-collapsed': sidebarCollapsed }"
                 >
                   <div class="am-fs-sb__page-icon">
                     <span :class="`am-icon-${step.icon}`"></span>
@@ -58,18 +65,12 @@
                   </transition>
                 </div>
               </div>
-              <div
-                v-if="index === 0"
-                class="am-fs-sb__page-divider"
-              ></div>
+              <div v-if="index === 0" class="am-fs-sb__page-divider"></div>
             </template>
           </div>
         </template>
         <template #support-info>
-          <div
-            ref="sidebarFooterRef"
-            class="am-fs-sb__footer"
-          >
+          <div ref="sidebarFooterRef" class="am-fs-sb__footer">
             <div
               class="am-fs-sb__page"
               @click="sidebarCollapsed = !sidebarCollapsed"
@@ -109,10 +110,7 @@
           </div>
         </template>
       </SideBar>
-      <MainContent
-        :max-width="786"
-        :old-responsive="false"
-      >
+      <MainContent :max-width="786" :old-responsive="false">
         <template #header>
           <MainPanelHeader>
             <template #default>
@@ -121,7 +119,9 @@
                   <template v-if="stepIndex === 4">
                     {{ sidebarSteps[3].label }}
                   </template>
-                  <template v-else-if="sidebarSteps[stepIndex].key === 'profile'">
+                  <template
+                    v-else-if="sidebarSteps[stepIndex].key === 'profile'"
+                  >
                     {{ sidebarSteps[stepIndex].pageLabel }}
                   </template>
                   <template v-else>
@@ -131,12 +131,17 @@
                 <div
                   v-if="!sidebarVisibility"
                   class="am-cap__menu"
-                  @click="() => menuVisibility = !menuVisibility"
+                  @click="() => (menuVisibility = !menuVisibility)"
                 >
                   <span class="am-icon-menu"></span>
                 </div>
                 <TimeZoneSelect
-                  v-if="sidebarVisibility && stepName !== 'profile' && customizedOptions.timeZone.visibility"
+                  v-if="
+                    amSettings.featuresIntegrations.timezones.enabled &&
+                    sidebarVisibility &&
+                    stepName !== 'profile' &&
+                    customizedOptions.timeZone.visibility
+                  "
                 />
                 <MenuSlideDialog
                   :menu-items="sidebarSteps"
@@ -146,7 +151,7 @@
                   :width="240"
                   :customized-labels="globalStepLabels('sidebar')"
                   position="right"
-                  @update:visibility="(e) => menuVisibility = e"
+                  @update:visibility="(e) => (menuVisibility = e)"
                   @logout="menuLogout"
                 />
               </div>
@@ -166,9 +171,9 @@
 
 <script setup>
 // * Form construction
-import MainContent from "../../../common/SbsFormConstruction/MainContent/MainContent.vue";
-import SideBar from "../../../common/SbsFormConstruction/SideBar/SideBar.vue";
-import MainPanelHeader from "../../../common/SbsFormConstruction/MainContent/parts/MainPanelHeader.vue";
+import MainContent from '../../../common/SbsFormConstruction/MainContent/MainContent.vue'
+import SideBar from '../../../common/SbsFormConstruction/SideBar/SideBar.vue'
+import MainPanelHeader from '../../../common/SbsFormConstruction/MainContent/parts/MainPanelHeader.vue'
 
 // * Form Component Collection
 // authentication
@@ -177,15 +182,15 @@ import SendAccessLink from '../steps/Cabinet/common/Authentication/SendAccessLin
 import SendAccessLinkSuccess from '../steps/Cabinet/common/Authentication/SendAccessLinkSuccess.vue'
 import SetPass from '../steps/Cabinet/common/Authentication/SetPass.vue'
 // panel
-import Profile from "../steps/Cabinet/common/Profile/Profile.vue"
-import Appointments from "../steps/Cabinet/common/Appointments/Appointments.vue";
-import Events from "../steps/Cabinet/common/Events/Events.vue";
-import PackageAppointmentsList from "../steps/Cabinet/common/Packages/PackageAppointmentsList.vue";
-import PackagesList from "../steps/Cabinet/common/Packages/PackagesList.vue";
+import Profile from '../steps/Cabinet/common/Profile/Profile.vue'
+import Appointments from '../steps/Cabinet/common/Appointments/Appointments.vue'
+import Events from '../steps/Cabinet/common/Events/Events.vue'
+import PackageAppointmentsList from '../steps/Cabinet/common/Packages/PackageAppointmentsList.vue'
+import PackagesList from '../steps/Cabinet/common/Packages/PackagesList.vue'
 
 // * Dedicated Components
-import TimeZoneSelect from "../steps/Cabinet/common/parts/TimeZoneSelect.vue";
-import MenuSlideDialog from "../../../common/SbsFormConstruction/MenuSlideDialog/MenuSlideDialog.vue";
+import TimeZoneSelect from '../steps/Cabinet/common/parts/TimeZoneSelect.vue'
+import MenuSlideDialog from '../../../common/SbsFormConstruction/MenuSlideDialog/MenuSlideDialog.vue'
 
 // * import from Vue
 import {
@@ -197,50 +202,62 @@ import {
   onBeforeMount,
   onMounted,
   readonly,
-  watchEffect
+  watchEffect,
+  onUnmounted,
+  nextTick,
 } from 'vue'
 
 // * + this has to be tested for responsive usage
 // import { useElementSize } from "@vueuse/core";
 
 // * import composable
-import {
-  defaultCustomizeSettings
-} from '../../../../assets/js/common/defaultCustomize.js'
-import {
-  useColorTransparency
-} from '../../../../assets/js/common/colorManipulation.js'
-import {usePopulateMultiDimensionalObject} from "../../../../assets/js/common/objectAndArrayManipulation";
-
-let { pageNameHandler } = inject('headerFunctionality', {
-  pageNameHandler: () => 'Step-by-Step Booking Form'
-})
-
-pageNameHandler('Customer Panel')
+import { defaultCustomizeSettings } from '../../../../assets/js/common/defaultCustomize.js'
+import { useColorTransparency } from '../../../../assets/js/common/colorManipulation.js'
+import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Plugin Licence
 // let licence = inject('licence')
 
-// * Step index
-let stepIndex = inject('stepIndex')
+// * Root Settings
+let amSettings = inject('settings')
 
-let pagesType = inject('pagesType')
+// * Features
+let features = useReactiveCustomize().features
+provide('features', features)
+
+// * Step index
+let stepIndex = useReactiveCustomize().stepIndex
+provide('stepIndex', stepIndex)
+
+// * Page Type
+let pagesType = useReactiveCustomize().pagesType
+provide('pagesType', pagesType)
 
 const amLabels = inject('labels')
-let amTranslations = inject('translations')
-let langKey = inject('langKey')
-let stepName = inject('stepName')
-let pageRenderKey = inject('pageRenderKey')
-let amCustomize = inject('customize')
+// * Language Key
+let langKey = useReactiveCustomize().langKey
+provide('langKey', langKey)
+
+// * Step name
+let stepName = useReactiveCustomize().stepName
+provide('stepName', stepName)
+
+// * Sub Step name
+let subStepName = useReactiveCustomize().subStepName
+provide('subStepName', subStepName)
+
+// * Page render key
+let pageRenderKey = ref('capc')
+provide('pageRenderKey', pageRenderKey)
+
+// * Customize data
+const { amCustomize } = useReactiveCustomize()
+provide('customize', amCustomize)
 
 let amFonts = computed(() => {
   return amCustomize.value.fonts
 })
 provide('amFonts', amFonts)
-
-// * Origin key
-let originKey = ref('capc')
-provide('originKey', originKey)
 
 // * Cabinet Type
 let cabinetType = ref('customer')
@@ -252,12 +269,7 @@ let sendAccessLink = markRaw(SendAccessLink)
 let sendAccessLinkSuccess = markRaw(SendAccessLinkSuccess)
 let setPass = markRaw(SetPass)
 
-let authFlow = ref([
-  signIn,
-  sendAccessLink,
-  sendAccessLinkSuccess,
-  setPass
-])
+let authFlow = ref([signIn, sendAccessLink, sendAccessLinkSuccess, setPass])
 
 // * Panel steps
 let profile = markRaw(Profile)
@@ -271,7 +283,7 @@ let panelFlow = ref([
   appointments,
   events,
   packagesList,
-  packageAppointmentsList
+  packageAppointmentsList,
 ])
 
 let stepsArray = computed(() => {
@@ -280,24 +292,39 @@ let stepsArray = computed(() => {
   return panelFlow.value
 })
 
-watchEffect(() => {
-  stepName.value = stepsArray.value[stepIndex.value].key
-})
-
 // * Component reference
 let ameliaContainer = ref(null)
+
+let isLoaded = ref(false)
+
+onMounted(() => {
+  window.customizeComponentLoaded = true
+
+  if (typeof window.stylesInjectedV3 === 'function') {
+    if (window.v3.componentToMount === 'CustomizeCustomerPanel') {
+      window.stylesInjectedV3 = () => {
+        nextTick().then(() => {
+          isLoaded.value = true
+        })
+      }
+    }
+  }
+})
+
+onUnmounted(() => {
+  window.customizeComponentLoaded = false
+  // Reset to no-op function
+  window.stylesInjectedV3 = async function () {}
+})
 
 // * Plugin wrapper width
 let containerWidth = ref()
 provide('containerWidth', containerWidth)
 
-// * Empty state
-// let empty = ref(false)
-
 // * Mobile menu
 let menuVisibility = ref(false)
 
-function menuLogout () {
+function menuLogout() {
   menuVisibility.value = false
 }
 
@@ -321,7 +348,7 @@ let toggleSidebar = computed(() => {
   return amCustomize.value.capc.sidebar.options.toggle.visibility
 })
 
-watchEffect( () => {
+watchEffect(() => {
   sidebarCollapsed.value = toggleSidebar.value
 })
 
@@ -332,7 +359,7 @@ let sidebarFooterHeight = ref(0)
 let sidebarVisibility = ref(true)
 
 onMounted(() => {
-  if(sidebarFooterRef.value) {
+  if (sidebarFooterRef.value) {
     setTimeout(() => {
       sidebarFooterHeight.value = sidebarFooterRef.value.offsetHeight
     }, 200)
@@ -340,20 +367,25 @@ onMounted(() => {
 
   if (ameliaContainer.value) {
     containerWidth.value = ameliaContainer.value.offsetWidth
-    sidebarCollapsed.value = !toggleSidebar.value ? ameliaContainer.value.offsetWidth <= 600 : toggleSidebar.value
+    sidebarCollapsed.value = !toggleSidebar.value
+      ? ameliaContainer.value.offsetWidth <= 600
+      : toggleSidebar.value
     sidebarVisibility.value = ameliaContainer.value.offsetWidth > 480
   }
 })
 
 // * window resize listener
-window.addEventListener('resize', resize);
+window.addEventListener('resize', resize)
 // * resize function
 function resize() {
   if (ameliaContainer.value) {
     containerWidth.value = ameliaContainer.value.offsetWidth
-    sidebarCollapsed.value = !toggleSidebar.value ? ameliaContainer.value.offsetWidth <= 600 : toggleSidebar.value
+    sidebarCollapsed.value = !toggleSidebar.value
+      ? ameliaContainer.value.offsetWidth <= 600
+      : toggleSidebar.value
     sidebarVisibility.value = ameliaContainer.value.offsetWidth > 480
-    menuVisibility.value = ameliaContainer.value.offsetWidth > 481 ? false : menuVisibility.value
+    menuVisibility.value =
+      ameliaContainer.value.offsetWidth > 481 ? false : menuVisibility.value
   }
 }
 
@@ -361,56 +393,65 @@ function resize() {
 const baseUrls = inject('baseUrls')
 
 // * Array of Sidebar steps
-const sidebarSteps = computed(() =>
-  [{
-    key: 'profile',
-    icon: 'user',
-    pageLabel: labelsDisplay('my_profile', 'profile'),
-    label: amCustomize.value.capc.profile.options.lastName.visibility ? 'John Doe' : 'John',
-  },
-  {
-    key: 'appointments',
-    icon: 'service',
-    label: labelsDisplay('appointments', 'appointments'),
-  },
-  {
-    key: 'events',
-    icon: 'star-outline',
-    label: labelsDisplay('events', 'events'),
-  },
-  {
-    key: 'packages',
-    icon: 'shipment',
-    label: labelsDisplay('packages', 'packagesList'),
-  }]
-)
+const sidebarSteps = computed(() => {
+  let arr = [
+    {
+      key: 'profile',
+      icon: 'user',
+      pageLabel: labelsDisplay('my_profile', 'profile'),
+      label: amCustomize.value.capc.profile.options.lastName.visibility
+        ? 'John Doe'
+        : 'John',
+    },
+    {
+      key: 'appointments',
+      icon: 'service',
+      label: labelsDisplay('appointments', 'appointments'),
+    },
+    {
+      key: 'events',
+      icon: 'star-outline',
+      label: labelsDisplay('events', 'events'),
+    },
+    {
+      key: 'packages',
+      icon: 'shipment',
+      label: labelsDisplay('packages', 'packagesList'),
+    },
+  ]
+
+  if (!features.value.packages) {
+    arr = arr.filter((step) => step.key !== 'packages')
+  }
+
+  return arr
+})
 provide('sidebarSteps', sidebarSteps)
 
 let sidebarIndex = ref(0)
 
 onMounted(() => {
-  sidebarIndex.value = sidebarSteps.value.findIndex(a => a.key === stepName.value)
+  sidebarIndex.value = sidebarSteps.value.findIndex(
+    (a) => a.key === stepName.value
+  )
+})
 
+watchEffect(() => {
   if (amCustomize.value.fonts.customFontSelected) {
     activateCustomFontStyles()
+  } else {
+    importDefaultFonts()
   }
 })
 
-// * implementation of saved labels into amTranslation object
-let stepKey = ref('')
-
-function savedLabelsImplementation (labelObj) {
-  Object.keys(labelObj).forEach((labelKey) => {
-    if (labelKey in amCustomize.value[pageRenderKey.value][stepKey.value].translations) {
-      labelObj[labelKey] = {...labelObj[labelKey], ...amCustomize.value[pageRenderKey.value][stepKey.value].translations[labelKey]}
-    }
-  })
-}
-
-function activateCustomFontStyles () {
+function activateCustomFontStyles() {
   let head = document.head || document.getElementsByTagName('head')[0]
   if (head.querySelector('#amCustomFont')) {
     head.querySelector('#amCustomFont').remove()
+  }
+
+  if (head.querySelector('#amDefaultFontImport')) {
+    head.querySelector('#amDefaultFontImport').remove()
   }
 
   let css = `@font-face {font-family: '${amCustomize.value.fonts.fontFamily}'; src: url(${amCustomize.value.fonts.fontUrl});}`
@@ -421,6 +462,20 @@ function activateCustomFontStyles () {
   style.appendChild(document.createTextNode(css))
 }
 
+function importDefaultFonts() {
+  const head = document.head || document.getElementsByTagName('head')[0]
+  if (head.querySelector('#amDefaultFontImport')) {
+    return
+  }
+
+  const base = baseUrls.value.wpAmeliaPluginURL
+  const style = document.createElement('style')
+  style.setAttribute('type', 'text/css')
+  style.setAttribute('id', 'amDefaultFontImport')
+  style.textContent = `@import url("${base}v3/src/assets/scss/common/fonts/font.css");`
+  head.appendChild(style)
+}
+
 /**
  * Lifecycle Hooks
  */
@@ -428,23 +483,21 @@ onBeforeMount(() => {
   window.scrollTo({
     top: 0,
     left: 0,
-    behavior: 'smooth'
-  })
-  Object.keys(amCustomize.value[pageRenderKey.value]).forEach(step => {
-    if (step !== 'colors' && amCustomize.value[pageRenderKey.value][step].translations) {
-      stepKey.value = step
-      usePopulateMultiDimensionalObject('labels', amTranslations[pageRenderKey.value][step], savedLabelsImplementation)
-    }
+    behavior: 'smooth',
   })
 })
 
 // * Label computed function
-function labelsDisplay (label, stepKey) {
+function labelsDisplay(label, stepKey) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepKey].translations
-    && amCustomize.value[pageRenderKey.value][stepKey].translations[label]
-    && amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepKey].translations &&
+      amCustomize.value[pageRenderKey.value][stepKey].translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepKey].translations[label][
+        langKey.value
+      ]
+      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][
+          langKey.value
+        ]
       : amLabels[label]
   })
 
@@ -452,12 +505,19 @@ function labelsDisplay (label, stepKey) {
 }
 
 // * Step labels passed to inner components
-function globalStepLabels (step) {
+function globalStepLabels(step) {
   let stepLabels = {}
-  let customizedLabels = step ? amCustomize.value[pageRenderKey.value][step].translations : null
+  let customizedLabels = step
+    ? amCustomize.value[pageRenderKey.value][step].translations
+    : null
   if (customizedLabels && Object.keys(customizedLabels)) {
-    Object.keys(amCustomize.value[pageRenderKey.value][step].translations).forEach(label => {
-      stepLabels[label] = amCustomize.value[pageRenderKey.value][step].translations[label][langKey.value]
+    Object.keys(
+      amCustomize.value[pageRenderKey.value][step].translations
+    ).forEach((label) => {
+      stepLabels[label] =
+        amCustomize.value[pageRenderKey.value][step].translations[label][
+          langKey.value
+        ]
     })
   } else {
     stepLabels = {}
@@ -468,7 +528,8 @@ function globalStepLabels (step) {
 
 // * Custmozes Options
 let customizedOptions = computed(() => {
-  if (stepName.value === 'packageAppointmentsList') return amCustomize.value[pageRenderKey.value].packagesList.options
+  if (stepName.value === 'packageAppointmentsList')
+    return amCustomize.value[pageRenderKey.value].packagesList.options
   return amCustomize.value[pageRenderKey.value][stepName.value].options
 })
 
@@ -476,9 +537,11 @@ onBeforeMount(() => {})
 
 // * Colors block
 let amColors = computed(() => {
-  return amCustomize.value[pageRenderKey.value] ? amCustomize.value[pageRenderKey.value].colors : defaultCustomizeSettings[pageRenderKey.value].colors
+  return amCustomize.value[pageRenderKey.value]
+    ? amCustomize.value[pageRenderKey.value].colors
+    : defaultCustomizeSettings[pageRenderKey.value].colors
 })
-provide('amColors', amColors);
+provide('amColors', amColors)
 
 let cssVars = computed(() => {
   return {
@@ -489,6 +552,10 @@ let cssVars = computed(() => {
     '--am-c-main-bgr': amColors.value.colorMainBgr,
     '--am-c-main-heading-text': amColors.value.colorMainHeadingText,
     '--am-c-main-text': amColors.value.colorMainText,
+    '--am-c-main-text-op10': useColorTransparency(
+      amColors.value.colorMainText,
+      0.1
+    ),
     '--am-c-sb-bgr': amColors.value.colorSbBgr,
     '--am-c-sb-text': amColors.value.colorSbText,
     '--am-c-inp-bgr': amColors.value.colorInpBgr,
@@ -501,19 +568,35 @@ let cssVars = computed(() => {
     '--am-c-btn-prim-text': amColors.value.colorBtnPrimText,
     '--am-c-btn-sec': amColors.value.colorBtnSec,
     '--am-c-btn-sec-text': amColors.value.colorBtnSecText,
-    '--am-c-skeleton-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
-    '--am-c-skeleton-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
-    '--am-c-skeleton-sb-op20': useColorTransparency(amColors.value.colorSbText, 0.2),
-    '--am-c-skeleton-sb-op60': useColorTransparency(amColors.value.colorSbText, 0.6),
+    '--am-c-skeleton-op20': useColorTransparency(
+      amColors.value.colorMainText,
+      0.2
+    ),
+    '--am-c-skeleton-op60': useColorTransparency(
+      amColors.value.colorMainText,
+      0.6
+    ),
+    '--am-c-skeleton-sb-op20': useColorTransparency(
+      amColors.value.colorSbText,
+      0.2
+    ),
+    '--am-c-skeleton-sb-op60': useColorTransparency(
+      amColors.value.colorSbText,
+      0.6
+    ),
     '--am-font-family': amFonts.value.fontFamily,
 
     // css properties
-    '--am-rad-input': '6px',
-    '--am-fs-input': '15px',
+    '--am-rad-inp': '6px',
+    '--am-fs-inp': '15px',
     // -mw- max width
     // -brad- border-radius
-    '--am-mw-main': sidebarVisibility.value ? sidebarCollapsed.value ? '858px' : '1024px' : '520px',
-    '--am-brad-main': sidebarVisibility.value ? '0 0.5rem 0.5rem 0' : '0.5rem'
+    '--am-mw-main': sidebarVisibility.value
+      ? sidebarCollapsed.value
+        ? '858px'
+        : '1024px'
+      : '520px',
+    '--am-brad-main': sidebarVisibility.value ? '0 0.5rem 0.5rem 0' : '0.5rem',
   }
 })
 
@@ -521,23 +604,30 @@ let cssSideMenu = computed(() => {
   return {
     '--am-c-msd-bgr': amColors.value.colorSbBgr,
     '--am-c-msd-text': amColors.value.colorSbText,
-    '--am-c-msd-text-op05': useColorTransparency(amColors.value.colorSbText, 0.05),
-    '--am-c-msd-text-op10': useColorTransparency(amColors.value.colorSbText, 0.1),
-    '--am-c-msd-text-op60': useColorTransparency(amColors.value.colorSbText, 0.6),
+    '--am-c-msd-text-op05': useColorTransparency(
+      amColors.value.colorSbText,
+      0.05
+    ),
+    '--am-c-msd-text-op10': useColorTransparency(
+      amColors.value.colorSbText,
+      0.1
+    ),
+    '--am-c-msd-text-op60': useColorTransparency(
+      amColors.value.colorSbText,
+      0.6
+    ),
   }
 })
 </script>
 
 <script>
-
 export default {
-  name: "CustomerPanel",
+  name: 'CustomerPanel',
 }
 </script>
 
 <style lang="scss">
 @import '../../../../assets/scss/public/overides/overides';
-@import '../../../../assets/scss/common/icon-fonts/style';
 @import '../../../../assets/scss/common/empty-state/_empty-state-mixin.scss';
 @import '../../../../assets/scss/common/transitions/_transitions-mixin.scss';
 
@@ -551,6 +641,8 @@ export default {
       font-family: var(--am-font-family);
       font-style: initial;
       box-sizing: border-box;
+      word-break: break-word;
+      letter-spacing: normal;
     }
 
     // cap - cabinet panel
@@ -574,6 +666,92 @@ export default {
 
         &.am-collapsed {
           transition-delay: 1s;
+        }
+
+        // overrides for element plus components
+        // tabs
+        .el-tabs {
+          display: flex;
+          flex-direction: column-reverse;
+          gap: 16px 0;
+
+          &__nav {
+            gap: 0 40px;
+
+            &-wrap {
+              &:after {
+                background-color: var(--am-c-main-text-op10);
+              }
+
+              &.is-scrollable {
+                padding: 0 24px;
+              }
+            }
+
+            &-next,
+            &-prev {
+              color: var(--am-c-main-text);
+              top: 11px;
+            }
+          }
+
+          &__active-bar {
+            background-color: var(--am-c-primary);
+          }
+
+          &__item {
+            padding: 0;
+            line-height: 40px;
+            color: var(--am-c-main-text);
+            transition: color 0.2s ease-in-out;
+
+            &:nth-child(2) {
+              padding-left: 0;
+            }
+
+            &:last-child {
+              padding-right: 0;
+            }
+
+            &.is-active {
+              color: var(--am-c-primary);
+            }
+
+            &:focus-visible {
+              box-shadow: none;
+            }
+
+            &:hover {
+              color: var(--am-c-primary);
+            }
+
+            &.is-focus {
+              color: var(--am-c-main-text);
+
+              &.is-active {
+                color: var(--am-c-primary);
+              }
+            }
+          }
+
+          &__content {
+            overflow: unset;
+            position: static;
+          }
+        }
+
+        // collapse
+        .el-collapse-item {
+          &__wrap {
+            overflow: visible;
+          }
+
+          &__header {
+            border: none;
+            font-size: var(--am-fs-label);
+            line-height: 1.6;
+            height: unset;
+          }
         }
 
         * {
@@ -623,7 +801,7 @@ export default {
             align-items: center;
             flex: 1;
             position: relative;
-            font-size: var(--am-fs-input);
+            font-size: var(--am-fs-inp);
             min-width: 0;
           }
 

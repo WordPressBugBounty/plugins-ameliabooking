@@ -17,13 +17,12 @@ use AmeliaBooking\Infrastructure\Repository\AbstractRepository;
  */
 class EventPeriodsRepository extends AbstractRepository implements EventRepositoryInterface
 {
-
-    const FACTORY = EventPeriodFactory::class;
+    public const FACTORY = EventPeriodFactory::class;
 
     /**
      * @param EventPeriod $entity
      *
-     * @return bool
+     * @return int
      * @throws QueryExecutionException
      */
     public function add($entity)

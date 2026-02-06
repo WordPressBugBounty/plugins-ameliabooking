@@ -14,29 +14,34 @@
       v-model="infoFormData.firstName"
       name="firstName"
       :placeholder="labelsDisplay('enter_first_name')"
-    ></AmInput>
+    />
   </el-form-item>
   <!-- /First Name -->
 </template>
 
 <script setup>
-import AmInput from'../../../_components/input/AmInput.vue'
+import AmInput from '../../../_components/input/AmInput.vue'
+import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
 
-import { computed, inject } from "vue";
+import { computed, inject } from 'vue'
 
 let langKey = inject('langKey')
 let amLabels = inject('labels')
 
 let pageRenderKey = inject('pageRenderKey')
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value].infoStep.translations
-    && amCustomize.value[pageRenderKey.value].infoStep.translations[label]
-    && amCustomize.value[pageRenderKey.value].infoStep.translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value].infoStep.translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value].infoStep.translations &&
+      amCustomize.value[pageRenderKey.value].infoStep.translations[label] &&
+      amCustomize.value[pageRenderKey.value].infoStep.translations[label][
+        langKey.value
+      ]
+      ? amCustomize.value[pageRenderKey.value].infoStep.translations[label][
+          langKey.value
+        ]
       : amLabels[label]
   })
 
@@ -45,15 +50,12 @@ function labelsDisplay (label) {
 
 // * Form field data
 let infoFormData = inject('infoFormData')
-
 </script>
 
 <script>
 export default {
-  name: "FirstNameFormField"
+  name: 'FirstNameFormField',
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

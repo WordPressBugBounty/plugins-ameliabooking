@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -33,7 +33,7 @@ class PaymentsTable extends AbstractDatabaseTable
                    `amount` DOUBLE NOT NULL default 0,
                    `dateTime` datetime NULL,
                    `status` ENUM('paid', 'pending', 'partiallyPaid', 'refunded') NOT NULL,
-                   `gateway` ENUM('onSite', 'payPal', 'stripe', 'wc', 'mollie', 'razorpay', 'square') NOT NULL,
+                   `gateway` ENUM('onSite', 'payPal', 'stripe', 'wc', 'mollie', 'razorpay', 'square', 'barion') NOT NULL,
                    `gatewayTitle` varchar(255) NULL,
                    `data` text NULL,
                    `packageCustomerId` int(11) NULL,

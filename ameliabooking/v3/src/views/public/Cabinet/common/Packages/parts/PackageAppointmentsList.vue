@@ -493,7 +493,8 @@ function bookAppointment () {
           email: user.email,
           phone: user.phone,
           countryPhoneIso: user.countryPhoneIso,
-          externalId: user.externalId
+          externalId: user.externalId,
+          translations: user.translations
         },
         customerId: user.id,
         customFields: null,

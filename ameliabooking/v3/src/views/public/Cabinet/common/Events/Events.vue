@@ -33,10 +33,23 @@
       />
 
       <div
-        v-if="shortcodeData.cabinetType === 'employee' && amSettings.roles.allowWriteEvents && !eventAttendeeVisibility && !eventVisibility && !eventAttendeesVisibility && ready"
+        v-if="(shortcodeData.cabinetType === 'employee' && ready && !eventAttendeeVisibility && !eventVisibility && !eventAttendeesVisibility) &&
+          (((licence.isPro || licence.isDeveloper) && amSettings.featuresIntegrations.eTickets.enabled) || amSettings.roles.allowWriteEvents)"
         class="am-cap__actions"
+        :class="responsiveClass"
       >
         <AmButton
+          v-if="(licence.isPro || licence.isDeveloper) && amSettings.featuresIntegrations.eTickets.enabled && (amCustomize.events.options?.scanQrCodeBtn?.visibility ?? true)"
+          prefix="scan-qr-code"
+          size="small"
+          category="secondary"
+          type="plain"
+          @click="qrScannerVisibility = true"
+        >
+          {{amLabels.scan_e_ticket}}
+        </AmButton>
+        <AmButton
+          v-if="amSettings.roles.allowWriteEvents"
           :icon="plusIcon"
           prefix="plus"
           size="small"
@@ -83,6 +96,7 @@
               :tickets="useTicketsData(event)"
               :custom-fields="useCustomFieldsData(event.bookings, shortcodeData.cabinetType)"
               :location="useEventLocation(store, event)"
+              :qr-codes="qrCodeTicketsVisibility ? useEventQrCodes(event) : []"
               :google-meet-link="event.periods.length === 1 && event.periods[0].googleMeetUrl ? event.periods[0].googleMeetUrl : ''"
               :microsoft-teams-link="event.periods.length === 1 && event.periods[0].microsoftTeamsUrl ? event.periods[0].microsoftTeamsUrl : ''"
               :zoom-link="event.periods.length === 1 && event.periods[0].zoomMeeting ? event.periods[0].zoomMeeting.joinUrl : ''"
@@ -110,8 +124,8 @@
         ></EmptyState>
 
         <AmPagination
-          v-if="!eventAttendeeVisibility && !eventVisibility && !eventAttendeesVisibility && dateGroupedEvents && Object.keys(dateGroupedEvents).length > 0 && eventsCount > amSettings.general.itemsPerPageBackEnd"
-          :page-size="amSettings.general.itemsPerPageBackEnd"
+          v-if="!eventAttendeeVisibility && !eventVisibility && !eventAttendeesVisibility && dateGroupedEvents && Object.keys(dateGroupedEvents).length > 0 && eventsCount > amSettings.general.itemsPerPage"
+          :page-size="amSettings.general.itemsPerPage"
           :pager-count="5"
           layout="prev, pager, next"
           :total="eventsCount"
@@ -162,6 +176,12 @@
           @confirm="cancelBooking"
         >
         </CancelPopup>
+
+        <QrCodeScanner
+          v-if="qrScannerVisibility"
+          v-model:visibility="qrScannerVisibility"
+          @update:visibility="(value) => qrScannerVisibility = value"
+        />
       </template>
       <Skeleton v-else></Skeleton>
     </div>
@@ -193,6 +213,7 @@ import CancelPopup from "../../common/parts/CancelPopup.vue";
 import CollapseCard from "../parts/CollapseCard/CollapseCard.vue";
 import CabinetFilters from "../parts/Filters.vue";
 import Skeleton from "../../common/parts/Skeleton.vue";
+import QrCodeScanner from "../parts/QrCodeScanner.vue";
 
 // * Composables
 import {
@@ -209,6 +230,7 @@ import {
   usePeriodsData,
   useTicketsData,
   useEventLocation,
+  useEventQrCodes,
 } from "../../../../../assets/js/admin/event";
 import {
   useFrontEvent,
@@ -258,6 +280,9 @@ let plusIcon = {
   template: `<IconComponent icon="plus"/>`
 }
 
+// * Plugin Licence
+let licence = inject('licence')
+
 // * Root Settings
 const amSettings = inject('settings')
 
@@ -268,6 +293,11 @@ let amCustomize = inject('amCustomize')
 
 // * Data in shortcode
 const shortcodeData = inject('shortcodeData')
+
+// * Qr Code Tickets visibility
+let qrCodeTicketsVisibility = computed(() => {
+  return shortcodeData.value.cabinetType === 'customer' && (licence.isPro || licence.isDeveloper) && amSettings.featuresIntegrations.eTickets.enabled
+})
 
 // * labels
 const labels = inject('labels')
@@ -377,7 +407,7 @@ function getEvents (page = 1) {
   params.id = params.events
   params.group = true
   params.page = page
-  params.limit = amSettings.general.itemsPerPageBackEnd
+  params.limit = amSettings.general.itemsPerPage
 
   if (params.customers) {
     params.customerId = params.customers
@@ -664,6 +694,9 @@ function noShowData(noShowCount) {
 }
 provide('noShowData', { noShowData })
 
+// * Qr Scanner
+let qrScannerVisibility = ref(false)
+
 // * Colors
 let amColors = inject('amColors')
 
@@ -799,9 +832,20 @@ export default {
       display: flex;
       justify-content: flex-end;
       margin: 0 0 16px;
+      gap: 0 10px;
+
+      &.am-rw-420 {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        .am-button {
+          width: 100%;
+        }
+      }
 
       .am-button {
-        .am-icon-plus {
+        .am-icon-plus, .am-icon-scan-qr-code {
           font-size: 24px;
         }
       }

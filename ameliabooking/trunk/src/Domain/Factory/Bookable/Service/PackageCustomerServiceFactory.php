@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -91,6 +92,7 @@ class PackageCustomerServiceFactory
                             'lastName'  => $row['customer_lastName'],
                             'email'     => $row['customer_email'],
                             'phone'     => $row['customer_phone'],
+                            'status'    => !empty($row['customer_status']) ? $row['customer_status'] : null,
                         ],
                         'packageId'  => $row['package_customer_packageId'],
                         'tax'        => $row['package_customer_tax'],
@@ -103,6 +105,9 @@ class PackageCustomerServiceFactory
                         'status'        => $row['package_customer_status'],
                         'bookingsCount' => $row['package_customer_bookingsCount'],
                         'couponId'      => $row['package_customer_couponId'],
+                        'package'       => [
+                            'name' => $row['package_name']
+                        ]
                     ]
                 ];
             }
@@ -121,6 +126,8 @@ class PackageCustomerServiceFactory
                     'data'              => $row['payment_data'],
                     'wcOrderId'         => !empty($row['payment_wcOrderId']) ? $row['payment_wcOrderId'] : null,
                     'wcOrderItemId'     => !empty($row['payment_wcOrderItemId']) ? $row['payment_wcOrderItemId'] : null,
+                    'created'           => !empty($row['payment_created']) ? $row['payment_created'] : null,
+                    'invoiceNumber'     => !empty($row['payment_invoiceNumber']) ? $row['payment_invoiceNumber'] : null,
                 ];
             }
         }

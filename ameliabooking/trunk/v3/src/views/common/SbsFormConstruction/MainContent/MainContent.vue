@@ -3,6 +3,7 @@
     class="am-fs__main"
     :style="cssVars"
     :class="responsiveClass"
+    role="main"
   >
     <div class="am-fs__main-inner">
       <slot name="header"></slot>
@@ -115,7 +116,8 @@ let cssVars = computed(() => {
           height: calc(100% - 72px);
         }
 
-        &.am-capi {
+        &.am-capi, &.am-caep {
+          padding: 0;
           height: calc(100% - 136px);
         }
 
@@ -149,6 +151,10 @@ let cssVars = computed(() => {
         --am-brad-main-default: 0.5rem;
         .am-fs__main-content {
           padding: 16px;
+
+          &.am-capi, &.am-caep {
+            padding: 0;
+          }
         }
       }
     }

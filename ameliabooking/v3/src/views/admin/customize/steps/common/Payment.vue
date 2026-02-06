@@ -18,7 +18,7 @@
     ></component>
 
     <AmCheckbox
-      v-if="paymentGateway !== 'onSite'"
+      v-if="paymentGateway !== 'onSite' && features.depositPayment"
       v-model="paymentDeposit"
       class="am-payments__full"
       :label="props.customizedLabels.full_amount_consent"
@@ -43,6 +43,7 @@
         >
           <img
             :src="`${baseUrls.wpAmeliaPluginURL}/v3/src/assets/img/icons/${gateway === 'mollie' ? 'stripe' : gateway}.svg`"
+            :class="gateway"
           >
           <div>
             <p>
@@ -103,6 +104,9 @@ const baseUrls = inject('baseUrls')
 
 // * Plugin Licence
 let licence = inject('licence')
+
+// * Features
+let features = inject('features')
 
 // * Bookable type
 let bookableType = inject('bookableType')
@@ -331,6 +335,10 @@ const cssVars = computed(() => {
         img {
           height: 24px;
           width: 24px;
+        }
+
+        .barion {
+          width: 50px;
         }
 
         div {

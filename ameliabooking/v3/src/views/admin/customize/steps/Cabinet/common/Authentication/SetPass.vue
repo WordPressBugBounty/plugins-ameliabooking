@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="am-asi"
-    :style="cssVars"
-  >
+  <div class="am-asi" :style="cssVars">
     <div class="am-asi__top">
       <div class="am-asi__header">
         {{ labelsDisplay('new_password_set') }}
@@ -43,11 +40,7 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  computed,
-  inject,
-} from 'vue'
+import { ref, computed, inject } from 'vue'
 
 // * Components
 import { formFieldsTemplates } from '../../../../../../../assets/js/common/formFieldsTemplates'
@@ -56,9 +49,10 @@ import AmButton from '../../../../../../_components/button/AmButton.vue'
 // * Composables
 import { useResponsiveClass } from '../../../../../../../assets/js/common/responsive.js'
 import { useColorTransparency } from '../../../../../../../assets/js/common/colorManipulation.js'
+import { useReactiveCustomize } from '../../../../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Customize
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // * Labels
 let langKey = inject('langKey')
@@ -68,12 +62,19 @@ let pageRenderKey = inject('pageRenderKey')
 let stepName = inject('stepName')
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepName.value].translations
-    && amCustomize.value[pageRenderKey.value][stepName.value].translations[label]
-    && amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepName.value]
+      .translations &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[
+        label
+      ] &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[
+        label
+      ][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[
+          label
+        ][langKey.value]
       : amLabels[label]
   })
 
@@ -104,8 +105,8 @@ let infoFormRules = computed(() => {
       {
         min: 4,
         message: labelsDisplay('new_password_length'),
-        trigger: 'submit'
-      }
+        trigger: 'submit',
+      },
     ],
     confirmPassword: [
       {
@@ -116,8 +117,8 @@ let infoFormRules = computed(() => {
       {
         min: 4,
         message: labelsDisplay('new_password_length'),
-        trigger: 'submit'
-      }
+        trigger: 'submit',
+      },
     ],
   }
 })
@@ -133,8 +134,8 @@ let signInFormConstruction = ref({
       label: computed(() => labelsDisplay('new_password_colon')),
       placeholder: '',
       minLength: 3,
-      class: 'am-asi__item'
-    }
+      class: 'am-asi__item',
+    },
   },
   confirmPassword: {
     template: formFieldsTemplates.text,
@@ -145,16 +146,15 @@ let signInFormConstruction = ref({
       label: computed(() => labelsDisplay('new_password_colon_retype')),
       placeholder: '',
       minLength: 3,
-      class: 'am-asi__item'
-    }
+      class: 'am-asi__item',
+    },
   },
 })
-
 
 // * Submit Form
 function submitForm() {
   authFormRef.value.validate((valid) => {
-    return !!valid;
+    return !!valid
   })
 }
 
@@ -182,22 +182,46 @@ let cssVars = computed(() => {
     '--am-c-main-bgr': amColors.value.colorMainBgr,
     '--am-c-main-heading-text': amColors.value.colorMainHeadingText,
     '--am-c-main-text': amColors.value.colorMainText,
-    '--am-c-main-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
-    '--am-c-main-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
-    '--am-c-main-text-op40': useColorTransparency(amColors.value.colorMainText, 0.4),
-    '--am-c-main-text-op25': useColorTransparency(amColors.value.colorMainText, 0.25),
+    '--am-c-main-text-op70': useColorTransparency(
+      amColors.value.colorMainText,
+      0.7
+    ),
+    '--am-c-main-text-op60': useColorTransparency(
+      amColors.value.colorMainText,
+      0.6
+    ),
+    '--am-c-main-text-op40': useColorTransparency(
+      amColors.value.colorMainText,
+      0.4
+    ),
+    '--am-c-main-text-op25': useColorTransparency(
+      amColors.value.colorMainText,
+      0.25
+    ),
     '--am-c-inp-bgr': amColors.value.colorInpBgr,
     '--am-c-inp-border': amColors.value.colorInpBorder,
     '--am-c-inp-text': amColors.value.colorInpText,
     '--am-c-inp-placeholder': amColors.value.colorInpPlaceHolder,
     '--am-c-btn-prim': amColors.value.colorBtnPrim,
     '--am-c-btn-prim-text': amColors.value.colorBtnPrimText,
-    '--am-c-skeleton-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
-    '--am-c-skeleton-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-skeleton-op20': useColorTransparency(
+      amColors.value.colorMainText,
+      0.2
+    ),
+    '--am-c-skeleton-op60': useColorTransparency(
+      amColors.value.colorMainText,
+      0.6
+    ),
     '--am-font-family': amFonts.value.fontFamily,
 
-    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
-    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
+    '--am-c-scroll-op30': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.3
+    ),
+    '--am-c-scroll-op10': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.1
+    ),
   }
 })
 </script>
@@ -205,7 +229,7 @@ let cssVars = computed(() => {
 <script>
 export default {
   name: 'AuthNewPass',
-  key: 'setPass'
+  key: 'setPass',
 }
 </script>
 
@@ -217,7 +241,8 @@ export default {
     max-width: 400px;
     width: 100%;
     background-color: var(--am-c-main-bgr);
-    box-shadow: 0 0 9px -4px var(--am-c-main-text-op40), 0px 17px 35px -12px var(--am-c-main-text-op25);
+    box-shadow: 0 0 9px -4px var(--am-c-main-text-op40),
+      0px 17px 35px -12px var(--am-c-main-text-op25);
     border-radius: 12px;
     padding: 32px 24px 24px;
     margin: 0 auto;

@@ -96,6 +96,10 @@ class CustomFieldFactory
             $customField->setUseAsLocation(new BooleanValueObject($data['useAsLocation']));
         }
 
+        if (isset($data['includeInInvoice'])) {
+            $customField->setIncludeInInvoice(new BooleanValueObject($data['includeInInvoice']));
+        }
+
         if (isset($data['saveFirstChoice'])) {
             $customField->setSaveFirstChoice(new BooleanValueObject($data['saveFirstChoice']));
         }
@@ -117,8 +121,8 @@ class CustomFieldFactory
         foreach ($rows as $row) {
             $customFieldId = $row['cf_id'];
             $optionId      = $row['cfo_id'];
-            $serviceId     = $row['s_id'];
-            $eventId       = $row['e_id'];
+            $serviceId     = !empty($row['s_id']) ? $row['s_id'] : null;
+            $eventId       = !empty($row['e_id']) ? $row['e_id'] : null;
 
             $customFields[$customFieldId]['id']              = $row['cf_id'];
             $customFields[$customFieldId]['label']           = $row['cf_label'];
@@ -132,6 +136,7 @@ class CustomFieldFactory
             $customFields[$customFieldId]['useAsLocation']   = $row['cf_useAsLocation'];
             $customFields[$customFieldId]['width']           = $row['cf_width'];
             $customFields[$customFieldId]['saveFirstChoice'] = $row['cf_saveFirstChoice'];
+            $customFields[$customFieldId]['includeInInvoice'] = $row['cf_includeInInvoice'];
 
 
             if ($optionId) {

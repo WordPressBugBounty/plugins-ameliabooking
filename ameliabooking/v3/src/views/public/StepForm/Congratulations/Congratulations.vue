@@ -11,7 +11,13 @@
         :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/congratulations/congratulations.svg'"
         :alt="amLabels.congratulations"
       >
-      <p class="am-fs__congrats-main-heading">
+      <div v-if="waitingListOptions.enabled && waitingListOptions.isWaitingListSlot" class="am-fs__congrats-main-waiting-list-block">
+        <p class="am-fs__congrats-main-heading">
+          {{amLabels.your_position_on_waiting_list}} {{ '#' + (waitingListOptions.peopleWaiting + 1)}}
+        </p>
+        <span>{{amLabels.appointment_waiting_list_notify_message}}</span>
+      </div>
+      <p v-else class="am-fs__congrats-main-heading">
         {{ amLabels.congratulations }}
       </p>
       <span v-if="booked && booked.data.length && bookedType === 'appointment'">{{amLabels.appointment_id}} #{{ booked.data[0].appointmentId  }}</span>
@@ -130,6 +136,8 @@ let customer = computed(() => {
     phone: store.getters['booking/getCustomerPhone'],
   }
 })
+
+let waitingListOptions = computed(() => store.getters['appointmentWaitingListOptions/getOptions'])
 
 /**************
  * Navigation *
@@ -291,6 +299,12 @@ export default {
         font-weight: 400;
         font-size: 13px;
         line-height: 18px;
+      }
+
+      &-waiting-list-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
     }
     &-info-mobile {

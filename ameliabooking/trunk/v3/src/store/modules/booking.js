@@ -17,6 +17,8 @@ export default {
           phone: '',
           countryPhoneIso : '',
           translations: null,
+          customFields: null,
+          subscribeToMailchimp: settings.mailchimp.checkedByDefault,
         },
         customFields: {},
         customerId: 0,
@@ -51,6 +53,7 @@ export default {
     payPalActions: null,
     appointmentsIndex: 0,
     currentCartItem: null,
+    shownCart: false,
     appointments: [
       {
         packageId: null,
@@ -169,8 +172,8 @@ export default {
         for (let date in selection.slots) {
           for (let time in selection.slots[date]) {
             for (let i = 0; i < selection.slots[date][time].length; i++) {
-              if ((selection.providerId && selection.slots[date][time][i][0] === selection.providerId) ||
-                (selection.locationId && selection.slots[date][time][i][1] === selection.locationId)
+              if ((selection.providerId && selection.slots[date][time][i].e === selection.providerId) ||
+                (selection.locationId && selection.slots[date][time][i].l === selection.locationId)
               ) {
                 if (!(date in slots)) {
                   slots[date] = {}
@@ -276,12 +279,20 @@ export default {
       return state.appointment.bookings[0].customer.countryPhoneIso
     },
 
+    getCustomerSubscribe (state) {
+      return state.appointment.bookings[0].customer.subscribeToMailchimp
+    },
+
     getCustomerExternalId (state) {
       return state.appointment.bookings[0].customer.externalId
     },
 
     getCustomerTranslations (state) {
       return state.appointment.bookings[0].customer.translations
+    },
+
+    getCustomerCustomFields (state) {
+      return state.appointment.bookings[0].customer.customFields
     },
 
     getAvailableCustomFields (state) {
@@ -368,6 +379,10 @@ export default {
       return state.currentCartItem
     },
 
+    getShownCart (state) {
+      return state.shownCart
+    },
+
     getCartItemIndex (state) {
       return state.appointmentsIndex
     },
@@ -402,6 +417,10 @@ export default {
       state.currentCartItem = payload
     },
 
+    setShownCart (state, payload) {
+      state.shownCart = payload
+    },
+
     setCartItemIndex (state, payload) {
       state.appointmentsIndex = payload
     },
@@ -433,8 +452,15 @@ export default {
           extras: state.appointments[i].services[state.appointments[i].serviceId].list[payload].extras,
           duration: null,
           slots: [],
+          price: null,
         }
       }
+    },
+
+    unsetRecurringItems (state) {
+      let i = state.appointmentsIndex
+
+      state.appointments[i].services[state.appointments[i].serviceId].list.length = 1
     },
 
     setMultipleAppointmentsRange (state, payload) {
@@ -539,8 +565,21 @@ export default {
         .duration = payload
     },
 
-    setAvailableCustomFields (state, payload) {
-      state.appointment.bookings[0].customFields = payload
+    setAvailableCustomFields(state, payload) {
+      let customFields = state.appointment.bookings[0].customer?.customFields
+      let populateAvailableCustomFields = { ...payload }
+
+      if (state.appointment.bookings[0].customer?.id && customFields) {
+        let customerCustomFields = JSON.parse(customFields)
+
+        for (let id in customerCustomFields) {
+          if (populateAvailableCustomFields.hasOwnProperty(id)) {
+            populateAvailableCustomFields[id].value = customerCustomFields[id].value
+          }
+        }
+      }
+
+      state.appointment.bookings[0].customFields = populateAvailableCustomFields
     },
 
     setBookableType (state, payload) {
@@ -580,6 +619,10 @@ export default {
       state.appointment.bookings[0].customer.countryPhoneIso = payload
     },
 
+    setCustomerSubscribe (state, payload) {
+      state.appointment.bookings[0].customer.subscribeToMailchimp = payload
+    },
+
     setCustomerExternalId (state, payload) {
       state.appointment.bookings[0].customer.externalId = payload
     },
@@ -614,6 +657,10 @@ export default {
 
     setCustomerTranslations (state, payload) {
       state.appointment.bookings[0].customer.translations = payload
+    },
+
+    setCustomerCustomFields (state, payload) {
+      state.appointment.bookings[0].customer.customFields = payload
     },
 
     setAttachment (state, payload) {

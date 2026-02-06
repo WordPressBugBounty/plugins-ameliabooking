@@ -34,10 +34,10 @@
             {value: 'eventscalendarbooking', text: 'Events Calendar Booking', classes: 'am-booking-shortcode'},
             {value: 'customer_panel', text: 'Customer Panel', classes: 'am-booking-shortcode'},
             {value: 'employee_panel', text: 'Employee Panel', classes: 'am-booking-shortcode'},
-            {value: 'booking', text: 'Booking', classes: 'am-booking-shortcode am-outdated-booking-shortcode'},
-            {value: 'search', text: 'Search', classes: 'am-booking-shortcode am-outdated-booking-shortcode'},
-            {value: 'catalog', text: 'Catalog', classes: 'am-booking-shortcode am-outdated-booking-shortcode'},
-            {value: 'events', text: 'Events', classes: 'am-booking-shortcode am-outdated-booking-shortcode'},
+            // {value: 'booking', text: 'Booking', classes: 'am-booking-shortcode am-outdated-booking-shortcode'},
+            // {value: 'search', text: 'Search', classes: 'am-booking-shortcode am-outdated-booking-shortcode'},
+            // {value: 'catalog', text: 'Catalog', classes: 'am-booking-shortcode am-outdated-booking-shortcode'},
+            // {value: 'events', text: 'Events', classes: 'am-booking-shortcode am-outdated-booking-shortcode'},
           ],
           value: view,
           onSelect: function () {
@@ -154,6 +154,18 @@
             })
 
             if (view === 'stepbooking') {
+              // Layout version selector
+              viewBody.push({
+                type: 'listbox',
+                label: wpAmeliaLabels.layout_select_label,
+                name: 'am_layout',
+                values: [
+                  {value: '1', text: wpAmeliaLabels.layout_dropdown},
+                  {value: '2', text: wpAmeliaLabels.layout_list}
+                ],
+                classes: 'am-booking-layout',
+              })
+
               // Selector
               viewBody.push({
                 type: 'listbox',
@@ -483,20 +495,6 @@
               })
             }
 
-            if (view === 'customer_panel') {
-              // Selector
-              viewBody.push({
-                type: 'listbox',
-                label: wpAmeliaLabels.choose_panel_version,
-                name: 'am_version',
-                values: [
-                  {value: 1, text: wpAmeliaLabels.panel_version_old},
-                  {value: 2, text: wpAmeliaLabels.panel_version_new}
-                ],
-                classes: 'am_cabinet_version',
-              })
-            }
-
             break
         }
 
@@ -551,6 +549,10 @@
 
                 if (e.data.am_trigger && view === 'stepbooking' && e.data.am_in_dialog) {
                   shortCodeString += ' in_dialog=1'
+                }
+
+                if (view === 'stepbooking' && e.data.am_layout) {
+                  shortCodeString += ' layout=' + e.data.am_layout
                 }
 
                 editor.insertContent((view === 'stepbooking' ? '[ameliastepbooking' : '[ameliabooking') + shortCodeString + ']')
@@ -696,12 +698,6 @@
 
               case ('customer_panel'):
               case ('employee_panel'):
-                if (view === 'customer_panel') {
-                  if (e.data.am_version) {
-                    shortCodeString += ' version=' + e.data.am_version
-                  }
-                }
-
                 if (e.data.am_cabinet_appointments) {
                   shortCodeString += ' appointments=1'
                 }
@@ -792,10 +788,12 @@
 
             // Create array of employees objects
             for (let i = 0; i < response.data.employees.length; i++) {
-              employees.push({
-                value: response.data.employees[i].id,
-                text: response.data.employees[i].firstName + ' ' + response.data.employees[i].lastName + ' (id: ' + response.data.employees[i].id + ')'
-              })
+              if (response.data.employees[i].show) {
+                employees.push({
+                  value: response.data.employees[i].id,
+                  text: response.data.employees[i].firstName + ' ' + response.data.employees[i].lastName + ' (id: ' + response.data.employees[i].id + ')'
+                })
+              }
             }
 
             // Create array of locations objects

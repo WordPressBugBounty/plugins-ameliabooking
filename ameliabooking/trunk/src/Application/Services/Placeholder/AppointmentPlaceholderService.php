@@ -1,11 +1,13 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
 namespace AmeliaBooking\Application\Services\Placeholder;
 
+use AmeliaBooking\Application\Services\Bookable\BookableApplicationService;
 use AmeliaBooking\Application\Services\Booking\AppointmentApplicationService;
 use AmeliaBooking\Application\Services\Helper\HelperService;
 use AmeliaBooking\Domain\Collection\Collection;
@@ -22,10 +24,12 @@ use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Factory\Bookable\Service\ServiceFactory;
 use AmeliaBooking\Domain\Factory\Booking\Appointment\CustomerBookingFactory;
+use AmeliaBooking\Domain\Factory\User\UserFactory;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\Services\Reservation\ReservationServiceInterface;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
+use AmeliaBooking\Domain\ValueObjects\String\PaymentStatus;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\CategoryRepository;
@@ -71,15 +75,15 @@ class AppointmentPlaceholderService extends PlaceholderService
 
         if (empty($timeZone)) {
             $gmtOffset = get_option('gmt_offset');
-            $timeZone = sprintf('Etc/GMT%+d', -$gmtOffset);
+            $timeZone  = sprintf('Etc/GMT%+d', -$gmtOffset);
         }
 
         $dateTime = new DateTime("now", new \DateTimeZone($timeZone));
 
-        $appointment_date = $dateTime->format($dateFormat);
-        $appointment_date_time = $dateTime->format($dateFormat . ' ' . $timeFormat);
+        $appointment_date       = $dateTime->format($dateFormat);
+        $appointment_date_time  = $dateTime->format($dateFormat . ' ' . $timeFormat);
         $appointment_start_time = $dateTime->format($timeFormat);
-        $appointment_end_time = (new DateTime("now +1 hour", new \DateTimeZone($timeZone)))->format($timeFormat);
+        $appointment_end_time   = (new DateTime("now +1 hour", new \DateTimeZone($timeZone)))->format($timeFormat);
 
         return [
             'appointment_id'          => '1',
@@ -89,20 +93,23 @@ class AppointmentPlaceholderService extends PlaceholderService
             'appointment_end_time'    => $appointment_end_time,
             'appointment_notes'       => 'Appointment note',
             'appointment_price'       => $helperService->getFormattedPrice(100),
+            'payment_due_amount'      => $helperService->getFormattedPrice(80),
             'appointment_cancel_url'  => 'http://cancel_url.com',
             'appointment_approve_url' => 'http://approve_url.com',
             'appointment_reject_url'  => 'http://reject_url.com',
             'zoom_join_url'           => $type === 'email' ?
-                '<a href="#">' . BackendStrings::getCommonStrings()['zoom_click_to_join'] . '</a>' : 'https://join_zoom_link.com',
+                '<a href="#">' . BackendStrings::get('zoom_click_to_join') . '</a>' : 'https://join_zoom_link.com',
             'zoom_host_url'           => $type === 'email' ?
-                '<a href="#">' . BackendStrings::getCommonStrings()['zoom_click_to_start'] . '</a>' : 'https://start_zoom_link.com',
-            'google_meet_url'          => $type === 'email' ?
-                '<a href="#">' . BackendStrings::getCommonStrings()['google_meet_join'] . '</a>' : 'https://join_google_meet_link.com',
-            'lesson_space_url'       => $type === 'email' ?
-                '<a href="#">' . BackendStrings::getCommonStrings()['lesson_space_join'] . '</a>' : 'https://lessonspace.com/room-id',
+                '<a href="#">' . BackendStrings::get('zoom_click_to_start') . '</a>' : 'https://start_zoom_link.com',
+            'google_meet_url'         => $type === 'email' ?
+                '<a href="#">' . BackendStrings::get('google_meet_join') . '</a>' : 'https://join_google_meet_link.com',
+            'lesson_space_url'        => $type === 'email' ?
+                '<a href="#">' . BackendStrings::get('lesson_space_join') . '</a>' : 'https://lessonspace.com/room-id',
+            'microsoft_teams_url'     => $type === 'email' ?
+                '<a href="#">' . BackendStrings::get('microsoft_teams_join') . '</a>' : 'https://join_microsoft_teams_link.com',
             'appointment_duration'    => $helperService->secondsToNiceDuration(1800),
             'appointment_deposit_payment'     => $helperService->getFormattedPrice(20),
-            'appointment_status'      => BackendStrings::getCommonStrings()['approved'],
+            'appointment_status'      => BackendStrings::get('approved'),
             'category_name'           => 'Category Name',
             'service_description'     => 'Service Description',
             'reservation_description' => 'Service Description',
@@ -113,7 +120,7 @@ class AppointmentPlaceholderService extends PlaceholderService
             'service_price'           => $helperService->getFormattedPrice(100),
             'service_extras'          => 'Extra1, Extra2, Extra3',
             'service_extras_details'  => '<p>Extra1: ($1.00 x 1) x 3</p><p>Extra2: ($2.00 x 2)</p><p>Extra3: ($3.00 x 3)</p>' .
-                '<p>-------------------------</p>' . '<p>' . BackendStrings::getCommonStrings()['extras_total_price'] . ' $16.00</p>'
+                '<p>-------------------------</p>' . '<p>' . BackendStrings::get('extras_total_price') . ' $16.00</p>'
 
         ];
     }
@@ -122,7 +129,9 @@ class AppointmentPlaceholderService extends PlaceholderService
      * @param array        $appointment
      * @param int          $bookingKey
      * @param string       $type
-     * @param AbstractUser $customer
+     * @param string       $token
+     * @param bool         $invoice
+     * @param string       $notificationType
      *
      * @return array
      *
@@ -133,8 +142,58 @@ class AppointmentPlaceholderService extends PlaceholderService
      * @throws ContainerException
      * @throws Exception
      */
-    public function getPlaceholdersData($appointment, $bookingKey = null, $type = null, $customer = null, $allBookings = null)
-    {
+    public function getAppointmentPlaceholderData(
+        $appointment,
+        $bookingKey = null,
+        $type = null,
+        $token = null,
+        $invoice = false,
+        $notificationType = null
+    ) {
+        $data = [];
+
+        $this->setData($appointment, $bookingKey);
+
+        $data = array_merge($data, $this->getAppointmentData($appointment, $bookingKey, $type));
+        $data = array_merge($data, $this->getServiceData($appointment, $bookingKey, $type));
+        $data = array_merge($data, $this->getEmployeeData($appointment, $bookingKey));
+        $data = array_merge($data, $this->getBookingData($appointment, $type, $bookingKey, $token, $data['deposit'], null, $invoice));
+        $data = array_merge($data, $this->getCustomFieldsData($appointment, $type, $bookingKey));
+
+        if ($notificationType === 'customer_appointment_approved') {
+            $data = array_merge($data, $this->getCouponsData($appointment, $type, $bookingKey));
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param array        $appointment
+     * @param int          $bookingKey
+     * @param string       $type
+     * @param AbstractUser $customer
+     * @param array        $allBookings
+     * @param bool         $invoice
+     * @param string       $notificationType
+     *
+     * @return array
+     *
+     * @throws InvalidArgumentException
+     * @throws ContainerValueNotFoundException
+     * @throws NotFoundException
+     * @throws QueryExecutionException
+     * @throws ContainerException
+     * @throws Exception
+     */
+    public function getPlaceholdersData(
+        $appointment,
+        $bookingKey = null,
+        $type = null,
+        $customer = null,
+        $allBookings = null,
+        $invoice = false,
+        $notificationType = null
+    ) {
         /** @var CustomerBookingRepository $bookingRepository */
         $bookingRepository = $this->container->get('domain.booking.customerBooking.repository');
 
@@ -156,18 +215,114 @@ class AppointmentPlaceholderService extends PlaceholderService
 
         $locale = $this->getLocale($appointment, $bookingKey);
 
-        $data = array_merge($data, $this->getAppointmentData($appointment, $bookingKey, $type));
-        $data = array_merge($data, $this->getServiceData($appointment, $bookingKey, $type));
-        $data = array_merge($data, $this->getEmployeeData($appointment, $bookingKey));
+        $data = array_merge($data, $this->getAppointmentPlaceholderData($appointment, $bookingKey, $type, $token, false, $notificationType));
         $data = array_merge($data, $this->getRecurringAppointmentsData($appointment, $bookingKey, $type, 'recurring', $bookingKeyForEmployee));
         if (empty($customer)) {
-            $data = array_merge($data, $this->getGroupedAppointmentData($appointment, $bookingKey, $type, $token));
+            $data = array_merge($data, $this->getGroupedAppointmentData($appointment, $bookingKey, $type));
         }
-        $data = array_merge($data, $this->getBookingData($appointment, $type, $bookingKey, $token, $data['deposit']));
         $data = array_merge($data, $this->getCompanyData($bookingKey !== null ? $locale : null));
         $data = array_merge($data, $this->getCustomersData($appointment, $type, $bookingKey, $customer));
-        $data = array_merge($data, $this->getCustomFieldsData($appointment, $type, $bookingKey));
-        $data = array_merge($data, $this->getCouponsData($appointment, $type, $bookingKey));
+
+        return $data;
+    }
+
+
+    /**
+     * @param array  $reservationData
+     *
+     * @return array
+     *
+     * @throws InvalidArgumentException
+     * @throws ContainerValueNotFoundException
+     * @throws NotFoundException
+     * @throws QueryExecutionException
+     * @throws ContainerException
+     * @throws Exception
+     */
+    public function getInvoicePlaceholdersData($reservationData)
+    {
+        $type = 'email';
+
+        $data = ['customer_custom_fields' => []];
+
+        $appointment = $reservationData['appointment'];
+        $bookingKey  = array_search($reservationData['booking']['id'], array_column($appointment['bookings'], 'id'));
+
+        $this->setData($appointment, $bookingKey);
+
+        $locale = $this->getLocale($appointment, $bookingKey);
+
+        $appointments = array_merge([['appointment' => $appointment, 'booking' => $reservationData['booking']]], $reservationData['recurring']);
+
+        foreach ($appointments as $recurringAppointment) {
+            $appointment = $recurringAppointment['appointment'];
+            $bookingKey  = array_search($recurringAppointment['booking']['id'], array_column($appointment['bookings'], 'id'));
+
+            $placeholders = $this->getAppointmentPlaceholderData($appointment, $bookingKey, $type, null, true);
+            $invoiceItem  = $placeholders['invoice_items_booking'][0];
+
+            if (empty($data['invoice_number'])) {
+                $data['invoice_number'] = $placeholders['payment_invoice_number'];
+            }
+            $data['invoice_method'] = !empty($placeholders['payment_gateway_title']) ? $placeholders['payment_gateway_title'] : $placeholders['payment_type'];
+            $data['invoice_issued'] = $placeholders['payment_created'];
+
+            $index = "service_{$appointment['serviceId']}_{$recurringAppointment['booking']['price']}";
+            if (!empty($data['items'][$index])) {
+                $data['items'][$index]['invoice_qty']         += $invoiceItem['invoice_qty'];
+                $data['items'][$index]['invoice_subtotal']    += $invoiceItem['invoice_subtotal'];
+                $data['items'][$index]['invoice_discount']    += $invoiceItem['invoice_discount'];
+                $data['items'][$index]['service_discount']    += $invoiceItem['service_discount'];
+                $data['items'][$index]['invoice_tax']         += $invoiceItem['invoice_tax'];
+                $data['items'][$index]['invoice_paid_amount'] += $invoiceItem['invoice_paid_amount'];
+                $data['items'][$index]['total_tax']           += $invoiceItem['total_tax'];
+            } else {
+                $data['items'][$index] = $invoiceItem;
+                $data['items'][$index]['item_name'] = $placeholders['service_name'];
+            }
+
+            $extraItems      = $placeholders['invoice_items_extras'];
+            $extraItemsTaxes = $invoiceItem['invoice_extras_items'];
+            foreach ($extraItems as $extraItem) {
+                $index = $extraItem['item_index'];
+                if (!empty($data['items'][$index])) {
+                    $data['items'][$index]['invoice_qty']      += $extraItem['invoice_qty'];
+                    $data['items'][$index]['invoice_subtotal'] += $extraItem['invoice_subtotal'];
+                    $data['items'][$index]['invoice_tax']      += !empty($extraItemsTaxes[$extraItem['item_id']]['tax']['amount']) ?
+                        $extraItemsTaxes[$extraItem['item_id']]['tax']['amount'] : 0;
+                    $data['items'][$index]['invoice_discount'] += !empty($extraItemsTaxes[$extraItem['item_id']]['full_discount']) ?
+                        $extraItemsTaxes[$extraItem['item_id']]['full_discount'] : 0;
+                } else {
+                    $data['items'][$index] = array_merge(
+                        $extraItem,
+                        !empty($extraItemsTaxes[$extraItem['item_id']]) ?
+                            [
+                                'invoice_tax' =>
+                                $extraItemsTaxes[$extraItem['item_id']]['tax']['amount'],
+                                'invoice_tax_rate' => $extraItemsTaxes[$extraItem['item_id']]['tax']['rate'],
+                                'invoice_tax_excluded' => $extraItemsTaxes[$extraItem['item_id']]['tax']['excluded'],
+                                'invoice_tax_type' => $extraItemsTaxes[$extraItem['item_id']]['tax']['type'],
+                                'invoice_discount' => !empty($extraItemsTaxes[$extraItem['item_id']]['full_discount']) ?
+                                    $extraItemsTaxes[$extraItem['item_id']]['full_discount'] : 0,
+                            ] :
+                            []
+                    );
+                }
+            }
+
+            $data['customer_custom_fields'] = array_merge(
+                $data['customer_custom_fields'],
+                array_filter($placeholders, function ($key) {
+                    return strpos($key, 'invoice_custom_field_') === 0;
+                }, ARRAY_FILTER_USE_KEY)
+            );
+        }
+
+        $data['items'] = array_values($data['items']);
+        $data['invoice_tax'] = array_sum(array_column($data['items'], 'total_tax'));
+
+        $data = array_merge($data, $this->getCompanyData($bookingKey !== null ? $locale : null));
+        $data = array_merge($data, $this->getCustomersData($appointment, $type, $bookingKey));
 
         return $data;
     }
@@ -199,7 +354,8 @@ class AppointmentPlaceholderService extends PlaceholderService
             $appointment['provider'] = $user->toArray();
         }
 
-        if ($bookingKey !== null && $appointment['bookings'][$bookingKey]['utcOffset'] !== null
+        if (
+            $bookingKey !== null && $appointment['bookings'][$bookingKey]['utcOffset'] !== null
             && $settingsService->getSetting('general', 'showClientTimeZone')
         ) {
             $info = !empty($appointment['bookings'][$bookingKey]['info'])
@@ -227,7 +383,37 @@ class AppointmentPlaceholderService extends PlaceholderService
                 DateTimeService::getCustomDateTimeInUtc($appointment['initialAppointmentDateTime']['bookingEnd']),
                 $appointment['bookings'][$bookingKey]['utcOffset']
             ) : '';
-        } else if ($bookingKey === null && !empty($appointment['provider']['timeZone'])) {
+
+            if (!empty($appointment['initialAppointmentDateTime']) && $timeZone) {
+                $bookingStart = DateTimeService::getDateTimeObjectInTimeZone(
+                    DateTimeService::getCustomDateTimeObject(
+                        $appointment['bookingStart']
+                    )->setTimezone(new \DateTimeZone($timeZone))->format('Y-m-d H:i:s'),
+                    'UTC'
+                );
+
+                $bookingEnd = DateTimeService::getDateTimeObjectInTimeZone(
+                    DateTimeService::getCustomDateTimeObject(
+                        $appointment['bookingEnd']
+                    )->setTimezone(new \DateTimeZone($timeZone))->format('Y-m-d H:i:s'),
+                    'UTC'
+                );
+
+                $oldBookingStart = DateTimeService::getDateTimeObjectInTimeZone(
+                    DateTimeService::getCustomDateTimeObject(
+                        $appointment['initialAppointmentDateTime']['bookingStart']
+                    )->setTimezone(new \DateTimeZone($timeZone))->format('Y-m-d H:i:s'),
+                    'UTC'
+                );
+
+                $oldBookingEnd = DateTimeService::getDateTimeObjectInTimeZone(
+                    DateTimeService::getCustomDateTimeObject(
+                        $appointment['initialAppointmentDateTime']['bookingEnd']
+                    )->setTimezone(new \DateTimeZone($timeZone))->format('Y-m-d H:i:s'),
+                    'UTC'
+                );
+            }
+        } elseif ($bookingKey === null && !empty($appointment['provider']['timeZone'])) {
             $timeZone = $appointment['provider']['timeZone'];
 
             $bookingStart = DateTimeService::getDateTimeObjectInTimeZone(
@@ -279,7 +465,7 @@ class AppointmentPlaceholderService extends PlaceholderService
         $lessonSpaceLink = '';
         if (array_key_exists('lessonSpace', $appointment) && $appointment['lessonSpace']) {
             $lessonSpaceLink = $type === 'email' ?
-                '<a href="' . $appointment['lessonSpace'] . '">' . BackendStrings::getCommonStrings()['lesson_space_join'] . '</a>'
+                '<a href="' . $appointment['lessonSpace'] . '">' . BackendStrings::get('lesson_space_join') . '</a>'
                 : $appointment['lessonSpace'];
         }
 
@@ -291,13 +477,20 @@ class AppointmentPlaceholderService extends PlaceholderService
         $googleMeetUrl = '';
         if (array_key_exists('googleMeetUrl', $appointment) && $appointment['googleMeetUrl']) {
             $googleMeetUrl = $type === 'email' ?
-                '<a href="' . $appointment['googleMeetUrl'] . '">' . BackendStrings::getCommonStrings()['google_meet_join'] . '</a>'
+                '<a href="' . $appointment['googleMeetUrl'] . '">' . BackendStrings::get('google_meet_join') . '</a>'
                 : $appointment['googleMeetUrl'];
+        }
+
+        $microsoftTeamsUrl = '';
+        if (array_key_exists('microsoftTeamsUrl', $appointment) && $appointment['microsoftTeamsUrl']) {
+            $microsoftTeamsUrl = $type === 'email' ?
+                '<a href="' . $appointment['microsoftTeamsUrl'] . '">' . BackendStrings::get('microsoft_teams_joi') . '</a>'
+                : $appointment['microsoftTeamsUrl'];
         }
 
         return [
             'appointment_id'         => !empty($appointment['id']) ? $appointment['id'] : '',
-            'appointment_status'     => BackendStrings::getCommonStrings()[$appointment['status']],
+            'appointment_status'     => BackendStrings::get($appointment['status']),
             'appointment_notes'      => !empty($appointment['internalNotes']) ? $appointment['internalNotes'] : '',
             'appointment_date'       => date_i18n($dateFormat, $bookingStart->getTimestamp()),
             'appointment_date_time'  => date_i18n($dateFormat . ' ' . $timeFormat, $bookingStart->getTimestamp()),
@@ -309,12 +502,13 @@ class AppointmentPlaceholderService extends PlaceholderService
             'initial_appointment_end_time' => !empty($oldBookingEnd) ? date_i18n($timeFormat, $oldBookingEnd->getTimestamp()) : '',
             'lesson_space_url'       => $lessonSpaceLink,
             'zoom_host_url'          => $zoomStartUrl && $type === 'email' ?
-                '<a href="' . $zoomStartUrl . '">' . BackendStrings::getCommonStrings()['zoom_click_to_start'] . '</a>'
+                '<a href="' . $zoomStartUrl . '">' . BackendStrings::get('zoom_click_to_start') . '</a>'
                 : $zoomStartUrl,
             'zoom_join_url'          => $zoomJoinUrl && $type === 'email' ?
-                '<a href="' . $zoomJoinUrl . '">' . BackendStrings::getCommonStrings()['zoom_click_to_join'] . '</a>'
+                '<a href="' . $zoomJoinUrl . '">' . BackendStrings::get('zoom_click_to_join') . '</a>'
                 : $zoomJoinUrl,
             'google_meet_url'        => $googleMeetUrl,
+            'microsoft_teams_url'    => $microsoftTeamsUrl,
             'time_zone'              => $timeZone,
         ];
     }
@@ -336,16 +530,28 @@ class AppointmentPlaceholderService extends PlaceholderService
         $categoryRepository = $this->container->get('domain.bookable.category.repository');
         /** @var ServiceRepository $serviceRepository */
         $serviceRepository = $this->container->get('domain.bookable.service.repository');
+        /** @var UserRepository $userRepository */
+        $userRepository = $this->container->get('domain.users.repository');
 
         /** @var HelperService $helperService */
         $helperService = $this->container->get('application.helper.service');
         /** @var AppointmentApplicationService $appointmentAS */
         $appointmentAS = $this->container->get('application.booking.appointment.service');
+        /** @var BookableApplicationService $bookableAS */
+        $bookableAS = $this->container->get('application.bookable.service');
 
         /** @var Service $service */
-        $service = $serviceRepository->getByIdWithExtras($appointmentArray['serviceId']);
+        $service = $appointmentArray['providerId']
+            ? $bookableAS->getAppointmentService($appointmentArray['serviceId'], $appointmentArray['providerId'])
+            : $serviceRepository->getByIdWithExtras($appointmentArray['serviceId']);
+
         /** @var Category $category */
         $category = $categoryRepository->getById($service->getCategoryId()->getValue());
+
+        /** @var Provider $provider */
+        $provider = $appointmentAS->isPeriodCustomPricing($service)
+            ? $userRepository->getById($appointmentArray['providerId'])
+            : null;
 
         $locale = $this->getLocale($appointmentArray, $bookingKey);
 
@@ -377,11 +583,18 @@ class AppointmentPlaceholderService extends PlaceholderService
                     continue;
                 }
 
-                $duration = $booking['duration'] ? $booking['duration'] : $service->getDuration()->getValue();
+                $duration = $booking['duration'] ?: $service->getDuration()->getValue();
 
-                $price = $appointmentAS->getBookingPriceForServiceDuration(
+                $price = $appointmentAS->getBookingPriceForService(
                     $service,
-                    $duration
+                    CustomerBookingFactory::create(
+                        [
+                            'duration' => $duration,
+                            'persons'  => $booking['persons'],
+                        ]
+                    ),
+                    $provider,
+                    $appointmentArray['bookingStart']
                 );
 
                 $servicePrices[] = $helperService->getFormattedPrice($price);
@@ -392,9 +605,16 @@ class AppointmentPlaceholderService extends PlaceholderService
             $duration = !empty($appointmentArray['bookings'][$bookingKey]['duration'])
                 ? $appointmentArray['bookings'][$bookingKey]['duration'] : $service->getDuration()->getValue();
 
-            $price = $appointmentAS->getBookingPriceForServiceDuration(
+            $price = $appointmentAS->getBookingPriceForService(
                 $service,
-                $duration
+                CustomerBookingFactory::create(
+                    [
+                        'duration' => $duration,
+                        'persons'  => $appointmentArray['bookings'][$bookingKey]['persons'],
+                    ]
+                ),
+                $provider,
+                $appointmentArray['bookingStart']
             );
 
             $servicePrices[] = $helperService->getFormattedPrice(
@@ -426,11 +646,11 @@ class AppointmentPlaceholderService extends PlaceholderService
             if (
                 ($bookingKey === null && ($booking['isChangedStatus'] || $booking['status'] === BookingStatus::APPROVED
                     || $booking['status'] === BookingStatus::PENDING)) || $bookingKey === $key
-                )
-            {
+            ) {
                 foreach ((array)$booking['extras'] as $bookingExtra) {
                     $bookingExtras[$bookingExtra['extraId']] = [
-                        'quantity' => $bookingExtra['quantity']
+                        'quantity' => $bookingExtra['quantity'],
+                        'price'    => $bookingExtra['price']
                     ];
                 }
 
@@ -470,7 +690,8 @@ class AppointmentPlaceholderService extends PlaceholderService
                         $extra->getDuration()->getValue() * $bookingExtra['quantity'] : 0;
                 }
 
-                if ($bookingDuration > $maxBookingDuration &&
+                if (
+                    $bookingDuration > $maxBookingDuration &&
                     ($booking['status'] === BookingStatus::APPROVED || $booking['status'] === BookingStatus::PENDING)
                 ) {
                     $maxBookingDuration = $bookingDuration;
@@ -496,14 +717,17 @@ class AppointmentPlaceholderService extends PlaceholderService
                 }
             );
 
-            foreach (array_shift($lastBooking)['extras'] as $ex) {
+            foreach ($lastBooking ? array_shift($lastBooking)['extras'] : [] as $ex) {
                 $lastBookingExtraIds[$ex['extraId']] = $ex;
             }
         }
 
-        $allExtraNames = "";
+        $allExtraNames   = "";
         $allExtraDetails = "";
-        $allExtraSum = 0;
+        $allExtraSum     = 0;
+
+        $invoiceItems = [];
+
         /** @var Extra $extra */
         foreach ($extras->getItems() as $extra) {
             $extraId = $extra->getId()->getValue();
@@ -528,12 +752,15 @@ class AppointmentPlaceholderService extends PlaceholderService
                 : $extra->getAggregatedPrice()->getValue()) && $persons !== 1;
 
             if (!empty($data["service_extra_{$extraId}_name"])) {
-                $allExtraNames .= $data["service_extra_{$extraId}_name"].', ';
+                $allExtraNames .= $data["service_extra_{$extraId}_name"] . ', ';
             }
 
             if (array_key_exists($extraId, $bookingExtras) && $bookingExtras[$extraId]['quantity'] !== 0) {
                 if ($bookingKey === null) {
-                    if (!array_key_exists($extraId, $lastBookingExtraIds)) {
+                    if (
+                        empty($appointmentArray['sendForAllBookings']) &&
+                        !array_key_exists($extraId, $lastBookingExtraIds)
+                    ) {
                         continue;
                     }
                 }
@@ -545,16 +772,28 @@ class AppointmentPlaceholderService extends PlaceholderService
 
                 $allExtraSum += $extra->getPrice()->getValue() * $bookingExtras[$extraId]['quantity'] *
                     ($multiplyByNumberOfPeople ? $persons : 1);
+
+                $invoiceItems[] = [
+                    'item_id'            => $extraId,
+                    'item_index'         => "extra_{$extraId}_{$bookingExtras[$extraId]['price']}",
+                    'item_name'          => $extra->getName()->getValue(),
+                    'invoice_qty'        => $bookingExtras[$extraId]['quantity'] * ($multiplyByNumberOfPeople ? $persons : 1),
+                    'invoice_unit_price' => $bookingExtras[$extraId]['price'],
+                    'invoice_subtotal'   => 0,
+                    'invoice_tax'        => 0
+                ];
             }
         }
 
-        $data["service_extras"]         = substr($allExtraNames, 0, -2);
+        $data["service_extras"] = substr($allExtraNames, 0, -2);
 
-        $data['deposit']                = $service->getDeposit() && $service->getDeposit()->getValue();
+        $data['deposit'] = $service->getDeposit() && $service->getDeposit()->getValue();
+
+        $data['invoice_items_extras'] = $invoiceItems;
 
         $data["service_extras_details"] = $allExtraDetails ? ($allExtraDetails . ($type !== 'whatsapp' ?
             ($type === 'email' ? '<p>' : $break) . "-------------------------" . ($type === 'email' ? '</p>' : $break) : '') .
-            ($type === 'email' ? '<p>' : '') . BackendStrings::getCommonStrings()['extras_total_price'] .
+            ($type === 'email' ? '<p>' : '') . BackendStrings::get('extras_total_price') .
             " {$helperService->getFormattedPrice($allExtraSum)}" . ($type === 'email' ? '</p>' : '')) : "";
 
         return $data;
@@ -695,7 +934,7 @@ class AppointmentPlaceholderService extends PlaceholderService
         $recurringAppointmentDetails = [];
 
         foreach ($appointment['recurring'] as $recurringData) {
-            $recurringBookingKey = null;
+            $recurringBookingKey            = null;
             $recurringBookingKeyForEmployee = null;
 
             $isForCustomer =
@@ -708,7 +947,7 @@ class AppointmentPlaceholderService extends PlaceholderService
                         if ($recurringBooking['id'] === $recurringData['booking']['id']) {
                             $recurringBookingKey = $key;
                         }
-                    } else if ($recurringBooking['customerId'] === $appointment['bookings'][$bookingKey]['customerId']) {
+                    } elseif ($bookingKey !== null && $recurringBooking['customerId'] === $appointment['bookings'][$bookingKey]['customerId']) {
                         $recurringBookingKey = $key;
                     }
                 }
@@ -733,7 +972,7 @@ class AppointmentPlaceholderService extends PlaceholderService
                 isset(
                     $recurringData['appointment']['bookings'][$recurringBookingKey],
                     $recurringData['appointment']['bookings'][$recurringBookingKey]['id']
-                ) ? $bookingRepository->getToken($recurringData['appointment']['bookings'][$recurringBookingKey]['id']) :(
+                ) ? $bookingRepository->getToken($recurringData['appointment']['bookings'][$recurringBookingKey]['id']) : (
                     $recurringBookingKeyForEmployee !== null &&
                     isset(
                         $recurringData['appointment']['bookings'][$recurringBookingKeyForEmployee],
@@ -800,7 +1039,9 @@ class AppointmentPlaceholderService extends PlaceholderService
             $helperService = $this->container->get('application.helper.service');
 
             $content = $helperService->getBookingTranslation(
-                $recurringBookingKey !== null ? $helperService->getLocaleFromBooking($recurringData['appointment']['bookings'][$recurringBookingKey]['info']) : null,
+                $recurringBookingKey !== null ?
+                    $helperService->getLocaleFromBooking($recurringData['appointment']['bookings'][$recurringBookingKey]['info']) :
+                    null,
                 json_encode($appointmentsSettings['translations']),
                 $placeholderString
             ) ?: $appointmentsSettings[$placeholderString];
@@ -856,7 +1097,11 @@ class AppointmentPlaceholderService extends PlaceholderService
         }
 
         foreach ($appointment['bookings'] as $bookingId => $booking) {
-            if ($booking['status'] === BookingStatus::CANCELED || $booking['status'] === BookingStatus::REJECTED || $booking['status'] === BookingStatus::NO_SHOW) {
+            if (
+                $booking['status'] === BookingStatus::CANCELED ||
+                $booking['status'] === BookingStatus::REJECTED ||
+                $booking['status'] === BookingStatus::NO_SHOW
+            ) {
                 continue;
             }
 
@@ -883,7 +1128,7 @@ class AppointmentPlaceholderService extends PlaceholderService
             $content = $appointmentsSettings['groupAppointmentPlaceholder' . ($type === null || $type === 'email' ? '' : 'Sms')] ;
             if ($type === 'email') {
                 $content = str_replace(array("\n","\r"), '', $content);
-            } else if ($type === 'whatsapp') {
+            } elseif ($type === 'whatsapp') {
                 $content = str_replace(array("\n","\r"), '; ', $content);
                 $content = preg_replace('!\s+!', ' ', $content);
             }
@@ -911,7 +1156,7 @@ class AppointmentPlaceholderService extends PlaceholderService
      * @throws NotFoundException
      * @throws QueryExecutionException
      */
-    public function getAmountData(&$bookingArray, $entity)
+    public function getAmountData(&$bookingArray, $entity, $invoice = false)
     {
         /** @var ReservationServiceInterface $reservationService */
         $reservationService = $this->container->get('application.reservation.service')->get(Entities::APPOINTMENT);
@@ -939,7 +1184,7 @@ class AppointmentPlaceholderService extends PlaceholderService
         $bookable = ServiceFactory::create(
             [
                 'price'           => $bookingArray['price'],
-                'aggregatedPrice' => !!$bookingArray['aggregatedPrice'],
+                'aggregatedPrice' => !empty($bookingArray['aggregatedPrice']),
                 'extras'          => $extras,
             ]
         );
@@ -948,16 +1193,12 @@ class AppointmentPlaceholderService extends PlaceholderService
         $booking = CustomerBookingFactory::create(
             [
                 'persons' => $bookingArray['persons'],
-                'coupon'  => $bookingArray['coupon'],
+                'coupon'  => !empty($bookingArray['coupon']) ? $bookingArray['coupon'] : null,
                 'extras'  => $bookingArray['extras'],
-                'tax'     => $bookingArray['tax'],
+                'tax'     => !empty($bookingArray['tax']) ? $bookingArray['tax'] : null,
             ]
         );
 
-        return [
-            'price'     => $reservationService->getPaymentAmount($booking, $bookable),
-            'discount'  => $reservationService->getPaymentAmount($booking, $bookable, 'discount'),
-            'deduction' => $reservationService->getPaymentAmount($booking, $bookable, 'deduction'),
-        ];
+        return $reservationService->getPaymentAmount($booking, $bookable, $invoice);
     }
 }

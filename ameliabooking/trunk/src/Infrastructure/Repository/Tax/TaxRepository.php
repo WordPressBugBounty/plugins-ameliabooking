@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -8,12 +9,17 @@ namespace AmeliaBooking\Infrastructure\Repository\Tax;
 
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
+use AmeliaBooking\Domain\Entity\Booking\Event\Event;
 use AmeliaBooking\Domain\Entity\Tax\Tax;
+use AmeliaBooking\Domain\Factory\Booking\Event\EventFactory;
 use AmeliaBooking\Domain\Factory\Tax\TaxFactory;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Connection;
-use AmeliaBooking\Infrastructure\Repository\AbstractStatusRepository;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
+use AmeliaBooking\Infrastructure\Repository\AbstractRepository;
+use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Bookable\PackagesTable;
+use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Bookable\ServicesTable;
+use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\EventsTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Tax\TaxesToEntitiesTable;
 
 /**
@@ -21,10 +27,9 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Tax\TaxesToEntitiesTable;
  *
  * @package AmeliaBooking\Infrastructure\Repository\Tax
  */
-class TaxRepository extends AbstractStatusRepository
+class TaxRepository extends AbstractRepository
 {
-
-    const FACTORY = TaxFactory::class;
+    public const FACTORY = TaxFactory::class;
 
     /** @var string */
     protected $taxesToEntitiesTable;
@@ -46,7 +51,7 @@ class TaxRepository extends AbstractStatusRepository
     /**
      * @param Tax $entity
      *
-     * @return string|false
+     * @return int
      * @throws QueryExecutionException
      */
     public function add($entity)
@@ -54,10 +59,14 @@ class TaxRepository extends AbstractStatusRepository
         $data = $entity->toArray();
 
         $params = [
-            ':name'   => $data['name'],
-            ':amount' => $data['amount'],
-            ':type'   => $data['type'],
-            ':status' => $data['status'],
+            ':name'        => $data['name'],
+            ':amount'      => $data['amount'],
+            ':type'        => $data['type'],
+            ':status'      => $data['status'],
+            ':allServices' => !empty($data['allServices']) ? 1 : 0,
+            ':allEvents'   => !empty($data['allEvents']) ? 1 : 0,
+            ':allPackages' => !empty($data['allPackages']) ? 1 : 0,
+            ':allExtras'   => !empty($data['allExtras']) ? 1 : 0,
         ];
 
         try {
@@ -65,9 +74,9 @@ class TaxRepository extends AbstractStatusRepository
                 "INSERT INTO
                 {$this->table} 
                 (
-                `name`, `amount`, `type`, `status`  
+                `name`, `amount`, `type`, `status`, `allServices`, `allEvents`, `allPackages`, `allExtras`
                 ) VALUES (
-                :name, :amount, :type, :status  
+                :name, :amount, :type, :status, :allServices, :allEvents, :allPackages, :allExtras
                 )"
             );
 
@@ -96,21 +105,29 @@ class TaxRepository extends AbstractStatusRepository
         $data = $entity->toArray();
 
         $params = [
-            ':name'   => $data['name'],
-            ':amount' => $data['amount'],
-            ':type'   => $data['type'],
-            ':status' => $data['status'],
-            ':id'     => $id,
+            ':name'        => $data['name'],
+            ':amount'      => $data['amount'],
+            ':type'        => $data['type'],
+            ':status'      => $data['status'],
+            ':allServices' => !empty($data['allServices']) ? 1 : 0,
+            ':allEvents'   => !empty($data['allEvents']) ? 1 : 0,
+            ':allPackages' => !empty($data['allPackages']) ? 1 : 0,
+            ':allExtras'   => !empty($data['allExtras']) ? 1 : 0,
+            ':id'          => $id,
         ];
 
         try {
             $statement = $this->connection->prepare(
                 "UPDATE {$this->table}
                 SET
-                `name`   = :name,
+                `name` = :name,
                 `amount` = :amount,
-                `type`   = :type,
-                `status` = :status
+                `type` = :type,
+                `status` = :status,
+                `allServices` = :allServices,
+                `allEvents` = :allEvents,
+                `allPackages` = :allPackages,
+                `allExtras` = :allExtras
                 WHERE
                 id = :id"
             );
@@ -133,6 +150,7 @@ class TaxRepository extends AbstractStatusRepository
      * @return Tax
      * @throws QueryExecutionException
      * @throws NotFoundException
+     * @throws InvalidArgumentException
      */
     public function getById($id)
     {
@@ -144,10 +162,14 @@ class TaxRepository extends AbstractStatusRepository
                     t.amount AS tax_amount,
                     t.type AS tax_type,
                     t.status AS tax_status,
+                    t.allServices AS tax_allServices,
+                    t.allEvents AS tax_allEvents,
+                    t.allPackages AS tax_allPackages,
+                    t.allExtras AS tax_allExtras,
                     te.entityId AS tax_entityId,
                     te.entityType AS tax_entityType
                 FROM {$this->table} t
-                LEFT JOIN {$this->taxesToEntitiesTable} te ON te.taxId = t.id
+                LEFT JOIN {$this->taxesToEntitiesTable} te ON te.taxId = t.id AND te.entityType != 'event'
                 WHERE t.id = :taxId"
             );
 
@@ -164,7 +186,33 @@ class TaxRepository extends AbstractStatusRepository
             throw new NotFoundException('Data not found in ' . __CLASS__);
         }
 
-        return call_user_func([static::FACTORY, 'createCollection'], $rows)->getItem($id);
+        $eventsTable = EventsTable::getTableName();
+
+        /** @var Tax $tax */
+        $tax = call_user_func([static::FACTORY, 'createCollection'], $rows)->getItem($id);
+
+        $statement = $this->connection->prepare(
+            "SELECT
+                   e.id AS id,
+                   e.name AS name
+                FROM {$eventsTable} e
+                INNER JOIN {$this->taxesToEntitiesTable} te ON te.entityId = e.id AND te.entityType = 'event'
+                WHERE te.taxId = :taxId"
+        );
+
+        $statement->bindParam(':taxId', $id);
+
+        $statement->execute();
+
+        $rows = $statement->fetchAll();
+
+        $tax->setEventList(new Collection());
+
+        foreach ($rows as $row) {
+            $tax->getEventList()->addItem(EventFactory::create($row));
+        }
+
+        return $tax;
     }
 
     /**
@@ -172,6 +220,7 @@ class TaxRepository extends AbstractStatusRepository
      *
      * @return Collection
      * @throws QueryExecutionException
+     * @throws InvalidArgumentException
      */
     public function getWithEntities($criteria)
     {
@@ -185,6 +234,10 @@ class TaxRepository extends AbstractStatusRepository
                     t.amount AS tax_amount,
                     t.type AS tax_type,
                     t.status AS tax_status,
+                    t.allServices AS tax_allServices,
+                    t.allEvents AS tax_allEvents,
+                    t.allPackages AS tax_allPackages,
+                    t.allExtras AS tax_allExtras,
                     te.entityId AS tax_entityId,
                     te.entityType AS tax_entityType
                     FROM {$this->table} t
@@ -200,7 +253,51 @@ class TaxRepository extends AbstractStatusRepository
             throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
         }
 
-        return call_user_func([static::FACTORY, 'createCollection'], $rows);
+        /** @var Collection $taxes */
+        $taxes = call_user_func([static::FACTORY, 'createCollection'], $rows);
+
+        $taxesIds = array_column($taxes->toArray(), 'id');
+
+        if ($taxesIds && !empty($criteria['events'])) {
+            $eventsTable = EventsTable::getTableName();
+
+            $statement = $this->connection->prepare(
+                "SELECT
+                    e.id AS id,
+                    e.name AS name
+                FROM {$this->taxesToEntitiesTable} te
+                INNER JOIN {$eventsTable} e ON te.entityId = e.id AND te.entityType = 'event'
+                WHERE te.taxId IN (" . implode(', ', $taxesIds) . ")"
+            );
+
+            $statement->execute();
+
+            $rows = $statement->fetchAll();
+
+            /** @var Collection $events */
+            $events = new Collection();
+
+            foreach ($rows as $row) {
+                if (!$events->keyExists($row['id'])) {
+                    $events->addItem(EventFactory::create($row), $row['id']);
+                }
+            }
+
+            /** @var Tax $tax */
+            foreach ($taxes->getItems() as $tax) {
+                /** @var Tax $taxEvent */
+                foreach ($tax->getEventList()->getItems() as $taxEvent) {
+                    if ($events->keyExists($taxEvent->getId()->getValue())) {
+                        /** @var Event $event */
+                        $event = $events->getItem($taxEvent->getId()->getValue());
+
+                        $taxEvent->setName($event->getName());
+                    }
+                }
+            }
+        }
+
+        return $taxes;
     }
 
     /**
@@ -233,10 +330,10 @@ class TaxRepository extends AbstractStatusRepository
                 $params[$param] = $value;
             }
 
-            $where[] = "t.id IN (
+            $where[] = "(t.id IN (
                     SELECT taxId FROM {$this->taxesToEntitiesTable} 
                     WHERE entityId IN (" . implode(', ', $queryServices) . ") AND entityType = 'service'
-                )";
+                ) OR t.allServices = 1)";
         }
 
         if (!empty($criteria['extras'])) {
@@ -250,10 +347,10 @@ class TaxRepository extends AbstractStatusRepository
                 $params[$param] = $value;
             }
 
-            $where[] = "t.id IN (
+            $where[] = "(t.id IN (
                     SELECT taxId FROM {$this->taxesToEntitiesTable} 
                     WHERE entityId IN (" . implode(', ', $queryExtras) . ") AND entityType = 'extra'
-                )";
+                ) OR t.allExtras = 1)";
         }
 
         if (!empty($criteria['events'])) {
@@ -267,10 +364,10 @@ class TaxRepository extends AbstractStatusRepository
                 $params[$param] = $value;
             }
 
-            $where[] = "t.id IN (
+            $where[] = "(t.id IN (
                     SELECT taxId FROM {$this->taxesToEntitiesTable} 
                     WHERE entityId IN (" . implode(', ', $queryEvents) . ") AND entityType = 'event'
-                )";
+                ) OR t.allEvents = 1)";
         }
 
         if (!empty($criteria['packages'])) {
@@ -284,10 +381,10 @@ class TaxRepository extends AbstractStatusRepository
                 $params[$param] = $value;
             }
 
-            $where[] = "t.id IN (
+            $where[] = "(t.id IN (
                     SELECT taxId FROM {$this->taxesToEntitiesTable} 
                     WHERE entityId IN (" . implode(', ', $queryPackages) . ") AND entityType = 'package'
-                )";
+                ) OR t.allPackages = 1)";
         }
 
 
@@ -298,16 +395,26 @@ class TaxRepository extends AbstractStatusRepository
             (int)$itemsPerPage
         );
 
+        $order = "ORDER BY id";
+        if (!empty($criteria['sort'])) {
+            $order = "ORDER BY {$criteria['sort']['field']} {$criteria['sort']['order']}";
+        }
+
         try {
             $statement = $this->connection->prepare(
                 "SELECT
-                t.id AS tax_id,
-                t.name AS tax_name,
-                t.amount AS tax_amount,
-                t.type AS tax_type,
-                t.status AS tax_status
+                    t.id AS tax_id,
+                    t.name AS tax_name,
+                    t.amount AS tax_amount,
+                    t.type AS tax_type,
+                    t.status AS tax_status,
+                    t.allServices AS tax_allServices,
+                    t.allEvents AS tax_allEvents,
+                    t.allPackages AS tax_allPackages,
+                    t.allExtras AS tax_allExtras
                 FROM {$this->table} t
                 {$where}
+                {$order}
                 {$limit}"
             );
 
@@ -350,10 +457,27 @@ class TaxRepository extends AbstractStatusRepository
                 $params[$param] = $value;
             }
 
-            $where[] = "t.id IN (
+            $where[] = "(t.id IN (
                 SELECT taxId FROM {$this->taxesToEntitiesTable} 
                 WHERE entityId IN (" . implode(', ', $queryServices) . ") AND entityType = 'service'
-            )";
+            ) OR t.allServices = 1)";
+        }
+
+        if (!empty($criteria['extras'])) {
+            $queryExtras = [];
+
+            foreach ($criteria['extras'] as $index => $value) {
+                $param = ':extra' . $index;
+
+                $queryExtras[] = $param;
+
+                $params[$param] = $value;
+            }
+
+            $where[] = "(t.id IN (
+                SELECT taxId FROM {$this->taxesToEntitiesTable} 
+                WHERE entityId IN (" . implode(', ', $queryExtras) . ") AND entityType = 'extra'
+            ) OR t.allExtras = 1)";
         }
 
         if (!empty($criteria['events'])) {
@@ -367,10 +491,10 @@ class TaxRepository extends AbstractStatusRepository
                 $params[$param] = $value;
             }
 
-            $where[] = "t.id IN (
+            $where[] = "(t.id IN (
                 SELECT taxId FROM {$this->taxesToEntitiesTable} 
                 WHERE entityId IN (" . implode(', ', $queryEvents) . ") AND entityType = 'event'
-            )";
+            ) OR t.allEvents = 1)";
         }
 
         if (!empty($criteria['packages'])) {
@@ -384,10 +508,10 @@ class TaxRepository extends AbstractStatusRepository
                 $params[$param] = $value;
             }
 
-            $where[] = "t.id IN (
+            $where[] = "(t.id IN (
                 SELECT taxId FROM {$this->taxesToEntitiesTable} 
                 WHERE entityId IN (" . implode(', ', $queryPackages) . ") AND entityType = 'package'
-            )";
+            ) OR t.allPackages = 1)";
         }
 
         $where = $where ? ' WHERE ' . implode(' AND ', $where) : '';

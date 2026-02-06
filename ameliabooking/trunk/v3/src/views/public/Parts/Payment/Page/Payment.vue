@@ -46,10 +46,7 @@
       >
         {{ amLabels.payment_method }}
       </p>
-      <div
-        class="am-payments__method-cards"
-        :class="{'am-payments__method-cards-wrap': wrapCards}"
-      >
+      <div class="am-payments__method-cards">
         <template v-for="(available, gateway) in availablePayments">
           <div
             v-if="available && Object.keys(availablePayments).filter(item => availablePayments[item]).length > 1"
@@ -60,10 +57,12 @@
           >
             <img
               v-if="available"
-              :src="`${baseUrls.wpAmeliaPluginURL}/v3/src/assets/img/icons/${gateway === 'mollie' || gateway === 'wc' ? 'stripe' : gateway}.svg`"
+              :src="`${baseUrls.wpAmeliaPluginURL}/v3/src/assets/img/icons/${gateway === 'wc' ? 'online' : gateway}.svg`"
+              :alt="gateway"
+              :class="gateway"
             >
             <div>
-              <p>{{ paymentsBtnText.filter(item => item.key === gateway)[0].text }}</p>
+              <p>{{ getPaymentBtnString(gateway) }}</p>
             </div>
           </div>
         </template>
@@ -108,6 +107,7 @@ import PaymentPayPal from '../Methods/PaymentPayPal.vue'
 import PaymentOnSite from '../Methods/PaymentOnSite.vue'
 import PaymentWc from '../Methods/PaymentWc.vue'
 import PaymentCommon from '../Methods/PaymentCommon.vue'
+import PaymentSquare from "../Methods/PaymentSquare.vue";
 
 // * Loader component
 import BookingSkeleton from '../../../Parts/BookingSkeleton.vue'
@@ -206,7 +206,8 @@ const paymentTypes = {
   razorpay: markRaw(PaymentCommon),
   mollie: markRaw(PaymentCommon),
   wc: markRaw(PaymentWc),
-  square: markRaw(PaymentCommon)
+  square: markRaw(PaymentSquare),
+  barion: markRaw(PaymentCommon),
 }
 
 let ready = computed(() => store.getters['getReady'])
@@ -244,7 +245,7 @@ let paymentSentence = computed(() => {
   let sentence = ''
   if (paymentGateway.value === 'onSite' && !mandatoryOnSitePayment.value) {
     sentence = amLabels.payment_onsite_sentence
-  } else if (paymentGateway.value === 'mollie' || paymentGateway.value === 'wc' || paymentGateway.value === 'square') {
+  } else if (paymentGateway.value === 'mollie' || paymentGateway.value === 'wc' || paymentGateway.value === 'barion') {
     sentence = amLabels.payment_wc_mollie_sentence
   }
 
@@ -277,7 +278,8 @@ let availablePayments = computed(() => {
         wc: false,
         mollie: false,
         razorpay: false,
-        square: false
+        square: false,
+        barion: false,
       }
     }
 
@@ -293,6 +295,7 @@ let availablePayments = computed(() => {
       mollie: amSettings.value.payments.mollie.enabled,
       razorpay: amSettings.value.payments.razorpay.enabled,
       square: settings.payments.square.enabled,
+      barion: settings.payments.barion.enabled,
     } : {
       onSite: 'onSite' in entityPayments ? entityPayments.onSite && amSettings.value.payments.onSite : amSettings.value.payments.onSite,
       stripe: 'stripe' in entityPayments ? entityPayments.stripe.enabled && amSettings.value.payments.stripe.enabled : amSettings.value.payments.stripe.enabled,
@@ -301,6 +304,7 @@ let availablePayments = computed(() => {
       mollie: 'mollie' in entityPayments ? entityPayments.mollie.enabled && amSettings.value.payments.mollie.enabled : amSettings.value.payments.mollie.enabled,
       razorpay: 'razorpay' in entityPayments ? entityPayments.razorpay.enabled && amSettings.value.payments.razorpay.enabled : amSettings.value.payments.razorpay.enabled,
       square: 'square' in entityPayments ? entityPayments.square.enabled && settings.payments.square.enabled : settings.payments.square.enabled,
+      barion: 'barion' in entityPayments ? entityPayments.barion.enabled && settings.payments.barion.enabled && ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode) : settings.payments.barion.enabled && ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode),
     }
 
     if (!payments.onSite &&
@@ -309,7 +313,8 @@ let availablePayments = computed(() => {
       !payments.wc &&
       !payments.mollie &&
       !payments.square &&
-      !payments.razorpay
+      !payments.razorpay &&
+      !payments.barion
     ) {
       payments = {
         onSite: amSettings.value.payments.onSite,
@@ -319,6 +324,7 @@ let availablePayments = computed(() => {
         mollie: amSettings.value.payments.mollie.enabled,
         square: settings.payments.square.enabled,
         razorpay: amSettings.value.payments.razorpay.enabled,
+        barion: settings.payments.barion.enabled,
       }
     }
 
@@ -411,12 +417,6 @@ const cssVars = computed(() => {
   }
 })
 
-let paymentsBtnText = []
-
-Object.keys(availablePayments.value).forEach(key => {
-  paymentsBtnText.push({key, text:getPaymentBtnString(key)})
-})
-
 function getPaymentBtnString (key) {
   switch(key) {
     case 'square':
@@ -429,8 +429,12 @@ function getPaymentBtnString (key) {
       return amLabels['stripe']
     case 'razorpay':
       return amLabels['razorpay']
-    case 'mollie': case 'wc':
+    case 'mollie':
+      return amLabels['mollie']
+    case 'wc':
       return amLabels['on_line']
+    case 'barion':
+      return amLabels['barion']
     default:
       return ''
   }
@@ -442,7 +446,6 @@ let dWidth = inject('dialogWidth', ref(0))
 let responsiveClass = computed(() => {
   return useResponsiveClass(props.inDialog ? dWidth.value : cWidth.value)
 })
-let wrapCards = computed(() => cWidth.value < 450 || (cWidth.value > 560 && (cWidth.value - 240 < 450)))
 </script>
 
 <script>
@@ -553,15 +556,9 @@ export default {
 
       &-cards {
         display: flex;
+        gap: 6px;
         justify-items: center;
-
-        & > div {
-          margin: 0 6px 6px 0;
-        }
-
-        &-wrap {
-          flex-wrap: wrap;
-        }
+        flex-wrap: wrap;
       }
 
       &-button {
@@ -584,6 +581,10 @@ export default {
           width: 24px;
         }
 
+        .barion {
+          width: 50px;
+        }
+
         div {
           p {
             font-weight: 500;
@@ -592,7 +593,7 @@ export default {
             color: var(--am-c-ps-text);
             margin: 0;
             text-align: center;
-            word-break: break-all;
+            word-break: break-word;
           }
           span {
             font-size: 12px;

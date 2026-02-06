@@ -3,7 +3,9 @@
     wrapper-class="am-fcip"
     form-class="am-fcip__form"
     heading-class="am-fcip__header"
-    :content-class="`am-fcip__content ${customizeOptions.pageScroll.visibility ? '' : 'no-scroll'}`"
+    :content-class="`am-fcip__content ${
+      customizeOptions.pageScroll.visibility ? '' : 'no-scroll'
+    }`"
     :style="cssVars"
   >
     <template #header>
@@ -17,7 +19,7 @@
         <div class="am-fcip__header-text">
           <span class="am-fcip__header-name">
             <span>
-              {{pack.name}}
+              {{ pack.name }}
             </span>
           </span>
           <div
@@ -31,11 +33,21 @@
           </div>
         </div>
         <div class="am-fcip__header-action">
-          <span v-if="pack.discount && customizeOptions.packagePrice.visibility" class="am-fcip__header-discount">
-            {{`${labelsDisplay('save')} ${pack.discount}%`}}
+          <span
+            v-if="pack.discount && customizeOptions.packagePrice.visibility"
+            class="am-fcip__header-discount"
+          >
+            {{ `${labelsDisplay('save')} ${pack.discount}%` }}
           </span>
-          <span v-if="customizeOptions.packagePrice.visibility" class="am-fcip__header-price">
-            {{ pack.price ? useFormattedPrice(usePackageAmount(pack)) : amLabels.free }}
+          <span
+            v-if="customizeOptions.packagePrice.visibility"
+            class="am-fcip__header-price"
+          >
+            {{
+              pack.price
+                ? useFormattedPrice(usePackageAmount(pack))
+                : amLabels.free
+            }}
           </span>
           <span class="am-fcip__header-btn">
             <AmButton :type="customizeOptions.bookingBtn.buttonType">
@@ -45,10 +57,12 @@
         </div>
       </div>
       <div
-        v-if="customizeOptions.packageCategory.visibility
-        || customizeOptions.packageDuration.visibility
-        || customizeOptions.packageCapacity.visibility
-        || customizeOptions.packageLocation.visibility"
+        v-if="
+          customizeOptions.packageCategory.visibility ||
+          customizeOptions.packageDuration.visibility ||
+          customizeOptions.packageCapacity.visibility ||
+          customizeOptions.packageLocation.visibility
+        "
         class="am-fcip__header-bottom"
       >
         <div class="am-fcip__mini-info">
@@ -65,10 +79,16 @@
           >
             <span class="am-icon-clock"></span>
             <span v-if="pack.endDate">
-              {{ `${labelsDisplay('expires_at')} ${pack.endDate.split(' ')[0]}` }}
+              {{
+                `${labelsDisplay('expires_at')} ${pack.endDate.split(' ')[0]}`
+              }}
             </span>
             <span v-else-if="pack.durationCount">
-              {{ `${labelsDisplay('expires_after')} ${pack.durationCount} ${durationTypeLabel(pack.durationCount, pack.durationType)}` }}
+              {{
+                `${labelsDisplay('expires_after')} ${
+                  pack.durationCount
+                } ${durationTypeLabel(pack.durationCount, pack.durationType)}`
+              }}
             </span>
             <span v-else>
               {{ labelsDisplay('without_expiration') }}
@@ -98,8 +118,10 @@
       <div v-if="pack.gallery.length" class="am-fcip__gallery">
         <div
           class="am-fcip__gallery-hero"
-          :class="{'w100': pack.gallery.length === 1}"
-          :style="{backgroundImage: `url(${pack.gallery[0].pictureFullPath})`}"
+          :class="{ w100: pack.gallery.length === 1 }"
+          :style="{
+            backgroundImage: `url(${pack.gallery[0].pictureFullPath})`,
+          }"
         ></div>
         <div
           v-if="packageThumbsGallery.length"
@@ -109,14 +131,14 @@
             v-for="(img, index) in packageThumbsGallery"
             :key="index"
             class="am-fcip__gallery-thumb"
-            :class="{'am-one-thumb': packageThumbsGallery.length === 1}"
-            :style="{backgroundImage: `url(${img.pictureFullPath})`}"
+            :class="{ 'am-one-thumb': packageThumbsGallery.length === 1 }"
+            :style="{ backgroundImage: `url(${img.pictureFullPath})` }"
           ></div>
           <AmButton
             class="am-fcip__gallery-btn"
             category="secondary"
             type="filled"
-            @click="() => galleryDialog = true"
+            @click="() => (galleryDialog = true)"
           >
             <span class="am-icon-gallery"></span>
             <span>
@@ -137,39 +159,59 @@
       >
         <div class="am-gd" :style="cssGalleryDialogVars">
           <div class="am-gd__display-wrapper">
-            <div class="am-gd__arrows" style="display: flex; justify-content: space-between">
+            <div
+              class="am-gd__arrows"
+              style="display: flex; justify-content: space-between"
+            >
               <span
                 class="am-icon-arrow-left"
-                @click="() => activeImage = activeImage <= 0 ? pack.gallery.length - 1 : activeImage - 1"
+                @click="
+                  () =>
+                    (activeImage =
+                      activeImage <= 0
+                        ? pack.gallery.length - 1
+                        : activeImage - 1)
+                "
               ></span>
               <span
                 class="am-icon-arrow-right"
-                @click="() => activeImage = pack.gallery.length - 1 === activeImage ? 0 : activeImage + 1"
+                @click="
+                  () =>
+                    (activeImage =
+                      pack.gallery.length - 1 === activeImage
+                        ? 0
+                        : activeImage + 1)
+                "
               ></span>
             </div>
             <div
               v-for="(img, index) in pack.gallery"
               :key="index"
               class="am-gd__display"
-              :style="{display: index === activeImage ? 'flex': 'none'}"
-              @click="() => activeImage = pack.gallery.length - 1 === activeImage ? 0 : activeImage + 1"
+              :style="{ display: index === activeImage ? 'flex' : 'none' }"
+              @click="
+                () =>
+                  (activeImage =
+                    pack.gallery.length - 1 === activeImage
+                      ? 0
+                      : activeImage + 1)
+              "
             >
-              <img :src="img.pictureFullPath" :alt="index">
+              <img :src="img.pictureFullPath" :alt="index" />
             </div>
           </div>
           <div class="am-gd__selection">
-            {{`${activeImage + 1}/${pack.gallery.length}`}}
+            {{ `${activeImage + 1}/${pack.gallery.length}` }}
           </div>
           <div class="am-gd__thumb-wrapper">
             <div
               v-for="(img, index) in pack.gallery"
               :key="index"
               class="am-gd__thumb"
-              :class="{'am-active': index === activeImage}"
-              :style="{backgroundImage: `url(${img.pictureFullPath})`}"
-              @click="() => activeImage = index"
-            >
-            </div>
+              :class="{ 'am-active': index === activeImage }"
+              :style="{ backgroundImage: `url(${img.pictureFullPath})` }"
+              @click="() => (activeImage = index)"
+            ></div>
           </div>
         </div>
       </AmDialog>
@@ -177,23 +219,28 @@
 
       <!-- Package Info - (description, employees) -->
       <div
-        v-if="customizeOptions.packageDescription.visibility || customizeOptions.packageEmployees.visibility"
+        v-if="
+          customizeOptions.packageDescription.visibility ||
+          customizeOptions.packageEmployees.visibility
+        "
         class="am-fcip__info"
       >
         <div class="am-fcip__info-tab__wrapper">
           <div
-            v-if="pack.description && customizeOptions.packageDescription.visibility"
+            v-if="
+              pack.description && customizeOptions.packageDescription.visibility
+            "
             class="am-fcip__info-tab"
-            :class="{'am-active': tabsActive === 'description'}"
-            @click="() => tabsActive = 'description'"
+            :class="{ 'am-active': tabsActive === 'description' }"
+            @click="() => (tabsActive = 'description')"
           >
             {{ labelsDisplay('about_package') }}
           </div>
           <div
             v-if="customizeOptions.packageEmployees.visibility"
-            :class="{'am-active': tabsActive === 'employees'}"
+            :class="{ 'am-active': tabsActive === 'employees' }"
             class="am-fcip__info-tab"
-            @click="() => tabsActive = 'employees'"
+            @click="() => (tabsActive = 'employees')"
           >
             {{ labelsDisplay('tab_employees') }}
           </div>
@@ -201,7 +248,9 @@
         <div class="am-fcip__info-content__wrapper">
           <!-- Description -->
           <div
-            v-if="pack.description && customizeOptions.packageDescription.visibility"
+            v-if="
+              pack.description && customizeOptions.packageDescription.visibility
+            "
             v-show="tabsActive === 'description'"
             class="am-fcip__info-content"
           >
@@ -218,9 +267,16 @@
             v-show="tabsActive === 'employees'"
             class="am-fcip__info-content"
           >
-            <div v-for="employee in packageEmployees" :key="employee.id" class="am-fcip__info-employee">
+            <div
+              v-for="employee in packageEmployees"
+              :key="employee.id"
+              class="am-fcip__info-employee"
+            >
               <div class="am-fcip__info-employee__hero">
-                <div class="am-fcip__info-employee__img" :style="{...employeeImage(employee)}">
+                <div
+                  class="am-fcip__info-employee__img"
+                  :style="{ ...employeeImage(employee) }"
+                >
                   {{ employeeSign(employee) }}
                 </div>
                 <div class="am-fcip__info-employee__name">
@@ -234,7 +290,10 @@
       </div>
 
       <!-- Available Service in Packages -->
-      <div v-if="customizeOptions.packageServices.visibility" class="am-fcip__include-wrapper">
+      <div
+        v-if="customizeOptions.packageServices.visibility"
+        class="am-fcip__include-wrapper"
+      >
         <div class="am-fcip__include-heading">
           <span class="am-fcip__include-heading__text">
             {{ `${labelsDisplay('package_includes')}:` }}
@@ -248,17 +307,29 @@
           >
             <template #heading>
               <div class="am-fcip__include-service">
-                <div class="am-fcip__include-service__img" :style="{...cardImage(book)}">
+                <div
+                  class="am-fcip__include-service__img"
+                  :style="{ ...cardImage(book) }"
+                >
                   {{ cardSign(book) }}
                 </div>
-                {{ book.name + (!pack.sharedCapacity ? ' x ' + book.quantity : '') }}
+                {{
+                  book.name +
+                  (!pack.sharedCapacity ? ' x ' + book.quantity : '')
+                }}
               </div>
             </template>
             <template #default>
               <div class="am-fcip__include-service__info">
                 <span>{{ `${labelsDisplay('tab_employees')}:` }}</span>
-                <template v-for="employee in packageEmployees" :key="employee.id">
-                  <div class="am-fcip__include-service__employee" :style="{...cardImage(employee)}">
+                <template
+                  v-for="employee in packageEmployees"
+                  :key="employee.id"
+                >
+                  <div
+                    class="am-fcip__include-service__employee"
+                    :style="{ ...cardImage(employee) }"
+                  >
                     {{ cardSign(employee) }}
                   </div>
                 </template>
@@ -274,7 +345,7 @@
         </AmCollapse>
         <div class="am-fcip__include-footer">
           <span class="am-fcip__include-footer__text">
-            {{labelsDisplay('package_book_service')}}
+            {{ labelsDisplay('package_book_service') }}
           </span>
         </div>
       </div>
@@ -297,21 +368,22 @@ import {
   ref,
   inject,
   computed,
-  onMounted, watchEffect, onBeforeUnmount
-} from "vue";
+  onMounted,
+  watchEffect,
+  onBeforeUnmount,
+} from 'vue'
 
 // * Composables
 import { useFormattedPrice } from '../../../../assets/js/common/formatting.js'
 import {
   amCardColors,
-  useColorTransparency
+  useColorTransparency,
 } from '../../../../assets/js/common/colorManipulation.js'
-import {
-  usePackageAmount,
-} from '../../../../assets/js/public/package.js'
+import { usePackageAmount } from '../../../../assets/js/public/package.js'
+import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
 
 // * Customize
-let amCustomize = inject('customize')
+const { amCustomize } = useReactiveCustomize()
 
 // *  Customize Options
 let customizeOptions = computed(() => {
@@ -322,18 +394,19 @@ let customizeOptions = computed(() => {
 const baseUrls = inject('baseUrls')
 
 // * Selected service
-let pack = ref( {
+let pack = ref({
   id: 1,
-  name: "Package 1",
-  color: "#689BCA",
+  name: 'Package 1',
+  color: '#689BCA',
   calculatedPrice: false,
   deposit: 50,
   discount: 10,
   price: 500,
-  depositPayment: "percentage",
-  description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+  depositPayment: 'percentage',
+  description:
+    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
   durationCount: 2,
-  durationType: "week",
+  durationType: 'week',
   endDate: null,
   gallery: [
     {
@@ -351,7 +424,7 @@ let pack = ref( {
     {
       pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
       pictureThumbPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
-    }
+    },
   ],
   pictureFullPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
   pictureThumbPath: `${baseUrls.value.wpAmeliaPluginURL}v3/src/assets/img/admin/customize/img_holder1.svg`,
@@ -360,42 +433,49 @@ let pack = ref( {
     {
       id: 1,
       name: 'Service 1',
-      description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
-      quantity: 5
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+      quantity: 5,
     },
     {
       id: 2,
       name: 'Service 2',
-      description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
-      quantity: 5
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+      quantity: 5,
     },
     {
       id: 3,
       name: 'Service 3',
-      description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
-      quantity: 5
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+      quantity: 5,
     },
     {
       id: 4,
       name: 'Service 4',
-      description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
-      quantity: 5
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+      quantity: 5,
     },
     {
       id: 5,
       name: 'Service 5',
-      description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
-      quantity: 5
-    }
-  ]
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+      quantity: 5,
+    },
+  ],
 })
 
 // * Package info tabs
 let tabsActive = ref('description')
 
 watchEffect(() => {
-  if (!customizeOptions.value.packageDescription.visibility) tabsActive.value = 'employees'
-  if (!customizeOptions.value.packageEmployees.visibility) tabsActive.value = 'description'
+  if (!customizeOptions.value.packageDescription.visibility)
+    tabsActive.value = 'employees'
+  if (!customizeOptions.value.packageEmployees.visibility)
+    tabsActive.value = 'description'
 })
 
 onBeforeUnmount(() => {
@@ -405,59 +485,64 @@ onBeforeUnmount(() => {
 let packageEmployees = ref([
   {
     id: 1,
-    firstName: "Herman",
-    lastName: "Small",
+    firstName: 'Herman',
+    lastName: 'Small',
     pictureFullPath: null,
     pictureThumbPath: null,
     price: 20,
   },
   {
     id: 2,
-    firstName: "Abbie",
-    lastName: "William",
+    firstName: 'Abbie',
+    lastName: 'William',
     pictureFullPath: null,
     pictureThumbPath: null,
     price: 150,
   },
   {
     id: 3,
-    firstName: "Miya",
-    lastName: "Burrows",
+    firstName: 'Miya',
+    lastName: 'Burrows',
     pictureFullPath: null,
     pictureThumbPath: null,
     price: 80,
   },
   {
     id: 4,
-    firstName: "Derrick",
-    lastName: "Cardenas",
+    firstName: 'Derrick',
+    lastName: 'Cardenas',
     pictureFullPath: null,
     pictureThumbPath: null,
     price: 120,
   },
   {
     id: 5,
-    firstName: "Zeynep",
-    lastName: "Whittington",
+    firstName: 'Zeynep',
+    lastName: 'Whittington',
     pictureFullPath: null,
     pictureThumbPath: null,
     price: 45,
-  }
+  },
 ])
 
 function employeeImage(employee) {
-  if (employee.pictureFullPath) return {backgroundImage: `url(${employee.pictureFullPath})`}
+  if (employee.pictureFullPath)
+    return { backgroundImage: `url(${employee.pictureFullPath})` }
 
-  return {backgroundColor: `${amCardColors.value[Math.floor(Math.random() * amCardColors.value.length)]}`}
+  return {
+    backgroundColor: `${
+      amCardColors.value[Math.floor(Math.random() * amCardColors.value.length)]
+    }`,
+  }
 }
 
-function employeeSign (employee) {
+function employeeSign(employee) {
   if (!employee.pictureFullPath) {
     let firstName = employee.firstName.charAt(0)
     let lastName = employee.lastName.charAt(0)
     return `${firstName}${lastName}`
   }
-  return''
+  return ''
 }
 
 onMounted(() => {
@@ -469,7 +554,9 @@ let activeImage = ref(0)
 let galleryDialog = ref(false)
 
 let packageThumbsGallery = computed(() => {
-  let thumbs = pack.value.gallery.length ? JSON.parse(JSON.stringify(pack.value.gallery)) : []
+  let thumbs = pack.value.gallery.length
+    ? JSON.parse(JSON.stringify(pack.value.gallery))
+    : []
   if (pack.value.gallery.length === 1) return []
   thumbs.shift()
   if (thumbs.length > 2) thumbs.splice(2, thumbs.length - 2)
@@ -477,15 +564,27 @@ let packageThumbsGallery = computed(() => {
 })
 
 function cardImage(info) {
-  if (info.pictureFullPath) return {backgroundImage: `url(${info.pictureFullPath})`}
+  if (info.pictureFullPath)
+    return { backgroundImage: `url(${info.pictureFullPath})` }
 
-  return {backgroundColor: `${amCardColors.value[Math.floor(Math.random() * amCardColors.value.length)]}`}
+  return {
+    backgroundColor: `${
+      amCardColors.value[Math.floor(Math.random() * amCardColors.value.length)]
+    }`,
+  }
 }
 
 function cardSign(info) {
   if (!info.pictureFullPath) {
-    let name = 'firstName' in info ? `${info.firstName} ${info.lastName}` : info.name
-    return name.split(' ').map((s) => s.charAt(0)).join('').toUpperCase().substring(0, 3).replace(/[^\w\s]/g, '')
+    let name =
+      'firstName' in info ? `${info.firstName} ${info.lastName}` : info.name
+    return name
+      .split(' ')
+      .map((s) => s.charAt(0))
+      .join('')
+      .toUpperCase()
+      .substring(0, 3)
+      .replace(/[^\w\s]/g, '')
   }
   return ''
 }
@@ -494,10 +593,14 @@ function cardSign(info) {
 let langKey = inject('langKey')
 let amLabels = inject('labels')
 
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
     let translations = amCustomize.value.cbf.categoryPackage.translations
-    return translations && translations[label] && translations[label][langKey.value] ? translations[label][langKey.value] : amLabels[label]
+    return translations &&
+      translations[label] &&
+      translations[label][langKey.value]
+      ? translations[label][langKey.value]
+      : amLabels[label]
   })
 
   return computedLabel.value
@@ -525,12 +628,30 @@ let amColors = inject('amColors')
 
 let cssVars = computed(() => {
   return {
-    '--am-c-fcip-success-op20': useColorTransparency(amColors.value.colorSuccess, 0.20),
-    '--am-c-fcip-primary-op20': useColorTransparency(amColors.value.colorPrimary, 0.20),
-    '--am-c-fcip-text-op80': useColorTransparency(amColors.value.colorMainText, 0.80),
-    '--am-c-fcip-text-op60': useColorTransparency(amColors.value.colorMainText, 0.60),
-    '--am-c-fcip-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03),
-    '--am-c-fcip-btn-op50': useColorTransparency(amColors.value.colorBtnSec, 0.5),
+    '--am-c-fcip-success-op20': useColorTransparency(
+      amColors.value.colorSuccess,
+      0.2
+    ),
+    '--am-c-fcip-primary-op20': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.2
+    ),
+    '--am-c-fcip-text-op80': useColorTransparency(
+      amColors.value.colorMainText,
+      0.8
+    ),
+    '--am-c-fcip-text-op60': useColorTransparency(
+      amColors.value.colorMainText,
+      0.6
+    ),
+    '--am-c-fcip-text-op03': useColorTransparency(
+      amColors.value.colorMainText,
+      0.03
+    ),
+    '--am-c-fcip-btn-op50': useColorTransparency(
+      amColors.value.colorBtnSec,
+      0.5
+    ),
   }
 })
 
@@ -540,8 +661,14 @@ let cssGalleryDialogVars = computed(() => {
     '--am-c-fcip-text': amColors.value.colorMainText,
     '--am-c-fcip-success': amColors.value.colorSuccess,
     '--am-c-fcip-primary': amColors.value.colorPrimary,
-    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
-    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
+    '--am-c-scroll-op30': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.3
+    ),
+    '--am-c-scroll-op10': useColorTransparency(
+      amColors.value.colorPrimary,
+      0.1
+    ),
     '--am-font-family': amFonts.fontFamily,
   }
 })
@@ -549,8 +676,8 @@ let cssGalleryDialogVars = computed(() => {
 
 <script>
 export default {
-  name: "CategoryPackage",
-  key: "categoryPackage"
+  name: 'CategoryPackage',
+  key: 'categoryPackage',
 }
 </script>
 
@@ -592,7 +719,7 @@ export default {
         &-name {
           display: inline-flex;
 
-          span  {
+          span {
             display: -webkit-box;
             font-size: 28px;
             font-weight: 500;
@@ -632,7 +759,8 @@ export default {
           color: var(--am-c-fcip-primary);
         }
 
-        &-btn {}
+        &-btn {
+        }
 
         &-bottom {
           padding: 0 0 16px;
@@ -655,7 +783,11 @@ export default {
         margin-left: 10px;
 
         &.am-package {
-          background: linear-gradient(95.75deg, var(--am-c-fcip-bgr) -110.8%,  var(--am-c-warning) 114.33%);
+          background: linear-gradient(
+            95.75deg,
+            var(--am-c-fcip-bgr) -110.8%,
+            var(--am-c-warning) 114.33%
+          );
           span {
             color: var(--am-c-fcip-bgr);
           }
@@ -667,7 +799,7 @@ export default {
           font-weight: 400;
           line-height: 1;
 
-          &[class*="am-icon"] {
+          &[class*='am-icon'] {
             font-size: 24px;
           }
         }
@@ -698,7 +830,7 @@ export default {
             white-space: nowrap;
             overflow: hidden;
 
-            &[class*="am-icon"] {
+            &[class*='am-icon'] {
               flex: 0 0 auto;
               font-size: 24px;
               color: var(--am-c-fcip-primary);
@@ -759,7 +891,8 @@ export default {
             max-width: 264px;
             position: relative;
 
-            &:after, &:before {
+            &:after,
+            &:before {
               content: '';
               display: block;
               clear: both;
@@ -923,14 +1056,18 @@ export default {
             $count: 100;
             @for $i from 0 through $count {
               &:nth-child(#{$i + 1}) {
-                animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+                animation: 600ms
+                  cubic-bezier(0.45, 1, 0.4, 1.2)
+                  #{$i *
+                  100}ms
+                  am-animation-slide-up;
                 animation-fill-mode: both;
               }
             }
 
             &__heading {
               padding: 8px;
-              transition-delay: .5s;
+              transition-delay: 0.5s;
 
               &-side {
                 transition-delay: 0s;
@@ -1030,7 +1167,7 @@ export default {
               margin: 16px 0 0;
 
               & * {
-                color: var(--am-c-fcip-text-op80)
+                color: var(--am-c-fcip-text-op80);
               }
             }
           }

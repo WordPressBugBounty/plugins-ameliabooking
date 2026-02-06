@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @copyright © TMS-Plugins. All rights reserved.
+ * @copyright © Melograno Ventures. All rights reserved.
  * @licence   See LICENCE.md for license details.
  */
 
@@ -33,7 +34,7 @@ class GeneralSettings
      */
     public function getMinimumTimeRequirementPriorToBooking()
     {
-        return $this->minimumTimeRequirementPriorToBooking;
+        return $this->minimumTimeRequirementPriorToBooking ?: 0;
     }
 
     /**
@@ -49,7 +50,7 @@ class GeneralSettings
      */
     public function getMinimumTimeRequirementPriorToCanceling()
     {
-        return $this->minimumTimeRequirementPriorToCanceling;
+        return $this->minimumTimeRequirementPriorToCanceling ?: 0;
     }
 
     /**
@@ -65,7 +66,7 @@ class GeneralSettings
      */
     public function getMinimumTimeRequirementPriorToRescheduling()
     {
-        return $this->minimumTimeRequirementPriorToRescheduling;
+        return $this->minimumTimeRequirementPriorToRescheduling ?: 0;
     }
 
     /**
@@ -97,7 +98,7 @@ class GeneralSettings
      */
     public function getNumberOfDaysAvailableForBooking()
     {
-        return $this->numberOfDaysAvailableForBooking;
+        return $this->numberOfDaysAvailableForBooking ?: 0;
     }
 
     /**

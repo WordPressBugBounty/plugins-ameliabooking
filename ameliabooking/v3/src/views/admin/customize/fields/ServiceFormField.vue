@@ -1,5 +1,9 @@
 <template>
-  <el-form-item class="am-fs__init-form__item" prop="service" label-position="top">
+  <el-form-item
+    class="am-fs__init-form__item"
+    prop="service"
+    label-position="top"
+  >
     <template #label>
       <span class="am-fs__init-form__label">
         {{ `${labelsDisplay('service_colon')}:` }}
@@ -9,7 +13,9 @@
       v-model="formData.service"
       :options="categoryOptions"
       :props-data="advSelectProps"
-      :filterable="amCustomize[pageRenderKey].initStep.options.service.filterable"
+      :filterable="
+        amCustomize[pageRenderKey].initStep.options.service.filterable
+      "
       :placeholder="labelsDisplay('select_service')"
       :category-name="labelsDisplay('dropdown_category_heading')"
       :sub-category-name="labelsDisplay('dropdown_items_heading')"
@@ -22,21 +28,25 @@
 <script setup>
 import AmAdvancedSelect from '../../../_components/advanced-select/AmAdvancedSelect.vue'
 import { computed, inject, reactive, ref } from 'vue'
+import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
 
 let langKey = inject('langKey')
 let amLabels = inject('labels')
 
 let pageRenderKey = inject('pageRenderKey')
-let amCustomize = inject('customize')
-
+const { amCustomize } = useReactiveCustomize()
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value].initStep.translations
-    && amCustomize.value[pageRenderKey.value].initStep.translations[label]
-    && amCustomize.value[pageRenderKey.value].initStep.translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value].initStep.translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value].initStep.translations &&
+      amCustomize.value[pageRenderKey.value].initStep.translations[label] &&
+      amCustomize.value[pageRenderKey.value].initStep.translations[label][
+        langKey.value
+      ]
+      ? amCustomize.value[pageRenderKey.value].initStep.translations[label][
+          langKey.value
+        ]
       : amLabels[label]
   })
 
@@ -45,8 +55,8 @@ function labelsDisplay (label) {
 
 // * Sidebar steps
 let { sidebarDataCollector } = inject('sidebarStepsFunctions', {
-  sidebarDataCollector: () => {}
-});
+  sidebarDataCollector: () => {},
+})
 
 // * Form field data
 let formData = inject('formData')
@@ -65,7 +75,7 @@ let advSelectProps = reactive({
   label: 'name',
   children: 'serviceList',
   disabled: 'disabled',
-  leaf: 'leaf'
+  leaf: 'leaf',
 })
 
 // * Set Category Options from entities
@@ -77,19 +87,19 @@ let categoryOptions = ref([
       {
         id: 10,
         name: 'Service 11',
-        price: 125
+        price: 125,
       },
       {
         id: 11,
         name: 'Service 12',
-        price: 125
+        price: 125,
       },
       {
         id: 12,
         name: 'Service 13',
-        price: 125
-      }
-    ]
+        price: 125,
+      },
+    ],
   },
   {
     id: 2,
@@ -98,19 +108,19 @@ let categoryOptions = ref([
       {
         id: 10,
         name: 'Service 21',
-        price: 125
+        price: 125,
       },
       {
         id: 11,
         name: 'Service 22',
-        price: 125
+        price: 125,
       },
       {
         id: 12,
         name: 'Service 23',
-        price: 125
-      }
-    ]
+        price: 125,
+      },
+    ],
   },
   {
     id: 3,
@@ -119,19 +129,19 @@ let categoryOptions = ref([
       {
         id: 10,
         name: 'Service 31',
-        price: 125
+        price: 125,
       },
       {
         id: 11,
         name: 'Service 32',
-        price: 125
+        price: 125,
       },
       {
         id: 12,
         name: 'Service 33',
-        price: 125
-      }
-    ]
+        price: 125,
+      },
+    ],
   },
   {
     id: 4,
@@ -140,19 +150,19 @@ let categoryOptions = ref([
       {
         id: 10,
         name: 'Service 41',
-        price: 125
+        price: 125,
       },
       {
         id: 11,
         name: 'Service 42',
-        price: 125
+        price: 125,
       },
       {
         id: 12,
         name: 'Service 43',
-        price: 125
-      }
-    ]
+        price: 125,
+      },
+    ],
   },
   {
     id: 5,
@@ -161,20 +171,20 @@ let categoryOptions = ref([
       {
         id: 10,
         name: 'Service 51',
-        price: 125
+        price: 125,
       },
       {
         id: 11,
         name: 'Service 52',
-        price: 125
+        price: 125,
       },
       {
         id: 12,
         name: 'Service 53',
-        price: 125
-      }
-    ]
-  }
+        price: 125,
+      },
+    ],
+  },
 ])
 
 /**
@@ -186,11 +196,13 @@ let changeService = (val) => {
     reference: 'service',
     // position will depends on fields order
     position: 0,
-    value: ''
+    value: '',
   })
 
   if (Array.isArray(val)) {
-    serviceData.value = categoryOptions.value.find((item) => item.id === val[0]).serviceList.find(item => item.id === val[1]).name
+    serviceData.value = categoryOptions.value
+      .find((item) => item.id === val[0])
+      .serviceList.find((item) => item.id === val[1]).name
   }
 
   sidebarDataCollector(serviceData)
@@ -199,6 +211,6 @@ let changeService = (val) => {
 
 <script>
 export default {
-  name: "ServiceFormField"
+  name: 'ServiceFormField',
 }
 </script>

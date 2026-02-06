@@ -17,6 +17,7 @@ use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\CustomerBooking;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
+use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
@@ -94,6 +95,25 @@ class GetAppointmentsCommandHandler extends CommandHandler
 
         $readOthers = $this->container->getPermissionsService()->currentUserCanReadOthers(Entities::APPOINTMENTS);
 
+        $providerCountParams = [];
+        if (
+            (!$readOthers) &&
+            $user && $user->getType() === Entities::PROVIDER
+        ) {
+            $providerCountParams['providerId'] = $user->getId()->getValue();
+        }
+
+        // TODO: Redesign - replace 'customerId' parameter with 'customers' on all /appointments calls and remove this part
+        if (!empty($params['customerId'])) {
+            $params['customers'] = $params['customerId'];
+        }
+
+        $customerCountParams = [];
+        if ($user && $user->getType() === Entities::CUSTOMER) {
+            $customerCountParams['customers'] = [$user->getId()->getValue()];
+            $params['customers'] = [$user->getId()->getValue()];
+        }
+
         if (!empty($params['dates'])) {
             !empty($params['dates'][0]) ? $params['dates'][0] .= ' 00:00:00' : null;
             !empty($params['dates'][1]) ? $params['dates'][1] .= ' 23:59:59' : null;
@@ -113,15 +133,13 @@ class GetAppointmentsCommandHandler extends CommandHandler
         $entitiesIds = !empty($params['search']) && !$isCabinetPackageRequest ?
             $appointmentAS->getAppointmentEntitiesIdsBySearchString($params['search']) : [];
 
-        if ($user && $user->getType() === Entities::CUSTOMER) {
-            $params['customerId'] = $user->getId()->getValue();
-        }
 
         $countParams = $params;
 
         $appointmentsIds = [];
 
-        if (!empty($params['search']) &&
+        if (
+            !empty($params['search']) &&
             !$entitiesIds['customers'] &&
             !$entitiesIds['services'] &&
             !$entitiesIds['providers']
@@ -136,6 +154,8 @@ class GetAppointmentsCommandHandler extends CommandHandler
                     'total'                    => 0,
                     'totalApproved'            => 0,
                     'totalPending'             => 0,
+                    'totalCount'               => $appointmentRepository->getPeriodAppointmentsCount(array_merge($providerCountParams, $customerCountParams)),
+                    'filteredCount'            => 0,
                 ]
             );
 
@@ -145,22 +165,20 @@ class GetAppointmentsCommandHandler extends CommandHandler
         $availablePackageBookings = [];
 
         if (!$isCabinetPackageRequest && !$isDashboardPackageRequest) {
-            $upcomingAppointmentsLimit = $settingsDS->getSetting('general', 'itemsPerPageBackEnd');
-
             /** @var Collection $periodAppointments */
             $periodAppointments = $appointmentRepository->getPeriodAppointments(
                 array_merge(
                     [
                         'customers' => $isCabinetPage && $user->getType() === Entities::CUSTOMER ?
                             [$user->getId()->getValue()] : [],
-                        'providers' => $isCabinetPage && $user->getType() === Entities::PROVIDER ?
+                        'providers' => $user && $user->getType() === Entities::PROVIDER ?
                             [$user->getId()->getValue()] : [],
                     ],
                     array_merge($params, ['endsInDateRange' => $isCalendarPage]),
                     $entitiesIds,
-                    ['skipBookings' => !$isCabinetPage && empty($params['customerId']) && empty($entitiesIds['customers'])]
+                    ['skipBookings' => !$isCabinetPage && empty($params['customers']) && empty($entitiesIds['customers'])]
                 ),
-                $upcomingAppointmentsLimit
+                $settingsDS->getSetting('general', 'itemsPerPage')
             );
 
             /** @var Appointment $appointment */
@@ -172,34 +190,25 @@ class GetAppointmentsCommandHandler extends CommandHandler
         /** @var Collection $appointments */
         $appointments = new Collection();
 
-        $customerId = isset($params['customerId']) ? $params['customerId'] : null;
-
-        if (isset($params['customerId'])) {
-            unset($params['customerId']);
-        }
-
         $customersNoShowCountIds = [];
 
-        $noShowTagEnabled = $settingsDS->getSetting('roles', 'enableNoShowTag');
+        $noShowTagEnabled = $settingsDS->isFeatureEnabled('noShowTag');
 
         if (!$isCabinetPackageRequest && $appointmentsIds) {
             $appointments = $appointmentRepository->getFiltered(
-                array_merge(
-                    $params,
-                    [
-                        'ids'           => $appointmentsIds,
-                        'skipServices'  => isset($params['skipServices']) ? $params['skipServices'] : false,
-                        'skipProviders' => isset($params['skipProviders']) ? $params['skipProviders'] : false,
-                        'endsInDateRange' => $isCalendarPage
-                    ]
-                )
+                [
+                    'ids'           => $appointmentsIds,
+                    'skipServices'  => isset($params['skipServices']) ? $params['skipServices'] : false,
+                    'skipProviders' => isset($params['skipProviders']) ? $params['skipProviders'] : false,
+                    'joinPackages'  => $isCabinetPage
+                ]
             );
         } elseif ($isDashboardPackageRequest || ($user && $user->getId() && $isCabinetPackageRequest)) {
             $availablePackageBookings = $packageAS->getPackageAvailability(
                 $appointments,
                 [
                     'purchased'  => !empty($params['dates']) ? $params['dates'] : [],
-                    'customerId' => $isCabinetPackageRequest ? $user->getId()->getValue() : $customerId,
+                    'customers'  => $isCabinetPackageRequest ? [$user->getId()->getValue()] : (!empty($params['customers']) ? $params['customers'] : null),
                     'packageId'  => !$isCabinetPackageRequest && !empty($params['packageId']) ?
                         (int)$params['packageId'] : null,
                 ]
@@ -233,7 +242,8 @@ class GetAppointmentsCommandHandler extends CommandHandler
             /** @var CustomerBooking $booking */
             foreach ($appointment->getBookings()->getItems() as $booking) {
                 // fix for wrongly saved JSON
-                if ($booking->getCustomFields() &&
+                if (
+                    $booking->getCustomFields() &&
                     json_decode($booking->getCustomFields()->getValue(), true) === null
                 ) {
                     $booking->setCustomFields(null);
@@ -260,7 +270,8 @@ class GetAppointmentsCommandHandler extends CommandHandler
                         /** @var CustomerBooking $otherBooking */
                         $otherBooking = $appointment->getBookings()->getItem($bookingKey);
 
-                        if ($otherBooking->getStatus()->getValue() === BookingStatus::APPROVED ||
+                        if (
+                            $otherBooking->getStatus()->getValue() === BookingStatus::APPROVED ||
                             $otherBooking->getStatus()->getValue() === BookingStatus::PENDING
                         ) {
                             $isGroup = true;
@@ -297,7 +308,8 @@ class GetAppointmentsCommandHandler extends CommandHandler
             }
 
             // skip appointments for other providers if user is provider
-            if ((!$readOthers || $isCabinetPage) &&
+            if (
+                (!$readOthers || $isCabinetPage) &&
                 $user->getType() === Entities::PROVIDER &&
                 $user->getId()->getValue() !== $providerId
             ) {
@@ -336,6 +348,11 @@ class GetAppointmentsCommandHandler extends CommandHandler
 
                 if (!empty($params['timeZone'])) {
                     $timeZone = $params['timeZone'];
+                } elseif (
+                    ($user instanceof Provider) &&
+                    empty($user->getTimeZone()) && !empty(get_option('timezone_string'))
+                ) {
+                    $timeZone = get_option('timezone_string');
                 }
 
                 $appointment->getBookingStart()->getValue()->setTimezone(new \DateTimeZone($timeZone));
@@ -374,7 +391,8 @@ class GetAppointmentsCommandHandler extends CommandHandler
 
         $emptyBookedPackages = null;
 
-        if (!empty($params['packageId']) &&
+        if (
+            !empty($params['packageId']) &&
             empty($params['services']) &&
             empty($params['providers']) &&
             empty($params['locations'])
@@ -387,7 +405,7 @@ class GetAppointmentsCommandHandler extends CommandHandler
                 [
                     'packages'   => [$params['packageId']],
                     'purchased'  => !empty($params['dates']) ? $params['dates'] : [],
-                    'customerId' => $customerId,
+                    'customers'  => !empty($params['customers']) ? $params['customers'] : null,
                 ]
             );
         }
@@ -398,20 +416,26 @@ class GetAppointmentsCommandHandler extends CommandHandler
 
         $periodsAppointmentsPendingCount = 0;
 
-        if (!$isCabinetPackageRequest && !$isCabinetPage) {
-            if ((!$readOthers) &&
+        $periodsAppointmentsTotalCount = 0;
+
+        if (!empty($countParams['page']) || (!$isCabinetPackageRequest && !$isCabinetPage && !$isCalendarPage)) {
+            if (
+                (!$readOthers) &&
                 $user->getType() === Entities::PROVIDER
             ) {
                 $countParams['providerId'] = $user->getId()->getValue();
             }
             $periodsAppointmentsCount = $appointmentRepository->getPeriodAppointmentsCount(
-                array_merge($countParams, $entitiesIds, ['ids' => $appointmentsIds,])
+                array_merge($countParams, $providerCountParams, $entitiesIds)
             );
+
+            $periodsAppointmentsTotalCount = $appointmentRepository->getPeriodAppointmentsCount(array_merge($providerCountParams, $customerCountParams));
 
             $periodsAppointmentsApprovedCount = $appointmentRepository->getPeriodAppointmentsCount(
                 array_merge(
                     $countParams,
-                    ['status' => BookingStatus::APPROVED, 'ids' => $appointmentsIds],
+                    $providerCountParams,
+                    ['status' => BookingStatus::APPROVED],
                     $entitiesIds
                 )
             );
@@ -419,7 +443,8 @@ class GetAppointmentsCommandHandler extends CommandHandler
             $periodsAppointmentsPendingCount = $appointmentRepository->getPeriodAppointmentsCount(
                 array_merge(
                     $countParams,
-                    ['status' => BookingStatus::PENDING, 'ids' => $appointmentsIds],
+                    $providerCountParams,
+                    ['status' => BookingStatus::PENDING],
                     $entitiesIds
                 )
             );
@@ -439,19 +464,25 @@ class GetAppointmentsCommandHandler extends CommandHandler
         do_action('amelia_get_appointments', $groupedAppointments);
 
 
+        // TODO: Redesign - remove total, totalApproved, totalPending
         $result->setResult(CommandResult::RESULT_SUCCESS);
         $result->setMessage('Successfully retrieved appointments');
         $result->setData(
             [
-                Entities::APPOINTMENTS     => !empty($params['asArray']) && filter_var($params['asArray'], FILTER_VALIDATE_BOOLEAN) ? $appointments->toArray() : $groupedAppointments,
+                Entities::APPOINTMENTS     =>
+                !empty($params['asArray']) && filter_var($params['asArray'], FILTER_VALIDATE_BOOLEAN) ?
+                    $appointments->toArray() :
+                    $groupedAppointments,
                 'availablePackageBookings' => $availablePackageBookings,
                 'emptyPackageBookings'     => !empty($emptyBookedPackages) ? $emptyBookedPackages->toArray() : [],
                 'occupied'                 => $occupiedTimes,
                 'total'                    => $periodsAppointmentsCount,
                 'totalApproved'            => $periodsAppointmentsApprovedCount,
                 'totalPending'             => $periodsAppointmentsPendingCount,
+                'totalCount'               => $periodsAppointmentsTotalCount,
+                'filteredCount'            => $periodsAppointmentsCount,
                 'currentUser'              => $user ? $user->toArray() : null,
-                'customersNoShowCount'     => $customersNoShowCount
+                'customersNoShowCount'     => $customersNoShowCount ? array_values($customersNoShowCount) : []
             ]
         );
 
