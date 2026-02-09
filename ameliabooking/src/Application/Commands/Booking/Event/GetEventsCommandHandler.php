@@ -16,7 +16,6 @@ use AmeliaBooking\Domain\Entity\Booking\Event\Event;
 use AmeliaBooking\Domain\Entity\Booking\Event\EventPeriod;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
-use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Factory\Booking\Event\EventPeriodFactory;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
@@ -139,17 +138,29 @@ class GetEventsCommandHandler extends CommandHandler
                 : ($isFrontEnd ? $settingsDS->getSetting('general', 'itemsPerPage') : 10)
         );
 
-        $popupEventId = !empty($params['idPopup']) ? $params['idPopup'] : null;
+        $selectedEventIds = [];
+
+        if (!empty($params['idPopup']) && !$events->keyExists($params['idPopup'])) {
+            $selectedEventIds = [$params['idPopup']];
+        } elseif (!empty($params['ids'])) {
+            $missingIds = array_values(array_diff(array_map('intval', $params['ids']), $events->keys()));
+            if (!empty($missingIds)) {
+                $selectedEventIds = $missingIds;
+            }
+        }
 
         /** @var Collection $requestedEvents */
-        $requestedEvents = $popupEventId && !$events->keyExists($popupEventId) ? $eventAS->getEventsByCriteria(
-            array_merge($params, ['id' => [$popupEventId]]),
+        $requestedEvents = !empty($selectedEventIds) ? $eventAS->getEventsByCriteria(
+            ['id' => $selectedEventIds],
             $criteria,
-            1
+            0
         ) : new Collection();
 
         foreach ($requestedEvents->getItems() as $event) {
-            $events->placeItem($event, $event->getId()->getValue(), true);
+            if ($events->keyExists($event->getId()->getValue())) {
+                continue;
+            }
+            $events->prependItem($event, $event->getId()->getValue(), true);
         }
 
         $eventsArray = [];
@@ -169,16 +180,9 @@ class GetEventsCommandHandler extends CommandHandler
                 ($isFrontEnd && $settingsDS->getSetting('general', 'showClientTimeZone')) ||
                 $isCabinetPage || ($user && $user->getType() === AbstractUser::USER_ROLE_PROVIDER)
             ) {
-                $timeZone = 'UTC';
-
-                if (!empty($params['timeZone'])) {
-                    $timeZone = $params['timeZone'];
-                } elseif (
-                    $user instanceof Provider &&
-                    empty($user->getTimeZone()) && !empty(get_option('timezone_string'))
-                ) {
-                    $timeZone = get_option('timezone_string');
-                }
+                $timeZone = !empty($params['timeZone'])
+                    ? $params['timeZone']
+                    : ($user && $user->getType() === Entities::PROVIDER ? $providerAS->getTimeZone($user) : 'UTC');
 
                 /** @var EventPeriod $period */
                 foreach ($event->getPeriods()->getItems() as $period) {

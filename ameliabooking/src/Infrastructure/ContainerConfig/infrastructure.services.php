@@ -207,6 +207,17 @@ $entries['infrastructure.outlook.calendar.service'] = function ($c) {
 };
 
 /**
+ * Google Calendar Middleware Service
+ *
+ * @param Container $c
+ *
+ * @return AmeliaBooking\Infrastructure\Services\Outlook\AbstractOutlookCalendarMiddlewareService
+ */
+$entries['infrastructure.outlook.calendar.middleware.service'] = function ($c) {
+    return AmeliaBooking\Infrastructure\Licence\InfrastructureService::getOutlookCalendarMiddlewareService($c);
+};
+
+/**
  * Recaptcha Service
  *
  * @param Container $c

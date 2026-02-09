@@ -430,6 +430,8 @@ This message does not have an option for responding. If you need additional info
             ],
             'mailEnabled'                      => false,
             'token'                            => null,
+            'accessToken'                      => '',
+            'outlookAccountData'               => null
         ];
 
         self::initSettings('outlookCalendar', $settings);
@@ -1793,7 +1795,6 @@ This message does not have an option for responding. If you need additional info
                 'skipGetItemDataProcessing'      => !isset($savedSettings['wc']),
                 'redirectPage' => 1,
                 'bookMultiple' => false,
-                'bookUnpaid'   => empty($savedSettings['wc']),
                 'rules'        =>
                 isset($savedSettings['wc']['rules']) ? $savedSettings['wc']['rules'] : [
                     'appointment' => [
@@ -2042,7 +2043,6 @@ This message does not have an option for responding. If you need additional info
                 ['wc', 'rules'],
                 ['wc', 'redirectPage'],
                 ['wc', 'bookMultiple'],
-                ['wc', 'bookUnpaid'],
                 ['wc', 'checkoutData'],
                 ['wc', 'checkoutData', 'package'],
                 ['wc', 'checkoutData', 'cart'],
@@ -2093,6 +2093,7 @@ This message does not have an option for responding. If you need additional info
             'deleteTables'                  => false,
             'showAmeliaPromoCustomizePopup' => true,
             'showAmeliaSurvey'              => true,
+            'showWelcomePage'               => true,
             'stash'                         => false,
             'responseErrorAsConflict'       => $savedSettings ? false : true,
             'hideTipsAndSuggestions'        => false,

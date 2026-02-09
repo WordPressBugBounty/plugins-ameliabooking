@@ -129,6 +129,11 @@ export default {
       flex-direction: row;
       width: 100%;
 
+      * {
+        box-sizing: border-box;
+        font-family: var(--am-font-family), sans-serif;
+      }
+
       &-wrapper {
         display: flex;
         flex-direction: column;

@@ -31,27 +31,54 @@ function useOutlookSync (code, successCallback) {
 }
 
 function useOutlookConnect (store) {
+  const amSettings = store.getters['getSettings']
   if (!store.getters['auth/getOutlookLoading']) {
     store.commit('auth/setOutlookLoading', true)
 
-    httpClient.get(
-      '/outlook/authorization/url/' + store.getters['employee/getId'],
-      Object.assign(
-        {
-          'redirectUri': window.location.href.split('?')[0],
-        },
-        useAuthorizationHeaderObject(store)
-      )
-    ).then((response) => {
-      window.location.href = response.data.data.authUrl.replace(
-        /redirect_uri=.+?&/,
-        'redirect_uri=' + window.location.href + '&'
-      )
-    }).catch((error) => {
-      console.log(error)
+    if (!amSettings.outlookCalendar.accessToken) {
+      httpClient
+        .get(
+          '/outlook/authorization/url/' + store.getters['employee/getId'],
+          Object.assign(
+            {
+              redirectUri: window.location.href.split('?')[0],
+            },
+            useAuthorizationHeaderObject(store)
+          )
+        )
+        .then((response) => {
+          window.location.href = response.data.data.authUrl.replace(
+            /redirect_uri=.+?&/,
+            'redirect_uri=' + window.location.href + '&'
+          )
+        })
+        .catch((error) => {
+          console.log(error)
 
-      store.commit('auth/setGoogleLoading', false)
-    })
+          store.commit('auth/setOutlookLoading', false)
+        })
+    }
+
+    if (amSettings.outlookCalendar.accessToken) {
+      httpClient
+        .get(
+          '/outlook-calendar/authorization/url/' +
+            store.getters['employee/getId'],
+          {
+            params: {
+              redirectUri: window.location.href,
+            },
+          }
+        )
+        .then((response) => {
+          window.location.href = response.data.data.authUrl
+        })
+        .catch((error) => {
+          console.log(error)
+
+          store.commit('auth/setOutlookLoading', false)
+        })
+    }
   }
 }
 

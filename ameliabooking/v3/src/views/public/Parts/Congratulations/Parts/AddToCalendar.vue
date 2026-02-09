@@ -153,7 +153,7 @@ function getCalendarLinkData(eventData, type) {
     case ('yahoo'):
       eventData.forEach(function (data) {
         let location = data.locationId ?
-            store.getters['entities/getLocation'](
+            store.getters['eventEntities/getLocation'](
               data.locationId
             ) : ''
 
@@ -189,7 +189,7 @@ function getCalendarLinkData(eventData, type) {
     case ('google'):
       eventData.forEach(function (data) {
         let location = data.locationId ?
-          store.getters['entities/getLocation'](
+          store.getters['eventEntities/getLocation'](
             data.locationId
           ) : ''
 

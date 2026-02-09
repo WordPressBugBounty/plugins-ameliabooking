@@ -1,5 +1,6 @@
 <template>
   <Content
+    ref="contentRef"
     wrapper-class="am-fcip"
     form-class="am-fcip__form"
     heading-class="am-fcip__header"
@@ -15,7 +16,10 @@
       ></Header>
     </template>
     <template #heading>
-      <div class="am-fcip__header-top">
+      <div
+        class="am-fcip__header-top"
+        :class="[{'am-tablet': pageWidth <= 678}, {'am-mobile': pageWidth < 450}]"
+      >
         <div class="am-fcip__header-text">
           <span class="am-fcip__header-name">
             <span>
@@ -118,13 +122,13 @@
       <div v-if="pack.gallery.length" class="am-fcip__gallery">
         <div
           class="am-fcip__gallery-hero"
-          :class="{ w100: pack.gallery.length === 1 }"
+          :class="[{'w100': pack.gallery.length === 1}, {'am-mobile w100': pageWidth < 678}]"
           :style="{
             backgroundImage: `url(${pack.gallery[0].pictureFullPath})`,
           }"
         ></div>
         <div
-          v-if="packageThumbsGallery.length"
+          v-if="packageThumbsGallery.length && pageWidth > 677"
           class="am-fcip__gallery-thumb__wrapper"
         >
           <div
@@ -135,7 +139,7 @@
             :style="{ backgroundImage: `url(${img.pictureFullPath})` }"
           ></div>
           <AmButton
-            class="am-fcip__gallery-btn"
+            :custom-class="`am-fcip__gallery-btn${pageWidth < 678 ? ' am-mobile' : ''}`"
             category="secondary"
             type="filled"
             @click="() => (galleryDialog = true)"
@@ -267,23 +271,30 @@
             v-show="tabsActive === 'employees'"
             class="am-fcip__info-content"
           >
-            <div
-              v-for="employee in packageEmployees"
-              :key="employee.id"
-              class="am-fcip__info-employee"
-            >
-              <div class="am-fcip__info-employee__hero">
-                <div
-                  class="am-fcip__info-employee__img"
-                  :style="{ ...employeeImage(employee) }"
-                >
-                  {{ employeeSign(employee) }}
-                </div>
-                <div class="am-fcip__info-employee__name">
-                  {{ employee.firstName }} {{ employee.lastName }}
-                </div>
-              </div>
-            </div>
+            <AmCollapse>
+              <AmCollapseItem
+                v-for="employee in packageEmployees"
+                :key="employee.id"
+                side
+              >
+                <template #heading>
+                  <div class="am-fcip__info-employee">
+                    <div class="am-fcip__info-employee__hero">
+                      <div
+                        class="am-fcip__info-employee__img"
+                        :style="{ ...employeeImage(employee) }"
+                      >
+                        {{ employeeSign(employee) }}
+                      </div>
+                      <div class="am-fcip__info-employee__name">
+                        {{ employee.firstName }} {{ employee.lastName }}
+                      </div>
+                    </div>
+                  </div>
+                </template>
+                <template #default></template>
+              </AmCollapseItem>
+            </AmCollapse>
           </div>
           <!-- /Employees -->
         </div>
@@ -384,6 +395,10 @@ import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCus
 
 // * Customize
 const { amCustomize } = useReactiveCustomize()
+
+// * Page Width
+let contentRef = ref()
+let pageWidth = inject('containerWidth')
 
 // *  Customize Options
 let customizeOptions = computed(() => {
@@ -682,6 +697,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import '../../../../../src/assets/scss/common/quill/_quill-mixin.scss';
+
 #amelia-app-backend-new {
   // am-    amelia
   // -c-    color
@@ -708,6 +725,53 @@ export default {
           align-items: center;
           justify-content: space-between;
           padding: 0 0 16px;
+
+          &.am-tablet {
+            flex-wrap: wrap;
+
+            .am-fcip__header-text {
+              width: 100%;
+              justify-content: space-between;
+              margin-bottom: 12px;
+            }
+
+            .am-fcip__header-action {
+              width: 100%;
+              justify-content: space-between;
+            }
+
+            &.am-mobile {
+              .am-fcip__header {
+                &-text {
+                  flex-wrap: wrap;
+                }
+
+                &-name {
+                  width: 100%;
+                }
+
+                &-action {
+                  flex-wrap: wrap;
+                }
+
+                &-discount, &-price, &-tax {
+                  margin-bottom: 6px;
+                }
+
+                &-btn {
+                  width: 100%;
+                  .am-button {
+                    width: 100%;
+                    margin-top: 6px;
+                  }
+                }
+              }
+
+              .am-fcip__badge {
+                margin-left: 0;
+              }
+            }
+          }
         }
 
         &-text {
@@ -719,7 +783,7 @@ export default {
         &-name {
           display: inline-flex;
 
-          span {
+          span  {
             display: -webkit-box;
             font-size: 28px;
             font-weight: 500;
@@ -759,7 +823,17 @@ export default {
           color: var(--am-c-fcip-primary);
         }
 
-        &-btn {
+        &-tax {
+          display: inline-flex;
+          align-items: center;
+          height: 28px;
+          padding: 0 12px 0;
+          border-radius: 14px;
+          font-size: 18px;
+          font-weight: 500;
+          margin: 0 12px 0 0;
+          color: var(--am-c-fcip-primary);
+          background-color: var(--am-c-fcip-primary-op20);
         }
 
         &-bottom {
@@ -776,6 +850,7 @@ export default {
 
       &__badge {
         display: inline-flex;
+        flex: 0 0 auto;
         align-items: center;
         height: 28px;
         padding: 0 12px 0 8px;
@@ -783,11 +858,7 @@ export default {
         margin-left: 10px;
 
         &.am-package {
-          background: linear-gradient(
-            95.75deg,
-            var(--am-c-fcip-bgr) -110.8%,
-            var(--am-c-warning) 114.33%
-          );
+          background: linear-gradient(95.75deg, var(--am-c-fcip-bgr) -110.8%,  var(--am-c-warning) 114.33%);
           span {
             color: var(--am-c-fcip-bgr);
           }
@@ -799,7 +870,7 @@ export default {
           font-weight: 400;
           line-height: 1;
 
-          &[class*='am-icon'] {
+          &[class*="am-icon"] {
             font-size: 24px;
           }
         }
@@ -830,7 +901,7 @@ export default {
             white-space: nowrap;
             overflow: hidden;
 
-            &[class*='am-icon'] {
+            &[class*="am-icon"] {
               flex: 0 0 auto;
               font-size: 24px;
               color: var(--am-c-fcip-primary);
@@ -841,6 +912,7 @@ export default {
 
       &__gallery {
         display: flex;
+        position: relative;
         transition: all 0.3s ease-in-out;
         margin: 0 0 32px;
         padding: 0 12px;
@@ -861,6 +933,10 @@ export default {
             padding-top: 25%;
             border-radius: 8px;
             margin-bottom: 0;
+
+            &.am-mobile {
+              padding-top: 150px;
+            }
           }
         }
 
@@ -891,8 +967,7 @@ export default {
             max-width: 264px;
             position: relative;
 
-            &:after,
-            &:before {
+            &:after, &:before {
               content: '';
               display: block;
               clear: both;
@@ -907,21 +982,27 @@ export default {
         &-btn {
           position: absolute;
           bottom: 12px;
-          right: 12px;
+          right: 24px;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: calc(100% - 40px);
+          width: calc(264px - 40px);
+
+          &.am-mobile {
+            width: calc(100% - 48px);
+          }
 
           &.am-button.am-button--filled {
             --am-c-btn-bgr: var(--am-c-btn-second);
             --am-c-btn-text: var(--am-c-btn-first);
             --am-c-btn-border: var(--am-c-fcip-btn-op50);
 
-            &:hover {
-              --am-c-btn-bgr: var(--am-c-btn-second);
-              --am-c-btn-text: var(--am-c-btn-first);
-              --am-c-btn-border: var(--am-c-fcip-btn-op50);
+            &:not(.is-disabled) {
+              &:hover {
+                --am-c-btn-bgr: var(--am-c-btn-second);
+                --am-c-btn-text: var(--am-c-btn-first);
+                --am-c-btn-border: var(--am-c-fcip-btn-op50);
+              }
             }
           }
 
@@ -963,6 +1044,27 @@ export default {
 
         &-content {
           padding: 24px 0;
+
+          .am-collapse-item {
+            background-color: var(--am-c-fcip-bgr);
+
+            $count: 100;
+            @for $i from 0 through $count {
+              &:nth-child(#{$i + 1}) {
+                animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+                animation-fill-mode: both;
+              }
+            }
+
+            &__heading {
+              padding: 12px;
+              transition-delay: .5s;
+
+              &-side {
+                transition-delay: 0s;
+              }
+            }
+          }
         }
 
         &-service {
@@ -984,6 +1086,10 @@ export default {
             a {
               color: var(--am-c-fcip-primary);
             }
+
+            &.ql-description {
+              @include quill-styles;
+            }
           }
         }
 
@@ -992,10 +1098,6 @@ export default {
           flex-wrap: wrap;
           align-items: center;
           justify-content: space-between;
-          border: 1px solid var(--am-c-inp-border);
-          border-radius: 4px;
-          padding: 12px;
-          margin: 0 0 8px;
 
           &:last-child {
             margin: 0;
@@ -1011,6 +1113,7 @@ export default {
             width: 54px;
             height: 54px;
             display: flex;
+            flex: 0 0 auto;
             align-items: center;
             justify-content: center;
             background-position: center;
@@ -1029,6 +1132,14 @@ export default {
             margin: 0 0 0 12px;
           }
 
+          &__badge {
+            color: #FFF;
+            border-radius: 4px;
+            padding: 0 4px;
+            font-size: 13px;
+            line-height: 19px;
+          }
+
           &__price {
             display: flex;
             align-items: center;
@@ -1040,6 +1151,14 @@ export default {
             background-color: var(--am-c-fcip-primary-op20);
             padding: 0 8px;
             border-radius: 12px;
+          }
+
+          &__description {
+            color: var(--am-c-fcis-text);
+
+            &.ql-description {
+              @include quill-styles;
+            }
           }
         }
       }
@@ -1056,18 +1175,14 @@ export default {
             $count: 100;
             @for $i from 0 through $count {
               &:nth-child(#{$i + 1}) {
-                animation: 600ms
-                  cubic-bezier(0.45, 1, 0.4, 1.2)
-                  #{$i *
-                  100}ms
-                  am-animation-slide-up;
+                animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
                 animation-fill-mode: both;
               }
             }
 
             &__heading {
               padding: 8px;
-              transition-delay: 0.5s;
+              transition-delay: .5s;
 
               &-side {
                 transition-delay: 0s;
@@ -1111,6 +1226,7 @@ export default {
 
           &__img {
             display: inline-flex;
+            flex: 0 0 auto;
             align-items: center;
             justify-content: center;
             width: 54px;
@@ -1120,6 +1236,9 @@ export default {
             font-weight: 500;
             line-height: 1;
             border-radius: 4px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             margin: 0 8px 0 0;
           }
 
@@ -1148,14 +1267,23 @@ export default {
               margin-right: 20px;
             }
 
-            & > img {
+            & > .am-fcip__include-service__info-name {
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
               width: 36px;
               height: 36px;
-              display: inline-block;
               vertical-align: middle;
-              margin-left: -12px;
+              font-size: 13px;
+              font-weight: 500;
+              color: var(--am-c-fcip-bgr);
+              margin-left: -10px;
               border-radius: 50%;
-              border: 3px solid var(--am-c-fcip-bgr);
+              border: 2px solid var(--am-c-fcip-bgr);
+              background-color: var(--am-c-fcip-bgr);
+              background-size: cover;
+              background-position: center;
+              background-repeat: no-repeat;
             }
 
             & > p {
@@ -1167,7 +1295,13 @@ export default {
               margin: 16px 0 0;
 
               & * {
-                color: var(--am-c-fcip-text-op80);
+                color: var(--am-c-fcip-text-op80)
+              }
+            }
+
+            & .am-fcip__include-service__info-description {
+              &.ql-description {
+                @include quill-styles;
               }
             }
           }

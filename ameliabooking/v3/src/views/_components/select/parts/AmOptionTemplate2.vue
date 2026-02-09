@@ -153,9 +153,13 @@ const handleClick = () => {
 }
 
 function replaceNewLines (description) {
-  description = description.replace(/<\/p>/g, ' </p>').replace(/<\/h1>/g, ' </h1>').replace(/<\/h2>/g, ' </h2>').replace(/<\/h3>/g, ' </h3>').replace(/<\/h4>/g, ' </h4>')
-  description = description.replace(/<\/li>/g, ' </li>')
-  return description
+  if (!description) return ''
+  let text = description.replace(/<br\s*\/?>/gi, ' ')
+  text = text.replace(/<\/p>/gi, ' ').replace(/<\/div>/gi, ' ').replace(/<\/li>/gi, ' ')
+  text = text.replace(/<[^>]*>/g, '')
+  text = text.replace(/&nbsp;/g, ' ')
+  text = text.replace(/\s+/g, ' ').trim()
+  return text
 }
 
 function imagePlaceholder () {
@@ -214,6 +218,7 @@ export default {
 
     &__wrapper {
       display: flex;
+      width: 100%;
     }
 
     &__img {

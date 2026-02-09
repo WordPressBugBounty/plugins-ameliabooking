@@ -1,22 +1,34 @@
 <template>
   <Content
-    wrapper-class="am-fcil"
-    form-class="am-fcil__main"
-    :content-class="`am-fcil__wrapper ${
+    ref="contentRef"
+    :wrapper-class="`am-fcil ${pageWidth < 481 ? 'am-mobile' : ''}`"
+    :form-class="`am-fcil__main ${pageWidth < 481 ? 'am-mobile' : ''}`"
+    :content-class="`am-fcil__wrapper ${pageWidth < 481 ? 'am-mobile' : ''} ${
       customizeOptions.pageScroll.visibility ? '' : 'no-scroll'
     }`"
     :style="cssVars"
   >
     <template #header>
-      <Header
-        :btn-string="labelsDisplay('back_btn')"
-        :btn-type="btnType('backBtn')"
-      ></Header>
+      <span class="am-fcil__filter-buttons">
+        <Header
+          :btn-size="filterWidth < 481 ? 'medium' : 'mini'"
+          :btn-string="labelsDisplay('back_btn')"
+          :btn-type="btnType('backBtn')"
+        />
+        <AmButton
+          v-if="filterWidth < 481"
+          size="medium"
+          category="secondary"
+          :type="customizeOptions.filterMenuBtn.buttonType"
+          custom-class="am-fcil__filter-buttons__menu"
+          :icon-only="true"
+          :icon="iconSearchMenu"
+          @click="() => filterMobileMenu = !filterMobileMenu"
+        />
+      </span>
       <div class="am-fcil__filter">
         <div
-          v-if="
-            amCustomize.cbf.categoryItemsList.options.searchInput.visibility
-          "
+          v-if="customizeOptions.searchInput.visibility"
           class="am-fcil__filter-item"
           :class="filterClassWidth.search"
         >
@@ -26,62 +38,87 @@
             :prefix-icon="iconSearch"
           />
         </div>
-        <div
-          v-if="
-            amCustomize.cbf.categoryItemsList.options.filterEmployee
-              .visibility && !licence.isLite
-          "
-          class="am-fcil__filter-item"
-          :class="filterClassWidth.employee"
-        >
-          <AmSelect
-            v-model="employeeFilter"
-            clearable
-            filterable
-            :placeholder="labelsDisplay('filter_employee')"
-            :fit-input-width="true"
+        <Transition name="slide-fade">
+          <div
+            v-if="customizeOptions.filterEmployee.visibility && !licence.isLite"
+            class="am-fcil__filter-item"
+            :class="filterClassWidth.employee"
           >
-            <AmOption
-              v-for="employee in employeesList"
-              :key="employee.id"
-              :value="employee.id"
-              :label="`${employee.firstName} ${employee.lastName}`"
+            <AmSelect
+              v-model="employeeFilter"
+              clearable
+              filterable
+              :placeholder="labelsDisplay('filter_employee')"
+              :fit-input-width="true"
             >
-            </AmOption>
-          </AmSelect>
-        </div>
-        <div
-          v-if="
-            amCustomize.cbf.categoryItemsList.options.filterLocation
-              .visibility &&
-            !licence.isLite &&
-            !licence.isStarter
-          "
-          class="am-fcil__filter-item"
-          :class="filterClassWidth.location"
-        >
-          <AmSelect
-            v-model="locationFilter"
-            clearable
-            filterable
-            :placeholder="labelsDisplay('filter_location')"
-            :fit-input-width="true"
+              <AmOption
+                v-for="employee in employeesList"
+                :key="employee.id"
+                :value="employee.id"
+                :label="`${employee.firstName} ${employee.lastName}`"
+              >
+              </AmOption>
+            </AmSelect>
+          </div>
+        </Transition>
+        <Transition name="slide-fade">
+          <div
+            v-if="
+              customizeOptions.filterLocation
+                .visibility &&
+              !licence.isLite &&
+              !licence.isStarter
+            "
+            class="am-fcil__filter-item"
+            :class="filterClassWidth.location"
           >
-            <AmOption
-              v-for="location in locationsList"
-              :key="location.id"
-              :value="location.id"
-              :label="location.name"
+            <AmSelect
+              v-model="locationFilter"
+              clearable
+              filterable
+              :placeholder="labelsDisplay('filter_location')"
+              :fit-input-width="true"
             >
-            </AmOption>
-          </AmSelect>
-        </div>
+              <AmOption
+                v-for="location in locationsList"
+                :key="location.id"
+                :value="location.id"
+                :label="location.name"
+              >
+              </AmOption>
+            </AmSelect>
+          </div>
+        </Transition>
+        <Transition name="slide-fade">
+          <div
+            v-if="customizeOptions.sidebar.visibility && !sideMenuVisibility && filterMobileMenu"
+            class="am-fcil__filter-item am-w100"
+            :class="filterClassWidth.category"
+          >
+            <AmSelect
+              v-model="categorySelected"
+              :clearable="false"
+              :filterable="false"
+              :placeholder="''"
+              :fit-input-width="true"
+            >
+              <AmOption
+                v-for="cat in categoriesMenu"
+                :key="cat.id"
+                :value="cat.id"
+                :label="cat.name"
+              >
+              </AmOption>
+            </AmSelect>
+          </div>
+        </Transition>
         <div
           v-if="
             features.packages &&
-            amCustomize.cbf.categoryItemsList.options.filterButtons.visibility
+            customizeOptions.filterButtons.visibility
           "
-          class="am-fcil__filter-item am-w30"
+          class="am-fcil__filter-item"
+          :class="filterClassWidth.buttons"
         >
           <div class="am-fcil__filter-item__btn-wrapper">
             <div
@@ -117,7 +154,7 @@
         </div>
       </div>
     </template>
-    <template v-if="customizeOptions.sidebar.visibility" #side>
+    <template v-if="customizeOptions.sidebar.visibility && sideMenuVisibility" #side>
       <SideMenu
         :menu-items="categoriesMenu"
         :init-selection="categorySelected"
@@ -140,12 +177,16 @@
           v-for="item in categoryPackages"
           :key="item.id"
           class="am-fcil__item"
+          :class="{'am-mobile': containerWidth < 481}"
         >
-          <div class="am-fcil__item-inner">
+          <div
+            class="am-fcil__item-inner"
+            :class="{'am-mobile': containerWidth < 481}"
+          >
             <div
               class="am-fcil__item-content"
               :style="
-                amCustomize.cbf.categoryItemsList.options.cardColor.visibility
+                customizeOptions.cardColor.visibility
                   ? { backgroundColor: useColorTransparency(item.color, 0.1) }
                   : {}
               "
@@ -269,9 +310,13 @@
             </div>
 
             <!-- Card Footer -->
-            <div class="am-fcil__item-footer">
+            <div
+              class="am-fcil__item-footer"
+              :class="[{'am-mobile': containerWidth < 481}, {'am-micro': containerWidth < 320}]"
+            >
               <AmButton
                 v-if="customizeOptions.cardEmployeeBtn.visibility"
+                :class="{'am-w100': containerWidth < 320}"
                 size="small"
                 :type="btnType('cardEmployeeBtn')"
                 @click="getDialogEmployees()"
@@ -279,9 +324,7 @@
                 {{ labelsDisplay('view_employees') }}
               </AmButton>
               <AmButton
-                :class="{
-                  'am-w100': !customizeOptions.cardEmployeeBtn.visibility,
-                }"
+                :class="[{'am-w100': !customizeOptions.cardEmployeeBtn.visibility}, {'am-micro am-w100': containerWidth < 320}]"
                 size="small"
                 :type="btnType('cardContinueBtn')"
               >
@@ -299,12 +342,16 @@
           v-for="item in categoryServices"
           :key="item.id"
           class="am-fcil__item"
+          :class="{'am-mobile': containerWidth < 481}"
         >
-          <div class="am-fcil__item-inner">
+          <div
+            class="am-fcil__item-inner"
+            :class="{'am-mobile': containerWidth < 481}"
+          >
             <div
               class="am-fcil__item-content"
               :style="
-                amCustomize.cbf.categoryItemsList.options.cardColor.visibility
+                customizeOptions.cardColor.visibility
                   ? { backgroundColor: useColorTransparency(item.color, 0.1) }
                   : {}
               "
@@ -405,11 +452,15 @@
             </div>
 
             <!-- Card Footer -->
-            <div class="am-fcil__item-footer">
+            <div
+              class="am-fcil__item-footer"
+              :class="[{'am-mobile': containerWidth < 481}, {'am-micro': containerWidth < 320}]"
+            >
               <AmButton
                 v-if="
                   customizeOptions.cardEmployeeBtn.visibility && !licence.isLite
                 "
+                :class="{'am-w100': containerWidth < 320}"
                 size="small"
                 :type="btnType('cardEmployeeBtn')"
                 @click="getDialogEmployees('service')"
@@ -417,9 +468,7 @@
                 {{ labelsDisplay('view_employees') }}
               </AmButton>
               <AmButton
-                :class="{
-                  'am-w100': !customizeOptions.cardEmployeeBtn.visibility,
-                }"
+                :class="[{'am-w100': !customizeOptions.cardEmployeeBtn.visibility}, {'am-micro am-w100': containerWidth < 320}]"
                 size="small"
                 :type="btnType('cardContinueBtn')"
               >
@@ -519,7 +568,7 @@ import AmImagePlaceholder from '../../../_components/image-placeholder/AmImagePl
 import moment from 'moment'
 
 // * Import from Vue
-import { inject, ref, defineComponent, computed } from 'vue'
+import {inject, ref, defineComponent, computed, nextTick, onMounted} from 'vue'
 
 // * Composables
 import { useFormattedPrice } from '../../../../assets/js/common/formatting.js'
@@ -536,6 +585,10 @@ let features = inject('features')
 // * Customize
 const { amCustomize } = useReactiveCustomize()
 
+// * Page Width and Reference
+let contentRef = ref()
+let pageWidth = inject('containerWidth')
+
 // * Options
 let customizeOptions = computed(() => {
   return amCustomize.value.cbf.categoryItemsList.options
@@ -544,8 +597,41 @@ let customizeOptions = computed(() => {
 // * Base Urls
 const baseUrls = inject('baseUrls')
 
+// * Sidebar Menu Visibility
+let sideMenuVisibility = computed(() => {
+  let sidebarByContainer = contentRef.value && contentRef.value.catContainerWidth ? contentRef.value.catContainerWidth > 768 : true
+  return customizeOptions.value.sidebar.visibility && sidebarByContainer
+})
+
 // * Filters
 let searchFilter = ref('')
+
+let filterMobileMenu = ref(true)
+
+let iconSearchMenu = {
+  components: {IconComponent},
+  template: `<IconComponent icon="filter"/>`
+}
+
+let filterWidth = computed(() => {
+  return contentRef.value && contentRef.value.catHeaderWidth ? contentRef.value.catHeaderWidth : 0
+})
+
+// * window resize listener
+window.addEventListener('resize', resize);
+
+// * resize function
+function resize() {
+  nextTick(() => {
+    if (filterWidth.value > 480) {
+      filterMobileMenu.value = true
+    }
+  })
+}
+
+onMounted(() => {
+  resize()
+})
 
 let employeesList = ref([
   { id: 1, firstName: 'Silas', lastName: 'Rudy' },
@@ -993,42 +1079,61 @@ let filterClassWidth = computed(() => {
     employee: 'am-w20',
     location: 'am-w20',
     buttons: 'am-w30',
+    category: 'am-w100'
   }
 
-  if (!searchVisibility || !buttonsVisibility) {
-    classFilter.employee =
-      !searchVisibility && !buttonsVisibility ? 'am-w50' : 'am-w35'
-    classFilter.location =
-      !searchVisibility && !buttonsVisibility ? 'am-w50' : 'am-w35'
-    classFilter.search =
-      !buttonsVisibility && !locationVisibility && !employeeVisibility
-        ? 'am-w100'
-        : 'am-w30'
+  if (filterWidth.value > 992) {
+    if (!searchVisibility || !buttonsVisibility) {
+      classFilter.employee = (!searchVisibility && !buttonsVisibility) ? 'am-w50' : 'am-w35'
+      classFilter.location = (!searchVisibility && !buttonsVisibility) ? 'am-w50' : 'am-w35'
+      classFilter.search = !buttonsVisibility && !locationVisibility && !employeeVisibility ? 'am-w100' : 'am-w30'
 
-    if (!employeeVisibility) {
-      classFilter.location =
-        !searchVisibility && !buttonsVisibility ? 'am-w100' : 'am-w70'
-    }
+      if (!employeeVisibility) {
+        classFilter.location = (!searchVisibility && !buttonsVisibility) ? 'am-w100' : 'am-w70'
+      }
 
-    if (!locationVisibility) {
-      classFilter.employee =
-        !searchVisibility && !buttonsVisibility ? 'am-w100' : 'am-w70'
+      if (!locationVisibility) {
+        classFilter.employee = (!searchVisibility && !buttonsVisibility) ? 'am-w100' : 'am-w70'
+      }
+    } else {
+      if (!employeeVisibility) {
+        classFilter.location = 'am-w40'
+      }
+
+      if (!locationVisibility) {
+        classFilter.employee = 'am-w40'
+      }
+
+      if (!employeeVisibility && !locationVisibility) {
+        classFilter.search = 'am-w70'
+      }
     }
+  } else if (filterWidth.value > 768) {
+    classFilter.search = buttonsVisibility ? 'am-w50 am-tablet am-order1' : 'am-w100 am-tablet am-order1'
+    classFilter.buttons = searchVisibility ? 'am-w50 am-tablet am-order2' : 'am-w100 tablet am-order2'
+    classFilter.employee = locationVisibility ? 'am-w50 am-tablet am-order3' : 'am-w100 am-tablet am-order3'
+    classFilter.location = employeeVisibility ? 'am-w50 am-tablet am-order4' : 'am-w100 am-tablet am-order4'
+    classFilter.category = 'am-w100 am-tablet am-order5'
+  } else if (filterWidth.value > 480) {
+    classFilter.search = buttonsVisibility ? 'am-w50 am-tablet am-order1' : 'am-w100 am-tablet am-order1'
+    classFilter.buttons = searchVisibility ? 'am-w50 am-tablet am-order2' : 'am-w100 tablet am-order2'
+    classFilter.employee = locationVisibility ? 'am-w50 am-tablet am-order3' : 'am-w100 am-tablet am-order3'
+    classFilter.location = employeeVisibility ? 'am-w50 am-tablet am-order4' : 'am-w100 am-tablet am-order4'
+    classFilter.category = 'am-w100 am-tablet am-order5'
   } else {
-    if (!employeeVisibility) {
-      classFilter.location = 'am-w40'
-    }
-
-    if (!locationVisibility) {
-      classFilter.employee = 'am-w40'
-    }
-
-    if (!employeeVisibility && !locationVisibility) {
-      classFilter.search = 'am-w70'
-    }
+    classFilter.employee = 'am-w100 am-mobile'
+    classFilter.location = 'am-w100 am-mobile'
+    classFilter.search = 'am-w100 am-mobile'
+    classFilter.buttons = 'am-w100 am-mobile'
+    classFilter.category = 'am-w100 am-mobile'
   }
 
   return classFilter
+})
+
+// * Container width
+let containerWidth = computed(() => {
+  return contentRef.value && contentRef.value.catContainerWidth ? contentRef.value.catContainerWidth : 0
 })
 
 // * Items location
@@ -1130,9 +1235,8 @@ let cssVars = computed(() => {
       amColors.value.colorInpText,
       0.1
     ),
-    '--am-w-fcil-main': !customizeOptions.value.sidebar.visibility
-      ? '100%'
-      : 'calc(100% - 220px)',
+    '--am-w-fcil-main': customizeOptions.value.sidebar.visibility && sideMenuVisibility.value ? 'calc(100% - 220px)' : '100%',
+    '--am-w-fcil-card': contentRef.value && contentRef.value.catFormWidth < 580 ? '100%' : '50%',
   }
 })
 
@@ -1191,11 +1295,28 @@ export default {
     padding: 24px;
     border-radius: 10px;
 
+    &.am-mobile {
+      padding: 8px;
+    }
+
     &__filter {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
       margin: 12px 0;
+
+      &-buttons {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+
+        &__menu {
+          font-size: 24px;
+          flex: 0 0 auto;
+          margin: 0 0 0 8px;
+        }
+      }
 
       &-item {
         width: 100%;
@@ -1210,6 +1331,28 @@ export default {
           padding-right: 0;
         }
 
+        &.am-tablet {
+          &.am-order {
+            &1 {
+              order: 1;
+            }
+            &2{
+              order: 2;
+            }
+            &3 {
+              order: 3;
+              padding-left: 0;
+            }
+            &4 {
+              order: 4;
+              padding-right: 0;
+            }
+            &5 {
+              order: 5;
+            }
+          }
+        }
+
         &__btn {
           width: 100%;
           max-width: 30%;
@@ -1221,14 +1364,19 @@ export default {
           line-height: 1.6;
           padding: 2px 8px;
           border-radius: 6px;
-          transition: all 0.2s ease-in-out;
+          transition: all .2s ease-in-out;
           cursor: pointer;
           color: var(--am-c-fcil-filter-placeholder);
 
-          &:hover,
-          &.am-active {
+          &:hover, &.am-active {
             color: var(--am-c-fcil-filter-text);
             background-color: var(--am-c-fcil-filter-inp-bgr);
+          }
+
+          & span {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
           }
 
           &-wrapper {
@@ -1275,8 +1423,23 @@ export default {
 
           &w100 {
             max-width: 100%;
+            padding: 0;
           }
         }
+      }
+
+      .slide-fade-enter-active {
+        transition: all 0.3s ease-out;
+      }
+
+      .slide-fade-leave-active {
+        transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+      }
+
+      .slide-fade-enter-from,
+      .slide-fade-leave-to {
+        transform: translatey(20px);
+        opacity: 0;
       }
     }
 
@@ -1285,6 +1448,10 @@ export default {
       max-width: var(--am-w-fcil-main);
       border: 1px solid var(--am-c-fcil-main-text-op15);
       border-radius: 6px;
+
+      &.am-mobile {
+        border: none;
+      }
     }
 
     &__heading {
@@ -1295,12 +1462,16 @@ export default {
       padding: 16px 24px 16px;
     }
 
-    &__wrapper {
+    &__wrapper{
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
       justify-content: center;
       padding: 0 16px 16px;
+
+      &.am-mobile {
+        padding: 0;
+      }
 
       &.no-scroll {
         max-height: unset;
@@ -1309,7 +1480,7 @@ export default {
     }
 
     &__item {
-      max-width: 50%;
+      max-width: var(--am-w-fcil-card);
       width: 100%;
       display: flex;
       padding: 8px;
@@ -1324,6 +1495,10 @@ export default {
         border-radius: 6px;
         background-color: var(--am-c-fcil-card-bgr);
         box-shadow: 0 0 6px 2px var(--am-c-fcil-main-text-op15);
+
+        &.am-mobile {
+          padding: 12px;
+        }
       }
 
       &-content {
@@ -1338,11 +1513,7 @@ export default {
         border-radius: 12px;
 
         &.am-package {
-          background: linear-gradient(
-            95.75deg,
-            var(--am-c-fcil-card-bgr) -110.8%,
-            var(--am-c-warning) 114.33%
-          );
+          background: linear-gradient(95.75deg, var(--am-c-fcil-card-bgr) -110.8%,  var(--am-c-warning) 114.33%);
           span {
             color: var(--am-c-fcil-card-bgr);
           }
@@ -1351,7 +1522,7 @@ export default {
         &.am-service {
           background-color: var(--am-c-fcil-success-op20);
           span {
-            color: var(--am-c-fcil-success);
+            color:  var(--am-c-fcil-success);
           }
         }
 
@@ -1366,7 +1537,7 @@ export default {
           font-weight: 400;
           line-height: 1;
 
-          &[class*='am-icon'] {
+          &[class*="am-icon"] {
             font-size: 24px;
           }
         }
@@ -1398,10 +1569,12 @@ export default {
         white-space: nowrap;
         overflow: hidden;
         color: var(--am-c-fcil-card-text);
+        margin: 0 4px 0 0;
       }
 
       &-cost {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
 
@@ -1412,7 +1585,7 @@ export default {
           line-height: 20px;
           padding: 2px 8px;
           border-radius: 24px;
-          margin-right: 8px;
+          margin: 0 8px 8px 0;
           flex: 0 1 auto;
 
           &:last-child {
@@ -1437,8 +1610,9 @@ export default {
         align-items: center;
 
         &__inner {
+          height: 18px;
           display: inline-flex;
-          align-items: flex-end;
+          align-items: center;
           max-width: 100%;
           padding: 0 8px 0 0;
           margin: 0 0 8px;
@@ -1455,7 +1629,7 @@ export default {
             white-space: nowrap;
             overflow: hidden;
 
-            &[class*='am-icon'] {
+            &[class*="am-icon"] {
               flex: 0 0 auto;
               font-size: 24px;
               color: var(--am-c-fcil-primary);
@@ -1491,8 +1665,7 @@ export default {
             padding-right: 2px;
           }
 
-          &:first-child,
-          &:last-child {
+          &:first-child, &:last-child {
             &:after {
               display: none;
             }
@@ -1509,8 +1682,18 @@ export default {
         align-items: center;
         justify-content: space-between;
 
-        &__btn {
-          align-self: end;
+        &.am-mobile {
+          position: relative;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          flex-wrap: wrap;
+        }
+
+        .am-button {
+          &.am-micro {
+            margin-top: 8px;
+          }
         }
       }
     }

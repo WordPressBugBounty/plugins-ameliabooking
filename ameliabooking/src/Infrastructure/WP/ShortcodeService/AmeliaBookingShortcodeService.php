@@ -110,7 +110,7 @@ class AmeliaBookingShortcodeService
         } else {
             wp_enqueue_script(
                 $scriptId,
-                AMELIA_URL . 'v3/public/assets/public.c4d99abe.js',
+                AMELIA_URL . 'v3/public/assets/public.fc906d7b.js',
                 [],
                 AMELIA_VERSION,
                 true
@@ -199,6 +199,8 @@ class AmeliaBookingShortcodeService
                 $stashAS->getStash()
             );
         }
+
+        do_action('amelia_scripts_loaded');
     }
 
     /**

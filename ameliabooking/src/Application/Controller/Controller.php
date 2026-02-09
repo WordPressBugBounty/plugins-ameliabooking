@@ -163,7 +163,7 @@ abstract class Controller
             return $response;
         }
 
-        if ($commandResult->hasAttachment() === false) {
+        if ($commandResult->hasAttachment() === false && $commandResult->getHtml() === null) {
             $responseBody = [
                 'message' => $commandResult->getMessage(),
                 'data'    => $commandResult->getData()
@@ -195,6 +195,30 @@ abstract class Controller
                             $responseBody : array_merge($responseBody, ['data' => []])
                     )
             );
+        }
+
+        if (($html = $commandResult->getHtml()) !== null) {
+            /** @var Response $response */
+            $this->emitSuccessEvent($this->eventBus, $commandResult);
+
+            switch ($commandResult->getResult()) {
+                case (CommandResult::RESULT_SUCCESS):
+                    $response = $response->withStatus(self::STATUS_OK);
+
+                    break;
+                case (CommandResult::RESULT_CONFLICT):
+                    $response = $response->withStatus(self::STATUS_CONFLICT);
+
+                    break;
+                default:
+                    $response = $response->withStatus(self::STATUS_INTERNAL_SERVER_ERROR);
+
+                    break;
+            }
+
+            $response = $response->withHeader('Content-Type', 'text/html; charset=utf-8');
+            $response = $response->withHeader('Cache-Control', 'max-age=0');
+            $response = $response->write($html);
         }
 
         if (($file = $commandResult->getFile()) !== null) {
@@ -243,6 +267,7 @@ abstract class Controller
             'providerIds',
             'locations',
             'locationIds',
+            'ids',
             'events',
             'tag',
             'dates',
@@ -319,5 +344,25 @@ abstract class Controller
                 $this->filterField($requestBody['extras'][$index], 'description', 'description');
             }
         }
+    }
+
+    /**
+     * Helper to set HTML content on CommandResult as an inline file
+     * so the controller can respond with a text/html body.
+     *
+     * @param CommandResult $result
+     * @param string        $html
+     * @param string        $filename
+     *
+     * @return void
+     */
+    protected function setResultHtml(CommandResult $result, $html, $filename = 'content.html')
+    {
+        $result->setFile([
+            'type'    => 'text/html; charset=utf-8',
+            'name'    => $filename,
+            'size'    => strlen($html),
+            'content' => $html,
+        ]);
     }
 }

@@ -265,22 +265,31 @@ let outlookBtnText = computed(() => {
 let employeeFormData = ref({
   googleId: computed({
     get: () => {
-      return store.getters['employee/getGoogleToken'] ? store.getters['employee/getGoogleCalendarId']
-          : store.getters['employee/getUserTableGoogleCalendarId'];
+      return store.getters['employee/getGoogleToken']
+        ? store.getters['employee/getGoogleCalendarId']
+        : store.getters['employee/getUserTableGoogleCalendarId']
     },
     set: (val) => {
       if (store.getters['employee/getGoogleToken']) {
-        store.commit('employee/setGoogleCalendarId', val || '');
+        store.commit('employee/setGoogleCalendarId', val || '')
       } else {
-        store.commit('employee/setEmployeeGoogleCalendarId', val || '');
+        store.commit('employee/setEmployeeGoogleCalendarId', val || '')
       }
     },
   }),
   googleBtn: '',
   outlookId: computed({
-    get: () => store.getters['employee/getOutlookCalendarId'],
+    get: () => {
+      return store.getters['employee/getOutlookToken']
+        ? store.getters['employee/getOutlookCalendarId']
+        : store.getters['employee/getUserTableOutlookCalendarId']
+    },
     set: (val) => {
-      store.commit('employee/setOutlookCalendarId', val ? val : '')
+      if (store.getters['employee/getOutlookToken']) {
+        store.commit('employee/setOutlookCalendarId', val || '')
+      } else {
+        store.commit('employee/setEmployeeOutlookCalendarId', val || '')
+      }
     },
   }),
   outlookBtn: '',
@@ -321,13 +330,14 @@ let employeeDataFormConstruction = ref({
           `am-caepif__item am-google-calendar-button ${props.responsiveClass}`
       ),
       category: computed(() => 'primary'),
-      disabled: computed(() => !!store.getters['employee/getUserTableGoogleCalendarId']),
+      disabled: computed(
+        () => !!store.getters['employee/getUserTableGoogleCalendarId']
+      ),
     },
     slots: {
-      default: computed(
-        () => {
-          return `<img src="${baseUrls.wpAmeliaPluginURL}/v3/src/assets/img/cabinet/google-button.svg" alt="Google" />${googleBtnText.value}`
-        }),
+      default: computed(() => {
+        return `<img src="${baseUrls.wpAmeliaPluginURL}/v3/src/assets/img/cabinet/google-button.svg" alt="Google" />${googleBtnText.value}`
+      }),
     },
     handlers: {
       click: () => {
@@ -354,8 +364,13 @@ let employeeDataFormConstruction = ref({
   outlookBtn: {
     template: markRaw(AmButton),
     props: {
-      class: computed(() => `am-caepif__item am-outlook-button ${props.responsiveClass}`),
+      class: computed(
+        () => `am-caepif__item am-outlook-button ${props.responsiveClass}`
+      ),
       category: computed(() => 'primary'),
+      disabled: computed(
+        () => !!store.getters['employee/getUserTableOutlookCalendarId']
+      ),
     },
     slots: {
       default: computed(() => {
@@ -407,16 +422,19 @@ onBeforeMount(() => {
     delete employeeDataFormConstruction.value.zoomUserId
   }
 
-  if (!amSettings.googleCalendar.enabled && !amSettings.googleCalendar.accessToken) {
+  if (!amSettings.googleCalendar.enabled) {
     delete employeeDataFormConstruction.value.googleId
   }
 
-  if (!amSettings.googleCalendar.enabled && !amSettings.googleCalendar.accessToken) {
+  if (!amSettings.googleCalendar.enabled) {
     delete employeeDataFormConstruction.value.googleBtn
   }
 
   if (!amSettings.outlookCalendar.enabled) {
     delete employeeDataFormConstruction.value.outlookId
+  }
+
+  if (!amSettings.outlookCalendar.enabled) {
     delete employeeDataFormConstruction.value.outlookBtn
   }
 

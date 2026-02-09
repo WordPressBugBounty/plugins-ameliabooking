@@ -15,6 +15,7 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\CustomerBookingToE
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\EventsPeriodsTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\EventsProvidersTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\EventsTable;
+use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Bookable\PackagesCustomersServicesTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Coupon\CouponsTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Payment\PaymentsTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\User\UsersTable;
@@ -144,16 +145,26 @@ class CustomerBookingRepository extends AbstractRepository
             ':qrCodes'      => $data['qrCodes'] && json_decode($data['qrCodes']) !== false ? $data['qrCodes'] : null,
         ];
 
+        $updateColumns = "
+            `customerId`   = :customerId,
+            `status`       = :status,
+            `duration`     = :duration,
+            `persons`      = :persons,
+            `couponId`     = :couponId,
+            `customFields` = :customFields,
+            `qrCodes`      = :qrCodes
+        ";
+
+        if (isset($data['utcOffset'])) {
+            $params[':utcOffset'] = $data['utcOffset'];
+            $updateColumns .= ",
+                `utcOffset`    = :utcOffset";
+        }
+
         try {
             $statement = $this->connection->prepare(
                 "UPDATE {$this->table} SET
-                `customerId`   = :customerId,
-                `status`       = :status,
-                `duration`     = :duration,
-                `persons`      = :persons,
-                `couponId`     = :couponId,
-                `customFields` = :customFields,
-                `qrCodes`      = :qrCodes
+                {$updateColumns}
                 WHERE id = :id"
             );
 
@@ -940,5 +951,34 @@ class CustomerBookingRepository extends AbstractRepository
         }
 
         return CustomerBookingFactory::reformat($rows);
+    }
+
+    /**
+     * Get appointment bookings by package customer ID
+     *
+     * @throws QueryExecutionException|InvalidArgumentException
+     */
+    public function getByPackageCustomerId(int $packageCustomerId): array
+    {
+        $packagesCustomersServicesTable = PackagesCustomersServicesTable::getTableName();
+
+        try {
+            $statement = $this->connection->prepare(
+                "SELECT 
+                    cb.appointmentId as appointmentId,
+                    cb.id as id,
+                    cb.status as status
+                FROM {$this->table} cb
+                INNER JOIN {$packagesCustomersServicesTable} pcs ON pcs.id = cb.packageCustomerServiceId
+                WHERE pcs.packageCustomerId = :packageCustomerId
+                AND cb.appointmentId IS NOT NULL"
+            );
+
+            $statement->execute([':packageCustomerId' => $packageCustomerId]);
+
+            return $statement->fetchAll();
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to get bookings by package customer id in ' . __CLASS__, $e->getCode(), $e);
+        }
     }
 }

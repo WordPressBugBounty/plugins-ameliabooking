@@ -1,5 +1,6 @@
 <template>
   <Content
+    ref="contentRef"
     wrapper-class="am-fcis"
     form-class="am-fcis__form"
     heading-class="am-fcis__header"
@@ -15,7 +16,10 @@
       ></Header>
     </template>
     <template #heading>
-      <div class="am-fcis__header-top">
+      <div
+        :class="[{'am-tablet': pageWidth <= 678}, {'am-mobile': pageWidth < 450}]"
+        class="am-fcis__header-top"
+      >
         <div class="am-fcis__header-text">
           <span class="am-fcis__header-name">
             {{ service.name }}
@@ -104,13 +108,13 @@
       <div v-if="service.gallery.length" class="am-fcis__gallery">
         <div
           class="am-fcis__gallery-hero"
-          :class="{ w100: service.gallery.length === 1 }"
+          :class="[{'w100': service.gallery.length === 1}, {'am-mobile w100': pageWidth < 678}]"
           :style="{
             backgroundImage: `url(${service.gallery[0].pictureFullPath})`,
           }"
         ></div>
         <div
-          v-if="serviceThumbsGallery.length"
+          v-if="serviceThumbsGallery.length && pageWidth > 677"
           class="am-fcis__gallery-thumb__wrapper"
         >
           <div
@@ -120,18 +124,18 @@
             :class="{ 'am-one-thumb': serviceThumbsGallery.length === 1 }"
             :style="{ backgroundImage: `url(${img.pictureFullPath})` }"
           ></div>
-          <AmButton
-            class="am-fcis__gallery-btn"
-            category="secondary"
-            type="filled"
-            @click="() => (galleryDialog = true)"
-          >
-            <span class="am-icon-gallery"></span>
-            <span>
+        </div>
+        <AmButton
+          :custom-class="`am-fcis__gallery-btn${pageWidth < 678 ? ' am-mobile' : ''}`"
+          category="secondary"
+          type="filled"
+          @click="() => (galleryDialog = true)"
+        >
+          <span class="am-icon-gallery"></span>
+          <span>
               {{ labelsDisplay('view_all_photos') }}
             </span>
-          </AmButton>
-        </div>
+        </AmButton>
       </div>
       <!-- Service Gallery -->
 
@@ -265,32 +269,42 @@
             v-show="tabsActive === 'employees'"
             class="am-fcis__info-content"
           >
-            <div
-              v-for="employee in serviceEmployees"
-              :key="employee.id"
-              class="am-fcis__info-employee"
-            >
-              <div class="am-fcis__info-employee__hero">
-                <div
-                  class="am-fcis__info-employee__img"
-                  :style="{ ...employeeImage(employee) }"
-                >
-                  {{ employeeSign(employee) }}
-                </div>
-                <div class="am-fcis__info-employee__name">
-                  {{ employee.firstName }} {{ employee.lastName }}
-                </div>
-              </div>
-              <div
-                v-if="
+            <AmCollapse>
+              <AmCollapseItem
+                v-for="employee in serviceEmployees"
+                :key="employee.id"
+                side
+              >
+                <template #heading>
+                  <div
+                    :class="{'am-mobile': pageWidth < 451}"
+                    class="am-fcis__info-employee"
+                  >
+                    <div class="am-fcis__info-employee__hero">
+                      <div
+                        class="am-fcis__info-employee__img"
+                        :style="{ ...employeeImage(employee) }"
+                      >
+                        {{ employeeSign(employee) }}
+                      </div>
+                      <div class="am-fcis__info-employee__name">
+                        {{ employee.firstName }} {{ employee.lastName }}
+                      </div>
+                    </div>
+                    <div
+                      v-if="
                   serviceEmployeePrice(employee) &&
                   customizeOptions.serviceEmployeePrice.visibility
                 "
-                class="am-fcis__info-employee__price"
-              >
-                {{ serviceEmployeePrice(employee) }}
-              </div>
-            </div>
+                      class="am-fcis__info-employee__price"
+                    >
+                      {{ serviceEmployeePrice(employee) }}
+                    </div>
+                  </div>
+                </template>
+                <template #default></template>
+              </AmCollapseItem>
+            </AmCollapse>
           </div>
           <!-- /Employees -->
         </div>
@@ -328,14 +342,24 @@
         >
           <div class="am-fcis__include-hero">
             <div
+              v-if="pageWidth > 450"
               class="am-fcis__include-img"
               :style="{ ...packageImage(pack) }"
             >
               {{ !pack.pictureFullPath ? pack.name.charAt(0) : '' }}
             </div>
-            <div class="am-fcis__include-text">
-              <div class="am-fcis__include-header">
-                <div class="am-fcis__include-name">
+            <div
+              class="am-fcis__include-text"
+              :class="{'am-mobile': pageWidth < 451}"
+            >
+              <div
+                class="am-fcis__include-header"
+                :class="{'am-mobile': pageWidth < 600}"
+              >
+                <div
+                  class="am-fcis__include-name"
+                  :class="{'am-mobile': pageWidth < 600}"
+                >
                   {{ pack.name }}
                 </div>
                 <div
@@ -457,6 +481,8 @@ import {
 } from '../../../../assets/js/common/colorManipulation.js'
 import { usePackageAmount } from '../../../../assets/js/public/package.js'
 import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
+import AmCollapse from "../../../_components/collapse/AmCollapse.vue";
+import AmCollapseItem from "../../../_components/collapse/AmCollapseItem.vue";
 
 // * Plugin Licence
 let licence = inject('licence')
@@ -466,6 +492,10 @@ let features = inject('features')
 
 // * Customize
 const { amCustomize } = useReactiveCustomize()
+
+// * Page Width and Reference
+let contentRef = ref()
+let pageWidth = inject('containerWidth')
 
 // * Options
 let customizeOptions = computed(() => {
@@ -706,10 +736,8 @@ let servicePackages = ref([
     durationType: 'week',
     endDate: null,
     locations: [{ name: 'Location 1' }, { name: 'Location 2' }],
-    pictureFullPath:
-      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d.jpeg',
-    pictureThumbPath:
-      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d-150x150.jpeg',
+    pictureFullPath: null,
+    pictureThumbPath: null,
     services: [
       {
         id: 1,
@@ -748,10 +776,8 @@ let servicePackages = ref([
     durationType: 'week',
     endDate: null,
     locations: [{ name: 'Location 1' }, { name: 'Location 2' }],
-    pictureFullPath:
-      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d.jpeg',
-    pictureThumbPath:
-      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d-150x150.jpeg',
+    pictureFullPath: null,
+    pictureThumbPath: null,
     services: [
       {
         id: 1,
@@ -790,10 +816,8 @@ let servicePackages = ref([
     durationType: 'week',
     endDate: null,
     locations: [{ name: 'Location 1' }, { name: 'Location 2' }],
-    pictureFullPath:
-      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d.jpeg',
-    pictureThumbPath:
-      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d-150x150.jpeg',
+    pictureFullPath: null,
+    pictureThumbPath: null,
     services: [
       {
         id: 1,
@@ -832,10 +856,8 @@ let servicePackages = ref([
     durationType: 'week',
     endDate: null,
     locations: [{ name: 'Location 1' }, { name: 'Location 2' }],
-    pictureFullPath:
-      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d.jpeg',
-    pictureThumbPath:
-      'http://localhost/amelia-test/wp-content/uploads/2021/06/photo-1503023345310-bd7c1de61c7d-150x150.jpeg',
+    pictureFullPath: null,
+    pictureThumbPath: null,
     services: [
       {
         id: 1,
@@ -977,6 +999,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import '../../../../../src/assets/scss/common/quill/_quill-mixin.scss';
+
 #amelia-app-backend-new {
   // am-    amelia
   // -c-    color
@@ -1003,9 +1027,57 @@ export default {
           align-items: center;
           justify-content: space-between;
           padding: 0 0 16px;
-        }
 
-        &-text {
+          &.am-tablet {
+            flex-wrap: wrap;
+
+            .am-fcis__header-text {
+              width: 100%;
+              justify-content: space-between;
+              margin-bottom: 12px;
+            }
+
+            .am-fcis__header-action {
+              width: 100%;
+              justify-content: space-between;
+              flex: unset;
+            }
+
+            &.am-mobile {
+              .am-fcis__header {
+                &-text {
+                  flex-wrap: wrap;
+                }
+
+                &-name {
+                  width: 100%;
+                }
+
+                &-action {
+                  flex-wrap: wrap;
+                }
+
+                &-price {
+                  margin-bottom: 12px;
+                }
+
+                &-tax {
+                  margin-bottom: 12px;
+                }
+
+                &-btn {
+                  width: 100%;
+                  .am-button {
+                    width: 100%;
+                  }
+                }
+              }
+
+              .am-fcis__badge {
+                margin-left: 0;
+              }
+            }
+          }
         }
 
         &-name {
@@ -1019,6 +1091,7 @@ export default {
           display: flex;
           align-items: center;
           justify-content: flex-end;
+          flex: 0 0 auto;
         }
 
         &-price {
@@ -1028,7 +1101,19 @@ export default {
           color: var(--am-c-fcis-primary);
         }
 
-        &-btn {
+        &-tax {
+          display: inline-flex;
+          flex: 0 0 auto;
+          align-items: center;
+          height: 28px;
+          font-size: 18px;
+          font-weight: 500;
+          line-height: 1;
+          border-radius: 14px;
+          padding: 0 8px;
+          margin-right: 10px;
+          background-color: var(--am-c-fcis-primary-op20);
+          color: var(--am-c-fcis-primary)
         }
 
         &-bottom {
@@ -1045,6 +1130,7 @@ export default {
 
       &__badge {
         display: inline-flex;
+        flex: 0 0 auto;
         align-items: center;
         height: 28px;
         padding: 0 12px 0 8px;
@@ -1054,7 +1140,7 @@ export default {
         &.am-service {
           background-color: var(--am-c-fcis-success-op20);
           span {
-            color: var(--am-c-fcis-success);
+            color:  var(--am-c-fcis-success);
           }
         }
 
@@ -1064,7 +1150,7 @@ export default {
           font-weight: 400;
           line-height: 1;
 
-          &[class*='am-icon'] {
+          &[class*="am-icon"] {
             font-size: 24px;
           }
         }
@@ -1095,7 +1181,7 @@ export default {
             white-space: nowrap;
             overflow: hidden;
 
-            &[class*='am-icon'] {
+            &[class*="am-icon"] {
               flex: 0 0 auto;
               font-size: 24px;
               color: var(--am-c-fcis-primary);
@@ -1106,6 +1192,7 @@ export default {
 
       &__gallery {
         display: flex;
+        position: relative;
         transition: all 0.3s ease-in-out;
         margin: 0 0 32px;
         padding: 0 12px;
@@ -1126,6 +1213,10 @@ export default {
             padding-top: 25%;
             border-radius: 8px;
             margin-bottom: 0;
+
+            &.am-mobile {
+              padding-top: 150px;
+            }
           }
         }
 
@@ -1156,8 +1247,7 @@ export default {
             max-width: 264px;
             position: relative;
 
-            &:after,
-            &:before {
+            &:after, &:before {
               content: '';
               display: block;
               clear: both;
@@ -1172,21 +1262,27 @@ export default {
         &-btn {
           position: absolute;
           bottom: 12px;
-          right: 12px;
+          right: 24px;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: calc(100% - 40px);
+          width: calc(264px - 40px);
+
+          &.am-mobile {
+            width: calc(100% - 48px);
+          }
 
           &.am-button.am-button--filled {
             --am-c-btn-bgr: var(--am-c-btn-second);
             --am-c-btn-text: var(--am-c-btn-first);
             --am-c-btn-border: var(--am-c-fcis-btn-op50);
 
-            &:hover {
-              --am-c-btn-bgr: var(--am-c-btn-second);
-              --am-c-btn-text: var(--am-c-btn-first);
-              --am-c-btn-border: var(--am-c-fcis-btn-op50);
+            &:not(.is-disabled) {
+              &:hover {
+                --am-c-btn-bgr: var(--am-c-btn-second);
+                --am-c-btn-text: var(--am-c-btn-first);
+                --am-c-btn-border: var(--am-c-fcis-btn-op50);
+              }
             }
           }
 
@@ -1228,6 +1324,26 @@ export default {
 
         &-content {
           padding: 24px 0;
+
+          .am-collapse-item {
+
+            $count: 100;
+            @for $i from 0 through $count {
+              &:nth-child(#{$i + 1}) {
+                animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+                animation-fill-mode: both;
+              }
+            }
+
+            &__heading {
+              padding: 12px;
+              transition-delay: .5s;
+
+              &-side {
+                transition-delay: 0s;
+              }
+            }
+          }
         }
 
         &-service {
@@ -1249,18 +1365,18 @@ export default {
             a {
               color: var(--am-c-fcis-primary);
             }
+
+            &.ql-description {
+              @include quill-styles;
+            }
           }
         }
 
         &-employee {
+          width: 100%;
           display: flex;
-          flex-wrap: wrap;
           align-items: center;
           justify-content: space-between;
-          border: 1px solid var(--am-c-inp-border);
-          border-radius: 4px;
-          padding: 12px;
-          margin: 0 0 8px;
 
           &:last-child {
             margin: 0;
@@ -1269,13 +1385,14 @@ export default {
           &__hero {
             display: flex;
             align-items: center;
-            justify-content: center;
+            width: 100%;
           }
 
           &__img {
             width: 54px;
             height: 54px;
             display: flex;
+            flex: 0 0 auto;
             align-items: center;
             justify-content: center;
             background-position: center;
@@ -1287,6 +1404,14 @@ export default {
             font-weight: 500;
           }
 
+          &__heading {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+          }
+
           &__name {
             font-size: 15px;
             font-weight: 500;
@@ -1294,10 +1419,19 @@ export default {
             margin: 0 0 0 12px;
           }
 
+          &__badge {
+            color: #FFF;
+            border-radius: 4px;
+            padding: 0 4px;
+            font-size: 13px;
+            line-height: 19px;
+          }
+
           &__price {
             display: flex;
             align-items: center;
             justify-content: center;
+            flex: 0 0 auto;
             height: 24px;
             font-size: 14px;
             font-weight: 500;
@@ -1306,6 +1440,15 @@ export default {
             background-color: var(--am-c-fcis-primary-op20);
             padding: 0 8px;
             border-radius: 12px;
+            margin: 0 0 0 12px;
+          }
+
+          &__description {
+            color: var(--am-c-fcis-text);
+
+            &.ql-description {
+              @include quill-styles;
+            }
           }
         }
       }
@@ -1379,6 +1522,10 @@ export default {
         &-text {
           width: 100%;
           margin: 0 0 0 12px;
+
+          &.am-mobile {
+            margin: 0;
+          }
         }
 
         &-header {
@@ -1386,6 +1533,10 @@ export default {
           align-items: center;
           justify-content: space-between;
           width: 100%;
+
+          &.am-mobile {
+            flex-wrap: wrap;
+          }
         }
 
         &-name {
@@ -1394,6 +1545,10 @@ export default {
           line-height: 1.6;
           color: var(--am-c-fcis-text);
           margin: 0 0 4px;
+
+          &.am-mobile {
+            width: 100%;
+          }
         }
 
         &-cost {
@@ -1435,7 +1590,11 @@ export default {
 
           &__inner {
             display: inline-flex;
+            align-items: center;
+            justify-content: center;
             max-width: 100%;
+            height: auto;
+            line-height: 20px;
             padding: 0 8px 0 0;
             margin: 0 0 8px;
 
@@ -1450,7 +1609,7 @@ export default {
               color: var(--am-c-fcis-text-op80);
               flex-wrap: wrap;
 
-              &[class*='am-icon'] {
+              &[class*="am-icon"] {
                 flex: 0 0 auto;
                 font-size: 24px;
                 color: var(--am-c-fcis-primary);
@@ -1460,14 +1619,16 @@ export default {
 
           &__services {
             width: 100%;
+            height: auto;
             display: flex;
             flex-wrap: wrap;
+            justify-content: flex-start;
             margin: 0;
 
             span {
               position: relative;
               display: inline-flex;
-              flex: 0 0 auto;
+              flex: 0 1 auto;
               font-size: 13px;
               font-weight: 400;
               line-height: 1.384615;
@@ -1485,8 +1646,7 @@ export default {
                 border-radius: 50%;
               }
 
-              &:first-child,
-              &:nth-child(2) {
+              &:first-child, &:nth-child(2) {
                 padding-right: 2px;
 
                 &::after {
@@ -1499,57 +1659,12 @@ export default {
       }
     }
   }
-
-  &.amelia-v2-booking-dialog {
-    --am-c-fcis-header-text: var(--am-c-main-heading-text);
-    --am-c-fcis-bgr: var(--am-c-main-bgr);
-    --am-c-fcis-text: var(--am-c-main-text);
-    --am-c-fcis-success: var(--am-c-success);
-    --am-c-fcis-primary: var(--am-c-primary);
-
-    .el-overlay-dialog {
-      background-color: rgba(26, 44, 55, 0.5);
-    }
-
-    .el-dialog {
-      max-width: var(--el-dialog-width);
-      width: 100%;
-      border-radius: 8px;
-
-      &__header {
-        padding: 0;
-      }
-
-      &__headerbtn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 19px;
-        height: 19px;
-        background-color: var(--am-c-fcis-bgr);
-        color: var(--am-c-fcis-text);
-        border-radius: 50%;
-        z-index: 1000000;
-
-        .el-dialog__close {
-          line-height: 1;
-        }
-      }
-
-      &__body {
-        padding: 0;
-        word-break: break-word;
-      }
-
-      &__footer {
-        display: none;
-      }
-    }
-  }
 }
 
 // - sgd - service gallery dialog
 .amelia-v2-booking.amelia-v2-sgd {
+  z-index: 9999999 !important;
+
   .el-overlay-dialog {
     background-color: rgba(26, 44, 55, 0.5);
   }

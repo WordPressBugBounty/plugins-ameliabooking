@@ -181,6 +181,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     u.zoomUserId AS user_zoom_user_id,
                     u.appleCalendarId as user_apple_calendar_id,
                     u.googleCalendarId as user_google_calendar_id,
+                    u.outlookCalendarId as user_outlook_calendar_id,
                     u.employeeAppleCalendar as user_employee_apple_calendar,
                     u.stripeConnect AS user_stripeConnect,
                     u.translations AS user_translations,
@@ -247,6 +248,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     u.translations AS user_translations,
                     u.badgeId AS user_badge_id,
                     u.googleCalendarId as user_google_calendar_id,
+                    u.outlookCalendarId as user_outlook_calendar_id,
                     lt.locationId AS user_locationId
                 FROM {$this->table} u
                 LEFT JOIN {$this->providerLocationTable} lt ON lt.userId = u.id
@@ -535,6 +537,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     u.zoomUserId AS user_zoom_user_id,
                     u.appleCalendarId AS user_apple_calendar_id,
                     u.googleCalendarId as user_google_calendar_id,
+                    u.outlookCalendarId as user_outlook_calendar_id,
                     u.employeeAppleCalendar AS user_employee_apple_calendar,
                     u.stripeConnect AS user_stripeConnect,
                     u.countryPhoneIso AS user_countryPhoneIso,
@@ -1527,6 +1530,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 'badgeId'          => isset($row['badge_id']) ? $row['badge_id'] : null,
                 'appleCalendarId'  => isset($row['user_apple_calendar_id']) ? $row['user_apple_calendar_id'] : null,
                 'googleCalendarId' => isset($row['user_google_calendar_id']) ? $row['user_google_calendar_id'] : null,
+                'outlookCalendarId' => isset($row['user_outlook_calendar_id']) ? $row['user_outlook_calendar_id'] : null,
                 'employeeAppleCalendar' => isset($row['user_employee_apple_calendar']) ? $row['user_employee_apple_calendar'] : null,
                 'show'             => isset($row['user_show']) ? $row['user_show'] : 0,
             ];
@@ -1869,6 +1873,34 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             return $result;
         } catch (\Exception $e) {
             throw new QueryExecutionException('Unable to batch clear googleCalendarId in ' . __CLASS__, $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Batch update to clear outlookCalendarId for all providers with a single SQL query
+     *
+     * @return bool
+     * @throws QueryExecutionException
+     */
+    public function clearOutlookCalendarIds()
+    {
+        try {
+            $statement = $this->connection->prepare(
+                "UPDATE {$this->table} 
+                 SET outlookCalendarId = NULL 
+                 WHERE outlookCalendarId IS NOT NULL 
+                 AND type = 'provider'"
+            );
+
+            $result = $statement->execute();
+
+            if (!$result) {
+                throw new QueryExecutionException('Unable to batch clear outlookCalendarId in ' . __CLASS__);
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to batch clear outlookCalendarId in ' . __CLASS__, $e->getCode(), $e);
         }
     }
 

@@ -553,7 +553,7 @@ class TimeSlotService
                 $specialDayDateKey = null;
 
                 foreach ((array)$specialDayIntervals[$providerKey] as $specialDayKey => $specialDays) {
-                    if (array_key_exists($dateKey, $specialDays['dates'])) {
+                    if (array_key_exists($dateKey, $specialDays['dates']) && !empty($specialDays['intervals'])) {
                         $specialDayDateKey = $specialDayKey;
                         break;
                     }
@@ -630,7 +630,10 @@ class TimeSlotService
                     $specialDayDateKey = null;
 
                     foreach ((array)$specialDayIntervals[$providerKey] as $specialDayKey => $specialDays) {
-                        if (array_key_exists($currentDate, $specialDays['dates'])) {
+                        if (
+                            array_key_exists($currentDate, $specialDays['dates']) &&
+                            !empty($specialDays['intervals'])
+                        ) {
                             $specialDayDateKey = $specialDayKey;
                             break;
                         }

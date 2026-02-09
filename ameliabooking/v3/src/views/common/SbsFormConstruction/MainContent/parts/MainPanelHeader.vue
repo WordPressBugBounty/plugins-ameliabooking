@@ -66,6 +66,7 @@ let cssVars = computed(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 8px;
 
     &__main {
       padding: 16px 32px;
@@ -84,6 +85,8 @@ let cssVars = computed(() => {
       padding: 6px 0;
       margin: 0;
       white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
 
       &:before { // theme Twenty Nineteen
         display: none;

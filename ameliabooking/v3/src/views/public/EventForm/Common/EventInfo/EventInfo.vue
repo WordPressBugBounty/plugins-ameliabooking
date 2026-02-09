@@ -562,8 +562,6 @@ export default {
 <style lang="scss">
 .amelia-v2-booking #amelia-container {
   // eli - event list info
-  --am-c-eli-bgr: var(--am-c-main-bgr);
-  background: var(--am-c-eli-bgr);
   .am-eli {
     * {
       font-family: var(--am-font-family);

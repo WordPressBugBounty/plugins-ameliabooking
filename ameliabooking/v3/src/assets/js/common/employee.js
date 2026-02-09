@@ -269,6 +269,7 @@ function useFrontendEmployee (store, employee) {
         outlookCalendar: employee.outlookCalendar,
         appleCalendarId: employee.appleCalendarId,
         googleCalendarId: employee.googleCalendarId,
+        outlookCalendarId: employee.outlookCalendarId,
         employeeAppleCalendar: employee.employeeAppleCalendar ? employee.employeeAppleCalendar : {
             iCloudId: null,
             appSpecificPassword: null

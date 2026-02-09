@@ -29,6 +29,7 @@ use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
 use AmeliaBooking\Domain\ValueObjects\DateTime\DateTimeValue;
 use AmeliaBooking\Domain\ValueObjects\Number\Float\Price;
+use AmeliaBooking\Domain\ValueObjects\Number\Integer\IntegerValue;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
@@ -207,7 +208,14 @@ class UpdateAppointmentCommandHandler extends CommandHandler
                     $newBooking->getId()->getValue() === $oldBooking->getId()->getValue()
                 ) {
                     if ($oldBooking->getUtcOffset()) {
-                        $newBooking->setUtcOffset($oldBooking->getUtcOffset());
+                        $bookingStartClone = clone $appointment->getBookingStart()->getValue();
+                        if ($oldBooking->getInfo() && json_decode($oldBooking->getInfo()->getValue(), true)) {
+                            $info = json_decode($oldBooking->getInfo()->getValue(), true);
+                            if (!empty($info['timeZone'])) {
+                                $bookingStartClone->setTimezone(new \DateTimeZone($info['timeZone']));
+                            }
+                        }
+                        $newBooking->setUtcOffset(new IntegerValue($bookingStartClone->getOffset() / 60));
                     }
 
                     if ($oldBooking->getCreated()) {

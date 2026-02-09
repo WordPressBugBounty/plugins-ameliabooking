@@ -1057,8 +1057,30 @@ function slotSelected(slot) {
   calendarEventSlot.value = slot.time
 
   let isWaiting = waitingListDisplayTimes.value.includes(slot.time)
+  
+  // Get the first qualifying provider ID for waiting list slot
+  let selectedProviderId = null
+  if (isWaiting && slot.waiting) {
+    const dateKey = calendarEventDate?.value
+      ? moment(calendarEventDate.value).format('YYYY-MM-DD')
+      : null
+    if (dateKey && calendarWaitingListSlots?.value?.[dateKey]?.[slot.time]) {
+      const slotProviders = calendarWaitingListSlots.value[dateKey][slot.time]
+      if (slotProviders && slotProviders.length > 0) {
+        // Get first qualifying provider
+        const qualifyingProvider = slotProviders.find(p => {
+          const isFullyBooked = p.c <= 0
+          const hasWaitingSpace = !p.maxWaitingCapacity || (p.w || 0) < p.maxWaitingCapacity
+          return isFullyBooked && hasWaitingSpace
+        })
+        if (qualifyingProvider) {
+          selectedProviderId = qualifyingProvider.e
+        }
+      }
+    }
+  }
 
-  emits('waitingListSlot', isWaiting, (slot.waiting ? slot.peopleWaiting : 0))
+  emits('waitingListSlot', isWaiting, (slot.waiting ? slot.peopleWaiting : 0), selectedProviderId)
 
   emits('selectedTime', slot.time)
 }

@@ -141,7 +141,7 @@ export default {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin: 0 0 32px;
+      margin: 0 0 24px;
     }
 
     &__img {
@@ -184,7 +184,7 @@ export default {
 
     &__btn {
       width: 100%;
-      margin: 8px 0 16px;
+      margin: 16px 0;
     }
   }
 }

@@ -416,6 +416,25 @@ watch(containerWidth, (current) => {
   menuVisibility.value = current > 481 ? false : menuVisibility.value
 })
 
+function populateFilterOptions () {
+  store.dispatch(
+    'cabinetFilters/injectServiceOptions',
+    store.getters['entities/getServices'].map(i => i.id)
+  )
+
+  store.dispatch(
+    'cabinetFilters/injectProviderOptions',
+    cabinetType.value === 'customer'
+      ? store.getters['entities/getEmployees'].map(i => i.id)
+      : []
+  )
+
+  store.dispatch(
+    'cabinetFilters/injectLocationOptions',
+    store.getters['entities/getLocations'].map(i => i.id)
+  )
+}
+
 const entitiesReady = computed(() => store.getters['entities/getReady'])
 watch(entitiesReady, (ready) => {
   if (ready) {
@@ -427,22 +446,7 @@ watch(entitiesReady, (ready) => {
       store.commit('entities/setEmployees', [store.getters['entities/getEmployee'](store.getters['employee/getId'])])
     }
 
-    store.dispatch(
-      'cabinetFilters/injectServiceOptions',
-      store.getters['entities/getServices'].map(i => i.id)
-    )
-
-    store.dispatch(
-      'cabinetFilters/injectProviderOptions',
-      cabinetType.value === 'customer'
-        ? store.getters['entities/getEmployees'].map(i => i.id)
-        : []
-    )
-
-    store.dispatch(
-      'cabinetFilters/injectLocationOptions',
-      store.getters['entities/getLocations'].map(i => i.id)
-    )
+    populateFilterOptions()
   }
 })
 
@@ -566,6 +570,10 @@ function sidebarSelection(step, index) {
 
       store.commit('attendee/setAttendee', useInitAttendee(store, store.getters['attendee/getDefaultAttendee']))
     }
+  }
+
+  if (step.key === 'appointments' || step.key === 'events') {
+    populateFilterOptions()
   }
 
   pageKey.value = step.key

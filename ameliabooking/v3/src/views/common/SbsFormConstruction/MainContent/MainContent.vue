@@ -139,7 +139,6 @@ let cssVars = computed(() => {
 
       // Mobile
       &-mobile {
-        --am-brad-main: 0.5rem;
         --am-brad-main-default: 0.5rem;
         .am-fs__main-content {
           padding: 16px;

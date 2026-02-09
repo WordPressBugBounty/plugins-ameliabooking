@@ -8186,6 +8186,620 @@ namespace AmeliaVendor {
     array (
     ),
   ),
+  'Requests' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Requests',
+    'isabstract' => false,
+    'namespace' => '\\',
+    'extends' => 'AmeliaVendor_Requests',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Auth\\Basic' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Basic',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Auth',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Auth\\Basic',
+    'implements' => 
+    array (
+      0 => 'WpOrg\\Requests\\Auth',
+    ),
+  ),
+  'WpOrg\\Requests\\Autoload' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Autoload',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Autoload',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Cookie\\Jar' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Jar',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Cookie',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Cookie\\Jar',
+    'implements' => 
+    array (
+      0 => 'ArrayAccess',
+      1 => 'IteratorAggregate',
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\ArgumentCount' => 
+  array (
+    'type' => 'class',
+    'classname' => 'ArgumentCount',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\ArgumentCount',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status304' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status304',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status304',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status305' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status305',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status305',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status306' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status306',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status306',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status400' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status400',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status400',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status401' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status401',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status401',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status402' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status402',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status402',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status403' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status403',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status403',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status404' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status404',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status404',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status405' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status405',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status405',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status406' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status406',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status406',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status407' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status407',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status407',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status408' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status408',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status408',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status409' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status409',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status409',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status410' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status410',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status410',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status411' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status411',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status411',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status412' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status412',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status412',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status413' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status413',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status413',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status414' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status414',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status414',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status415' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status415',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status415',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status416' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status416',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status416',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status417' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status417',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status417',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status418' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status418',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status418',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status428' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status428',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status428',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status429' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status429',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status429',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status431' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status431',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status431',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status500' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status500',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status500',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status501' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status501',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status501',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status502' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status502',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status502',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status503' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status503',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status503',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status504' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status504',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status504',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status505' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status505',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status505',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\Status511' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Status511',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\Status511',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Http\\StatusUnknown' => 
+  array (
+    'type' => 'class',
+    'classname' => 'StatusUnknown',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Http',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Http\\StatusUnknown',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\InvalidArgument' => 
+  array (
+    'type' => 'class',
+    'classname' => 'InvalidArgument',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\InvalidArgument',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Exception\\Transport\\Curl' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Curl',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Exception\\Transport',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Exception\\Transport\\Curl',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Hooks' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Hooks',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Hooks',
+    'implements' => 
+    array (
+      0 => 'WpOrg\\Requests\\HookManager',
+    ),
+  ),
+  'WpOrg\\Requests\\IdnaEncoder' => 
+  array (
+    'type' => 'class',
+    'classname' => 'IdnaEncoder',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\IdnaEncoder',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Ipv6' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Ipv6',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Ipv6',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Iri' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Iri',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Iri',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Port' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Port',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Port',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Proxy\\Http' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Http',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Proxy',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Proxy\\Http',
+    'implements' => 
+    array (
+      0 => 'WpOrg\\Requests\\Proxy',
+    ),
+  ),
+  'WpOrg\\Requests\\Requests' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Requests',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Requests',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Response\\Headers' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Headers',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Response',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Response\\Headers',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Session' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Session',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Session',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Ssl' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Ssl',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Ssl',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Transport\\Curl' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Curl',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Transport',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Transport\\Curl',
+    'implements' => 
+    array (
+      0 => 'WpOrg\\Requests\\Transport',
+    ),
+  ),
+  'WpOrg\\Requests\\Transport\\Fsockopen' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Fsockopen',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Transport',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Transport\\Fsockopen',
+    'implements' => 
+    array (
+      0 => 'WpOrg\\Requests\\Transport',
+    ),
+  ),
+  'WpOrg\\Requests\\Utility\\CaseInsensitiveDictionary' => 
+  array (
+    'type' => 'class',
+    'classname' => 'CaseInsensitiveDictionary',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Utility',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Utility\\CaseInsensitiveDictionary',
+    'implements' => 
+    array (
+      0 => 'ArrayAccess',
+      1 => 'IteratorAggregate',
+    ),
+  ),
+  'WpOrg\\Requests\\Utility\\FilteredIterator' => 
+  array (
+    'type' => 'class',
+    'classname' => 'FilteredIterator',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Utility',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Utility\\FilteredIterator',
+    'implements' => 
+    array (
+    ),
+  ),
+  'WpOrg\\Requests\\Utility\\InputValidator' => 
+  array (
+    'type' => 'class',
+    'classname' => 'InputValidator',
+    'isabstract' => false,
+    'namespace' => 'WpOrg\\Requests\\Utility',
+    'extends' => 'AmeliaVendor\\WpOrg\\Requests\\Utility\\InputValidator',
+    'implements' => 
+    array (
+    ),
+  ),
   'Sabberworm\\CSS\\CSSList\\AtRuleBlockList' => 
   array (
     'type' => 'class',
@@ -13511,6 +14125,36 @@ namespace AmeliaVendor {
     array (
     ),
   ),
+  'WpOrg\\Requests\\Auth' => 
+  array (
+    'type' => 'interface',
+    'interfacename' => 'Auth',
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 
+    array (
+      0 => 'AmeliaVendor\\WpOrg\\Requests\\Auth',
+    ),
+  ),
+  'WpOrg\\Requests\\Proxy' => 
+  array (
+    'type' => 'interface',
+    'interfacename' => 'Proxy',
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 
+    array (
+      0 => 'AmeliaVendor\\WpOrg\\Requests\\Proxy',
+    ),
+  ),
+  'WpOrg\\Requests\\Transport' => 
+  array (
+    'type' => 'interface',
+    'interfacename' => 'Transport',
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 
+    array (
+      0 => 'AmeliaVendor\\WpOrg\\Requests\\Transport',
+    ),
+  ),
   'Sabre\\Xml\\Element' => 
   array (
     'type' => 'interface',
@@ -14149,6 +14793,26 @@ namespace AmeliaVendor {
     'extends' => 
     array (
       0 => 'AmeliaVendor\\Psr\\Log\\LoggerInterface',
+    ),
+  ),
+  'WpOrg\\Requests\\Capability' => 
+  array (
+    'type' => 'interface',
+    'interfacename' => 'Capability',
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 
+    array (
+      0 => 'AmeliaVendor\\WpOrg\\Requests\\Capability',
+    ),
+  ),
+  'WpOrg\\Requests\\HookManager' => 
+  array (
+    'type' => 'interface',
+    'interfacename' => 'HookManager',
+    'namespace' => 'WpOrg\\Requests',
+    'extends' => 
+    array (
+      0 => 'AmeliaVendor\\WpOrg\\Requests\\HookManager',
     ),
   ),
   'Sabberworm\\CSS\\CSSElement' => 

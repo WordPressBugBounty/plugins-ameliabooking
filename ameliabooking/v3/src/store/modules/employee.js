@@ -21,6 +21,7 @@ export default {
     },
     appleCalendarId: '',
     googleCalendarId: '',
+    outlookCalendarId: '',
     employeeAppleCalendar: {
       iCloudId: null,
       appSpecificPassword: null
@@ -96,6 +97,10 @@ export default {
 
     getUserTableGoogleCalendarId (state) {
       return state.googleCalendarId
+    },
+
+    getUserTableOutlookCalendarId (state) {
+      return state.outlookCalendarId
     },
 
     getEmployeeAppleCalendarICloudId (state) {
@@ -190,6 +195,10 @@ export default {
 
     setGoogleToken (state, payload) {
       state.googleCalendar.token = payload
+    },
+
+    setEmployeeOutlookCalendarId(state, payload) {
+      state.outlookCalendarId = payload
     },
 
     setAppleCalendarId (state, payload) {

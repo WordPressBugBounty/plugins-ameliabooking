@@ -321,7 +321,7 @@ class ProviderApplicationService
             $userId = $this->add($user);
 
             if ($fields['externalId'] === 0) {
-                $userAS->setWpUserIdForNewUser($userId, $user, $fields['password']);
+                $userAS->setWpUserIdForNewUser($userId, $user, Entities::PROVIDER, $fields['password']);
             }
 
             if (!empty($fields['password'])) {
@@ -1547,12 +1547,11 @@ class ProviderApplicationService
         /** @var ResourceEntitiesRepository $resourceEntitiesRepository */
         $resourceEntitiesRepository = $this->container->get('domain.bookable.resourceEntities.repository');
 
-        /** @var CustomerApplicationService $customerApplicationService */
-        $customerApplicationService = $this->container->get('application.user.customer.service');
+        /** @var UserRepository $userRepository */
+        $userRepository = $this->container->get('domain.users.repository');
 
-        /** @var EventRepository $eventRepository */
-        $eventRepository = $this->container->get('domain.booking.event.repository');
-
+        /** @var SettingsService $settingsDS */
+        $settingsDS = $this->container->get('domain.settings.service');
 
         /** @var Collection $appointments */
         $appointments = $appointmentRepository->getFiltered(
@@ -1580,6 +1579,17 @@ class ProviderApplicationService
             )
         );
 
+        $emptyPackageEmployees =  $settingsDS->getSetting('notifications', 'emptyPackageEmployees');
+
+        if (!empty($emptyPackageEmployees)) {
+            $employeeIds = explode(',', $emptyPackageEmployees);
+            if (($key = array_search($provider->getId()->getValue(), $employeeIds)) !== false) {
+                unset($employeeIds[$key]);
+                $employeeIds = implode(',', $employeeIds);
+                $settingsDS->setSetting('notifications', 'emptyPackageEmployees', $employeeIds);
+            }
+        }
+
         return
             $this->updateProviderDaysOff($provider, $newProvider) &&
             $this->updateProviderSpecialDays($provider, $newProvider) &&
@@ -1594,7 +1604,7 @@ class ProviderApplicationService
             $packageCustomerServiceRepository->updateByEntityId($provider->getId()->getValue(), null, 'providerId') &&
             $providerRepository->deleteViewStats($provider->getId()->getValue()) &&
             $resourceEntitiesRepository->deleteByEntityIdAndEntityType($provider->getId()->getValue(), 'employee') &&
-            $customerApplicationService->delete($provider);
+            $userRepository->delete($provider->getId()->getValue());
     }
 
     /**
@@ -1709,5 +1719,27 @@ class ProviderApplicationService
             : null;
 
         return !empty($badge) ? array_values($badge)[0] : null;
+    }
+
+    /**
+     * @param AbstractUser $user
+     *
+     * @return string
+     */
+    public function getTimeZone($user)
+    {
+        if (
+            ($user instanceof Provider) &&
+            empty($user->getTimeZone()) && !empty(get_option('timezone_string'))
+        ) {
+            return get_option('timezone_string');
+        } elseif (
+            ($user instanceof Provider) &&
+            !empty($user->getTimeZone())
+        ) {
+            return $user->getTimeZone()->getValue();
+        }
+
+        return 'UTC';
     }
 }

@@ -26,6 +26,7 @@
       ></AmDatePicker>
       <div>
         <AmButton
+          v-if="filterBtnVisibility"
           :icon="filterIcon"
           :icon-only="cWidth <= 700"
           custom-class="am-capf__menu-btn"
@@ -272,6 +273,11 @@ let filterIcon = {
   components: { IconComponent },
   template: `<IconComponent icon="filter"/>`,
 }
+
+// * Filter button visibility
+let filterBtnVisibility = computed(() => {
+  return Object.values(props.paramList).filter((p) => p.name !== 'dates').some((p) => amCustomize.value[pageRenderKey.value][stepName.value].options[`${p.name}Filter`].visibility && entities.value[p.name].length > 0)
+})
 
 let cWidth = inject('containerWidth')
 

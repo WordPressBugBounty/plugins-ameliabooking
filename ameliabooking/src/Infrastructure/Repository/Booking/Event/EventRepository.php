@@ -501,7 +501,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
         }
 
         if (!empty($criteria['dates'])) {
-            if (isset($criteria['dates'][0], $criteria['dates'][1])) {
+            if (!empty($criteria['dates'][0]) && !empty($criteria['dates'][1])) {
                 $where[] = "((ep.periodStart BETWEEN :eventFrom1 AND :eventTo1)
                 OR (ep.periodEnd BETWEEN :eventFrom2 AND :eventTo2)
                 OR (:eventFrom3 BETWEEN ep.periodStart AND ep.periodEnd)
@@ -509,11 +509,11 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
                 $params[':eventFrom1'] = $params[':eventFrom2'] = $params[':eventFrom3'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]);
                 $params[':eventTo1']   = $params[':eventTo2']   = $params[':eventTo3']   = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][1]);
-            } elseif (isset($criteria['dates'][0])) {
+            } elseif (!empty($criteria['dates'][0])) {
                 $where[] = "(ep.periodStart >= :eventFrom OR (ep.periodEnd >= :eventTo))";
                 $params[':eventFrom'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]);
                 $params[':eventTo']   = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]);
-            } elseif (isset($criteria['dates'][1])) {
+            } elseif (!empty($criteria['dates'][1])) {
                 $where[] = "(ep.periodStart <= :eventTo)";
 
                 $params[':eventTo'] = DateTimeService::getCustomDateTimeInUtc($criteria['dates'][1]);

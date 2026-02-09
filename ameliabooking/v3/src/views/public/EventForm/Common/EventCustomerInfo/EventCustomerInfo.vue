@@ -899,7 +899,6 @@ export default {
             font-weight: 500;
             line-height: unset;
             margin-bottom: 4px;
-            padding: 0;
 
             &:before {
               color: var(--am-c-error);

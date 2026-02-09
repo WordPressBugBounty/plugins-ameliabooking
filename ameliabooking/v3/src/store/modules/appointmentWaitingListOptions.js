@@ -8,11 +8,24 @@ export default {
     maxExtraPeopleEnabled: false,
     peopleWaiting: 0,
     isWaitingListSlot: false,
+    selectedProviderId: null,
   }),
 
   getters: {
     getIsWaitingListSlot (state) {
       return state.isWaitingListSlot
+    },
+
+    getWaitingListOptions (state) {
+      return {
+        enabled: state.enabled,
+        maxCapacity: state.maxCapacity,
+        maxExtraPeople: state.maxExtraPeople,
+        maxExtraPeopleEnabled: state.maxExtraPeopleEnabled,
+        peopleWaiting: state.peopleWaiting,
+        isWaitingListSlot: state.isWaitingListSlot,
+        selectedProviderId: state.selectedProviderId,
+      }
     },
 
     getOptions (state) {
@@ -23,6 +36,7 @@ export default {
         maxExtraPeopleEnabled: state.maxExtraPeopleEnabled,
         peopleWaiting: state.peopleWaiting,
         isWaitingListSlot: state.isWaitingListSlot,
+        selectedProviderId: state.selectedProviderId,
       }
     }
   },
@@ -35,12 +49,16 @@ export default {
       state.maxExtraPeopleEnabled = payload.maxExtraPeopleEnabled
       state.peopleWaiting = payload.peopleWaiting
       state.isWaitingListSlot = 'isWaitingListSlot' in payload ? payload.isWaitingListSlot : false
+      state.selectedProviderId = 'selectedProviderId' in payload ? payload.selectedProviderId : null
     },
     setIsWaitingListSlot (state, payload) {
       state.isWaitingListSlot = !!payload
     },
     setPeopleWaiting (state, payload) {
       state.peopleWaiting = payload
+    },
+    setSelectedProviderId (state, payload) {
+      state.selectedProviderId = payload
     }
   },
 
@@ -53,6 +71,7 @@ export default {
         maxExtraPeopleEnabled: false,
         peopleWaiting: 0,
         isWaitingListSlot: false,
+        selectedProviderId: null,
       })
     }
   }

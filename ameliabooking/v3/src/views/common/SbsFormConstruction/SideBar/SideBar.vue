@@ -382,6 +382,7 @@ export default {
           display: flex;
           align-items: center;
           justify-content: space-between;
+          gap: 0 4px;
 
           &.am-collapsed {
             justify-content: center;
@@ -394,6 +395,7 @@ export default {
           width: 24px;
           height: 20px;
           font-size: 24px;
+          flex: 0 0 auto;
 
           span {
             display: block;
@@ -410,10 +412,13 @@ export default {
           font-size: 14px;
           font-weight: 500;
           line-height: 1.43;
-          margin: 0 auto 0 6px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin: 0 auto 0 0;
 
           &.am-rtl {
-            margin: 0 6px 0 auto;
+            margin: 0 0 0 auto;
           }
 
           &.fade-enter-active {

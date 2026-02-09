@@ -119,6 +119,8 @@ class Licence
             new Commands\Notification\UpdateSMSNotificationHistoryDirectlyCommandHandler($c),
             Commands\Notification\GetSMSNotificationsHistoryCommand::class                =>
             new Commands\Notification\GetSMSNotificationsHistoryCommandHandler($c),
+            Commands\Notification\ValidateSMTPCredentialsCommand::class                   =>
+                new Commands\Notification\ValidateSMTPCredentialsCommandHandler($c),
             // Payment
             Commands\Payment\AddPaymentCommand::class                                     => new Commands\Payment\AddPaymentCommandHandler($c),
             Commands\Payment\DeletePaymentCommand::class                                  => new Commands\Payment\DeletePaymentCommandHandler($c),

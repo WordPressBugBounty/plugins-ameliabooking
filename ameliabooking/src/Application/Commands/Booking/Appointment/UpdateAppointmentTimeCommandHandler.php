@@ -105,6 +105,8 @@ class UpdateAppointmentTimeCommandHandler extends CommandHandler
         /** @var Appointment $appointment */
         $appointment = $appointmentRepo->getById((int)$command->getArg('id'));
 
+        $oldAppointment = clone $appointment;
+
         $initialBookingStart = $appointment->getBookingStart()->getValue();
         $initialBookingEnd   = $appointment->getBookingEnd()->getValue();
 
@@ -196,7 +198,7 @@ class UpdateAppointmentTimeCommandHandler extends CommandHandler
             return $result;
         }
 
-        do_action('amelia_before_booking_rescheduled', $appointment->toArray());
+        do_action('amelia_before_booking_rescheduled', $oldAppointment->toArray(), null, $bookingStart);
 
         $appointmentRepo->update((int)$command->getArg('id'), $appointment);
 
@@ -244,7 +246,7 @@ class UpdateAppointmentTimeCommandHandler extends CommandHandler
         );
 
 
-        do_action('amelia_after_booking_rescheduled', $appointment->toArray());
+        do_action('amelia_after_booking_rescheduled', $oldAppointment->toArray(), null, $bookingStart);
 
         $result->setResult(CommandResult::RESULT_SUCCESS);
         $result->setMessage('Successfully updated appointment time');

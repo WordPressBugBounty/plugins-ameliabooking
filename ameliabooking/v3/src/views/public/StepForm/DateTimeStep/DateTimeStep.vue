@@ -27,6 +27,7 @@
       :show-slot-pricing="slotPricingVisibility"
       :show-people-waiting="peopleWaitingVisibility"
       :label-slots-selected="amLabels.date_time_slots_selected"
+      :label-waiting-list="amLabels.waiting_list"
       :fetched-slots="null"
       :service-id="cartItem ? cartItem.serviceId : 0"
       :date="date"

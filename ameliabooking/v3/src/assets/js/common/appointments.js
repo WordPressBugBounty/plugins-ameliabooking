@@ -717,52 +717,61 @@ function useFillAppointments (store) {
     let booking = cartItem.services[cartItem.serviceId].list[0]
 
     if (!booking.providerId && booking.date && booking.time) {
-      // Derive employeesIds. If a waiting list slot is selected (not present in regular slots),
-      // pull provider data from occupied structure instead of slots.
+      // Check if waiting list slot with pre-selected provider
       let isWaitingListSlot = store.getters['appointmentWaitingListOptions/getIsWaitingListSlot']
-
-      let slotDataArray = null
-
-      if (
-        isWaitingListSlot &&
-        booking.date && booking.time &&
-        (
-          !(booking.date in cartItem.services[cartItem.serviceId].slots) ||
-          !(booking.time in cartItem.services[cartItem.serviceId].slots[booking.date])
-        ) &&
-        booking.date in cartItem.services[cartItem.serviceId].occupied &&
-        booking.time in cartItem.services[cartItem.serviceId].occupied[booking.date]
-      ) {
-        // Waiting list slot: use occupied data (fully booked original appointment rows)
-        slotDataArray = cartItem.services[cartItem.serviceId].occupied[booking.date][booking.time]
-      } else if (
-        booking.date && booking.time &&
-        booking.date in cartItem.services[cartItem.serviceId].slots &&
-        booking.time in cartItem.services[cartItem.serviceId].slots[booking.date]
-      ) {
-        // Regular slot
-        slotDataArray = cartItem.services[cartItem.serviceId].slots[booking.date][booking.time]
+      let waitingListOptions = store.getters['appointmentWaitingListOptions/getWaitingListOptions']
+      
+      if (isWaitingListSlot && waitingListOptions.selectedProviderId) {
+        // Use the provider ID that was stored when the waiting list slot was selected
+        booking.providerId = waitingListOptions.selectedProviderId
       } else {
-        slotDataArray = []
-      }
+        // Derive employeesIds. If a waiting list slot is selected (not present in regular slots),
+        // pull provider data from occupied structure instead of slots.
+        let slotDataArray = null
 
-      let employeesIds = slotDataArray.map(i => i.e).filter((v, i, a) => a.indexOf(v) === i)
-
-      if (settings.roles.limitPerEmployee.enabled) {
-        let chosenEmployees = store.getters['booking/getAllMultipleAppointments'].map(a => Object.values(a.services)[0].list[0])
-        let appCount = store.getters['booking/getMultipleAppointmentsAppCount'](cartItem.serviceId);
-        let result = checkLimitPerEmployee(employeesIds, 0, [], booking, appCount, chosenEmployees, cartItem.serviceId)
-        if (result.bookingFailed !== null) {
-          return {booking: result.bookingFailed, serviceId: parseInt(cartItem.serviceId)}
+        if (
+          isWaitingListSlot &&
+          booking.date && booking.time &&
+          (
+            !(booking.date in cartItem.services[cartItem.serviceId].slots) ||
+            !(booking.time in cartItem.services[cartItem.serviceId].slots[booking.date])
+          ) &&
+          booking.date in cartItem.services[cartItem.serviceId].occupied &&
+          booking.time in cartItem.services[cartItem.serviceId].occupied[booking.date]
+        ) {
+          // Waiting list slot: use occupied data (fully booked original appointment rows)
+          const serviceId = parseInt(cartItem.serviceId)
+          slotDataArray = cartItem.services[cartItem.serviceId].occupied[booking.date][booking.time]
+            .filter(p => p.s === serviceId)
+        } else if (
+          booking.date && booking.time &&
+          booking.date in cartItem.services[cartItem.serviceId].slots &&
+          booking.time in cartItem.services[cartItem.serviceId].slots[booking.date]
+        ) {
+          // Regular slot
+          slotDataArray = cartItem.services[cartItem.serviceId].slots[booking.date][booking.time]
+        } else {
+          slotDataArray = []
         }
-        employeesIds = result.employeeIds
-      }
 
-      if (settings.appointments.employeeSelection === 'random') {
-        booking.providerId = employeesIds[Math.floor(Math.random() * (employeesIds.length) + 1) - 1]
-      } else {
-        employeesIds = sortForEmployeeSelection(store, employeesIds, cartItem.serviceId)
-        booking.providerId = employeesIds[0]
+        let employeesIds = slotDataArray.map(i => i.e).filter((v, i, a) => a.indexOf(v) === i)
+
+        if (settings.roles.limitPerEmployee.enabled) {
+          let chosenEmployees = store.getters['booking/getAllMultipleAppointments'].map(a => Object.values(a.services)[0].list[0])
+          let appCount = store.getters['booking/getMultipleAppointmentsAppCount'](cartItem.serviceId);
+          let result = checkLimitPerEmployee(employeesIds, 0, [], booking, appCount, chosenEmployees, cartItem.serviceId)
+          if (result.bookingFailed !== null) {
+            return {booking: result.bookingFailed, serviceId: parseInt(cartItem.serviceId)}
+          }
+          employeesIds = result.employeeIds
+        }
+
+        if (settings.appointments.employeeSelection === 'random') {
+          booking.providerId = employeesIds[Math.floor(Math.random() * (employeesIds.length) + 1) - 1]
+        } else {
+          employeesIds = sortForEmployeeSelection(store, employeesIds, cartItem.serviceId)
+          booking.providerId = employeesIds[0]
+        }
       }
     }
 
@@ -780,7 +789,9 @@ function useFillAppointments (store) {
         booking.time in cartItem.services[cartItem.serviceId].occupied[booking.date]
       ) {
         // Waiting list slot: derive possible locations from occupied data
+        const serviceId = parseInt(cartItem.serviceId)
         slotRows = cartItem.services[cartItem.serviceId].occupied[booking.date][booking.time]
+          .filter(p => p.s === serviceId)
       } else if (
         booking.date in cartItem.services[cartItem.serviceId].slots &&
         booking.time in cartItem.services[cartItem.serviceId].slots[booking.date]

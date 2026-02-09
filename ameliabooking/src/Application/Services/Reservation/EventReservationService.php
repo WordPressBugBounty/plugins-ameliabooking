@@ -1020,7 +1020,7 @@ class EventReservationService extends AbstractReservationService
 
         $priceWithoutCoupon = $price;
 
-        $subtotalPrice = $price;
+        $subtotalPrice = round($price, 4);
 
         $subtraction = 0;
 

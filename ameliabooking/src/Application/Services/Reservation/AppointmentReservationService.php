@@ -885,6 +885,11 @@ class AppointmentReservationService extends AbstractReservationService
             ) || (
                 ($requestedStatus === BookingStatus::CANCELED || $requestedStatus === BookingStatus::REJECTED) &&
                 ($oldBookingStatus === BookingStatus::PENDING || $oldBookingStatus === BookingStatus::APPROVED)
+            ) || $this->shouldFlagPendingApprovedTransition(
+                $appStatusChanged,
+                $appointmentStatus,
+                $oldBookingStatus,
+                $requestedStatus
             )
         ) {
             $booking->setChangedStatus(new BooleanValueObject(true));
@@ -906,6 +911,23 @@ class AppointmentReservationService extends AbstractReservationService
             'appointmentStatusChanged' => $appStatusChanged,
             Entities::BOOKING          => $booking->toArray()
         ];
+    }
+
+    /**
+     * Determines if a pending<->approved transition should be flagged in group appointments
+     * when the appointment status doesn't change.
+     *
+     */
+    private function shouldFlagPendingApprovedTransition(
+        bool $appStatusChanged,
+        string $appointmentStatus,
+        string $oldBookingStatus,
+        string $requestedStatus
+    ): bool {
+        return !$appStatusChanged && $appointmentStatus === BookingStatus::APPROVED &&
+            ($oldBookingStatus === BookingStatus::PENDING || $oldBookingStatus === BookingStatus::APPROVED) &&
+            ($requestedStatus === BookingStatus::PENDING || $requestedStatus === BookingStatus::APPROVED) &&
+            $oldBookingStatus !== $requestedStatus;
     }
 
     /**
@@ -1485,8 +1507,8 @@ class AppointmentReservationService extends AbstractReservationService
             'unit_price' => (float)$bookable->getPrice()->getValue(),
             'qty'        => $this->isAggregatedPrice($bookable) ? $persons : 1,
             'extra_total' => $extraTotal,
-            'bookable'   => $serviceAmountWithoutDiscount,
-            'subtotal'   => $serviceAmountWithoutDiscount + $extrasAmountWithoutDiscount,
+            'bookable'   => round($serviceAmountWithoutDiscount, 4),
+            'subtotal'   => round($serviceAmountWithoutDiscount + $extrasAmountWithoutDiscount, 4),
             'tax'        => $serviceTax ? $this->getTaxAmount($serviceTax, $serviceAmountWithoutDiscount) : 0,
             'tax_rate'   => $serviceTax ? $this->getTaxRate($serviceTax) : '',
             'tax_type'   => $serviceTax ? $serviceTax->getType()->getValue() : '',

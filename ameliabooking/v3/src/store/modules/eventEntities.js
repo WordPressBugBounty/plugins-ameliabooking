@@ -111,6 +111,10 @@ export default {
       return state.locations
     },
 
+    getLocation: (state) => (id) => {
+      return state.locations.find(i => parseInt(i.id) === parseInt(id)) || null
+    },
+
     getCustomFields(state) {
       return state.customFields
     },

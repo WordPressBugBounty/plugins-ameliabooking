@@ -455,6 +455,7 @@ function setEmployee (response) {
     },
     appleCalendarId: response.data.data.user.appleCalendarId ? response.data.data.user.appleCalendarId : '',
     googleCalendarId: response.data.data.user.googleCalendarId ? response.data.data.user.googleCalendarId : '',
+    outlookCalendarId: response.data.data.user.outlookCalendarId ? response.data.data.user.outlookCalendarId : '',
     stripeConnect: response.data.data.user.stripeConnect,
     zoomUserId: response.data.data.user.zoomUserId ? response.data.data.user.zoomUserId : '',
     locationId: response.data.data.user.locationId,

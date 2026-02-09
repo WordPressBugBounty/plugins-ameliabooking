@@ -73,9 +73,15 @@ class GetPaymentDetailsCommandHandler extends CommandHandler
             !empty($params['invoices'])
         );
 
+        $paymentArray = reset($paymentsData);
+
+        $paymentArray = apply_filters('amelia_get_payment_filter', $paymentArray);
+
+        do_action('amelia_get_payment', $paymentArray);
+
         $result->setResult(CommandResult::RESULT_SUCCESS);
         $result->setMessage('Successfully retrieved payment.');
-        $result->setData([Entities::PAYMENT => reset($paymentsData)]);
+        $result->setData([Entities::PAYMENT => $paymentArray]);
 
         return $result;
     }

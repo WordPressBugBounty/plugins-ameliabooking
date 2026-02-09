@@ -921,7 +921,7 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-els-text': amColors.value.colorMainText,
-    '--am-c-els-head-text': amColors.value.colorMainHeadingText,
+    '--am-c-els-head-text': amColors.value.colorMainText,
     '--am-c-els-bgr': amColors.value.colorMainBgr,
     '--am-c-els-text-op10': useColorTransparency(
       amColors.value.colorMainText,

@@ -167,7 +167,7 @@ class UpdateCustomerCommandHandler extends CommandHandler
             /** @var UserApplicationService $userAS */
             $userAS = $this->getContainer()->get('application.user.service');
 
-            $userAS->setWpUserIdForNewUser($command->getArg('id'), $newUser);
+            $userAS->setWpUserIdForNewUser($command->getArg('id'), $newUser, Entities::CUSTOMER);
         } elseif ($newUser->getExternalId() && $newUser->getExternalId()->getValue()) {
             add_filter('amelia_user_profile_updated', '__return_true');
             wp_update_user(

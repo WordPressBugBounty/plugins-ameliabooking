@@ -36,6 +36,7 @@ return array(
     'Beta\\Microsoft\\Graph\\' => array($vendorDir . '/microsoft/microsoft-graph/src/Beta/Microsoft/Graph'),
     'BaconQrCode\\' => array($vendorDir . '/bacon/bacon-qr-code/src'),
     'AmeliaVendor\\phpseclib3\\' => array($vendorDir . '/phpseclib/phpseclib/phpseclib'),
+    'AmeliaVendor\\WpOrg\\Requests\\' => array($vendorDir . '/rmccue/requests/src'),
     'AmeliaVendor\\Svg\\' => array($vendorDir . '/dompdf/php-svg-lib/src/Svg'),
     'AmeliaVendor\\Stripe\\' => array($vendorDir . '/stripe/stripe-php/lib'),
     'AmeliaVendor\\Sabre\\Xml\\' => array($vendorDir . '/sabre/xml/lib'),

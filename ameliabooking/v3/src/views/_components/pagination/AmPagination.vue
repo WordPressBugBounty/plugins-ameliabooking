@@ -188,7 +188,7 @@ let cssVars = computed(() => {
         border-radius: var(--am-rad-pagination);
         margin: 2px;
 
-        &.active {
+        &.is-active {
           --am-c-pagination-bgr: var(--am-c-primary);
           --am-c-pagination-border: var(--am-c-primary);
           --am-c-pagination-text: var(--am-c-card-bgr, var(--am-c-main-bgr));
@@ -207,6 +207,7 @@ let cssVars = computed(() => {
 
         &.el-icon {
           color: var(--am-c-pagination-text);
+          background-color: transparent;
 
           &:hover {
             --am-c-pagination-text: var(--am-c-primary);

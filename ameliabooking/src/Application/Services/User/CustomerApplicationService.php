@@ -85,7 +85,7 @@ class CustomerApplicationService extends UserApplicationService
                 /** @var UserApplicationService $userAS */
                 $userAS = $this->container->get('application.user.service');
 
-                $userAS->setWpUserIdForNewUser($userId, $user);
+                $userAS->setWpUserIdForNewUser($userId, $user, Entities::CUSTOMER);
             }
 
             $result->setResult(CommandResult::RESULT_SUCCESS);
@@ -246,10 +246,8 @@ class CustomerApplicationService extends UserApplicationService
 
             try {
                 if ($customer->getExternalId()) {
-                    $userAS->setWpUserIdForExistingUser($customer->getId()->getValue(), $customer);
-                } else {
-                    $userAS->setWpUserIdForNewUser($customer->getId()->getValue(), $customer);
-
+                    $userAS->setWpUserIdForExistingUser($customer->getId()->getValue(), $customer, Entities::CUSTOMER);
+                } elseif ($userAS->setWpUserIdForNewUser($customer->getId()->getValue(), $customer, Entities::CUSTOMER)) {
                     do_action('AmeliaCustomerWPCreated', $customer->toArray(), $this->container);
                     do_action('amelia_customer_wp_created', $customer->toArray(), $this->container);
                 }

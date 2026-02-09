@@ -438,9 +438,10 @@ function setSelectedTime (value) {
   calendarEventSlot.value = value
 }
 
-function setWaitingListSlot (isWaiting, peopleWaiting) {
+function setWaitingListSlot (isWaiting, peopleWaiting, providerId = null) {
   store.commit('appointmentWaitingListOptions/setIsWaitingListSlot', !!isWaiting)
   store.commit('appointmentWaitingListOptions/setPeopleWaiting', peopleWaiting)
+  store.commit('appointmentWaitingListOptions/setSelectedProviderId', providerId)
   // Determine if CartStep currently present
   let hasCartStep = false
   if (stepsArray && Array.isArray(stepsArray.value)) {

@@ -1740,6 +1740,8 @@ let amColors = computed(() => {
 })
 provide('amColors', amColors)
 
+let borderCalculation = computed(() => containerWidth.value !== 0 && containerWidth.value > 560 ? sidebarVisibility.value || sidebarCollapsed.value : false)
+
 let cssVars = computed(() => {
   return {
     '--am-c-primary': amColors.value.colorPrimary,
@@ -1787,7 +1789,7 @@ let cssVars = computed(() => {
         ? '592px'
         : '760px'
       : '520px',
-    '--am-brad-main': sidebarVisibility.value
+    '--am-brad-main': borderCalculation.value
       ? isRtl.value
         ? '0.5rem 0 0 0.5rem'
         : '0 0.5rem 0.5rem 0'

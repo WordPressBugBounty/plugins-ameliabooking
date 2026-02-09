@@ -5,17 +5,17 @@
     :style="cssVars"
     tabindex="0"
   >
+    <div v-if="paymentError" class="am-fs__payments-error">
+      <AmAlert
+        type="error"
+        :title="paymentError"
+        :show-icon="true"
+        :closable="false"
+      >
+      </AmAlert>
+    </div>
     <div v-show="ready && !loading" class="am-fs__payments">
       <div class="am-fs__payments-heading">
-        <div v-if="paymentError" class="am-fs__payments-error">
-          <AmAlert
-            type="error"
-            :title="paymentError"
-            :show-icon="true"
-            :closable="false"
-          >
-          </AmAlert>
-        </div>
         <span class="am-fs__payments-heading-main">
           {{ amLabels.summary }}
         </span>
@@ -405,7 +405,18 @@ function setOnSitePayment (isMandatory) {
 }
 
 onMounted(() => {
-  usePaymentError(store, '')
+  const isPaymentStatusError = paymentError.value && (
+    paymentError.value === globalLabels.payment_canceled ||
+    paymentError.value === globalLabels.payment_error ||
+    paymentError.value === globalLabels.payment_error_default
+  )
+
+  // If it's a payment status error (canceled/failed) delay clear for 3s
+  if (!isPaymentStatusError) {
+    usePaymentError(store, '')
+  } else {
+    setTimeout(() => {usePaymentError(store, '')}, 3000)
+  }
 
   if (usePrepaidPrice(store) === 0) {
     if (settings.payments.wc.enabled === true && !settings.payments.wc.onSiteIfFree) {

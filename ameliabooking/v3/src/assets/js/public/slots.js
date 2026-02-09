@@ -1,9 +1,9 @@
-import moment from "moment";
-import httpClient from "../../../plugins/axios";
-import {useSortedDateStrings, useUrlParams} from "../common/helper";
-import {settings} from "../../../plugins/settings";
-import {useAvailableSlots, useDuration} from "../common/appointments";
-import {useCartItem} from "./cart";
+import moment from 'moment'
+import httpClient from '../../../plugins/axios'
+import { useSortedDateStrings, useUrlParams } from '../common/helper'
+import { settings } from '../../../plugins/settings'
+import { useAvailableSlots, useDuration } from '../common/appointments'
+import { useCartItem } from './cart'
 
 function useLocalFromUtcSlots (slots) {
   let formattedSlots = {}
@@ -95,18 +95,34 @@ function useAppointmentSlots (params, fetchedSlots, callback, customCallback, wa
               // Consider only rows for this service; require at least one match
               const serviceRows = providersData.filter(p => p.s === serviceId)
               if (duration && (serviceRows.length && serviceRows[0].d !== duration / 60)) return
-              const fullyBooked = serviceRows.length && serviceRows.every(p => p.c <= 0)
-              if (!fullyBooked) return
-              let canAdd = true
-              if (waitingListOptions.maxCapacity) {
-                const currentWaiting = providersData[0].w || 0
-                if (currentWaiting >= waitingListOptions.maxCapacity) {
-                  canAdd = false
+              // Filter for selected providers only
+              const selectedProviderRows = params.providerIds && params.providerIds.length
+                ? serviceRows.filter(p => params.providerIds.includes(p.e))
+                : serviceRows
+
+              // Check if ALL selected providers are fully booked (no capacity available)
+              const allFullyBooked = selectedProviderRows.length > 0 && selectedProviderRows.every(p => p.c <= 0)
+
+              if (!allFullyBooked) return
+
+              // Filter providers that have waiting list capacity
+              const waitingListProviders = selectedProviderRows.filter(p => {
+                return (
+                  !waitingListOptions.maxCapacity ||
+                  (p.w || 0) < waitingListOptions.maxCapacity
+                )
+              })
+
+              // Add to waiting list only if all providers are fully booked and at least one has waiting capacity
+              if (waitingListProviders.length > 0) {
+                // IMPORTANT FIX: Check if this time slot exists in regular slots
+                // If it does, don't add to waiting list because user can book the regular slot
+                let regularSlotExists = slots[date] && slots[date][time];
+
+                if (!regularSlotExists) {
+                  if (!(date in waitingListSlots)) waitingListSlots[date] = {}
+                  waitingListSlots[date][time] = waitingListProviders
                 }
-              }
-              if (canAdd) {
-                if (!(date in waitingListSlots)) waitingListSlots[date] = {}
-                waitingListSlots[date][time] = providersData
               }
             }
           })

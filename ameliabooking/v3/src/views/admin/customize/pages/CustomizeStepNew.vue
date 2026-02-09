@@ -709,6 +709,8 @@ let amColors = computed(() => {
     : defaultCustomizeSettings[pageRenderKey.value].colors
 })
 
+let borderCalculation = computed(() => containerWidth.value !== 0 && containerWidth.value > 560 ? amCustomize.value.sbsNew.sidebar.options.self.visibility || sidebarCollapsed.value : false)
+
 provide('amColors', amColors)
 let cssVars = computed(() => {
   return {
@@ -745,7 +747,7 @@ let cssVars = computed(() => {
         ? '592px'
         : '760px'
       : '520px',
-    '--am-brad-main': amCustomize.value.sbsNew.sidebar.options.self.visibility
+    '--am-brad-main': borderCalculation.value
       ? '0 0.5rem 0.5rem 0'
       : '0.5rem',
   }
