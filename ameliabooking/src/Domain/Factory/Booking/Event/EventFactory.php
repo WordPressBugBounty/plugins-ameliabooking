@@ -370,7 +370,7 @@ class EventFactory
                     'description'           => $row['event_description'],
                     'color'                 => $row['event_color'],
                     'show'                  => $row['event_show'],
-                    'notifyParticipants'    => $row['event_notifyParticipants'],
+                    'notifyParticipants'    => (int)$row['event_notifyParticipants'],
                     'locationId'            => $row['event_locationId'],
                     'customLocation'        => $row['event_customLocation'],
                     'parentId'              => $row['event_parentId'],

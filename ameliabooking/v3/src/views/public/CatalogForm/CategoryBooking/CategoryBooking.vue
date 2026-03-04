@@ -176,7 +176,7 @@
       </template>
       <template #footer>
         <MainContentFooter
-          :second-button-show="stepsArray[stepIndex] === congratulationsStep && amSettings.roles.customerCabinet.pageUrl !== null"
+          :second-button-show="stepsArray[stepIndex] === congratulationsStep && !!amSettings.roles.customerCabinet.pageUrl"
           :add-to-cart-button-show="useCartStep(store) && stepsArray[stepIndex] === cartStep"
           :back-to-cart-button-show="useCartStep(store) && cart.length > 1 && stepsArray[stepIndex] !== cartStep && stepsArray[stepIndex] !== infoStep && stepsArray[stepIndex] !== paymentStep && stepsArray[stepIndex] !== congratulationsStep"
           :booked="booked"

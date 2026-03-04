@@ -466,6 +466,7 @@ function setEmployee (response) {
     specialDayList: response.data.data.user.specialDayList,
     dayOffList: response.data.data.user.dayOffList,
     serviceList: response.data.data.user.serviceList,
+    badgeId: response.data.data.user.badgeId ?? null,
   }
 
   employee.serviceList.forEach((employeeService) => {

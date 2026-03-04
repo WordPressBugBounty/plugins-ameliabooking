@@ -1,12 +1,12 @@
 === Booking for Appointments and Events Calendar - Amelia ===
-Contributors: ameliabooking, wpDataTables, isidoramarkovic, jelenicdanijela
+Contributors: ameliabooking, wpDataTables, isidoramarkovic, jelenicdanijela, alexandergilmanov
 Author URI: https://melograno.io/
 Tags: appointments, booking, event booking system, booking system, scheduling
 Donate link: https://wpamelia.com/
 Requires at least: 5.3
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1
+Stable tag: 2.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,11 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.1.1
+* BugFix: Fixed issue with "Notify the attendees" checkbox not persisting after being unchecked.
+* BugFix: Fixed issue CVE-2026-2931
+* Additional minor bug fixes and overall stability improvements.
+
 v2.1
 * Feature: Welcome onboarding guide - smoother first-time setup experience to help users get started faster.
 * Feature: Elementor Angie AI - for quick actions such as listing services or events, and creating bookings or customers directly from Angie AI.

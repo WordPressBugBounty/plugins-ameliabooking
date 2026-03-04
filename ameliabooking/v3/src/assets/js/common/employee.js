@@ -281,6 +281,7 @@ function useFrontendEmployee (store, employee) {
         weekDayList: weekDayList,
         specialDayList: specialDayList,
         dayOffList: dayOffList,
+        badgeId: employee.badgeId,
     }
 }
 

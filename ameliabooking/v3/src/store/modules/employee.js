@@ -36,6 +36,7 @@ export default {
     savedSpecialDayList: [],
     dayOffList: [],
     savedDayOffList: [],
+    badgeId: null,
   },
 
   getters: {

@@ -244,7 +244,7 @@
         <MainContentFooter
           :second-button-show="
             stepsArray[stepIndex] === congratulationsStep &&
-            amSettings.roles.customerCabinet.pageUrl !== null
+            !!amSettings.roles.customerCabinet.pageUrl
           "
           :add-to-cart-button-show="
             useCartStep(store) && stepsArray[stepIndex] === cartStep

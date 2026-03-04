@@ -269,7 +269,7 @@ let ifBookedCustomerCabinetUrl = computed(() => {
 
 let customerCabinetButton = computed(() => {
   if (stepsArray.value[stepIndex.value].name === 'CongratulationsStep') {
-    return amSettings.roles.customerCabinet.pageUrl !== null && ifBookedCustomerCabinetUrl.value
+    return !!amSettings.roles.customerCabinet.pageUrl && ifBookedCustomerCabinetUrl.value
   }
 
   return true

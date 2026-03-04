@@ -385,13 +385,6 @@ class AppointmentReservationService extends AbstractReservationService
             );
         }
 
-        /** @var Appointment $existingAppointment */
-        $existingAppointment = $appointmentAS->getAlreadyBookedAppointment(
-            $appointmentData,
-            empty($appointmentData['packageBookingFromBackend']),
-            $service
-        );
-
         $bookingStatus = $settingsDS
             ->getEntitySettings($service->getSettings())
             ->getGeneralSettings()
@@ -401,6 +394,13 @@ class AppointmentReservationService extends AbstractReservationService
             isset($appointmentData['bookings'][0]['status']) &&
             $appointmentData['bookings'][0]['status'] === BookingStatus::WAITING) ?
             $appointmentData['bookings'][0]['status'] : $bookingStatus;
+
+        /** @var Appointment $existingAppointment */
+        $existingAppointment = $appointmentAS->getAlreadyBookedAppointment(
+            $appointmentData,
+            empty($appointmentData['packageBookingFromBackend']),
+            $service
+        );
 
         if (!empty($appointmentData['payment']['gateway']) && !empty($appointmentData['payment']['orderStatus'])) {
             $appointmentData['bookings'][0]['status'] = $this->getWcStatus(

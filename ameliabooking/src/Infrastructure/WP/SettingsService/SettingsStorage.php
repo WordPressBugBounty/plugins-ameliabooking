@@ -6,6 +6,7 @@ use AmeliaBooking\Application\Services\Location\AbstractCurrentLocation;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\Services\Settings\SettingsStorageInterface;
 use AmeliaBooking\Infrastructure\Licence;
+use AmeliaBooking\Plugin;
 
 /**
  * Class SettingsStorage
@@ -30,6 +31,10 @@ class SettingsStorage implements SettingsStorageInterface
 
     public function __construct()
     {
+        if (!defined('AMELIA_LOCALE')) {
+            define('AMELIA_LOCALE', get_user_locale());
+        }
+
         $this->locationService = Licence\ApplicationService::getCurrentLocationService();
 
         $this->settingsCache = self::getSavedSettings();
@@ -38,8 +43,9 @@ class SettingsStorage implements SettingsStorageInterface
 
         foreach (self::$wpSettings as $ameliaSetting => $wpSetting) {
             $this->settingsCache['wordpress'][$ameliaSetting] = get_option($wpSetting);
-            $this->settingsCache['wordpress']['locale']       = get_user_locale();
         }
+
+        $this->settingsCache['wordpress']['locale'] = AMELIA_LOCALE;
 
         DateTimeService::setTimeZone($this->getAllSettings());
     }
