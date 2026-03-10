@@ -226,9 +226,9 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
 
         $order = '';
         if (!empty($criteria['sort'])) {
-            $orderColumn    = $criteria['sort'][0] === '-' ? substr($criteria['sort'], 1) : $criteria['sort'];
-            $orderDirection = $criteria['sort'][0] === '-' ? 'DESC' : 'ASC';
-            $order          = "ORDER BY {$orderColumn} {$orderDirection}";
+            $orderColumn = $criteria['sort']['field'];
+            $orderDirection = $criteria['sort']['order'];
+            $order = "ORDER BY {$orderColumn} {$orderDirection}";
         }
 
         $search = '';

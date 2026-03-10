@@ -387,7 +387,8 @@ class PackageCustomerRepository extends AbstractRepository
 
 
         if (isset($criteria['couponId'])) {
-            $where[] = "pc.couponId = {$criteria['couponId']}";
+            $where[]                = 'pc.couponId = :couponId';
+            $params[':couponId']    = (int)$criteria['couponId'];
         }
 
         $limit = $this->getLimit(

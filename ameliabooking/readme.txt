@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 5.3
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,10 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.1.2
+* BugFix: Fixed an SQL injection issue.
+* Additional minor bug fixes and overall stability improvements.
+
 v2.1.1
 * BugFix: Fixed issue with "Notify the attendees" checkbox not persisting after being unchecked.
 * BugFix: Fixed issue CVE-2026-2931

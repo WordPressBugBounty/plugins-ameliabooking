@@ -363,6 +363,7 @@ return array(
     'AmeliaBooking\\Application\\Commands\\Settings\\UpdateSettingsCategoriesCommandHandler' => $baseDir . '/src/Application/Commands/Settings/UpdateSettingsCategoriesCommandHandler.php',
     'AmeliaBooking\\Application\\Commands\\Settings\\UpdateSettingsCommand' => $baseDir . '/src/Application/Commands/Settings/UpdateSettingsCommand.php',
     'AmeliaBooking\\Application\\Commands\\Settings\\UpdateSettingsCommandHandler' => $baseDir . '/src/Application/Commands/Settings/UpdateSettingsCommandHandler.php',
+    'AmeliaBooking\\Application\\Commands\\SortParamsTrait' => $baseDir . '/src/Application/Commands/SortParamsTrait.php',
     'AmeliaBooking\\Application\\Commands\\Square\\DisconnectFromSquareAccountCommand' => $baseDir . '/src/Application/Commands/Square/DisconnectFromSquareAccountCommand.php',
     'AmeliaBooking\\Application\\Commands\\Square\\DisconnectFromSquareAccountCommandHandler' => $baseDir . '/src/Application/Commands/Square/DisconnectFromSquareAccountCommandHandler.php',
     'AmeliaBooking\\Application\\Commands\\Square\\DisconnectFromSquareAccountDirectlyCommand' => $baseDir . '/src/Application/Commands/Square/DisconnectFromSquareAccountDirectlyCommand.php',

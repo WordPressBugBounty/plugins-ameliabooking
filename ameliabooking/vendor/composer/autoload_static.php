@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit158292498222e94a8cad4314557691ed
+class ComposerStaticInit6d092db902dcd0f4cb4f15a49ca370ad
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -786,6 +786,7 @@ class ComposerStaticInit158292498222e94a8cad4314557691ed
         'AmeliaBooking\\Application\\Commands\\Settings\\UpdateSettingsCategoriesCommandHandler' => __DIR__ . '/../..' . '/src/Application/Commands/Settings/UpdateSettingsCategoriesCommandHandler.php',
         'AmeliaBooking\\Application\\Commands\\Settings\\UpdateSettingsCommand' => __DIR__ . '/../..' . '/src/Application/Commands/Settings/UpdateSettingsCommand.php',
         'AmeliaBooking\\Application\\Commands\\Settings\\UpdateSettingsCommandHandler' => __DIR__ . '/../..' . '/src/Application/Commands/Settings/UpdateSettingsCommandHandler.php',
+        'AmeliaBooking\\Application\\Commands\\SortParamsTrait' => __DIR__ . '/../..' . '/src/Application/Commands/SortParamsTrait.php',
         'AmeliaBooking\\Application\\Commands\\Square\\DisconnectFromSquareAccountCommand' => __DIR__ . '/../..' . '/src/Application/Commands/Square/DisconnectFromSquareAccountCommand.php',
         'AmeliaBooking\\Application\\Commands\\Square\\DisconnectFromSquareAccountCommandHandler' => __DIR__ . '/../..' . '/src/Application/Commands/Square/DisconnectFromSquareAccountCommandHandler.php',
         'AmeliaBooking\\Application\\Commands\\Square\\DisconnectFromSquareAccountDirectlyCommand' => __DIR__ . '/../..' . '/src/Application/Commands/Square/DisconnectFromSquareAccountDirectlyCommand.php',
@@ -11976,10 +11977,10 @@ class ComposerStaticInit158292498222e94a8cad4314557691ed
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit158292498222e94a8cad4314557691ed::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit158292498222e94a8cad4314557691ed::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit158292498222e94a8cad4314557691ed::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit158292498222e94a8cad4314557691ed::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit6d092db902dcd0f4cb4f15a49ca370ad::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit6d092db902dcd0f4cb4f15a49ca370ad::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit6d092db902dcd0f4cb4f15a49ca370ad::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit6d092db902dcd0f4cb4f15a49ca370ad::$classMap;
 
         }, null, ClassLoader::class);
     }
