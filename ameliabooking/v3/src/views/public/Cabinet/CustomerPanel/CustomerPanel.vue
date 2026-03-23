@@ -135,7 +135,6 @@
                 </div>
                 <TimeZoneSelect
                   v-if="
-                    amSettings.featuresIntegrations.timezones.enabled &&
                     entitiesReady &&
                     sidebarVisibility &&
                     timeZoneSelectVisibility

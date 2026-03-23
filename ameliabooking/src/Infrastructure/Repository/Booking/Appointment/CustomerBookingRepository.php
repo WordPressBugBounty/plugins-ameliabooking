@@ -111,15 +111,11 @@ class CustomerBookingRepository extends AbstractRepository
                 )"
             );
 
-            $res = $statement->execute($params);
-
-            if (!$res) {
-                throw new QueryExecutionException('Unable to add data in ' . __CLASS__);
-            }
+            $statement->execute($params);
 
             return $this->connection->lastInsertId();
         } catch (Exception $e) {
-            throw new QueryExecutionException('Unable to add data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to add data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -168,15 +164,11 @@ class CustomerBookingRepository extends AbstractRepository
                 WHERE id = :id"
             );
 
-            $res = $statement->execute($params);
+            $statement->execute($params);
 
-            if (!$res) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
-            }
-
-            return $res;
+            return true;
         } catch (Exception $e) {
-            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to save data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -203,15 +195,11 @@ class CustomerBookingRepository extends AbstractRepository
                 WHERE id = :id"
             );
 
-            $res = $statement->execute($params);
+            $statement->execute($params);
 
-            if (!$res) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
-            }
-
-            return $res;
+            return true;
         } catch (Exception $e) {
-            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to save data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -238,15 +226,11 @@ class CustomerBookingRepository extends AbstractRepository
                 WHERE id = :id"
             );
 
-            $res = $statement->execute($params);
+            $statement->execute($params);
 
-            if (!$res) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
-            }
-
-            return $res;
+            return true;
         } catch (Exception $e) {
-            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to save data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -271,7 +255,7 @@ class CustomerBookingRepository extends AbstractRepository
 
             $row = $statement->fetch();
         } catch (Exception $e) {
-            throw new QueryExecutionException('Unable to return customer booking from' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to return customer booking from' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $row;
@@ -306,7 +290,7 @@ class CustomerBookingRepository extends AbstractRepository
 
             $rows = $statement->fetchAll();
         } catch (Exception $e) {
-            throw new QueryExecutionException('Unable to return customer booking from' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to return customer booking from' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $rows;
@@ -331,7 +315,7 @@ class CustomerBookingRepository extends AbstractRepository
 
             return $row ?: null;
         } catch (Exception $e) {
-            throw new QueryExecutionException('Unable to return customer bookings from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to return customer bookings from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -412,7 +396,7 @@ class CustomerBookingRepository extends AbstractRepository
 
             $rows = $statement->fetchAll();
         } catch (Exception $e) {
-            throw new QueryExecutionException('Unable to find booking by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find booking by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $reformattedData = call_user_func([static::FACTORY, 'reformat'], $rows);
@@ -453,7 +437,7 @@ class CustomerBookingRepository extends AbstractRepository
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $items = [];
@@ -502,7 +486,7 @@ class CustomerBookingRepository extends AbstractRepository
                 ];
             }
         } catch (Exception $e) {
-            throw new QueryExecutionException('Unable to find booking by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find booking by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $result;
@@ -563,7 +547,7 @@ class CustomerBookingRepository extends AbstractRepository
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $result = new Collection();
@@ -634,6 +618,7 @@ class CustomerBookingRepository extends AbstractRepository
                 $where[] = "(
                         e.name LIKE {$param}
                         OR SUBSTR(cb.token, 1, 5) LIKE {$param}
+                        OR CONCAT(cu.firstName, ' ', cu.lastName) LIKE {$param}
                     )";
 
                 $termIndex++;
@@ -724,16 +709,28 @@ class CustomerBookingRepository extends AbstractRepository
 
         if (!empty($criteria['sort'])) {
             $column      = $criteria['sort'][0] === '-' ? substr($criteria['sort'], 1) : $criteria['sort'];
-            $orderColumn = '';
+            $orderDir = $criteria['sort'][0] === '-' ? 'DESC' : 'ASC';
+
             if ($column === 'attendee') {
                 $joins[] = "INNER JOIN {$customersTable} cu ON cu.id = cb.customerId ";
-
-                $orderColumn = ', CONCAT(cu.firstName, " ", cu.lastName)';
+                $orderBy  = "ORDER BY MIN(DATE(ep.periodStart)), CONCAT(cu.firstName, \" \", cu.lastName) {$orderDir}, cb.id";
             } elseif ($column === 'event') {
-                $orderColumn = ', e.name';
+                $orderBy  = "ORDER BY MIN(DATE(ep.periodStart)), e.name {$orderDir}, cb.id";
+            } elseif ($column === 'created') {
+                $groupBy = 'GROUP BY cb.id, cb.created';
+                $orderBy  = "ORDER BY cb.created {$orderDir}, cb.id";
             }
-            $orderDir = $orderColumn ? ($criteria['sort'][0] === '-' ? 'DESC' : 'ASC') : '';
-            $orderBy  = "ORDER BY MIN(DATE(ep.periodStart)) {$orderColumn} {$orderDir}, cb.id";
+        }
+
+        // TODO: refactor JOIN
+        if (
+            !empty($criteria['search']) &&
+            (
+                empty($criteria['sort']) ||
+                ($criteria['sort'][0] === '-' ? substr($criteria['sort'], 1) : $criteria['sort']) !== 'attendee'
+            )
+        ) {
+            $joins[] = "INNER JOIN {$customersTable} cu ON cu.id = cb.customerId ";
         }
 
         $joins = $joins ? implode(' ', $joins) : '';
@@ -757,7 +754,7 @@ class CustomerBookingRepository extends AbstractRepository
 
             $rows = $statement->fetchAll(Statement::FETCH_COLUMN);
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $rows;
@@ -808,6 +805,11 @@ class CustomerBookingRepository extends AbstractRepository
             }
 
             $where[] = '(cb.id IN (' . implode(', ', $queryIds) . '))';
+        }
+
+        $orderBy = '';
+        if (!empty($ids)) {
+            $orderBy = 'ORDER BY FIELD(cb.id, ' . implode(', ', $queryIds) . ')';
         }
 
         if (!empty($criteria['fetchBookingsCoupons'])) {
@@ -907,6 +909,24 @@ class CustomerBookingRepository extends AbstractRepository
             ";
         }
 
+        $orderBy = '';
+
+        if (!empty($criteria['sort'])) {
+            $column = $criteria['sort'][0] === '-' ? substr($criteria['sort'], 1) : $criteria['sort'];
+
+            $orderColumn = '';
+
+            if ($column === 'attendee' && !empty($criteria['fetchCustomers'])) {
+                $orderColumn = 'CONCAT(cu.firstName, " ", cu.lastName)';
+            } elseif ($column === 'status') {
+                $orderColumn = 'cb.status';
+            }
+
+            $orderDir = $orderColumn ? ($criteria['sort'][0] === '-' ? 'DESC' : 'ASC') : '';
+
+            $orderBy = $orderColumn ? "ORDER BY {$orderColumn} {$orderDir}" : '';
+        }
+
         $fields .= '
             cb.id AS booking_id,
             cb.appointmentId AS booking_appointmentId,
@@ -922,6 +942,7 @@ class CustomerBookingRepository extends AbstractRepository
             cb.token AS booking_token,
             cb.aggregatedPrice AS booking_aggregatedPrice,
             cb.qrCodes AS booking_qrCodes,
+            cb.created AS booking_created,
             
             cbt.id AS booking_ticket_id,
             cbt.eventTicketId AS booking_ticket_eventTicketId,
@@ -937,9 +958,9 @@ class CustomerBookingRepository extends AbstractRepository
                 {$fields}
                 FROM {$this->table} cb
                 LEFT JOIN {$bookingsTicketsTable} cbt ON cbt.customerBookingId = cb.id
-            
                 {$joins}
                 {$where}
+                {$orderBy}
                 "
             );
 
@@ -947,7 +968,7 @@ class CustomerBookingRepository extends AbstractRepository
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return CustomerBookingFactory::reformat($rows);
@@ -978,7 +999,7 @@ class CustomerBookingRepository extends AbstractRepository
 
             return $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get bookings by package customer id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get bookings by package customer id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 }

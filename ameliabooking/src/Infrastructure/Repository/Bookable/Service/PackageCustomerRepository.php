@@ -74,13 +74,9 @@ class PackageCustomerRepository extends AbstractRepository
                 (:packageId, :customerId, :price, :tax, :start, :end, :purchased, 'approved', :bookingsCount, :couponId, :token)"
             );
 
-            $res = $statement->execute($params);
-
-            if (!$res) {
-                throw new QueryExecutionException('Unable to add data in ' . __CLASS__);
-            }
+            $statement->execute($params);
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to add data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to add data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $this->connection->lastInsertId();
@@ -115,15 +111,11 @@ class PackageCustomerRepository extends AbstractRepository
                 id = :id"
             );
 
-            $result = $statement->execute($params);
+            $statement->execute($params);
 
-            if (!$result) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
-            }
-
-            return $result;
+            return true;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to save data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -167,7 +159,7 @@ class PackageCustomerRepository extends AbstractRepository
 
             $rows = $statement->fetch()['count'];
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $rows;
@@ -439,7 +431,7 @@ class PackageCustomerRepository extends AbstractRepository
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return array_column($rows, 'id');
@@ -616,7 +608,7 @@ class PackageCustomerRepository extends AbstractRepository
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return call_user_func([static::FACTORY, 'createCollection'], $rows);

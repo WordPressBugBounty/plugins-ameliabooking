@@ -579,10 +579,16 @@ function useDuration (serviceDuration, extras) {
   return duration
 }
 
-function useCalendarEvents (slots) {
+function useCalendarEvents (slots, waitingSlots) {
   let calendarSlotsValues = []
 
-  useSortedDateStrings(Object.keys(slots)).forEach((date) => {
+  let dates = Object.keys(slots)
+
+  if (waitingSlots) {
+    dates = [...new Set([...dates, ...Object.keys(waitingSlots)])]
+  }
+
+  useSortedDateStrings(dates).forEach((date) => {
     calendarSlotsValues.push({
       title  : 'e',
       start  : date,
@@ -590,7 +596,7 @@ function useCalendarEvents (slots) {
       extendedProps: {
         slotsTotal: 100,
         slotsAvailable: 1,
-        slots: slots[date]
+        slots: date in slots ? slots[date] : {}
       }
     })
   })
@@ -675,6 +681,11 @@ function useAvailableSlots (store) {
 
     let service = services.find(i => i.id === cart[cartIndex].serviceId)
 
+    // Date may only exist in waiting list slots (not in regular slots) — guard against undefined
+    if (!(activeAppointment.date in cart[cartIndex].services[cart[cartIndex].serviceId].slots)) {
+      return []
+    }
+
     let defaultSlots = Object.keys(cart[cartIndex].services[cart[cartIndex].serviceId].slots[activeAppointment.date])
 
     let availableSlots = {}
@@ -720,7 +731,7 @@ function useFillAppointments (store) {
       // Check if waiting list slot with pre-selected provider
       let isWaitingListSlot = store.getters['appointmentWaitingListOptions/getIsWaitingListSlot']
       let waitingListOptions = store.getters['appointmentWaitingListOptions/getWaitingListOptions']
-      
+
       if (isWaitingListSlot && waitingListOptions.selectedProviderId) {
         // Use the provider ID that was stored when the waiting list slot was selected
         booking.providerId = waitingListOptions.selectedProviderId

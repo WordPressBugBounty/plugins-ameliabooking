@@ -62,8 +62,6 @@ class OutlookCalendarMiddlewareService extends AbstractOutlookCalendarMiddleware
             $url      = $response['result'];
         }
 
-        curl_close($ch);
-
         return $url;
     }
 
@@ -200,7 +198,6 @@ class OutlookCalendarMiddlewareService extends AbstractOutlookCalendarMiddleware
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['refresh_token' => $refreshToken]));
 
         $response = curl_exec($ch);
-        curl_close($ch);
 
         if ($response) {
             $responseData = json_decode($response, true);

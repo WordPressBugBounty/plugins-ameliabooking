@@ -244,6 +244,7 @@ class CustomerBookingFactory
                     'token'           => isset($row['booking_token']) ? $row['booking_token'] : null,
                     'tax'             => isset($row['booking_tax']) ? $row['booking_tax'] : null,
                     'qrCodes'         => isset($row['booking_qrCodes']) ? $row['booking_qrCodes'] : (isset($row['qrCodes']) ? $row['qrCodes'] : null),
+                    'created'         => isset($row['booking_created']) ? $row['booking_created'] : null,
                 ];
             }
 

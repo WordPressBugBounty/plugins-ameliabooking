@@ -208,7 +208,7 @@ arrApp.forEach((item, index) => {
         ],
         customer: {
           birthday: null,
-          countryPhoneIso: null,
+          countryPhoneIso: 'us',
           email: 'testjanedoe@test.com',
           externalId: null,
           firstName: 'Jane',
@@ -216,7 +216,7 @@ arrApp.forEach((item, index) => {
           id: 1,
           lastName: 'Doe',
           note: null,
-          phone: '',
+          phone: '+15056260628',
           pictureFullPath: null,
           pictureThumbPath: null,
           status: 'visible',

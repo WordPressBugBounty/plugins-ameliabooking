@@ -153,7 +153,10 @@ function jsDateFormat () {
     return 'd MMMM yyyy'
   }
 
-  return settings.wordpress.dateFormat.replace(formatRegex.formatEx, function (phpStr) {
+  // Remove ordinal suffix (S) as it's not supported in all languages
+  let format = settings.wordpress.dateFormat.replace(/S/g, '')
+
+  return format.replace(formatRegex.formatEx, function (phpStr) {
     return formatRegex.formatPHPtoJsMap[phpStr]
   })
 }
@@ -180,8 +183,10 @@ function getFrontedFormattedDateTime (dateTime) {
   return getFrontedFormattedDate(data[0]) + ' ' + getFrontedFormattedTime(data[1].substring(0, 5))
 }
 
-function getFrontedFormattedTime (time) {
-  return DateTime.fromFormat(time, 'HH:mm').toFormat(jsTimeFormat())
+function getFrontedFormattedTime (time, zone = '') {
+  return zone
+    ? DateTime.fromFormat(time, 'HH:mm', { zone: zone }).toFormat(jsTimeFormat())
+    : DateTime.fromFormat(time, 'HH:mm').toFormat(jsTimeFormat())
 }
 
 function getFrontedFormattedDate (date) {

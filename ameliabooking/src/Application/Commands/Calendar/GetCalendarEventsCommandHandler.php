@@ -53,6 +53,10 @@ class GetCalendarEventsCommandHandler extends CommandHandler
         $timeZone = '';
 
         if ($user->getType() === Entities::CUSTOMER) {
+            if (!$user->getId()) {
+                throw new AccessDeniedException('You are not allowed to read calendar events.');
+            }
+
             $queryParams['customers'] = [$user->getId()->getValue()];
         }
 
@@ -112,6 +116,7 @@ class GetCalendarEventsCommandHandler extends CommandHandler
         }
 
         $result->setData(['events' => $filledDays]);
+
         return $result;
     }
 

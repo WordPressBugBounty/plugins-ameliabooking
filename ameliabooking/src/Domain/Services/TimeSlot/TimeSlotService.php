@@ -767,6 +767,8 @@ class TimeSlotService
         foreach ($freeIntervals as $dateKey => $dateProviders) {
             foreach ((array)$dateProviders as $providerKey => $provider) {
                 foreach ((array)$provider['intervals'] as $timePeriod) {
+                    $freeIntervalEnd = $timePeriod[1];
+
                     $moveStart = false;
 
                     if ($timePeriod[0] === 0 && $isContinuousTime && $continuousTimeSlot !== null) {
@@ -796,6 +798,8 @@ class TimeSlotService
                             $realRequiredTime + $service->getTimeAfter()->getValue() <= $nextDayInterval
                                 ? $realRequiredTime + $service->getTimeAfter()->getValue()
                                 : $nextDayInterval);
+
+                            $freeIntervalEnd = $timePeriod[1];
                         }
                     }
 
@@ -841,7 +845,15 @@ class TimeSlotService
 
                         $providerTimeStart += $bookingLength - (86400 - $continuousTimeSlot);
 
-                        $numberOfSlots = (int)(floor(($timePeriod[1] - $providerTimeStart - $requiredTime) / $bookingLength) + 1);
+                        $numberOfSlots = (int)(
+                            floor(
+                                (
+                                    $timePeriod[1] -
+                                    $providerTimeStart -
+                                    ($requiredTime - $service->getTimeBefore()->getValue())
+                                ) / $bookingLength
+                            ) + 1
+                        );
                     }
 
                     if ($moveStart) {
@@ -854,17 +866,16 @@ class TimeSlotService
                         $timeSlot = $customerTimeStart + $i * $bookingLength;
 
                         if (
+                            $timeSlot + $realRequiredTime + $service->getTimeAfter()->getValue() <= $freeIntervalEnd &&
                             (
-                                $startDateFormatted !== $dateKey &&
-                                ($serviceDurationAsSlot &&
-                                !$bufferTimeInSlot ? $timeSlot <= $timePeriod[1] - $requiredTime : true)
-                            ) ||
-                            ($startDateFormatted === $dateKey && $startTimeInSeconds < $timeSlot) ||
-                            ($startDateFormatted ===
-                                $currentDateFormatted &&
-                                $startDateFormatted === $dateKey &&
-                                $startTimeInSeconds < $timeSlot &&
-                                $currentTimeInSeconds < $timeSlot)
+                                $startDateFormatted !== $dateKey || (
+                                    $startTimeInSeconds < $timeSlot &&
+                                    (
+                                        $startDateFormatted !== $currentDateFormatted ||
+                                        $currentTimeInSeconds < $timeSlot
+                                    )
+                                )
+                            )
                         ) {
                             $timeSlotEnd = $timeSlot + $bookingLength;
 

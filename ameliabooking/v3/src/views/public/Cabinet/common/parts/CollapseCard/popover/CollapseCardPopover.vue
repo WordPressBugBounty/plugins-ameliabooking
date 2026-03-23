@@ -23,6 +23,7 @@
         :is="templates[props.type]"
         class="am-cc__popover-content"
         :data="props.contentData"
+        :customized-options="amCustomize"
       ></component>
     </div>
   </el-popover>
@@ -64,6 +65,8 @@ let props = defineProps({
     default: ''
   }
 })
+
+let amCustomize = inject('amCustomize')
 
 let templates = ref({
   period: markRaw(Periods),

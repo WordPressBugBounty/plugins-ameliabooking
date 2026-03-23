@@ -64,6 +64,10 @@ class GetEventsCommandHandler extends CommandHandler
 
         $isFrontEnd = isset($params['page']) && empty($params['group']);
 
+        $fetchBookings = !$isFrontEnd && (
+            !isset($params['bookings']) || filter_var($params['bookings'], FILTER_VALIDATE_BOOLEAN)
+        );
+
         $isCalendarPage = $isFrontEnd && (int)$params['page'] === 0;
 
         $isCabinetPage = $command->getPage() === 'cabinet';
@@ -122,11 +126,12 @@ class GetEventsCommandHandler extends CommandHandler
             'fetchEventsProviders'  => true,
             'fetchEventsOrganizer'  => true,
             'fetchEventsImages'     => true,
-            'fetchBookings'         => true,
-            'fetchBookingsTickets'  => true,
-            'fetchBookingsCoupons'  => $isCabinetPage,
-            'fetchBookingsPayments' => $isCabinetPage,
-            'fetchBookingsUsers'    => $isCabinetPage,
+            'fetchBookings'         => $fetchBookings,
+            'fetchBookingsTickets'  => $fetchBookings,
+            'fetchBookingsCoupons'  => $fetchBookings && $isCabinetPage,
+            'fetchBookingsPayments' => $fetchBookings && $isCabinetPage,
+            'fetchBookingsUsers'    => $fetchBookings && $isCabinetPage,
+            'fetchOccupancy'        => !$fetchBookings,
         ];
 
         /** @var Collection $events */

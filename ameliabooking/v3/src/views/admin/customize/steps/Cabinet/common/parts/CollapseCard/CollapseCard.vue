@@ -212,6 +212,26 @@
               </template>
               <!-- /Employee -->
 
+              <!-- Customers -->
+              <template v-if="pageRenderKey === 'cape' && props.reservation.type === 'appointment' && props.customizedOptions.customer.visibility">
+                <CollapseCardPopover
+                    v-if="props.customers.length"
+                    :header-text="props.customers.length > 1 ? labelsDisplay('customers') : labelsDisplay('customer') "
+                    type="customers"
+                    :content-data="props.customers"
+                >
+                  <template #default>
+                    <div class="am-cc__data">
+                      <span class="am-icon-user"></span>
+                      <span class="am-cc__data-text">
+                      {{ props.customers.length > 1 ? labelsDisplay('customers') : labelsDisplay('customer') }}
+                    </span>
+                    </div>
+                  </template>
+                </CollapseCardPopover>
+              </template>
+              <!-- /Customers -->
+
               <!-- Price -->
               <div
                 v-if="props.customizedOptions.price.visibility"
@@ -421,6 +441,10 @@ let props = defineProps({
   employee: {
     type: [String, Object],
     default: '',
+  },
+  customers: {
+    type: [Array],
+    default: () => []
   },
   location: {
     type: [String, Object],

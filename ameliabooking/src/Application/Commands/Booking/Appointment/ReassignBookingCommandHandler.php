@@ -616,6 +616,8 @@ class ReassignBookingCommandHandler extends CommandHandler
                     $oldAppointment->getStatus()->getValue()
                 );
 
+                $newAppointment->setInternalNotes(new Description(''));
+
                 $newAppointmentId = $appointmentRepository->add($newAppointment);
 
                 $newAppointment->setId(new Id($newAppointmentId));

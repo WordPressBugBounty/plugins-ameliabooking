@@ -355,6 +355,7 @@ class AppointmentFactory
                         'badgeId'   => !empty($row['provider_badgeId']) ? $row['provider_badgeId'] : null,
                         'pictureFullPath' => !empty($row['provider_pictureFullPath']) ? $row['provider_pictureFullPath'] : null,
                         'pictureThumbPath' => !empty($row['provider_pictureThumbPath']) ? $row['provider_pictureThumbPath'] : null,
+                        'zoomUserId' => !empty($row['provider_zoomUserId']) ? $row['provider_zoomUserId'] : null,
                     ];
             }
 

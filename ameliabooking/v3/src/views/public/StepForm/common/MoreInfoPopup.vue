@@ -103,6 +103,7 @@
       <div
         v-if="useDescriptionVisibility(props.item.description)"
         class="am-fs-iipu__description ql-description"
+        :style="props.plainText ? 'white-space: pre-wrap' : ''"
         v-html="props.item.description"
       />
       <!-- /DESCRIPTION -->
@@ -158,6 +159,10 @@ const props = defineProps({
   locationsData: {
     type: Array,
     default: () => [],
+  },
+  plainText: {
+    type: Boolean,
+    default: false,
   },
 })
 

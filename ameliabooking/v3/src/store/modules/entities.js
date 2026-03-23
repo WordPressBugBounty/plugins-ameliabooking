@@ -495,6 +495,14 @@ export default {
       )
     },
 
+    getServiceEmployees: (state) => (serviceId) => {
+      return state.employees.filter((item) => {
+        return item.serviceList.some((service) => {
+          return parseInt(service.id) === parseInt(serviceId)
+        })
+      })
+    },
+
     getEmployeeServices: (state, getters) => (data) => {
       let employeeServices = []
 

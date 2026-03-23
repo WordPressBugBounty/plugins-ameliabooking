@@ -1177,7 +1177,10 @@ class AppointmentReservationService extends AbstractReservationService
         $service = $reservation['bookable'];
 
         /** @var array $customer */
-        $customer = $reservation['customer'];
+        $customer = !empty($reservation['customer'])
+            ? $reservation['customer']
+            : (!empty($reservation['appointment']['bookings'][0]['customer']) ? $reservation['appointment']['bookings'][0]['customer'] : null);
+
 
         /** @var array $booking */
         $booking = $reservation['booking'];

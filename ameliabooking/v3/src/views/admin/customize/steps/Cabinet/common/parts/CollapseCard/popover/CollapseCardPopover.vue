@@ -23,6 +23,7 @@
         :is="templates[props.type]"
         class="am-cc__popover-content"
         :data="props.contentData"
+        :customized-options="amCustomize.cape"
       ></component>
     </div>
   </el-popover>
@@ -36,6 +37,7 @@ import Extras from "./templates/Extras.vue";
 import Tickets from "./templates/Tickets.vue";
 import CustomFields from "./templates/CustomFields.vue";
 import Employee from "./templates/Employee.vue";
+import Customers from "../../../../../../../../public/Cabinet/common/parts/CollapseCard/popover/templates/Customers.vue";
 import QrCode from "./templates/QrCode.vue";
 
 // * Import from Vue
@@ -70,6 +72,7 @@ let templates = ref({
   ticket: markRaw(Tickets),
   customField: markRaw(CustomFields),
   employee: markRaw(Employee),
+  customers: markRaw(Customers),
   qrCode: markRaw(QrCode),
 })
 
@@ -78,6 +81,8 @@ let amFonts = inject('amFonts')
 
 // * Colors block
 let amColors = inject('amColors')
+
+let amCustomize = inject('customize')
 
 let cssVars = computed(() => {
   return {

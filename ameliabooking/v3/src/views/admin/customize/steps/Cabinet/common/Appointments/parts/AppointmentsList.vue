@@ -44,6 +44,7 @@
         "
         :name="appointment.service.name"
         :employee="appointment.provider"
+        :customers="appointment.bookings.map(b => b.customer)"
         :price="125"
         :duration="1800"
         :periods="[]"

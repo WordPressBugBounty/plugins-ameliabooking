@@ -184,7 +184,7 @@ class CustomerRepository extends UserRepository implements CustomerRepositoryInt
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $items = [];
@@ -296,7 +296,7 @@ class CustomerRepository extends UserRepository implements CustomerRepositoryInt
 
             $rows = $statement->fetch()['count'];
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $rows;
@@ -335,7 +335,7 @@ class CustomerRepository extends UserRepository implements CustomerRepositoryInt
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $rows;
@@ -396,7 +396,7 @@ class CustomerRepository extends UserRepository implements CustomerRepositoryInt
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $items = new Collection();

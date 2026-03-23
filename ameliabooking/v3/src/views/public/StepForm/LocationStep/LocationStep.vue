@@ -75,6 +75,7 @@
     :item="selectedLocation"
     :item-name="selectedLocation.name"
     :is-person="false"
+    :plain-text="true"
   />
   <!-- /More Info -->
 </template>

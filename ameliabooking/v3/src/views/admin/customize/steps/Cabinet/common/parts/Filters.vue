@@ -4,11 +4,11 @@
     :style="cssVars"
   >
     <div v-if="cWidth <= 480 && customizeOptions.timeZone.visibility && stepName !== 'packagesList'" class="am-capf__zone">
-      <TimeZoneSelect v-if="amSettings.featuresIntegrations.timezones.enabled" size="small"></TimeZoneSelect>
+      <TimeZoneSelect size="small"></TimeZoneSelect>
     </div>
     <div class="am-capf__menu">
       <TimeZoneSelect
-        v-if="amSettings.featuresIntegrations.timezones.enabled && cWidth <= 480 && customizeOptions.timeZone.visibility && stepName === 'packagesList'"
+        v-if="cWidth <= 480 && customizeOptions.timeZone.visibility && stepName === 'packagesList'"
         size="small"
       ></TimeZoneSelect>
       <AmDatePicker

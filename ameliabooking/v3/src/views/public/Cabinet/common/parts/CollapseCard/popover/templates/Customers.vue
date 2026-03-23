@@ -16,10 +16,10 @@
             ></span>
             {{ item.firstName }} {{ item.lastName }}
           </span>
-          <span class="am-cc__customers-info">
+          <span v-if="!customizedOptions || customizedOptions.appointments.options.customerEmail.visibility" class="am-cc__customers-info">
             {{ item.email }}
           </span>
-          <span class="am-cc__customers-info">
+          <span v-if="!customizedOptions || customizedOptions.appointments.options.customerPhone.visibility" class="am-cc__customers-info">
             {{ item.phone }}
           </span>
         </div>
@@ -41,6 +41,10 @@ import { useResponsiveClass } from "../../../../../../../../assets/js/common/res
 let props = defineProps({
   data: {
     type: [Array, Object, String]
+  },
+  customizedOptions: {
+    type: Object,
+    required: true
   }
 })
 

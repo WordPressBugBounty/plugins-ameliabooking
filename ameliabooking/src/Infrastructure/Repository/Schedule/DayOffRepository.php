@@ -43,12 +43,9 @@ class DayOffRepository extends AbstractRepository
                 (:userId, :name, :startDate, :endDate, :repeat)"
             );
 
-            $res = $statement->execute($params);
-            if (!$res) {
-                throw new QueryExecutionException('Unable to add data in ' . __CLASS__);
-            }
+            $statement->execute($params);
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to add data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to add data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $this->connection->lastInsertId();
@@ -80,12 +77,9 @@ class DayOffRepository extends AbstractRepository
                 WHERE id = :id"
             );
 
-            $res = $statement->execute($params);
-            if (!$res) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
-            }
+            $statement->execute($params);
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to add save in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to add save in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 }

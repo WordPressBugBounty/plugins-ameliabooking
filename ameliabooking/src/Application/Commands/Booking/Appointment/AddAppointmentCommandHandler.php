@@ -151,6 +151,10 @@ class AddAppointmentCommandHandler extends CommandHandler
             $service
         );
 
+        if (!empty($appointmentData['createPaymentLinks'])) {
+            $appointment->setCreatePaymentLinks(true);
+        }
+
         if ($existingAppointment && !empty($appointmentData['internalNotes'])) {
             if (
                 $existingAppointment->getInternalNotes() &&

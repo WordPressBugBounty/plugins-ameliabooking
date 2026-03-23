@@ -114,13 +114,9 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                 )"
             );
 
-            $res = $statement->execute($params);
-
-            if (!$res) {
-                throw new QueryExecutionException('Unable to add data in ' . __CLASS__);
-            }
+            $statement->execute($params);
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to add data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to add data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return (int) $this->connection->lastInsertId();
@@ -190,15 +186,11 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                 id = :id"
             );
 
-            $res = $statement->execute($params);
+            $statement->execute($params);
 
-            if (!$res) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
-            }
-
-            return $res;
+            return true;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to save data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -217,7 +209,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
             $statement->execute();
             $row = $statement->fetch();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by external id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by external id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         if (!$row) {
@@ -247,7 +239,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $items = [];
@@ -293,7 +285,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $items = [];
@@ -346,7 +338,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $items = [];
@@ -379,7 +371,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
 
             $row = $statement->fetch();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         if (!$row) {
@@ -419,7 +411,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
 
             $row = $statement->fetch();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         if (!$row) {
@@ -451,7 +443,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
             $statement->execute($params);
             $rows = $statement->fetchAll(Statement::FETCH_COLUMN);
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $rows;
@@ -482,15 +474,11 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                 "UPDATE {$this->table} SET {$fields} WHERE email = :email"
             );
 
-            $res = $statement->execute($params);
-
-            if (!$res) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
-            }
+            $statement->execute($params);
 
             return true;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to save data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 }

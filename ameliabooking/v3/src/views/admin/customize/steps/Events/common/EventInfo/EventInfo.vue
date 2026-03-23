@@ -62,7 +62,7 @@
           ></DescriptionItem>
 
           <EventEmployee
-            v-if="customizeOptions.eventOrganizer.visibility"
+            v-if="customizeOptions.eventOrganizer.visibility && !licence.isLite"
             :divider="true"
             :employee="eventOrganizer"
             :rank="labelsDisplay('event_organizer')"
@@ -72,7 +72,7 @@
 
           <template v-if="customizeOptions.eventEmployees.visibility">
             <EventEmployee
-              v-for="employee in selectedEvent.providers"
+              v-for="employee in eventProviders"
               :key="employee.id"
               :divider="true"
               :employee="employee"
@@ -176,6 +176,9 @@ let props = defineProps({
     default: false,
   },
 })
+
+// * Plugin Licence
+let licence = inject('licence')
 
 // * Features
 let features = inject('features')
@@ -300,23 +303,33 @@ let selectedEvent = ref({
 })
 
 // * Locations array
-let locations = ref([
-  {
-    id: 1,
-    name: 'Location 1',
-    address: 'Location 1',
-  },
-  {
-    id: 2,
-    name: 'Location 2',
-    address: 'Location 2',
-  },
-  {
-    id: 3,
-    name: 'Location 3',
-    address: 'Location 3',
-  },
-])
+let locations = computed(() => {
+  if (licence.isLite) return []
+
+  return [
+    {
+      id: 1,
+      name: 'Location 1',
+      address: 'Location 1',
+    },
+    {
+      id: 2,
+      name: 'Location 2',
+      address: 'Location 2',
+    },
+    {
+      id: 3,
+      name: 'Location 3',
+      address: 'Location 3',
+    },
+  ]
+})
+
+// * Employees - limit to 1 for lite licence
+let eventProviders = computed(() => {
+  if (licence.isLite) return selectedEvent.value.providers.slice(0, 1)
+  return selectedEvent.value.providers
+})
 
 // * Event Tickets
 let tickets = ref([

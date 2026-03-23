@@ -223,7 +223,7 @@
       </div>
     </div>
     <div
-      v-if="isDateSelected && !calendarEventSlots.length"
+      v-if="isDateSelected && !calendarEventSlots.length && !waitingListDisplayTimes.length"
       style="text-align: center"
     >
       {{ props.labelSlotsSelected }}
@@ -723,10 +723,10 @@ const mergedSlots = computed(() => {
 // Only show slots on iOS when a date is currently selected; other platforms unchanged
 const shouldShowSlots = computed(() => {
   if (iOS()) {
-    return isDateSelected.value && calendarEventSlots.value.length
+    return isDateSelected.value && (calendarEventSlots.value.length || waitingListDisplayTimes.value.length)
   }
 
-  return calendarEventSlots.value.length
+  return calendarEventSlots.value.length || waitingListDisplayTimes.value.length
 })
 
 /**
@@ -872,10 +872,7 @@ function calendarDateClickFunctionality(data) {
   } else {
     isDateSelected.value = true
 
-    // On iOS, emit first so injected refs refresh before we read them
-    if (iOS()) {
-      emits('selectedDate', data.dateStr)
-    }
+    emits('selectedDate', data.dateStr)
 
     if (
       calendarEventSlot.value &&
@@ -1769,8 +1766,10 @@ $amCalClass: am-advsc;
                 padding: 3px;
                 .fc-daygrid-day {
                   &-frame {
-                    width: calc(100% - 6px);
-                    height: calc(100% - 4px);
+                    top: 3px;
+                    left: 4px;
+                    width: calc(100% - 8px);
+                    height: calc(100% - 6px);
                   }
                 }
               }

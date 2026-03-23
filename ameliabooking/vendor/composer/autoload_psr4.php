@@ -7,11 +7,8 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'apimatic\\jsonmapper\\' => array($vendorDir . '/apimatic/jsonmapper/src'),
-    'Webmozart\\Assert\\' => array($vendorDir . '/webmozart/assert/src'),
     'Unirest\\' => array($vendorDir . '/apimatic/unirest-php/src'),
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
-    'Symfony\\Polyfill\\Ctype\\' => array($vendorDir . '/symfony/polyfill-ctype'),
-    'Symfony\\Component\\OptionsResolver\\' => array($vendorDir . '/symfony/options-resolver'),
     'Symfony\\Component\\HttpFoundation\\' => array($vendorDir . '/symfony/http-foundation'),
     'Square\\' => array($vendorDir . '/square/square/src'),
     'Slim\\' => array($vendorDir . '/slim/slim/Slim'),
@@ -62,11 +59,9 @@ return array(
     'AmeliaVendor\\Firebase\\JWT\\' => array($vendorDir . '/firebase/php-jwt/src'),
     'AmeliaVendor\\Dompdf\\' => array($vendorDir . '/dompdf/dompdf/src'),
     'AmeliaHttp\\Promise\\' => array($vendorDir . '/php-http/promise/src'),
-    'AmeliaHttp\\Message\\MultipartStream\\' => array($vendorDir . '/php-http/multipart-stream-builder/src'),
     'AmeliaHttp\\Message\\' => array($vendorDir . '/php-http/message/src', $vendorDir . '/php-http/message-factory/src'),
     'AmeliaHttp\\Discovery\\' => array($vendorDir . '/php-http/discovery/src'),
     'AmeliaHttp\\Client\\Curl\\' => array($vendorDir . '/php-http/curl-client/src'),
-    'AmeliaHttp\\Client\\Common\\' => array($vendorDir . '/php-http/client-common/src'),
     'AmeliaHttp\\Client\\' => array($vendorDir . '/php-http/httplug/src'),
     'AmeliaBooking\\' => array($baseDir . '/src'),
 );

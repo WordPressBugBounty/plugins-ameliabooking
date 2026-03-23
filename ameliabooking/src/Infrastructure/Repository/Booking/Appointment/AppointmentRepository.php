@@ -201,6 +201,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                     pu.email AS provider_email,
                     pu.pictureFullPath AS provider_pictureFullPath,
                     pu.pictureThumbPath AS provider_pictureThumbPath,
+                    pu.zoomUserId AS provider_zoomUserId,
                     
                     cu.id AS customer_id,
                     cu.firstname AS customer_firstName,
@@ -239,7 +240,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find appointment by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find appointment by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return call_user_func([static::FACTORY, 'createCollection'], $rows)->getItem($id);
@@ -320,8 +321,8 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                     c.status AS coupon_status        
                 FROM {$this->table} a
                 INNER JOIN {$this->bookingsTable} cb ON cb.appointmentId = a.id
-                LEFT JOIN {$this->packagesCustomersTable} pc ON pc.customerId = cb.customerId
                 LEFT JOIN {$this->packagesCustomersServicesTable} pcs ON pcs.id = cb.packageCustomerServiceId
+                LEFT JOIN {$this->packagesCustomersTable} pc ON pc.id = pcs.packageCustomerId
                 LEFT JOIN {$this->paymentsTable} p ON (
                     (p.customerBookingId = cb.id AND cb.packageCustomerServiceId IS NULL) OR
                     (p.packageCustomerId = pc.id AND cb.packageCustomerServiceId IS NOT NULL AND cb.packageCustomerServiceId = pcs.id)
@@ -340,7 +341,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find appointment by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find appointment by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         /** @var Collection $appointments */
@@ -447,7 +448,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find appointment by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find appointment by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         /** @var Collection $appointments */
@@ -514,15 +515,11 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                 )"
             );
 
-            $res = $statement->execute($params);
-
-            if (!$res) {
-                throw new QueryExecutionException('Unable to add data in ' . __CLASS__);
-            }
+            $statement->execute($params);
 
             return $this->connection->lastInsertId();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to add data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to add data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -578,15 +575,11 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                 WHERE id = :id"
             );
 
-            $res = $statement->execute($params);
+            $statement->execute($params);
 
-            if (!$res) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
-            }
-
-            return $res;
+            return true;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to save data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -619,7 +612,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find appointments in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find appointments in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $result = [];
@@ -745,7 +738,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                 }
             }
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find appointments in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find appointments in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -793,7 +786,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find appointments in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find appointments in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $rows ? array_column($rows, 'serviceId') : [];
@@ -843,7 +836,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find appointments in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find appointments in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $rows ? array_column($rows, 'providerId') : [];
@@ -1141,6 +1134,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                 pu.badgeId AS provider_badgeId,
                 pu.pictureFullPath AS provider_pictureFullPath,
                 pu.pictureThumbPath AS provider_pictureThumbPath,
+                pu.zoomUserId AS provider_zoomUserId,
             ';
 
             $providersJoin = "INNER JOIN {$this->usersTable} pu ON pu.id = a.providerId";
@@ -1292,6 +1286,9 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                     case 'service':
                         $orderColumn = 's.name, a.bookingStart';
                         break;
+                    case 'created':
+                        $orderColumn = 'cb.created';
+                        break;
                 }
                 $orderDirection = $criteria['sort'][0] === '-' ? 'DESC' : 'ASC';
                 $order = "ORDER BY {$orderColumn} {$orderDirection}, a.id";
@@ -1343,7 +1340,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return call_user_func([static::FACTORY, 'createCollection'], $rows);
@@ -1377,7 +1374,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return call_user_func([static::FACTORY, 'createCollection'], $rows);
@@ -1648,7 +1645,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return call_user_func([static::FACTORY, 'createCollection'], $rows);
@@ -1830,7 +1827,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
 
             $rows = (int)$statement->fetch()['count'];
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $rows;
@@ -1899,7 +1896,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
 
             $rows = $statement->fetch()['count'];
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $rows;
@@ -1946,7 +1943,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
 
             $rows = $statement->fetchAll(Statement::FETCH_COLUMN);
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return !empty($rows) ? $rows[0] : $providerIds[0];

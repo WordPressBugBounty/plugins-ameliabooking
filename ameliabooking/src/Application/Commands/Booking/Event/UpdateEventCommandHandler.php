@@ -169,6 +169,21 @@ class UpdateEventCommandHandler extends CommandHandler
                     if ($oldEventPeriod->getLessonSpace()) {
                         $eventPeriod->setLessonSpace($oldEventPeriod->getLessonSpace());
                     }
+                    if ($oldEventPeriod->getGoogleCalendarEventId()) {
+                        $eventPeriod->setGoogleCalendarEventId($oldEventPeriod->getGoogleCalendarEventId());
+                    }
+                    if ($oldEventPeriod->getGoogleMeetUrl()) {
+                        $eventPeriod->setGoogleMeetUrl($oldEventPeriod->getGoogleMeetUrl());
+                    }
+                    if ($oldEventPeriod->getOutlookCalendarEventId()) {
+                        $eventPeriod->setOutlookCalendarEventId($oldEventPeriod->getOutlookCalendarEventId());
+                    }
+                    if ($oldEventPeriod->getMicrosoftTeamsUrl()) {
+                        $eventPeriod->setMicrosoftTeamsUrl($oldEventPeriod->getMicrosoftTeamsUrl());
+                    }
+                    if ($oldEventPeriod->getAppleCalendarEventId()) {
+                        $eventPeriod->setAppleCalendarEventId($oldEventPeriod->getAppleCalendarEventId());
+                    }
                 }
             }
         }

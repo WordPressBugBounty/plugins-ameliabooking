@@ -5,11 +5,11 @@
     :style="cssVars"
   >
     <div v-if="cWidth <= 480 && customizedOptions.timeZone.visibility && props.stepKey !== 'packages'" class="am-capf__zone">
-      <TimeZoneSelect v-if="amSettings.featuresIntegrations.timezones.enabled" size="small"/>
+      <TimeZoneSelect size="small"/>
     </div>
     <div class="am-capf__menu">
       <TimeZoneSelect
-        v-if="amSettings.featuresIntegrations.timezones.enabled && cWidth <= 480 && customizedOptions.timeZone.visibility && props.stepKey === 'packages'"
+        v-if="cWidth <= 480 && customizedOptions.timeZone.visibility && props.stepKey === 'packages'"
         size="small"
       />
       <AmDatePicker

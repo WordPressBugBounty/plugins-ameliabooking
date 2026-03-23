@@ -217,15 +217,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'mailgun/mailgun-php' => array(
-            'pretty_version' => '2.8.1',
-            'version' => '2.8.1.0',
-            'reference' => '4af0346851914ae0d9a58bf9ddf17eb48f6498c8',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../mailgun/mailgun-php',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'masterminds/html5' => array(
             'pretty_version' => '2.10.0',
             'version' => '2.10.0.0',
@@ -331,15 +322,6 @@
                 0 => '1.0',
             ),
         ),
-        'php-http/client-common' => array(
-            'pretty_version' => '1.11.0',
-            'version' => '1.11.0.0',
-            'reference' => '11d34cad40647848aa98536494f9da63571af9da',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../php-http/client-common',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'php-http/client-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
@@ -396,15 +378,6 @@
             'provided' => array(
                 0 => '1.0',
             ),
-        ),
-        'php-http/multipart-stream-builder' => array(
-            'pretty_version' => '1.0.0',
-            'version' => '1.0.0.0',
-            'reference' => '1fa3c623fc813a43b39494b2a1612174e36e0fb0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../php-http/multipart-stream-builder',
-            'aliases' => array(),
-            'dev_requirement' => false,
         ),
         'php-http/promise' => array(
             'pretty_version' => 'v1.0.0',
@@ -638,24 +611,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'symfony/options-resolver' => array(
-            'pretty_version' => 'v3.4.47',
-            'version' => '3.4.47.0',
-            'reference' => 'c7efc97a47b2ebaabc19d5b6c6b50f5c37c92744',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../symfony/options-resolver',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
-        'symfony/polyfill-ctype' => array(
-            'pretty_version' => 'v1.19.0',
-            'version' => '1.19.0.0',
-            'reference' => 'aed596913b70fae57be53d86faa2e9ef85a2297b',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../symfony/polyfill-ctype',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'symfony/polyfill-mbstring' => array(
             'pretty_version' => 'v1.33.0',
             'version' => '1.33.0.0',
@@ -671,15 +626,6 @@
             'reference' => '5f03a781d984aae42cebd18e7912fa80f02ee644',
             'type' => 'metapackage',
             'install_path' => NULL,
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
-        'webmozart/assert' => array(
-            'pretty_version' => '1.9.1',
-            'version' => '1.9.1.0',
-            'reference' => 'bafc69caeb4d49c39fd0779086c03a3738cbb389',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../webmozart/assert',
             'aliases' => array(),
             'dev_requirement' => false,
         ),

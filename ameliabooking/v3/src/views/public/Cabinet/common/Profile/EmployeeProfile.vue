@@ -242,7 +242,10 @@ function saveEmployee () {
       '/users/providers/' + employee.value.id,
       useBackendEmployee(store, timeZone.value),
       Object.assign(useAuthorizationHeaderObject(store), {params: {source: 'cabinet-provider'}})
-    ).then(() => {
+    ).then((response) => {
+      store.commit('employee/setSavedSpecialDayList', JSON.parse(JSON.stringify(response.data.data.user.specialDayList)))
+      store.commit('employee/setSavedDayOffList', JSON.parse(JSON.stringify(response.data.data.user.dayOffList)))
+
       message.value = amLabels.profile_data_success
       messageType.value = 'success'
     }).catch((error) => {

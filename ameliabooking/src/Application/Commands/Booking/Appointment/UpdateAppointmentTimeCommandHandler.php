@@ -129,26 +129,28 @@ class UpdateAppointmentTimeCommandHandler extends CommandHandler
             }
         }
 
-        $minimumRescheduleTimeInSeconds = $settingsDS
-            ->getEntitySettings($service->getSettings())
-            ->getGeneralSettings()
-            ->getMinimumTimeRequirementPriorToRescheduling();
+        if ($userAS->isCustomer($user)) {
+            $minimumRescheduleTimeInSeconds = $settingsDS
+                ->getEntitySettings($service->getSettings())
+                ->getGeneralSettings()
+                ->getMinimumTimeRequirementPriorToRescheduling();
 
-        try {
-            $reservationService->inspectMinimumCancellationTime(
-                $appointment->getBookingStart()->getValue(),
-                $minimumRescheduleTimeInSeconds
-            );
-        } catch (BookingCancellationException $e) {
-            $result->setResult(CommandResult::RESULT_ERROR);
-            $result->setMessage('You are not allowed to update booking');
-            $result->setData(
-                [
-                    'rescheduleBookingUnavailable' => true
-                ]
-            );
+            try {
+                $reservationService->inspectMinimumCancellationTime(
+                    $appointment->getBookingStart()->getValue(),
+                    $minimumRescheduleTimeInSeconds
+                );
+            } catch (BookingCancellationException $e) {
+                $result->setResult(CommandResult::RESULT_ERROR);
+                $result->setMessage('You are not allowed to update booking');
+                $result->setData(
+                    [
+                        'rescheduleBookingUnavailable' => true
+                    ]
+                );
 
-            return $result;
+                return $result;
+            }
         }
 
         $bookingStart = $command->getField('bookingStart');

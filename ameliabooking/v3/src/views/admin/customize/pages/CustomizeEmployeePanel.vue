@@ -127,7 +127,6 @@
                 </div>
                 <TimeZoneSelect
                   v-if="
-                    amSettings.featuresIntegrations.timezones.enabled &&
                     sidebarVisibility &&
                     stepName !== 'profile' &&
                     customizedOptions.timeZone.visibility

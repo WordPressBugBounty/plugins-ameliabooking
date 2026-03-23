@@ -220,7 +220,7 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
 
       jsonData.couponCode = coupon && (coupon.required || (coupon.discount || coupon.deduction)) ? coupon.code : null
 
-      jsonData.notifyParticipants = settings.notifications.notifyCustomers ? 1 : 0
+      jsonData.notifyParticipants = 1
 
       let appointments = useAppointmentBookingData(store)
 
@@ -398,7 +398,7 @@ function usePackageBookingData (store) {
           providerId: appointment.providerId,
           locationId: appointment.locationId,
           utcOffset: utcOffset,
-          notifyParticipants: settings.notifications.notifyCustomers ? 1 : 0,
+          notifyParticipants: 1,
         })
       }
     })

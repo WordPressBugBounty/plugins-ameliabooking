@@ -137,15 +137,11 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 )"
             );
 
-            $res = $statement->execute($params);
-
-            if (!$res) {
-                throw new QueryExecutionException('Unable to add data in ' . __CLASS__);
-            }
+            $statement->execute($params);
 
             return $this->connection->lastInsertId();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to add data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to add data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -222,15 +218,11 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 WHERE id = :id"
             );
 
-            $res = $statement->execute($params);
+            $statement->execute($params);
 
-            if (!$res) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
-            }
-
-            return $res;
+            return true;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to save data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -256,15 +248,11 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 WHERE id = :id"
             );
 
-            $res = $statement->execute($params);
+            $statement->execute($params);
 
-            if (!$res) {
-                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
-            }
-
-            return $res;
+            return true;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to save data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -392,7 +380,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return call_user_func([static::FACTORY, 'createCollection'], $rows);
@@ -698,7 +686,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return array_column($rows, 'id');
@@ -891,7 +879,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return call_user_func([static::FACTORY, 'createCollection'], $rows)->getItem($id);
@@ -921,7 +909,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
             return $statement->fetch();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -955,7 +943,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
             return array_column($events, 'eventId');
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -963,11 +951,11 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
      * @param int   $bookingId
      * @param array $criteria
      *
-     * @return Event
+     * @return ?Event
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    public function getByBookingId($bookingId, $criteria = [])
+    public function getByBookingId($bookingId, $criteria = []): ?Event
     {
         $eventsPeriodsTable = EventsPeriodsTable::getTableName();
 
@@ -1134,7 +1122,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find event by booking id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find event by booking id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         /** @var Collection $events */
@@ -1388,7 +1376,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return call_user_func([static::FACTORY, 'createCollection'], $rows);
@@ -1567,7 +1555,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find event by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $reformattedData = [];
@@ -1653,12 +1641,277 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
             $rows = $statement->fetch()['count'];
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $rows;
     }
 
+    /**
+     * @param array $ids
+     * @return array
+     * @throws QueryExecutionException
+     * @throws InvalidArgumentException
+     */
+    public function getEventsSpotsCount($ids)
+    {
+        $eventsPeriodsTable = EventsPeriodsTable::getTableName();
+
+        $customerBookingsEventsPeriods = CustomerBookingsToEventsPeriodsTable::getTableName();
+
+        $customerBookingsTable = CustomerBookingsTable::getTableName();
+
+        $where = "WHERE ep.eventId IN (" . implode(', ', $ids) . ") AND cb.status IN ('approved', 'pending', 'waiting')";
+
+        try {
+            $statement = $this->connection->prepare(
+                "SELECT
+                t.eventId, t.status, SUM(t.persons) as places
+                FROM (
+                    SELECT
+                    ep.eventId,
+                    cb.id,
+                    cb.status,
+                    cb.persons
+                    FROM {$eventsPeriodsTable} ep
+                    INNER JOIN {$customerBookingsEventsPeriods} cbep ON cbep.eventPeriodId = ep.id
+                    INNER JOIN {$customerBookingsTable} cb ON cb.id = cbep.customerBookingId
+                    {$where}
+                    GROUP BY ep.eventId, cb.id, cb.status
+                ) t
+                GROUP BY t.eventId, t.status"
+            );
+
+            $statement->execute();
+
+            $rows = $statement->fetchAll();
+
+            $result = [];
+
+            foreach ($rows as $row) {
+                $result[$row['eventId']][$row['status']] =
+                    $row['places'] +
+                    (!empty($result[$row['eventId']][$row['status']]) ? $result[$row['eventId']][$row['status']] : 0);
+            }
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array $ids
+     * @return array
+     * @throws QueryExecutionException
+     * @throws InvalidArgumentException
+     */
+    public function getEventsTicketsCount($ids)
+    {
+        $eventsPeriodsTable = EventsPeriodsTable::getTableName();
+
+        $customerBookingsEventsPeriods = CustomerBookingsToEventsPeriodsTable::getTableName();
+
+        $customerBookingsTable = CustomerBookingsTable::getTableName();
+
+        $customerBookingsTicketsTable = CustomerBookingToEventsTicketsTable::getTableName();
+
+        $where = "WHERE ep.eventId IN (" . implode(', ', $ids) . ") AND cb.status IN ('approved', 'pending', 'waiting')";
+
+        try {
+            $statement = $this->connection->prepare(
+                "SELECT
+                t.eventId, t.status, t.eventTicketId, SUM(t.persons) as places
+                FROM (
+                    SELECT
+                    ep.eventId,
+                    cb.id,
+                    cb.status,
+                    cbt.eventTicketId,
+                    cbt.persons
+                    FROM {$eventsPeriodsTable} ep
+                    INNER JOIN {$customerBookingsEventsPeriods} cbep ON cbep.eventPeriodId = ep.id
+                    INNER JOIN {$customerBookingsTable} cb ON cb.id = cbep.customerBookingId
+                    INNER JOIN {$customerBookingsTicketsTable} cbt ON cbt.customerBookingId = cb.id
+                    {$where}
+                    GROUP BY ep.eventId, cb.id, cb.status, cbt.eventTicketId, cbt.persons
+                ) t
+                GROUP BY t.eventId, t.status, t.eventTicketId"
+            );
+
+            $statement->execute();
+
+            $rows = $statement->fetchAll();
+
+            $result = [];
+
+            foreach ($rows as $row) {
+                $result[$row['eventId']][$row['eventTicketId']][$row['status']] =
+                    $row['places'] +
+                    (
+                        !empty($result[$row['eventId']][$row['eventTicketId']][$row['status']])
+                            ? $result[$row['eventId']][$row['eventTicketId']][$row['status']]
+                            : 0
+                    );
+            }
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param int $id
+     * @return array
+     * @throws QueryExecutionException
+     * @throws InvalidArgumentException
+     */
+    public function getEventsPaymentsSummary($id)
+    {
+        $eventsPeriodsTable = EventsPeriodsTable::getTableName();
+
+        $customerBookingsEventsPeriods = CustomerBookingsToEventsPeriodsTable::getTableName();
+
+        $customerBookingsTable = CustomerBookingsTable::getTableName();
+
+        $paymentsTable = PaymentsTable::getTableName();
+
+        try {
+            $statementAmount = $this->connection->prepare(
+                "SELECT
+                SUM(t.amount) as amount
+                FROM (
+                    SELECT
+                    cb.id,
+                    p.amount
+                    FROM {$eventsPeriodsTable} ep
+                    INNER JOIN {$customerBookingsEventsPeriods} cbep ON cbep.eventPeriodId = ep.id
+                    INNER JOIN {$customerBookingsTable} cb ON cb.id = cbep.customerBookingId
+                    INNER JOIN {$paymentsTable} p ON p.customerBookingId = cb.id
+                    WHERE ep.eventId = :eventId AND cb.status IN ('approved', 'pending', 'waiting')
+                    GROUP BY cb.id, p.amount
+                ) t"
+            );
+
+            $statementAmount->execute([':eventId' => $id]);
+
+            $rowAmount = $statementAmount->fetch();
+
+            $statementStatus = $this->connection->prepare(
+                "SELECT
+                t.status, COUNT(t.status) as counter
+                FROM (
+                    SELECT
+                    cb.id,
+                    p.status
+                    FROM {$eventsPeriodsTable} ep
+                    INNER JOIN {$customerBookingsEventsPeriods} cbep ON cbep.eventPeriodId = ep.id
+                    INNER JOIN {$customerBookingsTable} cb ON cb.id = cbep.customerBookingId
+                    INNER JOIN {$paymentsTable} p ON p.customerBookingId = cb.id
+                    INNER JOIN (
+                        SELECT customerBookingId, MAX(id) as maxId
+                        FROM {$paymentsTable}
+                        GROUP BY customerBookingId
+                    ) pm ON p.customerBookingId = pm.customerBookingId AND p.id = pm.maxId
+                    WHERE ep.eventId = :eventId AND cb.status IN ('approved', 'pending', 'waiting')
+                    GROUP BY cb.id, p.status
+                ) t
+                GROUP BY t.status"
+            );
+
+            $statementStatus->execute([':eventId' => $id]);
+
+            $rowsStatus = $statementStatus->fetchAll();
+
+            $statementGateway = $this->connection->prepare(
+                "SELECT
+                t.gateway, COUNT(t.gateway) as counter
+                FROM (
+                    SELECT
+                    p.id,
+                    p.gateway
+                    FROM {$eventsPeriodsTable} ep
+                    INNER JOIN {$customerBookingsEventsPeriods} cbep ON cbep.eventPeriodId = ep.id
+                    INNER JOIN {$customerBookingsTable} cb ON cb.id = cbep.customerBookingId
+                    INNER JOIN {$paymentsTable} p ON p.customerBookingId = cb.id
+                    WHERE ep.eventId = :eventId AND cb.status IN ('approved', 'pending', 'waiting')
+                    GROUP BY p.id, p.gateway
+                ) t
+                GROUP BY t.gateway"
+            );
+
+            $statementGateway->execute([':eventId' => $id]);
+
+            $rowsGateway = $statementGateway->fetchAll();
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+        }
+
+        return [
+            'amount' => $rowAmount['amount'] ? floatval($rowAmount['amount']) : 0,
+            'method' => array_map(
+                'intval',
+                array_column($rowsGateway, 'counter', 'gateway')
+            ),
+            'status'  => array_map(
+                'intval',
+                array_column($rowsStatus, 'counter', 'status')
+            ),
+        ];
+    }
+
+    /**
+     * @param array $ids
+     * @return array
+     * @throws QueryExecutionException
+     * @throws InvalidArgumentException
+     */
+    public function getEventsBookingsStatusesCount($ids)
+    {
+        $eventsPeriodsTable = EventsPeriodsTable::getTableName();
+
+        $customerBookingsEventsPeriods = CustomerBookingsToEventsPeriodsTable::getTableName();
+
+        $customerBookingsTable = CustomerBookingsTable::getTableName();
+
+        $where = "WHERE ep.eventId IN (" . implode(', ', $ids) . ")";
+
+        try {
+            $statement = $this->connection->prepare(
+                "SELECT
+                t.eventId, t.status, COUNT(t.status) as counter
+                FROM (
+                    SELECT
+                    ep.eventId,
+                    cb.id,
+                    cb.status
+                    FROM {$eventsPeriodsTable} ep
+                    INNER JOIN {$customerBookingsEventsPeriods} cbep ON cbep.eventPeriodId = ep.id
+                    INNER JOIN {$customerBookingsTable} cb ON cb.id = cbep.customerBookingId
+                    {$where}
+                    GROUP BY ep.eventId, cb.id, cb.status
+                ) t
+                GROUP BY t.eventId, t.status"
+            );
+
+            $statement->execute();
+
+            $rows = $statement->fetchAll();
+
+            $result = [];
+
+            foreach ($rows as $row) {
+                $result[$row['eventId']][$row['status']] =
+                    $row['counter'] +
+                    (!empty($result[$row['eventId']][$row['status']]) ? $result[$row['eventId']][$row['status']] : 0);
+            }
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+        }
+
+        return $result;
+    }
 
     /**
      * @param string $sort
@@ -1730,15 +1983,11 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 $where"
             );
 
-            $res = $statement->execute($params);
+            $statement->execute($params);
 
-            if (!$res) {
-                throw new QueryExecutionException('Unable to update visibility in ' . __CLASS__);
-            }
-
-            return $res;
+            return true;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to update visibility in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to update visibility in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -1760,15 +2009,11 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 WHERE organizerId = :organizerId"
             );
 
-            $res = $statement->execute($params);
+            $statement->execute($params);
 
-            if (!$res) {
-                throw new QueryExecutionException('Unable to remove organizer in ' . __CLASS__);
-            }
-
-            return $res;
+            return true;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to remove organizer in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to remove organizer in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 }

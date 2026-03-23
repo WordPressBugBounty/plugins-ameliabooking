@@ -282,9 +282,8 @@ let selectedPackage = computed(() => {
 })
 
 let servicesOrderInPackage = computed(() =>
-  selectedPackage.value.bookable
-    .filter(item => props.data.services[item.service.id])
-    .map(item => item.service.id.toString())
+  Object.keys(props.data.services)
+    .map(id => id.toString())
 )
 
 let bookable = computed(() => selectedPackage.value.bookable.find(i => parseInt(i.service.id) === parseInt(selectedServiceId.value)))
@@ -342,7 +341,7 @@ let employees = computed(() => {
     )
   }
 
-  return []
+  return store.getters['entities/getServiceEmployees'](selectedServiceId.value)
 })
 
 let locations = computed(() => {
@@ -469,7 +468,14 @@ function bookAppointment () {
     page: 'cabinet'
   }
 
-  let employeeIds = selectedPackage.value.bookable.find(i => parseInt(i.service.id) === parseInt(selectedServiceId.value)).providers.map(i => i.id)
+  let bookable = selectedPackage.value.bookable.find(
+    i => parseInt(i.service.id) === parseInt(selectedServiceId.value)
+  )
+
+  // Return employees for this specific service if service is removed from the package, but it is in the "package booking"
+  let employeeIds = bookable
+    ? bookable.providers.map(i => i.id)
+    : store.getters['entities/getServiceEmployees'](selectedServiceId.value).map(i => i.id)
 
   if (employeeIds.length) {
     params.providerIds = employeeIds
@@ -507,7 +513,7 @@ function bookAppointment () {
     locationId: props.data.services[selectedServiceId.value].purchaseData.locitionId,
     providerId: props.data.services[selectedServiceId.value].purchaseData.employeeId,
     isGroup: true,
-    notifyParticipants: amSettings.value.notifications.notifyCustomers ? 1 : 0,
+    notifyParticipants: 1,
     payment: null,
     recurring: [],
     package: [],

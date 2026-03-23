@@ -219,7 +219,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
             }
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return call_user_func([static::FACTORY, 'createCollection'], $providerRows, $serviceRows, $providerServiceRows)->getItem($id);
@@ -270,7 +270,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
             }
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return call_user_func([static::FACTORY, 'createCollection'], $providerRows, $serviceRows, $providerServiceRows);
@@ -402,7 +402,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $items = new Collection();
@@ -575,7 +575,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
             }
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         /** @var Collection $providers */
@@ -625,7 +625,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
             }
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         /** @var Collection $providersWithWeekDays */
@@ -697,7 +697,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
             }
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         /** @var Collection $providersWithSpecialDays */
@@ -740,7 +740,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
                 }
             } catch (\Exception $e) {
-                throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+                throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
             }
 
             /** @var Collection $providersWithCalendars */
@@ -877,7 +877,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $row = $statement->fetch()['count'];
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return $row;
@@ -967,7 +967,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
             }
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return call_user_func([static::FACTORY, 'createCollection'], $providerRows, $serviceRows, $providerServiceRows);
@@ -1033,7 +1033,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $result = [];
@@ -1097,7 +1097,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $result = [];
@@ -1156,7 +1156,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $result = [];
@@ -1200,7 +1200,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $result = [];
@@ -1259,7 +1259,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $result = [];
@@ -1314,7 +1314,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $result = [];
@@ -1371,13 +1371,9 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 );
             }
 
-            $response = $statement->execute($params);
+            $statement->execute($params);
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to add data in ' . __CLASS__, $e->getCode(), $e);
-        }
-
-        if (!$response) {
-            throw new QueryExecutionException('Unable to add data in ' . __CLASS__);
+            throw new QueryExecutionException('Unable to add data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         return true;
@@ -1449,7 +1445,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $rows = $statement->fetchAll();
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $result = [];
@@ -1809,9 +1805,10 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 "DELETE FROM {$this->providerViewsTable} WHERE userId = :userId"
             );
 
-            return $statement->execute($params);
+            $statement->execute($params);
+            return true;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to delete data from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to delete data from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -1844,7 +1841,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             return $row ? (int)$row['maxCapacity'] : 0;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to get max capacity from ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to get max capacity from ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -1864,15 +1861,11 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                  AND type = 'provider'"
             );
 
-            $result = $statement->execute();
+            $statement->execute();
 
-            if (!$result) {
-                throw new QueryExecutionException('Unable to batch clear googleCalendarId in ' . __CLASS__);
-            }
-
-            return $result;
+            return true;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to batch clear googleCalendarId in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to batch clear googleCalendarId in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -1892,15 +1885,11 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                  AND type = 'provider'"
             );
 
-            $result = $statement->execute();
+            $statement->execute();
 
-            if (!$result) {
-                throw new QueryExecutionException('Unable to batch clear outlookCalendarId in ' . __CLASS__);
-            }
-
-            return $result;
+            return true;
         } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to batch clear outlookCalendarId in ' . __CLASS__, $e->getCode(), $e);
+            throw new QueryExecutionException('Unable to batch clear outlookCalendarId in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -1937,7 +1926,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     $criteria['providers'] = [(int)$result['id']];
                 }
             } catch (\Exception $e) {
-                throw new QueryExecutionException('Unable to apply Lite license restriction in ' . __CLASS__, $e->getCode(), $e);
+                throw new QueryExecutionException('Unable to apply Lite license restriction in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
             }
         }
 

@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 5.3
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.2
+Stable tag: 2.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,26 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.1.3
+* Feature: RTL Support - implemented full RTL support across all plugin pages.
+* Improvement: Added a “Created on” column to the Appointments Bookings page.
+* Improvement: Added Amelia shortcut to the WordPress header for quicker access to everyday actions.
+* Improvement: Enabled drag & drop rescheduling for past appointments in the Calendar.
+* Improvement: Added search functionality to all select fields for faster and easier option selection.
+* Improvement: Resolved conflict with LiteSpeed Cache.
+* Improvement: Added sorting options to the Amount column on the Finance page for easier data management.
+* Improvement: Updated design on pages with a fixed footer to indicate that additional content is available below.
+* BugFix: Fixed issue with unassigned service availability on Special Days.
+* BugFix: Fixed critical error preventing specific users from opening the Appointment Sidebar and Edit Appointment on the Bookings page.
+* BugFix: Fixed conflict with BeTheme.
+* BugFix: Fixed issue with date format mismatch between WP General Settings and Amelia.
+* BugFix: Fixed issue with Alpha Sender ID allowing more than 11 characters.
+* BugFix: Fixed issue with unexpected error when deleting Event bookings from the Calendar.
+* BugFix: Fixed issue with mobile calendar navigation on the Employee page.
+* BugFix: Fixed issue with loading Events page when opening events with a large number of attendees.
+* BugFix: Fixed an IDOR vulnerability that could allow arbitrary user password changes and SQL injection issue.
+* Additional minor bug fixes and overall stability improvements.
+
 v2.1.2
 * BugFix: Fixed an SQL injection issue.
 * Additional minor bug fixes and overall stability improvements.

@@ -166,7 +166,7 @@
           :value="slot"
           :label="slot"
         >
-          {{ getFrontedFormattedTime(slot) }} <span style="float: right;">{{ getTimePrice(slot) }}</span>
+          {{ getFrontedFormattedTime(slot, 'UTC') }} <span style="float: right;">{{ getTimePrice(slot) }}</span>
         </AmOption>
       </AmSelect>
     </el-form-item>

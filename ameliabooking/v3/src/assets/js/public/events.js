@@ -4,7 +4,7 @@ import {useUrlParams} from "../common/helper";
 function useEvents (params, callback) {
   httpClient.get(
     '/events',
-    {params: useUrlParams(params)}
+    {params: useUrlParams(Object.assign({bookings: false}, params))}
   ).then(response => {
     callback(response.data.data.events)
   }).catch(() => {

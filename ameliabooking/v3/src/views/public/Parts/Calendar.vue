@@ -487,6 +487,8 @@ function unselectDate () {
   calendarEventDate.value = ''
 
   calendarEventBusySlots.value = []
+
+  calendarWaitingListTimes.value = []
 }
 
 function changeMonth (yearMonth) {
@@ -505,7 +507,7 @@ function getSlotsCallback (slots, occupied, minimumDateTime, maximumDateTime, bu
   calendarMinimumDate.value = minimumDateTime
   calendarMaximumDate.value = maximumDateTime
 
-  calendarEvents.value = useCalendarEvents(slots)
+  calendarEvents.value = useCalendarEvents(slots, waitingListSlots)
 
   calendarWaitingListSlots.value = waitingListSlots || {}
 

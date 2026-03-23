@@ -866,22 +866,68 @@ let placesLabels = computed(() => {
 })
 
 function getQrCodesBooking (qrCodes) {
-  const tickets = JSON.parse(qrCodes)
-  const eDates = {}
+  if (!qrCodes) {
+    return {}
+  }
 
-  tickets.forEach(ticket => {
-    if (ticket.type !== 'booking') {
-      for (const [date, scanned] of Object.entries(ticket.dates)) {
-        (eDates[date] = eDates[date] || []).push(scanned)
-      }
+  let tickets = []
+
+  try {
+    tickets = JSON.parse(qrCodes)
+  } catch (error) {
+    return {}
+  }
+
+  if (!Array.isArray(tickets)) {
+    return {}
+  }
+
+  const periodDates = new Set()
+
+  if (!Array.isArray(props.event?.periods)) {
+    return {}
+  }
+
+  props.event.periods.forEach(period => {
+    if (!period?.periodStart || !period?.periodEnd) {
+      return
+    }
+
+    const startDate = new Date(period.periodStart.split(' ')[0])
+    const endDate = new Date(period.periodEnd.split(' ')[0])
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      return
+    }
+
+    const currentDate = new Date(startDate)
+
+    while (currentDate <= endDate) {
+      periodDates.add(currentDate.toISOString().split('T')[0])
+      currentDate.setDate(currentDate.getDate() + 1)
     }
   })
 
+  const eDates = {}
+
+  periodDates.forEach(date => {
+    eDates[date] = { scanned: 0, total: 0 }
+
+    tickets.forEach(ticket => {
+      if (ticket.type !== 'booking') {
+        eDates[date].total += 1
+
+        if (ticket.dates && ticket.dates[date]) {
+          eDates[date].scanned += 1
+        }
+      }
+    })
+  })
+
   return Object.fromEntries(
-    Object.entries(eDates).map(([date, scans]) => [
-      date,
-      `${scans.filter(Boolean).length}/${scans.length}`
-    ])
+    Object.entries(eDates)
+      .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
+      .map(([date, counts]) => [date, `${counts.scanned}/${counts.total}`])
   )
 }
 

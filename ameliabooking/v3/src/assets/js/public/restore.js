@@ -46,6 +46,10 @@ function fixCacheData (data) {
         keys.forEach((key) => {
           fixType(i, key)
         })
+
+        if (!('extras' in i) || i.extras === undefined || i.extras === null) {
+          i.extras = []
+        }
       })
 
       keys = ['locationId', 'providerId']

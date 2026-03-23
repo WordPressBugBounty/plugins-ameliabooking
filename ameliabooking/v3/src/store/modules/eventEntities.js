@@ -391,7 +391,7 @@ export default {
       )
 
       httpClient
-        .get('/events', { params: useUrlParams(eventParams) })
+        .get('/events', { params: useUrlParams(Object.assign({bookings: false}, eventParams)) })
         .then((response) => {
           if (
             loadingCounter !==

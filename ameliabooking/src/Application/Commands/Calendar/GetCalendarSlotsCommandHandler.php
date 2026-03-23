@@ -9,9 +9,11 @@ namespace AmeliaBooking\Application\Commands\Calendar;
 
 use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Application\Commands\CommandResult;
+use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\Schedule\DayOff;
 use AmeliaBooking\Domain\Entity\Schedule\SpecialDay;
 use AmeliaBooking\Domain\Entity\Schedule\WeekDay;
+use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
@@ -31,6 +33,9 @@ class GetCalendarSlotsCommandHandler extends CommandHandler
 
         $providerRepository = $this->container->get('domain.users.providers.repository');
         $locationRepository = $this->container->get('domain.locations.repository');
+
+        /** @var AbstractUser $user */
+        $user = $this->container->get('logged.in.user');
 
         $queryParams = $command->getField('queryParams');
         $allWorkDays = [];
@@ -61,7 +66,7 @@ class GetCalendarSlotsCommandHandler extends CommandHandler
             }
         }
 
-        if (empty($allWorkDays)) {
+        if (empty($allWorkDays) || $user->getType() === Entities::CUSTOMER) {
             $this->fillEmptyWorkDays($allWorkDays, $queryParams);
         }
 

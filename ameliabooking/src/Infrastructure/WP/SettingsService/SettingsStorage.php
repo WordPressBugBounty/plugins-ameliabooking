@@ -343,7 +343,6 @@ class SettingsStorage implements SettingsStorageInterface
                 'senderName'          => $this->getSetting('notifications', 'senderName'),
                 'replyTo'             => $this->getSetting('notifications', 'replyTo'),
                 'senderEmail'         => $this->getSetting('notifications', 'senderEmail'),
-                'notifyCustomers'     => $this->getSetting('notifications', 'notifyCustomers'),
                 'invoiceFormat'       => $this->getSetting('notifications', 'invoiceFormat'),
                 'sendAllCF'           => $this->getSetting('notifications', 'sendAllCF'),
                 'cancelSuccessUrl'    => $this->getSetting('notifications', 'cancelSuccessUrl'),
