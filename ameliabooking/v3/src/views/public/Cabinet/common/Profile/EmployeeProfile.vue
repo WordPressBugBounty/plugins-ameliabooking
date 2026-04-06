@@ -63,6 +63,7 @@
           name="specialDays"
         >
           <SpecialDays
+            ref="specialDaysRef"
             :responsive-class="responsiveClass"
           />
         </el-tab-pane>
@@ -73,6 +74,7 @@
           name="daysOff"
         >
           <DaysOff
+            ref="daysOffRef"
             :responsive-class="responsiveClass"
           />
         </el-tab-pane>
@@ -213,6 +215,8 @@ function closeAlert () {
  * Details *
  ***********/
 let detailsRef = ref(null)
+let daysOffRef = ref(null)
+let specialDaysRef = ref(null)
 
 let employee = computed(() => {
   return store.getters['employee/getEmployee']
@@ -231,8 +235,23 @@ let loading = ref(false)
 let timeZone = inject('timeZone')
 
 function saveEmployee () {
-  detailsRef.value.employeeFormRef.validate((valid) => {
-    if (!valid) {
+  Promise.all([
+    detailsRef.value?.employeeFormRef ? detailsRef.value.employeeFormRef.validate().then(() => true).catch(() => false) : Promise.resolve(true),
+    daysOffRef.value ? daysOffRef.value.validate() : Promise.resolve(true),
+    specialDaysRef.value ? specialDaysRef.value.validate() : Promise.resolve(true),
+  ]).then(([detailsValid, daysOffValid, specialDaysValid]) => {
+    if (!detailsValid) {
+      activeTab.value = 'details'
+      return
+    }
+
+    if (!daysOffValid) {
+      activeTab.value = 'daysOff'
+      return
+    }
+
+    if (!specialDaysValid) {
+      activeTab.value = 'specialDays'
       return
     }
 
@@ -245,6 +264,9 @@ function saveEmployee () {
     ).then((response) => {
       store.commit('employee/setSavedSpecialDayList', JSON.parse(JSON.stringify(response.data.data.user.specialDayList)))
       store.commit('employee/setSavedDayOffList', JSON.parse(JSON.stringify(response.data.data.user.dayOffList)))
+
+      if (daysOffRef.value) daysOffRef.value.commitEditedState()
+      if (specialDaysRef.value) specialDaysRef.value.commitEditedState()
 
       message.value = amLabels.profile_data_success
       messageType.value = 'success'

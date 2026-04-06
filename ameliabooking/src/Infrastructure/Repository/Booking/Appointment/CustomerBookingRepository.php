@@ -363,6 +363,7 @@ class CustomerBookingRepository extends AbstractRepository
                     cu.email AS customer_email,
                     cu.note AS customer_note,
                     cu.phone AS customer_phone,
+                    cu.countryPhoneIso AS customer_countryPhoneIso,
                     cu.gender AS customer_gender,
                     cu.birthday AS customer_birthday,
        
@@ -900,6 +901,7 @@ class CustomerBookingRepository extends AbstractRepository
                 cu.email AS customer_email,
                 cu.note AS customer_note,
                 cu.phone AS customer_phone,
+                cu.countryPhoneIso AS customer_countryPhoneIso,
                 cu.gender AS customer_gender,
                 cu.birthday AS customer_birthday,
             ';

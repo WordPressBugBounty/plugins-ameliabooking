@@ -5,6 +5,21 @@ function getDateString (date) {
   return moment(date).format('YYYY-MM-DD')
 }
 
+function formatDateRange (dateArray) {
+  if (!dateArray.length) return []
+
+  // Handle single date case
+  if (!dateArray[1]) {
+    return [getDateString(dateArray[0])]
+  }
+
+  // Handle date range case
+  const startDate = getDateString(dateArray[0])
+  const endDate = getDateString(dateArray[1])
+
+  return [startDate, endDate]
+}
+
 export default {
   namespaced: true,
 
@@ -19,6 +34,7 @@ export default {
       locationId: null,
       locations: null,
       providers: null,
+      range: null,
     },
     shortcodeParams: {
       ids: null,
@@ -64,12 +80,13 @@ export default {
           : { locations: state.shortcodeParams.locations };
 
       return Object.assign({
-          dates: state.params.dates[1] ? [getDateString(state.params.dates[0]), getDateString(state.params.dates[1])] : [getDateString(state.params.dates[0])],
+          dates: formatDateRange(state.params.dates),
           id: state.params.id ? state.params.id : state.shortcodeParams.ids,
           search: state.params.search,
           tag: state.params.tag ? state.params.tag : state.shortcodeParams.tags,
           recurring: state.params.recurring,
-          providers: state.params.providers
+          providers: state.params.providers,
+          range: state.params.range
         },
         locations
       )
@@ -165,6 +182,17 @@ export default {
 
       if (payload.eventRecurring) {
         state.params.recurring = payload.eventRecurring
+      }
+
+      if (payload.range) {
+        state.params.dates = []
+        if (payload.range === 'past' || payload.range === 'future') {
+          state.params.range = payload.range
+        }
+
+        if (payload.range.includes(' - ')) {
+          state.params.range = payload.range.split(' - ').map(date => moment(date.trim()).format('YYYY-MM-DD'))
+        }
       }
     },
 

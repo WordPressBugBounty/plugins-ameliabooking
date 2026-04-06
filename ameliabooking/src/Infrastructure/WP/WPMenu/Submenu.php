@@ -65,7 +65,7 @@ class Submenu
             remove_submenu_page('amelia', 'wpamelia-welcome');
         });
 
-        if (!Licence::isPremium()) {
+        if (!Licence::isPremium() && current_user_can('manage_options')) {
             $this->addUpgradeMenuItem();
         }
     }
@@ -124,12 +124,9 @@ class Submenu
             . '</svg>';
     }
 
-    /**
-     * @param array $menu
-     */
-    public function handleMenuItem($menu)
+    public function handleMenuItem(array $menu)
     {
-        if (!is_array($menu) || empty($menu['menuSlug'])) {
+        if (!isset($menu['menuSlug'])) {
             return;
         }
 

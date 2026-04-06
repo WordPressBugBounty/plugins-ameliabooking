@@ -490,17 +490,33 @@ let customersForDisplay = computed(() => {
 let addEditCustomerDialogVisibility = ref(false)
 
 function addedCustomer(customer) {
-  store.commit(
-    'customerInfo/setCustomersIds',
-    [customer.id].concat(store.getters['customerInfo/getCustomersIds'])
-  )
+  const existingIds = store.getters['customerInfo/getCustomersIds']
+  const isExisting = existingIds.includes(customer.id)
 
-  store.commit(
-    'customerInfo/setCustomers',
-    [customer].concat(store.getters['customerInfo/getCustomers'])
-  )
+  if (!isExisting) {
+    store.commit(
+      'customerInfo/setCustomersIds',
+      [customer.id].concat(existingIds)
+    )
+  }
 
-  selectCustomer()
+  const existingCustomers = store.getters['customerInfo/getCustomers']
+  const customerIndex = existingCustomers.findIndex((c) => c.id === customer.id)
+
+  if (customerIndex !== -1) {
+    const updatedCustomers = [...existingCustomers]
+    updatedCustomers[customerIndex] = customer
+    store.commit('customerInfo/setCustomers', updatedCustomers)
+  } else {
+    store.commit(
+      'customerInfo/setCustomers',
+      [customer].concat(existingCustomers)
+    )
+  }
+
+  if (!isExisting) {
+    selectCustomer()
+  }
 }
 
 // * Select Customer

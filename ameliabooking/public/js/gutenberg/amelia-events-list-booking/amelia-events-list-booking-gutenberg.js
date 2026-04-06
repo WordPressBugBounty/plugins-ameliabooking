@@ -6,6 +6,8 @@
   var blockControls = wp.blockEditor.BlockControls
   var inspectorControls = wp.blockEditor.InspectorControls
   var useBlockProps = wp.blockEditor.useBlockProps
+  var useEffect = wp.element.useEffect
+  var useRef = wp.element.useRef
   var data = wpAmeliaLabels.data
 
   var entityNames = ['events', 'tags', 'locations']
@@ -80,11 +82,139 @@
       parametars: {
         type: 'boolean',
         default: false
+      },
+      event_to_show: {
+        type: 'string',
+        default: 'all'
+      },
+      start_date: {
+        type: 'string',
+        default: ''
+      },
+      end_date: {
+        type: 'string',
+        default: ''
       }
     },
     edit: function (props) {
       var inspectorElements = []
       var attributes = props.attributes
+      var startDatePickerRef = useRef(null)
+      var endDatePickerRef = useRef(null)
+
+      useEffect(function () {
+        var hasCustomRangeControls = attributes.parametars &&
+          attributes.event_to_show === 'custom' &&
+          (!attributes.event || !attributes.event.length || attributes.event[0] === '')
+
+        if (!hasCustomRangeControls) {
+          return undefined
+        }
+
+        function applyWeekdayLabelStyles (container) {
+          if (!container) {
+            return
+          }
+
+          var datePickerRoot = container.querySelector('.components-datetime__date')
+
+          if (!datePickerRoot) {
+            return
+          }
+
+          var calendar = Array.from(datePickerRoot.children)
+            .find(function (child) {
+              return child.querySelector('button.components-datetime__date__day')
+            })
+
+          if (!calendar) {
+            return
+          }
+
+          Array.from(calendar.children)
+            .filter(function (child) {
+              return child.tagName === 'DIV'
+            })
+            .forEach(function (child) {
+              child.style.maxWidth = '26px'
+              child.style.overflow = 'hidden'
+              child.style.textOverflow = 'ellipsis'
+              child.style.whiteSpace = 'nowrap'
+            })
+        }
+
+        function observeDatePicker (container) {
+          if (!container) {
+            return null
+          }
+
+          applyWeekdayLabelStyles(container)
+
+          var observer = new MutationObserver(function () {
+            applyWeekdayLabelStyles(container)
+          })
+
+          observer.observe(container, {
+            childList: true,
+            subtree: true
+          })
+
+          return observer
+        }
+
+        function setupDatePickerObservers () {
+          var dateControls = [startDatePickerRef.current, endDatePickerRef.current].filter(Boolean)
+
+          var observers = []
+          dateControls.forEach(function (control) {
+            var observer = observeDatePicker(control)
+            if (observer) {
+              observers.push(observer)
+            }
+          })
+
+          return observers
+        }
+
+        // First try immediately
+        var observers = setupDatePickerObservers()
+
+        // If not found, watch for DOM changes to detect when elements are added
+        if (!observers || observers.length === 0) {
+
+          var domObserver = new MutationObserver(function (mutations) {
+            var dateControls = document.querySelectorAll('.amelia-date-control')
+            if (dateControls.length > 0) {
+              domObserver.disconnect()
+
+              observers = setupDatePickerObservers()
+            }
+          })
+
+          // Watch the entire document for changes
+          domObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+          })
+
+          return function () {
+            domObserver.disconnect()
+            if (observers) {
+              observers.forEach(function (observer) {
+                observer.disconnect()
+              })
+            }
+          }
+        }
+
+        return function () {
+          if (observers) {
+            observers.forEach(function (observer) {
+              observer.disconnect()
+            })
+          }
+        }
+      }, [attributes.event_to_show, attributes.parametars, attributes.event])
 
       var options = {
         events: [{value: '', label: wpAmeliaLabels.show_all_events}],
@@ -97,6 +227,12 @@
         trigger_type: [
           {value: 'id', label: wpAmeliaLabels.trigger_type_id},
           {value: 'class', label: wpAmeliaLabels.trigger_type_class}
+        ],
+        event_to_show: [
+          {value: 'all', label: wpAmeliaLabels.all_events},
+          {value: 'future', label: wpAmeliaLabels.future_events},
+          {value: 'past', label: wpAmeliaLabels.past_events},
+          {value: 'custom', label: wpAmeliaLabels.custom_range}
         ]
       }
 
@@ -142,6 +278,23 @@
 
             if (attributes.recurring) {
               shortCodeString += ' recurring=1'
+            }
+          }
+
+          // Add event_to_show range logic (only if no specific event is selected)
+          if ((!attributes.event || !attributes.event.length || attributes.event[0] === '') &&
+              attributes.event_to_show && attributes.event_to_show !== 'all') {
+            if (attributes.event_to_show === 'custom') {
+              // Get today's date in Y-m-d format
+              const today = new Date()
+              const todayFormatted = today.toISOString().split('T')[0]
+
+              const startDate = attributes.start_date || todayFormatted
+              const endDate = attributes.end_date || todayFormatted
+
+              shortCodeString += ' range="' + startDate + ' - ' + endDate + '"'
+            } else {
+              shortCodeString += ' range="' + attributes.event_to_show + '"'
             }
           }
 
@@ -206,6 +359,74 @@
 
         if (attributes.parametars) {
           inspectorElements.push(el('div', {className: 'amelia-gutenberg-multi-select-note'}, wpAmeliaLabels.multiselect_note))
+
+          if (!attributes.event.length || attributes.event[0] === '') {
+            // Add Event Time Scope dropdown
+            inspectorElements.push(el(components.SelectControl, {
+              id: 'amelia-js-select-event-to-show',
+              label: wpAmeliaLabels.event_time_scope || 'Event Time Scope',
+              value: attributes.event_to_show,
+              options: options.event_to_show,
+              onChange: function (selectControl) {
+                return props.setAttributes({event_to_show: selectControl})
+              }
+            }))
+
+            // Add custom date range fields when 'custom' is selected
+            if (attributes.event_to_show === 'custom') {
+              inspectorElements.push(el(components.BaseControl,
+                {
+                  id: 'amelia-js-start-date',
+                  className: 'amelia-date-control',
+                  label: wpAmeliaLabels.red_start_date || 'Start Date'
+                },
+                el('div', {ref: startDatePickerRef},
+                  el(components.DatePicker, {
+                    currentDate: attributes.start_date,
+                    onChange: function (date) {
+                      // Format date as Y-m-d
+                      const formattedDate = date ? date.split('T')[0] : ''
+                      return props.setAttributes({
+                        start_date: formattedDate,
+                        end_date: !formattedDate
+                          ? attributes.end_date
+                          : (!attributes.end_date || attributes.end_date < formattedDate
+                            ? formattedDate
+                            : attributes.end_date)
+                      })
+                    },
+                    is12Hour: false
+                  })
+                )
+              ))
+
+              inspectorElements.push(el(components.BaseControl,
+                {
+                  id: 'amelia-js-end-date',
+                  className: 'amelia-date-control',
+                  label: wpAmeliaLabels.red_end_date || 'End Date'
+                },
+                el('div', {ref: endDatePickerRef},
+                  el(components.DatePicker, {
+                    currentDate: attributes.end_date,
+                    onChange: function (date) {
+                      // Format date as Y-m-d
+                      const formattedDate = date ? date.split('T')[0] : ''
+                      return props.setAttributes({
+                        start_date: !attributes.start_date && formattedDate
+                          ? formattedDate
+                          : attributes.start_date,
+                        end_date: attributes.start_date && formattedDate && formattedDate < attributes.start_date
+                          ? attributes.start_date
+                          : formattedDate
+                      })
+                    },
+                    is12Hour: false
+                  })
+                )
+              ))
+            }
+          }
 
           if (entities.tags.length) {
             inspectorElements.push(el(components.SelectControl, {

@@ -183,7 +183,7 @@ export default {
     },
 
     getNotifyParticipants(state) {
-      return state.notifyParticipants
+      return !!state.notifyParticipants
     },
 
     getParentId(state) {

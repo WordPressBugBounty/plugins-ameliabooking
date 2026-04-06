@@ -23,7 +23,6 @@
           :prefix-icon="couponIcon"
           :suffix-icon="validateIcon"
           @input="clearValidation"
-          @change="changeCoupon"
           @keydown.enter="(e) => {e.preventDefault()}"
         />
       </el-form-item>
@@ -139,16 +138,6 @@ let rules = ref({
     }
   ]
 })
-
-function changeCoupon () {
-  if (couponRequired.value) {
-    if (couponFormData.value.coupon) {
-      store.commit('coupon/enablePayPalActions')
-    } else {
-      store.commit('coupon/disablePayPalActions')
-    }
-  }
-}
 
 onMounted(() => {
   store.commit('coupon/setCouponRequired', couponRequired.value)

@@ -55,15 +55,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'box/spout' => array(
-            'pretty_version' => 'v2.7.3',
-            'version' => '2.7.3.0',
-            'reference' => '3681a3421a868ab9a65da156c554f756541f452b',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../box/spout',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'clue/stream-filter' => array(
             'pretty_version' => 'v1.6.0',
             'version' => '1.6.0.0',
@@ -289,12 +280,12 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'omnipay/paypal' => array(
-            'pretty_version' => 'v3.0.2',
-            'version' => '3.0.2.0',
-            'reference' => '519db61b32ff0c1e56cbec94762b970ee9674f65',
+        'openspout/openspout' => array(
+            'pretty_version' => 'v3.7.4',
+            'version' => '3.7.4.0',
+            'reference' => 'dfbbd53b5edcd486b45a37f6a04fac33073c70f3',
             'type' => 'library',
-            'install_path' => __DIR__ . '/../omnipay/paypal',
+            'install_path' => __DIR__ . '/../openspout/openspout',
             'aliases' => array(),
             'dev_requirement' => false,
         ),

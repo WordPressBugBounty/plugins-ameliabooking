@@ -3,7 +3,7 @@
 Plugin Name: Amelia
 Plugin URI: https://wpamelia.com/
 Description: Amelia is a simple yet powerful automated booking specialist, working 24/7 to make sure your customers can make appointments and events even while you sleep!
-Version: 2.1.3
+Version: 2.2
 Author: Melograno Ventures
 Author URI: https://melograno.io/
 Text Domain: ameliabooking
@@ -111,7 +111,7 @@ if (!defined('AMELIA_LOGIN_URL')) {
 
 // Const for Amelia version
 if (!defined('AMELIA_VERSION')) {
-    define('AMELIA_VERSION', '2.1.3');
+    define('AMELIA_VERSION', '2.2');
 }
 
 // Const for site URL
@@ -619,7 +619,18 @@ class Plugin
         ];
 
         if (Licence\Licence::getLicence() === LicenceConstants::LITE) {
-            $links[] = '<a href="https://wpamelia.com/pricing/?utm_source=wp_org&utm_medium=wp_org&utm_content=plugin_row&utm_campaign=wp_org" style="color: #5951F6; font-weight: bold;" target="_blank">Get Amelia Pro</a>';
+            $deactivate = [];
+            if (isset($links['deactivate'])) {
+                $deactivate = ['deactivate' => $links['deactivate']];
+                unset($links['deactivate']);
+            }
+
+            return array_merge(
+                $primaryLinks,
+                $links,
+                ['<a href="https://wpamelia.com/pricing/?utm_source=wp_org&utm_medium=wp_org&utm_content=plugin_row&utm_campaign=wp_org" style="color: #5951F6; font-weight: bold;" target="_blank">Get Amelia Pro</a>'],
+                $deactivate
+            );
         }
 
         return array_merge($primaryLinks, $links);

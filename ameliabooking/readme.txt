@@ -1,19 +1,19 @@
 === Booking for Appointments and Events Calendar - Amelia ===
 Contributors: ameliabooking, wpDataTables, isidoramarkovic, jelenicdanijela, alexandergilmanov
 Author URI: https://melograno.io/
-Tags: appointments, booking, event booking system, booking system, scheduling
+Tags: appointments, booking, event booking system, wpamelia, booking system, scheduling
 Donate link: https://wpamelia.com/
-Requires at least: 5.3
+Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.3
+Stable tag: 2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Amelia is a powerful booking plugin for appointments and events. Manage scheduling, calendars, and availability with an all-in-one booking system.
 
 ==Description==
-Experience the most powerful booking system for appointments and event booking on WordPress! [Amelia](https://wpamelia.com/?utm_source=wp_org&utm_medium=wp_org&utm_content=link&utm_campaign=wp_org) is a reliable booking calendar that automates online appointment scheduling and event booking processes.
+Experience the most powerful booking system for appointments and event booking on WordPress! [Amelia](https://wpamelia.com/?utm_source=wp_org&utm_medium=wp_org&utm_content=link&utm_campaign=wp_org) (wpamelia) is a reliable booking calendar that automates online appointment scheduling and event booking processes.
 
 Our easy-to-use scheduling and event booking WordPress plugin has an intuitive design and provides you and your clients with an unparalleled booking experience.
 
@@ -79,7 +79,7 @@ You can also try out Amelia before committing [Amelia Demo](https://wpamelia.com
 
 ## Amelia Lite Booking Plugin Features
 
-Amazing Deal Alert! We’ve partnered with SuperbThemes to bring you and your customers an unparalleled booking experience and **more appointments than ever**. As a result of this partnership, you get a **FREE WordPress theme** to use on your website **integrated with Amelia’s booking system**. You will literally get more online bookings than ever before, without any hassle as you get both the theme and the booking system in all-in-one.
+Amazing Deal Alert! We’ve partnered with SuperbThemes to bring you and your customers an unparalleled booking experience and **more appointments than ever**. As a result of this partnership, you get a **FREE WordPress theme** to use on your website **integrated with Amelia’s booking system**. You will literally get more online bookings than ever before, without any hassle as you get both the theme and the wpamelia booking system in all-in-one.
 
 Booking forms for online scheduling appointments and events management with a great user interface and user experience your customers will love.
 
@@ -210,7 +210,7 @@ This powerful integration improves your business operations, ensures smooth tran
 
 3. Customize the colors for your booking form on our Customize page.
 
-4. Add Amelia booking plugin shortcode for the desired booking form to one of your posts or pages. For appointments, add **[ameliastepbooking]** or **[ameliacatalogbooking]** shortcode, for events add **[ameliaeventslistbooking]** shortcode.
+4. Add WPAmelia booking plugin shortcode for the desired booking form to one of your posts or pages. For appointments, add **[ameliastepbooking]** or **[ameliacatalogbooking]** shortcode, for events add **[ameliaeventslistbooking]** shortcode.
 
     * If on your website, you have different pages for different categories of services or each of your service has a page and you want to show the booking form just for one certain service/category you can use our "Preselect Booking Parameters" option while adding the shortcode to the page or post and select one specific category or service that will be shown for the booking.
 
@@ -289,6 +289,21 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.2
+* Feature: Calendar Block Time – Added the ability to quickly block one or more time slots directly from the calendar, preventing new bookings for the employee while keeping blocked periods distinct from regular appointments.
+* Feature: Event list date range filtering – Added an option to filter events by future, past, or custom date ranges per shortcode instance, allowing independent control for multiple lists.
+* Feature: Gutenberg Block API v3 support – Updated compatibility with version 3 of the Gutenberg Block API, ensuring blocks function correctly in the latest editor.
+* Improvement: Added a tooltip on calendar appointment cards to display key details at a glance without opening the item.
+* Improvement: Added handling for SMS messages with invalid phone numbers.
+* Improvement: Added a hook to allow whitelisting specific countries for SMS sending.
+* BugFix: Fixed an issue with slow loading when deleting customers.
+* BugFix: Fixed an issue with a disabled event start date field when using negative UTC time zones.
+* BugFix: Fixed an issue where the event image disappeared after updating an event in the Employee Panel.
+* BugFix: Fixed an issue where current-day time slots did not load initially when booking a package from the Customer Panel.
+* BugFix: Fixed an issue where time slots did not load after deleting a service when the “Preload entities when page loads” option is enabled.
+* BugFix: Fixed an issue where the date picker displayed available months and years as unavailable.
+* Additional minor bug fixes and overall stability improvements.
+
 v2.1.3
 * Feature: RTL Support - implemented full RTL support across all plugin pages.
 * Improvement: Added a “Created on” column to the Appointments Bookings page.

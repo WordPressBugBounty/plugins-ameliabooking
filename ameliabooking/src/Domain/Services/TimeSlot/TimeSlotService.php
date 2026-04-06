@@ -552,12 +552,18 @@ class TimeSlotService
 
                 $specialDayDateKey = null;
 
+                $emptySpecialDayKey = null;
+
                 foreach ((array)$specialDayIntervals[$providerKey] as $specialDayKey => $specialDays) {
                     if (array_key_exists($dateKey, $specialDays['dates']) && !empty($specialDays['intervals'])) {
                         $specialDayDateKey = $specialDayKey;
                         break;
+                    } elseif (array_key_exists($dateKey, $specialDays['dates'])) {
+                        $emptySpecialDayKey = $specialDayKey;
                     }
                 }
+
+                $specialDayDateKey = $specialDayDateKey !== null ? $specialDayDateKey : $emptySpecialDayKey;
 
                 if (
                     $specialDayDateKey !== null &&
@@ -629,6 +635,8 @@ class TimeSlotService
 
                     $specialDayDateKey = null;
 
+                    $emptySpecialDayKey = null;
+
                     foreach ((array)$specialDayIntervals[$providerKey] as $specialDayKey => $specialDays) {
                         if (
                             array_key_exists($currentDate, $specialDays['dates']) &&
@@ -636,8 +644,12 @@ class TimeSlotService
                         ) {
                             $specialDayDateKey = $specialDayKey;
                             break;
+                        } elseif (array_key_exists($currentDate, $specialDays['dates'])) {
+                            $emptySpecialDayKey = $specialDayKey;
                         }
                     }
+
+                    $specialDayDateKey = $specialDayDateKey !== null ? $specialDayDateKey : $emptySpecialDayKey;
 
                     if (!$isProviderDayOff) {
                         // daily limit per employee

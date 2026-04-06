@@ -363,6 +363,7 @@ class CustomerRepository extends UserRepository implements CustomerRepositoryInt
             u.email AS email,
             u.note AS note,
             u.phone AS phone,
+            u.countryPhoneIso AS countryPhoneIso,
             u.gender AS gender,
             u.birthday AS birthday,
             u.status AS status

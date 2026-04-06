@@ -129,6 +129,10 @@ class UpdateEventCommandHandler extends CommandHandler
             return $result;
         }
 
+        if (!empty($oldEvent->getPicture()) && $command->getPage() === 'cabinet') {
+            $event->setPicture($oldEvent->getPicture());
+        }
+
         /** @var DateTimeValue $newUntil */
         $newUntil = $event->getRecurring()
             ? $event->getRecurring()->getUntil()->getValue()->setTime(0, 0, 0)

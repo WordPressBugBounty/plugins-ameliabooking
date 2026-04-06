@@ -517,6 +517,8 @@ class PackageRepository extends AbstractRepository
                 pu.firstName AS provider_firstName,
                 pu.lastName AS provider_lastName,
                 pu.email AS provider_email,
+                pu.phone AS provider_phone,
+                pu.countryPhoneIso AS provider_countryPhoneIso,
                 pu.translations AS provider_translations,
                 pu.stripeConnect AS provider_stripeConnect,
                                 

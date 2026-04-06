@@ -699,9 +699,9 @@ function useSlotsCallback(
     let dates = useSortedDateStrings(Object.keys(slots))
 
     return {
-      calendarStartDate: dates[0],
+      calendarStartDate: dates.length ? dates[0] : null,
       calendarEventSlots: [],
-      calendarEventDate: dates[0],
+      calendarEventDate: null,
       calendarEventSlot: null,
     }
   }

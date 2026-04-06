@@ -103,10 +103,14 @@
             :class="[responsiveClass, filterClassWidth.date]"
           >
             <AmDatePickerFull
+              :input-placeholder="amLabels.date_picker_placeholder"
               :existing-date="dateFilter"
               :presistant="false"
               :disabled="false"
+              :clearable="!!shortcode.range"
+              :readonly="!shortcode.range"
               @selected-date="(dateString) => {store.commit('params/setDates', [dateString])}"
+              @clear-date="() => {store.commit('params/setDates', [])}"
             />
           </div>
         </div>

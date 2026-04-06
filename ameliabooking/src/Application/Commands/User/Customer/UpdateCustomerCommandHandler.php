@@ -72,6 +72,8 @@ class UpdateCustomerCommandHandler extends CommandHandler
                     $provider === null &&
                     ($oldUser === null || $oldUser->getId()->getValue() !== intval($command->getArg('id')))
                 ) {
+                    $userRepository->rollback();
+
                     $result->setResult(CommandResult::RESULT_ERROR);
                     $result->setMessage('Could not retrieve user');
                     $result->setData(
@@ -87,6 +89,13 @@ class UpdateCustomerCommandHandler extends CommandHandler
             }
         } else {
             $oldUser = $userRepository->getById($command->getArg('id'));
+            if ($oldUser === null) {
+                $userRepository->rollback();
+
+                $result->setResult(CommandResult::RESULT_ERROR);
+                $result->setMessage('Could not retrieve user');
+                return $result;
+            }
         }
 
         if ($command->getField('externalId') === -1) {

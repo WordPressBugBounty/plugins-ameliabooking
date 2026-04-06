@@ -272,6 +272,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
             u.note AS note,
             u.description AS description,
             u.phone AS phone,
+            u.countryPhoneIso AS countryPhoneIso,
             u.gender AS gender,
             u.status AS status,
             u.translations AS translations
@@ -317,6 +318,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                     u.email AS email,
                     u.note AS note,
                     u.phone AS phone,
+                    u.countryPhoneIso AS countryPhoneIso,
                     u.gender AS gender,
                     u.status AS status,
                     u.translations AS translations

@@ -16,6 +16,7 @@
             </div>
 
             <DotsPopup
+              v-if="editedSpecialDay.index === null"
               :index="specialDayIndex"
               :have-duplicate="true"
               @remove="removeSpecialDay(specialDayIndex)"
@@ -237,7 +238,7 @@ function saveSpecialDay (index) {
 
       editedSpecialDay.data = null
     } else {
-      periodsErrorDisplay.value = 'Please add period to special day'
+      periodsErrorDisplay.value = amLabels.select_day_period_warning
     }
   })
 }
@@ -275,6 +276,35 @@ function setFormRef (el, index) {
     specialDayFormRef.value.splice(index, 1);
   }
 }
+
+function validate () {
+  return new Promise((resolve) => {
+    if (editedSpecialDay.index !== null && specialDayFormRef.value[editedSpecialDay.index]) {
+      let periodList = store.getters['employee/getEmployee'].specialDayList[editedSpecialDay.index].periodList
+      specialDayFormRef.value[editedSpecialDay.index].validate((valid) => {
+        if (valid && periodList.length > 0) {
+          resolve(true)
+        } else {
+          periodsErrorDisplay.value = periodList.length === 0 ? amLabels.select_day_period_warning : ''
+          resolve(false)
+        }
+      })
+    } else {
+      resolve(true)
+    }
+  })
+}
+
+function commitEditedState () {
+  editedSpecialDay.index = null
+  editedSpecialDay.data = null
+  periodsErrorDisplay.value = ''
+}
+
+defineExpose({
+  validate,
+  commitEditedState,
+})
 
 // * Colors
 let amColors = inject('amColors')

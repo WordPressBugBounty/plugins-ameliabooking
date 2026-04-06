@@ -296,8 +296,10 @@ let personPricing = computed(() => {
     store.commit('booking/setBookingPersons', maxCapacity)
   }
 
+  let additionalOffset = amSettings.appointments.bringingAnyoneLogic === 'additional' ? 1 : 0
+
   Object.keys(service.customPricing.persons).forEach((key) => {
-    if (service.customPricing.persons[key].from in allowedRanges && service.customPricing.persons[key].from <= options.value.max) {
+    if (service.customPricing.persons[key].from in allowedRanges && service.customPricing.persons[key].from <= options.value.max + additionalOffset) {
       ranges[service.customPricing.persons[key].from] = {from: service.customPricing.persons[key].from, to: parseInt(key), prices: []}
     }
   })

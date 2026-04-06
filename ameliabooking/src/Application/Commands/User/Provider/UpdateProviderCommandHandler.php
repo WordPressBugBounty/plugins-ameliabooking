@@ -150,6 +150,15 @@ class UpdateProviderCommandHandler extends CommandHandler
         /** @var Provider $newUser */
         $newUser = UserFactory::create($newUserData);
 
+        $oldExternalId = $oldUser->getExternalId() ? $oldUser->getExternalId()->getValue() : null;
+        $newExternalId = $newUser->getExternalId() ? $newUser->getExternalId()->getValue() : null;
+
+        if ($oldExternalId !== $newExternalId && (!$currentUser || $currentUser->getType() !== AbstractUser::USER_ROLE_ADMIN)) {
+            $result->setResult(CommandResult::RESULT_ERROR);
+            $result->setMessage('Could not update user.');
+            return $result;
+        }
+
         // If the phone is not set and the old phone is set, set the phone and country phone iso to null
         if (empty($providerData['phone']) && $oldUser->getPhone() && $oldUser->getPhone()->getValue()) {
             $newUser->setPhone(new Phone(null));

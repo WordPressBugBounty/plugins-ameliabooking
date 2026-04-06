@@ -9,6 +9,7 @@ use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Factory\User\ProviderFactory;
 use AmeliaBooking\Domain\Repository\User\ProviderRepositoryInterface;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
+use AmeliaBooking\Domain\ValueObjects\String\DayOffType;
 use AmeliaBooking\Domain\ValueObjects\String\Status;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Connection;
@@ -176,6 +177,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     u.email AS user_email,
                     u.note AS note,
                     u.phone AS phone,
+                    u.countryPhoneIso AS user_countryPhoneIso,
                     u.pictureFullPath AS picture_full_path,
                     u.pictureThumbPath AS picture_thumb_path,
                     u.zoomUserId AS user_zoom_user_id,
@@ -243,6 +245,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     u.email AS user_email,
                     u.note AS note,
                     u.phone AS phone,
+                    u.countryPhoneIso AS user_countryPhoneIso,
                     u.pictureFullPath AS picture_full_path,
                     u.pictureThumbPath AS picture_thumb_path,
                     u.translations AS user_translations,
@@ -383,7 +386,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $where[] = "u.status NOT LIKE 'disabled'";
 
-            $where = $where ? ' AND ' . implode(' AND ', $where) : '';
+            $where = ' AND ' . implode(' AND ', $where);
 
             $limit = $this->getLimit(
                 !empty($criteria['page']) ? (int)$criteria['page'] : 0,
@@ -518,12 +521,12 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
             $userParams[':to1'] = $userParams[':to2'] = $userParams[':to3'] = $criteria['dates'][1];
         } elseif (isset($criteria['dates'][0])) {
-            $dotJoinQuery = "AND (dot.repeat = 1 OR dot.startDate >= :from1 OR dot.endDate >= :from2)";
+            $dotJoinQuery = "AND (dot.repeat = 1 OR (dot.startDate >= :from1 OR dot.endDate >= :from2))";
 
             $userParams[':from1'] = $userParams[':from2'] = $criteria['dates'][0];
         }
 
-        $where = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+        $where = 'WHERE ' . implode(' AND ', $where);
 
         try {
             $statement = $this->connection->prepare(
@@ -560,11 +563,12 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                     dot.name AS dayOff_name,
                     dot.startDate AS dayOff_startDate,
                     dot.endDate AS dayOff_endDate,
-                    dot.repeat AS dayOff_repeat
+                    dot.repeat AS dayOff_repeat,
+                    dot.type AS dayOff_type
                 FROM {$this->table} u
                 LEFT JOIN {$this->providerServicesTable} pst ON pst.userId = u.id
                 LEFT JOIN {$this->providerLocationTable} plt ON plt.userId = u.id
-                LEFT JOIN {$this->providerDayOffTable} dot ON dot.userId = u.id {$dotJoinQuery}
+                LEFT JOIN {$this->providerDayOffTable} dot ON (dot.userId = u.id OR dot.userId IS null) {$dotJoinQuery}
                 {$where}
                 ORDER BY CONCAT(u.firstName, ' ', u.lastName), u.id"
             );
@@ -1179,6 +1183,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         $params = [
             ':type'        => AbstractUser::USER_ROLE_PROVIDER,
             ':currentDate' => $currentDateTime,
+            ':dayOffType'  => DayOffType::DAY_OFF
         ];
 
         try {
@@ -1191,7 +1196,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 dot.endDate,
                 dot.name
               FROM {$this->table} u
-              LEFT JOIN {$this->providerDayOffTable} dot ON dot.userId = u.id
+              LEFT JOIN {$this->providerDayOffTable} dot ON dot.userId = u.id AND dot.type = :dayOffType
               WHERE u.type = :type AND
               :currentDate BETWEEN dot.startDate AND dot.endDate"
             );
@@ -1520,6 +1525,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 'googleCalendar'   => [],
                 'weekDayList'      => [],
                 'dayOffList'       => [],
+                'blockTimeList'    => [],
                 'specialDayList'   => [],
                 'serviceList'      => [],
                 'timeZone'         => isset($row['user_timeZone']) ? $row['user_timeZone'] : null,
@@ -1699,13 +1705,25 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             array_key_exists($userId, $providerRows) &&
             !array_key_exists($dayOffId, $providerRows[$userId]['dayOffList'])
         ) {
-            $providerRows[$userId]['dayOffList'][$dayOffId] = [
-                'id'        => $dayOffId,
-                'name'      => $row['dayOff_name'],
-                'startDate' => $row['dayOff_startDate'],
-                'endDate'   => $row['dayOff_endDate'],
-                'repeat'    => $row['dayOff_repeat'],
-            ];
+            if ($row['dayOff_type'] === DayOffType::DAY_OFF) {
+                $providerRows[$userId]['dayOffList'][$dayOffId] = [
+                    'id'        => $dayOffId,
+                    'name'      => $row['dayOff_name'],
+                    'startDate' => $row['dayOff_startDate'],
+                    'endDate'   => $row['dayOff_endDate'],
+                    'repeat'    => $row['dayOff_repeat'],
+                ];
+            }
+
+            if ($row['dayOff_type'] === DayOffType::BLOCK_TIME) {
+                $providerRows[$userId]['blockTimeList'][$dayOffId] = [
+                    'id'        => $dayOffId,
+                    'name'      => $row['dayOff_name'],
+                    'startDate' => $row['dayOff_startDate'],
+                    'endDate'   => $row['dayOff_endDate'],
+                    'repeat'    => $row['dayOff_repeat'],
+                ];
+            }
         }
 
         if (

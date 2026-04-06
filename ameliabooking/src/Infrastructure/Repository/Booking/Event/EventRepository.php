@@ -364,6 +364,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                     pu.note AS provider_note,
                     pu.description AS provider_description,
                     pu.phone AS provider_phone,
+                    pu.countryPhoneIso AS provider_countryPhoneIso,
                     pu.gender AS provider_gender,
                     pu.pictureFullPath AS provider_pictureFullPath,
                     pu.pictureThumbPath AS provider_pictureThumbPath,
@@ -528,6 +529,26 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
             $joins .= "
                 INNER JOIN {$eventsTagsTable} et ON et.eventId = e.id
             ";
+        }
+
+        if (!empty($criteria['skipRecurring'])) {
+            // When skipRecurring is true, only return the first upcoming event from each recurring series
+            $params[':recurringEventFrom'] = !empty($criteria['dates'][0]) ?
+                DateTimeService::getCustomDateTimeInUtc($criteria['dates'][0]) :
+                DateTimeService::getNowDateTimeInUtc();
+            $where[] = "e.id IN (
+                SELECT e_sub.id
+                FROM {$this->table} e_sub
+                INNER JOIN {$eventsPeriodsTable} ep_sub ON ep_sub.eventId = e_sub.id
+                INNER JOIN (
+                    SELECT COALESCE(e_inner.parentId, e_inner.id) as series_id, MIN(ep_inner.periodStart) as min_start
+                    FROM {$this->table} e_inner
+                    INNER JOIN {$eventsPeriodsTable} ep_inner ON ep_inner.eventId = e_inner.id
+                    WHERE ep_inner.periodStart >= :recurringEventFrom
+                    GROUP BY COALESCE(e_inner.parentId, e_inner.id)
+                ) upcoming ON COALESCE(e_sub.parentId, e_sub.id) = upcoming.series_id 
+                    AND ep_sub.periodStart = upcoming.min_start
+            )";
         }
 
         if (!empty($criteria['id'])) {
@@ -815,6 +836,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                     cu.email AS customer_email,
                     cu.note AS customer_note,
                     cu.phone AS customer_phone,
+                    cu.countryPhoneIso AS customer_countryPhoneIso,
                     cu.gender AS customer_gender,
                     cu.birthday AS customer_birthday,
                     
@@ -837,6 +859,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                     pu.note AS provider_note,
                     pu.description AS provider_description,
                     pu.phone AS provider_phone,
+                    pu.countryPhoneIso AS provider_countryPhoneIso,
                     pu.gender AS provider_gender,
                     pu.translations AS provider_translations,
                     pu.timeZone AS provider_timeZone,
@@ -1048,6 +1071,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 pu.note AS provider_note,
                 pu.description AS provider_description,
                 pu.phone AS provider_phone,
+                pu.countryPhoneIso AS provider_countryPhoneIso,                
                 pu.gender AS provider_gender,
                 pu.pictureFullPath AS provider_pictureFullPath,
                 pu.pictureThumbPath AS provider_pictureThumbPath,
@@ -1290,6 +1314,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 pu.note AS provider_note,
                 pu.description AS provider_description,
                 pu.phone AS provider_phone,
+                pu.countryPhoneIso AS provider_countryPhoneIso,
                 pu.gender AS provider_gender,
                 pu.pictureFullPath AS provider_pictureFullPath,
                 pu.pictureThumbPath AS provider_pictureThumbPath,
@@ -1479,6 +1504,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 cu.email AS customer_email,
                 cu.note AS customer_note,
                 cu.phone AS customer_phone,
+                cu.countryPhoneIso AS customer_countryPhoneIso,
                 cu.gender AS customer_gender,
                 cu.birthday AS customer_birthday,
                 cu.customFields AS customer_customFields,

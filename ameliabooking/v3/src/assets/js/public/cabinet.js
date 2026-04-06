@@ -90,48 +90,48 @@ function usePaymentMethods (entitySettings) {
   }
 
   let paymentOptions = []
-  entitySettings = entitySettings.payments
+  entitySettings = entitySettings.payments || null
 
   if (settings.payments.wc.enabled) {
     paymentOptions.push({
       value: 'wc',
       label: globalLabels.wc
     })
-  } else if (settings.payments.mollie.enabled && (!('mollie' in entitySettings) || entitySettings.mollie.enabled)) {
+  } else if (settings.payments.mollie.enabled && (!entitySettings || !('mollie' in entitySettings) || entitySettings.mollie.enabled)) {
     paymentOptions.push({
       value: 'mollie',
       label: globalLabels.on_line
     })
   } else {
-    if (settings.payments.payPal.enabled && (!('payPal' in entitySettings) || entitySettings.payPal.enabled)) {
+    if (settings.payments.payPal.enabled && (!entitySettings || !('payPal' in entitySettings) || entitySettings.payPal.enabled)) {
       paymentOptions.push({
         value: 'payPal',
         label: globalLabels.pay_pal
       })
     }
 
-    if (settings.payments.stripe.enabled && (!('stripe' in entitySettings) || entitySettings.stripe.enabled)) {
+    if (settings.payments.stripe.enabled && (!entitySettings || !('stripe' in entitySettings) || entitySettings.stripe.enabled)) {
       paymentOptions.push({
         value: 'stripe',
         label: globalLabels.credit_card
       })
     }
 
-    if (settings.payments.razorpay.enabled && (!('razorpay' in entitySettings) || entitySettings.razorpay.enabled)) {
+    if (settings.payments.razorpay.enabled && (!entitySettings || !('razorpay' in entitySettings) || entitySettings.razorpay.enabled)) {
       paymentOptions.push({
         value: 'razorpay',
         label: globalLabels.razorpay
       })
     }
 
-    if (settings.payments.square.enabled && (!('square' in entitySettings) || entitySettings.square.enabled)) {
+    if (settings.payments.square.enabled && (!entitySettings || !('square' in entitySettings) || entitySettings.square.enabled)) {
       paymentOptions.push({
         value: 'square',
         label: globalLabels.square
       })
     }
 
-    if (settings.payments.barion.enabled && (!('barion' in entitySettings) || entitySettings.barion.enabled)) {
+    if (settings.payments.barion.enabled && (!entitySettings || !('barion' in entitySettings) || entitySettings.barion.enabled)) {
       paymentOptions.push({
         value: 'barion',
         label: globalLabels.barion

@@ -98,12 +98,11 @@
           >{{ labelsDisplay('repeats_on') }}
           {{ weekDays.filter((i) => i.enabled).join(', ') }},</span
         >
-        <span v-if="repeatType === 'monthly'" class="am-fa__rs-light"
-          >{{ labelsDisplay('repeats_on') }}
-          {{ monthlyTypes[repeatMonthly].label }}
-          <span v-if="repeatMonthly !== 0" class="am-fa__rs-light"></span
-          >,</span
+        <span
+          v-if="repeatType === 'monthly'" class="am-fa__rs-light"
         >
+          {{ `${labelsDisplay('repeats_on')} ${monthlyTypes[repeatMonthly].label}, ` }}
+        </span>
         <span class="am-fa__rs-light">
           {{ labelsDisplay('repeats_from') }}
           {{ moment().format('YYYY-MM-DD') }} {{ labelsDisplay('repeats_at') }}

@@ -50,7 +50,6 @@ export default {
       required: false,
       bookingsCount: 0
     },
-    payPalActions: null,
     appointmentsIndex: 0,
     currentCartItem: null,
     shownCart: false,
@@ -341,10 +340,6 @@ export default {
 
     getCouponValidated (state) {
       return !state.coupon.required || (state.coupon.code !== '')
-    },
-
-    getPayPalActions (state) {
-      return state.payPalActions
     },
 
     getPaymentGateway (state) {
@@ -681,22 +676,6 @@ export default {
 
     setBookingsCount (state, payload) {
       state.coupon.bookingsCount = payload
-    },
-
-    setPayPalActions (state, payload) {
-      state.payPalActions = payload
-    },
-
-    enablePayPalActions (state) {
-      if (state.payPalActions) {
-        state.payPalActions.enable()
-      }
-    },
-
-    disablePayPalActions (state) {
-      if (state.payPalActions) {
-        state.payPalActions.disable()
-      }
     },
 
     setPaymentGateway (state, payload) {

@@ -390,6 +390,28 @@ function setFormRef (el, index) {
   }
 }
 
+function validate () {
+  return new Promise((resolve) => {
+    if (editedDayOff.index !== null && dayOffFormRef.value[editedDayOff.index]) {
+      dayOffFormRef.value[editedDayOff.index].validate((valid) => {
+        resolve(valid)
+      })
+    } else {
+      resolve(true)
+    }
+  })
+}
+
+function commitEditedState () {
+  editedDayOff.index = null
+  editedDayOff.data = null
+}
+
+defineExpose({
+  validate,
+  commitEditedState,
+})
+
 onMounted(() => {
   globalDayOffList.value = amSettings.daysOff.map(
     i => new Object({

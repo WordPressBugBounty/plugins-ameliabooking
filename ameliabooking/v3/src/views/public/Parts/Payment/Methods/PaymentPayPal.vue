@@ -14,7 +14,6 @@ import {
   inject,
   computed,
   onMounted,
-  nextTick
 } from 'vue'
 
 // * Import from Vuex
@@ -55,111 +54,105 @@ let transactionReference = null
 const shortcodeData = inject('shortcodeData')
 
 function payPalPaymentInit () {
-  nextTick(() => {
-    window.paypal.Button.render(
-      {
-        style: {
-          size: 'responsive',
-          color: 'gold',
-          shape: 'rect',
-          tagline: false,
-          height: 40
-        },
+  const selector = '#am-paypal-element-' + shortcodeData.value.counter
+  const el = document.getElementById('am-paypal-element-' + shortcodeData.value.counter)
 
-        env: settings.payments.payPal.sandboxMode ? 'sandbox' : 'production',
+  if (
+    typeof window.paypal === 'undefined' ||
+    typeof window.paypal.Buttons !== 'function' ||
+    !window.paypal.FUNDING ||
+    !el
+  ) {
+    setTimeout(payPalPaymentInit, 100)
+    return
+  }
 
-        client: {
-          sandbox: settings.payments.payPal.testApiClientId,
-          production: settings.payments.payPal.liveApiClientId
-        },
+  let btn
+  try {
+    btn = window.paypal.Buttons({
+      fundingSource: window.paypal.FUNDING.PAYPAL,
+      style: {
+        color: 'gold',
+        shape: 'rect',
+        tagline: false,
+        height: 40
+      },
 
-        commit: true,
-
-        validate: function (actions) {
-          store.commit('coupon/setPayPalActions', actions)
-          if (store.getters['coupon/getCouponValidated']) {
-            store.commit('coupon/enablePayPalActions')
-          } else {
-            store.commit('coupon/disablePayPalActions')
-          }
-        },
-
-        onClick: function () {
-          if (store.getters['coupon/getCouponValidated']) {
-            store.commit('coupon/enablePayPalActions')
-          } else {
-            store.commit('coupon/disablePayPalActions')
-            emits('payment-error', amLabels.coupon_mandatory)
-          }
-        },
-
-        payment: function () {
-          return window.paypal.request(
-            {
-              method: 'post',
-              url: ajaxUrl + '/payment/payPal',
-              json: useBookingData(
-                store,
-                null,
-                true,
-                {},
-                null
-              )['data']
-            }
-          ).then(response => {
-            transactionReference = response.data.transactionReference
-
-            return response.data.paymentID
-          }).catch(error => {
-              payPalError(error)
-            }
-          )
-        },
-
-        onAuthorize: function (data, actions) {
-          return actions.payment.get().then(
-            function () {
-              store.commit('setLoading', true)
-
-              useCreateBooking(
-                store,
-                useBookingData(
-                  store,
-                  null,
-                  false,
-                  {
-                    transactionReference: transactionReference,
-                    PaymentId: data.paymentID,
-                    PayerId: data.payerID
-                  },
-                  null
-                ),
-                successBooking,
-                error => {
-                  useCreateBookingError(
-                    store,
-                    error.response.data,
-                    () => {
-                      emits('payment-error', getErrorMessage())
-                    }
-                  )
-                }
-              )
-            }
-          )
-        },
-
-        onCancel: function () {
-          store.commit('setLoading', false)
-        },
-
-        onError: function (error) {
-          payPalError(error)
+      onClick: function (data, actions) {
+        if (store.getters['coupon/getCouponValidated']) {
+          actions.resolve()
+        } else {
+          emits('payment-error', amLabels.coupon_mandatory)
+          actions.reject()
         }
       },
-      '#am-paypal-element-' + shortcodeData.value.counter
-    )
-  })
+
+      createOrder: function () {
+        return fetch(ajaxUrl + '/payment/payPal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+          body: JSON.stringify(useBookingData(store, null, true, {}, null)['data'])
+        })
+          .then(r => {
+            if (!r.ok) return Promise.reject(new Error('HTTP ' + r.status))
+            return r.json()
+          })
+          .then(response => {
+            transactionReference = response.data.transactionReference
+            return response.data.paymentID
+          })
+          .catch(error => {
+            payPalError(error)
+          })
+      },
+
+      onApprove: function (data) {
+        store.commit('setLoading', true)
+
+        useCreateBooking(
+          store,
+          useBookingData(
+            store,
+            null,
+            false,
+            {
+              transactionReference: transactionReference,
+              PaymentId: data.orderID,
+              PayerId: data.payerID
+            },
+            null
+          ),
+          successBooking,
+          error => {
+            useCreateBookingError(
+              store,
+              error.response.data,
+              () => {
+                emits('payment-error', getErrorMessage())
+              }
+            )
+          }
+        )
+      },
+
+      onCancel: function () {
+        store.commit('setLoading', false)
+      },
+
+      onError: function (error) {
+        payPalError(error)
+      }
+    })
+  } catch (e) {
+    setTimeout(payPalPaymentInit, 100)
+    return
+  }
+
+  if (btn && btn.render) {
+    btn.render(selector).catch(function (e) {})
+  } else {
+    setTimeout(payPalPaymentInit, 100)
+  }
 }
 
 function payPalError(error) {

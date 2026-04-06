@@ -191,9 +191,12 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                     s.name AS service_name,
                     s.color AS service_color,
                     s.price AS service_price,
+                    s.timeBefore AS service_timeBefore,
+                    s.timeAfter AS service_timeAfter,
                     s.aggregatedPrice AS service_aggregatedPrice,
                     s.pictureFullPath AS service_pictureFullPath,
                     s.pictureThumbPath AS service_pictureThumbPath,
+                    s.categoryId AS service_categoryId,
                     
                     pu.id AS provider_id,
                     pu.firstname AS provider_firstName,
@@ -209,6 +212,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                     cu.email AS customer_email,
                     cu.note AS customer_note,
                     cu.phone AS customer_phone,
+                    cu.countryPhoneIso AS customer_countryPhoneIso,
                     cu.gender AS customer_gender,
                     cu.status AS customer_status,
                     cu.birthday AS customer_birthday,
@@ -1128,6 +1132,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                 pu.note AS provider_note,
                 pu.description AS provider_description,
                 pu.phone AS provider_phone,
+                pu.countryPhoneIso AS provider_countryPhoneIso,
                 pu.gender AS provider_gender,
                 pu.translations AS provider_translations,
                 pu.timeZone AS provider_timeZone,
@@ -1168,6 +1173,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                 cu.email AS customer_email,
                 cu.note AS customer_note,
                 cu.phone AS customer_phone,
+                cu.countryPhoneIso AS customer_countryPhoneIso,
                 cu.gender AS customer_gender,
                 cu.status AS customer_status,
             ';
@@ -1367,9 +1373,11 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                 a.microsoftTeamsUrl AS appointment_microsoft_teams_url,
                 a.appleCalendarEventId AS appointment_apple_calendar_event_id,
                 a.notifyParticipants AS appointment_notifyParticipants
-            FROM {$this->table} a WHERE (
-                  SELECT COUNT(*) FROM {$this->bookingsTable} cb WHERE a.id = cb.appointmentId
-                ) = 0"
+                FROM {$this->table} a WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM {$this->bookingsTable} cb
+                  WHERE cb.appointmentId = a.id
+                )"
             );
 
             $rows = $statement->fetchAll();

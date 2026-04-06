@@ -946,9 +946,12 @@ class EventReservationService extends AbstractReservationService
                     if (!$reservation->getMaxCustomCapacity()) {
                         $ticketData = $reservation->getCustomTickets()->getItem($item->getId()->getValue());
 
-                        $hasWaitingList = $ticketData->getWaitingListSpots() && $ticketData->getWaitingListSpots()->getValue() >=
-                            ($item->getPersons() ? $item->getPersons()->getValue() : 0
-                                + ($ticketData->getWaiting() ? $ticketData->getWaiting()->getValue() : 0));
+                        $waitingListSpots = $ticketData->getWaitingListSpots() ? $ticketData->getWaitingListSpots()->getValue() : 0;
+
+                        $personsValue = $item->getPersons() ? $item->getPersons()->getValue() : 0;
+                        $waitingValue = $ticketData->getWaiting() ? $ticketData->getWaiting()->getValue() : 0;
+
+                        $hasWaitingList = $waitingListSpots >= ($personsValue + $waitingValue);
                     }
                 }
 

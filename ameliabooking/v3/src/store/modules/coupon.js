@@ -9,7 +9,6 @@ export default {
     error: '',
     loading: false,
     required: false,
-    payPalActions: null,
     servicesIds: [],
   }),
 
@@ -40,10 +39,6 @@ export default {
     getLoading (state) {
       return state.loading
     },
-
-    getPayPalActions (state) {
-      return state.payPalActions
-    },
   },
 
   mutations: {
@@ -69,22 +64,6 @@ export default {
 
     setCouponRequired (state, payload) {
       state.required = payload
-    },
-
-    setPayPalActions (state, payload) {
-      state.payPalActions = payload
-    },
-
-    enablePayPalActions (state) {
-      if (state.payPalActions) {
-        state.payPalActions.enable()
-      }
-    },
-
-    disablePayPalActions (state) {
-      if (state.payPalActions) {
-        state.payPalActions.disable()
-      }
     },
   },
 

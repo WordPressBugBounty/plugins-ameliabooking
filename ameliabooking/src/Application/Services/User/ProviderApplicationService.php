@@ -13,6 +13,7 @@ use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\CustomerBooking;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\Location\Location;
+use AmeliaBooking\Domain\Entity\Schedule\BlockTime;
 use AmeliaBooking\Domain\Entity\Schedule\DayOff;
 use AmeliaBooking\Domain\Entity\Schedule\Period;
 use AmeliaBooking\Domain\Entity\Schedule\PeriodLocation;
@@ -25,6 +26,7 @@ use AmeliaBooking\Domain\Entity\Schedule\TimeOut;
 use AmeliaBooking\Domain\Entity\Schedule\WeekDay;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Entity\User\Provider;
+use AmeliaBooking\Domain\Factory\Booking\Appointment\AppointmentFactory;
 use AmeliaBooking\Domain\Factory\Location\ProviderLocationFactory;
 use AmeliaBooking\Domain\Factory\Schedule\PeriodLocationFactory;
 use AmeliaBooking\Domain\Factory\Schedule\SpecialDayPeriodLocationFactory;
@@ -63,6 +65,7 @@ use AmeliaBooking\Infrastructure\Repository\Schedule\TimeOutRepository;
 use AmeliaBooking\Infrastructure\Repository\Schedule\WeekDayRepository;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
+use AmeliaVendor\Psr\Container\ContainerExceptionInterface;
 use Interop\Container\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
 
@@ -1080,6 +1083,46 @@ class ProviderApplicationService
             $newUser->getOutlookCalendar(),
             $newUser->getOutlookCalendar()->getId()->getValue()
         );
+    }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     */
+    public function removeSlotsFromBlockTime($providers, $dates)
+    {
+        $providersIds = (array)$providers->keys();
+
+        $dayOffRepository = $this->container->get('domain.schedule.dayOff.repository');
+
+        $blockTimes = $dayOffRepository->getFiltered([
+            'providers' => $providersIds,
+            'type'      => 'blockTime',
+            'dates'     => $dates,
+        ]);
+
+        /** @var BlockTime $blockTime */
+        foreach ($blockTimes->getItems() as $blockTime) {
+            /** @var Provider $provider */
+            foreach ($providers->getItems() as $provider) {
+                if (is_null($blockTime->getUserId()) || $blockTime->getUserId()->getValue() === $provider->getId()->getValue()) {
+                    $blockTimeStartString = $blockTime->getStartDate()->getValue()->format('Y-m-d H:i:s');
+                    $blockTimeEndString = $blockTime->getEndDate()->getValue()->format('Y-m-d H:i:s');
+
+                    $appointment = AppointmentFactory::create(
+                        [
+                            'bookingStart'       => $blockTimeStartString,
+                            'bookingEnd'         => $blockTimeEndString,
+                            'notifyParticipants' => false,
+                            'serviceId'          => 0,
+                            'providerId'         => $provider->getId()->getValue(),
+                        ]
+                    );
+
+                    $provider->getAppointmentList()->addItem($appointment);
+                }
+            }
+        }
     }
 
     /**

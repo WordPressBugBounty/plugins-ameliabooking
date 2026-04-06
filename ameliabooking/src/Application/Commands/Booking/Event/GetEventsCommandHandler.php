@@ -74,7 +74,6 @@ class GetEventsCommandHandler extends CommandHandler
 
         if (!$isFrontEnd) {
             try {
-                /** @var AbstractUser $user */
                 $user = $command->getUserApplicationService()->authorization(
                     $isCabinetPage ? $command->getToken() : null,
                     $command->getCabinetType()
@@ -119,6 +118,105 @@ class GetEventsCommandHandler extends CommandHandler
             }
         }
 
+        if (isset($params['range']) && $isFrontEnd) {
+            if ($params['range'] === 'future') {
+                $startDate = date('Y-m-d 00:00:00');
+
+                // Date filter is selected on the frontend,
+                // so if the provided date is in the past,
+                // we can return empty result right away
+                if (!empty($params['dates'][0]) && $params['dates'][0] < $startDate) {
+                    $result->setResult(CommandResult::RESULT_SUCCESS);
+                    $result->setData(
+                        [
+                            Entities::EVENTS       => [],
+                            'count'                => 0,
+                            'countTotal'           => 0,
+                            'customersNoShowCount' => []
+                        ]
+                    );
+                    return $result;
+                }
+
+                // Date filter selected and date is in future or present.
+                // Intentionally discard any user-provided end date because a
+                // "future" widget has no upper bound.
+                if (!empty($params['dates'][0])) {
+                    $params['dates'][1] = null;
+                }
+
+                // Date filter not selected
+                if (empty($params['dates'][0])) {
+                    $params['dates'][0] = $startDate;
+                    $params['dates'][1] = null;
+                }
+            }
+
+            if ($params['range'] === 'past') {
+                $endDate = date('Y-m-d 23:59:59', strtotime('-1 day'));
+
+                // Date filter is selected on the frontend,
+                // so if the provided date is in the future,
+                // we can return empty result right away
+                if (!empty($params['dates'][0]) && $params['dates'][0] > $endDate) {
+                    $result->setResult(CommandResult::RESULT_SUCCESS);
+                    $result->setData(
+                        [
+                            Entities::EVENTS       => [],
+                            'count'                => 0,
+                            'countTotal'           => 0,
+                            'customersNoShowCount' => []
+                        ]
+                    );
+                    return $result;
+                }
+
+                // Date filter selected and date is in past
+                if (!empty($params['dates'][0])) {
+                    $params['dates'][1] = $endDate;
+                }
+
+                // Date filter not selected
+                if (empty($params['dates'][0])) {
+                    $params['dates'][0] = null;
+                    $params['dates'][1] = $endDate;
+                }
+            }
+
+            if (is_array($params['range'])) {
+                $startDate = !empty($params['range'][0]) ? $params['range'][0] . ' 00:00:00' : null;
+                $endDate = !empty($params['range'][1]) ? $params['range'][1] . ' 23:59:59' : null;
+
+                // Date filter is selected on the frontend,
+                // so if the provided date is out of range,
+                // we can return empty result right away
+                if (!empty($params['dates'][0]) && ($params['dates'][0] < $startDate || $params['dates'][0] > $endDate)) {
+                    $result->setResult(CommandResult::RESULT_SUCCESS);
+                    $result->setData(
+                        [
+                            Entities::EVENTS       => [],
+                            'count'                => 0,
+                            'countTotal'           => 0,
+                            'customersNoShowCount' => []
+                        ]
+                    );
+
+                    return $result;
+                }
+
+                // Date filter selected and date is in range
+                if (!empty($params['dates'][0])) {
+                    $params['dates'][1] = $endDate;
+                }
+
+                // Date filter not selected
+                if (empty($params['dates'][0])) {
+                    $params['dates'][0] = $startDate;
+                    $params['dates'][1] = $endDate;
+                }
+            }
+        }
+
         $criteria = [
             'fetchEventsPeriods'    => true,
             'fetchEventsTickets'    => true,
@@ -156,15 +254,35 @@ class GetEventsCommandHandler extends CommandHandler
 
         /** @var Collection $requestedEvents */
         $requestedEvents = !empty($selectedEventIds) ? $eventAS->getEventsByCriteria(
-            ['id' => $selectedEventIds],
+            ['id' => $selectedEventIds, 'search' => !empty($params['search']) ? $params['search'] : null],
             $criteria,
             0
         ) : new Collection();
+
+        $existingSeriesIds = [];
+        /** @var Event $existingEvent */
+        foreach ($events->getItems() as $existingEvent) {
+            $seriesId = $existingEvent->getParentId()
+                ? $existingEvent->getParentId()->getValue()
+                : $existingEvent->getId()->getValue();
+            $existingSeriesIds[$seriesId] = $existingEvent->getId()->getValue();
+        }
+
+        $replacedEventIds = [];
 
         foreach ($requestedEvents->getItems() as $event) {
             if ($events->keyExists($event->getId()->getValue())) {
                 continue;
             }
+
+            $requestedSeriesId = $event->getParentId()
+                ? $event->getParentId()->getValue()
+                : $event->getId()->getValue();
+            if (!empty($existingSeriesIds[$requestedSeriesId]) && !empty($params['skipRecurring'])) {
+                $replacedEventIds[$event->getId()->getValue()] = $existingSeriesIds[$requestedSeriesId];
+                continue;
+            }
+
             $events->prependItem($event, $event->getId()->getValue(), true);
         }
 
@@ -296,7 +414,8 @@ class GetEventsCommandHandler extends CommandHandler
                 Entities::EVENTS       => $eventsArray,
                 'count'                => !$isCalendarPage && empty($params['skipCount']) ? (int)sizeof($eventRepository->getFilteredIds($params, 0)) : null,
                 'countTotal'           => !$isCalendarPage && empty($params['skipCount']) ? (int)sizeof($eventRepository->getFilteredIds([], 0)) : null,
-                'customersNoShowCount' => $customersNoShowCount ? array_values($customersNoShowCount) : []
+                'customersNoShowCount' => $customersNoShowCount ? array_values($customersNoShowCount) : [],
+                'replacedEventIds'     => !empty($replacedEventIds) ? $replacedEventIds : null,
             ]
         );
 
