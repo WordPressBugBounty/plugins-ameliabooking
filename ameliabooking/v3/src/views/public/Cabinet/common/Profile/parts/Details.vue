@@ -244,11 +244,7 @@ let employeeInfoFormConstruction = ref({
       ),
       phoneError: computed(() => phoneError.value),
       whatsAppLabel: amLabels.whatsapp_opt_in_text,
-      isWhatsApp:
-        amSettings.notifications.whatsAppEnabled &&
-        amSettings.notifications.whatsAppAccessToken &&
-        amSettings.notifications.whatsAppBusinessID &&
-        amSettings.notifications.whatsAppPhoneID,
+      isWhatsApp: amSettings.notifications.whatsAppEnabled,
       class: computed(() => `am-caepif__item ${props.responsiveClass}`),
     },
   },

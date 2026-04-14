@@ -100,7 +100,7 @@ let amCustomize = inject('amCustomize')
 let infoFormData = inject('infoFormData')
 
 function whatsAppSetUp () {
-  return settings.notifications.whatsAppEnabled && settings.notifications.whatsAppAccessToken && settings.notifications.whatsAppBusinessID && settings.notifications.whatsAppPhoneID
+  return settings.notifications.whatsAppEnabled
 }
 
 onMounted(() => {

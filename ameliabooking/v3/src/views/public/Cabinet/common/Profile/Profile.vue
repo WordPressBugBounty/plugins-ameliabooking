@@ -386,10 +386,7 @@ let infoFormConstruction = ref({
       defaultCode: computed(() => store.getters['auth/getProfile'].countryPhoneIso ? store.getters['auth/getProfile'].countryPhoneIso : ''),
       phoneError: computed(() => phoneError.value),
       whatsAppLabel: amLabels.value.whatsapp_opt_in_text,
-      isWhatsApp: amSettings.notifications.whatsAppEnabled
-        && amSettings.notifications.whatsAppAccessToken
-        && amSettings.notifications.whatsAppBusinessID
-        && amSettings.notifications.whatsAppPhoneID,
+      isWhatsApp: amSettings.notifications.whatsAppEnabled,
       class: computed(() => `am-capi__item ${responsiveClass.value}`),
     }
   },

@@ -386,10 +386,7 @@ let infoFormConstruction = ref({
       }),
       phoneError: false,
       whatsAppLabel: amLabels.value.whatsapp_opt_in_text,
-      isWhatsApp: amSettings.notifications.whatsAppEnabled
-        && amSettings.notifications.whatsAppAccessToken
-        && amSettings.notifications.whatsAppBusinessID
-        && amSettings.notifications.whatsAppPhoneID,
+      isWhatsApp: amSettings.notifications.whatsAppEnabled,
       class: 'am-elfci__item',
       disabled: computed(() => {
         return !!(store.getters['customerInfo/getCustomerPhone'] && store.getters['customerInfo/getLoggedUser'])

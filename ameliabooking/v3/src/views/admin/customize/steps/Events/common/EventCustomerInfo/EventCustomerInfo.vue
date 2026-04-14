@@ -199,11 +199,7 @@ let infoFormConstruction = ref({
           : amSettings.general.phoneDefaultCountryCode.toLowerCase(),
       phoneError: false,
       whatsAppLabel: computed(() => labelsDisplay('whatsapp_opt_in_text')),
-      isWhatsApp:
-        amSettings.notifications.whatsAppEnabled &&
-        amSettings.notifications.whatsAppAccessToken &&
-        amSettings.notifications.whatsAppBusinessID &&
-        amSettings.notifications.whatsAppPhoneID,
+      isWhatsApp: amSettings.notifications.whatsAppEnabled,
       class: 'am-elfci__item',
     },
   },

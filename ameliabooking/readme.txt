@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.2
+Stable tag: 2.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,9 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.2.1
+* BugFix: Resolved a security vulnerability.
+
 v2.2
 * Feature: Calendar Block Time – Added the ability to quickly block one or more time slots directly from the calendar, preventing new bookings for the employee while keeping blocked periods distinct from regular appointments.
 * Feature: Event list date range filtering – Added an option to filter events by future, past, or custom date ranges per shortcode instance, allowing independent control for multiple lists.
