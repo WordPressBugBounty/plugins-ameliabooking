@@ -14,22 +14,33 @@
     @after-enter="reRenderCalendar"
   >
     <template #reference>
-      <AmInput
-        v-model="selectedDate"
-        class="am-dp__input"
-        :class="{'am-dp__input-focused': visible}"
-        :disabled="props.disabled"
-        :prefix-icon="calendarIcon"
-        :readonly="props.readonly"
-        :clearable="props.clearable"
-        :placeholder="inputPlaceholder"
-        :aria-label="ariaLabel"
-        @click="selectCalendar"
-        @clear="clearCalendar"
-        @keypress.prevent
-      />
+      <div ref="inputWrapperRef">
+        <AmInput
+          v-model="selectedDate"
+          class="am-dp__input"
+          :class="{'am-dp__input-focused': visible}"
+          :disabled="props.disabled"
+          :prefix-icon="calendarIcon"
+          :readonly="props.readonly"
+          :clearable="props.clearable"
+          :placeholder="inputPlaceholder"
+          :aria-label="ariaLabel"
+          :aria-expanded="visible"
+          aria-haspopup="dialog"
+          @click="selectCalendar"
+          @clear="clearCalendar"
+          @keydown="handleInputKeydown"
+        />
+      </div>
     </template>
-    <div class="am-dp__wrapper">
+    <div
+      class="am-dp__wrapper"
+      role="dialog"
+      aria-modal="true"
+      :aria-label="ariaLabel"
+      @keydown="handleCalendarKeydown"
+      @focusin="handleCalendarFocusin"
+    >
       <FullCalendar
         ref="popCalendarRef"
         v-click-outside="onClickOutside"
@@ -138,6 +149,7 @@ const props = defineProps({
 
 let popoverRef = ref(null)
 let popCalendarRef = ref(null)
+let inputWrapperRef = ref(null)
 
 const emits = defineEmits([
   'selectedDate',
@@ -165,6 +177,172 @@ function selectCalendar () {
   }
 }
 
+// * Keyboard: open/close calendar from the input field
+function handleInputKeydown (event) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    if (!props.disabled) {
+      visible.value = !visible.value
+    }
+  } else if (event.key === 'Escape') {
+    event.preventDefault()
+    if (visible.value) {
+      closeCalendar()
+    }
+  } else if (event.key !== 'Tab') {
+    // Block text input for all other non-navigation keys (field is readonly)
+    event.preventDefault()
+  }
+}
+
+// * ARIA grid structure helpers
+
+/**
+ * Upgrades the FullCalendar day-cell table from role="presentation" to
+ * role="grid" and makes sure every week row has role="row".
+ * FullCalendar sets role="presentation" on its layout tables, which strips
+ * all row/column context from the accessibility tree.  Setting role="grid"
+ * here restores that context so screen readers can announce
+ * "row 2, column 4 of 7" when a user navigates with arrow keys.
+ * The grid is labelled by the visible month/year title via aria-labelledby.
+ */
+function initGridAriaRoles () {
+  const calendarEl = popCalendarRef.value?.$el
+  if (!calendarEl) return
+
+  // Target the table that contains the day cells (.fc-daygrid-body table).
+  const bodyTable = calendarEl.querySelector('.fc-daygrid-body table')
+  if (bodyTable) {
+    bodyTable.setAttribute('role', 'grid')
+
+    // Label the grid with the visible month/year toolbar title
+    const titleEl = calendarEl.querySelector('.fc-toolbar-title')
+    if (titleEl) {
+      // Assign a stable id so aria-labelledby survives month changes
+      if (!titleEl.id) {
+        titleEl.id = `am-dp-title-${props.id !== 0 ? props.id : 'default'}`
+      }
+      bodyTable.setAttribute('aria-labelledby', titleEl.id)
+    }
+  }
+
+  // Explicitly set role="row" on every week row.
+  // The prior role="presentation" on the ancestor table would have stripped
+  // the implicit row semantics from <tr> elements; we restore them here.
+  calendarEl.querySelectorAll('.fc-daygrid-body table tr').forEach(row => {
+    row.setAttribute('role', 'row')
+  })
+}
+
+// * Roving tabindex helpers
+
+/**
+ * Returns all day-cell <td> elements in the current calendar view.
+ * Both selectable and disabled cells are included so arrow keys traverse
+ * the full grid (matching the WCAG grid navigation pattern).
+ */
+function getDayCells () {
+  const calendarEl = popCalendarRef.value?.$el
+  if (!calendarEl) return []
+  return Array.from(calendarEl.querySelectorAll('td.fc-day'))
+}
+
+/**
+ * Moves the roving tabindex seat to `targetEl` and focuses it.
+ * All other day cells are set to tabindex="-1".
+ */
+function setRovingFocus (targetEl) {
+  getDayCells().forEach(cell => {
+    cell.setAttribute('tabindex', cell === targetEl ? '0' : '-1')
+  })
+  targetEl.focus()
+}
+
+/**
+ * Sets the roving tabindex "home" cell after a render or month navigation
+ * WITHOUT stealing focus (focus stays on whichever element has it now).
+ * Priority: selected day → today (non-disabled) → first non-disabled,
+ * non-other-month cell → first cell.
+ */
+function initRovingTabindex () {
+  const calendarEl = popCalendarRef.value?.$el
+  if (!calendarEl) return
+
+  const cells = getDayCells()
+  if (!cells.length) return
+
+  cells.forEach(cell => cell.setAttribute('tabindex', '-1'))
+
+  const popCalendar = popCalendarRef.value.getApi()
+  const viewType = popCalendar.currentData.currentViewType
+  const selectedClass = `am-dp__${viewType}-selected`
+  const disabledClass = `am-dp__${viewType}-disabled`
+
+  const homeCell =
+    calendarEl.querySelector(`td.fc-day.${selectedClass}`) ||
+    calendarEl.querySelector(`td.fc-day-today:not(.${disabledClass})`) ||
+    cells.find(c => !c.classList.contains(disabledClass) && !c.classList.contains('fc-day-other')) ||
+    cells[0]
+
+  if (homeCell) {
+    homeCell.setAttribute('tabindex', '0')
+  }
+}
+
+// * Update roving seat whenever any day cell receives focus (e.g. via mouse click)
+function handleCalendarFocusin (event) {
+  const dayCell = event.target.closest?.('td.fc-day')
+  if (!dayCell) return
+
+  getDayCells().forEach(cell => {
+    cell.setAttribute('tabindex', cell === dayCell ? '0' : '-1')
+  })
+}
+
+// * Keyboard: close calendar or navigate the day grid with arrow keys
+function handleCalendarKeydown (event) {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    event.stopPropagation()
+    closeCalendar()
+    return
+  }
+
+  // Arrow-key grid navigation (roving tabindex)
+  const arrowKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']
+  if (!arrowKeys.includes(event.key)) return
+
+  const dayCell = event.target.closest?.('td.fc-day')
+  if (!dayCell) return
+
+  event.preventDefault()
+
+  const cells = getDayCells()
+  const currentIndex = cells.indexOf(dayCell)
+  if (currentIndex === -1) return
+
+  const offsets = {
+    ArrowRight: 1,
+    ArrowLeft: -1,
+    ArrowDown: 7,
+    ArrowUp: -7,
+  }
+  const nextIndex = currentIndex + offsets[event.key]
+
+  if (nextIndex >= 0 && nextIndex < cells.length) {
+    setRovingFocus(cells[nextIndex])
+  }
+}
+
+// * Close calendar and return focus to the input
+function closeCalendar () {
+  visible.value = false
+  nextTick(() => {
+    const input = inputWrapperRef.value?.querySelector('input')
+    if (input) input.focus()
+  })
+}
+
 watch(() => props.refreshValue, (newValue) => {
   if (newValue) {
     selectedDate.value = getFrontedFormattedDate(
@@ -179,6 +357,58 @@ const options = ref({
   locale: shortLocale,
   plugins: [dayGridPlugin, interactionPlugin],
   initialView: props.initialView,
+  dayCellDidMount: function (info) {
+    // Start every cell at -1; initRovingTabindex() promotes the "home" cell to 0
+    info.el.setAttribute('tabindex', '-1')
+    info.el.setAttribute(
+      'aria-label',
+      `Select date ${info.date.toDateString()}`
+    )
+
+    // role="gridcell" (not "button") preserves row/column context in the
+    // role="grid" table so screen readers can announce position information.
+    // role="button" tells AT this is a standalone button and drops all
+    // grid context ("row 2, column 4 of 7").
+    info.el.setAttribute('role', 'gridcell')
+
+    // Reflect initial selection and disabled state to AT
+    const viewType = info.view.type
+    const selectedClass = `am-dp__${viewType}-selected`
+    const disabledClass  = `am-dp__${viewType}-disabled`
+    info.el.setAttribute(
+      'aria-selected',
+      info.el.classList.contains(selectedClass) ? 'true' : 'false'
+    )
+    if (info.el.classList.contains(disabledClass)) {
+      info.el.setAttribute('aria-disabled', 'true')
+    }
+
+    // Enhanced keyboard navigation
+    info.el.addEventListener('keydown', (e) => {
+      const calendarApi = info.view.calendar
+
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+
+        // Use moment to format the date the same way as mouse clicks do
+        // This avoids timezone issues with toISOString()
+        const localDateStr = moment(info.date).format('YYYY-MM-DD')
+
+        // Build the event object manually (as FullCalendar would)
+        const dateClickEvent = {
+          date: info.date,
+          dateStr: localDateStr, // Use local date string instead of ISO string
+          allDay: true,
+          dayEl: info.el,
+          jsEvent: e,
+          view: info.view,
+        }
+
+        // First trigger dateClick
+        calendarApi.trigger('dateClick', dateClickEvent)
+      }
+    })
+  },
   headerToolbar: {
     start: 'title',
     center: '',
@@ -202,6 +432,14 @@ const options = ref({
   firstDay: props.weekStartsFromDay,
   dayMaxEvents: true,
   selectLongPressDelay: 0,
+  datesSet: function () {
+    // Re-establish the roving tabindex seat and ARIA grid roles after every
+    // month/view change (new cells are mounted on each navigation).
+    nextTick(() => {
+      initRovingTabindex()
+      initGridAriaRoles()
+    })
+  },
   dayHeaderClassNames: calendarDayHeaderClassBuilder,
   dayCellClassNames: calendarDayClassBuilder,
   dateClick: calendarDateClick
@@ -235,21 +473,22 @@ function calendarDayClassBuilder (data) {
 function calendarDateClick (data) {
   const popCalendar = popCalendarRef.value.getApi()
   const popCalendarType = popCalendar.currentData.currentViewType
-  let disabledDayClass = `am-dp__${popCalendarType}-disabled`
-  let selectedDayClass = `am-dp__${popCalendarType}-selected`
+  const disabledDayClass = `am-dp__${popCalendarType}-disabled`
+  const selectedDayClass = `am-dp__${popCalendarType}-selected`
 
-  if (popCalendar.el.querySelectorAll(`.${selectedDayClass}`).length) {
-    for (let i = 0; i < popCalendar.el.querySelectorAll(`.${selectedDayClass}`).length; i++) {
-      popCalendar.el.querySelectorAll(`.${selectedDayClass}`)[i].classList.remove(selectedDayClass)
-    }
-  }
+  // Remove selected class and clear aria-selected on the previously selected cell
+  popCalendar.el.querySelectorAll(`.${selectedDayClass}`).forEach(el => {
+    el.classList.remove(selectedDayClass)
+    el.setAttribute('aria-selected', 'false')
+  })
 
   if (!data.dayEl.classList.contains(disabledDayClass)) {
     emits('selectedDate', data.dateStr)
     nonFormattedSelectedDate.value = data.date
     selectedDate.value = getFrontedFormattedDate(data.dateStr)
     data.dayEl.classList.add(selectedDayClass)
-    visible.value = false
+    data.dayEl.setAttribute('aria-selected', 'true')
+    closeCalendar()
   }
 }
 
@@ -260,6 +499,17 @@ function onClickOutside () {
 function reRenderCalendar () {
   nextTick(() => {
     popCalendarRef.value.getApi().render()
+    // Initialise roving tabindex and ARIA grid structure, then move focus to
+    // the first nav button so keyboard users can Tab forward into the grid.
+    nextTick(() => {
+      initRovingTabindex()
+      initGridAriaRoles()
+      const calendarEl = popCalendarRef.value?.$el
+      if (calendarEl) {
+        const firstBtn = calendarEl.querySelector('.fc-button')
+        if (firstBtn) firstBtn.focus()
+      }
+    })
   })
 }
 
@@ -274,13 +524,13 @@ function clearCalendar () {
   setTimeout(() => {
     const popCalendar = popCalendarRef.value.getApi()
     const popCalendarType = popCalendar.currentData.currentViewType
-    let selectedDayClass = `am-dp__${popCalendarType}-selected`
+    const selectedDayClass = `am-dp__${popCalendarType}-selected`
 
-    if (popCalendar.el.querySelectorAll(`.${selectedDayClass}`).length) {
-      for (let i = 0; i < popCalendar.el.querySelectorAll(`.${selectedDayClass}`).length; i++) {
-        popCalendar.el.querySelectorAll(`.${selectedDayClass}`)[i].classList.remove(selectedDayClass)
-      }
-    }
+    // Remove visual selection and aria-selected from all previously selected cells
+    popCalendar.el.querySelectorAll(`.${selectedDayClass}`).forEach(el => {
+      el.classList.remove(selectedDayClass)
+      el.setAttribute('aria-selected', 'false')
+    })
 
     popCalendar.unselect()
   }, 200)
@@ -430,7 +680,10 @@ $amCalClass: am-dp;
                   color: var(--am-c-dpf-text-op60);
                 }
 
+                // Visible keyboard focus ring for navigation buttons
                 &:focus {
+                  outline: 2px solid var(--am-c-primary);
+                  outline-offset: 2px;
                   border: none;
                   box-shadow: none;
                 }
@@ -644,6 +897,15 @@ $amCalClass: am-dp;
               &.fc-day-other {
                 .fc-daygrid-day-top {
                   opacity: 0.7;
+                }
+              }
+
+              // Keyboard focus ring on individual day cells
+              &:focus {
+                outline: none;
+                .fc-daygrid-day-frame {
+                  outline: 2px solid var(--am-c-primary);
+                  outline-offset: -2px;
                 }
               }
             }

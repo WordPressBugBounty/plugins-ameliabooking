@@ -16,7 +16,7 @@
       :class="{
         'am--selected': anyEmployee,
       }"
-      tabindex="0"
+      :tabindex="keyboardSelectionDisabled ? -1 : 0"
       @click="chooseAnyEmployee"
     >
       <div class="am-fs__init-item__img am-item-any">
@@ -44,6 +44,7 @@
       :price-visibility="customizeOptions.price.visibility && getEmployeePrice(employee) !== ''"
       :labels="amLabels"
       :parent-width="componentWidth"
+      :keyboard-selection-disabled="keyboardSelectionDisabled"
       :info-btn-visibility="!!employee.description && customizeOptions.moreBtn.visibility"
       @select-item="selectEmployee(employee)"
       @trigger-info-popup="() => {
@@ -68,7 +69,7 @@
 
 <script setup>
 // * Import from Vue
-import { computed, inject, ref, onMounted, reactive, onUnmounted } from 'vue'
+import { computed, inject, ref, onMounted, reactive, onUnmounted, watch } from 'vue'
 
 // * Import components
 import StepCardLayout from '../common/StepCardLayout.vue'
@@ -307,6 +308,14 @@ function writeEmployeeData(employeeData) {
 // * Employee - More Info
 let moreInfoVisibility = ref(false)
 let selectedEmployee = ref(null)
+
+const keyboardSelectionDisabled = computed(() => moreInfoVisibility.value)
+
+watch(moreInfoVisibility, (isVisible, wasVisible) => {
+  if (wasVisible && !isVisible) {
+    stepCardLayoutReference.value?.focusSelectedOrFirstItem?.()
+  }
+})
 
 // * Mounted hook
 onMounted(() => {

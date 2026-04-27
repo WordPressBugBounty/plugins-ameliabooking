@@ -3,7 +3,6 @@
     v-if="loaded"
     class="am-fs__init"
     :class="[props.globalClass, {'am-oxvisible': (bringingAnyoneVisibility || packagesVisibility)}]"
-    tabindex="0"
   >
     <el-form
       ref="initFormRef"
@@ -22,6 +21,7 @@
 
     <!-- Bringing Anyone with you -->
     <AmSlidePopup
+      ref="bringingPopupRef"
       v-if="bringingAnyoneOptions.availability"
       :visibility="bringingAnyoneVisibility"
       class="am-fs__init__bringing"
@@ -85,7 +85,7 @@
 
 <script setup>
 import { useStore } from "vuex";
-import {ref, reactive, computed, watchEffect, inject, provide, markRaw} from 'vue'
+import {ref, reactive, computed, watchEffect, inject, provide, markRaw, nextTick, watch} from 'vue'
 
 import AmSlidePopup from "../../../_components/slide-popup/AmSlidePopup.vue";
 import AmButton from "../../../_components/button/AmButton.vue";
@@ -232,6 +232,7 @@ provide('bringingOptions', {
 
 // * Bringing anyone with you popup visibility
 let bringingAnyoneVisibility = ref(false)
+let bringingPopupRef = ref(null)
 
 function noOneBringWith() {
   closeBringingPopup()
@@ -242,6 +243,19 @@ function noOneBringWith() {
 function bringPeopleWithYou() {
   nextStep()
 }
+
+// * Focus management for keyboard navigation on Bringing Anyone popup
+watch(bringingAnyoneVisibility, async (isVisible) => {
+  if (isVisible) {
+    // Wait for DOM to update
+    await nextTick()
+    // Find the input number field and focus it
+    const numberInput = bringingPopupRef.value?.$el?.querySelector('.am-input-number input')
+    if (numberInput) {
+      numberInput.focus()
+    }
+  }
+})
 
 function continueWithService() {
   packagesVisibility.value = false

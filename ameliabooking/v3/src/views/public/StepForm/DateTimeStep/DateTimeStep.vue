@@ -2,8 +2,7 @@
   <div
     ref="dateTimeRef"
     class="am-fs-dt__calendar"
-    :class="[props.globalClass, {'am-oxvisible': (recurringPopupVisibility || packagesVisibility)}]"
-    tabindex="0"
+    :class="[props.globalClass, {'am-oxvisible': (packagesVisibility)}]"
   >
     <div v-if="limitPerEmployeeError" ref="limitError" class="am-fs__payments-error" >
       <AmAlert
@@ -41,6 +40,7 @@
     <!-- Recurring Appointment -->
     <AmSlidePopup
       v-if="service.recurringCycle !== 'disabled' && notLastDay && cart.length <= 1"
+      ref="recurringPopupRef"
       :visibility="recurringPopupVisibility"
       class="am-fs-dt__calendar__recurring"
     >
@@ -87,7 +87,9 @@ import {
   computed,
   onMounted,
   watchEffect,
-  reactive
+  reactive,
+  watch,
+  nextTick
 } from "vue";
 import AmButton from "../../../_components/button/AmButton.vue";
 import AmSlidePopup from "../../../_components/slide-popup/AmSlidePopup.vue";
@@ -274,6 +276,12 @@ let packagesVisibility = ref(
 )
 provide('packagesVisibility', packagesVisibility)
 
+watch(packagesVisibility, (isVisible) => {
+  if (!isVisible && dateTimeRef.value) {
+    dateTimeRef.value.focus()
+  }
+})
+
 
 /**************
  * Navigation *
@@ -379,6 +387,7 @@ provide('useDeselectedDate', useDeselectedDate)
 let service = reactive({})
 
 let recurringPopupVisibility = ref(false)
+let recurringPopupRef = ref(null)
 
 let { goToRecurringStep } = inject('goToRecurringStep', {
   goToRecurringStep: () => {}
@@ -386,6 +395,18 @@ let { goToRecurringStep } = inject('goToRecurringStep', {
 
 let { removeRecurringStep } = inject('removeRecurringStep', {
   removeRecurringStep: () => {}
+})
+
+// * Focus management for keyboard navigation on Recurring Appointment Popup
+watch(recurringPopupVisibility, async (isVisible) => {
+  if (isVisible) {
+    // Wait for DOM to update
+    await nextTick()
+    let footerButton = recurringPopupRef.value?.$el?.querySelector('.am-button--secondary')
+    if (footerButton) {
+      footerButton.focus()
+    }
+  }
 })
 
 let notLastDay = computed(() => {
@@ -531,6 +552,10 @@ onMounted(() => {
   }
 
   loadCounter.value++
+
+  if (dateTimeRef.value && !packagesVisibility.value) {
+    dateTimeRef.value.focus()
+  }
 })
 </script>
 

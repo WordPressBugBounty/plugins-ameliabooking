@@ -1,6 +1,7 @@
 <template>
   <!-- Select -->
   <div
+    ref="amSelectWrapper"
     class="am-select-wrapper"
     :class="props.parentClass"
   >
@@ -67,10 +68,11 @@
       @change="(val) => $emit('change', val)"
       @visible-change="visibleChange"
       @remove-tag="(eventValue) => $emit('remove-tag', eventValue)"
-      @clear="$emit('clear')"
-      @blur="(e) => $emit('blur', e)"
+      @clear="handleClear"
+      @blur="handleBlur"
       @focus="(e) => $emit('focus', e)"
       @click="(e) => $emit('click', e)"
+      @keydown="handleKeydown"
     >
       <template v-if="prefixIcon" #prefix>
         <component :is="prefixIcon" v-if="typeof prefixIcon === 'object'" />
@@ -81,6 +83,9 @@
         />
       </template>
       <slot />
+      <template v-if="$slots.footer" #footer>
+        <slot name="footer" />
+      </template>
     </el-select>
   </div>
   <!-- /Select -->
@@ -92,7 +97,9 @@ import {
   ref,
   toRefs,
   computed,
-  inject
+  inject,
+  onMounted,
+  onBeforeUnmount
 } from 'vue'
 
 // * Components
@@ -434,6 +441,8 @@ let model = computed({
  * Component reference
  */
 const amSelect = ref(null)
+const amSelectWrapper = ref(null)
+const clearHandledKey = '__amSelectClearHandled'
 
 // * Component text orientation
 let isRtl = computed(() => {
@@ -518,6 +527,75 @@ let cssVars = computed(() => {
   }
 })
 
+function getClearValue () {
+  if (typeof props.valueOnClear === 'function') {
+    return props.valueOnClear()
+  }
+
+  if (props.valueOnClear !== undefined) {
+    return props.valueOnClear
+  }
+
+  return props.multiple ? [] : null
+}
+
+function hasSelectedValue () {
+  if (props.multiple) {
+    return Array.isArray(model.value) && model.value.length > 0
+  }
+
+  const emptyValues = props.emptyValues ?? [undefined, null, '']
+  return !emptyValues.includes(model.value)
+}
+
+function handleClear () {
+  emits('clear')
+}
+
+function canClearFromKeyboard (event) {
+  if (!props.clearable || props.disabled || !hasSelectedValue()) {
+    return false
+  }
+
+  if (!['Backspace', 'Delete'].includes(event.key)) {
+    return false
+  }
+
+  // Keep Backspace usable for search input editing in filterable mode.
+  return !(props.filterable && event.target && typeof event.target.value === 'string' && event.target.value.length);
+}
+
+function clearFromKeyboard (event) {
+  if (event && event[clearHandledKey]) {
+    return
+  }
+
+  if (!canClearFromKeyboard(event)) {
+    return
+  }
+
+  if (event) {
+    event[clearHandledKey] = true
+  }
+
+  const clearedValue = getClearValue()
+  model.value = clearedValue
+  emits('change', clearedValue)
+  emits('clear')
+}
+
+function handleKeydown (event) {
+  clearFromKeyboard(event)
+}
+
+function handleWrapperKeydownCapture (event) {
+  clearFromKeyboard(event)
+}
+
+function handleBlur (event) {
+  emits('blur', event)
+}
+
 function visibleChange (eventValue) {
   amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-success', amColors.value.colorSuccess)
   amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-error', amColors.value.colorError)
@@ -535,6 +613,24 @@ function visibleChange (eventValue) {
   amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-font-family', amFonts.value.fontFamily)
   emits('visible-change', eventValue)
 }
+
+onMounted(() => {
+  // check if wrapper element exist if element plus is updated
+  const wrapper = amSelectWrapper.value?.querySelector('.el-select__wrapper')
+
+  if (wrapper) {
+    wrapper.addEventListener('keydown', handleWrapperKeydownCapture, true)
+  }
+})
+
+onBeforeUnmount(() => {
+  // check if wrapper element exist if element plus is updated
+  const wrapper = amSelectWrapper.value?.querySelector('.el-select__wrapper')
+
+  if (wrapper) {
+    wrapper.removeEventListener('keydown', handleWrapperKeydownCapture, true)
+  }
+})
 </script>
 
 <script>

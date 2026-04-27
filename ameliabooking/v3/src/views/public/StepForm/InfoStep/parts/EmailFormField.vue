@@ -17,7 +17,6 @@
       name="email"
       type="email"
       :placeholder="amLabels.enter_email"
-      :disabled="props.loggedInUser"
     />
   </el-form-item>
   <!-- /Email -->
@@ -38,13 +37,6 @@ let amCustomize = inject('amCustomize')
 
 // * Form field data
 let infoFormData = inject('infoFormData')
-
-let props = defineProps({
-  loggedInUser: {
-    type: Boolean,
-    default: false
-  }
-})
 
 defineExpose({
   primeFieldRef

@@ -128,7 +128,7 @@ let isWaitingList = computed(() => store.getters['eventWaitingListOptions/getAva
 
 // * Event Tickets
 let tickets = computed(() => {
-  const sorted = [...(store.getters['tickets/getTicketsData'] || [])].sort((a, b) => a.price - b.price)
+  const sorted = [...(store.getters['tickets/getTicketsData'] || [])]
   if (window?.ameliaActions?.EventTickets) {
     let override
     useAction(

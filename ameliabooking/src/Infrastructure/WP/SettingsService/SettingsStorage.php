@@ -268,8 +268,14 @@ class SettingsStorage implements SettingsStorageInterface
                 'microsoftTeamsEnabled' => $this->getSetting('outlookCalendar', 'enableMicrosoftTeams'),
                 'accessToken' => !empty($this->getSetting('outlookCalendar', 'accessToken')),
             ],
-            'appleCalendar'          =>
-            $this->getSetting('appleCalendar', 'clientID') && $this->getSetting('appleCalendar', 'clientSecret'),
+            'appleCalendar'          => [
+                'enabled' => Licence\Licence::isFeatureEnabledWithLicense(
+                    'appleCalendar',
+                    $this->getSetting('featuresIntegrations', 'appleCalendar')
+                ) &&
+                    $this->getSetting('appleCalendar', 'clientID') && $this->getSetting('appleCalendar', 'clientSecret'),
+
+            ],
             'zoom'                   => [
                 'enabled' => (
                     Licence\Licence::isFeatureEnabledWithLicense(
@@ -467,6 +473,7 @@ class SettingsStorage implements SettingsStorageInterface
                 'allowConfigureServices'      => $this->getSetting('roles', 'allowConfigureServices'),
                 'allowWriteAppointments'      => $this->getSetting('roles', 'allowWriteAppointments'),
                 'allowWriteCustomers'         => $this->getSetting('roles', 'allowWriteCustomers'),
+                'allowReadAllCustomers'       => $this->getSetting('roles', 'allowReadAllCustomers'),
                 'automaticallyCreateCustomer' => $this->getSetting('roles', 'automaticallyCreateCustomer'),
                 'inspectCustomerInfo'         => $this->getSetting('roles', 'inspectCustomerInfo'),
                 'allowCustomerReschedule'     => $this->getSetting('roles', 'allowCustomerReschedule'),

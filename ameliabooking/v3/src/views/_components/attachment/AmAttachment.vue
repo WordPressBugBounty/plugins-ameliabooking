@@ -14,11 +14,13 @@
     :auto-upload="props.autoUpload"
     :disabled="props.disabled"
     :limit="props.limit"
+    :style="cssVars"
     :on-change="onChange"
     :on-remove="onRemove"
   >
     <AmButton
       class="am-attachment__btn"
+      tabindex="-1"
       :icon-only="props.iconOnly"
       :size="props.btnSize"
       :category="props.btnCategory"
@@ -40,8 +42,14 @@
 </template>
 
 <script setup>
+// * Components
 import AmButton from '../button/AmButton.vue'
+
+// * Import from Vue
 import { computed, ref } from "vue";
+
+// * Composables
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
 
 /**
  * Component Props
@@ -200,6 +208,36 @@ function onRemove (removedFile, arrayOfFiles) {
 
   emits('remove', file)
 }
+
+// * Colors
+let amColors = inject('amColors', ref({
+  colorPrimary: '#1246D6',
+  colorSuccess: '#019719',
+  colorError: '#B4190F',
+  colorWarning: '#CCA20C',
+  colorMainBgr: '#FFFFFF',
+  colorMainHeadingText: '#33434C',
+  colorMainText: '#1A2C37',
+  colorSbBgr: '#17295A',
+  colorSbText: '#FFFFFF',
+  colorInpBgr: '#FFFFFF',
+  colorInpBorder: '#D1D5D7',
+  colorInpText: '#1A2C37',
+  colorInpPlaceHolder: '#1A2C37',
+  colorDropBgr: '#FFFFFF',
+  colorDropBorder: '#D1D5D7',
+  colorDropText: '#0E1920',
+  colorBtnPrim: '#265CF2',
+  colorBtnPrimText: '#FFFFFF',
+  colorBtnSec: '#1A2C37',
+  colorBtnSecText: '#FFFFFF',
+}))
+
+let cssVars = computed(() => {
+  return {
+    '--am-c-btn-op30': useColorTransparency(amColors.value.colorBtnPrim, 0.3)
+  }
+})
 </script>
 
 <style lang="scss">
@@ -223,6 +261,11 @@ function onRemove (removedFile, arrayOfFiles) {
 
       .el-upload {
         width: 100%;
+
+        &:focus {
+          border-radius: 6px;
+          box-shadow: 0 0 0 3px var(--am-c-btn-op30);
+        }
 
         &-list {
           &__item {

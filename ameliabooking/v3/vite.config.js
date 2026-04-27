@@ -52,7 +52,7 @@ export default defineConfig(({ mode }) => {
     return {
       name: 'collect-all-css',
       transform(code, id) {
-        // Only process .vue files in development
+        // Only process .vue files in development and in WordPress admin panel
         if (mode === 'development' && id.endsWith('.vue')) {
           // Inject a script that runs in the browser, not during build
           return {
@@ -60,27 +60,37 @@ export default defineConfig(({ mode }) => {
               code +
               `
               if (typeof document !== 'undefined') {
-                requestIdleCallback(() => {
-                  const styleElements = Array.from(document.getElementsByTagName('style')).filter(
-                    (el) => el.hasAttribute('type') && el.getAttribute('type') === 'text/css' && el.attributes.length === 1
-                  );
-                  
-                  let existingStyleTag = document.getElementById('vite-dev-vue3');
-                  if (!existingStyleTag) {
-                    existingStyleTag = document.createElement('style');
-                    existingStyleTag.id = 'vite-dev-vue3';
-                    document.head.appendChild(existingStyleTag);
-                  }
-                  
-                  // Accumulate styles into the combined tag
-                  let combinedStyles = existingStyleTag.innerHTML || '';
-                  styleElements.forEach((el,index) => {
-                    combinedStyles += el.innerHTML;
-                    el.remove(); // Remove individual style tags
+                // Only run in WordPress admin panel, not on frontend
+                const hasAdminBodyClass = document.body?.classList?.contains('wp-admin') ?? false;
+                const isWordPressAdmin = hasAdminBodyClass || window.location.pathname.includes('/wp-admin/');
+                
+                if (isWordPressAdmin) {
+                  const scheduleStyleCollection = typeof window.requestIdleCallback === 'function'
+                    ? window.requestIdleCallback.bind(window)
+                    : (callback) => window.setTimeout(callback, 0);
+
+                  scheduleStyleCollection(() => {
+                    const styleElements = Array.from(document.getElementsByTagName('style')).filter(
+                      (el) => el.hasAttribute('type') && el.getAttribute('type') === 'text/css' && el.attributes.length === 1
+                    );
+                    
+                    let existingStyleTag = document.getElementById('vite-dev-vue3');
+                    if (!existingStyleTag) {
+                      existingStyleTag = document.createElement('style');
+                      existingStyleTag.id = 'vite-dev-vue3';
+                      document.head.appendChild(existingStyleTag);
+                    }
+                    
+                    // Accumulate styles into the combined tag
+                    let combinedStyles = existingStyleTag.innerHTML || '';
+                    styleElements.forEach((el,index) => {
+                      combinedStyles += el.innerHTML;
+                      el.remove(); // Remove individual style tags
+                    });
+                    
+                    existingStyleTag.innerHTML = combinedStyles;
                   });
-                  
-                  existingStyleTag.innerHTML = combinedStyles;
-                });
+                }
               }
             `,
             map: null,
@@ -112,6 +122,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       extensions: ['.js', '.vue', '.json', '.mjs'],
       alias: {
+        '@': path.resolve(__dirname, 'src'),
         '@css': path.resolve(__dirname, '/src/assets/scss'),
       },
     },

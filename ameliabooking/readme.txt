@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.2.1
+Stable tag: 2.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,14 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.3
+* BugFix: Fixed an issue where appointment status remained "Pending" after a successful payment
+* BugFix: Fixed an issue with service ordering being reset after editing the service name
+* BugFix: Fixed an issue where the customer's phone number was not updated when a phone field became mandatory after the initial booking
+* BugFix: Fixed an issue where duplicate time slots appeared on the booking form when "Show slots in client's timezone" was enabled
+* BugFix: Resolved security vulnerabilities.
+* Additional minor bug fixes and overall stability improvements.
+
 v2.2.1
 * BugFix: Resolved a security vulnerability.
 

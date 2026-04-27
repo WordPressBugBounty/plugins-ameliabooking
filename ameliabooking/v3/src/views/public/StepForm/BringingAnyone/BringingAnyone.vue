@@ -76,7 +76,12 @@
           :key="range"
           class="am-fs__bringing-content-text am-fs__bringing-content-price-text"
           :class="{'am-fs__bringing-content-price-text-selected': selectedGroup(item.from, item.to)}"
+          tabindex="0"
+          role="button"
+          :aria-label="`${item.from === item.to ? item.from : item.from + ' - ' + item.to }: ${item.prices[0] === item.prices[1] ? useFormattedPrice(item.prices[0]) : useFormattedPrice(item.prices[0])  + ' - ' + useFormattedPrice(item.prices[1])}`"
           @click="rangeSelected(item.from)"
+          @keydown.enter="rangeSelected(item.from)"
+          @keydown.space.prevent="rangeSelected(item.from)"
         >
           <span class="am-icon-users"></span>
           <span>{{item.from === item.to ? item.from : item.from + ' - ' + item.to }}</span>
@@ -416,6 +421,11 @@ export default {
           border-radius: 8px;
           display: inline-block;
           margin: 3px 0 0 3px;
+
+          &:focus {
+            outline: none;
+            border-color: var(--am-c-ps-primary);
+          }
 
           span {
             margin: 3px;

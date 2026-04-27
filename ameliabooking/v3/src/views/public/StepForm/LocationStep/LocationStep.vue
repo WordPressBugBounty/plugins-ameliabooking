@@ -16,7 +16,7 @@
       :class="{
         'am--selected': anyLocation,
       }"
-      tabindex="0"
+      :tabindex="keyboardSelectionDisabled ? -1 : 0"
       @click="chooseAnyLocation"
     >
       <div class="am-fs__init-item__img am-item-any">
@@ -54,6 +54,7 @@
           : []
       "
       :parent-width="componentWidth"
+      :keyboard-selection-disabled="keyboardSelectionDisabled"
       :info-btn-visibility="!!location.description && customizeOptions.moreBtn.visibility"
       @select-item="selectLocation(location)"
       @trigger-info-popup="
@@ -86,7 +87,7 @@ import StepCard from '../common/StepCard.vue'
 import MoreInfoPopup from '../common/MoreInfoPopup.vue'
 
 // * Import from Vue
-import { computed, inject, ref, reactive, onMounted, onUnmounted } from 'vue'
+import { computed, inject, ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -310,6 +311,14 @@ function writeLocationData(locationData) {
 // * Location - More Info
 let moreInfoVisibility = ref(false)
 let selectedLocation = ref(null)
+
+const keyboardSelectionDisabled = computed(() => moreInfoVisibility.value)
+
+watch(moreInfoVisibility, (isVisible, wasVisible) => {
+  if (wasVisible && !isVisible) {
+    stepCardLayoutReference.value?.focusSelectedOrFirstItem?.()
+  }
+})
 
 // * Mounted hook
 onMounted(() => {

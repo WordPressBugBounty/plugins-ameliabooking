@@ -5,7 +5,8 @@
     :style="cssVars"
   >
     <div
-      v-if="ready && !loading && !integrationsLoading"
+      v-if="ready"
+      v-show="!loading"
       class="am-caep__inner"
       :class="responsiveClass"
     >
@@ -96,17 +97,18 @@
         </el-tab-pane>
 
         <el-tab-pane
-          v-if="amSettings.zoom.enabled ||
-          amSettings.googleCalendar.enabled ||
-          amSettings.outlookCalendar.enabled ||
-          amSettings.appleCalendar ||
-          (amSettings.payments.stripe.enabled && amSettings.payments.stripe.connect.enabled)"
+          v-if="
+            amSettings.zoom.enabled ||
+            amSettings.googleCalendar.enabled ||
+            amSettings.outlookCalendar.enabled ||
+            amSettings.appleCalendar.enabled ||
+            (amSettings.payments.stripe.enabled &&
+              amSettings.payments.stripe.connect.enabled)
+          "
           :label="amLabels.integrations_settings"
           name="integrations"
         >
-          <Integrations
-            :responsive-class="responsiveClass"
-          />
+          <EmployeeIntegrations :responsive-class="responsiveClass" />
         </el-tab-pane>
       </el-tabs>
 
@@ -120,7 +122,7 @@
       />
       <!-- /Profile Footer -->
     </div>
-    <Skeleton v-else></Skeleton>
+    <Skeleton v-if="!ready || loading"></Skeleton>
   </div>
 </template>
 
@@ -156,17 +158,17 @@ import {
 } from "../../../../../assets/js/common/colorManipulation";
 
 // * Dedicated components
-import Skeleton from "../Authentication/parts/Skeleton.vue";
-import Details from "./parts/Details.vue";
-import Services from "./parts/Services.vue";
-import WeekDays from "./parts/WeekDays.vue";
-import SpecialDays from "./parts/SpecialDays.vue";
-import DaysOff from "./parts/DaysOff.vue";
-import Integrations from "./parts/Integrations.vue";
-import ProfileFooter from "./parts/ProfileFooter.vue";
-import ChangePassword from "./parts/ChangePassword.vue";
-import AmAlert from "../../../../_components/alert/AmAlert.vue";
-import ProfileSkeleton from "./parts/ProfileSkeleton.vue";
+import Skeleton from '../Authentication/parts/Skeleton.vue'
+import Details from './parts/Details.vue'
+import Services from './parts/Services.vue'
+import WeekDays from './parts/WeekDays.vue'
+import SpecialDays from './parts/SpecialDays.vue'
+import DaysOff from './parts/DaysOff.vue'
+import ProfileFooter from './parts/ProfileFooter.vue'
+import ChangePassword from './parts/ChangePassword.vue'
+import AmAlert from '../../../../_components/alert/AmAlert.vue'
+import ProfileSkeleton from './parts/ProfileSkeleton.vue'
+import EmployeeIntegrations from './parts/Integrations/EmployeeIntegrations.vue'
 
 // * Store
 let store = useStore()
@@ -221,14 +223,6 @@ let specialDaysRef = ref(null)
 let employee = computed(() => {
   return store.getters['employee/getEmployee']
 })
-
-let integrationsLoading = computed(
-  () => store.getters['auth/getGoogleLoading'] ||
-    store.getters['auth/getOutlookLoading'] ||
-    store.getters['auth/getAppleLoading'] ||
-    store.getters['auth/getStripeLoading'] ||
-    store.getters['auth/getZoomLoading']
-)
 
 let loading = ref(false)
 

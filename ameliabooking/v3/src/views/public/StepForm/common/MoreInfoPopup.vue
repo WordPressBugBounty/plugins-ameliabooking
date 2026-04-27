@@ -8,7 +8,7 @@
     @update:visibility="(value) => emits('update:visibility', value)"
   >
     <template #header>
-      <div class="am-fs-iipu__header">
+      <div class="am-fs-iipu__header" :aria-label="props.heading">
         {{ props.heading }}
       </div>
     </template>

@@ -112,6 +112,11 @@ export default {
           padding: 0 8px 0;
           overflow-x: hidden;
 
+          &:focus {
+            box-shadow: 0 0 0 1px var(--am-c-sb-text-op60);
+            border-radius: 4px;
+          }
+
           // Main Scroll styles
           &::-webkit-scrollbar {
             width: 6px;
@@ -505,6 +510,11 @@ export default {
           text-decoration: none;
           margin: 4px 0 0;
 
+          &:focus {
+            box-shadow: 0 0 0 1px var(--am-c-sb-text-op60);
+            border-radius: 4px;
+          }
+
           [class^="am-icon-"] {
             font-size: 24px;
             color: var(--am-c-sb-text);
@@ -521,6 +531,13 @@ export default {
         border-top: 1px solid var(--am-c-sb-text-op10);
         padding: 12px 0 0;
         cursor: pointer;
+
+        &:focus {
+          & [class^="am-icon-"], & [class*=" am-icon-"] {
+            box-shadow: 0 0 0 1px var(--am-c-sb-text-op60);
+            border-radius: 4px;
+          }
+        }
 
         &-text {
           font-size: 15px;

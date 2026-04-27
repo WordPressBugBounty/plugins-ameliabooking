@@ -3,7 +3,7 @@
 Plugin Name: Amelia
 Plugin URI: https://wpamelia.com/
 Description: Amelia is a simple yet powerful automated booking specialist, working 24/7 to make sure your customers can make appointments and events even while you sleep!
-Version: 2.2.1
+Version: 2.3
 Author: Melograno Ventures
 Author URI: https://melograno.io/
 Text Domain: ameliabooking
@@ -56,13 +56,13 @@ if (!defined('AMELIA_PATH')) {
 // Const for uploads path
 if (!defined('AMELIA_UPLOADS_PATH')) {
     $uploadDir = wp_upload_dir();
-    define('AMELIA_UPLOADS_PATH', $uploadDir['basedir']);
+    define('AMELIA_UPLOADS_PATH', !empty($uploadDir['basedir']) ? $uploadDir['basedir'] : '');
 }
 
 // Const for uploads url
 if (!defined('AMELIA_UPLOADS_URL')) {
     $uploadUrl = wp_upload_dir();
-    define('AMELIA_UPLOADS_URL', set_url_scheme($uploadUrl['baseurl']));
+    define('AMELIA_UPLOADS_URL', !empty($uploadUrl['baseurl']) ? set_url_scheme($uploadUrl['baseurl']) : '');
 }
 
 // Const for uploads url
@@ -111,7 +111,7 @@ if (!defined('AMELIA_LOGIN_URL')) {
 
 // Const for Amelia version
 if (!defined('AMELIA_VERSION')) {
-    define('AMELIA_VERSION', '2.2.1');
+    define('AMELIA_VERSION', '2.3');
 }
 
 // Const for site URL

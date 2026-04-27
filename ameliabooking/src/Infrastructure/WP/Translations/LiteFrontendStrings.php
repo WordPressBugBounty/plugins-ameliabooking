@@ -130,6 +130,7 @@ class LiteFrontendStrings
             'view'                         => __('View', 'ameliabooking'),
             'select'                       => __('Select', 'ameliabooking'),
             'free'                         => __('Free', 'ameliabooking'),
+            'error_use_diff_email_or_phone' => __('Please use a different email or phone number to complete the booking.', 'ameliabooking'),
         ];
     }
 

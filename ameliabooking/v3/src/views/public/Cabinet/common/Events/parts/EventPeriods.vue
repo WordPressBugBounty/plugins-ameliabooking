@@ -320,9 +320,8 @@ function isInPeriod (value) {
 }
 
 function isDisabledStartDate(value, endDate) {
-  const isBeforeToday = moment(value) < minDate.value
   const isAfterEndDate = endDate ? moment(value) > moment(endDate) : false
-  return isAfterEndDate || isBeforeToday
+  return isAfterEndDate
 }
 
 function isDisabledEndDate(value, startDate) {

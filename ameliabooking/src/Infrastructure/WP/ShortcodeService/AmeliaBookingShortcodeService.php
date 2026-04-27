@@ -72,7 +72,7 @@ class AmeliaBookingShortcodeService extends AmeliaShortcodeService
         $gmapApiKey = $settingsService->getSetting('general', 'gMapApiKey');
 
         if ($gmapApiKey) {
-            $container = $container ?: require AMELIA_PATH . '/src/Infrastructure/ContainerConfig/container.php';
+            $container = require AMELIA_PATH . '/src/Infrastructure/ContainerConfig/container.php';
 
             /** @var CustomFieldRepository $customFieldRepository */
             $customFieldRepository = $container->get('domain.customField.repository');
@@ -108,7 +108,7 @@ class AmeliaBookingShortcodeService extends AmeliaShortcodeService
         } else {
             wp_enqueue_script(
                 $scriptId,
-                AMELIA_URL . 'v3/public/assets/public.eda3778f.js',
+                AMELIA_URL . 'v3/public/assets/public.22539921.js',
                 [],
                 AMELIA_VERSION,
                 true

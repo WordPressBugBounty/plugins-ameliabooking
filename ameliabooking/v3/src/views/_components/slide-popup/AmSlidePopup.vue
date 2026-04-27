@@ -7,6 +7,7 @@
       :style="{...cssVars, ...customCss}"
     >
       <div
+        ref="dialogRef"
         v-click-outside="onClickOutside"
         class="am-slide-popup__block-inner"
         :class="[
@@ -14,10 +15,25 @@
           customClass,
           `am-position-${position}`
         ]"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="props.ariaLabel || undefined"
+        :aria-labelledby="props.ariaLabelledby || undefined"
+        tabindex="-1"
+        @keydown.tab="onTab"
+        @keydown.esc="onEscape"
       >
         <div v-if="popupHeaderVisibility" class="am-slide-popup__block-header">
           <slot name="header"></slot>
-          <span class="am-icon-close" @click="emits('update:visibility', false)" />
+          <span
+            class="am-icon-close"
+            tabindex="0"
+            role="button"
+            aria-label="Close"
+            @click="emits('update:visibility', false)"
+            @keydown.enter="emits('update:visibility', false)"
+            @keydown.space.prevent="emits('update:visibility', false)"
+          />
         </div>
         <slot></slot>
         <div v-if="props.footerVisibility" class="am-slide-popup__block-footer">
@@ -33,7 +49,11 @@
 import {
   inject,
   computed,
-  useSlots
+  useSlots,
+  ref,
+  watch,
+  nextTick,
+  onMounted,
 } from 'vue';
 
 // * Import from Libraries
@@ -71,11 +91,116 @@ let props = defineProps({
   footerVisibility: {
     type: Boolean,
     default: true
-  }
+  },
+  // Accessible name for the dialog — provide one of these two props.
+  // ariaLabel: plain string label (e.g. "Filter options").
+  // ariaLabelledby: id of a visible heading element inside the dialog.
+  ariaLabel: {
+    type: String,
+    default: ''
+  },
+  ariaLabelledby: {
+    type: String,
+    default: ''
+  },
 })
 
 // * Compomnets Emits
 let emits = defineEmits(['click-outside', 'update:visibility'])
+
+// ---------------------------------------------------------------------------
+// Focus management
+// ---------------------------------------------------------------------------
+
+// The dialog element itself — used as a programmatic focus target fallback
+const dialogRef = ref(null)
+
+// The element that had focus before the dialog opened; restored on close
+let triggerEl = null
+
+/**
+ * Returns every keyboard-reachable element inside the dialog.
+ * Elements that are hidden (display:none / hidden attribute) are excluded.
+ */
+function getFocusableElements () {
+  if (!dialogRef.value) return []
+  return Array.from(
+    dialogRef.value.querySelectorAll(
+      'a[href], area[href], ' +
+      'input:not([disabled]):not([type="hidden"]), ' +
+      'select:not([disabled]), ' +
+      'textarea:not([disabled]), ' +
+      'button:not([disabled]), ' +
+      '[tabindex]:not([tabindex="-1"]), ' +
+      '[contenteditable]'
+    )
+  ).filter(el => !el.hasAttribute('hidden') && !el.closest('[hidden]'))
+}
+
+/** Moves focus to the first interactive child, or the dialog container itself. */
+function focusFirstElement () {
+  const focusable = getFocusableElements()
+  if (focusable.length) {
+    focusable[0].focus()
+  } else {
+    dialogRef.value?.focus()
+  }
+}
+
+/**
+ * Focus trap — keeps Tab / Shift+Tab cycling inside the dialog.
+ * Attached to @keydown.tab on the dialog container so it catches the event
+ * wherever focus currently sits inside the dialog.
+ */
+function onTab (event) {
+  const focusable = getFocusableElements()
+  if (!focusable.length) {
+    event.preventDefault()
+    return
+  }
+
+  const first = focusable[0]
+  const last  = focusable[focusable.length - 1]
+
+  if (event.shiftKey) {
+    // Shift+Tab from the first focusable (or the container): wrap to last
+    if (document.activeElement === first || document.activeElement === dialogRef.value) {
+      event.preventDefault()
+      last.focus()
+    }
+  } else {
+    // Tab from the last focusable: wrap to first
+    if (document.activeElement === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
+}
+
+/** Escape closes the dialog (standard dialog keyboard pattern). */
+function onEscape () {
+  emits('update:visibility', false)
+}
+
+// Save the triggering element when the dialog opens; restore it when it closes
+watch(() => props.visibility, (isVisible) => {
+  if (isVisible) {
+    triggerEl = document.activeElement
+    nextTick(focusFirstElement)
+  } else {
+    nextTick(() => {
+      triggerEl?.focus()
+      triggerEl = null
+    })
+  }
+})
+
+// Handle the case where the popup is already open at mount time
+onMounted(() => {
+  if (props.visibility) {
+    nextTick(focusFirstElement)
+  }
+})
 
 const slots = useSlots()
 
@@ -145,6 +270,11 @@ let cssVars = computed(() => {
         font-size: 20px;
         cursor: pointer;
         flex: 0 0 auto;
+
+        &:focus {
+          box-shadow: 0 0 0 1px var(--am-c-primary);
+          border-radius: 4px;
+        }
       }
     }
 
@@ -165,6 +295,12 @@ let cssVars = computed(() => {
       @extend .am-slide-popup;
       background: var(--am-c-main-bgr);
       padding: 16px 32px;
+
+      // The container receives programmatic focus only (tabindex="-1" fallback).
+      // Interactive children retain their own visible focus rings.
+      &:focus {
+        outline: none;
+      }
 
       &.am-position-top {
         top: 0;

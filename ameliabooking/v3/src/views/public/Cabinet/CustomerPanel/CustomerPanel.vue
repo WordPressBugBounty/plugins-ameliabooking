@@ -418,13 +418,13 @@ watch(containerWidth, (current) => {
 function populateFilterOptions () {
   store.dispatch(
     'cabinetFilters/injectServiceOptions',
-    store.getters['entities/getServices'].map(i => i.id)
+    store.getters['entities/getServices'].filter(s => s.show).map(i => i.id)
   )
 
   store.dispatch(
     'cabinetFilters/injectProviderOptions',
     cabinetType.value === 'customer'
-      ? store.getters['entities/getEmployees'].map(i => i.id)
+      ? store.getters['entities/getEmployees'].filter(e => e.show).map(i => i.id)
       : []
   )
 
@@ -557,8 +557,6 @@ function sidebarSelection(step, index) {
   if (shortcodeData.value.cabinetType === 'employee') {
     if (step.key !== 'appointments') {
       store.commit('appointment/resetAppointment', {providerId: store.getters['auth/getProfile'].id, categoryId: null, serviceId: null, locationId: null})
-      store.commit('customerInfo/setCustomers', [])
-      store.commit('customerInfo/setCustomersIds', [])
     }
 
     if (step.key !== 'events') {

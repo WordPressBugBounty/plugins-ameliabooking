@@ -11,6 +11,7 @@
         v-model="searchFilter"
         :placeholder="amLabels.filter_input"
         :prefix-icon="iconSearch"
+        :disabled="keyboardSelectionDisabled"
       />
       <AmSelect
         v-if="customizeOptions.category.visibility && categoryOptions.length > 1"
@@ -21,6 +22,7 @@
         :filterable="customizeOptions.category.filterable"
         :fit-input-width="true"
         clearable
+        :disabled="keyboardSelectionDisabled"
         :filter-method="filterCategory"
       >
         <AmOption
@@ -57,6 +59,7 @@
         useCart(store).length <= 1) && customizeOptions.packagesBtn.visibility
       "
       :parent-width="componentWidth"
+      :keyboard-selection-disabled="keyboardSelectionDisabled"
       :labels="amLabels"
       @select-item="selectService(service)"
       @trigger-info-popup="() => {
@@ -92,7 +95,7 @@
 
 <script setup>
 // * Import from Vue
-import { ref, computed, inject, nextTick, watchEffect, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, computed, inject, nextTick, watch, watchEffect, reactive, onMounted, onUnmounted } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -148,6 +151,16 @@ const stepCardLayoutDom = computed(
 
 // * Component width
 const { width: componentWidth } = useElementSize(stepCardLayoutDom)
+
+const packagesPopupVisibility = computed(() => {
+  const popupVisibility = stepCardLayoutReference.value?.packagesVisibility
+
+  if (typeof popupVisibility === 'boolean') {
+    return popupVisibility
+  }
+
+  return popupVisibility?.value ?? false
+})
 
 // * Plugin Licence
 let licence = inject('licence')
@@ -473,6 +486,16 @@ function displayServiceLocation(serviceId) {
 
 // * Service - More Info
 let moreInfoVisibility = ref(false)
+
+const keyboardSelectionDisabled = computed(() => {
+  return moreInfoVisibility.value || packagesPopupVisibility.value
+})
+
+watch(moreInfoVisibility, (isVisible, wasVisible) => {
+  if (wasVisible && !isVisible) {
+    stepCardLayoutReference.value?.focusSelectedOrFirstItem?.()
+  }
+})
 
 watchEffect(() => {
   if (!moreInfoVisibility.value) {

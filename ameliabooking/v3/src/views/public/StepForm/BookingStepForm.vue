@@ -210,8 +210,12 @@
           </div>
           <div
             class="am-fs-sb__menu"
+            tabindex="0"
+            :aria-label="amLabels.collapse_menu"
             :class="sidebarCollapseItemsClass"
             @click="sidebarCollapsed = !sidebarCollapsed"
+            @keydown.enter="sidebarCollapsed = !sidebarCollapsed"
+            @keydown.space.prevent="sidebarCollapsed = !sidebarCollapsed"
           >
             <Transition name="fade">
               <span v-if="!sidebarCollapsed" class="am-fs-sb__menu-text">

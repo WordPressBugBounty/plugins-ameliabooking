@@ -79,7 +79,7 @@
     <!-- Event Organizer -->
     <el-form-item
       v-if="!licence.isStarter &&
-        (amSettings.googleCalendar.enabled || amSettings.outlookCalendar.enabled || amSettings.appleCalendar) &&
+        (amSettings.googleCalendar.enabled || amSettings.outlookCalendar.enabled || amSettings.appleCalendar.enabled) &&
         (store.getters['employee/getGoogleCalendarId'] || store.getters['employee/getOutlookCalendarId'] || store.getters['employee/getAppleCalendarId'])"
       class="am-capei-def__item am-capei-def__item-tool"
     >
@@ -104,15 +104,16 @@
 
     <!-- Event Tags -->
     <el-form-item
+      v-if="amSettings.featuresIntegrations.eventTags.enabled"
       :label="`${amLabels.event_tags}:`"
       class="am-capei-def__item"
     >
       <AmSelect
+        ref="tagsSelectRef"
         v-model="formData.tags"
         clearable
         filterable
         multiple
-        :allow-create="true"
         :placeholder="amLabels.event_tags_select_or_create"
         :filter-method="filterTags"
       >
@@ -172,11 +173,11 @@ import {
 import { useStore } from "vuex";
 
 // * Import Components
-import AmInput from "../../../../../_components/input/AmInput.vue";
-import AmSelect from "../../../../../_components/select/AmSelect.vue";
-import AmOption from "../../../../../_components/select/AmOption.vue";
-import AmSwitch from "../../../../../_components/switch/AmSwitch.vue";
-import IconComponent from "../../../../../_components/icons/IconComponent.vue";
+import AmInput from "@/views/_components/input/AmInput.vue";
+import AmSelect from "@/views/_components/select/AmSelect.vue";
+import AmOption from "@/views/_components/select/AmOption.vue";
+import AmSwitch from "@/views/_components/switch/AmSwitch.vue";
+import IconComponent from "@/views/_components/icons/IconComponent.vue";
 import DescriptionEditor from "../../parts/DescriptionEditor.vue";
 
 // * Store

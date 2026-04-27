@@ -6,9 +6,9 @@
       { 'am--selected': props.selected },
       { 'am--disabled': props.disabled }
     ]"
-    :tabindex="props.disabled ? -1 : 0"
+    :tabindex="props.disabled || props.keyboardSelectionDisabled ? -1 : 0"
     @click="selectItem(props.item)"
-    @keydown.enter="selectItem(props.item)"
+    @keydown.enter="selectItemWithKeyboard(props.item)"
   >
     <div v-if="componentWidth > 370" class="am-fs__init-item__img">
       <img
@@ -89,18 +89,18 @@
         <span
           v-if="props.infoBtnVisibility"
           class="am-fs__init-item__footer-actions"
-          tabindex="0"
-          @click.stop="emits('triggerInfoPopup', props.item)"
-          @keydown.enter="emits('triggerInfoPopup', props.item)"
+          :tabindex="props.keyboardSelectionDisabled ? -1 : 0"
+          @click.stop="triggerInfoPopup(props.item)"
+          @keydown.enter="triggerInfoPopup(props.item)"
         >
           {{ props.labels.learn_more }}
         </span>
         <span
           v-if="props.packagesBtnVisibility"
           class="am-fs__init-item__footer-actions"
-          tabindex="0"
-          @click.stop="emits('triggerPackagesPopup', props.item)"
-          @keydown.enter="emits('triggerPackagesPopup', props.item)"
+          :tabindex="props.keyboardSelectionDisabled ? -1 : 0"
+          @click.stop="triggerPackagesPopup(props.item)"
+          @keydown.enter="triggerPackagesPopup(props.item)"
         >
           {{ props.labels.view_in_package }}
         </span>
@@ -176,6 +176,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  keyboardSelectionDisabled: {
+    type: Boolean,
+    default: false
+  },
   labels: {
     type: Object,
     required: true,
@@ -204,6 +208,30 @@ let responsiveClass = computed(() => {
 // * Item selection
 function selectItem(item) {
   emits('selectItem', item)
+}
+
+function selectItemWithKeyboard(item) {
+  if (props.disabled || props.keyboardSelectionDisabled) {
+    return
+  }
+
+  selectItem(item)
+}
+
+function triggerInfoPopup(item) {
+  if (props.keyboardSelectionDisabled) {
+    return
+  }
+
+  emits('triggerInfoPopup', item)
+}
+
+function triggerPackagesPopup(item) {
+  if (props.keyboardSelectionDisabled) {
+    return
+  }
+
+  emits('triggerPackagesPopup', item)
 }
 </script>
 

@@ -13,11 +13,17 @@ export default {
       id: null,
       calendarId: '',
       token: null,
+      accounts: [],
+      blockedCalendars: [],
+      calendarList: [],
     },
     googleCalendar: {
       id: null,
       calendarId: '',
       token: null,
+      accounts: [],
+      blockedCalendars: [],
+      calendarList: [],
     },
     appleCalendarId: '',
     googleCalendarId: '',
@@ -84,12 +90,28 @@ export default {
       return state.outlookCalendar.token
     },
 
+    getOutlookCalendarAccounts (state) {
+      return state.outlookCalendar.accounts
+    },
+
+    getOutlookCalendarBlockedCalendars (state) {
+      return state.outlookCalendar.blockedCalendars
+    },
+
     getGoogleCalendarId (state) {
       return state.googleCalendar.calendarId
     },
 
     getGoogleToken (state) {
       return state.googleCalendar.token
+    },
+
+    getGoogleCalendarAccounts (state) {
+      return state.googleCalendar.accounts
+    },
+
+    getGoogleCalendarBlockedCalendars (state) {
+      return state.googleCalendar.blockedCalendars
     },
 
     getAppleCalendarId (state) {
@@ -186,6 +208,14 @@ export default {
       state.outlookCalendar.token = payload
     },
 
+    setOutlookCalendarAccounts (state, payload) {
+      state.outlookCalendar.accounts = payload
+    },
+
+    setOutlookCalendarBlockedCalendars (state, payload) {
+      state.outlookCalendar.blockedCalendars = payload
+    },
+
     setGoogleId (state, payload) {
       state.googleCalendar.id = payload
     },
@@ -196,6 +226,14 @@ export default {
 
     setGoogleToken (state, payload) {
       state.googleCalendar.token = payload
+    },
+
+    setGoogleCalendarAccounts (state, payload) {
+      state.googleCalendar.accounts = payload
+    },
+
+    setGoogleCalendarBlockedCalendars (state, payload) {
+      state.googleCalendar.blockedCalendars = payload
     },
 
     setEmployeeOutlookCalendarId(state, payload) {

@@ -38,6 +38,23 @@ import {
 const globalLabels = reactive(window.wpAmeliaLabels)
 let errorMessage = ref()
 
+function normalizeDatepickerValue (value) {
+  if (!value) {
+    return null
+  }
+
+  if (typeof value === 'string') {
+    const matches = value.match(/^(\d{4}-\d{2}-\d{2})/)
+    if (matches) {
+      return matches[1]
+    }
+  }
+
+  const dateObject = value instanceof Date ? value : new Date(value)
+
+  return useStringFromDate(dateObject)
+}
+
 function usePaymentError (store, callback) {
   store.commit('booking/setLoading', false)
 
@@ -96,8 +113,7 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
       }
 
       if (availableCustomFields[id].type === 'datepicker') {
-        customFields[id].value = availableCustomFields[id].value ?
-          useStringFromDate(new Date(availableCustomFields[id].value)) : null
+        customFields[id].value = normalizeDatepickerValue(availableCustomFields[id].value)
       }
     }
   } else {
@@ -124,8 +140,8 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
       }
 
       if (availableCustomFields[key].type === 'datepicker') {
-        customFields[availableCustomFields[key].id].value = availableCustomFields[key].value ?
-          useStringFromDate(new Date(availableCustomFields[key].value)) : null
+        customFields[availableCustomFields[key].id].value =
+          normalizeDatepickerValue(availableCustomFields[key].value)
       }
     }
   }

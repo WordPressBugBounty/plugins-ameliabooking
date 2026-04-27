@@ -21,6 +21,7 @@
 
     <!-- Bringing Anyone with you -->
     <AmSlidePopup
+      ref="bringingPopupRef"
       v-if="bringingAnyoneOptions.availability"
       :visibility="bringingAnyoneVisibility"
       class="am-fs__init__bringing"
@@ -28,7 +29,9 @@
       <p
         class="am-fs__popup-x"
         :class="{ 'am-rtl': isRtl }"
+        tabindex="0"
         @click="closeBringingPopup"
+        @keydown.enter="closeBringingPopup"
       >
         <AmeliaIconClose></AmeliaIconClose>
       </p>
@@ -87,7 +90,7 @@
       class="am-fs__init__package"
       :footer-visibility="packagesPopupFooterVisibility"
       @continue-with-service="continueWithService()"
-      @close-package-popup="packagesPopupFooterVisibility = true"
+      @close-package-popup="closePackagePopup"
     />
     <!--/ Packages Popup -->
   </div>
@@ -95,7 +98,7 @@
 
 <script setup>
 // * Import from Vue
-import { computed, inject, provide, reactive, ref, watchEffect } from 'vue'
+import { computed, inject, nextTick, provide, reactive, ref, watchEffect, watch } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -250,6 +253,7 @@ provide('bringingOptions', {
 
 // * Bringing anyone with you pop up visibility
 let bringingAnyoneVisibility = ref(false)
+let bringingPopupRef = ref(null)
 
 // * Booking persons
 let bookingPersons = computed(() => {
@@ -279,6 +283,39 @@ function closeBringingPopup() {
   bringingAnyoneVisibility.value = false
 }
 
+// * Focus management for keyboard navigation on Bringing Anyone popup
+watch(bringingAnyoneVisibility, async (isVisible) => {
+  if (isVisible) {
+    // Wait for DOM to update
+    await nextTick()
+    // Find the input number field and focus it
+    const numberInput = bringingPopupRef.value?.$el?.querySelector('.am-input-number input')
+    if (numberInput) {
+      numberInput.focus()
+    }
+  }
+})
+
+async function focusSelectedOrFirstItem() {
+  await nextTick()
+
+  const layoutElement = stepCardLayoutRef.value
+
+  if (!layoutElement) {
+    return
+  }
+
+  const selectedItem = layoutElement.querySelector(
+    '.am-fs__init-item.am--selected:not(.am--disabled)[tabindex="0"]'
+  )
+
+  const firstFocusableItem = layoutElement.querySelector(
+    '.am-fs__init-item:not(.am--disabled)[tabindex="0"]'
+  )
+
+  ;(selectedItem || firstFocusableItem)?.focus()
+}
+
 // * Package popup
 let packagesOptions = computed(() =>
   store.getters['entities/filteredPackages'](
@@ -290,6 +327,12 @@ let packagesPopupFooterVisibility = ref(true)
 
 let packagesVisibility = ref(false)
 provide('packagesVisibility', packagesVisibility)
+
+function closePackagePopup() {
+  packagesPopupFooterVisibility.value = true
+  focusSelectedOrFirstItem()
+}
+
 watchEffect(() => {
   if (footerButtonClicked.value) {
     footerButtonReset()
@@ -312,6 +355,7 @@ watchEffect(() => {
 })
 
 defineExpose({
+  focusSelectedOrFirstItem,
   packagesVisibility,
   packagesPopupFooterVisibility,
   stepCardLayoutRef,

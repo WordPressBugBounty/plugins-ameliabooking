@@ -13,6 +13,7 @@
     >
       <AmButton
         v-if="stepIndex > 0"
+        ref="backButtonRef"
         class="am-heading-prev"
         :icon="{
           components: { IconComponent },
@@ -70,7 +71,7 @@ import AmButton from '../../../../_components/button/AmButton.vue'
 import IconComponent from '../../../../_components/icons/IconComponent.vue'
 
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
-import { ref, computed, inject } from 'vue'
+import { ref, computed, inject, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
 
 const store = useStore()
@@ -91,7 +92,8 @@ let loading = computed(() => store.getters['booking/getLoading'])
 let isRtl = computed(() => store.getters['getIsRtl'])
 
 // * Step Index
-const stepIndex = inject('stepIndex', 0)
+const stepIndex = inject('stepIndex', ref(0))
+const backButtonRef = ref(null)
 
 // * Step Functions
 const { previousStep } = inject('changingStepsFunctions', {
@@ -157,6 +159,25 @@ let cssVars = computed(() => {
     ),
   }
 })
+
+watch(() => stepIndex.value, async () => {
+  if (stepIndex.value <= 0 || loading.value) {
+    return
+  }
+
+  await nextTick()
+
+  const backButtonElement = backButtonRef.value?.$el || backButtonRef.value
+  const focusTarget =
+    backButtonElement && typeof backButtonElement.querySelector === 'function'
+      ? backButtonElement.querySelector('button') || backButtonElement
+      : backButtonElement
+
+  if (focusTarget && typeof focusTarget.focus === 'function') {
+    focusTarget.focus()
+  }
+})
+
 </script>
 
 <style lang="scss">

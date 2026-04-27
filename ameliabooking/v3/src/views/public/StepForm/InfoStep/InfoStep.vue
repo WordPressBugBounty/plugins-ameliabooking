@@ -5,7 +5,7 @@
     :class="props.globalClass"
   >
     <div v-show="!loading">
-  <div v-if="paymentError && (instantBooking || isWaitingListBooking)" class="am-fs__info-error">
+      <div v-if="paymentError && (instantBooking || isWaitingListBooking)" class="am-fs__info-error">
         <AmAlert
           type="error"
           :title="paymentError"
@@ -32,8 +32,8 @@
             {{amLabels.auto_fill_your_details}}
           </div>
           <am-social-button
-              :provider="socialProvider"
-              @social-action="onSignupSocial"
+            :provider="socialProvider"
+            @social-action="onSignupSocial"
           />
         </div>
 
@@ -44,192 +44,192 @@
         <!-- /Social Divider -->
       </div>
       <!-- /Social Buttons -->
-    <el-form
-      ref="infoFormRef"
-      :model="infoFormData"
-      :rules="rules"
-      label-position="top"
-      class="am-fs__info-form"
-      :class="[
-        {'am-fs__info-form-mobile': pageWidth < 330},
-        {'am-fs__info-form-mobile-s': pageWidth < 300}
-      ]"
-    >
-      <template v-for="item in amCustomize.infoStep.order" :key="item.id">
-        <component
-          :is="formFields[item.id].template"
-          ref="primeCollectorRef"
-          v-bind="formFields[item.id].props"
-          v-on="'handlers' in formFields[item.id] ? formFields[item.id].handlers : {}"
-        ></component>
-      </template>
+      <el-form
+        ref="infoFormRef"
+        :model="infoFormData"
+        :rules="rules"
+        label-position="top"
+        class="am-fs__info-form"
+        :class="[
+          {'am-fs__info-form-mobile': pageWidth < 330},
+          {'am-fs__info-form-mobile-s': pageWidth < 300}
+        ]"
+      >
+        <template v-for="item in amCustomize.infoStep.order" :key="item.id">
+          <component
+            :is="formFields[item.id].template"
+            ref="primeCollectorRef"
+            v-bind="formFields[item.id].props"
+            v-on="'handlers' in formFields[item.id] ? formFields[item.id].handlers : {}"
+          ></component>
+        </template>
 
-      <el-form-item
+        <el-form-item
           v-if="
             settings.featuresIntegrations.mailchimp.enabled &&
             settings.mailchimp.subscribeFieldVisible &&
             amCustomize.infoStep.options.email.visibility
           "
           class="am-subscribe"
-      >
-        <AmCheckBox
-          v-model="subscribeToMailchimp"
-          :label="amLabels.subscribe_to_mailing_list"
         >
-        </AmCheckBox>
-      </el-form-item>
-
-
-      <!-- Custom Fields TODO - validation for custom fields isn't set-->
-      <template v-if="availableCustomFields && allCustomFields">
-        <el-form-item
-          v-for="(cf, index) in allCustomFields"
-          v-show="cf.id in availableCustomFields && checkCustomerCustomFieldVisibility(cf)"
-          :id="'am-cf-' + cf.id"
-          :ref="el => customFieldsRefs[index] = el"
-          :key="index"
-          class="am-fs__info-form__item"
-          :class="[
-            { 'is-required': cf.type === 'file' && cf.required },
-            `am-cf-width-${cf.width}`,
-            {'am-rtl': isRtl}
-          ]"
-          label-position="top"
-          :prop="cf.required && cf.type !== 'content' ? 'cf' + cf.id : 'inputFile'"
-        >
-          <!-- ####### LABEL ####### -->
-          <template v-if="cf.type !== 'content'" #label>
-            <span
-              v-if="
-                (cf.type === 'checkbox' || cf.type === 'radio') && cf.label
-              "
-              :class="
-                (cf.type === 'checkbox' || cf.type === 'radio') && cf.required
-                  ? 'am-custom-required-as-html'
-                  : ''
-              "
-              v-html="cf.label ? cf.label : ''"
-            >
-            </span>
-            <span v-else class="am-fs__info-form__label">
-              {{cf.label}}
-            </span>
-          </template>
-          <!-- ####### /LABEL ####### -->
-
-          <!-- ####### INPUT ####### -->
-          <!-- types - [input, text-area] -->
-          <component
-            :is="customFieldsComponents[cf.type]"
-            v-model="infoFormData['cf' + cf.id]"
-            :type="cf.type === 'text-area' ? 'textarea' : (cf.type === 'text' ? 'text' : '')"
-            :placeholder="refCFPlaceholders[cf.id] && refCFPlaceholders[cf.id].placeholder"
-          ></component>
-          <!-- /types - [input, text-area] -->
-
-          <!-- Address Field -->
-          <template v-if="cf.type === 'address'">
-            <AmAddressInput
-              :id="`amelia-address-autocomplete-${cf.id}`"
-              v-model="infoFormData['cf' + cf.id]"
-              @address-selected="(address) => addressSelected(address, cf.id)"
-            />
-          </template>
-          <!-- /Address Field -->
-
-          <!-- type - date-picker-full -->
-          <AmDatePickerFull
-            v-if="cf.type === 'datepicker'"
-            :persistent="false"
-            :existing-date="infoFormData['cf' + cf.id]"
-            :disabled="false"
-            @selected-date="(dateString) => {selectedDatePickerValue('cf' + cf.id, dateString)}"
-          />
-          <!-- /type - date-picker-full -->
-
-          <!-- type - select -->
-          <AmSelect
-            v-if="cf.type === 'select'"
-            v-model="infoFormData['cf' + cf.id]"
-            :fit-input-width="true"
+          <AmCheckBox
+            v-model="subscribeToMailchimp"
+            :label="amLabels.subscribe_to_mailing_list"
           >
-            <AmOption
-              v-for="(option, i) in cf.options"
-              :key="i"
-              :label="option.label"
-              :value="option.label"
-            />
-          </AmSelect>
-          <!-- /type - select -->
-
-          <!-- type - radio -->
-          <AmRadioGroup
-            v-if="cf.type === 'radio'"
-            v-model="infoFormData['cf' + cf.id]"
-          >
-            <AmRadio
-              v-for="(option, i) in cf.options"
-              :key="i"
-              :label="option.label"
-              :value="option.label"
-            />
-          </AmRadioGroup>
-          <!-- /type - radio -->
-
-          <!-- type - checkbox -->
-          <AmCheckBoxGroup
-            v-if="cf.type === 'checkbox'"
-            v-model="infoFormData['cf' + cf.id]"
-          >
-            <AmCheckBox
-              v-for="(option, i) in cf.options"
-              :key="i"
-              :label="option.label"
-              :value="option.label"
-            />
-          </AmCheckBoxGroup>
-          <!-- /type - checkbox -->
-
-          <!-- type - attachment -->
-          <AmAttachment
-            v-if="cf.type === 'file'"
-            :id="cf.id"
-            v-model="infoFormData['cf' + cf.id]"
-            :auto-upload="false"
-            :accept="customFieldsAllowedExtensions"
-            @change="onAddFile"
-            @remove="onRemoveFile"
-          >
-            {{amLabels.upload_file_here}}
-          </AmAttachment>
-          <!-- /type - attachment -->
-
-          <!-- type - content -->
-          <div v-if="cf.type === 'content'" v-html="cf.label"></div>
-          <!-- /type - content -->
-          <!-- ####### INPUT ####### -->
+          </AmCheckBox>
         </el-form-item>
-      </template>
-      <div v-if="instantBooking && settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled" class="am-fs__payments-sentence">
-        <p>
-          {{amLabels.payment_wc_mollie_sentence}}
-        </p>
-      </div>
-    </el-form>
 
-    <PaymentOnSite
-      v-if="isWaitingListBooking || (instantBooking && (settings.payments.wc.enabled ? settings.payments.wc.onSiteIfFree || !wcEntityEnabled : true))"
-      ref="refOnSiteBooking"
-      :instant-booking="instantBooking"
-      @payment-error="callPaymentError"
-    />
 
-    <PaymentWc
-      v-if="instantBooking && !isWaitingListBooking && settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled"
-      ref="refWcBooking"
-      :instant-booking="instantBooking"
-      @payment-error="callPaymentError"
-    />
+        <!-- Custom Fields TODO - validation for custom fields isn't set-->
+        <template v-if="availableCustomFields && allCustomFields">
+          <el-form-item
+            v-for="(cf, index) in allCustomFields"
+            v-show="cf.id in availableCustomFields && checkCustomerCustomFieldVisibility(cf)"
+            :id="'am-cf-' + cf.id"
+            :ref="el => customFieldsRefs[index] = el"
+            :key="index"
+            class="am-fs__info-form__item"
+            :class="[
+              { 'is-required': cf.type === 'file' && cf.required },
+              `am-cf-width-${cf.width}`,
+              {'am-rtl': isRtl}
+            ]"
+            label-position="top"
+            :prop="cf.required && cf.type !== 'content' ? 'cf' + cf.id : 'inputFile'"
+          >
+            <!-- ####### LABEL ####### -->
+            <template v-if="cf.type !== 'content'" #label>
+              <span
+                v-if="
+                  (cf.type === 'checkbox' || cf.type === 'radio') && cf.label
+                "
+                :class="
+                  (cf.type === 'checkbox' || cf.type === 'radio') && cf.required
+                    ? 'am-custom-required-as-html'
+                    : ''
+                "
+                v-html="cf.label ? cf.label : ''"
+              >
+              </span>
+              <span v-else class="am-fs__info-form__label">
+                {{cf.label}}
+              </span>
+            </template>
+            <!-- ####### /LABEL ####### -->
+
+            <!-- ####### INPUT ####### -->
+            <!-- types - [input, text-area] -->
+            <component
+              :is="customFieldsComponents[cf.type]"
+              v-model="infoFormData['cf' + cf.id]"
+              :type="cf.type === 'text-area' ? 'textarea' : (cf.type === 'text' ? 'text' : '')"
+              :placeholder="refCFPlaceholders[cf.id] && refCFPlaceholders[cf.id].placeholder"
+            ></component>
+            <!-- /types - [input, text-area] -->
+
+            <!-- Address Field -->
+            <template v-if="cf.type === 'address'">
+              <AmAddressInput
+                :id="`amelia-address-autocomplete-${cf.id}`"
+                v-model="infoFormData['cf' + cf.id]"
+                @address-selected="(address) => addressSelected(address, cf.id)"
+              />
+            </template>
+            <!-- /Address Field -->
+
+            <!-- type - date-picker-full -->
+            <AmDatePickerFull
+              v-if="cf.type === 'datepicker'"
+              :persistent="false"
+              :existing-date="infoFormData['cf' + cf.id]"
+              :disabled="false"
+              @selected-date="(dateString) => {selectedDatePickerValue('cf' + cf.id, dateString)}"
+            />
+            <!-- /type - date-picker-full -->
+
+            <!-- type - select -->
+            <AmSelect
+              v-if="cf.type === 'select'"
+              v-model="infoFormData['cf' + cf.id]"
+              :fit-input-width="true"
+            >
+              <AmOption
+                v-for="(option, i) in cf.options"
+                :key="i"
+                :label="option.label"
+                :value="option.label"
+              />
+            </AmSelect>
+            <!-- /type - select -->
+
+            <!-- type - radio -->
+            <AmRadioGroup
+              v-if="cf.type === 'radio'"
+              v-model="infoFormData['cf' + cf.id]"
+            >
+              <AmRadio
+                v-for="(option, i) in cf.options"
+                :key="i"
+                :label="option.label"
+                :value="option.label"
+              />
+            </AmRadioGroup>
+            <!-- /type - radio -->
+
+            <!-- type - checkbox -->
+            <AmCheckBoxGroup
+              v-if="cf.type === 'checkbox'"
+              v-model="infoFormData['cf' + cf.id]"
+            >
+              <AmCheckBox
+                v-for="(option, i) in cf.options"
+                :key="i"
+                :label="option.label"
+                :value="option.label"
+              />
+            </AmCheckBoxGroup>
+            <!-- /type - checkbox -->
+
+            <!-- type - attachment -->
+            <AmAttachment
+              v-if="cf.type === 'file'"
+              :id="cf.id"
+              v-model="infoFormData['cf' + cf.id]"
+              :auto-upload="false"
+              :accept="customFieldsAllowedExtensions"
+              @change="onAddFile"
+              @remove="onRemoveFile"
+            >
+              {{amLabels.upload_file_here}}
+            </AmAttachment>
+            <!-- /type - attachment -->
+
+            <!-- type - content -->
+            <div v-if="cf.type === 'content'" v-html="cf.label"></div>
+            <!-- /type - content -->
+            <!-- ####### INPUT ####### -->
+          </el-form-item>
+        </template>
+        <div v-if="instantBooking && settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled" class="am-fs__payments-sentence">
+          <p>
+            {{amLabels.payment_wc_mollie_sentence}}
+          </p>
+        </div>
+      </el-form>
+
+      <PaymentOnSite
+        v-if="isWaitingListBooking || (instantBooking && (settings.payments.wc.enabled ? settings.payments.wc.onSiteIfFree || !wcEntityEnabled : true))"
+        ref="refOnSiteBooking"
+        :instant-booking="instantBooking"
+        @payment-error="callPaymentError"
+      />
+
+      <PaymentWc
+        v-if="instantBooking && !isWaitingListBooking && settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled"
+        ref="refWcBooking"
+        :instant-booking="instantBooking"
+        @payment-error="callPaymentError"
+      />
     </div>
 
     <BookingSkeleton/>
@@ -411,21 +411,18 @@ let formFields = ref({
     template: markRaw(FirstNameFormField),
     props: {
       class: computed(() => isRtl.value ? 'am-rtl' : ''),
-      loggedInUser: computed(() => !!loggedInUser.value)
     }
   },
   lastName: {
     template: markRaw(LastNameFormField),
     props: {
       class: computed(() => isRtl.value ? 'am-rtl' : ''),
-      loggedInUser: computed(() => !!loggedInUser.value)
     }
   },
   email: {
     template: markRaw(EmailFormField),
     props: {
       class: computed(() => isRtl.value ? 'am-rtl' : ''),
-      loggedInUser: computed(() => !!loggedInUser.value)
     }
   },
   phone: {
@@ -433,7 +430,6 @@ let formFields = ref({
     props: {
       class: computed(() => isRtl.value ? 'am-rtl' : ''),
       phoneError: computed(() => phoneError.value),
-      loggedInUser: computed(() => !!loggedInUser.value),
       refreshTrigger: computed(() => refreshPhoneComponent.value)
     },
     handlers: {
@@ -709,6 +705,10 @@ let addressCustomFields = ref([])
 let wcEntityEnabled = ref(false)
 
 onMounted(() => {
+  if (infoFormWrapperRef.value) {
+    infoFormWrapperRef.value.focus()
+  }
+
   let entity = null
 
   switch (store.getters['booking/getBookableType']) {

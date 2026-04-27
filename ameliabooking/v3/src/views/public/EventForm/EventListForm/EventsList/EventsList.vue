@@ -53,7 +53,7 @@
           :class="responsiveClass"
         >
           <div
-            v-if="(!store.getters['params/getShortcodeParams'].tags || store.getters['params/getShortcodeParams'].tags.length !== 1) && tags.length > 0"
+            v-if="amSettings.featuresIntegrations.eventTags.enabled && (!store.getters['params/getShortcodeParams'].tags || store.getters['params/getShortcodeParams'].tags.length !== 1) && tags.length > 0"
             class="am-els__filters-menu__items"
             :class="[responsiveClass, filterClassWidth.tag]"
           >
@@ -322,7 +322,7 @@ let filterClassWidth = computed(() => {
   let pLocation = store.getters['params/getShortcodeParams'].locations && store.getters['params/getShortcodeParams'].locations.length === 1
   let aLocation = locations.value.length
 
-  let tagVisibility = !pTag && aTag > 0
+  let tagVisibility = !pTag && aTag > 0 && amSettings.featuresIntegrations.eventTags.enabled
   let locationVisibility = !pLocation && aLocation > 0
 
   let classFilter = {

@@ -4,7 +4,6 @@
     :style="cssVars"
     class="am-fs__main-content am-fs__congrats"
     :class="[{'am-fs-sb-atc' : checkScreen}, props.globalClass]"
-    tabindex="0"
   >
     <div class="am-fs__congrats-main">
       <img

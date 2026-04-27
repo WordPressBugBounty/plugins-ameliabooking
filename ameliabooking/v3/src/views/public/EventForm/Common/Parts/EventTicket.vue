@@ -111,13 +111,13 @@ let spots = computed({
 })
 
 let spotsLimitation = computed(() => {
-  if (props.extraPeople) {
-    if (props.capacity) {
-      return (
-        props.extraPeople +
-        1 -
-        (store.getters['tickets/getEventGlobalSpots'] - spots.value)
-      )
+  if (props.extraPeople !== null && props.extraPeople !== undefined) {
+    if (props.capacity !== null && props.capacity !== undefined) {
+      const selectedWithoutCurrent =
+        store.getters['tickets/getEventGlobalSpots'] - spots.value
+      const capacityLimit = props.capacity - selectedWithoutCurrent
+      const extraPeopleLimit = props.extraPeople + 1 - selectedWithoutCurrent
+      return Math.max(0, Math.min(capacityLimit, extraPeopleLimit))
     }
 
     let limitCorrection =
@@ -125,25 +125,25 @@ let spotsLimitation = computed(() => {
       1 -
       (store.getters['tickets/getEventGlobalSpots'] - spots.value)
     if (isWaitingList.value) {
-      return limitCorrection >=
+      return Math.max(0, limitCorrection >=
         props.ticket.waitingListSpots - props.ticket.waiting
         ? props.ticket.waitingListSpots - props.ticket.waiting
-        : limitCorrection
+        : limitCorrection)
     }
-    return limitCorrection >= props.ticket.spots - props.ticket.sold
+    return Math.max(0, limitCorrection >= props.ticket.spots - props.ticket.sold
       ? props.ticket.spots - props.ticket.sold
-      : limitCorrection
+      : limitCorrection)
   }
 
-  if (props.capacity)
-    return (
+  if (props.capacity !== null && props.capacity !== undefined)
+    return Math.max(0, (
       props.capacity -
       (store.getters['tickets/getEventGlobalSpots'] - spots.value)
-    )
+    ))
 
-  return isWaitingList.value
+  return Math.max(0, isWaitingList.value
     ? props.ticket.waitingListSpots - props.ticket.waiting
-    : props.ticket.spots - props.ticket.sold
+    : props.ticket.spots - props.ticket.sold)
 })
 
 let disableSelection = computed(() => {
@@ -164,8 +164,8 @@ let disableSelection = computed(() => {
 
 function updateSpots(newValue, oldValue) {
   if (
-    props.capacity ||
-    props.extraPeople ||
+    props.capacity !== null && props.capacity !== undefined ||
+    props.extraPeople !== null && props.extraPeople !== undefined ||
     !selectedEvent.value.bringingAnyone
   ) {
     store.commit('tickets/setEventGlobalSpots', newValue - oldValue)

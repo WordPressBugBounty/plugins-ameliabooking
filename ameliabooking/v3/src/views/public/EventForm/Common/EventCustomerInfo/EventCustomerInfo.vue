@@ -339,9 +339,6 @@ let infoFormConstruction = ref({
       label: amLabels.value.first_name_colon,
       placeholder: amLabels.value.enter_first_name,
       class: 'am-elfci__item',
-      disabled: computed(() => {
-        return !!(store.getters['customerInfo/getCustomerFirstName'] && store.getters['customerInfo/getLoggedUser'])
-      })
     }
   },
   lastName: {
@@ -351,9 +348,6 @@ let infoFormConstruction = ref({
       label: amLabels.value.last_name_colon,
       placeholder: amLabels.value.enter_last_name,
       class: 'am-elfci__item',
-      disabled: computed(() => {
-        return !!(store.getters['customerInfo/getCustomerLastName'] && store.getters['customerInfo/getLoggedUser'])
-      })
     }
   },
   email: {
@@ -363,9 +357,6 @@ let infoFormConstruction = ref({
       label: amLabels.value.email_colon,
       placeholder: amLabels.value.enter_email,
       class: 'am-elfci__item',
-      disabled: computed(() => {
-        return !!(store.getters['customerInfo/getCustomerEmail'] && store.getters['customerInfo/getLoggedUser'])
-      })
     }
   },
   phone: {
@@ -388,9 +379,6 @@ let infoFormConstruction = ref({
       whatsAppLabel: amLabels.value.whatsapp_opt_in_text,
       isWhatsApp: amSettings.notifications.whatsAppEnabled,
       class: 'am-elfci__item',
-      disabled: computed(() => {
-        return !!(store.getters['customerInfo/getCustomerPhone'] && store.getters['customerInfo/getLoggedUser'])
-      }),
       refreshTrigger: computed(() => refreshPhoneComponent.value)
     }
   },

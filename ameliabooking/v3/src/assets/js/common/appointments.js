@@ -646,6 +646,10 @@ function useBusySlots (store) {
   return busySlots[activeAppointment.date] ? Object.keys(busySlots[activeAppointment.date]) : []
 }
 
+function isSlotOccupiedBySelection (inspectedStart, inspectedEnd, occupiedStart, occupiedEnd) {
+  return !(inspectedEnd <= occupiedStart || inspectedStart >= occupiedEnd)
+}
+
 function useAvailableSlots (store) {
   let cart = store.getters['booking/getAllMultipleAppointments']
 
@@ -669,8 +673,9 @@ function useAvailableSlots (store) {
 
           if (i.date && i.date === activeAppointment.date && i.time && !isCurrentAppointment) {
             selectedSlots.push({
+              providerId: i.providerId,
               time: i.time,
-              duration: service.duration + i.extras.filter(e => e.quantity && e.duration).map(e => e.duration).reduce((fullDuration, duration) => fullDuration + duration, 0),
+              duration: i.duration + i.extras.filter(e => e.quantity && e.duration).map(e => e.duration).reduce((fullDuration, duration) => fullDuration + duration, 0),
               timeAfter: service.timeAfter,
               timeBefore: service.timeBefore
             })
@@ -679,7 +684,12 @@ function useAvailableSlots (store) {
       }
     })
 
-    let service = services.find(i => i.id === cart[cartIndex].serviceId)
+    let targetService = services.find(i => i.id === cart[cartIndex].serviceId)
+
+    let targetDuration = activeAppointment.duration + activeAppointment.extras
+      .filter(e => e.quantity && e.duration)
+      .map(e => e.duration)
+      .reduce((fullDuration, duration) => fullDuration + duration, 0)
 
     // Date may only exist in waiting list slots (not in regular slots) — guard against undefined
     if (!(activeAppointment.date in cart[cartIndex].services[cart[cartIndex].serviceId].slots)) {
@@ -691,24 +701,41 @@ function useAvailableSlots (store) {
     let availableSlots = {}
 
     for (let i = 0; i < defaultSlots.length; i++) {
-      let defaultSlotSeconds = useTimeInSeconds(defaultSlots[i])
+      let slotEmployeesIds = cart[cartIndex].services[
+          cart[cartIndex].serviceId
+        ].slots[activeAppointment.date][defaultSlots[i]].map((j) => parseInt(j.e))
 
-      let isFreeSlot = true
+      let targetSlotSeconds = useTimeInSeconds(defaultSlots[i])
+
+      let occupiedSlotsCounter = 0
+
+      let occupiedSlotsEmployeesIds = []
 
       for (let j = 0; j < selectedSlots.length; j++) {
-        let slotInSeconds = useTimeInSeconds(selectedSlots[j].time)
+        let selectedSlotSeconds = useTimeInSeconds(selectedSlots[j].time)
 
-        if (defaultSlotSeconds > (slotInSeconds - service.duration - service.timeAfter) &&
-          defaultSlotSeconds < (slotInSeconds + selectedSlots[j].duration + selectedSlots[j].timeBefore + service.timeAfter)
-        ) {
-          isFreeSlot = false
+        if (isSlotOccupiedBySelection(
+          targetSlotSeconds - targetService.timeBefore,
+          targetSlotSeconds + targetDuration + targetService.timeAfter,
+          selectedSlotSeconds - selectedSlots[j].timeBefore,
+          selectedSlotSeconds + selectedSlots[j].duration + selectedSlots[j].timeAfter
+        )) {
+          occupiedSlotsCounter++
 
-          break
+          if (selectedSlots[j].providerId) {
+            occupiedSlotsEmployeesIds.push(selectedSlots[j].providerId)
+          }
         }
       }
 
-      if (isFreeSlot) {
-        availableSlots[defaultSlots[i]] = useTimeInSeconds(defaultSlots[i])
+      if (
+        occupiedSlotsEmployeesIds.length
+          ? slotEmployeesIds.some(
+            (value) => !occupiedSlotsEmployeesIds.includes(value)
+            )
+          : occupiedSlotsCounter < cart[cartIndex].services[cart[cartIndex].serviceId].slots[activeAppointment.date][defaultSlots[i]].length
+      ) {
+        availableSlots[defaultSlots[i]] = targetSlotSeconds
       }
     }
 
@@ -765,7 +792,17 @@ function useFillAppointments (store) {
           slotDataArray = []
         }
 
-        let employeesIds = slotDataArray.map(i => i.e).filter((v, i, a) => a.indexOf(v) === i)
+        let occupiedSlotEmployeesIds = !isWaitingListSlot
+          ? getOccupiedSlotEmployeesIds(store, cartItem.serviceId, booking)
+          : []
+
+        let employeesIds = slotDataArray.map(i => i.e).filter(
+            (v, i, a) => a.indexOf(v) === i && !occupiedSlotEmployeesIds.includes(v)
+        )
+
+        if (!employeesIds.length) {
+          employeesIds = slotDataArray.map(i => i.e).filter((v, i, a) => a.indexOf(v) === i)
+        }
 
         if (settings.roles.limitPerEmployee.enabled) {
           let chosenEmployees = store.getters['booking/getAllMultipleAppointments'].map(a => Object.values(a.services)[0].list[0])
@@ -865,6 +902,43 @@ function useFillAppointments (store) {
   return null
 }
 
+function getOccupiedSlotEmployeesIds (store, serviceId, booking) {
+  let cart = useCart(store)
+
+  let services = useServices(store)
+
+  let targetService = services.find(i => i.id === parseInt(serviceId))
+
+  let targetSlotSeconds = useTimeInSeconds(booking.time)
+
+  let targetDuration = booking.duration + booking.extras.filter(e => e.quantity && e.duration).map(e => e.duration).reduce((fullDuration, duration) => fullDuration + duration, 0)
+
+  let occupiedSlotEmployeesIds = []
+
+  cart.forEach((item) => {
+    item.services[item.serviceId].list.forEach((slot) => {
+      if (slot.providerId && slot.date && slot.time && booking.date === slot.date) {
+        let selectedService = services.find(i => i.id === item.serviceId)
+
+        let selectedSlotSeconds = useTimeInSeconds(slot.time)
+
+        let selectedDuration = slot.duration + slot.extras.filter(e => e.quantity && e.duration).map(e => e.duration).reduce((fullDuration, duration) => fullDuration + duration, 0)
+
+        if (isSlotOccupiedBySelection(
+          targetSlotSeconds - targetService.timeBefore,
+          targetSlotSeconds + targetDuration + targetService.timeAfter,
+          selectedSlotSeconds - selectedService.timeBefore,
+          selectedSlotSeconds + selectedDuration + selectedService.timeAfter
+        )) {
+          occupiedSlotEmployeesIds.push(slot.providerId)
+        }
+      }
+    })
+  })
+
+  return [...new Set(occupiedSlotEmployeesIds)].map(i => parseInt(i))
+}
+
 function setProviderServicePrice (store, employeeId, serviceId, persons) {
   let employee = store.getters['entities/getUnfilteredEmployee'](employeeId)
 
@@ -949,11 +1023,11 @@ function useAppointmentsPayments (store, serviceId, appointments) {
 }
 
 function setPreferredEntitiesData (bookings, store, serviceId, chosenEmployees) {
-  let employeesIds = getAllEntitiesIds(bookings, 'e')
+  let allEmployeesIds = getAllEntitiesIds(bookings, 'e')
 
   let locationsIds = getAllEntitiesIds(bookings, 'l')
 
-  let isSingleEmployee = employeesIds.length === 1
+  let isSingleEmployee = allEmployeesIds.length === 1
 
   let isSingleLocation = locationsIds.length === 1
 
@@ -961,8 +1035,21 @@ function setPreferredEntitiesData (bookings, store, serviceId, chosenEmployees) 
 
   for (let bookingIndex = 0; bookingIndex < bookings.list.length; bookingIndex++) {
     let booking = bookings.list[bookingIndex]
+
     if (booking.date && booking.time) {
-      employeesIds = sortForEmployeeSelection(store, employeesIds, serviceId)
+      let occupiedSlotEmployeesIds = !booking.providerId
+        ? getOccupiedSlotEmployeesIds(store, serviceId, booking)
+        : []
+
+      let employeesIds = sortForEmployeeSelection(
+          store,
+          allEmployeesIds.filter(x => !occupiedSlotEmployeesIds.includes(x)),
+          serviceId
+      )
+
+      if (!employeesIds.length) {
+        employeesIds = sortForEmployeeSelection(store, allEmployeesIds, serviceId)
+      }
 
       if (settings.roles.limitPerEmployee.enabled) {
         let result = checkLimitPerEmployee(employeesIds, bookingIndex, bookings.list, booking, appCount, chosenEmployees, serviceId)
@@ -1006,7 +1093,7 @@ function setPreferredEntitiesData (bookings, store, serviceId, chosenEmployees) 
       } else if (isSingleLocation && !isSingleEmployee) {
         booking.locationId = locationsIds[0]
 
-        booking.providerId = getPreferredEntityId(
+        const preferredProviderId = getPreferredEntityId(
           bookings.slots[booking.date],
           booking.date in bookings.occupied ? bookings.occupied[booking.date] : {},
           booking.time,
@@ -1014,6 +1101,8 @@ function setPreferredEntitiesData (bookings, store, serviceId, chosenEmployees) 
           employeesIds,
           'e'
         )
+
+        booking.providerId = employeesIds.includes(preferredProviderId) ? preferredProviderId : employeesIds[0]
       } else {
         let setEntities = false
         outsideLoop: for (let j = 0; j < employeesIds.length; j++) {

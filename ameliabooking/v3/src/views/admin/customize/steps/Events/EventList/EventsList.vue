@@ -42,6 +42,7 @@
           :class="responsiveClass"
         >
           <div
+          v-if="amSettings.featuresIntegrations.eventTags.enabled"
             class="am-els__filters-menu__items"
             :class="[responsiveClass, filterClassWidth.tag]"
           >
@@ -166,6 +167,9 @@ let responsiveClass = computed(() => {
 
 // * Base Urls
 const baseUrls = inject('baseUrls')
+
+// * Root Settings
+const amSettings = inject('settings')
 
 // * Events array
 let events = ref([
@@ -840,7 +844,7 @@ let tags = ref([{ name: 'Tag 1' }, { name: 'Tag 2' }, { name: 'Tag 3' }])
 
 // * Filter class generated according to filter elements visibility
 let filterClassWidth = computed(() => {
-  let tagVisibility = tags.value.length > 0
+  let tagVisibility = tags.value.length > 0 && amSettings.featuresIntegrations.eventTags.enabled
   let locationVisibility = locations.value.length > 0
 
   let classFilter = {

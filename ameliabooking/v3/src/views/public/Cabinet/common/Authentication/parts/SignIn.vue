@@ -447,11 +447,17 @@ function setEmployee (response) {
       id: 'id' in response.data.data.user.googleCalendar ? response.data.data.user.googleCalendar.id : null,
       calendarId: response.data.data.user.googleCalendar.calendarId ? response.data.data.user.googleCalendar.calendarId : '',
       token: 'token' in response.data.data.user.googleCalendar ? response.data.data.user.googleCalendar.token : null,
+      accounts: response.data.data.user.googleCalendar.accounts || [],
+      blockedCalendars: response.data.data.user.googleCalendar.blockedCalendars || [],
+      calendarList: response.data.data.user.googleCalendar.calendarList || [],
     },
     outlookCalendar: {
       id: 'id' in response.data.data.user.outlookCalendar ? response.data.data.user.outlookCalendar.id : null,
       calendarId: response.data.data.user.outlookCalendar.calendarId ? response.data.data.user.outlookCalendar.calendarId : '',
       token: 'token' in response.data.data.user.outlookCalendar ? response.data.data.user.outlookCalendar.token : null,
+      accounts: response.data.data.user.outlookCalendar.accounts || [],
+      blockedCalendars: response.data.data.user.outlookCalendar.blockedCalendars || [],
+      calendarList: response.data.data.user.outlookCalendar.calendarList || [],
     },
     appleCalendarId: response.data.data.user.appleCalendarId ? response.data.data.user.appleCalendarId : '',
     googleCalendarId: response.data.data.user.googleCalendarId ? response.data.data.user.googleCalendarId : '',
@@ -499,7 +505,7 @@ function setEmployee (response) {
       response.data.data.user.googleCalendar?.calendarList ? response.data.data.user.googleCalendar.calendarList : []
   )
 
-  if (amSettings.appleCalendar &&
+  if (amSettings.appleCalendar.enabled &&
       !licence.isLite &&
       !licence.isStarter
   ) {
@@ -638,6 +644,10 @@ onBeforeMount(() => {
 onMounted(() => {
   if (!store.getters['auth/getLoggedOut']) {
     let queryParams = useUrlQueryParams(window.location.href)
+
+    if (queryParams && queryParams['iss'] && !queryParams['code']) {
+      window.history.replaceState(null, null, useRemoveUrlParameter(window.location.href, 'iss'))
+    }
 
     if (amSettings.googleCalendar.enabled && cabinetType.value === 'provider' && queryParams && queryParams['code'] && queryParams['scope']) {
       useGoogleSync(queryParams['code'], authenticate)

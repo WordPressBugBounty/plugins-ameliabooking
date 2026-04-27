@@ -67,6 +67,7 @@
             :class="filterResponsiveClass"
           >
             <div
+            v-if="amSettings.featuresIntegrations.eventTags.enabled"
               class="am-ecs__filters-menu__items"
               :class="[filterResponsiveClass, filterClassWidth.tag]"
             >
@@ -2383,7 +2384,7 @@ let evtStatus = ref(['Open', 'Full', 'Upcoming', 'Closed', 'Canceled'])
 
 // * Filter class generated according to filter elements visibility
 let filterClassWidth = computed(() => {
-  let tagVisibility = tags.value.length > 0
+  let tagVisibility = tags.value.length > 0 && amSettings.featuresIntegrations.eventTags.enabled
   let locationVisibility = locations.value.length > 0
   let employeeVisibility = employees.value.length > 0
 

@@ -17,11 +17,17 @@
         props.headingClass
       ]"
       :tabindex="props.side ? 0 : undefined"
-      @click="props.collapsable ? toggleContentHeading() : () => {}"
-      @keydown.enter="toggleContentHeading"
+      @click="onHeadingClick"
+      @keydown.enter.prevent="onHeadingKeydown"
+      @keydown.space.prevent="onHeadingKeydown"
     >
+      <div v-if="props.side && partsVisibility && props.arrowPosition === 'left'" class="am-collapse-item__trigger am-collapse-item__trigger-side am-collapse-item__trigger-side--left">
+        <slot name="icon-start" class="am-collapse-item__trigger-start"></slot>
+        <span class="am-icon-arrow-down" :class="{'am-rotate-180': contentVisibility}"></span>
+        <slot name="icon-end"></slot>
+      </div>
       <slot name="heading"></slot>
-      <div v-if="props.side && partsVisibility" class="am-collapse-item__trigger am-collapse-item__trigger-side">
+      <div v-if="props.side && partsVisibility && props.arrowPosition !== 'left'" class="am-collapse-item__trigger am-collapse-item__trigger-side">
         <slot name="icon-start" class="am-collapse-item__trigger-start"></slot>
         <span class="am-icon-arrow-down" :class="{'am-rotate-180': contentVisibility}"></span>
         <slot name="icon-end"></slot>
@@ -29,7 +35,7 @@
       <slot name="icon-below"></slot>
     </div>
 
-    <template v-if="partsVisibility">
+    <template v-if="partsVisibility && !contentClosed">
       <div
         ref="collapseContent"
         class="am-collapse-item__content"
@@ -38,6 +44,7 @@
           contentVisibility ? 'am-collapse-item__content-open' : 'am-collapse-item__content-close',
           contentClosing ? 'am-collapse-item__content-closing' : ''
         ]"
+        tabindex="-1"
       >
         <slot></slot>
       </div>
@@ -46,8 +53,9 @@
       v-if="partsVisibility && !props.side"
       class="am-collapse-item__trigger"
       :tabindex="partsVisibility && !props.side ? 0 : -1"
-      @click="toggleContentButton"
-      @keydown.enter="toggleContentButton"
+      @click="onTriggerClick"
+      @keydown.enter.prevent="onTriggerKeydown"
+      @keydown.space.prevent="onTriggerKeydown"
     >
       <span class="am-collapse-item__trigger-label">
         <slot v-if="!contentVisibility && !props.buttonClosed.length" name="button-closed"></slot>
@@ -71,6 +79,7 @@ import {
   ref,
   reactive,
   computed,
+  nextTick,
   useSlots
 } from 'vue';
 
@@ -112,6 +121,10 @@ let props = defineProps({
   headingClass: {
     type: String,
     default: ''
+  },
+  arrowPosition: {
+    type: String,
+    default: 'right'
   }
 })
 
@@ -128,9 +141,22 @@ let partsVisibility = computed(() => {
   return slots.default().length && slots.default()[0].props !== null
 })
 
+const keyboardToggleHandledKey = '__amCollapseKeyboardToggleHandled'
+
+function eventHandledByKeyboard(event) {
+  return !!(event && event[keyboardToggleHandledKey])
+}
+
+function markEventHandledByKeyboard(event) {
+  if (event) {
+    event[keyboardToggleHandledKey] = true
+  }
+}
+
 // * Card Expand variable
 let contentVisibility = ref(false)
 let contentClosing = ref(false)
+let contentClosed = ref(true)
 let collapseContent = ref(null)
 let collapseHeight = reactive({
   h: '0px'
@@ -140,20 +166,47 @@ function closingCollapse () {
   contentClosing.value = true
   setTimeout(() => {
     contentClosing.value = false
+    contentClosed.value = true
   }, 480)
 }
 
 function toggleContentHeading () {
-  if (props.side) {
+  if (props.side && props.collapsable) {
     toggleContent()
   }
 }
 
 // * Card Expand Function
 function toggleContentButton () {
-  if (collapseContent.value) {
+  if (!props.side && props.collapsable) {
     toggleContent()
   }
+}
+
+function onHeadingClick(event) {
+  if (eventHandledByKeyboard(event)) {
+    return
+  }
+
+  toggleContentHeading()
+}
+
+function onHeadingKeydown(event) {
+  markEventHandledByKeyboard(event)
+  toggleContentHeading()
+}
+
+function onTriggerClick(event) {
+  if (eventHandledByKeyboard(event)) {
+    return
+  }
+
+  toggleContentButton()
+}
+
+function onTriggerKeydown(event) {
+  markEventHandledByKeyboard(event)
+  toggleContentButton()
 }
 
 // * Card Expand Function
@@ -166,7 +219,10 @@ function toggleContent () {
       }
       if (contentVisibility.value) closingCollapse()
       contentVisibility.value = !contentVisibility.value
-      if (contentVisibility.value) emits('collapseOpen')
+      if (contentVisibility.value) {
+        emits('collapseOpen')
+        contentClosed.value = false
+      }
       if (!contentVisibility.value) emits('collapseClose')
     }, props.delay)
   }
@@ -179,12 +235,21 @@ function closingFromParent () {
 
 function openingFromParent () {
   contentVisibility.value = true
+  contentClosed.value = false
 }
 
+function focusContent () {
+  nextTick(() => {
+    if (collapseContent.value) {
+      collapseContent.value.focus()
+    }
+  })
+}
 
 defineExpose({
   closingFromParent,
   openingFromParent,
+  focusContent,
   contentVisibility
 })
 
@@ -359,7 +424,12 @@ $collapseContentHeight: v-bind('collapseHeight.h');
       }
 
       &-side {
-        border: none
+        border: none;
+
+        &--left {
+          margin-right: 8px;
+          flex: 0 0 auto;
+        }
       }
 
       &-label {
