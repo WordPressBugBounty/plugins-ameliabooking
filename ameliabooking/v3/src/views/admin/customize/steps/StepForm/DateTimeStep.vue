@@ -8,6 +8,7 @@
       :calendar-maximum-date="moment().add(1,'year').format('YYYY-MM-DD hh:mm')"
       :time-zone="features.timeZones && amCustomize[pageRenderKey].dateTimeStep.options.timeZoneVisibility.visibility"
       :show-busy-slots="amCustomize[pageRenderKey].dateTimeStep.options.busyTimeSlotsVisibility.visibility"
+      :show-calendar-date-busyness="amCustomize[pageRenderKey].dateTimeStep.options.calendarDateBusynessVisibility?.visibility ?? true"
       :show-estimated-pricing="amCustomize[pageRenderKey].dateTimeStep.options.estimatedPricingVisibility.visibility"
       :show-indicator-pricing="amCustomize[pageRenderKey].dateTimeStep.options.indicatorPricingVisibility.visibility"
       :show-slot-pricing="amCustomize[pageRenderKey].dateTimeStep.options.slotPricingVisibility.visibility"
@@ -15,6 +16,7 @@
       :label-slots-selected="labelsDisplay('date_time_slots_selected', 'dateTimeStep')"
       :label-waiting-list="labelsDisplay('waiting_list', 'dateTimeStep')"
       :period-pricing="periodPricing"
+      :busyness="previewCalendarBusyness"
       @selected-date="setSelectedDate"
       @unselect-date="unselectDate"
       @selected-time="setSelectedTime"
@@ -180,6 +182,18 @@ let calendarWaitingListTimes = ref(
 watchEffect (() => {
   calendarEventBusySlots.value = amCustomize.value[pageRenderKey.value].dateTimeStep.options.busyTimeSlotsVisibility.visibility ?
       ['08:00', '08:30', '09:30', '12:30', '14:00'] : []
+})
+
+let previewCalendarBusyness = computed(() => {
+  const opts = amCustomize.value[pageRenderKey.value].dateTimeStep.options
+  if (!(opts.calendarDateBusynessVisibility?.visibility ?? true)) {
+    return {}
+  }
+  const base = moment().startOf('day')
+  return {
+    [base.clone().add(6, 'days').format('YYYY-MM-DD')]: 40,
+    [base.clone().add(20, 'days').format('YYYY-MM-DD')]: 82,
+  }
 })
 
 let today = moment().format('YYYY-MM-DD')

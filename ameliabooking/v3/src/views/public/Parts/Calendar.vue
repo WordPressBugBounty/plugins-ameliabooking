@@ -14,6 +14,7 @@
       :end-time="props.endTime"
       :time-zone="props.timeZone"
       :show-busy-slots="props.showBusySlots"
+      :show-calendar-date-busyness="props.showCalendarDateBusyness"
       :show-estimated-pricing="props.showEstimatedPricing"
       :show-indicator-pricing="props.showIndicatorPricing"
       :show-slot-pricing="props.showSlotPricing"
@@ -146,6 +147,10 @@ const props = defineProps({
   showBusySlots: {
     type: Boolean,
     default: false
+  },
+  showCalendarDateBusyness: {
+    type: Boolean,
+    default: true,
   },
   showEstimatedPricing: {
     type: Boolean,

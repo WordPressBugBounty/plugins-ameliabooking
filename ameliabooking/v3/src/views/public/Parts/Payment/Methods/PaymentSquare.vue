@@ -117,7 +117,7 @@ watch(
     [() => store.getters['coupon/getCoupon'], () => store.getters['payment/getPaymentDeposit']],
     async (newValues, oldValues) => {
       const [newCoupon, newDeposit] = newValues || []
-      const [oldCoupon, oldDeposit] = oldValues || []
+      const [, oldDeposit] = oldValues || []
 
       if (paymentRequest && ((newCoupon.deduction || newCoupon.discount) || newDeposit !== oldDeposit)) {
         // Wait for next tick to ensure DOM is updated
@@ -359,10 +359,28 @@ function successBooking (response) {
   )
 }
 
+function getSquareBookingErrorResponse (error) {
+  if (error?.response?.data) {
+    return error.response.data
+  }
+
+  if (error?.data) {
+    return error
+  }
+
+  const labels = amLabels.value || amLabels
+
+  return {
+    data: {
+      message: error?.message || labels.payment_error,
+    },
+  }
+}
+
 function errorBooking (error) {
   useCreateBookingError(
       store,
-      error.response.data,
+      getSquareBookingErrorResponse(error),
       () => {
         emits('payment-error', getErrorMessage())
       }

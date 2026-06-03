@@ -55,8 +55,10 @@
               :show-indicator-pricing="amCustomize[pageRenderKey].recurringSummary.options.indicatorPricingVisibility.visibility"
               :show-slot-pricing="amCustomize[pageRenderKey].recurringSummary.options.slotPricingVisibility.visibility"
               :show-people-waiting="false"
+              :show-calendar-date-busyness="amCustomize[pageRenderKey].recurringSummary.options.calendarDateBusynessVisibility?.visibility ?? true"
               :label-slots-selected="labelsDisplay('recurring_slots_selected')"
               :period-pricing="periodPricing"
+              :busyness="previewCalendarBusyness"
             ></AmAdvancedSlotCalendar>
           </div>
         </template>
@@ -100,6 +102,18 @@ let amLabels = inject('labels')
 
 let pageRenderKey = inject('pageRenderKey')
 const { amCustomize } = useReactiveCustomize()
+
+let previewCalendarBusyness = computed(() => {
+  const opts = amCustomize.value[pageRenderKey.value].recurringSummary.options
+  if (!(opts.calendarDateBusynessVisibility?.visibility ?? true)) {
+    return {}
+  }
+  const base = moment().startOf('day')
+  return {
+    [base.clone().add(6, 'days').format('YYYY-MM-DD')]: 40,
+    [base.clone().add(20, 'days').format('YYYY-MM-DD')]: 82,
+  }
+})
 
 // * Label computed function
 function labelsDisplay(label) {

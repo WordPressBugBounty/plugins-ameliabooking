@@ -296,6 +296,10 @@ let defaultCustomizeSettings = {
           name: globalLabels.show_busy_slots,
           visibility: false,
         },
+        calendarDateBusynessVisibility: {
+          name: globalLabels.show_calendar_date_busyness,
+          visibility: true,
+        },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
           buttonType: 'filled',
@@ -373,6 +377,10 @@ let defaultCustomizeSettings = {
         busyTimeSlotsVisibility: {
           name: globalLabels.show_busy_slots,
           visibility: false,
+        },
+        calendarDateBusynessVisibility: {
+          name: globalLabels.show_calendar_date_busyness,
+          visibility: true,
         },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,
@@ -464,6 +472,10 @@ let defaultCustomizeSettings = {
         busyTimeSlotsVisibility: {
           name: globalLabels.show_busy_slots,
           visibility: false,
+        },
+        calendarDateBusynessVisibility: {
+          name: globalLabels.show_calendar_date_busyness,
+          visibility: true,
         },
         primaryFooterButton: {
           name: globalLabels.continue_button_type,

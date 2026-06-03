@@ -203,7 +203,7 @@ class UserFactory
                 $user = new Manager(
                     new Name(trim($data['firstName'])),
                     new Name(trim($data['lastName'])),
-                    new Email($data['email'])
+                    new Email(filter_var($data['email'], FILTER_VALIDATE_EMAIL, FILTER_FLAG_EMAIL_UNICODE) ? $data['email'] : null)
                 );
                 break;
             case 'customer':

@@ -213,11 +213,23 @@
               </div>
 
               <!-- Card Hero Image -->
-              <div v-if="item.pictureFullPath" class="am-fcil__item-hero" :style="{backgroundImage: `url(${item.pictureFullPath})`}"></div>
+              <div 
+                v-if="item.pictureFullPath"
+                class="am-fcil__item-hero"
+                :style="{backgroundImage: `url(${item.pictureFullPath})`}"
+                tabindex="0"
+                @click="selectPackage(item)"
+                @keydown.enter="selectPackage(item)"
+              />
 
               <!-- Card Heading -->
               <div class="am-fcil__item-heading">
-                <div class="am-fcil__item-name">
+                <div 
+                  class="am-fcil__item-name"
+                  tabindex="0"
+                  @click="selectPackage(item)"
+                  @keydown.enter="selectPackage(item)"
+                >
                   {{ item.name }}
                 </div>
                 <div
@@ -356,12 +368,24 @@
               <!-- /Card Badge -->
 
               <!-- Card Hero Image -->
-              <div v-if="item.pictureFullPath" class="am-fcil__item-hero" :style="{backgroundImage: `url(${item.pictureFullPath})`}"></div>
+              <div 
+                v-if="item.pictureFullPath"
+                class="am-fcil__item-hero"
+                :style="{backgroundImage: `url(${item.pictureFullPath})`}"
+                tabindex="0"
+                @click="selectService(item.id)"
+                @keydown.enter="selectService(item.id)"
+              />
               <!-- /Card Hero Image -->
 
               <!-- Card Heading -->
               <div class="am-fcil__item-heading">
-                <div class="am-fcil__item-name">
+                <div
+                  class="am-fcil__item-name"
+                  tabindex="0"
+                  @click="selectService(item.id)"
+                  @keydown.enter="selectService(item.id)"
+                >
                   {{ item.name }}
                 </div>
                 <div
@@ -1496,11 +1520,21 @@ export default {
 
       &-hero {
         padding: 56.25% 0 0;
-        background-size: cover;
+        background-size: 100%;
         background-repeat: no-repeat;
         background-position: center;
         border: 1px solid var(--am-c-fcil-main-text-op15);
         border-radius: 4px;
+        transition: background-size 0.2s ease-in-out;
+
+        & {
+          transition: background-size 0.3s ease-in-out;
+        }
+        &:hover {
+          cursor: pointer;
+          background-size: 105% !important;
+        }
+   
       }
 
       &-heading {
@@ -1521,6 +1555,7 @@ export default {
         overflow: hidden;
         color: var(--am-c-fcil-card-text);
         margin: 0 4px 0 0;
+        cursor: pointer;
       }
 
       &-cost {

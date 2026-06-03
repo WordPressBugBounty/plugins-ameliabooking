@@ -515,7 +515,7 @@ function useBookingError (response, store) {
       message = globalLabels['recaptcha_invalid_error']
     } else if ('packageBookingUnavailable' in response.data && response.data.packageBookingUnavailable === true) {
       message = globalLabels['package_booking_unavailable']
-    } else if ('message' in response.data) {
+    } else if ('message' in response.data && response.data.message) {
       message = response.data.message
     }
   }
@@ -651,6 +651,10 @@ function runAction (store, response) {
     {
       appointmentId: response.appointment ? response.appointment.id : null,
       payment: Object.assign(response.payment, {currency: settings.payments.currencyCode}),
+      ...(response.type === 'event' && {
+        event: response.event || null,
+        number_of_persons: response.booking ? response.booking.persons : null,
+      }),
       ...(response.isCart && {
         providerId: response.appointment ? response.appointment.providerId : null,
         locationId: response.appointment ? response.appointment.locationId : null,
@@ -984,8 +988,21 @@ function useCreateBookingSuccess (store, response, callback) {
 }
 
 function useCreateBookingError (store, response, callback) {
-  if ('data' in response) {
-    errorMessage.value = useBookingError(response, store)
+  const bookingErrorResponse = response &&
+    typeof response === 'object' &&
+    'data' in response &&
+    response.data &&
+    typeof response.data === 'object' &&
+    'data' in response.data
+    ? response.data
+    : response
+
+  if (bookingErrorResponse && typeof bookingErrorResponse === 'object') {
+    const normalizedBookingErrorResponse = 'data' in bookingErrorResponse
+      ? bookingErrorResponse
+      : {data: bookingErrorResponse}
+
+    errorMessage.value = useBookingError(normalizedBookingErrorResponse, store)
   }
 
   if (store.getters['bookableType/getType'] === 'event') {

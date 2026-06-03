@@ -3,7 +3,7 @@
 Plugin Name: Amelia
 Plugin URI: https://wpamelia.com/
 Description: Amelia is a simple yet powerful automated booking specialist, working 24/7 to make sure your customers can make appointments and events even while you sleep!
-Version: 2.4
+Version: 2.4.1
 Author: Melograno Ventures
 Author URI: https://melograno.io/
 Text Domain: ameliabooking
@@ -39,9 +39,13 @@ use AmeliaBooking\Infrastructure\WP\WPMenu\Submenu;
 use AmeliaBooking\Infrastructure\WP\WPMenu\SubmenuPageHandler;
 use AmeliaBooking\Infrastructure\WP\Compatibility\LiteSpeedCacheCompatibility;
 use AmeliaBooking\Infrastructure\WP\WPMenu\AdminBarMenu;
+use AmeliaBooking\Infrastructure\Common\AmeliaErrorHandler;
 use Exception;
 use Slim\App;
+use Slim\Psr7\Factory\ResponseFactory;
 use AmeliaBooking\Infrastructure\Licence;
+use Melograno\UsageTracker\Collectors\Plugin\AmeliaCollector;
+use Melograno\UsageTracker\Core\UsageTracker;
 use WP\MCP\Core\McpAdapter;
 
 // No direct access
@@ -114,7 +118,7 @@ if (!defined('AMELIA_LOGIN_URL')) {
 
 // Const for Amelia version
 if (!defined('AMELIA_VERSION')) {
-    define('AMELIA_VERSION', '2.4');
+    define('AMELIA_VERSION', '2.4.1');
 }
 
 // Const for site URL
@@ -123,8 +127,12 @@ if (!defined('AMELIA_SITE_URL')) {
 }
 
 // Const for plugin basename
+if (!defined('AMELIA_PLUGIN_BASENAME')) {
+    define('AMELIA_PLUGIN_BASENAME', plugin_basename(__FILE__));
+}
+
 if (!defined('AMELIA_PLUGIN_SLUG')) {
-    define('AMELIA_PLUGIN_SLUG', plugin_basename(__FILE__));
+    define('AMELIA_PLUGIN_SLUG', 'ameliabooking');
 }
 
 // Const for Amelia SMS API
@@ -144,6 +152,10 @@ if (!defined('AMELIA_STORE_API_URL')) {
     define('AMELIA_STORE_API_URL', 'https://store.melograno.io/api/');
 }
 
+if (!defined('MELOGRANO_BI_GATE_URL')) {
+    define('MELOGRANO_BI_GATE_URL', 'https://bi.melograno.io');
+}
+
 if (!defined('AMELIA_DEV')) {
     define('AMELIA_DEV', false);
 }
@@ -160,7 +172,35 @@ if (!defined('AMELIA_MAILCHIMP_CLIENT_ID')) {
     define('AMELIA_MAILCHIMP_CLIENT_ID', '459163389015');
 }
 
-require_once AMELIA_PATH . '/vendor/autoload.php';
+$ameliaVendorAutoload = AMELIA_PATH . '/vendor/autoload.php';
+
+if (!is_readable($ameliaVendorAutoload)) {
+    if (!defined('AMELIA_VENDOR_AUTOLOAD_MISSING')) {
+        define('AMELIA_VENDOR_AUTOLOAD_MISSING', true);
+    }
+
+    add_action(
+        'admin_notices',
+        static function () {
+            if (!current_user_can('activate_plugins')) {
+                return;
+            }
+
+            printf(
+                '<div class="notice notice-error"><p><strong>%s</strong> %s</p></div>',
+                esc_html__('Amelia:', AMELIA_DOMAIN),
+                esc_html__(
+                    'Composer dependencies are missing (vendor/autoload.php). From the plugin directory run: composer install',
+                    AMELIA_DOMAIN
+                )
+            );
+        }
+    );
+
+    return;
+}
+
+require_once $ameliaVendorAutoload;
 
 /**
  * @noinspection AutoloadingIssuesInspection
@@ -186,12 +226,28 @@ class Plugin
             /** @var Container $container */
             $container = require AMELIA_PATH . '/src/Infrastructure/ContainerConfig/container.php';
 
-            $app = new App($container);
+            $responseFactory = new ResponseFactory();
+
+            $app = new App($responseFactory, $container);
 
             // Initialize all API routes
             Routes::routes($app, $container);
 
-            $app->run();
+            $app->addBodyParsingMiddleware();
+            $app->addRoutingMiddleware();
+
+            $errorMiddleware = $app->addErrorMiddleware(true, true, true);
+
+            $errorMiddleware->setDefaultErrorHandler(
+                new AmeliaErrorHandler(
+                    $app->getCallableResolver(),
+                    $app->getResponseFactory()
+                )
+            );
+
+            $request = $container->get('request');
+
+            $app->run($request);
 
             exit();
         } catch (Exception $e) {
@@ -212,6 +268,8 @@ class Plugin
      */
     public static function init()
     {
+        UsageTracker::init(new AmeliaCollector(), __FILE__);
+        
         $settingsService = new SettingsService(new SettingsStorage());
 
         // Initialize LiteSpeed Cache compatibility
@@ -231,7 +289,7 @@ class Plugin
             if (!empty($settingsService->getCategorySettings('payments')['wc']['enabled'])) {
                 try {
                     StarterWooCommerceService::init($settingsService);
-                } catch (ContainerException $e) {
+                } catch (Exception $e) {
                 }
             } else {
                 StarterWooCommerceService::setContainer(require AMELIA_PATH . '/src/Infrastructure/ContainerConfig/container.php');
@@ -440,8 +498,8 @@ class Plugin
 
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-            deactivate_plugins(AMELIA_PLUGIN_SLUG);
-            activate_plugin(AMELIA_PLUGIN_SLUG);
+            deactivate_plugins(AMELIA_PLUGIN_BASENAME);
+            activate_plugin(AMELIA_PLUGIN_BASENAME);
         }
     }
 
@@ -483,7 +541,7 @@ class Plugin
 
         // Check PHP version
         if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 50500) {
-            deactivate_plugins(AMELIA_PLUGIN_SLUG);
+            deactivate_plugins(AMELIA_PLUGIN_BASENAME);
             wp_die(
                 BackendStrings::get('php_version_message'),
                 BackendStrings::get('php_version_title'),
@@ -550,6 +608,8 @@ class Plugin
             delete_option('amelia_settings');
             delete_option('amelia_stash');
             delete_option('amelia_show_wpdt_promo');
+            delete_option((new AmeliaCollector())->getConsentOptionName());
+
 
             // Delete Files
             foreach (['/amelia/css', '/amelia/files/tmp', '/amelia/files', '/amelia'] as $path) {
@@ -646,7 +706,7 @@ class Plugin
      */
     public static function addPluginRowMeta($links, $file, $pluginData, $status)
     {
-        if ($file !== AMELIA_PLUGIN_SLUG) {
+        if ($file !== AMELIA_PLUGIN_BASENAME) {
             return $links;
         }
 
@@ -788,13 +848,16 @@ register_uninstall_hook(__FILE__, array('AmeliaBooking\Plugin', 'deletion'));
 /** Activation hook for new site on multisite setup */
 add_action('wpmu_new_blog', array('AmeliaBooking\Infrastructure\WP\InstallActions\ActivationNewSiteMultisite', 'init'));
 
-/** Define the API for updating checking (callbacks on Plugin so hooks stay valid if AutoUpdateHook cannot load — e.g. partial delete) */
+/** Auto-update hooks only apply to paid versions */
+if (Licence\Licence::isPremium()) {
+    /** Define the API for updating checking (callbacks on Plugin so hooks stay valid if AutoUpdateHook cannot load — e.g. partial delete) */
 
-/** Define the alternative response for information checking */
+    /** Define the alternative response for information checking */
 
-/** Add a message for unavailable auto update if plugin is not activated */
+    /** Add a message for unavailable auto update if plugin is not activated */
 
-/** Add error message on plugin update if plugin is not activated */
+    /** Add error message on plugin update if plugin is not activated */
+}
 
 add_filter('script_loader_tag', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\StepBookingShortcodeService', 'prepareScripts') , 10, 3);
 add_filter('style_loader_tag', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\StepBookingShortcodeService', 'prepareStyles') , 10, 3);
@@ -803,7 +866,7 @@ add_filter('script_loader_tag', array('AmeliaBooking\Infrastructure\WP\Shortcode
 add_filter('style_loader_tag', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\EventsListBookingShortcodeService', 'prepareStyles') , 10, 3);
 
 add_filter('plugin_row_meta', array('AmeliaBooking\Plugin', 'addPluginRowMeta'), 10, 4);
-add_filter('plugin_action_links_' . AMELIA_PLUGIN_SLUG, array('AmeliaBooking\Plugin', 'addPluginActionLinks'));
+add_filter('plugin_action_links_' . AMELIA_PLUGIN_BASENAME, array('AmeliaBooking\Plugin', 'addPluginActionLinks'));
 
 add_action( 'wp_logout',  array('AmeliaBooking\Infrastructure\WP\UserService\UserService', 'logoutAmeliaUser'));
 add_action( 'profile_update',  array('AmeliaBooking\Infrastructure\WP\UserService\UserService', 'updateAmeliaUser'), 10, 3);

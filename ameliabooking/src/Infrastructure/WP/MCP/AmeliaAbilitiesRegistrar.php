@@ -14,9 +14,10 @@ use AmeliaBooking\Application\Controller\Booking\Event\GetEventsController;
 use AmeliaBooking\Application\Controller\User\Customer\AddCustomerController;
 use AmeliaBooking\Application\Controller\User\Customer\GetCustomersController;
 use AmeliaBooking\Application\Controller\User\Provider\GetProvidersController;
-use Slim\Http\Environment;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use AmeliaVendor\Psr\Http\Message\ServerRequestInterface as Request;
+use AmeliaVendor\Psr\Http\Message\ResponseInterface as Response;
+use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Psr7\Factory\ServerRequestFactory;
 use WP_Error;
 
 class AmeliaAbilitiesRegistrar
@@ -95,24 +96,20 @@ class AmeliaAbilitiesRegistrar
     {
         $container = static::getContainer();
 
-        $envOptions = [
-            'REQUEST_METHOD' => $method,
-            'CONTENT_TYPE'   => 'application/json',
-        ];
-
-        if ($method === 'GET') {
-            $envOptions['QUERY_STRING'] = http_build_query($params);
+        $serverRequestFactory = new ServerRequestFactory();
+        $uri = 'http://127.0.0.1/';
+        if ($method === 'GET' && $params !== []) {
+            $uri .= '?' . http_build_query($params);
         }
 
-        $environment = Environment::mock($envOptions);
-
-        $request = Request::createFromEnvironment($environment);
+        $request = $serverRequestFactory->createServerRequest($method, $uri)
+            ->withHeader('Content-Type', 'application/json');
 
         if ($method !== 'GET') {
             $request = $request->withParsedBody($params);
         }
 
-        $response = new Response();
+        $response = (new ResponseFactory())->createResponse();
 
         $controller = new $controllerClass($container);
 

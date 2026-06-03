@@ -81,6 +81,7 @@ class GetCalendarSlotsCommandHandler extends CommandHandler
             $formattedWorkPeriods = array_merge($formattedWorkPeriods, $providerFormatted);
             $resources[] = [
                 'id'               => $provider->getId()->getValue(),
+                'order'            => $provider->getId()->getValue(),
                 'title'            => $provider->getFullName(),
                 'pictureThumbPath' => $provider->getPicture() ? $provider->getPicture()->getThumbPath() : null,
                 'firstName'        => $provider->getFirstName()->getValue(),

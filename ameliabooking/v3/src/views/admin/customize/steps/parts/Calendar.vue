@@ -8,6 +8,8 @@
       :calendar-maximum-date="moment().add(1,'year').format('YYYY-MM-DD hh:mm')"
       :time-zone="features.timeZones && amCustomize[pageRenderKey][stepRecognition].options.timeZoneVisibility.visibility"
       :end-time="amCustomize[pageRenderKey][stepRecognition].options.endTimeVisibility.visibility"
+      :show-calendar-date-busyness="showCalendarDateBusyness"
+      :busyness="previewCalendarBusyness"
       :show-estimated-pricing="stepRecognition === 'rescheduleAppointment' ? amCustomize[pageRenderKey][stepRecognition].options.estimatedPricingVisibility.visibility : false"
       :show-indicator-pricing="stepRecognition === 'rescheduleAppointment' ? amCustomize[pageRenderKey][stepRecognition].options.indicatorPricingVisibility.visibility : false"
       :show-slot-pricing="stepRecognition === 'rescheduleAppointment' ? amCustomize[pageRenderKey][stepRecognition].options.slotPricingVisibility.visibility : false"
@@ -61,6 +63,37 @@ let stepRecognition = computed(() => {
 
 let customOptions = computed(() => {
   return amCustomize.value[pageRenderKey.value][stepRecognition.value].options
+})
+
+let showCalendarDateBusyness = computed(() => {
+  if (
+    stepRecognition.value === 'rescheduleAppointment' ||
+    stepRecognition.value === 'bookAppointment'
+  ) {
+    return false
+  }
+  if ('calendarDateBusynessVisibility' in customOptions.value) {
+    return customOptions.value.calendarDateBusynessVisibility.visibility
+  }
+  return true
+})
+
+let previewCalendarBusyness = computed(() => {
+  if (
+    stepRecognition.value === 'rescheduleAppointment' ||
+    stepRecognition.value === 'bookAppointment'
+  ) {
+    return {}
+  }
+  const opts = customOptions.value
+  if (!(opts.calendarDateBusynessVisibility?.visibility ?? true)) {
+    return {}
+  }
+  const base = moment().startOf('day')
+  return {
+    [base.clone().add(6, 'days').format('YYYY-MM-DD')]: 40,
+    [base.clone().add(20, 'days').format('YYYY-MM-DD')]: 82,
+  }
 })
 
 // * Form key

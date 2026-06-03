@@ -257,6 +257,7 @@ import {
   computed,
   watch,
   onMounted,
+  nextTick,
 } from 'vue'
 
 // * Composables
@@ -330,6 +331,10 @@ const props = defineProps({
   showBusySlots: {
     type: Boolean,
     default: false,
+  },
+  showCalendarDateBusyness: {
+    type: Boolean,
+    default: true,
   },
   showEstimatedPricing: {
     type: Boolean,
@@ -778,6 +783,19 @@ watch(calendarEventSlots, (val) => {
       : '')
 })
 
+watch(
+  () => ({
+    showCalendarDateBusyness: props.showCalendarDateBusyness,
+    busyness: props.busyness,
+  }),
+  () => {
+    nextTick(() => {
+      advCalendarRef.value?.getApi()?.render()
+    })
+  },
+  { deep: true },
+)
+
 /**
  * Html class builder for calendar day cell
  * @param data
@@ -1011,12 +1029,21 @@ function calendarEventClick(eventData) {
  * @returns {{html: string}}
  */
 function calendarEventContent(eventCalendarData) {
-  let eventContent
+  if (!props.showCalendarDateBusyness) {
+    return { html: '' }
+  }
 
   const slotsAvailablePercentage =
     props.busyness[moment(eventCalendarData.event.start).format('YYYY-MM-DD')]
 
-  eventContent = `<div class="am-advsc__slot-wrapper" style="height: ${slotsAvailablePercentage}%"></div>`
+  if (
+    slotsAvailablePercentage === undefined ||
+    slotsAvailablePercentage === null
+  ) {
+    return { html: '' }
+  }
+
+  const eventContent = `<div class="am-advsc__slot-wrapper" style="height: ${slotsAvailablePercentage}%"></div>`
 
   return { html: eventContent }
 }

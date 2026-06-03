@@ -282,6 +282,7 @@
       v-if="shortcodeData.show !== 'packages' && !shortcodeData.package"
       ref="ameliaContainer"
       class="am-no-services"
+      :style="cssVars"
     >
       <img
         :src="
@@ -309,7 +310,7 @@
       v-else
       ref="ameliaContainer"
       class="am-no-services"
-      style="height: 100%"
+      :style="{height: '100%', ...cssVars}"
     >
       <img
         :src="

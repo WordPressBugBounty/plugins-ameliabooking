@@ -21,8 +21,8 @@
 
     <!-- Bringing Anyone with you -->
     <AmSlidePopup
-      ref="bringingPopupRef"
       v-if="bringingAnyoneOptions.availability"
+      ref="bringingPopupRef"
       :visibility="bringingAnyoneVisibility"
       class="am-fs__init__bringing"
     >

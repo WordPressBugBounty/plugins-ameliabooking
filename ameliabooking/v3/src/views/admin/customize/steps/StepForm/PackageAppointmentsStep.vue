@@ -143,9 +143,14 @@
                   .timeZoneVisibility.visibility
               "
               :show-people-waiting="false"
+              :show-calendar-date-busyness="
+                amCustomize[pageRenderKey].packageAppointmentsStep.options
+                  .calendarDateBusynessVisibility?.visibility ?? true
+              "
               :label-slots-selected="
                 labelsDisplay('package_appointments_slots_selected')
               "
+              :busyness="previewCalendarBusyness"
             ></AmAdvancedSlotCalendar>
           </div>
         </template>
@@ -262,6 +267,19 @@ let amLabels = inject('labels')
 
 const { amCustomize } = useReactiveCustomize()
 let pageRenderKey = inject('pageRenderKey')
+
+let previewCalendarBusyness = computed(() => {
+  const opts =
+    amCustomize.value[pageRenderKey.value].packageAppointmentsStep.options
+  if (!(opts.calendarDateBusynessVisibility?.visibility ?? true)) {
+    return {}
+  }
+  const base = moment().startOf('day')
+  return {
+    [base.clone().add(6, 'days').format('YYYY-MM-DD')]: 40,
+    [base.clone().add(20, 'days').format('YYYY-MM-DD')]: 82,
+  }
+})
 
 // * Form validation rules
 let rules = computed(() => {

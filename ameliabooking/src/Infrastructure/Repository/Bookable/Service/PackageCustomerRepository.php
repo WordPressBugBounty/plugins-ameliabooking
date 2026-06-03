@@ -422,7 +422,7 @@ class PackageCustomerRepository extends AbstractRepository
                 $joins      .= "
                     INNER JOIN {$usersTable} cu ON cu.id = pc.customerId
                 ";
-                $orderColumn = 'CONCAT(cu.firstName, " ", cu.lastName)';
+                $orderColumn = 'CONCAT(cu.firstName, \' \', cu.lastName)';
             } elseif ($column === 'date') {
                 $orderColumn = 'pc.purchased';
             } elseif ($column === 'id') {
@@ -551,7 +551,7 @@ class PackageCustomerRepository extends AbstractRepository
             $column      = $sort[0] === '-' ? substr($sort, 1) : $sort;
             $orderColumn = '';
             if ($column === 'customer') {
-                $orderColumn = 'CONCAT(cu.firstName, " ", cu.lastName)';
+                $orderColumn = 'CONCAT(cu.firstName, \' \', cu.lastName)';
             } elseif ($column === 'date') {
                 $orderColumn = 'pc.purchased';
             } elseif ($column === 'id') {

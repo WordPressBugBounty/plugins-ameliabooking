@@ -4,9 +4,9 @@ Author URI: https://melograno.io/
 Tags: appointments, booking, event booking system, wpamelia, booking system, scheduling
 Donate link: https://wpamelia.com/
 Requires at least: 6.5
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.4
+Stable tag: 2.4.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,18 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.4.1
+This update includes a couple of improvements, bug fixes and security fixes. We strongly recommend updating to this version immediately.
+*Improvement: Improved clickable areas in the Catalog booking form for a better user experience.
+*Improvement: Added option in Customize to show/hide the busyness indicator on Calendar dates.
+*BugFix: Fixed an issue where saving a customer with an invalid email caused a 500 error on the Users search.
+*BugFix: Fixed an issue with the booking form auto-scroll causing overlap with sticky headers.
+*BugFix: Fixed an issue with the phone number field automatically adding a leading "0" during input.
+*BugFix: Fixed an issue with cancellation notifications being sent multiple times when a customer clicks the cancel link repeatedly or reloads the page.
+*BugFix: Fixed an issue where the Continue button was not clickable on iOS devices in the booking form.
+*BugFix: Resolved security vulnerabilities.
+*Additional minor bug fixes and overall stability improvements.
+
 v2.4
 This update includes a couple of new features, improvements, bug fixes and a security fix. We strongly recommend updating to this version immediately.
 *Feature: AI Assistant integration – Added support for AI-powered booking management via the WordPress Abilities API & MCP adapter.

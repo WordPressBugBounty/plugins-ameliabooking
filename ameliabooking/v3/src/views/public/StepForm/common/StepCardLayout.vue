@@ -21,8 +21,8 @@
 
     <!-- Bringing Anyone with you -->
     <AmSlidePopup
-      ref="bringingPopupRef"
       v-if="bringingAnyoneOptions.availability"
+      ref="bringingPopupRef"
       :visibility="bringingAnyoneVisibility"
       class="am-fs__init__bringing"
     >
@@ -413,6 +413,10 @@ let cssVars = computed(() => {
     display: flex;
     flex-direction: column;
     gap: 16px;
+
+    &.am-oxvisible {
+      overflow-x: visible;
+    }
 
     &__filters {
       display: flex;

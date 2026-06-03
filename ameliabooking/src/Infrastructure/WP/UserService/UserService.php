@@ -10,7 +10,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use AmeliaBooking\Infrastructure\WP\UserRoles\UserRoles;
-use Slim\Container;
+use AmeliaBooking\Infrastructure\Common\Container;
 use WP_Error;
 
 /**

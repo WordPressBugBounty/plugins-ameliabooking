@@ -116,10 +116,7 @@ const walletInstance = ref({googlePay: null, applePay: null})
 // Apple Pay - No async operations can be called between the user gesture (click) and tokenize().
 watch(
     [() => store.getters['booking/getCoupon'], () => store.getters['booking/getPaymentDeposit']],
-    async (newValues, oldValues) => {
-      const [newCoupon, newPaymentDeposit] = newValues
-      const [oldCoupon, oldPaymentDeposit] = oldValues
-
+    async () => {
       if (paymentRequest && store.getters['booking/getCouponValidated']) {
         // Wait for next tick to ensure DOM is updated
         await nextTick()
@@ -370,10 +367,28 @@ function successBooking (response) {
   )
 }
 
+function getSquareBookingErrorResponse (error) {
+  if (error?.response?.data) {
+    return error.response.data
+  }
+
+  if (error?.data) {
+    return error
+  }
+
+  const labels = amLabels.value || amLabels
+
+  return {
+    data: {
+      message: error?.message || labels.payment_error,
+    },
+  }
+}
+
 function errorBooking (error) {
   useCreateBookingError(
     store,
-    error.response.data,
+    getSquareBookingErrorResponse(error),
     () => {
       emits('payment-error', getErrorMessage())
     }

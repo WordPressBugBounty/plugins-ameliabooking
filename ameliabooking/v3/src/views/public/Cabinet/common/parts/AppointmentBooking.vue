@@ -129,6 +129,7 @@
           :show-estimated-pricing="props.appointment.id && 'estimatedPricingVisibility' in props.customizedOptions ? props.customizedOptions.estimatedPricingVisibility.visibility : false"
           :show-indicator-pricing="props.appointment.id && 'indicatorPricingVisibility' in props.customizedOptions ? props.customizedOptions.indicatorPricingVisibility.visibility : false"
           :show-slot-pricing="props.appointment.id && 'slotPricingVisibility' in props.customizedOptions ? props.customizedOptions.slotPricingVisibility.visibility : false"
+          :show-calendar-date-busyness="false"
           :label-slots-selected="labels.date_time_slots_selected"
           :fetched-slots="null"
           :service-id="parseInt(props.appointment.serviceId)"

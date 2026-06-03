@@ -25,6 +25,7 @@
       :show-indicator-pricing="indicatorPricingVisibility"
       :show-slot-pricing="slotPricingVisibility"
       :show-people-waiting="peopleWaitingVisibility"
+      :show-calendar-date-busyness="calendarDateBusynessVisibility"
       :label-slots-selected="amLabels.date_time_slots_selected"
       :label-waiting-list="amLabels.waiting_list"
       :fetched-slots="null"
@@ -180,6 +181,14 @@ let peopleWaitingVisibility = computed(() => {
   }
 
   return defaultCustomizeSettings.sbsNew.dateTimeStep.options.peopleWaitingVisibility.visibility
+})
+
+let calendarDateBusynessVisibility = computed(() => {
+  if ('calendarDateBusynessVisibility' in amCustomize.dateTimeStep.options) {
+    return amCustomize.dateTimeStep.options.calendarDateBusynessVisibility.visibility
+  }
+
+  return defaultCustomizeSettings.sbsNew.dateTimeStep.options.calendarDateBusynessVisibility.visibility
 })
 
 const store = useStore()

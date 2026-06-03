@@ -34,74 +34,30 @@
     color: 'red'
   }
 
-  if (data.categories.length !== 0) {
-    for (let i = 0; i < data.categories.length; i++) {
-      if (data.categories[i] && data.categories[i].id && data.categories[i].name) {
-        categories.push({
-          value: data.categories[i].id,
-          text: data.categories[i].name + ' (id: ' + data.categories[i].id + ')'
-        })
-      }
-    }
-  } else {
-    categories = []
-  }
+  categories = (data.categories ?? []).map((c) => ({
+    value: c.id,
+    text: `${c.name} (id: ${c.id})`,
+  }))
 
-  if (data.servicesList.length !== 0) {
-    // Create array of services objects
-    for (let i = 0; i < data.servicesList.length; i++) {
-      if (data.servicesList[i] && data.servicesList[i].id && data.servicesList[i].name) {
-        services.push({
-          value: data.servicesList[i].id,
-          text: data.servicesList[i].name + ' (id: ' + data.servicesList[i].id + ')'
-        })
-      }
-    }
-  } else {
-    services = []
-  }
+  services = (data.servicesList ?? []).map((s) => ({
+    value: s.id,
+    text: `${s.name} (id: ${s.id})`,
+  }))
 
-  if (data.employees.length !== 0) {
-    // Create array of employees objects
-    for (let i = 0; i < data.employees.length; i++) {
-      if (data.employees[i] && data.employees[i].id && data.employees[i].firstName && data.employees[i].lastName) {
-        employees.push({
-          value: data.employees[i].id,
-          text: data.employees[i].firstName + ' ' + data.employees[i].lastName + ' (id: ' + data.employees[i].id + ')'
-        })
-      }
-    }
-  } else {
-    employees = []
-  }
+  employees = (data.employees ?? []).map((e) => ({
+    value: e.id,
+    text: `${e.firstName} ${e.lastName} (id: ${e.id})`,
+  }))
 
-  if (data.locations.length !== 0) {
-    // Create array of locations objects
-    for (let i = 0; i < data.locations.length; i++) {
-      if (data.locations[i] && data.locations[i].id && data.locations[i].name) {
-        locations.push({
-          value: data.locations[i].id,
-          text: data.locations[i].name + ' (id: ' + data.locations[i].id + ')'
-        })
-      }
-    }
-  } else {
-    locations = []
-  }
+  locations = (data.locations ?? []).map((l) => ({
+    value: l.id,
+    text: `${l.name} (id: ${l.id})`,
+  }))
 
-  if (data.packages.length !== 0) {
-    // Create array of packages objects
-    for (let i = 0; i < data.packages.length; i++) {
-      if (data.packages[i] && data.packages[i].id && data.packages[i].name) {
-        packages.push({
-          value: data.packages[i].id,
-          text: data.packages[i].name + ' (id: ' + data.packages[i].id + ')'
-        })
-      }
-    }
-  } else {
-    packages = []
-  }
+  packages = (data.packages ?? []).map((p) => ({
+    value: p.id,
+    text: `${p.name} (id: ${p.id})`,
+  }))
 
   function getSelectOptions (items, defaultLabel) {
     var options = [{value: '', label: defaultLabel}]

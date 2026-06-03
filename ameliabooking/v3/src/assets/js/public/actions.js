@@ -100,7 +100,28 @@ function trackAmeliaData(data, marketing, type, action) {
                   }
 
                   if (value.includes('number_of_persons')) {
-                    pathParts = ['appointments', 0, 'persons']
+                    if (
+                      data &&
+                      data.appointments &&
+                      data.appointments[0] &&
+                      data.appointments[0].persons !== null &&
+                      typeof data.appointments[0].persons !== 'undefined'
+                    ) {
+                      pathParts = ['appointments', 0, 'persons']
+                    } else if (
+                      data &&
+                      data.booking &&
+                      data.booking.persons !== null &&
+                      typeof data.booking.persons !== 'undefined'
+                    ) {
+                      pathParts = ['booking', 'persons']
+                    } else if (
+                      data &&
+                      data.number_of_persons !== null &&
+                      typeof data.number_of_persons !== 'undefined'
+                    ) {
+                      pathParts = ['number_of_persons']
+                    }
                   }
 
                   pathParts.forEach((pathPart) => {
@@ -322,18 +343,25 @@ function useAction(
 
       break
 
-    case 'event':
+    case 'event': {
+      const customFieldsData = store.getters['customFields/getAllData']
       data.booking = {
         customer: store.getters['customerInfo/getAllData'],
         customFields: Object.values(
-          store.getters['customFields/getAllData'].customFields
+          customFieldsData && customFieldsData.customFields
+            ? customFieldsData.customFields
+            : {}
         ),
         persons: store.getters['persons/getPersons'],
       }
-      data.event = store.getters['eventEntities/getEvent'](
-        store.getters['eventBooking/getSelectedEventId']
-      )
+      data.event =
+        additionalData && additionalData.event
+          ? additionalData.event
+          : store.getters['eventEntities/getEvent'](
+              store.getters['eventBooking/getSelectedEventId']
+            )
       break
+    }
   }
 
   trackAmeliaData(

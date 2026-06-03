@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit2912874249c11808c71a66fb7d992891
+class ComposerStaticInita53134f36745539abd16674069f3e111
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c_am' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -19,6 +19,7 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         '941748b3c8cae4466c827dfb5ca9602a' => __DIR__ . '/..' . '/rmccue/requests/library/Deprecated.php',
         '3569eecfeed3bcf0bad3c998a494ecb8_am' => __DIR__ . '/..' . '/sabre/xml/lib/Deserializer/functions.php',
         '93aa591bc4ca510c520999e34229ee79_am' => __DIR__ . '/..' . '/sabre/xml/lib/Serializer/functions.php',
+        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         'a8d3953fd9959404dd22d3dfcd0a79f0' => __DIR__ . '/..' . '/google/apiclient/src/aliases.php',
         '13906c19e3d8fcd1341b24ed4d51cf72' => __DIR__ . '/..' . '/razorpay/razorpay/Deprecated.php',
         '2d223b650b5c56928c1affa16ee5cfe2' => __DIR__ . '/..' . '/wordpress/abilities-api/includes/bootstrap.php',
@@ -40,13 +41,19 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         ),
         'S' => 
         array (
+            'Symfony\\Polyfill\\Php80\\' => 23,
             'Square\\' => 7,
+            'Slim\\Psr7\\' => 10,
             'Slim\\' => 5,
         ),
         'R' => 
         array (
             'Razorpay\\Tests\\' => 15,
             'Razorpay\\Api\\' => 13,
+        ),
+        'P' => 
+        array (
+            'Psr\\Http\\Server\\' => 16,
         ),
         'O' => 
         array (
@@ -56,6 +63,7 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         array (
             'Money\\' => 6,
             'Microsoft\\Graph\\' => 16,
+            'Melograno\\UsageTracker\\' => 23,
         ),
         'L' => 
         array (
@@ -68,6 +76,7 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         ),
         'F' => 
         array (
+            'Fig\\Http\\Message\\' => 17,
             'FastRoute\\' => 10,
         ),
         'D' => 
@@ -139,9 +148,17 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         array (
             0 => __DIR__ . '/..' . '/apimatic/unirest-php/src',
         ),
+        'Symfony\\Polyfill\\Php80\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
+        ),
         'Square\\' => 
         array (
             0 => __DIR__ . '/..' . '/square/square/src',
+        ),
+        'Slim\\Psr7\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/slim/psr7/src',
         ),
         'Slim\\' => 
         array (
@@ -155,6 +172,11 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         array (
             0 => __DIR__ . '/..' . '/razorpay/razorpay/src',
         ),
+        'Psr\\Http\\Server\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/http-server-handler/src',
+            1 => __DIR__ . '/..' . '/psr/http-server-middleware/src',
+        ),
         'OpenSpout\\' => 
         array (
             0 => __DIR__ . '/..' . '/openspout/openspout/src',
@@ -167,6 +189,10 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         array (
             0 => __DIR__ . '/..' . '/microsoft/microsoft-graph/src',
         ),
+        'Melograno\\UsageTracker\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/melograno/usage-tracker/src',
+        ),
         'League\\Tactician\\' => 
         array (
             0 => __DIR__ . '/..' . '/league/tactician/src',
@@ -178,6 +204,10 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         'Http\\Factory\\Guzzle\\' => 
         array (
             0 => __DIR__ . '/..' . '/http-interop/http-factory-guzzle/src',
+        ),
+        'Fig\\Http\\Message\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/fig/http-message-util/src',
         ),
         'FastRoute\\' => 
         array (
@@ -656,6 +686,8 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         'AmeliaBooking\\Application\\Commands\\Outlook\\GetOutlookAuthURLCommandHandler' => __DIR__ . '/../..' . '/src/Application/Commands/Outlook/GetOutlookAuthURLCommandHandler.php',
         'AmeliaBooking\\Application\\Commands\\Outlook\\GetOutlookMiddlewareAuthURLCommand' => __DIR__ . '/../..' . '/src/Application/Commands/Outlook/GetOutlookMiddlewareAuthURLCommand.php',
         'AmeliaBooking\\Application\\Commands\\Outlook\\GetOutlookMiddlewareAuthURLCommandHandler' => __DIR__ . '/../..' . '/src/Application/Commands/Outlook/GetOutlookMiddlewareAuthURLCommandHandler.php',
+        'AmeliaBooking\\Application\\Commands\\Outlook\\ValidateOutlookCredentialsCommand' => __DIR__ . '/../..' . '/src/Application/Commands/Outlook/ValidateOutlookCredentialsCommand.php',
+        'AmeliaBooking\\Application\\Commands\\Outlook\\ValidateOutlookCredentialsCommandHandler' => __DIR__ . '/../..' . '/src/Application/Commands/Outlook/ValidateOutlookCredentialsCommandHandler.php',
         'AmeliaBooking\\Application\\Commands\\PaymentGateway\\BarionPaymentCallbackCommand' => __DIR__ . '/../..' . '/src/Application/Commands/PaymentGateway/BarionPaymentCallbackCommand.php',
         'AmeliaBooking\\Application\\Commands\\PaymentGateway\\BarionPaymentCallbackCommandHandler' => __DIR__ . '/../..' . '/src/Application/Commands/PaymentGateway/BarionPaymentCallbackCommandHandler.php',
         'AmeliaBooking\\Application\\Commands\\PaymentGateway\\BarionPaymentCommand' => __DIR__ . '/../..' . '/src/Application/Commands/PaymentGateway/BarionPaymentCommand.php',
@@ -961,6 +993,7 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         'AmeliaBooking\\Application\\Controller\\Outlook\\FetchOutlookMiddlewareAccessTokenController' => __DIR__ . '/../..' . '/src/Application/Controller/Outlook/FetchOutlookMiddlewareAccessTokenController.php',
         'AmeliaBooking\\Application\\Controller\\Outlook\\GetOutlookAuthURLController' => __DIR__ . '/../..' . '/src/Application/Controller/Outlook/GetOutlookAuthURLController.php',
         'AmeliaBooking\\Application\\Controller\\Outlook\\GetOutlookMiddlewareAuthURLController' => __DIR__ . '/../..' . '/src/Application/Controller/Outlook/GetOutlookMiddlewareAuthURLController.php',
+        'AmeliaBooking\\Application\\Controller\\Outlook\\ValidateOutlookCredentialsController' => __DIR__ . '/../..' . '/src/Application/Controller/Outlook/ValidateOutlookCredentialsController.php',
         'AmeliaBooking\\Application\\Controller\\PaymentGateway\\BarionPaymentCallbackController' => __DIR__ . '/../..' . '/src/Application/Controller/PaymentGateway/BarionPaymentCallbackController.php',
         'AmeliaBooking\\Application\\Controller\\PaymentGateway\\BarionPaymentController' => __DIR__ . '/../..' . '/src/Application/Controller/PaymentGateway/BarionPaymentController.php',
         'AmeliaBooking\\Application\\Controller\\PaymentGateway\\BarionPaymentNotifyController' => __DIR__ . '/../..' . '/src/Application/Controller/PaymentGateway/BarionPaymentNotifyController.php',
@@ -1380,6 +1413,7 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         'AmeliaBooking\\Infrastructure\\API\\ApiRoutes\\Stats\\Stats' => __DIR__ . '/../..' . '/src/Infrastructure/API/ApiRoutes/Stats/Stats.php',
         'AmeliaBooking\\Infrastructure\\API\\ApiRoutes\\TimeSlots\\TimeSlots' => __DIR__ . '/../..' . '/src/Infrastructure/API/ApiRoutes/TimeSlots/TimeSlots.php',
         'AmeliaBooking\\Infrastructure\\API\\ApiRoutes\\User\\User' => __DIR__ . '/../..' . '/src/Infrastructure/API/ApiRoutes/User/User.php',
+        'AmeliaBooking\\Infrastructure\\Common\\AmeliaErrorHandler' => __DIR__ . '/../..' . '/src/Infrastructure/Common/AmeliaErrorHandler.php',
         'AmeliaBooking\\Infrastructure\\Common\\Container' => __DIR__ . '/../..' . '/src/Infrastructure/Common/Container.php',
         'AmeliaBooking\\Infrastructure\\Common\\Exceptions\\NotFoundException' => __DIR__ . '/../..' . '/src/Infrastructure/Common/Exceptions/NotFoundException.php',
         'AmeliaBooking\\Infrastructure\\Common\\Exceptions\\QueryExecutionException' => __DIR__ . '/../..' . '/src/Infrastructure/Common/Exceptions/QueryExecutionException.php',
@@ -1562,6 +1596,7 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         'AmeliaBooking\\Infrastructure\\Services\\Outlook\\AbstractOutlookCalendarService' => __DIR__ . '/../..' . '/src/Infrastructure/Services/Outlook/AbstractOutlookCalendarService.php',
         'AmeliaBooking\\Infrastructure\\Services\\Outlook\\OutlookCalendarMiddlewareService' => __DIR__ . '/../..' . '/src/Infrastructure/Services/Outlook/OutlookCalendarMiddlewareService.php',
         'AmeliaBooking\\Infrastructure\\Services\\Outlook\\OutlookCalendarService' => __DIR__ . '/../..' . '/src/Infrastructure/Services/Outlook/OutlookCalendarService.php',
+        'AmeliaBooking\\Infrastructure\\Services\\Outlook\\OutlookCredentialsValidatorService' => __DIR__ . '/../..' . '/src/Infrastructure/Services/Outlook/OutlookCredentialsValidatorService.php',
         'AmeliaBooking\\Infrastructure\\Services\\Outlook\\StarterOutlookCalendarMiddlewareService' => __DIR__ . '/../..' . '/src/Infrastructure/Services/Outlook/StarterOutlookCalendarMiddlewareService.php',
         'AmeliaBooking\\Infrastructure\\Services\\Outlook\\StarterOutlookCalendarService' => __DIR__ . '/../..' . '/src/Infrastructure/Services/Outlook/StarterOutlookCalendarService.php',
         'AmeliaBooking\\Infrastructure\\Services\\PayPal\\PayPalClient' => __DIR__ . '/../..' . '/src/Infrastructure/Services/PayPal/PayPalClient.php',
@@ -3412,6 +3447,7 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         'AmeliaVendor_Google_Task_Runner' => __DIR__ . '/..' . '/google/apiclient/src/aliases.php',
         'AmeliaVendor_Google_Utils_UriTemplate' => __DIR__ . '/..' . '/google/apiclient/src/aliases.php',
         'AmeliaVendor_Requests' => __DIR__ . '/..' . '/rmccue/requests/library/Requests.php',
+        'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'BaconQrCode\\Common\\BitArray' => __DIR__ . '/..' . '/bacon/bacon-qr-code/src/Common/BitArray.php',
         'BaconQrCode\\Common\\BitMatrix' => __DIR__ . '/..' . '/bacon/bacon-qr-code/src/Common/BitMatrix.php',
         'BaconQrCode\\Common\\BitUtils' => __DIR__ . '/..' . '/bacon/bacon-qr-code/src/Common/BitUtils.php',
@@ -7401,6 +7437,8 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         'FastRoute\\RouteCollector' => __DIR__ . '/..' . '/nikic/fast-route/src/RouteCollector.php',
         'FastRoute\\RouteParser' => __DIR__ . '/..' . '/nikic/fast-route/src/RouteParser.php',
         'FastRoute\\RouteParser\\Std' => __DIR__ . '/..' . '/nikic/fast-route/src/RouteParser/Std.php',
+        'Fig\\Http\\Message\\RequestMethodInterface' => __DIR__ . '/..' . '/fig/http-message-util/src/RequestMethodInterface.php',
+        'Fig\\Http\\Message\\StatusCodeInterface' => __DIR__ . '/..' . '/fig/http-message-util/src/StatusCodeInterface.php',
         'Google_Task_Retryable' => __DIR__ . '/..' . '/google/apiclient/src/aliases.php',
         'Http\\Factory\\Guzzle\\RequestFactory' => __DIR__ . '/..' . '/http-interop/http-factory-guzzle/src/RequestFactory.php',
         'Http\\Factory\\Guzzle\\ResponseFactory' => __DIR__ . '/..' . '/http-interop/http-factory-guzzle/src/ResponseFactory.php',
@@ -7451,6 +7489,17 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         'League\\Tactician\\Plugins\\NamedCommand\\NamedCommand' => __DIR__ . '/..' . '/league/tactician/src/Plugins/NamedCommand/NamedCommand.php',
         'League\\Tactician\\Plugins\\NamedCommand\\NamedCommandExtractor' => __DIR__ . '/..' . '/league/tactician/src/Plugins/NamedCommand/NamedCommandExtractor.php',
         'League\\Tactician\\Setup\\QuickStart' => __DIR__ . '/..' . '/league/tactician/src/Setup/QuickStart.php',
+        'Melograno\\UsageTracker\\Collectors\\BaseCollector' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/BaseCollector.php',
+        'Melograno\\UsageTracker\\Collectors\\Common\\ActivationCollector' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/Common/ActivationCollector.php',
+        'Melograno\\UsageTracker\\Collectors\\Common\\WpEnvironmentCollector' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/Common/WpEnvironmentCollector.php',
+        'Melograno\\UsageTracker\\Collectors\\PluginCollectorInterface' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/PluginCollectorInterface.php',
+        'Melograno\\UsageTracker\\Collectors\\Plugin\\AmeliaCollector' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/Plugin/AmeliaCollector.php',
+        'Melograno\\UsageTracker\\Collectors\\Plugin\\IvyFormsCollector' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/Plugin/IvyFormsCollector.php',
+        'Melograno\\UsageTracker\\Collectors\\Plugin\\WpDataTablesCollector' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/Plugin/WpDataTablesCollector.php',
+        'Melograno\\UsageTracker\\Core\\Anonymizer' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Core/Anonymizer.php',
+        'Melograno\\UsageTracker\\Core\\ConsentManager' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Core/ConsentManager.php',
+        'Melograno\\UsageTracker\\Core\\HttpClient' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Core/HttpClient.php',
+        'Melograno\\UsageTracker\\Core\\UsageTracker' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Core/UsageTracker.php',
         'Microsoft\\Graph\\CallRecords\\Model\\CallRecord' => __DIR__ . '/..' . '/microsoft/microsoft-graph/src/CallRecords/Model/CallRecord.php',
         'Microsoft\\Graph\\CallRecords\\Model\\CallType' => __DIR__ . '/..' . '/microsoft/microsoft-graph/src/CallRecords/Model/CallType.php',
         'Microsoft\\Graph\\CallRecords\\Model\\ClientPlatform' => __DIR__ . '/..' . '/microsoft/microsoft-graph/src/CallRecords/Model/ClientPlatform.php',
@@ -9253,6 +9302,7 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         'OpenSpout\\Writer\\XLSX\\Manager\\WorkbookManager' => __DIR__ . '/..' . '/openspout/openspout/src/Writer/XLSX/Manager/WorkbookManager.php',
         'OpenSpout\\Writer\\XLSX\\Manager\\WorksheetManager' => __DIR__ . '/..' . '/openspout/openspout/src/Writer/XLSX/Manager/WorksheetManager.php',
         'OpenSpout\\Writer\\XLSX\\Writer' => __DIR__ . '/..' . '/openspout/openspout/src/Writer/XLSX/Writer.php',
+        'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
         'Pimple\\Container' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Container.php',
         'Pimple\\Exception\\ExpectedInvokableException' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Exception/ExpectedInvokableException.php',
         'Pimple\\Exception\\FrozenServiceException' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Exception/FrozenServiceException.php',
@@ -9271,6 +9321,8 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         'Pimple\\Tests\\Psr11\\ContainerTest' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Psr11/ContainerTest.php',
         'Pimple\\Tests\\Psr11\\ServiceLocatorTest' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/Psr11/ServiceLocatorTest.php',
         'Pimple\\Tests\\ServiceIteratorTest' => __DIR__ . '/..' . '/pimple/pimple/src/Pimple/Tests/ServiceIteratorTest.php',
+        'Psr\\Http\\Server\\MiddlewareInterface' => __DIR__ . '/..' . '/psr/http-server-middleware/src/MiddlewareInterface.php',
+        'Psr\\Http\\Server\\RequestHandlerInterface' => __DIR__ . '/..' . '/psr/http-server-handler/src/RequestHandlerInterface.php',
         'Razorpay\\Api\\Account' => __DIR__ . '/..' . '/razorpay/razorpay/src/Account.php',
         'Razorpay\\Api\\Addon' => __DIR__ . '/..' . '/razorpay/razorpay/src/Addon.php',
         'Razorpay\\Api\\Api' => __DIR__ . '/..' . '/razorpay/razorpay/src/Api.php',
@@ -9349,52 +9401,94 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         'Rs\\Json\\Pointer\\NonexistentValueReferencedException' => __DIR__ . '/..' . '/php-jsonpointer/php-jsonpointer/src/Rs/Json/Pointer/NonexistentValueReferencedException.php',
         'Slim\\App' => __DIR__ . '/..' . '/slim/slim/Slim/App.php',
         'Slim\\CallableResolver' => __DIR__ . '/..' . '/slim/slim/Slim/CallableResolver.php',
-        'Slim\\CallableResolverAwareTrait' => __DIR__ . '/..' . '/slim/slim/Slim/CallableResolverAwareTrait.php',
-        'Slim\\Collection' => __DIR__ . '/..' . '/slim/slim/Slim/Collection.php',
-        'Slim\\Container' => __DIR__ . '/..' . '/slim/slim/Slim/Container.php',
-        'Slim\\DefaultServicesProvider' => __DIR__ . '/..' . '/slim/slim/Slim/DefaultServicesProvider.php',
-        'Slim\\DeferredCallable' => __DIR__ . '/..' . '/slim/slim/Slim/DeferredCallable.php',
-        'Slim\\Exception\\ContainerException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/ContainerException.php',
-        'Slim\\Exception\\ContainerValueNotFoundException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/ContainerValueNotFoundException.php',
-        'Slim\\Exception\\InvalidMethodException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/InvalidMethodException.php',
-        'Slim\\Exception\\MethodNotAllowedException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/MethodNotAllowedException.php',
-        'Slim\\Exception\\NotFoundException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/NotFoundException.php',
-        'Slim\\Exception\\SlimException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/SlimException.php',
-        'Slim\\Handlers\\AbstractError' => __DIR__ . '/..' . '/slim/slim/Slim/Handlers/AbstractError.php',
-        'Slim\\Handlers\\AbstractHandler' => __DIR__ . '/..' . '/slim/slim/Slim/Handlers/AbstractHandler.php',
-        'Slim\\Handlers\\Error' => __DIR__ . '/..' . '/slim/slim/Slim/Handlers/Error.php',
-        'Slim\\Handlers\\NotAllowed' => __DIR__ . '/..' . '/slim/slim/Slim/Handlers/NotAllowed.php',
-        'Slim\\Handlers\\NotFound' => __DIR__ . '/..' . '/slim/slim/Slim/Handlers/NotFound.php',
-        'Slim\\Handlers\\PhpError' => __DIR__ . '/..' . '/slim/slim/Slim/Handlers/PhpError.php',
+        'Slim\\Error\\AbstractErrorRenderer' => __DIR__ . '/..' . '/slim/slim/Slim/Error/AbstractErrorRenderer.php',
+        'Slim\\Error\\Renderers\\HtmlErrorRenderer' => __DIR__ . '/..' . '/slim/slim/Slim/Error/Renderers/HtmlErrorRenderer.php',
+        'Slim\\Error\\Renderers\\JsonErrorRenderer' => __DIR__ . '/..' . '/slim/slim/Slim/Error/Renderers/JsonErrorRenderer.php',
+        'Slim\\Error\\Renderers\\PlainTextErrorRenderer' => __DIR__ . '/..' . '/slim/slim/Slim/Error/Renderers/PlainTextErrorRenderer.php',
+        'Slim\\Error\\Renderers\\XmlErrorRenderer' => __DIR__ . '/..' . '/slim/slim/Slim/Error/Renderers/XmlErrorRenderer.php',
+        'Slim\\Exception\\HttpBadRequestException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/HttpBadRequestException.php',
+        'Slim\\Exception\\HttpException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/HttpException.php',
+        'Slim\\Exception\\HttpForbiddenException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/HttpForbiddenException.php',
+        'Slim\\Exception\\HttpGoneException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/HttpGoneException.php',
+        'Slim\\Exception\\HttpInternalServerErrorException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/HttpInternalServerErrorException.php',
+        'Slim\\Exception\\HttpMethodNotAllowedException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/HttpMethodNotAllowedException.php',
+        'Slim\\Exception\\HttpNotFoundException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/HttpNotFoundException.php',
+        'Slim\\Exception\\HttpNotImplementedException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/HttpNotImplementedException.php',
+        'Slim\\Exception\\HttpSpecializedException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/HttpSpecializedException.php',
+        'Slim\\Exception\\HttpTooManyRequestsException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/HttpTooManyRequestsException.php',
+        'Slim\\Exception\\HttpUnauthorizedException' => __DIR__ . '/..' . '/slim/slim/Slim/Exception/HttpUnauthorizedException.php',
+        'Slim\\Factory\\AppFactory' => __DIR__ . '/..' . '/slim/slim/Slim/Factory/AppFactory.php',
+        'Slim\\Factory\\Psr17\\GuzzlePsr17Factory' => __DIR__ . '/..' . '/slim/slim/Slim/Factory/Psr17/GuzzlePsr17Factory.php',
+        'Slim\\Factory\\Psr17\\HttpSoftPsr17Factory' => __DIR__ . '/..' . '/slim/slim/Slim/Factory/Psr17/HttpSoftPsr17Factory.php',
+        'Slim\\Factory\\Psr17\\LaminasDiactorosPsr17Factory' => __DIR__ . '/..' . '/slim/slim/Slim/Factory/Psr17/LaminasDiactorosPsr17Factory.php',
+        'Slim\\Factory\\Psr17\\NyholmPsr17Factory' => __DIR__ . '/..' . '/slim/slim/Slim/Factory/Psr17/NyholmPsr17Factory.php',
+        'Slim\\Factory\\Psr17\\Psr17Factory' => __DIR__ . '/..' . '/slim/slim/Slim/Factory/Psr17/Psr17Factory.php',
+        'Slim\\Factory\\Psr17\\Psr17FactoryProvider' => __DIR__ . '/..' . '/slim/slim/Slim/Factory/Psr17/Psr17FactoryProvider.php',
+        'Slim\\Factory\\Psr17\\ServerRequestCreator' => __DIR__ . '/..' . '/slim/slim/Slim/Factory/Psr17/ServerRequestCreator.php',
+        'Slim\\Factory\\Psr17\\SlimHttpPsr17Factory' => __DIR__ . '/..' . '/slim/slim/Slim/Factory/Psr17/SlimHttpPsr17Factory.php',
+        'Slim\\Factory\\Psr17\\SlimHttpServerRequestCreator' => __DIR__ . '/..' . '/slim/slim/Slim/Factory/Psr17/SlimHttpServerRequestCreator.php',
+        'Slim\\Factory\\Psr17\\SlimPsr17Factory' => __DIR__ . '/..' . '/slim/slim/Slim/Factory/Psr17/SlimPsr17Factory.php',
+        'Slim\\Factory\\ServerRequestCreatorFactory' => __DIR__ . '/..' . '/slim/slim/Slim/Factory/ServerRequestCreatorFactory.php',
+        'Slim\\Handlers\\ErrorHandler' => __DIR__ . '/..' . '/slim/slim/Slim/Handlers/ErrorHandler.php',
+        'Slim\\Handlers\\Strategies\\RequestHandler' => __DIR__ . '/..' . '/slim/slim/Slim/Handlers/Strategies/RequestHandler.php',
         'Slim\\Handlers\\Strategies\\RequestResponse' => __DIR__ . '/..' . '/slim/slim/Slim/Handlers/Strategies/RequestResponse.php',
         'Slim\\Handlers\\Strategies\\RequestResponseArgs' => __DIR__ . '/..' . '/slim/slim/Slim/Handlers/Strategies/RequestResponseArgs.php',
-        'Slim\\Http\\Body' => __DIR__ . '/..' . '/slim/slim/Slim/Http/Body.php',
-        'Slim\\Http\\Cookies' => __DIR__ . '/..' . '/slim/slim/Slim/Http/Cookies.php',
-        'Slim\\Http\\Environment' => __DIR__ . '/..' . '/slim/slim/Slim/Http/Environment.php',
-        'Slim\\Http\\Headers' => __DIR__ . '/..' . '/slim/slim/Slim/Http/Headers.php',
-        'Slim\\Http\\Message' => __DIR__ . '/..' . '/slim/slim/Slim/Http/Message.php',
-        'Slim\\Http\\NonBufferedBody' => __DIR__ . '/..' . '/slim/slim/Slim/Http/NonBufferedBody.php',
-        'Slim\\Http\\Request' => __DIR__ . '/..' . '/slim/slim/Slim/Http/Request.php',
-        'Slim\\Http\\RequestBody' => __DIR__ . '/..' . '/slim/slim/Slim/Http/RequestBody.php',
-        'Slim\\Http\\Response' => __DIR__ . '/..' . '/slim/slim/Slim/Http/Response.php',
-        'Slim\\Http\\StatusCode' => __DIR__ . '/..' . '/slim/slim/Slim/Http/StatusCode.php',
-        'Slim\\Http\\Stream' => __DIR__ . '/..' . '/slim/slim/Slim/Http/Stream.php',
-        'Slim\\Http\\UploadedFile' => __DIR__ . '/..' . '/slim/slim/Slim/Http/UploadedFile.php',
-        'Slim\\Http\\Uri' => __DIR__ . '/..' . '/slim/slim/Slim/Http/Uri.php',
+        'Slim\\Handlers\\Strategies\\RequestResponseNamedArgs' => __DIR__ . '/..' . '/slim/slim/Slim/Handlers/Strategies/RequestResponseNamedArgs.php',
+        'Slim\\Interfaces\\AdvancedCallableResolverInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/AdvancedCallableResolverInterface.php',
         'Slim\\Interfaces\\CallableResolverInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/CallableResolverInterface.php',
-        'Slim\\Interfaces\\CollectionInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/CollectionInterface.php',
-        'Slim\\Interfaces\\Http\\CookiesInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/Http/CookiesInterface.php',
-        'Slim\\Interfaces\\Http\\EnvironmentInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/Http/EnvironmentInterface.php',
-        'Slim\\Interfaces\\Http\\HeadersInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/Http/HeadersInterface.php',
+        'Slim\\Interfaces\\DispatcherInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/DispatcherInterface.php',
+        'Slim\\Interfaces\\ErrorHandlerInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/ErrorHandlerInterface.php',
+        'Slim\\Interfaces\\ErrorRendererInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/ErrorRendererInterface.php',
         'Slim\\Interfaces\\InvocationStrategyInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/InvocationStrategyInterface.php',
+        'Slim\\Interfaces\\MiddlewareDispatcherInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/MiddlewareDispatcherInterface.php',
+        'Slim\\Interfaces\\Psr17FactoryInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/Psr17FactoryInterface.php',
+        'Slim\\Interfaces\\Psr17FactoryProviderInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/Psr17FactoryProviderInterface.php',
+        'Slim\\Interfaces\\RequestHandlerInvocationStrategyInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/RequestHandlerInvocationStrategyInterface.php',
+        'Slim\\Interfaces\\RouteCollectorInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/RouteCollectorInterface.php',
+        'Slim\\Interfaces\\RouteCollectorProxyInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/RouteCollectorProxyInterface.php',
         'Slim\\Interfaces\\RouteGroupInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/RouteGroupInterface.php',
         'Slim\\Interfaces\\RouteInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/RouteInterface.php',
-        'Slim\\Interfaces\\RouterInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/RouterInterface.php',
-        'Slim\\MiddlewareAwareTrait' => __DIR__ . '/..' . '/slim/slim/Slim/MiddlewareAwareTrait.php',
-        'Slim\\Routable' => __DIR__ . '/..' . '/slim/slim/Slim/Routable.php',
-        'Slim\\Route' => __DIR__ . '/..' . '/slim/slim/Slim/Route.php',
-        'Slim\\RouteGroup' => __DIR__ . '/..' . '/slim/slim/Slim/RouteGroup.php',
-        'Slim\\Router' => __DIR__ . '/..' . '/slim/slim/Slim/Router.php',
+        'Slim\\Interfaces\\RouteParserInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/RouteParserInterface.php',
+        'Slim\\Interfaces\\RouteResolverInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/RouteResolverInterface.php',
+        'Slim\\Interfaces\\ServerRequestCreatorInterface' => __DIR__ . '/..' . '/slim/slim/Slim/Interfaces/ServerRequestCreatorInterface.php',
+        'Slim\\Logger' => __DIR__ . '/..' . '/slim/slim/Slim/Logger.php',
+        'Slim\\MiddlewareDispatcher' => __DIR__ . '/..' . '/slim/slim/Slim/MiddlewareDispatcher.php',
+        'Slim\\Middleware\\BodyParsingMiddleware' => __DIR__ . '/..' . '/slim/slim/Slim/Middleware/BodyParsingMiddleware.php',
+        'Slim\\Middleware\\ContentLengthMiddleware' => __DIR__ . '/..' . '/slim/slim/Slim/Middleware/ContentLengthMiddleware.php',
+        'Slim\\Middleware\\ErrorMiddleware' => __DIR__ . '/..' . '/slim/slim/Slim/Middleware/ErrorMiddleware.php',
+        'Slim\\Middleware\\MethodOverrideMiddleware' => __DIR__ . '/..' . '/slim/slim/Slim/Middleware/MethodOverrideMiddleware.php',
+        'Slim\\Middleware\\OutputBufferingMiddleware' => __DIR__ . '/..' . '/slim/slim/Slim/Middleware/OutputBufferingMiddleware.php',
+        'Slim\\Middleware\\RoutingMiddleware' => __DIR__ . '/..' . '/slim/slim/Slim/Middleware/RoutingMiddleware.php',
+        'Slim\\Psr7\\Cookies' => __DIR__ . '/..' . '/slim/psr7/src/Cookies.php',
+        'Slim\\Psr7\\Environment' => __DIR__ . '/..' . '/slim/psr7/src/Environment.php',
+        'Slim\\Psr7\\Factory\\RequestFactory' => __DIR__ . '/..' . '/slim/psr7/src/Factory/RequestFactory.php',
+        'Slim\\Psr7\\Factory\\ResponseFactory' => __DIR__ . '/..' . '/slim/psr7/src/Factory/ResponseFactory.php',
+        'Slim\\Psr7\\Factory\\ServerRequestFactory' => __DIR__ . '/..' . '/slim/psr7/src/Factory/ServerRequestFactory.php',
+        'Slim\\Psr7\\Factory\\StreamFactory' => __DIR__ . '/..' . '/slim/psr7/src/Factory/StreamFactory.php',
+        'Slim\\Psr7\\Factory\\UploadedFileFactory' => __DIR__ . '/..' . '/slim/psr7/src/Factory/UploadedFileFactory.php',
+        'Slim\\Psr7\\Factory\\UriFactory' => __DIR__ . '/..' . '/slim/psr7/src/Factory/UriFactory.php',
+        'Slim\\Psr7\\Header' => __DIR__ . '/..' . '/slim/psr7/src/Header.php',
+        'Slim\\Psr7\\Headers' => __DIR__ . '/..' . '/slim/psr7/src/Headers.php',
+        'Slim\\Psr7\\Interfaces\\HeadersInterface' => __DIR__ . '/..' . '/slim/psr7/src/Interfaces/HeadersInterface.php',
+        'Slim\\Psr7\\Message' => __DIR__ . '/..' . '/slim/psr7/src/Message.php',
+        'Slim\\Psr7\\NonBufferedBody' => __DIR__ . '/..' . '/slim/psr7/src/NonBufferedBody.php',
+        'Slim\\Psr7\\Request' => __DIR__ . '/..' . '/slim/psr7/src/Request.php',
+        'Slim\\Psr7\\Response' => __DIR__ . '/..' . '/slim/psr7/src/Response.php',
+        'Slim\\Psr7\\Stream' => __DIR__ . '/..' . '/slim/psr7/src/Stream.php',
+        'Slim\\Psr7\\UploadedFile' => __DIR__ . '/..' . '/slim/psr7/src/UploadedFile.php',
+        'Slim\\Psr7\\Uri' => __DIR__ . '/..' . '/slim/psr7/src/Uri.php',
+        'Slim\\ResponseEmitter' => __DIR__ . '/..' . '/slim/slim/Slim/ResponseEmitter.php',
+        'Slim\\Routing\\Dispatcher' => __DIR__ . '/..' . '/slim/slim/Slim/Routing/Dispatcher.php',
+        'Slim\\Routing\\FastRouteDispatcher' => __DIR__ . '/..' . '/slim/slim/Slim/Routing/FastRouteDispatcher.php',
+        'Slim\\Routing\\Route' => __DIR__ . '/..' . '/slim/slim/Slim/Routing/Route.php',
+        'Slim\\Routing\\RouteCollector' => __DIR__ . '/..' . '/slim/slim/Slim/Routing/RouteCollector.php',
+        'Slim\\Routing\\RouteCollectorProxy' => __DIR__ . '/..' . '/slim/slim/Slim/Routing/RouteCollectorProxy.php',
+        'Slim\\Routing\\RouteContext' => __DIR__ . '/..' . '/slim/slim/Slim/Routing/RouteContext.php',
+        'Slim\\Routing\\RouteGroup' => __DIR__ . '/..' . '/slim/slim/Slim/Routing/RouteGroup.php',
+        'Slim\\Routing\\RouteParser' => __DIR__ . '/..' . '/slim/slim/Slim/Routing/RouteParser.php',
+        'Slim\\Routing\\RouteResolver' => __DIR__ . '/..' . '/slim/slim/Slim/Routing/RouteResolver.php',
+        'Slim\\Routing\\RouteRunner' => __DIR__ . '/..' . '/slim/slim/Slim/Routing/RouteRunner.php',
+        'Slim\\Routing\\RoutingResults' => __DIR__ . '/..' . '/slim/slim/Slim/Routing/RoutingResults.php',
         'Square\\ApiHelper' => __DIR__ . '/..' . '/square/square/src/ApiHelper.php',
         'Square\\Apis\\ApplePayApi' => __DIR__ . '/..' . '/square/square/src/Apis/ApplePayApi.php',
         'Square\\Apis\\BankAccountsApi' => __DIR__ . '/..' . '/square/square/src/Apis/BankAccountsApi.php',
@@ -11504,11 +11598,16 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
         'Square\\Utils\\CompatibilityConverter' => __DIR__ . '/..' . '/square/square/src/Utils/CompatibilityConverter.php',
         'Square\\Utils\\FileWrapper' => __DIR__ . '/..' . '/square/square/src/Utils/FileWrapper.php',
         'Square\\Utils\\WebhooksHelper' => __DIR__ . '/..' . '/square/square/src/Utils/WebhooksHelper.php',
+        'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
+        'Symfony\\Polyfill\\Php80\\Php80' => __DIR__ . '/..' . '/symfony/polyfill-php80/Php80.php',
+        'Symfony\\Polyfill\\Php80\\PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/PhpToken.php',
+        'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
         'Unirest\\Configuration' => __DIR__ . '/..' . '/apimatic/unirest-php/src/Configuration.php',
         'Unirest\\HttpClient' => __DIR__ . '/..' . '/apimatic/unirest-php/src/HttpClient.php',
         'Unirest\\Request\\Body' => __DIR__ . '/..' . '/apimatic/unirest-php/src/Request/Body.php',
         'Unirest\\Request\\Request' => __DIR__ . '/..' . '/apimatic/unirest-php/src/Request/Request.php',
         'Unirest\\Response' => __DIR__ . '/..' . '/apimatic/unirest-php/src/Response.php',
+        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
         'WP\\MCP\\Abilities\\DiscoverAbilitiesAbility' => __DIR__ . '/..' . '/wordpress/mcp-adapter/includes/Abilities/DiscoverAbilitiesAbility.php',
         'WP\\MCP\\Abilities\\ExecuteAbilityAbility' => __DIR__ . '/..' . '/wordpress/mcp-adapter/includes/Abilities/ExecuteAbilityAbility.php',
         'WP\\MCP\\Abilities\\GetAbilityInfoAbility' => __DIR__ . '/..' . '/wordpress/mcp-adapter/includes/Abilities/GetAbilityInfoAbility.php',
@@ -11769,10 +11868,10 @@ class ComposerStaticInit2912874249c11808c71a66fb7d992891
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit2912874249c11808c71a66fb7d992891::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit2912874249c11808c71a66fb7d992891::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit2912874249c11808c71a66fb7d992891::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit2912874249c11808c71a66fb7d992891::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInita53134f36745539abd16674069f3e111::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInita53134f36745539abd16674069f3e111::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInita53134f36745539abd16674069f3e111::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInita53134f36745539abd16674069f3e111::$classMap;
 
         }, null, ClassLoader::class);
     }

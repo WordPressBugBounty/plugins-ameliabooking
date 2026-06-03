@@ -50,26 +50,24 @@ class GetCalendarEventsCommandHandler extends CommandHandler
             throw new AccessDeniedException('You are not allowed to read calendar events.');
         }
 
-        /** @var AbstractUser $user */
-        $user = $this->container->get('logged.in.user');
-        $timeZone = DateTimeService::getTimeZone()->getName();
-        $userType = $user->getType();
+        /** @var AbstractUser $currentUser */
+        $currentUser = $this->container->get('logged.in.user');
+        $currentUserType = $currentUser->getType();
 
         $timeZone = '';
-
-        if ($user->getType() === Entities::CUSTOMER) {
-            if (!$user->getId()) {
+        if ($currentUserType === Entities::CUSTOMER) {
+            if (!$currentUser->getId()) {
                 throw new AccessDeniedException('You are not allowed to read calendar events.');
             }
 
-            $queryParams['customers'] = [$user->getId()->getValue()];
+            $queryParams['customers'] = [$currentUser->getId()->getValue()];
         }
 
-        if ($userType === Entities::PROVIDER) {
-            $queryParams['providers'] = [$user->getId()->getValue()];
+        if ($currentUserType === Entities::PROVIDER) {
+            $queryParams['providers'] = [$currentUser->getId()->getValue()];
             /** @var ProviderApplicationService $providerAS */
             $providerAS = $this->container->get('application.user.provider.service');
-            $timeZone = $providerAS->getTimeZone($user);
+            $timeZone = $providerAS->getTimeZone($currentUser);
         }
 
         /** @var CalendarProviderService $calendarProviderService */
@@ -81,7 +79,7 @@ class GetCalendarEventsCommandHandler extends CommandHandler
         $sortedItems = array_merge(
             $this->getAppointments($queryParams, $timeZone),
             $this->getEvents($queryParams, $timeZone),
-            $this->getBlockTimes($queryParams, $timeZone)
+            $this->getBlockTimes($queryParams, $timeZone, $currentUserType)
         );
 
         usort($sortedItems, function ($a, $b) {
@@ -116,10 +114,11 @@ class GetCalendarEventsCommandHandler extends CommandHandler
             }
 
             if ($isAppointment) {
-                $filledDays[$itemStartDate]['events'][] = $this->appointmentFormatter($item, $user);
+                $filledDays[$itemStartDate]['events'][] = $this->appointmentFormatter($item, $currentUser);
             } elseif ($isBlockTime) {
                 $filledDays[$itemStartDate]['events'][] = $this->blockTimeFormatter(
                     $item,
+                    $currentUserType,
                     $queryParams,
                     $resourceTimeGridProviderIds
                 );
@@ -250,8 +249,12 @@ class GetCalendarEventsCommandHandler extends CommandHandler
      * @throws ContainerExceptionInterface
      * @throws DateInvalidTimeZoneException
      */
-    private function getBlockTimes(array $queryParams, string $timeZone): array
+    private function getBlockTimes(array $queryParams, string $timeZone, string $currentUserType): array
     {
+        if ($currentUserType === Entities::CUSTOMER) {
+            return [];
+        }
+
         $dayOffRepository = $this->container->get('domain.schedule.dayOff.repository');
 
         $queryParams['type'] = 'blockTime';
@@ -271,7 +274,7 @@ class GetCalendarEventsCommandHandler extends CommandHandler
         return $blockTimes->getItems();
     }
 
-    private function appointmentFormatter(Appointment $appointment, AbstractUser $user): array
+    private function appointmentFormatter(Appointment $appointment, AbstractUser $currentUser): array
     {
         /** @var SettingsService $settingsService */
         $settingsService = $this->container->get('domain.settings.service');
@@ -318,10 +321,10 @@ class GetCalendarEventsCommandHandler extends CommandHandler
             'type'                    => $appointment->getBookings()->length() === 1
                 ? 'singleAppointment'
                 : 'groupAppointment',
-            'editable'                => $user->getType() === Entities::CUSTOMER
+            'editable'                => $currentUser->getType() === Entities::CUSTOMER
                 ? $settingsService->getSetting('roles', 'allowCustomerReschedule')
                 : (
-                    $user->getType() === Entities::PROVIDER ?
+                    $currentUser->getType() === Entities::PROVIDER ?
                         $settingsService->getSetting('roles', 'allowWriteAppointments')
                         : true
                 ),
@@ -371,11 +374,18 @@ class GetCalendarEventsCommandHandler extends CommandHandler
 
     private function blockTimeFormatter(
         BlockTime $blockTime,
+        string $currentUserType,
         array $queryParams,
         array $resourceTimeGridProviderIds
     ): array {
         $startDate = $blockTime->getStartDate()->getValue();
         $endDate   = $blockTime->getEndDate()->getValue();
+
+        $employeeName = '';
+
+        if ($currentUserType !== Entities::PROVIDER) {
+            $employeeName = $blockTime->getUser() ? $blockTime->getUser()->getFullName() : BackendStrings::get('all_employees');
+        }
 
         $event = [
             'uuid'               => $blockTime->getId()->getValue(),
@@ -388,7 +398,7 @@ class GetCalendarEventsCommandHandler extends CommandHandler
             'startWithoutBuffer' => $startDate->format('Y-m-d H:i:s'),
             'endWithoutBuffer'   => $endDate->format('Y-m-d H:i:s'),
             'timeZone'           => $startDate->getTimezone()->getName(),
-            'employeeName'       => $blockTime->getUser() ? $blockTime->getUser()->getFullName() : BackendStrings::get('all_employees'),
+            'employeeName'       => $employeeName,
             'resourceId'         => $blockTime->getUser() ? $blockTime->getUser()->getId()->getValue() : null,
         ];
 
