@@ -8,23 +8,22 @@
     <el-tabs v-model="activeTab" class="am-ap__tabs">
       <!-- Details -->
       <el-tab-pane :label="amLabels.details" name="details">
-        <EventDetails
-          ref="eventDetailsRef"
-        />
+        <EventDetails ref="eventDetailsRef" />
       </el-tab-pane>
       <!-- /Details -->
 
       <!-- Periods -->
       <el-tab-pane :label="amLabels.periods" name="periods">
-        <EventPeriods
-          ref="eventPeriodsRef"
-          :page-width="props.pageWidth"
-        />
+        <EventPeriods ref="eventPeriodsRef" :page-width="props.pageWidth" />
       </el-tab-pane>
       <!-- /Periods -->
 
       <!-- Recurring -->
-      <el-tab-pane v-if="!licence.isStarter" :label="amLabels.recurring" name="recurring">
+      <el-tab-pane
+        v-if="!licence.isStarter"
+        :label="amLabels.recurring"
+        name="recurring"
+      >
         <EventRecurring
           ref="eventRecurringRef"
           :page-width="props.pageWidth"
@@ -35,41 +34,43 @@
 
       <!-- Pricing -->
       <el-tab-pane :label="amLabels.pricing" name="pricing">
-        <EventPricing
-          ref="eventPricingRef"
-          :page-width="props.pageWidth"
-        />
+        <EventPricing ref="eventPricingRef" :page-width="props.pageWidth" />
       </el-tab-pane>
       <!-- /Pricing -->
 
       <!-- Customize -->
       <el-tab-pane :label="amLabels.customize" name="customize">
-        <EventCustomize/>
+        <EventCustomize />
       </el-tab-pane>
       <!-- /Customize -->
 
       <!-- Waiting List -->
       <el-tab-pane
-        v-if="amSettings.featuresIntegrations.waitingList.enabled && !licence.isStarter && !licence.isBasic"
+        v-if="
+          amSettings.featuresIntegrations.waitingList.enabled &&
+          !licence.isStarter &&
+          !licence.isBasic
+        "
         :label="amLabels.waiting_list"
         name="waitingList"
       >
-        <EventWaitingList
-          :page-width="props.pageWidth"
-        />
+        <EventWaitingList :page-width="props.pageWidth" />
       </el-tab-pane>
       <!-- /Waiting List -->
 
       <!-- Settings -->
       <el-tab-pane :label="amLabels.settings" name="settings">
-        <EventSettings/>
+        <EventSettings />
       </el-tab-pane>
       <!-- /Settings -->
     </el-tabs>
 
     <div
       class="am-capei__footer"
-      :class="[{'am-capei__footer_new': !store.getters['event/getId']}, props.responsiveClass]"
+      :class="[
+        { 'am-capei__footer_new': !store.getters['event/getId'] },
+        props.responsiveClass,
+      ]"
     >
       <AmButton
         v-if="store.getters['event/getId']"
@@ -85,7 +86,11 @@
           category="secondary"
           :size="'default'"
           :type="'plain'"
-          @click="() => {emits('close')}"
+          @click="
+            () => {
+              emits('close')
+            }
+          "
         >
           {{ amLabels.cancel }}
         </AmButton>
@@ -103,7 +108,10 @@
     :description="amLabels.confirm_save_following"
     :close-btn-text="amLabels.save_single"
     :confirm-btn-text="amLabels.update_following"
-    :customized-options="{cancelBtn: {type: 'plain'}, confirmBtn: {type: ''}}"
+    :customized-options="{
+      cancelBtn: { type: 'plain' },
+      confirmBtn: { type: '' },
+    }"
     @decline="saveEvent(false)"
     @confirm="saveEvent(true)"
     @close="followingPopUpVisible = false"
@@ -116,7 +124,10 @@
     :description="amLabels.confirm_save_conflict"
     :close-btn-text="amLabels.cancel"
     :confirm-btn-text="amLabels.confirm"
-    :customized-options="{cancelBtn: {buttonType: 'plain'}, confirmBtn: {buttonType: 'filled'}}"
+    :customized-options="{
+      cancelBtn: { buttonType: 'plain' },
+      confirmBtn: { buttonType: 'filled' },
+    }"
     @decline="conflictPopUpVisible = false"
     @confirm="validateFollowingUpdate"
     @close="conflictPopUpVisible = false"
@@ -126,12 +137,7 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  inject,
-  computed,
-  onMounted,
-} from 'vue'
+import { ref, inject, computed, onMounted } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -141,10 +147,12 @@ import moment from 'moment/moment'
 import httpClient from '../../../../../../plugins/axios'
 
 // * Composables
-import { useAuthorizationHeaderObject } from '../../../../../../assets/js/public/panel'
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
-import { useBackEvent, useEventPeriods } from '../../../../../../assets/js/common/events'
-import { useUpdateStashEntities } from "../../../../../../assets/js/common/settings";
+import {
+  useBackEvent,
+  useEventPeriods,
+} from '../../../../../../assets/js/common/events'
+import { useUpdateStashEntities } from '../../../../../../assets/js/common/settings'
 
 // * Components
 import AmButton from '../../../../../_components/button/AmButton.vue'
@@ -209,10 +217,13 @@ let followingPopUpVisible = ref(false)
 
 let conflictPopUpVisible = ref(false)
 
-function duplicateEvent () {
+function duplicateEvent() {
   emits(
     'duplicate',
-    Object.assign(JSON.parse(JSON.stringify(store.getters['event/getEvent'])), {id: null, bookings: []})
+    Object.assign(JSON.parse(JSON.stringify(store.getters['event/getEvent'])), {
+      id: null,
+      bookings: [],
+    })
   )
 }
 
@@ -275,19 +286,19 @@ function saveEvent(updateFollowing) {
 
   httpClient
     .post(
-      '/events' + (store.getters['event/getId'] ? '/' + store.getters['event/getId'] : ''),
-      Object.assign(
-        useBackEvent(store),
-        {
-          applyGlobally: updateFollowing,
-        }
-      ),
-      Object.assign(useAuthorizationHeaderObject(store), {
+      '/events' +
+        (store.getters['event/getId']
+          ? '/' + store.getters['event/getId']
+          : ''),
+      Object.assign(useBackEvent(store), {
+        applyGlobally: updateFollowing,
+      }),
+      {
         params: { source: 'cabinet-provider' },
-      })
+      }
     )
     .then(() => {
-      useUpdateStashEntities(store)
+      useUpdateStashEntities()
 
       close('save')
     })
@@ -310,30 +321,37 @@ function validateFollowingUpdate() {
 }
 
 function validateCalendarConflict(callback) {
-  let organizer = store.getters['event/getOrganizerId'] ? store.getters['employee/getEmployee'] : null
+  let organizer = store.getters['event/getOrganizerId']
+    ? store.getters['employee/getEmployee']
+    : null
 
   if (organizer && (organizer.googleCalendar || organizer.outlookCalendar)) {
     loading.value = true
 
-    let providers = store.getters['event/getProviders'].map(i => new Object({id: i.id}))
+    let providers = store.getters['event/getProviders'].map(
+      (i) => new Object({ id: i.id })
+    )
 
     httpClient
       .post(
         '/events/calendar',
         {
-          providers: store.getters['event/getProviders'].map(i => i.id).indexOf(organizer.id) === -1
-            ? providers.concat([{id: organizer.id}])
-            : providers,
+          providers:
+            store.getters['event/getProviders']
+              .map((i) => i.id)
+              .indexOf(organizer.id) === -1
+              ? providers.concat([{ id: organizer.id }])
+              : providers,
           periods: useEventPeriods(store),
-          eventIds: [store.getters['event/getId'], store.getters['event/getParentId']],
+          eventIds: [
+            store.getters['event/getId'],
+            store.getters['event/getParentId'],
+          ],
           recurring: store.getters['event/getRecurring'],
         },
-        Object.assign(
-          useAuthorizationHeaderObject(store),
-          {
-            params: { source: 'cabinet-provider' },
-          }
-        )
+        {
+          params: { source: 'cabinet-provider' },
+        }
       )
       .then(() => {
         callback(false)
@@ -355,8 +373,13 @@ function close(type) {
 }
 
 onMounted(() => {
-  if (store.getters['event/getId'] && store.getters['event/getRecurringUntil']) {
-    recurringUntil.value = moment(store.getters['event/getRecurringUntil'].toISOString().split('T')[0])
+  if (
+    store.getters['event/getId'] &&
+    store.getters['event/getRecurringUntil']
+  ) {
+    recurringUntil.value = moment(
+      store.getters['event/getRecurringUntil'].toISOString().split('T')[0]
+    )
   }
 
   store.commit('event/setActive', true)
@@ -371,7 +394,10 @@ let cssVars = computed(() => {
   return {
     // * Event item css variables
     '--am-c-capei-text': amColors.value.colorMainText,
-    '--am-c-capei-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
+    '--am-c-capei-text-op10': useColorTransparency(
+      amColors.value.colorMainText,
+      0.1
+    ),
     '--am-c-capei-primary': amColors.value.colorPrimary,
 
     // * Customer css variables
@@ -404,7 +430,6 @@ export default {
   // am    - amelia
   // capei - cabinet-panel-event-item
   .am-capei {
-
     // Divider
     .am-divider {
       width: 100%;

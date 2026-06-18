@@ -195,7 +195,6 @@ import AmAlert from "../../../../_components/alert/AmAlert.vue";
 import Calendar from "../../../Parts/Calendar.vue";
 
 // * Composables
-import { useAuthorizationHeaderObject } from "../../../../../assets/js/public/panel";
 import {
   useUtcValue,
   useUtcValueOffset,
@@ -549,7 +548,7 @@ function rescheduleBooking () {
   httpClient.post(
     '/bookings/reassign/' + props.appointment.bookings.filter(i => i.status === 'approved' || i.status === 'pending' || i.status === 'waiting')[0].id,
       bookingData,
-    Object.assign(useAuthorizationHeaderObject(store), {params: {source: 'cabinet-' + cabinetType.value}})
+    {params: {source: 'cabinet-' + cabinetType.value}}
   ).then(() => {
     calendarRef.value.calendarSlotsLoading = false
     emits('success', {message: amLabels.value.appointment_rescheduled})
@@ -622,8 +621,7 @@ function packageBookingApp () {
 
   httpClient.post(
     '/bookings',
-    data,
-    useAuthorizationHeaderObject(store)
+    data
   ).then((response) => {
     calendarRef.value.calendarSlotsLoading = false
     useCreateBookingSuccess(store, response)

@@ -3,7 +3,7 @@
 Plugin Name: Amelia
 Plugin URI: https://wpamelia.com/
 Description: Amelia is a simple yet powerful automated booking specialist, working 24/7 to make sure your customers can make appointments and events even while you sleep!
-Version: 2.4.1
+Version: 2.4.2
 Author: Melograno Ventures
 Author URI: https://melograno.io/
 Text Domain: ameliabooking
@@ -44,8 +44,8 @@ use Exception;
 use Slim\App;
 use Slim\Psr7\Factory\ResponseFactory;
 use AmeliaBooking\Infrastructure\Licence;
-use Melograno\UsageTracker\Collectors\Plugin\AmeliaCollector;
-use Melograno\UsageTracker\Core\UsageTracker;
+use AmeliaVendor\Melograno\UsageTracker\Collectors\Plugin\AmeliaCollector;
+use AmeliaVendor\Melograno\UsageTracker\Core\UsageTracker;
 use WP\MCP\Core\McpAdapter;
 
 // No direct access
@@ -118,7 +118,7 @@ if (!defined('AMELIA_LOGIN_URL')) {
 
 // Const for Amelia version
 if (!defined('AMELIA_VERSION')) {
-    define('AMELIA_VERSION', '2.4.1');
+    define('AMELIA_VERSION', '2.4.2');
 }
 
 // Const for site URL
@@ -268,9 +268,10 @@ class Plugin
      */
     public static function init()
     {
-        UsageTracker::init(new AmeliaCollector(), __FILE__);
-        
         $settingsService = new SettingsService(new SettingsStorage());
+        $savedVersion = $settingsService->getSetting('activation', 'version');
+
+        UsageTracker::init(new AmeliaCollector(), __FILE__, $savedVersion, AMELIA_VERSION);
 
         // Initialize LiteSpeed Cache compatibility
         LiteSpeedCacheCompatibility::init();
@@ -493,7 +494,9 @@ class Plugin
 
         self::handleWelcomePageRedirect($settingsService);
 
-        if (AMELIA_VERSION !== $settingsService->getSetting('activation', 'version')) {
+        $savedVersion = $settingsService->getSetting('activation', 'version');
+
+        if (AMELIA_VERSION !== $savedVersion) {
             $settingsService->setSetting('activation', 'version', AMELIA_VERSION);
 
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -608,7 +611,7 @@ class Plugin
             delete_option('amelia_settings');
             delete_option('amelia_stash');
             delete_option('amelia_show_wpdt_promo');
-            delete_option((new AmeliaCollector())->getConsentOptionName());
+            UsageTracker::deleteStoredOptions();
 
 
             // Delete Files

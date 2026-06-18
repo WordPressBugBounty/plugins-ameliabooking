@@ -49,12 +49,21 @@
       @click="showTickets"
     >
       <span>{{ `x${ticketNumber} ` }}</span>
-      <span class="am-clickable">{{ showLabel }}</span>
+      <AmButton
+        type="text"
+        size="micro"
+        class="am-clickable"
+        :aria-expanded="ticketVisible"
+        :aria-controls="ticketsDetailId"
+      >
+        {{ showLabel }}
+      </AmButton>
     </span>
   </div>
-
   <div
-    v-if="ticketVisible"
+    v-if="props.booked.customPricing"
+    v-show="ticketVisible"
+    :id="ticketsDetailId"
     class="am-congrats__info-item am-fs__congrats-info-event-tickets"
   >
     <span class="am-congrats__info-item__value collapsable">
@@ -74,7 +83,8 @@
 import {
   ref,
   computed,
-  inject
+  inject,
+  getCurrentInstance
 } from 'vue'
 
 // * Composables
@@ -85,6 +95,10 @@ import {
 import { useFormattedPrice } from "../../../../../assets/js/common/formatting";
 import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
 
+// * Componets
+import AmButton from '../../../../_components/button/AmButton.vue';
+
+// * Component prop
 let props = defineProps({
   booked: {
     type: Object,
@@ -117,6 +131,7 @@ let ticketNumber = computed(() => {
 
 let showLabel = ref(props.labels.event_show_more)
 let ticketVisible = ref(false)
+const ticketsDetailId = `am-congrats-tickets-detail-${getCurrentInstance()?.uid ?? '0'}`
 
 function showTickets () {
   ticketVisible.value = !ticketVisible.value
@@ -190,6 +205,16 @@ export default {
         .am-clickable {
           color: var(--am-c-primary);
           cursor: pointer;
+          padding: 0 2px;
+
+          &:hover {
+            background-color: transparent
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--am-c-primary);
+            border-radius: 2px;
+          }
         }
       }
     }

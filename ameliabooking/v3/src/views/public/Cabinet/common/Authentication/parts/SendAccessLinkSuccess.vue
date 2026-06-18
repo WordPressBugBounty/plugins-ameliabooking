@@ -2,12 +2,15 @@
   <div
     class="am-asi"
     :style="cssVars"
+    role="region"
+    aria-labelledby="am-sals-title"
+    aria-describedby="am-sals-description"
   >
-    <div class="am-asi__top">
-      <div class="am-asi__header">
+    <div class="am-asi__top" role="status" aria-live="polite">
+      <div id="am-sals-title" class="am-asi__header">
         {{ amLabels.access_link_send_check }}
       </div>
-      <div class="am-asi__text">
+      <div id="am-sals-description" class="am-asi__text">
         {{ amLabels.access_link_send_click }}
       </div>
       <div class="am-asi__email">
@@ -19,9 +22,15 @@
       <span class="am-asi__footer-text">
         {{ amLabels.access_link_send_inbox }}
       </span>
-      <span class="am-asi__footer-link" @click="pageKey = 'sendAccessLink'">
+      <AmButton
+        ref="retryButtonRef"
+        class="am-asi__footer-retry__btn"
+        size="micro"
+        type="text"
+        @click="goToSendAccessLink"
+      >
         {{ amLabels.access_link_send_retry }}
-      </span>
+      </AmButton>
     </div>
   </div>
 </template>
@@ -29,9 +38,12 @@
 <script setup>
 // * import from Vue
 import {
+  ref,
   computed,
   reactive,
   inject,
+  onMounted,
+  nextTick,
 } from 'vue'
 
 // * Import from Vuex
@@ -39,6 +51,7 @@ import { useStore } from 'vuex'
 
 // * Composables
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation.js'
+import AmButton from "@/views/_components/button/AmButton.vue";
 
 // * Vars
 let store = useStore()
@@ -83,6 +96,19 @@ let email = computed(() => store.getters['auth/getEmail'])
 
 // * Page key
 let pageKey = inject('pageKey')
+let retryButtonRef = ref(null)
+
+function goToSendAccessLink () {
+  pageKey.value = 'sendAccessLink'
+}
+
+onMounted(() => {
+  // Keep keyboard flow predictable after the success state is rendered.
+  // AmButton is a Vue component, so we reach the underlying DOM node via $el.
+  nextTick(() => {
+    retryButtonRef.value?.$el?.focus()
+  })
+})
 
 /*************
  * Customize *
@@ -194,13 +220,14 @@ export default {
         color: var(--am-c-main-text-op60);
       }
 
-      &-link {
-        display: inline-flex;
-        font-size: 15px;
+      &-retry__btn {
+        padding: 0;
         font-weight: 400;
-        line-height: 1.6;
-        color: var(--am-c-primary);
-        cursor: pointer;
+        font-size: 15px;
+
+        &:hover {
+          background-color: transparent;
+        }
       }
     }
   }

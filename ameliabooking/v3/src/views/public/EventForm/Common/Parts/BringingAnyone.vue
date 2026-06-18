@@ -1,11 +1,16 @@
 <template>
-  <div class="am-elf__bringing" :style="cssVars">
+  <div
+    class="am-elf__bringing"
+    :style="cssVars"
+    role="group"
+    :aria-labelledby="headingId"
+  >
     <div
       class="am-elf__bringing-main"
       :class="responsiveClass"
     >
       <div
-        v-if="true"
+        :id="headingId"
         class="am-elf__bringing-heading"
       >
         {{ amLabels.event_bringing }}
@@ -15,11 +20,21 @@
         :class="responsiveClass"
       >
         <AmInputNumber
+          :id="inputId"
           v-model="persons"
           :min="options.min"
           :max="options.max"
           :class="responsiveClass"
+          :name="'event-bringing-anyone'"
+          :aria-label="amLabels.event_bringing"
+          :aria-describedby="inputHelpId"
         />
+        <span
+          :id="inputHelpId"
+          class="am-elf__bringing-sr-only"
+        >
+          {{ inputAssistiveText }}
+        </span>
       </div>
     </div>
   </div>
@@ -58,6 +73,17 @@ let persons = computed({
   set: (val) => {
     store.commit('persons/setPersons', val)
   }
+})
+
+// * IDs for ARIA linkage
+const uid = Math.random().toString(36).slice(2, 8)
+const headingId = `am-elf-bringing-heading-${uid}`
+const inputId = `am-elf-bringing-input-${uid}`
+const inputHelpId = `am-elf-bringing-help-${uid}`
+
+// * Screen reader helper text
+const inputAssistiveText = computed(() => {
+  return `${amLabels.value.minimum} ${options.value.min}, ${amLabels.value.maximum} ${options.value.max}.`
 })
 
 // * Responsive - Container Width
@@ -185,6 +211,18 @@ export default {
             width: 100%;
           }
         }
+      }
+
+      &-sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
       }
     }
   }

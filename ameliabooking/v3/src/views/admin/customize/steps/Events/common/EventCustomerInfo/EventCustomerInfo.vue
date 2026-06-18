@@ -53,6 +53,7 @@
             infoFormConstruction[item.id].countryPhoneIso
           "
           v-bind="infoFormConstruction[item.id].props"
+          v-on="'handlers' in infoFormConstruction[item.id] ? infoFormConstruction[item.id].handlers : {}"
         ></component>
       </template>
 
@@ -201,6 +202,11 @@ let infoFormConstruction = ref({
       whatsAppLabel: computed(() => labelsDisplay('whatsapp_opt_in_text')),
       isWhatsApp: amSettings.notifications.whatsAppEnabled,
       class: 'am-elfci__item',
+    },
+    handlers: {
+      handlePhoneData: (phoneData) => {
+        infoFormData.value.phone = phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, '') : ''
+      },
     },
   },
 })

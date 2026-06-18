@@ -1,6 +1,6 @@
 <template>
   <Content
-    v-if="!empty"
+    v-if="!structuralEmpty"
     ref="contentRef"
     :wrapper-class="`am-fcil ${pageWidth < 481 ? 'am-mobile' : ''}`"
     :form-class="`am-fcil__main ${pageWidth < 481 ? 'am-mobile' : ''}`"
@@ -621,6 +621,7 @@ import {
   computed,
   onBeforeMount,
   onMounted,
+  onBeforeUnmount,
   provide
 } from "vue";
 
@@ -664,9 +665,6 @@ let {
 
 // * Root Urls
 const baseUrls = inject('baseUrls')
-
-// * Empty state
-let empty = ref(false)
 
 // * Booking Dialog
 let openBooking = ref(false)
@@ -803,20 +801,20 @@ let filterWidth = computed(() => {
   return contentRef.value && contentRef.value.catHeaderWidth ? contentRef.value.catHeaderWidth : 0
 })
 
-// * window resize listener
-window.addEventListener('resize', resize);
-
 // * resize function
 function resize() {
-  nextTick(() => {
-    if (filterWidth.value > 480) {
-      filterMobileMenu.value = true
-    }
-  })
+  if (filterWidth.value > 480 && !filterMobileMenu.value) {
+    filterMobileMenu.value = true
+  }
 }
 
 onMounted(() => {
+  window.addEventListener('resize', resize)
   resize()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resize)
 })
 
 function searchingStrings (name) {
@@ -851,7 +849,34 @@ let categoriesMenu = computed(() => {
 
 // * Selected category
 let categorySelected = inject('categorySelected')
-let categoriesFiltered = computed(() => useAvailableCategories(amEntities.value, shortcodeData.value, employeeFilter.value, locationFilter.value))
+let categoriesForFiltering = computed(() => {
+  return {
+    ...amEntities.value,
+    categories: amEntities.value.categories.map((category) => ({ ...category })),
+  }
+})
+
+let categoriesFiltered = computed(() => {
+  return useAvailableCategories(
+    categoriesForFiltering.value,
+    shortcodeData.value,
+    employeeFilter.value,
+    locationFilter.value
+  )
+})
+
+let categoriesStructural = computed(() => {
+  const e = amEntities.value
+  return useAvailableCategories(
+    {
+      ...e,
+      categories: JSON.parse(JSON.stringify(e.categories)),
+    },
+    shortcodeData.value,
+    null,
+    null
+  )
+})
 
 let categoryPackages = computed(() => {
   let arr = []
@@ -916,6 +941,62 @@ let categoryServices = computed(() => {
   return arr
 })
 
+let categoryPackagesStructural = computed(() => {
+  let arr = []
+  if (categoriesStructural.value.find(cat => cat.id === categorySelected.value)) {
+    amEntities.value.packages.forEach(pack => {
+      categoriesStructural.value.find(cat => cat.id === categorySelected.value).packageList.forEach(packId => {
+        if (pack.id === packId) {
+          arr.push(pack)
+        }
+      })
+    })
+  } else {
+    amEntities.value.packages.forEach(pack => {
+      categoriesStructural.value.forEach(cat => {
+        cat.packageList.forEach(packId => {
+          if (
+            pack.id === packId
+            && !arr.find(p => p.id === packId)
+          ) {
+            arr.push(pack)
+          }
+        })
+      })
+    })
+  }
+
+  return arr
+})
+
+let categoryServicesStructural = computed(() => {
+  let arr = []
+
+  if (categorySelected.value && categoriesStructural.value.find(cat => cat.id === categorySelected.value)) {
+    amEntities.value.services.forEach(service => {
+      categoriesStructural.value.find(cat => cat.id === categorySelected.value).serviceIdList.forEach(serviceId => {
+        if (service.id === serviceId) {
+          arr.push(service)
+        }
+      })
+    })
+  } else {
+    amEntities.value.services.forEach(service => {
+      categoriesStructural.value.forEach(cat => {
+        cat.serviceIdList.forEach(serviceId => {
+          if (
+            service.id === serviceId
+          ) {
+            arr.push(service)
+          }
+        })
+      })
+    })
+  }
+
+  return arr
+})
+
 let employeeFilter = ref(null)
 
 let locationFilter = ref(null)
@@ -943,6 +1024,18 @@ function changeCategoryItemsVisibility(key) {
 
 onBeforeMount(() => {
   if (preselected.value.show) changeCategoryItemsVisibility(preselected.value.show)
+})
+
+// * Full-page empty: unfiltered entity lists only (not search / employee / location filters)
+const structuralEmpty = computed(() => {
+  const hasPackagesStructural =
+    displayCategoryPackages.value &&
+    !useCartHasItems(store) &&
+    categoryPackagesStructural.value.length > 0
+  const hasServicesStructural =
+    displayCategoryServices.value &&
+    categoryServicesStructural.value.length > 0
+  return !hasPackagesStructural && !hasServicesStructural
 })
 
 let filterClassWidth = computed(() => {
@@ -1046,12 +1139,6 @@ let headingStringRender = computed(() => {
   let connective = packagesLength ? '/' : ''
 
   return `${amLabels.value.available} - ${categoryServices.value.length} ${serviceString} ${connective} ${packagesLength} ${packageString}`
-})
-
-onMounted(() => {
-  nextTick(() => {
-    empty.value = categoryPackages.value.length === 0 && categoryServices.value.length === 0
-  })
 })
 
 // * Choose category from categories menu

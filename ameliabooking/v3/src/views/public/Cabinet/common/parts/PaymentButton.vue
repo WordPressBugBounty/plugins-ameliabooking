@@ -11,6 +11,7 @@
   >
     <template #reference>
       <AmButton
+        ref="menuTriggerRef"
         :size="props.btnSize"
         :type="props.type"
         :suffix="paymentMethods.length > 1 && usePayable(store, props.reservation) ? arrowDown : ''"
@@ -18,26 +19,36 @@
         :loading="!!paymentButtonLoader"
         :loading-icon="'loading'"
         :disabled="!usePayable(store, props.reservation)"
+        :aria-label="usePayable(store, props.reservation) ? amLabels.pay_now_btn : amLabels.paid"
+        aria-haspopup="menu"
+        :aria-expanded="payPopVisible ? 'true' : 'false'"
         @click="paymentLinkActivated"
+        @keydown="onMenuTriggerKeydown"
       >
         {{ usePayable(store, props.reservation) ? amLabels.pay_now_btn : amLabels.paid }}
       </AmButton>
     </template>
     <div
-      v-click-outside="closeEditItemPopup"
+      v-click-outside="closePayPopup"
       class="am-cc__edit"
+      role="menu"
+      @keydown="onMenuKeydown"
     >
-      <div
+      <AmButton
         v-for="paymentMethod in usePaymentMethods(props.bookable.settings)"
         :key="paymentMethod.value"
         v-click-outside="closePayPopup"
         class="am-cc__edit-item"
+        category="secondary"
+        type="text"
+        role="menuitem"
+        :aria-label="paymentMethod.label"
         @click="usePaymentLink(store, paymentMethod.value, props.reservation)"
       >
         <span class="am-cc__edit-text">
           {{ paymentMethod.label }}
         </span>
-      </div>
+      </AmButton>
     </div>
   </el-popover>
 </template>
@@ -48,6 +59,7 @@ import {
   ref,
   computed,
   inject,
+  nextTick,
 } from "vue";
 
 // * Import from Vuex
@@ -110,6 +122,7 @@ let arrowDown = {
 }
 
 let payPopVisible = ref(false)
+let menuTriggerRef = ref(null)
 
 function paymentLinkActivated (e) {
   e.stopPropagation()
@@ -121,14 +134,113 @@ function paymentLinkActivated (e) {
   }
 }
 
-function closePayPopup () {
-  payPopVisible.value = false
+function onMenuTriggerKeydown (e) {
+  const openKeys = ['Enter', ' ', 'Spacebar', 'ArrowDown']
+
+  if (paymentMethods.value.length === 1 && openKeys.includes(e.key)) {
+    e.preventDefault()
+    e.stopPropagation()
+    usePaymentLink(store, paymentMethods.value[0].value, props.reservation)
+    return
+  }
+
+  if (openKeys.includes(e.key)) {
+    e.preventDefault()
+    e.stopPropagation()
+    payPopVisible.value = true
+    focusFirstMenuItem()
+  }
+
+  if (e.key === 'Escape') {
+    e.preventDefault()
+    e.stopPropagation()
+    closePayPopup(true)
+  }
 }
 
-let editPopVisible = ref(false)
+function getVisibleMenuItems (container = null) {
+  const popperRoot = container?.closest('.am-cc__popper') || document.querySelector('.am-cc__popper')
 
-function closeEditItemPopup () {
-  editPopVisible.value = false
+  if (!popperRoot) {
+    return []
+  }
+
+  return Array.from(popperRoot.querySelectorAll('.am-cc__edit-item'))
+    .filter(item => !item.disabled && item.offsetParent !== null)
+}
+
+function focusFirstMenuItem () {
+  nextTick(() => {
+    const firstItem = getVisibleMenuItems()[0]
+
+    if (firstItem) {
+      firstItem.focus()
+    }
+  })
+}
+
+function focusMenuTrigger () {
+  nextTick(() => {
+    const trigger = menuTriggerRef.value?.$el || menuTriggerRef.value
+
+    if (trigger && typeof trigger.focus === 'function') {
+      trigger.focus()
+    }
+  })
+}
+
+function onMenuKeydown (e) {
+  const menuItems = getVisibleMenuItems(e.currentTarget)
+
+  if (!menuItems.length) {
+    return
+  }
+
+  const currentIndex = menuItems.indexOf(document.activeElement)
+
+  if (e.key === 'Escape') {
+    e.preventDefault()
+    e.stopPropagation()
+    closePayPopup(true)
+    return
+  }
+
+  if (e.key === 'Tab') {
+    closePayPopup()
+    return
+  }
+
+  if (e.key === 'Home') {
+    e.preventDefault()
+    menuItems[0].focus()
+    return
+  }
+
+  if (e.key === 'End') {
+    e.preventDefault()
+    menuItems[menuItems.length - 1].focus()
+    return
+  }
+
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault()
+
+    const step = e.key === 'ArrowDown' ? 1 : -1
+    const fallbackIndex = e.key === 'ArrowDown' ? 0 : menuItems.length - 1
+    const nextIndex = currentIndex === -1
+      ? fallbackIndex
+      : (currentIndex + step + menuItems.length) % menuItems.length
+
+    menuItems[nextIndex].focus()
+  }
+}
+
+function closePayPopup (focusTrigger = false) {
+  payPopVisible.value = false
+
+  if (focusTrigger) {
+    focusMenuTrigger()
+  }
 }
 
 /*************

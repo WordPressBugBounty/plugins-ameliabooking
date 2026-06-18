@@ -59,7 +59,7 @@ export default {
             spots: item.spots,
             sold: item.sold,
             persons: 0,
-            price: item.dateRangePrice ? item.dateRangePrice : item.price,
+            price: item.dateRangePrice != null ? item.dateRangePrice : item.price,
             name: item.name,
             id: item.id,
             eventTicketId: item.id,

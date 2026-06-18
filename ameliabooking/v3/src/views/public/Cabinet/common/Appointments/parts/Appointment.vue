@@ -97,7 +97,9 @@
         <AppointmentLinked
           :linked-appointments="linkedAppointments"
           :responsive-class="props.responsiveClass"
-          @edit-linked-appointment="(data) => emits('editLinkedAppointment', data)"
+          @edit-linked-appointment="
+            (data) => emits('editLinkedAppointment', data)
+          "
         />
       </el-tab-pane>
       <!-- /Linked -->
@@ -149,7 +151,11 @@
         category="secondary"
         :size="'default'"
         :type="'plain'"
-        @click="() => {emits('close')}"
+        @click="
+          () => {
+            emits('close')
+          }
+        "
       >
         {{ amLabels.cancel }}
       </AmButton>
@@ -163,13 +169,7 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  provide,
-  inject,
-  computed,
-  onMounted
-} from 'vue'
+import { ref, provide, inject, computed, onMounted } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -178,8 +178,10 @@ import moment from 'moment'
 
 // * Composables
 import { useTimeInSeconds } from '../../../../../../assets/js/common/date'
-import { useAppointmentSlots, useSlotsPricing } from '../../../../../../assets/js/public/slots'
-import { useAuthorizationHeaderObject } from '../../../../../../assets/js/public/panel'
+import {
+  useAppointmentSlots,
+  useSlotsPricing,
+} from '../../../../../../assets/js/public/slots'
 
 // * Components
 import AmButton from '../../../../../_components/button/AmButton.vue'
@@ -193,8 +195,8 @@ import AppointmentExtras from './AppointmentExtras.vue'
 import AppointmentRecurring from './AppointmentRecurring.vue'
 import AppointmentLinked from './AppointmentLinked.vue'
 import AppointmentPayment from './AppointmentPayment.vue'
-import AmAlert from "../../../../../_components/alert/AmAlert.vue";
-import CancelPopup from "../../parts/CancelPopup.vue";
+import AmAlert from '../../../../../_components/alert/AmAlert.vue'
+import CancelPopup from '../../parts/CancelPopup.vue'
 
 import httpClient from '../../../../../../plugins/axios'
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
@@ -255,7 +257,8 @@ let capacityWarning = ref('')
 
 let appointmentCapacity = computed(() => {
   return store.getters['appointment/getBookings'].length
-    ? store.getters['appointment/getBookings'].filter(i => i.status === 'approved' || i.status === 'pending')
+    ? store.getters['appointment/getBookings']
+        .filter((i) => i.status === 'approved' || i.status === 'pending')
         .map((b) => b.persons)
         .reduce((sum, p) => sum + p, 0)
     : 0
@@ -478,7 +481,10 @@ function selectDate(date) {
 }
 
 function selectTime(time) {
-  let locationId = freeSlots.value[moment(store.getters['appointment/getStartDate']).format('YYYY-MM-DD')][time][0].l
+  let locationId =
+    freeSlots.value[
+      moment(store.getters['appointment/getStartDate']).format('YYYY-MM-DD')
+    ][time][0].l
 
   if (locationId) {
     store.commit('appointment/setLocationId', locationId)
@@ -488,18 +494,21 @@ function selectTime(time) {
 function isDisabledDate(value, inspectTimes, isMain, monthOrYear) {
   let date = moment(value).format('YYYY-MM-DD')
 
-  return typeof monthOrYear === 'undefined' && !(
-    date in freeSlots.value &&
-    (inspectTimes
-      ? getFreeTimes(
-          null,
-          {
-            date: value,
-            times: Object.keys(freeSlots.value[date]),
-          },
-          isMain
-        ).length
-      : true)
+  return (
+    typeof monthOrYear === 'undefined' &&
+    !(
+      date in freeSlots.value &&
+      (inspectTimes
+        ? getFreeTimes(
+            null,
+            {
+              date: value,
+              times: Object.keys(freeSlots.value[date]),
+            },
+            isMain
+          ).length
+        : true)
+    )
   )
 }
 
@@ -511,13 +520,18 @@ let slotsLoading = ref(false)
 let slotsProps = computed(() => {
   let extras = {}
 
-  store.getters['appointment/getBookings'].filter(i => (i.status === 'pending' || i.status === 'approved')).forEach((booking) => {
-    booking.extras.forEach((bookingExtra) => {
-      if (bookingExtra.quantity && !(bookingExtra.extraId in extras)) {
-        extras[bookingExtra.extraId] = {id: bookingExtra.extraId, quantity: bookingExtra.quantity}
-      }
+  store.getters['appointment/getBookings']
+    .filter((i) => i.status === 'pending' || i.status === 'approved')
+    .forEach((booking) => {
+      booking.extras.forEach((bookingExtra) => {
+        if (bookingExtra.quantity && !(bookingExtra.extraId in extras)) {
+          extras[bookingExtra.extraId] = {
+            id: bookingExtra.extraId,
+            quantity: bookingExtra.quantity,
+          }
+        }
+      })
     })
-  })
 
   return {
     serviceId: store.getters['appointment/getServiceId'],
@@ -548,7 +562,12 @@ function changedSlotCondition(isMount = false) {
   }
 }
 
-function fetchSlots(selectedDate, recurringIndex = null, isNavigation = false, isMount = false) {
+function fetchSlots(
+  selectedDate,
+  recurringIndex = null,
+  isNavigation = false,
+  isMount = false
+) {
   if (store.getters['appointment/getServiceId']) {
     slotsLoading.value = true
 
@@ -611,9 +630,14 @@ function fetchSlots(selectedDate, recurringIndex = null, isNavigation = false, i
           freeSlots.value = slots
         }
 
-        let slotsPricingResult = !licence.isLite && !licence.isStarter && !licence.isBasic
-         ? useSlotsPricing(store, slots, store.getters['appointment/getServiceId'])
-         : null
+        let slotsPricingResult =
+          !licence.isLite && !licence.isStarter && !licence.isBasic
+            ? useSlotsPricing(
+                store,
+                slots,
+                store.getters['appointment/getServiceId']
+              )
+            : null
 
         slotsPricing.value = slotsPricingResult ? slotsPricingResult.dates : {}
 
@@ -668,7 +692,7 @@ let alertVisibility = ref(false)
 
 let errorMessage = ref('')
 
-function closeAlert () {
+function closeAlert() {
   alertVisibility.value = false
   errorMessage.value = ''
 }
@@ -676,7 +700,6 @@ function closeAlert () {
 let loading = ref(false)
 
 let savedAppointment = ref(null)
-
 
 function getAmount(serviceId, bookings) {
   let amount = 0
@@ -687,7 +710,7 @@ function getAmount(serviceId, bookings) {
   )
 
   bookings
-    .filter(i => i.status !== 'canceled' && i.status !== 'rejected')
+    .filter((i) => i.status !== 'canceled' && i.status !== 'rejected')
     .forEach((booking) => {
       let changedBookingPrice = useChangedBookingPrice(
         store.getters['appointment/getAppointmentData'],
@@ -700,9 +723,16 @@ function getAmount(serviceId, bookings) {
         id: 'id' in booking ? booking.id : null,
         price: !changedBookingPrice
           ? booking.price
-          : useAppointmentServicePrice(employeeService, booking.persons, booking.duration),
+          : useAppointmentServicePrice(
+              employeeService,
+              booking.persons,
+              booking.duration
+            ),
         persons: booking.persons,
-        aggregatedPrice: 'aggregatedPrice' in booking ? booking.aggregatedPrice : employeeService.aggregatedPrice,
+        aggregatedPrice:
+          'aggregatedPrice' in booking
+            ? booking.aggregatedPrice
+            : employeeService.aggregatedPrice,
         extras: booking.extras.filter((e) => 'id' in e && e.id),
         serviceId: serviceId,
         coupon: booking.coupon,
@@ -718,9 +748,11 @@ function getAmount(serviceId, bookings) {
         false
       )
 
-      amount += bookingAmountData.total - bookingAmountData.discount + bookingAmountData.tax
-    }
-  )
+      amount +=
+        bookingAmountData.total -
+        bookingAmountData.discount +
+        bookingAmountData.tax
+    })
 
   return amount
 }
@@ -760,10 +792,12 @@ function validateSave() {
   const detailsPromise = new Promise((resolve) => {
     if (appointmentDetailsRef.value?.detailsFormRef) {
       appointmentDetailsRef.value.detailsFormRef.validate((valid) => {
-        if (!valid ||
+        if (
+          !valid ||
           !store.getters['appointment/getServiceId'] ||
           !store.getters['appointment/getStartDate'] ||
-          !store.getters['appointment/getStartTime']) {
+          !store.getters['appointment/getStartTime']
+        ) {
           activeTab.value = 'details'
           resolve(false)
         } else {
@@ -776,8 +810,8 @@ function validateSave() {
   })
 
   // Wait for all validations to complete
-  Promise.all([customFieldsPromise, customersPromise, detailsPromise])
-    .then((results) => {
+  Promise.all([customFieldsPromise, customersPromise, detailsPromise]).then(
+    (results) => {
       // If any validation failed, stop here
       if (results.includes(false)) {
         return
@@ -786,14 +820,19 @@ function validateSave() {
       // Continue with capacity check
       capacityWarning.value =
         store.getters['appointment/getBookings']
-          .filter(i => i.status !== 'canceled' && i.status !== 'rejected' && i.status !== 'waiting')
+          .filter(
+            (i) =>
+              i.status !== 'canceled' &&
+              i.status !== 'rejected' &&
+              i.status !== 'waiting'
+          )
           .map((i) => i.persons)
           .reduce((accumulator, currentValue) => {
             return accumulator + currentValue
           }, 0) > service.value.maxCapacity
           ? amLabels.value.select_max_customer_count_warning +
-          ' ' +
-          service.value.maxCapacity
+            ' ' +
+            service.value.maxCapacity
           : ''
 
       // Check capacity warning
@@ -803,7 +842,8 @@ function validateSave() {
       }
 
       saveAppointment()
-    })
+    }
+  )
 }
 
 function saveAppointment() {
@@ -829,9 +869,11 @@ function saveAppointment() {
       Object.assign({}, booking, {
         customerId: booking.customer.id,
         extras: booking.extras.filter((e) => e.quantity),
-        customFields: amSettings.featuresIntegrations.customFields.enabled || store.getters['appointment/getId']
-          ? customFields
-          : null,
+        customFields:
+          amSettings.featuresIntegrations.customFields.enabled ||
+          store.getters['appointment/getId']
+            ? customFields
+            : null,
       })
     )
   })
@@ -892,11 +934,12 @@ function saveAppointment() {
         )
       : [],
     lessonSpace: store.getters['appointment/getLessonSpace']
-      ? 'https://www.thelessonspace.com/space/' + store.getters['appointment/getLessonSpace']
+      ? 'https://www.thelessonspace.com/space/' +
+        store.getters['appointment/getLessonSpace']
       : null,
     createPaymentLinks: store.getters['appointment/getCreatePaymentLinks']
-        ? 1
-        : 0,
+      ? 1
+      : 0,
   }
 
   loading.value = true
@@ -908,12 +951,9 @@ function saveAppointment() {
           ? '/' + store.getters['appointment/getId']
           : ''),
       data,
-      Object.assign(
-        useAuthorizationHeaderObject(store),
-        {
-          params: { source: 'cabinet-provider' },
-        }
-      )
+      {
+        params: { source: 'cabinet-provider' },
+      }
     )
     .then((result) => {
       if (result.data.data.appointment.id) {
@@ -923,14 +963,24 @@ function saveAppointment() {
     .catch((e) => {
       errorMessage.value = amLabels.value.error
 
-      if ('response' in e && 'data' in e.response && 'data' in e.response.data) {
-        if ('timeSlotUnavailable' in e.response.data.data && e.response.data.data.timeSlotUnavailable === true) {
+      if (
+        'response' in e &&
+        'data' in e.response &&
+        'data' in e.response.data
+      ) {
+        if (
+          'timeSlotUnavailable' in e.response.data.data &&
+          e.response.data.data.timeSlotUnavailable === true
+        ) {
           errorMessage.value = amLabels.value.time_slot_unavailable
 
           activeTab.value = 'details'
         }
 
-        if ('customerAlreadyBooked' in e.response.data.data && e.response.data.data.customerAlreadyBooked === true) {
+        if (
+          'customerAlreadyBooked' in e.response.data.data &&
+          e.response.data.data.customerAlreadyBooked === true
+        ) {
           errorMessage.value = amLabels.value.customer_already_booked
 
           activeTab.value = 'customers'
@@ -958,33 +1008,31 @@ onMounted(() => {
       JSON.stringify(store.getters['appointment/getAppointmentData'])
     )
 
-    let locations = store.getters['entities/filteredLocations'](
-      {
-        categoryId: null,
-        serviceId: null,
-        providerId: store.getters['appointment/getProviderId'],
-        locationId: null,
-      }
-    )
+    let locations = store.getters['entities/filteredLocations']({
+      categoryId: null,
+      serviceId: null,
+      providerId: store.getters['appointment/getProviderId'],
+      locationId: null,
+    })
 
-    let services = store.getters['entities/filteredServices'](
-      {
-        categoryId: null,
-        serviceId: null,
-        providerId: store.getters['appointment/getProviderId'],
-        locationId: null,
-      }
-    )
+    let services = store.getters['entities/filteredServices']({
+      categoryId: null,
+      serviceId: null,
+      providerId: store.getters['appointment/getProviderId'],
+      locationId: null,
+    })
 
-    let detachedEntity = (
-      store.getters['appointment/getId'] &&
-      store.getters['appointment/getServiceId'] &&
-      services.map(i => i.id).indexOf(store.getters['appointment/getServiceId']) === -1
-    ) || (
-      store.getters['appointment/getId'] &&
-      store.getters['appointment/getLocationId'] &&
-      locations.map(i => i.id).indexOf(store.getters['appointment/getLocationId']) === -1
-    )
+    let detachedEntity =
+      (store.getters['appointment/getId'] &&
+        store.getters['appointment/getServiceId'] &&
+        services
+          .map((i) => i.id)
+          .indexOf(store.getters['appointment/getServiceId']) === -1) ||
+      (store.getters['appointment/getId'] &&
+        store.getters['appointment/getLocationId'] &&
+        locations
+          .map((i) => i.id)
+          .indexOf(store.getters['appointment/getLocationId']) === -1)
 
     if (!detachedEntity) {
       changedSlotCondition(true)
@@ -1008,7 +1056,10 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-capai-text': amColors.value.colorMainText,
-    '--am-c-capai-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
+    '--am-c-capai-text-op10': useColorTransparency(
+      amColors.value.colorMainText,
+      0.1
+    ),
     '--am-c-capai-primary': amColors.value.colorPrimary,
 
     '--am-c-cust-no1': amColors.value.colorMainText,
@@ -1040,7 +1091,6 @@ export default {
   // am    - amelia
   // capai - cabinet-panel-appointment-item
   .am-capai {
-
     // Customer
     &-customer {
       &__name {

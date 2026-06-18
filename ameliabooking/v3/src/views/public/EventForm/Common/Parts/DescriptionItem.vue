@@ -2,32 +2,39 @@
   <div
     v-if="useDescriptionVisibility(props.description)"
     class="am-eli__description"
+    :aria-labelledby="props.title ? titleId : undefined"
   >
     <p
       v-if="props.title"
+      :id="titleId"
       class="am-eli__description-title"
     >
       {{ props.title }}
     </p>
     <p
       v-if="showMore && props.description.replace(/<[^>]*>?/gm, '').length > props.limit"
+      :id="descriptionId"
       class="am-eli__description-text ql-description"
       v-html="props.description.slice(0, props.limit) + '...'"
     >
     </p>
     <p
       v-else
+      :id="descriptionId"
       class="am-eli__description-text ql-description"
       v-html="props.description"
     >
     </p>
-    <span
+    <button
       v-if="props.description.replace(/<[^>]*>?/gm, '').length > props.limit"
+      type="button"
       class="am-eli__description-btn"
+      :aria-expanded="!showMore"
+      :aria-controls="descriptionId"
       @click="showMore = !showMore"
     >
       {{ showMore ? displayLabels('show_more') : displayLabels('show_less') }}
-    </span>
+    </button>
   </div>
 </template>
 
@@ -36,6 +43,7 @@
 import {
   ref,
   inject,
+  computed,
   onMounted
 } from "vue";
 
@@ -71,6 +79,11 @@ let props = defineProps({
 let showMore = ref(false)
 
 let amLabels = inject('labels')
+
+// * Unique IDs for ARIA linkage
+const uid = Math.random().toString(36).slice(2, 8)
+const titleId = computed(() => `am-eli-title-${uid}`)
+const descriptionId = computed(() => `am-eli-desc-${uid}`)
 
 function displayLabels (label) {
   return Object.keys(props.customizedLabels).length && props.customizedLabels[label] ? props.customizedLabels[label] : amLabels[label]
@@ -121,6 +134,19 @@ export default {
         line-height: 1.6;
         color: var(--am-c-primary);
         cursor: pointer;
+
+        // Reset native button styles
+        background: none;
+        border: none;
+        padding: 0;
+        font-family: inherit;
+        text-align: left;
+
+        &:focus-visible {
+          outline: 2px solid var(--am-c-primary);
+          outline-offset: 2px;
+          border-radius: 2px;
+        }
       }
     }
   }

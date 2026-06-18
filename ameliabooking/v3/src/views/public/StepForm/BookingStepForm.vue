@@ -540,12 +540,21 @@ watch(ready, (current) => {
     setShortcodeParams()
 
     let preselected = store.getters['entities/getPreselected']
+
+    let selectionPackages = store.getters['entities/filteredPackages'](
+      store.getters['booking/getSelection']
+    )
+
     empty.value =
       store.getters['entities/getServices'].length === 0 ||
       store.getters['entities/getEmployees'].length === 0 ||
       (store.getters['entities/getPackages'].length === 0 &&
         (shortcodeData.value.show === 'packages' ||
-          preselected.package.length > 0))
+          preselected.package.length > 0)) ||
+      ((shortcodeData.value.show === 'packages' ||
+        preselected.show === 'packages' ||
+        preselected.package.length > 1) &&
+        selectionPackages.length === 0)
 
     let restore = useRestore(store, shortcodeData.value)
 

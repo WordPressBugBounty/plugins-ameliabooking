@@ -10,6 +10,7 @@
     class="am-elf"
     :style="cssVars"
     role="main"
+    :aria-busy="!ready || loading"
   >
       <!-- Events List -->
       <EventsList />
@@ -26,6 +27,7 @@
         :show-close="ready && !loading"
         modal-class="amelia-v2-booking am-dialog-el"
         :custom-styles="cssVars"
+        aria-labelledby="am-elf-dialog-title"
         @close="onCloseEventDialog"
         @closed="onClosedEventDialog"
         @opened="onOpenedEventDialog"
@@ -35,6 +37,10 @@
             id="amelia-container"
             ref="dialogContainer"
           >
+            <!-- Visually-hidden dialog title for screen readers -->
+            <div id="am-elf-dialog-title" class="am-sr-only">
+              {{ customizedStepLabels.event_booking || labels.event_booking || 'Event Booking' }}
+            </div>
             <div v-if="stepIndex > 0" class="am-dialog-el-header">
               <EventListHeader
                 :ready="ready"
@@ -239,13 +245,26 @@ watch(eventFluidStepKey ,(current) => {
 
 }, {deep: true})
 
-// * Waiting list availability and options
+// * Waiting list: vuex options aligned with selected event (parity with Events Calendar dialog flow).
 let isWaitingList = computed(() => useWaitingListAvailability(store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId'])))
-watch(isWaitingList, (current) => {
-  if (current) {
-    let waitingOptions = JSON.parse(JSON.stringify(store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId']).waitingList))
-    store.commit('eventWaitingListOptions/setAllData', {...waitingOptions, isAvailable: isWaitingList.value})
+
+function syncEventWaitingListOptionsForSelectedEvent () {
+  const event = store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId'])
+  if (event && useWaitingListAvailability(event)) {
+    const waitingOptions = event.waitingList != null
+      ? JSON.parse(JSON.stringify(event.waitingList))
+      : {}
+    store.commit('eventWaitingListOptions/setAllData', {...waitingOptions, isAvailable: true})
+  } else {
+    store.dispatch('eventWaitingListOptions/resetWaitingOptions')
   }
+}
+
+watch(() => store.getters['eventBooking/getSelectedEventId'], (eventId) => {
+  if (eventId == null) {
+    return
+  }
+  syncEventWaitingListOptionsForSelectedEvent()
 })
 
 
@@ -412,6 +431,7 @@ function onClosedEventDialog () {
 
 function onOpenedEventDialog () {
   nextTick(() => {
+    syncEventWaitingListOptionsForSelectedEvent()
     if (dialogContainer.value) {
       dialogWidth.value = dialogContainer.value.offsetWidth
     }
@@ -742,6 +762,19 @@ export default {
       font-family: var(--am-font-family), sans-serif;
       box-sizing: border-box;
       word-break: break-word;
+    }
+
+    // Visually hidden utility – content accessible to screen readers only
+    .am-sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     // el - event list

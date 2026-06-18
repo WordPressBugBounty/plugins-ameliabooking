@@ -1544,7 +1544,8 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
             cb.token AS booking_token,
             cb.aggregatedPrice AS booking_aggregatedPrice,
             cb.tax AS booking_tax,
-            cb.qrCodes AS booking_qrCodes
+            cb.qrCodes AS booking_qrCodes,
+            cb.ivyEntryId AS booking_ivyEntryId
         ';
 
         if (!empty($criteria['ids'])) {

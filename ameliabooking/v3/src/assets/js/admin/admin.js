@@ -1,5 +1,8 @@
 import { createApp, defineAsyncComponent } from 'vue/dist/vue.esm-bundler'
-import { provide, ref, reactive, readonly, nextTick } from 'vue'
+import { provide, ref, reactive, readonly, nextTick, onMounted } from 'vue'
+import { MazUi } from 'maz-ui/plugins'
+import { mazUi as mazUiThemePreset } from '@maz-ui/themes/presets/mazUi'
+import 'maz-ui/styles'
 import { useLicence } from '../common/licence'
 import store from '../../../store'
 
@@ -43,6 +46,17 @@ window.__dynamic_handler__ = function (importer) {
 // @ts-ignore
 window.__dynamic_preload__ = function (preloads) {
   return preloads.map((preload) => dynamicCdn + preload)
+}
+
+function getMazLocale() {
+  const locale = Array.isArray(window.localeLanguage) ? window.localeLanguage[0] : ''
+
+  if (typeof locale !== 'string' || !locale) {
+    return 'en'
+  }
+
+  // Normalize WP locale formats like en_US -> en for maz-ui locale keys.
+  return locale.toLowerCase().replace('_', '-').split('-')[0] || 'en'
 }
 
 function getVueStyleElements() {
@@ -216,6 +230,17 @@ function waitForMountElement() {
     template: `<${componentName} />`,
   })
     .component(componentName, selectedComponent)
+    .use(MazUi, {
+      theme: {
+        preset: mazUiThemePreset,
+        strategy: 'runtime',
+        darkModeStrategy: 'class',
+      },
+      translations: {
+        locale: getMazLocale(),
+        fallbackLocale: 'en',
+      },
+    })
     .use(store)
     .mount(mountElement)
 }

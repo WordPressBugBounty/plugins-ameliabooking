@@ -1,27 +1,37 @@
 <template>
-  <!-- :class="{'am-elf__main-heading-mobile': mobile}" -->
   <div
     v-if="props.ready && !props.loading && !props.loadingUpcoming"
     class="am-el__header-inner"
+    role="region"
+    :aria-label="displayLabels(stepsArray[stepIndex].label)"
+    :aria-busy="props.loading || props.loadingUpcoming"
     :style="cssVars"
   >
     <AmButton
       v-if="stepIndex < stepsArray.length - 1"
+      ref="backButtonRef"
       class="am-heading-prev"
       :icon="IconArrowLeft"
       :icon-only="true"
       size="micro"
       type="plain"
       category="secondary"
-      aria-label="Previous step"
+      :aria-label="amLabels.previous_step || 'Previous step'"
       :disabled="props.loading"
       @click="previousStep"
     ></AmButton>
-    <span class="am-el__header-inner__title">
+    <span class="am-el__header-inner__title" aria-live="polite" aria-atomic="true">
       {{ displayLabels(stepsArray[stepIndex].label) }}
     </span>
   </div>
-  <span v-else class="am-el__skeleton" :style="cssVars">
+  <span
+    v-else
+    class="am-el__skeleton"
+    role="status"
+    aria-live="polite"
+    :aria-label="amLabels.loading_header || 'Loading header'"
+    :style="cssVars"
+  >
     <el-skeleton animated>
       <template #template>
         <el-skeleton-item />
@@ -35,7 +45,7 @@ import AmButton from '../../../_components/button/AmButton.vue'
 import IconArrowLeft from '../../../_components/icons/IconArrowLeft'
 
 // * Import from Vue
-import { ref, computed, inject } from 'vue'
+import { ref, computed, inject, watch, nextTick, onBeforeUnmount } from 'vue'
 
 // * Composables
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
@@ -66,6 +76,30 @@ let stepsArray = inject('stepsArray')
 
 // * Step Index
 const stepIndex = inject('stepIndex')
+const backButtonRef = ref(null)
+const focusFallbackIntervalRef = ref(null)
+
+function clearFocusFallbackInterval() {
+  if (focusFallbackIntervalRef.value) {
+    clearInterval(focusFallbackIntervalRef.value)
+    focusFallbackIntervalRef.value = null
+  }
+}
+
+function tryFocusBackButton() {
+  const backButtonElement = backButtonRef.value?.$el || backButtonRef.value
+  const focusTarget =
+    backButtonElement && typeof backButtonElement.querySelector === 'function'
+      ? backButtonElement.querySelector('button') || backButtonElement
+      : backButtonElement
+
+  if (focusTarget && typeof focusTarget.focus === 'function') {
+    focusTarget.focus()
+    return true
+  }
+
+  return false
+}
 
 // * Step Functions
 const { previousStep } = inject('changingStepsFunctions', {
@@ -81,12 +115,6 @@ function displayLabels(label) {
     ? props.customizedLabels[label]
     : amLabels[label]
 }
-
-// * Container Width
-// let cWidth = inject('containerWidth', 0)
-// let checkScreen = computed(() => cWidth.value <= 560)
-// let sidebarVisibility = amCustomize
-// let mobile = computed(() => cWidth.value < 410)
 
 // * Colors
 let amColors = inject(
@@ -123,6 +151,33 @@ let cssVars = computed(() => {
       0.15
     ),
   }
+})
+
+watch(
+  () => stepIndex.value,
+  async () => {
+    clearFocusFallbackInterval()
+
+    await nextTick()
+
+    if (tryFocusBackButton()) {
+      return
+    }
+
+    focusFallbackIntervalRef.value = setInterval(() => {
+      if (tryFocusBackButton() || (!props.loading && props.ready && !props.loadingUpcoming)) {
+        clearFocusFallbackInterval()
+      }
+    }, 250)
+  },
+  {
+    flush: 'post',
+    immediate: true,
+  }
+)
+
+onBeforeUnmount(() => {
+  clearFocusFallbackInterval()
 })
 </script>
 

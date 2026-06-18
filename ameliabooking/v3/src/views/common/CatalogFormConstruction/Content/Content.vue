@@ -45,9 +45,10 @@
 import {
   inject,
   ref,
-  nextTick,
   onMounted,
-  computed
+  onBeforeUnmount,
+  computed,
+  nextTick
 } from 'vue'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
 
@@ -86,9 +87,6 @@ let catContent = ref(null)
 
 let scrollBlockHeight = ref(0)
 
-// * window resize listener
-window.addEventListener('resize', resize);
-
 // * resize function
 function resize() {
   nextTick(() => {
@@ -107,6 +105,9 @@ function resize() {
 }
 
 onMounted(() => {
+  // * window resize listener
+  window.addEventListener('resize', resize);
+
   nextTick(() => {
     if (catForm.value && catHeading.value) {
       let height = catForm.value.offsetHeight - catHeading.value.offsetHeight - 2
@@ -115,6 +116,10 @@ onMounted(() => {
 
     resize()
   })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resize)
 })
 
 defineExpose({

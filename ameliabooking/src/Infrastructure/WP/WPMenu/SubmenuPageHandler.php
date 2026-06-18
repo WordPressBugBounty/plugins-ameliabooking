@@ -148,10 +148,17 @@ class SubmenuPageHandler
         } else {
             wp_enqueue_script(
                 $scriptId,
-                AMELIA_URL . 'v3/public/assets/admin.55ce3ab4.js',
+                AMELIA_URL . 'v3/public/assets/admin.js',
                 [],
                 AMELIA_VERSION,
                 true
+            );
+
+            wp_enqueue_style(
+                'amelia_booking_v3_style',
+                AMELIA_URL . 'v3/public/assets/style.css',
+                [],
+                AMELIA_VERSION
             );
         }
 

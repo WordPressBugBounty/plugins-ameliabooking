@@ -1,6 +1,5 @@
 import httpClient from "../../../plugins/axios";
 import { settings } from '../../../plugins/settings.js'
-import { useAuthorizationHeaderObject } from "../public/panel";
 
 function usePopulateSettings (globalSettings, defaultSettings, savedSettings = {}, resultSettings = {}) {
   for (let key in defaultSettings) {
@@ -31,22 +30,20 @@ function usePopulateSettings (globalSettings, defaultSettings, savedSettings = {
   return resultSettings
 }
 
-function useUpdateStashEntities (store) {
+function useUpdateStashEntities () {
   if (settings.activation.stash) {
-    httpClient.post(
-      '/stash',
-      {},
-      Object.assign(
-        useAuthorizationHeaderObject(store),
+    httpClient
+      .post(
+        '/stash',
+        {},
         {
           params: {
             source: 'cabinet-provider',
           },
         }
       )
-    ).then(() => {
-    }).catch(() => {
-    })
+      .then(() => {})
+      .catch(() => {})
   }
 }
 

@@ -1,31 +1,69 @@
 <template>
   <div class="am-input-phone-wrapper">
-    <MazPhoneNumberInput
-      ref="amPhoneInput"
+    <MazInputPhoneNumber
+      :id="id"
       v-model="model"
+      v-model:country-code="countryCode"
+      v-bind="forwardedAttrs"
       class="am-input-phone"
-      :class="{'am-rtl': isRtl}"
-      show-code-on-list
-      :default-country-code="props.defaultCode ? props.defaultCode.toUpperCase() : null"
-      :countries-height="40"
-      :no-example="true"
-      size="md"
-      :name="name"
-      :success="results?.isValid"
+      :class="inputClasses"
+      :label="label"
+      :preferred-countries="preferredCountries"
+      :ignored-countries="ignoredCountries"
+      :only-countries="onlyCountries"
+      :translations="translations"
+      :list-position="listPosition"
+      :color="color"
+      :size="size"
+      :hide-flags="hideFlags"
+      :disabled="disabled"
+      :required="required"
       :placeholder="placeholder"
+      :example="example"
+      :search="search"
+      :search-threshold="searchThreshold"
+      :use-browser-locale="useBrowserLocale"
+      :fetch-country="fetchCountry"
+      :hide-country-select="hideCountrySelect"
+      :show-code-in-list="showCodeInList"
+      :custom-countries-list="customCountriesList"
+      :auto-format="autoFormat"
+      :country-locale="countryLocale"
+      :validation-error="validationError"
+      :validation-success="validationSuccess"
+      :success="success"
+      :error="error"
+      :display-country-name="displayCountryName"
+      :block="block"
+      :orientation="orientation"
+      :country-select-attributes="countrySelectAttributes"
+      :phone-input-attributes="resolvedPhoneInputAttributes"
       :style="cssVars"
-      @country-code="countryPhoneIsoUpdated"
-      @update="results = $event"
-      @click="triggerClick"
-      @keypress="triggerClick"
-    />
+      @country-code="handleCountryCode"
+      @data="handlePhoneData"
+
+    >
+      <template v-if="$slots['no-results']" #no-results>
+        <span class="am-input-phone-no-results">
+          <slot name="no-results" />
+        </span>
+      </template>
+
+      <template v-if="$slots['selector-flag']" #selector-flag="slotProps">
+        <slot name="selector-flag" v-bind="slotProps" />
+      </template>
+
+      <template v-if="$slots['country-list-flag']" #country-list-flag="slotProps">
+        <slot name="country-list-flag" v-bind="slotProps" />
+      </template>
+    </MazInputPhoneNumber>
   </div>
 </template>
 
 <script setup>
-import MazPhoneNumberInput from 'maz-ui/components/MazPhoneNumberInput'
-import { computed, ref, toRefs, inject, nextTick } from 'vue'
-import { useColorTransparency } from '../../../assets/js/common/colorManipulation.js'
+import { MazInputPhoneNumber } from 'maz-ui/components'
+import { computed, inject, useAttrs, onBeforeUnmount, watch } from 'vue'
+import { useColorTransparency } from '@/assets/js/common/colorManipulation'
 
 /**
  * Component Props
@@ -33,6 +71,14 @@ import { useColorTransparency } from '../../../assets/js/common/colorManipulatio
 const props = defineProps({
   modelValue: {
     type: String
+  },
+  countryCode: {
+    type: String,
+    default: undefined
+  },
+  id: {
+    type: String,
+    default: ''
   },
   name: {
     type: String,
@@ -46,300 +92,495 @@ const props = defineProps({
     type: String,
     default: 'Enter phone'
   },
-  defaultCode: {
+  label: {
     type: String,
-    default: ''
+    default: undefined
+  },
+  preferredCountries: {
+    type: Array,
+    default: undefined
+  },
+  ignoredCountries: {
+    type: Array,
+    default: undefined
+  },
+  onlyCountries: {
+    type: Array,
+    default: undefined
+  },
+  translations: {
+    type: Object,
+    default: undefined
+  },
+  listPosition: {
+    type: String,
+    default: undefined
+  },
+  color: {
+    type: String,
+    default: undefined
+  },
+  size: {
+    type: String,
+    default: 'md'
+  },
+  hideFlags: {
+    type: Boolean,
+    default: false
+  },
+  required: {
+    type: Boolean,
+    default: false
+  },
+  example: {
+    type: Boolean,
+    default: true
+  },
+  search: {
+    type: Boolean,
+    default: true
+  },
+  searchThreshold: {
+    type: Number,
+    default: 0.75
+  },
+  useBrowserLocale: {
+    type: Boolean,
+    default: true
+  },
+  fetchCountry: {
+    type: Boolean,
+    default: false
+  },
+  hideCountrySelect: {
+    type: Boolean,
+    default: false
+  },
+  showCodeInList: {
+    type: Boolean,
+    default: true
+  },
+  customCountriesList: {
+    type: Object,
+    default: undefined
+  },
+  autoFormat: {
+    type: [String, Boolean],
+    default: 'blur'
+  },
+  countryLocale: {
+    type: String,
+    default: undefined
+  },
+  validationError: {
+    type: Boolean,
+    default: false
+  },
+  validationSuccess: {
+    type: Boolean,
+    default: true
+  },
+  success: {
+    type: Boolean,
+    default: false
+  },
+  error: {
+    type: Boolean,
+    default: false
+  },
+  displayCountryName: {
+    type: Boolean,
+    default: false
+  },
+  block: {
+    type: Boolean,
+    default: false
+  },
+  orientation: {
+    type: String,
+    default: 'row'
+  },
+  countrySelectAttributes: {
+    type: Object,
+    default: undefined
+  },
+  phoneInputAttributes: {
+    type: Object,
+    default: undefined
   }
 })
+
 /**
  * Component Emits
  * */
-const emits = defineEmits(['update:modelValue', 'countryPhoneIsoUpdated'])
+const emits = defineEmits([
+  'update:modelValue',
+  'country-code',
+  'update:countryCode',
+  'data'
+])
 
-let isRtl = computed(() => {
-  if (document) {
-    return document.documentElement.dir === 'rtl'
-  }
-  return false
-})
+const attrs = useAttrs()
+
+const isRtl = computed(() => typeof document !== 'undefined' && document.documentElement?.dir === 'rtl')
 
 /**
  * Component model
  */
-let { modelValue } = toRefs(props)
+const hasLegacyName = computed(() => typeof props.name === 'string' && props.name.trim() !== '')
 
-let model = computed({
-  get: () => modelValue.value,
+const resolvedPhoneInputAttributes = computed(() => {
+  const hasPhoneInputAttributes = !!props.phoneInputAttributes
+
+  const resolvedAttributes = {
+    autocomplete: 'tel',
+    inputmode: 'tel',
+    ...(props.phoneInputAttributes || {})
+  }
+
+  if (!hasPhoneInputAttributes && !hasLegacyName.value) {
+    resolvedAttributes.name = 'phone'
+  }
+
+  if (hasLegacyName.value && props.phoneInputAttributes?.name === undefined) {
+    resolvedAttributes.name = props.name
+  }
+
+  return resolvedAttributes
+})
+
+const forwardedAttrs = computed(() => attrs)
+
+const inputClasses = computed(() => ({
+  'am-rtl': isRtl.value
+}))
+
+const model = computed({
+  get: () => props.modelValue,
   set: (val) => {
     emits('update:modelValue', val)
-    triggerClick()
   }
 })
 
-/**
- * Component reference
- */
-
-const amPhoneInput = ref(null)
-const results = ref()
-
-function triggerClick () {
-  if (amPhoneInput.value.$refs.CountrySelector.$refs.optionsList) {
-    nextTick(() => {
-      amPhoneInput.value.$refs.CountrySelector.$refs.optionsList.style.maxWidth = `${amPhoneInput.value.$el.offsetWidth}px`
-    })
+const countryCode = computed({
+  get: () => props.countryCode,
+  set: (val) => {
+    emits('update:countryCode', val)
   }
+})
+
+function handleCountryCode (val) {
+  emits('country-code', val)
 }
 
-function countryPhoneIsoUpdated (val) {
-  emits('countryPhoneIsoUpdated', val)
+function handlePhoneData (val) {
+  emits('data', val)
 }
 
-let amColors = inject('amColors')
-let cssVars = computed(() => {
+const amColors = inject('amColors')
+const cssVars = computed(() => {
   return {
     '--am-c-ph-drop-text-op10': useColorTransparency(amColors.value.colorDropText, 0.1)
   }
 })
+
+const cssDropVars = computed(() => {
+  return {
+    '--am-c-phone-primary': amColors.value.colorPrimary,
+    '--am-c-phone-primary-op01': useColorTransparency(amColors.value.colorPrimary, 0.1),
+    '--am-c-phone-bgr': amColors.value.colorDropBgr,
+    '--am-c-phone-text': amColors.value.colorDropText,
+    '--am-c-phone-text-op-60': useColorTransparency(amColors.value.colorDropText, 0.6),
+    '--am-c-phone-border': amColors.value.colorDropText,
+    '--am-c-phone-hover': useColorTransparency(amColors.value.colorDropText, 0.1),
+    '--am-c-phone-input': useColorTransparency(amColors.value.colorDropText, 0.3),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.30),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.10),
+  }
+})
+
+const instanceDropKeys = new Set()
+
+function applyDropdownVars (vars) {
+  if (typeof document === 'undefined') {
+    return
+  }
+
+  Object.entries(vars).forEach(([key, value]) => {
+    instanceDropKeys.add(key)
+    document.documentElement.style.setProperty(key, value)
+  })
+}
+
+function clearDropdownVars() {
+  if (typeof document === 'undefined') {
+    return
+  }
+
+  instanceDropKeys.forEach((key) => {
+    document.documentElement.style.removeProperty(key)
+  })
+
+  instanceDropKeys.clear()
+}
+
+const stopDropVarSync = watch(cssDropVars, (vars) => {
+  instanceDropKeys.clear()
+  Object.keys(vars).forEach((key) => {
+    instanceDropKeys.add(key)
+  })
+
+  applyDropdownVars(vars)
+}, { immediate: true })
+
+onBeforeUnmount(() => {
+  stopDropVarSync()
+  clearDropdownVars()
+})
+</script>
+
+<script>
+export default {
+  inheritAttrs: false
+}
 </script>
 
 <style lang="scss">
 @mixin am-phone-input-block {
   .am-input-phone {
+    width: 100%;
 
     &-wrapper {
       width: 100%;
     }
 
+    // RTL support for v4 component
     &.am-rtl {
-      .m-phone-number-input {
-        &__select {
-          &.m-select {
-            .m-input {
-              &-wrapper {
-                &-right {
-                  border-radius: 0 6px 6px 0;
-                  border-right: none;
-                  border-left: 1px solid var(--am-c-ph-inp-border);
-                  padding-right: 0;
-                  padding-left: 7px;
-                }
-              }
-            }
+      direction: rtl;
+
+      &.m-input-phone-number {
+        .m-select-country {
+          .m-input-wrapper.--border:first-child {
+            border-radius: 0 6px 6px 0;
+            padding: 0 12px 0 0;
           }
         }
 
-        &__input {
-          direction: rtl;
+        .m-phone-input {
+          .m-input-wrapper.--border:first-child {
+            border-radius: 6px 0 0 6px;
+            padding: 0 12px 0 0;
+          }
+        }
+      }
+    }
+
+    &.m-input-phone-number {
+      // am  - amelia
+      // c   - color
+      // ph  - phone
+      // inp - input
+      // bgr - background
+      --am-c-ph-inp-bgr: var(--am-c-inp-bgr);
+      --am-c-ph-inp-border: var(--am-c-inp-border);
+      --am-c-ph-inp-text: var(--am-c-inp-text);
+      --am-c-ph-inp-placeholder: var(--am-c-inp-placeholder);
+
+      width: 100%;
+      display: flex;
+      align-items: stretch;
+
+      // Global reset under #amelia-container sets border: 0 on divs; restore Maz field chrome.
+      .m-input-wrapper {
+        &.--border {
+          background-color: var(--am-c-ph-inp-bgr, hsl(0 0% 100%));
+          border: none;
+          box-shadow: 0 0 0 1px var(--am-c-ph-inp-border, hsl(220 13.04% 90.98%));
+          border-radius: 6px;
+          padding: 0;
+          font-size: 15px;
+          line-height: 1.5;
+
+          &:focus-within {
+            --am-c-ph-inp-border: var(--am-c-primary, hsl(220 13.04% 90.98%));
+          }
+
+          // First input (country code) - make it narrower
+          &:first-child {
+            padding: 0 0 0 12px;
+            box-sizing: border-box;
+          }
+
+          &.maz-border-destructive {
+            --am-c-ph-inp-border: var(--am-c-error, #ef4444);
+          }
+        }
+
+        input {
+          width: 100%;
+          border: none;
+          background: transparent;
+          padding: 0;
+          font-size: var(--am-fs-inp, 15px);
+          font-weight: 400;
+          line-height: 24px;
+          color: var(--am-c-ph-inp-text, #333);
+
+          &::placeholder {
+            color: var(--am-c-ph-inp-placeholder, #999);
+          }
+
+          &:focus {
+            outline: none;
+          }
+        }
+
+        button {
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          padding: 0 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--am-c-ph-inp-text, #333);
+
+          svg path {
+            color: var(--am-c-ph-inp-text, #333);
+          }
+
+          &:hover {
+            opacity: 0.7;
+          }
+        }
+
+        &-input {
+          height: 40px;
+        }
+      }
+
+      .m-phone-input {
+        width: 100%;
+        min-width: unset;
+
+        .m-input-wrapper {
+          border-radius: 0 6px 6px 0;
+        }
+      }
+
+      .m-select-country {
+        width: unset !important;
+
+        .m-input-wrapper {
           border-radius: 6px 0 0 6px;
 
-          .m-input-wrapper {
-            &-input {
-              label {
-                left: auto;
-                right: 8px;
-              }
-            }
+          &-input {
+            width: 0;
+            height: 0;
+            overflow: hidden;
+          }
+
+          img {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
           }
         }
+      }
 
-        &__country-flag {
-          left: auto;
-          right: 9px;
-        }
+      .m-popover-container,
+      .m-select-list {
+        background-color: hsl(var(--maz-background, 0 0% 100%));
       }
     }
   }
+}
 
-  .m-phone-number-input {
-    // am  - amelia
-    // c   - color
-    // ph  - phone
-    // inp - input
-    // bgr - background
-    --am-c-ph-inp-bgr: var(--am-c-inp-bgr);
-    --am-c-ph-inp-border: var(--am-c-inp-border);
-    --am-c-ph-inp-text: var(--am-c-inp-text);
-    --am-c-ph-inp-placeholder: var(--am-c-inp-placeholder);
-    --am-phone-input-font-size: var(--am-input-font-size);
-    --am-phone-input-color-border: var(--am-c-inp-border);
-    height: 40px;
-    display: flex;
-    flex-direction: row;
-    border: none;
-    box-shadow: 0 0 0 1px var(--am-c-ph-inp-border);
+.m-popover-panel.--surface {
+  background-color: transparent !important;
+  border-radius: 6px !important;
+  border-color: transparent !important;
+  color: transparent !important;
+  z-index: 100000000 !important;
+
+  .m-select-list {
+    background-color: var(--am-c-phone-bgr, hsl(var(--maz-background, 0 0% 100%)));
+    color: var(--am-c-phone-text, inherit);
     border-radius: 6px;
 
-    &__select {
-      &.m-select {
-        position: static;
-        width: 25%;
-        max-width: 60px;
-        min-width: 60px;
+    &__scroll-wrapper {
+      scrollbar-width: thin;
+      scrollbar-color: var(--am-c-scroll-op30) var(--am-c-scroll-op10);
 
-        .m-input {
-          position: static;
-          height: 100%;
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
 
-          &-wrapper {
-            border: none;
+      &::-webkit-scrollbar-thumb {
+        border-radius: 6px;
+        background: var(--am-c-scroll-op30);
+      }
 
-            &-input {
-              max-width: 40px;
-              label, input {
-                display: none;
-              }
-            }
-
-            &-right {
-              background: var(--am-c-ph-inp-bgr);
-              border-radius: 6px 0 0 6px;
-              width: 100%;
-              height: 100%;
-              border-right: 1px solid var(--am-c-ph-inp-border);
-              display: flex;
-              padding-right: 7px;
-              justify-content: flex-end;
-
-              button {
-                padding: 0;
-                background: transparent;
-
-                svg {
-                  font-size: 14px !important;
-                  path {
-                    color: var(--am-c-ph-inp-text);
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        .m-select-list {
-          padding: 6px 0;
-          //min-width: 260px;
-          box-shadow: 0 1px 2px rgba(0, 20, 60, 0.2), 0 4px 8px -1px rgba(0, 20, 60, 0.17);
-          border-radius: 6px;
-          margin-top: 4px;
-          background: var(--am-c-drop-bgr);
-          max-width: 100% !important;
-
-          // Main Scroll styles
-          &::-webkit-scrollbar {
-            width: 6px;
-          }
-
-          &::-webkit-scrollbar-thumb {
-            border-radius: 6px;
-            background: var(--am-c-scroll-op30);
-          }
-
-          &::-webkit-scrollbar-track {
-            border-radius: 6px;
-            background: var(--am-c-scroll-op10);
-          }
-
-          &-item {
-            padding: 4px 12px;
-            font-size: 14px;
-            line-height: 24px;
-            font-weight: 400;
-            border-radius: 0;
-            outline: none;
-            border: none;
-
-            &:hover:not(:active) {
-              background-color: var(--am-c-ph-drop-text-op10);
-            }
-
-            &:active {
-              background-color: var(--am-c-ph-drop-text-op10);
-            }
-
-            &.--is-selected {
-              border: 1px solid var(--am-c-ph-drop-text-op10);
-              background: var(--am-c-ph-drop-text-op10);
-              color: var(--am-c-ph-inp-text);
-            }
-
-            .m-phone-number-input__select__item {
-              display: flex;
-              align-items: center;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-              min-width: 28px;
-
-              > span {
-                color: var(--am-c-drop-text);
-              }
-
-              .maz-flag {
-                display: inline-flex;
-                margin-right: 8px;
-                border-radius: 3px;
-                min-width: 20px;
-              }
-
-              .maz-text-muted {
-                width: 32px;
-                margin-right: 8px;
-              }
-
-              .maz-truncate {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                max-width: calc(100% - 28px);
-              }
-            }
-          }
-        }
+      &::-webkit-scrollbar-track {
+        border-radius: 6px;
+        background: var(--am-c-scroll-op10);
       }
     }
 
-    &__input {
-      background: var(--am-c-ph-inp-bgr);
-      border-radius: 0 6px 6px 0;
-      width: 100%;
-      height: 100%;
-
-      &.--focused {
-        --am-c-ph-inp-border: var(--am-c-btn-prim);
-      }
-
+    .m-select-list__search-input {
       .m-input-wrapper {
-        width: 100%;
-        border: none;
+        background-color: transparent;
+        border-color: var(--am-c-phone-border, hsl(var(--maz-border, 0 0% 0%)));
+        border-radius: 6px;
 
-        &-input {
-          font-size: 14px;
-          line-height: 24px;
+        svg path {
+          color: var(--am-c-phone-text-op-60, hsl(var(--maz-text, 0 0% 0%)));
+        }
 
-          input {
-            font-size: 14px;
-            color: var(--am-c-ph-inp-text) !important;
-            border: none;
-            background-color: transparent;
-            padding: 14px 8px 8px;
-            margin: 0;
-          }
+        &.maz-border-primary {
+          border-color: var(--am-c-phone-primary, hsl(220 13.04% 90.98%));
+        }
 
-          label {
-            left: 8px;
-            color: var(--am-c-inp-placeholder);
-            font-size: 12px;
+        input {
+          color: var(--am-c-phone-text, hsl(var(--maz-text, 0 0% 0%)));
+
+          &::placeholder {
+            color: var(--am-c-phone-text-op-60, hsl(var(--maz-text, 0 0% 0%)));
           }
         }
       }
     }
 
-    &__country-flag {
-      bottom: 14px;
-      left: 9px;
+    .m-select-list-item {
+      &:hover, &:focus {
+        background-color: var(--am-c-phone-hover, hsl(0 0% 0% / 0.05));
+      }
+
+      &.--is-selected {
+        background-color: var(--am-c-phone-primary-op01, hsl(220 13.04% 90.98% / 0.1));
+        color: var(--am-c-phone-primary, hsl(220 13.04% 90.98%));
+
+        &:focus {
+          outline-color: var(--am-c-phone-primary, hsl(220 13.04% 90.98%));
+        }
+      }
+
+      .m-input-phone-number__country-list-code {
+        color: var(--am-c-phone-text-op-60, hsl(var(--maz-text, 0 0% 0%)));
+      }
     }
 
+    .am-input-phone-no-results {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--am-c-phone-text, hsl(var(--maz-text, 0 0% 0%)));
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.5;
+      padding: 0 12px;
+      margin: 4px 0 8px;
+    }
   }
 }
 

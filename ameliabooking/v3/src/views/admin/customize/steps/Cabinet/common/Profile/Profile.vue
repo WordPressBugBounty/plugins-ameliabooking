@@ -43,10 +43,11 @@
                 "
                 ref="customerCollectorRef"
                 v-model="infoFormData[item.id]"
-                v-model:countryPhoneIso="
+                v-model:country-code="
                   infoFormConstruction[item.id].countryPhoneIso
                 "
                 v-bind="infoFormConstruction[item.id].props"
+                v-on="'handlers' in infoFormConstruction[item.id] ? infoFormConstruction[item.id].handlers : {}"
               ></component>
             </template>
           </el-form>
@@ -291,6 +292,11 @@ let infoFormConstruction = computed(() => {
         whatsAppLabel: labelsDisplay('whatsapp_opt_in_text'),
         isWhatsApp: amSettings.notifications.whatsAppEnabled,
         class: `am-capi__item ${responsiveClass.value}`,
+      },
+      handlers: {
+        handlePhoneData: (phoneData) => {
+          infoFormData.value.phone = phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, '') : ''
+        },
       },
     },
     birthday: {

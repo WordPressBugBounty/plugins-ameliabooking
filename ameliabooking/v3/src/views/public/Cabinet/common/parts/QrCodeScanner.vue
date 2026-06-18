@@ -53,22 +53,28 @@
             v-if="responseData.ticketManualCode"
             class="am-cqcs__response-item"
           >
-            <span>{{amLabels.ticket_id}}:</span> #{{ responseData.ticketManualCode }}
+            <span>{{ amLabels.ticket_id }}:</span> #{{
+              responseData.ticketManualCode
+            }}
           </div>
           <div
             v-if="responseData.eventTicketName"
             class="am-cqcs__response-item"
           >
-            <span>{{amLabels.ticket_name}}:</span> {{ responseData.eventTicketName }}
+            <span>{{ amLabels.ticket_name }}:</span>
+            {{ responseData.eventTicketName }}
           </div>
           <div v-if="responseData.bookingId" class="am-cqcs__response-item">
-            <span>{{amLabels.booking_id}}:</span> #{{ responseData.bookingId }}
+            <span>{{ amLabels.booking_id }}:</span> #{{
+              responseData.bookingId
+            }}
           </div>
           <div
             v-if="responseData.ticketControlNumber"
             class="am-cqcs__response-item"
           >
-            <span>{{amLabels.attendees_allowed}}:</span> {{ responseData.ticketControlNumber }}
+            <span>{{ amLabels.attendees_allowed }}:</span>
+            {{ responseData.ticketControlNumber }}
           </div>
         </div>
 
@@ -83,13 +89,19 @@
             category="primary"
             @click="toggleTorch"
           >
-            <span :class="torchActive ? 'am-icon-bolt-lightning' : 'am-icon-bolt-lightning-fill'" />
+            <span
+              :class="
+                torchActive
+                  ? 'am-icon-bolt-lightning'
+                  : 'am-icon-bolt-lightning-fill'
+              "
+            />
             {{ torchActive ? amLabels.torch_off : amLabels.torch_on }}
           </AmButton>
 
           <AmButton v-if="cameras.length > 1" @click="switchCamera">
             <span class="am-icon-refresh" />
-            {{amLabels.switch_camera}}
+            {{ amLabels.switch_camera }}
           </AmButton>
 
           <AmButton
@@ -98,12 +110,12 @@
             @click="startScanning"
           >
             <span class="am-icon-mobile" />
-            {{amLabels.start_scanner}}
+            {{ amLabels.start_scanner }}
           </AmButton>
 
           <AmButton v-if="isScanning" category="danger" @click="stopScanning">
             <span class="am-icon-mobile" />
-            {{amLabels.stop_scanner}}
+            {{ amLabels.stop_scanner }}
           </AmButton>
         </div>
 
@@ -114,7 +126,7 @@
             class="am-cqcs__collapse-item"
           >
             <template #heading>
-              {{amLabels.enter_ticket_manually}}
+              {{ amLabels.enter_ticket_manually }}
             </template>
             <el-form
               ref="manualCodeForm"
@@ -135,7 +147,7 @@
               </template>
               <el-form-item>
                 <AmButton category="primary" @click="processManualInput">
-                  {{amLabels.validate_ticket}}
+                  {{ amLabels.validate_ticket }}
                 </AmButton>
               </el-form-item>
             </el-form>
@@ -171,7 +183,6 @@ import moment from 'moment/moment'
 
 // * Composables
 import httpClient from '../../../../../plugins/axios'
-import { useAuthorizationHeaderObject } from '../../../../../assets/js/public/panel'
 
 // * Props
 const props = defineProps({
@@ -499,11 +510,11 @@ function sendTicketData(ticketData) {
         ticketManualCode: ticketData.ticketManualCode,
         scannedAt: ticketData.scannedAt,
       },
-      Object.assign(useAuthorizationHeaderObject(store), {
+      {
         params: {
           source: 'cabinet-provider',
         },
-      })
+      }
     )
     .then((response) => {
       if (response.data && response.data.data) {
@@ -513,7 +524,9 @@ function sendTicketData(ticketData) {
           bookingId: response.data.data.bookingId,
           ticketManualCode: response.data.data.ticketManualCode,
           ticketControlNumber: response.data.data.ticketControl,
-          eventName: response.data.data.eventName ? response.data.data.eventName : getResponseEventName(response.data.data),
+          eventName: response.data.data.eventName
+            ? response.data.data.eventName
+            : getResponseEventName(response.data.data),
         }
 
         if (getResponseEventTicketName(response.data.data)) {
@@ -722,7 +735,7 @@ onUnmounted(() => {
       flex-wrap: wrap;
       justify-content: center;
 
-      [class^="am-icon-"] {
+      [class^='am-icon-'] {
         font-size: 26px;
       }
     }
@@ -739,7 +752,7 @@ onUnmounted(() => {
       text-align: center;
       max-width: 500px;
       font-size: 14px;
-      [class^="am-icon-"] {
+      [class^='am-icon-'] {
         font-size: 22px;
       }
     }
@@ -791,7 +804,6 @@ onUnmounted(() => {
         }
       }
     }
-
 
     // Collapse for manual input
     &__collapse {

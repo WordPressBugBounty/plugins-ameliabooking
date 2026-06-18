@@ -15,6 +15,7 @@
       :prefix-icon="props.prefixIcon"
       :placeholder="props.placeholder"
       :disabled="props.disabled"
+      :teleported="props.teleported"
       :loading="props.loading"
       :loading-text="props.loadingText"
     >
@@ -83,6 +84,10 @@ let props = defineProps({
   loadingText: {
     type: String,
     default: 'Loading...'
+  },
+  teleported: {
+    type: Boolean,
+    default: true
   },
 })
 

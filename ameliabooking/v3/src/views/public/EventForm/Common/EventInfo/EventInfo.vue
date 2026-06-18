@@ -2,17 +2,30 @@
   <!-- Event List (elf) -->
   <div
     v-if="!loading"
+    ref="eventInfoRef"
     class="am-eli"
     :class="props.globalClass"
     :style="cssVars"
+    role="region"
+    :aria-label="selectedEvent.name || amLabels.event_info"
+    @keydown.capture="onKeydownCapture"
   >
+    <!-- Gallery -->
     <GalleryCarousel
       v-if="selectedEvent.gallery.length && customizedOptions.gallery.visibility"
       :gallery="selectedEvent.gallery"
       class="am-eli__image"
+      :aria-label="amLabels.event_info + ' ' + amLabels.gallery"
+      role="img"
     ></GalleryCarousel>
+    <!--/ Gallery -->
 
-    <div class="am-eli__header">
+    <!-- Event header summary -->
+    <div
+      class="am-eli__header"
+      role="group"
+      :aria-label="amLabels.event_info"
+    >
      <EventCard
        :event="selectedEvent"
        :labels="amLabels"
@@ -30,36 +43,56 @@
        :tax-visible="useTaxVisibility(store, selectedEvent.id, 'event') && (customizedOptions.tax?.visibility ?? true)"
      ></EventCard>
     </div>
+    <!--/ Event header summary -->
 
+    <!-- Main tabbed content -->
     <div class="am-eli__main">
-      <el-tabs v-model="activeName">
+      <el-tabs
+        v-model="activeName"
+        :aria-label="amLabels.event_info"
+      >
+        <!-- Info tab -->
         <el-tab-pane
           :label="amLabels.event_info"
           name="first"
         >
+          <!-- Timetable -->
           <div
             v-if="selectedEvent.periods.length"
             class="am-eli__timetable am-eli__main-item"
           >
-            <p class="am-eli__timetable-title am-eli__main-title">
+            <p
+              id="am-eli-timetable-title"
+              class="am-eli__timetable-title am-eli__main-title"
+            >
               {{ amLabels.event_timetable }}
               <span v-if="eventRange.start !== eventRange.end">
                 {{ `: ${eventRange.start} - ${eventRange.end}` }}
               </span>
             </p>
-            <p
-              v-for="period in selectedEventsPeriods"
-              :key="period.id"
-              class="am-eli__timetable-main"
+            <ul
+              class="am-eli__timetable-list"
+              aria-labelledby="am-eli-timetable-title"
+              role="list"
             >
-              <span class="am-eli__timetable-main__date am-eli__main-text">
-                {{ period.dateOfMonth }}
-              </span>
-              <span class="am-eli__timetable-main__time am-eli__main-text">
-                {{ ` - ${period.timeStart} - ${period.timeEnd}` }}
-              </span>
-            </p>
+              <li
+                v-for="(period, index) in selectedEventsPeriods"
+                :key="`${period.dateOfMonth}-${index}`"
+                class="am-eli__timetable-main"
+              >
+                <span class="am-eli__timetable-main__date am-eli__main-text">
+                  {{ period.dateOfMonth }}
+                </span>
+                <span
+                  class="am-eli__timetable-main__time am-eli__main-text"
+                  :aria-label="`${period.dateOfMonth}, ${period.timeStart} – ${period.timeEnd}`"
+                >
+                  {{ ` - ${period.timeStart} - ${period.timeEnd}` }}
+                </span>
+              </li>
+            </ul>
           </div>
+          <!--/ Timetable -->
 
           <DescriptionItem
             v-if="customizedOptions.eventDescription.visibility"
@@ -70,6 +103,7 @@
             :customized-labels="amLabels"
           ></DescriptionItem>
 
+          <!-- Organizer -->
           <EventEmployee
             v-if="customizedOptions.eventOrganizer.visibility"
             :divider="true"
@@ -77,8 +111,12 @@
             :rank="amLabels.event_organizer"
             :customized-labels="amLabels"
             class="am-eli__main-item"
+            role="group"
+            :aria-label="amLabels.event_organizer"
           ></EventEmployee>
+          <!--/ Organizer -->
 
+          <!-- Staff -->
           <template v-if="customizedOptions.eventEmployees.visibility">
             <EventEmployee
               v-for="employee in eventStaff"
@@ -87,9 +125,15 @@
               :employee="employee"
               :customized-labels="amLabels"
               class="am-eli__main-item"
+              role="group"
+              :aria-label="employee.firstName ? `${employee.firstName} ${employee.lastName}` : ''"
             ></EventEmployee>
           </template>
+          <!--/ Staff -->
         </el-tab-pane>
+        <!--/ Info tab -->
+
+        <!-- Tickets tab -->
         <el-tab-pane
           v-if="tickets.length"
           :label="amLabels.event_tickets"
@@ -108,17 +152,30 @@
             />
           </template>
         </el-tab-pane>
+        <!--/ Tickets tab -->
       </el-tabs>
     </div>
+    <!--/ Main tabbed content -->
   </div>
 
-  <EventInfoSkeleton v-else></EventInfoSkeleton>
+  <!-- Loading skeleton -->
+  <EventInfoSkeleton
+    v-else
+    aria-busy="true"
+    :aria-label="amLabels.loading_event_information || amLabels.loading || 'Loading event information'"
+    role="status"
+  ></EventInfoSkeleton>
+  <!--/ Loading skeleton -->
 
   <!-- Bringing Anyone with you -->
   <AmSlidePopup
     v-if="bringingAnyoneAvailability"
     :visibility="bringingAnyoneVisibility"
     custom-class="am-eli__bringing-wrapper"
+    role="dialog"
+    aria-modal="true"
+    :aria-label="amDialogLabels.bringing_anyone || amLabels.bringing_anyone"
+    :aria-hidden="!bringingAnyoneVisibility"
   >
     <BringingAnyone></BringingAnyone>
 
@@ -131,6 +188,7 @@
           :type="amDialogCustomizedOptions.secBtn.buttonType"
           category="secondary"
           :disabled="false"
+          :aria-label="amDialogLabels.back_btn"
           @click="noOneBringWith"
         >
           {{ amDialogLabels.back_btn }}
@@ -139,6 +197,7 @@
           :type="amDialogCustomizedOptions.primBtn.buttonType"
           :category="isWaitingList ? 'waiting' : 'primary'"
           :disabled="false"
+          :aria-label="amDialogLabels.continue"
           @click="bringPeopleWithYou"
         >
           {{ amDialogLabels.continue }}
@@ -174,6 +233,8 @@ import {
   reactive,
   computed,
   onMounted,
+  nextTick,
+  watch,
   watchEffect
 } from "vue";
 
@@ -363,6 +424,39 @@ let eventRange = computed(() => {
 
 const activeName = ref('first')
 
+const eventInfoRef = ref(null)
+
+function onKeydownCapture (e) {
+  if (e?.key !== 'ArrowUp' && e?.key !== 'ArrowDown') {
+    return
+  }
+
+  const target = e.target
+  if (!(target instanceof HTMLElement)) {
+    return
+  }
+
+  // Don't interfere with arrow-key behavior inside form fields/editable content.
+  const editable = target.closest('input, textarea, select, [contenteditable="true"]')
+  if (editable) {
+    return
+  }
+
+  // Element Plus tabs header supports arrow key navigation; prevent Up/Down from switching tabs.
+  const isTabHeader = target.closest('.el-tabs__header')
+  const isTab = target.closest('[role="tab"], .el-tabs__item')
+  if (isTabHeader && isTab) {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const scrollEl = eventInfoRef.value
+    if (scrollEl && typeof scrollEl.scrollBy === 'function') {
+      const delta = e.key === 'ArrowDown' ? 40 : -40
+      scrollEl.scrollBy({ top: delta, left: 0, behavior: 'auto' })
+    }
+  }
+}
+
 // * Footer btn
 watchEffect(() => {
   footerBtnDisabled.value = !isWaitingList.value && (!selectedEvent.value.bookable || selectedEvent.value.full)
@@ -452,6 +546,30 @@ let bringingAnyoneAvailability = computed(() => {
 })
 
 let bringingAnyoneVisibility = ref(false)
+
+// * Focus management – track the element that opened the dialog so we can
+// * restore focus when it closes (WCAG 2.1 SC 2.4.3 / 3.2.2).
+let triggerElement = ref(null)
+
+watch(bringingAnyoneVisibility, async (isVisible) => {
+  if (isVisible) {
+    // Save current focus so we can restore it on close
+    triggerElement.value = document.activeElement
+    // Move focus into the dialog on next tick once it is rendered
+    await nextTick()
+    const dialog = document.querySelector('.am-eli__bringing-wrapper')
+    if (dialog) {
+      const focusable = dialog.querySelector(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+      focusable?.focus()
+    }
+  } else {
+    // Restore focus to the element that opened the dialog
+    triggerElement.value?.focus()
+    triggerElement.value = null
+  }
+})
 
 function noOneBringWith() {
   bringingAnyoneVisibility.value = false
@@ -597,9 +715,15 @@ export default {
 
           &__nav {
             &-wrap {
+              overflow: visible;
+
               &:after {
                 background-color: var(--am-c-eli-text-op20);
               }
+            }
+
+            &-scroll {
+              overflow: visible;
             }
           }
 
@@ -620,6 +744,10 @@ export default {
             &.is-active {
               color: var(--am-c-eli-primary);
             }
+
+            &:focus-visible {
+              box-shadow: 0 0 0 2px var(--am-c-eli-primary);
+            }
           }
 
           &__active-bar {
@@ -633,6 +761,12 @@ export default {
       }
 
       &__timetable {
+        &-list {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
+
         &-title {
           font-size: 14px;
           font-weight: 500;
@@ -669,6 +803,12 @@ export default {
           }
         }
       }
+    }
+
+    &__tickets-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
     }
 
     &__bringing {

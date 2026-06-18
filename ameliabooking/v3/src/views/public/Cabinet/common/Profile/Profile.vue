@@ -3,6 +3,9 @@
     ref="pageContainer"
     class="am-capi"
     :style="cssVars"
+    role="region"
+    :aria-busy="loading ? 'true' : 'false'"
+    :aria-label="currentRegionLabel"
   >
     <div class="am-capi__inner">
       <AmAlert
@@ -11,6 +14,8 @@
         :show-border="true"
         :close-after="5000"
         custom-class="am-capi__alert"
+        role="status"
+        aria-live="polite"
         @close="closeAlert"
         @trigger-close="closeAlert"
       >
@@ -22,6 +27,7 @@
       <el-tabs
         v-model="activeTab"
         class="am-capi__tabs"
+        :aria-label="tabsAriaLabel"
         @tab-click="tabClick"
       >
         <el-tab-pane
@@ -30,6 +36,7 @@
           name="first"
         >
           <template v-if="!loading">
+            <div class="am-capi__sr-only">{{ amLabels.personal_info }}</div>
             <el-form
               v-if="store.getters['auth/getProfile']"
               ref="infoFormRef"
@@ -45,8 +52,9 @@
                   v-if="customizedOptions[item.id] ? customizedOptions[item.id].visibility : true"
                   ref="customerCollectorRef"
                   v-model="infoFormData[item.id]"
-                  v-model:countryPhoneIso="infoFormConstruction[item.id].countryPhoneIso"
+                  v-model:country-code="infoFormConstruction[item.id].countryCode"
                   v-bind="infoFormConstruction[item.id].props"
+                  v-on="'handlers' in infoFormConstruction[item.id] ? infoFormConstruction[item.id].handlers : {}"
                 ></component>
               </template>
             </el-form>
@@ -65,6 +73,7 @@
           name="third"
         >
           <template v-if="!loading">
+            <div class="am-capi__sr-only">{{ amLabels.custom_fields }}</div>
             <el-form
               ref="customFieldsFormRef"
               :model="customFieldsForm"
@@ -98,6 +107,7 @@
           name="second"
         >
           <template v-if="!loading">
+            <div class="am-capi__sr-only">{{ amLabels.password_tab }}</div>
             <el-form
               ref="passFormRef"
               :model="passFormData"
@@ -169,6 +179,7 @@ import {
   inject,
   provide,
   onMounted,
+  onBeforeUnmount,
   nextTick,
   watch
 } from "vue";
@@ -177,9 +188,6 @@ import {
 import {
   useResponsiveClass
 } from "../../../../../assets/js/common/responsive";
-import {
-  useAuthorizationHeaderObject
-} from "../../../../../assets/js/public/panel";
 import {
   useColorTransparency
 } from "../../../../../assets/js/common/colorManipulation";
@@ -203,8 +211,6 @@ let pageWidth = ref(0)
 let sidebarCollapsed = inject('sidebarCollapsed')
 
 // * window resize listener
-window.addEventListener('resize', resize);
-// * resize function
 function resize() {
   if (pageContainer.value) {
     pageWidth.value = pageContainer.value.offsetWidth
@@ -227,10 +233,15 @@ function collapseTriggered () {
 }
 
 onMounted(() => {
+  window.addEventListener('resize', resize)
   nextTick(() => {
     pageWidth.value = pageContainer.value.offsetWidth
   })
   setInitCustomerCustomFields()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resize)
 })
 
 let responsiveClass = computed(() => {
@@ -291,6 +302,27 @@ let customizedOptions = computed(() => {
 
 let activeTab = ref('first')
 
+let currentRegionLabel = computed(() => {
+  switch (activeTab.value) {
+    case 'second':
+      return amLabels.value.password_tab
+    case 'third':
+      return amLabels.value.custom_fields
+    case 'first':
+      return amLabels.value.personal_info
+    default:
+      return amLabels.value.personal_info
+  }
+})
+
+let tabsAriaLabel = computed(() => {
+  let labels = [amLabels.value.personal_info, amLabels.value.password_tab]
+  if (Object.keys(customFields).length) {
+    labels.splice(1, 0, amLabels.value.custom_fields)
+  }
+  return labels.join(' / ')
+})
+
 // * Success message
 let successMessage = ref('')
 
@@ -307,6 +339,7 @@ function closeAlert () {
 let infoFormRef = ref(null)
 
 let phoneError = ref(false)
+let isPhoneValid = ref(false)
 
 // * Form data
 let infoFormData = ref({
@@ -372,22 +405,39 @@ let infoFormConstruction = ref({
     }
   },
   phone: {
-    countryPhoneIso: computed({
-      get: () => store.getters['auth/getProfile'].countryPhoneIso ? store.getters['auth/getProfile'].countryPhoneIso : '',
+    countryCode: computed({
+      get: () =>
+        store.getters['auth/getProfile'].countryPhoneIso
+          ? store.getters['auth/getProfile'].countryPhoneIso.toUpperCase()
+          : '',
       set: (val) => {
-        store.commit('auth/setProfileCountryPhoneIso', val ? val.toLowerCase() : '')
-      }
+        store.commit(
+          'auth/setProfileCountryPhoneIso',
+          val ? val.toLowerCase() : ''
+        )
+      },
     }),
     template: formFieldsTemplates.phone,
     props: {
       itemName: 'phone',
       label: amLabels.value.phone_colon,
       placeholder: amLabels.value.enter_phone,
-      defaultCode: computed(() => store.getters['auth/getProfile'].countryPhoneIso ? store.getters['auth/getProfile'].countryPhoneIso : ''),
-      phoneError: computed(() => phoneError.value),
+      phoneError: computed(() => phoneError.value && !isPhoneValid.value),
+      errorMessage: computed(() => phoneError.value && !isPhoneValid.value && infoFormData.value.phone ? amLabels.value.enter_valid_phone_warning : ''),
       whatsAppLabel: amLabels.value.whatsapp_opt_in_text,
-      isWhatsApp: amSettings.notifications.whatsAppEnabled,
+      isWhatsApp: computed(() => amSettings.notifications.whatsAppEnabled && !(phoneError.value && !isPhoneValid.value)),
       class: computed(() => `am-capi__item ${responsiveClass.value}`),
+    },
+    handlers: {
+      handlePhoneData: (phoneData) => {
+        if (phoneData && !phoneData.countryCode && !store.getters['auth/getProfile'].countryPhoneIso && amSettings.general.phoneDefaultCountryCode !== 'auto') {
+          store.commit('auth/setProfileCountryPhoneIso', amSettings.general.phoneDefaultCountryCode.toLowerCase())
+        }
+
+        store.commit('auth/setProfilePhone', phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, "") : "")
+
+        isPhoneValid.value = !!phoneData.isValid
+      }
     }
   },
   birthday: {
@@ -431,7 +481,7 @@ let infoFormRules = ref({
     {
       required: customizedOptions.value.phone.required,
       message: amLabels.value.enter_phone_warning,
-      trigger: 'submit',
+      trigger: ['blur', 'submit'],
     }
   ],
   birthday: [
@@ -453,7 +503,8 @@ function saveProfileChanges () {
   store.commit('auth/setProfileEmail', infoFormData.value.email ? infoFormData.value.email.trim() : "")
 
   infoFormRef.value.validate((valid) => {
-    if (valid) {
+    if (valid && (customizedOptions.value.phone.required ? isPhoneValid.value : true)) {
+      phoneError.value = false
       successMessage.value = amLabels.value.profile_data_success
       let user = store.getters['auth/getProfile']
 
@@ -461,19 +512,17 @@ function saveProfileChanges () {
 
       httpClient.post(
         '/users/' + cabinetType.value + 's/' + user.id,
-        user,
-        useAuthorizationHeaderObject(store)
+        user
       ).finally(() => {
         store.commit('setLoading', false)
         alertVisibility.value = true
-        if (customizedOptions.value.phone.required && infoFormData.value.phone) {
-          phoneError.value = false
-        }
       })
     } else {
-      if (customizedOptions.value.phone.required && !infoFormData.value.phone) {
-        phoneError.value = true
+      let phoneField = infoFormRef.value.fields.find(el => el.prop === 'phone')
+      if (phoneField && !isPhoneValid.value) {
+        phoneField.validateState = 'error'
       }
+      phoneError.value = !!(phoneField && phoneField.validateState === 'error')
       return false
     }
   })
@@ -581,8 +630,7 @@ function changeProfilePassword() {
 
       httpClient.post(
         '/users/customers/' + user.id,
-        {password: store.getters['auth/getNewPassword']},
-        useAuthorizationHeaderObject(store)
+        {password: store.getters['auth/getNewPassword']}
       ).then(() => {
         successMessage.value = amLabels.value.password_success
 
@@ -641,10 +689,7 @@ function deleteProfile () {
 
   httpClient.post(
     '/users/customers/' + profileId,
-    Object.assign(
-      useAuthorizationHeaderObject(store),
-      data
-    )
+    data
   ).then(() => {
     store.commit('auth/setProfile', {})
     vueCookies.remove('ameliaUserEmail')
@@ -772,8 +817,7 @@ function saveCustomerCustomFields() {
 
       httpClient.post(
           `/users/${cabinetType.value}s/${user.id}`,
-          updatedUser,
-          useAuthorizationHeaderObject(store)
+          updatedUser
       ).finally(() => {
         store.commit('setLoading', false)
         successMessage.value = amLabels.value.profile_data_success
@@ -811,124 +855,150 @@ export default {
   // capi - cabinet personal information
   // capp - cabinet personal password
   .am-capi {
-    &__inner {
-      display: block;
-      padding: 16px 32px;
+
+    &__sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
-    &__form {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
+     &__inner {
+       display: block;
+       padding: 16px 32px;
+     }
 
-      & > * {
-        $count: 100;
-        @for $i from 0 through $count {
-          &:nth-child(#{$i + 1}) {
-            animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
-            animation-fill-mode: both;
-          }
-        }
-      }
-
-      // * traba da postanu globalni stilovi za formu
-      .el-form {
-        &-item {
-          display: block;
-          font-family: var(--am-font-family);
-          font-size: var(--am-fs-label);
-          margin-bottom: 24px;
-
-          &.am-capi__item {
-            width: calc(50% - 12px);
-
-            &-birthday {
-              .el-input__inner {
-                color: transparent !important;
-                text-shadow: 0 0 0 var(--am-c-inp-text);
-                cursor: pointer;
-              }
-            }
-
-            &.am-rw-480 {
-              width: 100%;
-            }
-          }
-
-          &.am-capp__item {
-            width: 100%;
-
-            .el-form-item__content {
-              max-width: 360px;
-            }
-          }
-
-          &__label {
-            flex: 0 0 auto;
-            text-align: left;
-            font-size: var(--am-fs-label);
-            line-height: 1.3;
-            color: var(--am-c-main-text);
-            box-sizing: border-box;
-            margin: 0;
-
-            &:before {
-              color: var(--am-c-error);
-            }
-          }
-
-          &__content {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            flex: 1;
-            position: relative;
-            font-size: var(--am-fs-input);
-            min-width: 0;
-            color: var(--am-c-main-text);
-          }
-
-          &__error {
-            font-size: 12px;
-            color: var(--am-c-error);
-            padding-top: 4px;
-          }
-        }
-      }
-
-      .am-whatsapp-opt-in-text {
-        font-size: 14px;
-        line-height: 1.5;
+    &__tabs {
+      .el-tabs__item:focus-visible {
+        box-shadow: 0 0 2px 2px var(--am-c-capi-primary) inset;
+        border-radius: 3px;
       }
     }
 
-    &__alert {
-      .el-alert {
-        padding: 4px 12px 4px 0;
-        box-sizing: border-box;
+     &__form {
+       display: flex;
+       flex-wrap: wrap;
+       justify-content: space-between;
 
-        &__content {
-          .el-alert__closebtn {
-            top: 50%;
-            transform: translateY(-50%);
-          }
-        }
+       & > * {
+         $count: 100;
+         @for $i from 0 through $count {
+           &:nth-child(#{$i + 1}) {
+             animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+             animation-fill-mode: both;
+           }
+         }
+       }
 
-        &__title {
-          display: flex;
-          align-items: center;
-          font-size: 16px;
-          line-height: 1.5;
-
-          .am-icon-checkmark-circle-full {
-            font-size: 28px;
-            line-height: 1;
-            color: var(--am-c-alerts-bgr);
-          }
+      @media (prefers-reduced-motion: reduce) {
+        & > * {
+          animation: none !important;
         }
       }
-    }
-  }
+
+       // * traba da postanu globalni stilovi za formu
+       .el-form {
+         &-item {
+           display: block;
+           font-family: var(--am-font-family);
+           font-size: var(--am-fs-label);
+           margin-bottom: 24px;
+
+           &.am-capi__item {
+             width: calc(50% - 12px);
+
+             &-birthday {
+               .el-input__inner {
+                 color: transparent !important;
+                 text-shadow: 0 0 0 var(--am-c-inp-text);
+                 cursor: pointer;
+               }
+             }
+
+             &.am-rw-480 {
+               width: 100%;
+             }
+           }
+
+           &.am-capp__item {
+             width: 100%;
+
+             .el-form-item__content {
+               max-width: 360px;
+             }
+           }
+
+           &__label {
+             flex: 0 0 auto;
+             text-align: left;
+             font-size: var(--am-fs-label);
+             line-height: 1.3;
+             color: var(--am-c-main-text);
+             box-sizing: border-box;
+             margin: 0;
+
+             &:before {
+               color: var(--am-c-error);
+             }
+           }
+
+           &__content {
+             display: flex;
+             flex-wrap: wrap;
+             align-items: center;
+             flex: 1;
+             position: relative;
+             font-size: var(--am-fs-input);
+             min-width: 0;
+             color: var(--am-c-main-text);
+           }
+
+           &__error {
+             font-size: 12px;
+             color: var(--am-c-error);
+             padding-top: 4px;
+           }
+         }
+       }
+
+       .am-whatsapp-opt-in-text {
+         font-size: 14px;
+         line-height: 1.5;
+       }
+     }
+
+     &__alert {
+       .el-alert {
+         padding: 4px 12px 4px 0;
+         box-sizing: border-box;
+
+         &__content {
+           .el-alert__closebtn {
+             top: 50%;
+             transform: translateY(-50%);
+           }
+         }
+
+         &__title {
+           display: flex;
+           align-items: center;
+           font-size: 16px;
+           line-height: 1.5;
+
+           .am-icon-checkmark-circle-full {
+             font-size: 28px;
+             line-height: 1;
+             color: var(--am-c-alerts-bgr);
+           }
+         }
+       }
+     }
+   }
 }
 
 .amelia-v2-booking #amelia-container {

@@ -2,10 +2,23 @@
   <div
     class="am-els"
     :style="cssVars"
+    :aria-busy="!ready || loading"
   >
+    <!-- Screen-reader-only live region for loading announcements -->
+    <div
+      class="am-sr-only"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <span v-if="!ready || loading">{{ amLabels.loading || 'Loading events, please wait.' }}</span>
+    </div>
+
     <div
       v-if="ready && !loading ? customizedOptions.header.visibility && !onlyOneEvent : false"
       class="am-els__available"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
     >
       {{`${total} ${total === 1 ? amLabels.event_available : amLabels.events_available }`}}
     </div>
@@ -21,6 +34,7 @@
         <div
           class="am-els__filters-search"
           role="search"
+          :aria-label="amLabels.event_search"
         >
           <AmInput
             v-model="eventSearch"
@@ -36,10 +50,12 @@
             custom-class="am-els__filters-menu__btn-inner"
             category="secondary"
             :aria-label="amLabels.event_filters"
+            :aria-expanded="filtersMenuVisibility"
+            :aria-controls="filtersPanelId"
             :type="customizedOptions.filterBtn.buttonType"
-            @click="filtersMenuVisibility = !filtersMenuVisibility"
+            @click="toggleFiltersMenu"
           >
-            <span class="am-icon-filter"></span>
+            <span class="am-icon-filter" aria-hidden="true"></span>
             <span v-if="cWidth > 500">{{amLabels.event_filters}}</span>
           </AmButton>
         </div>
@@ -49,15 +65,21 @@
       <Transition name="am-slide-fade">
         <div
           v-if="filtersMenuVisibility"
+          :id="filtersPanelId"
+          ref="filtersPanelRef"
           class="am-els__filters-menu"
           :class="responsiveClass"
+          role="region"
+          :aria-label="amLabels.event_filters"
         >
           <div
             v-if="amSettings.featuresIntegrations.eventTags.enabled && (!store.getters['params/getShortcodeParams'].tags || store.getters['params/getShortcodeParams'].tags.length !== 1) && tags.length > 0"
             class="am-els__filters-menu__items"
             :class="[responsiveClass, filterClassWidth.tag]"
           >
+            <label :for="`am-els-tag-select-${shortcode.counter}`" class="am-sr-only">{{ amLabels.event_type }}</label>
             <AmSelect
+              :id="`am-els-tag-select-${shortcode.counter}`"
               v-model="tagFilter"
               filterable
               clearable
@@ -80,7 +102,9 @@
             class="am-els__filters-menu__items"
             :class="[responsiveClass, filterClassWidth.location]"
           >
+            <label :for="`am-els-location-select-${shortcode.counter}`" class="am-sr-only">{{ amLabels.event_location }}</label>
             <AmSelect
+              :id="`am-els-location-select-${shortcode.counter}`"
               v-model="locationFilter"
               filterable
               clearable
@@ -109,6 +133,7 @@
               :disabled="false"
               :clearable="!!shortcode.range"
               :readonly="!shortcode.range"
+              :aria-label="amLabels.date_picker_placeholder"
               @selected-date="(dateString) => {store.commit('params/setDates', [dateString])}"
               @clear-date="() => {store.commit('params/setDates', [])}"
             />
@@ -120,7 +145,12 @@
 
     <template v-if="!empty">
       <!-- Event List -->
-      <div v-if="!loading" class="am-els__wrapper">
+      <div
+        v-if="!loading"
+        class="am-els__wrapper"
+        role="list"
+        :aria-label="amLabels.events || 'Events'"
+      >
         <template
           v-for="event in events"
           :key="event.id"
@@ -143,13 +173,18 @@
       <!-- /Event List -->
 
       <!-- Events Pagination -->
-      <div
+      <nav
         v-if="total && Math.ceil(total / showItems) > 1"
         class="am-els__pagination"
+        :aria-label="amLabels.event_page ? `${amLabels.event_page} ${currentPage} / ${Math.ceil(total / showItems)}` : (amLabels.events_pagination || 'Events pagination')"
       >
-        <div class="am-els__pagination-info">
-          {{ `${amLabels.event_page} ${currentPage} / ${Math.ceil(total / showItems)}` }}
+        <div class="am-els__pagination-info" aria-hidden="true">
+          {{ `${amLabels.event_page || 'Page'} ${currentPage} / ${Math.ceil(total / showItems)}` }}
         </div>
+        <!-- Screen-reader-only page count -->
+        <span class="am-sr-only">
+          {{ `${amLabels.event_page || 'Page'} ${currentPage} / ${Math.ceil(total / showItems)}` }}
+        </span>
         <AmPagination
           v-model:current-page="currentPage"
           :page-count="Math.ceil(total / showItems)"
@@ -159,7 +194,7 @@
           :hide-on-single-page="true"
           @current-change="changePage"
         />
-      </div>
+      </nav>
       <!-- /Events Pagination -->
     </template>
 
@@ -192,6 +227,7 @@ import {
   inject,
   computed,
   reactive,
+  nextTick,
 } from 'vue'
 
 // * Import from vuex
@@ -448,6 +484,27 @@ watch([eventSearch, tagFilter, locationFilter, dateFilter], () => {
 
 let filtersMenuVisibility = ref(false)
 
+// * Computed panel ID using shortcode counter for uniqueness
+let filtersPanelId = computed(() => `am-els-filters-panel-${shortcode.value?.counter ?? 'default'}`)
+
+// * Ref for the filters panel (focus management on open)
+let filtersPanelRef = ref(null)
+
+function toggleFiltersMenu () {
+  filtersMenuVisibility.value = !filtersMenuVisibility.value
+  if (filtersMenuVisibility.value) {
+    nextTick(() => {
+      const panel = filtersPanelRef.value
+      if (panel) {
+        const firstFocusable = panel.querySelector('input, button, select, [tabindex]:not([tabindex="-1"])')
+        if (firstFocusable) {
+          firstFocusable.focus()
+        }
+      }
+    })
+  }
+}
+
 // * Colors
 let amColors = inject('amColors')
 
@@ -600,6 +657,19 @@ export default {
         color: var(--am-c-els-text-op60);
       }
     }
+  }
+
+  // Visually hidden utility – content accessible to screen readers only
+  .am-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 }
 </style>

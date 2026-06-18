@@ -10,6 +10,7 @@
     :top="props.top"
     :modal="props.modal"
     :append-to-body="props.appendToBody"
+    :append-to="props.appendTo"
     :lock-scroll="props.lockScroll"
     :open-delay="props.openDelay"
     :close-delay="props.closeDelay"
@@ -18,13 +19,22 @@
     :show-close="props.showClose"
     :before-close="props.beforeClose"
     :center="props.center"
+    :align-center="props.alignCenter"
     :destroy-on-close="props.destroyOnClose"
     :close-icon="props.closeIcon"
+    :draggable="props.draggable"
+    :overflow="props.overflow"
+    :z-index="props.zIndex"
+    :header-class="props.headerClass"
+    :body-class="props.bodyClass"
+    :footer-class="props.footerClass"
     :style="props.customStyles"
     @close="emits('close')"
     @open="emits('open')"
     @closed="emits('closed')"
     @opened="emits('opened')"
+    @open-auto-focus="emits('open-auto-focus', $event)"
+    @close-auto-focus="emits('close-auto-focus', $event)"
   >
     <template #header>
       <span v-if="title" class="am-dialog__title">{{ title }}</span>
@@ -83,9 +93,13 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  appendTo: {
+    type: [String, Object],
+    default: undefined
+  },
   alignCenter: {
     type: Boolean,
-    default: false
+    default: true
   },
   lockScroll: {
     type: Boolean,
@@ -130,6 +144,30 @@ const props = defineProps({
     type: [Object, Function],
     default: AmeliaIconClose
   },
+  draggable: {
+    type: Boolean,
+    default: false
+  },
+  overflow: {
+    type: Boolean,
+    default: false
+  },
+  zIndex: {
+    type: Number,
+    default: undefined
+  },
+  headerClass: {
+    type: String,
+    default: ''
+  },
+  bodyClass: {
+    type: String,
+    default: ''
+  },
+  footerClass: {
+    type: String,
+    default: ''
+  },
   customStyles: {
     type: Object
   },
@@ -150,7 +188,15 @@ onMounted(() => {
 /**
  * Component Emits
  * */
-const emits = defineEmits(['close', 'open', 'closed', 'opened', 'update:modelValue'])
+const emits = defineEmits([
+  'close',
+  'open',
+  'closed',
+  'opened',
+  'open-auto-focus',
+  'close-auto-focus',
+  'update:modelValue'
+])
 
 /**
  * Component model
@@ -178,7 +224,6 @@ export default {
   .el-dialog {
     max-width: var(--el-dialog-width, 50%);
     width: 100%;
-    margin: var(--el-dialog-margin-top,15vh) auto 50px;
     padding: 0;
 
     .el-dialog {
@@ -189,6 +234,10 @@ export default {
       &__headerbtn {
         width: auto;
         height: auto;
+
+        &:focus {
+          outline: 1px solid var(--am-c-main-text);
+        }
       }
 
       &__body {

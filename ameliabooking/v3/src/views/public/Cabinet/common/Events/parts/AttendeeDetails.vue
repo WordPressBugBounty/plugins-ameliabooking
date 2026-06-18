@@ -24,7 +24,11 @@
             prefix-icon-color="var(--am-c-inp-text)"
             popper-class="am-cap-cust__popper"
             :placeholder="amLabels.event_attendees_search"
-            :remote-method="(val) => {useSearchCustomers(store, val)}"
+            :remote-method="
+              (val) => {
+                useSearchCustomers(store, val)
+              }
+            "
             :loading="searchingCustomers"
             @focus="useFocusCustomers(store)"
           >
@@ -32,10 +36,14 @@
               v-for="item in customers"
               :key="item.id"
               :value="item.id"
-              :label="item.email ? item.email : item.firstName + ' ' + item.lastName"
+              :label="
+                item.email ? item.email : item.firstName + ' ' + item.lastName
+              "
             >
               <div class="am-cap__cust-option">
-                <div class="am-cap__cust-option__heading">{{ item.firstName + ' ' + item.lastName }}</div>
+                <div class="am-cap__cust-option__heading">
+                  {{ item.firstName + ' ' + item.lastName }}
+                </div>
                 <div
                   v-if="item.email && customerEmailVisibility"
                   class="am-cap__cust-option__inner"
@@ -56,7 +64,10 @@
 
         <!-- Add Customer -->
         <AmButton
-          v-if="!store.getters['attendee/getId'] && amSettings.roles.allowWriteCustomers"
+          v-if="
+            !store.getters['attendee/getId'] &&
+            amSettings.roles.allowWriteCustomers
+          "
           class="am-capai-cuf__heading-add"
           :class="props.responsiveClass"
           :size="'default'"
@@ -70,22 +81,11 @@
         </AmButton>
         <!-- /Add Customer -->
       </div>
-      
-      <div
-        v-if="customer"
-        class="am-cap-attendee"
-        :class="responsiveClass"
-      >
-        <div
-          class="am-cap-cust"
-          :class="responsiveClass"
-          :style="cssVars"
-        >
+
+      <div v-if="customer" class="am-cap-attendee" :class="responsiveClass">
+        <div class="am-cap-cust" :class="responsiveClass" :style="cssVars">
           <!-- Customer Name -->
-          <div
-            class="am-cap-cust__name"
-            :class="noShowData(0).class"
-          >
+          <div class="am-cap-cust__name" :class="noShowData(0).class">
             <span
               v-if="noShowData(0).icon"
               :class="`am-icon-${noShowData(0).icon}`"
@@ -96,7 +96,10 @@
 
           <!-- Customer Phone & Email -->
           <div
-            v-if="(customer.phone && customerPhoneVisibility) || (customer.email && customerEmailVisibility)"
+            v-if="
+              (customer.phone && customerPhoneVisibility) ||
+              (customer.email && customerEmailVisibility)
+            "
             class="am-cap-cust__data-wrapper"
           >
             <!-- Customer Phone -->
@@ -189,7 +192,10 @@
           <el-form-item
             v-for="(item, index) in detailsForm.tickets"
             :key="index"
-            :label="props.event.customTickets.find((i) => i.id === item.eventTicketId).name"
+            :label="
+              props.event.customTickets.find((i) => i.id === item.eventTicketId)
+                .name
+            "
             class="am-cap__att-form__item"
             :class="responsiveClass"
           >
@@ -202,11 +208,7 @@
         </template>
       </template>
 
-      <EmptyState
-        v-if="!customer"
-        :heading="amLabels.no_attendees_yet"
-      />
-
+      <EmptyState v-if="!customer" :heading="amLabels.no_attendees_yet" />
     </el-form>
 
     <!-- Add/Edit Customer -->
@@ -214,7 +216,7 @@
       v-if="addEditCustomerDialogVisibility"
       :visibility="addEditCustomerDialogVisibility"
       :responsive-class="props.responsiveClass"
-      @update:visibility="(e) => addEditCustomerDialogVisibility = e"
+      @update:visibility="(e) => (addEditCustomerDialogVisibility = e)"
       @added-customer="addedCustomer"
     />
     <!-- /Add/Edit Customer -->
@@ -223,7 +225,10 @@
 
 <script setup>
 // * Import Composable
-import { useFocusCustomers, useSearchCustomers } from '../../../../../../assets/js/admin/customers'
+import {
+  useFocusCustomers,
+  useSearchCustomers,
+} from '../../../../../../assets/js/admin/customers'
 import { useResponsiveClass } from '../../../../../../assets/js/common/responsive'
 import { useAttendeeStatuses } from '../../../../../../assets/js/common/attendees'
 
@@ -231,24 +236,23 @@ import { useAttendeeStatuses } from '../../../../../../assets/js/common/attendee
 import AmOption from '../../../../../_components/select/AmOption.vue'
 import AmSelect from '../../../../../_components/select/AmSelect.vue'
 import AmInputNumber from '../../../../../_components/input-number/AmInputNumber.vue'
-import AmButton from "../../../../../_components/button/AmButton.vue";
+import AmButton from '../../../../../_components/button/AmButton.vue'
 
 // * Dedicated Components
-import AddEditCustomerDialog from "../../Appointments/parts/common/AddEditCustomerDialog.vue";
-import EmptyState from "../../parts/EmptyState.vue";
-import DotsPopup from "../../../../Parts/DotsPopup.vue";
+import AddEditCustomerDialog from '../../Appointments/parts/common/AddEditCustomerDialog.vue'
+import EmptyState from '../../parts/EmptyState.vue'
+import DotsPopup from '../../../../Parts/DotsPopup.vue'
 
 // * Import from Vue
 import { computed, ref, inject, onMounted } from 'vue'
 
 // * Import from library
-import httpClient from "../../../../../../plugins/axios";
+import httpClient from '../../../../../../plugins/axios'
 
 // * Import Store
 import { useStore } from 'vuex'
-import {useColorTransparency} from "../../../../../../assets/js/common/colorManipulation";
-import {useAuthorizationHeaderObject} from "../../../../../../assets/js/public/panel";
-import {useFrontendCustomer} from "../../../../../../assets/js/common/customer";
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
+import { useFrontendCustomer } from '../../../../../../assets/js/common/customer'
 
 // * Component Props
 const props = defineProps({
@@ -262,7 +266,7 @@ const props = defineProps({
   },
   pageWidth: {
     type: Number,
-    required: true
+    required: true,
   },
 })
 
@@ -286,8 +290,16 @@ const shortcodeData = inject('shortcodeData')
 let amCustomize = inject('amCustomize')
 
 // * Customized options
-let customerPhoneVisibility = computed(() => shortcodeData.value.cabinetType === 'employee' ? amCustomize.value.events.options.customerPhone.visibility : true)
-let customerEmailVisibility = computed(() => shortcodeData.value.cabinetType === 'employee' ? amCustomize.value.events.options.customerEmail.visibility : true)
+let customerPhoneVisibility = computed(() =>
+  shortcodeData.value.cabinetType === 'employee'
+    ? amCustomize.value.events.options.customerPhone.visibility
+    : true
+)
+let customerEmailVisibility = computed(() =>
+  shortcodeData.value.cabinetType === 'employee'
+    ? amCustomize.value.events.options.customerEmail.visibility
+    : true
+)
 
 // * Form Reference
 let detailsFormRef = ref(null)
@@ -345,7 +357,11 @@ let searchingCustomers = computed(
 // * Customers
 let customers = computed(() => store.getters['customerInfo/getCustomers'])
 
-let customer = computed(() => detailsForm.value.customerId ? customers.value.find((i) => i.id === detailsForm.value.customerId) : null)
+let customer = computed(() =>
+  detailsForm.value.customerId
+    ? customers.value.find((i) => i.id === detailsForm.value.customerId)
+    : null
+)
 
 function editCustomer(id) {
   store.dispatch('customerInfo/resetCustomer')
@@ -354,23 +370,24 @@ function editCustomer(id) {
 
   addEditCustomerDialogVisibility.value = true
 
-  httpClient.get(
-    '/users/customers/' + id,
-    Object.assign(
-      {
-        params: {
-          source: 'cabinet-provider',
-        },
+  httpClient
+    .get('/users/customers/' + id, {
+      params: {
+        source: 'cabinet-provider',
       },
-      useAuthorizationHeaderObject(store)
-    )
-  ).then((response) => {
-    store.commit('customerInfo/setCustomer', useFrontendCustomer(store, response.data.data.user))
-  }).catch((error) => {
-    console.log(error)
-  }).finally(() => {
-    store.commit('customerInfo/setLoading', false)
-  })
+    })
+    .then((response) => {
+      store.commit(
+        'customerInfo/setCustomer',
+        useFrontendCustomer(store, response.data.data.user)
+      )
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+    .finally(() => {
+      store.commit('customerInfo/setLoading', false)
+    })
 }
 
 let addEditCustomerDialogVisibility = ref(false)
@@ -389,7 +406,10 @@ function addedCustomer(customer) {
 
 onMounted(() => {
   if (!store.getters['attendee/getId']) {
-    store.commit('customerInfo/setCustomers', store.getters['auth/getPreloadedCustomers'])
+    store.commit(
+      'customerInfo/setCustomers',
+      store.getters['auth/getPreloadedCustomers']
+    )
   }
 })
 
@@ -433,9 +453,15 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-cust-no1': amColors.value.colorMainText,
-    '--am-c-cust-no1-bgr': useColorTransparency(amColors.value.colorMainText, 0.1),
+    '--am-c-cust-no1-bgr': useColorTransparency(
+      amColors.value.colorMainText,
+      0.1
+    ),
     '--am-c-cust-no2': amColors.value.colorWarning,
-    '--am-c-cust-no2-bgr': useColorTransparency(amColors.value.colorWarning, 0.1),
+    '--am-c-cust-no2-bgr': useColorTransparency(
+      amColors.value.colorWarning,
+      0.1
+    ),
     '--am-c-cust-no3': amColors.value.colorError,
     '--am-c-cust-no3-bgr': useColorTransparency(amColors.value.colorError, 0.1),
     '--am-c-cust-text': amColors.value.colorMainText,

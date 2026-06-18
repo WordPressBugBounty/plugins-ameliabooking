@@ -17,10 +17,10 @@
 
       <div v-if="authError" class="am-fs__info-error">
         <AmAlert
-            type="error"
-            :title="authErrorMessage"
-            :show-icon="true"
-            :closable="true"
+          type="error"
+          :title="authErrorMessage"
+          :show-icon="true"
+          :closable="true"
         >
         </AmAlert>
       </div>
@@ -59,6 +59,8 @@
           <component
             :is="formFields[item.id].template"
             ref="primeCollectorRef"
+            v-model="infoFormData[item.id]"
+            v-model:country-code="formFields[item.id].countryCode"
             v-bind="formFields[item.id].props"
             v-on="'handlers' in formFields[item.id] ? formFields[item.id].handlers : {}"
           ></component>
@@ -283,6 +285,7 @@ import httpClient from "../../../../plugins/axios";
 import AmSocialButton from "../../../common/FormFields/AmSocialButton.vue";
 import {SocialAuthOptions} from "../../../../assets/js/admin/socialAuthOptions";
 import {mapAddressComponentsForXML} from "../../../../assets/js/common/helper";
+import { useIvyMapping } from "../../../../assets/js/public/ivy";
 
 let props = defineProps({
   globalClass: {
@@ -299,6 +302,9 @@ const amLabels = inject('amLabels')
 
 // * Customize
 let amCustomize = inject('amCustomize')
+
+// * Shortcode data
+const shortcodeData = inject('shortcodeData')
 
 let infoFormWrapperRef = ref(null)
 let {width: pageWidth} = useElementSize(infoFormWrapperRef)
@@ -365,16 +371,11 @@ let infoFormRef = ref(null)
 let isRtl = computed(() => store.getters['getIsRtl'])
 
 let phoneError = ref(false)
+let isPhoneValid = ref(false)
 let refreshPhoneComponent = ref(0)
+
 let loggedInUser = computed(() => (store.getters['booking/getCustomerId'] && store.getters['booking/getCustomerEmail'])
   || (!!window.ameliaUser && window.ameliaUser.type == 'admin'))
-
-// * Watch for logged in user to refresh phone component
-watch(loggedInUser, (newValue) => {
-  if (newValue) {
-    refreshPhoneComponent.value++
-  }
-})
 
 // * Form data
 let infoFormData = ref({
@@ -426,15 +427,33 @@ let formFields = ref({
     }
   },
   phone: {
+    countryCode: computed({
+      get: () => {
+        const iso = store.getters['booking/getCustomerCountryPhoneIso']
+        return iso ? iso.toUpperCase() : ''
+      },
+      set: (val) => {
+        store.commit('booking/setCustomerCountryPhoneIso', val ? val.toLowerCase() : "")
+      }
+    }),
     template: markRaw(PhoneFormField),
     props: {
       class: computed(() => isRtl.value ? 'am-rtl' : ''),
-      phoneError: computed(() => phoneError.value),
-      refreshTrigger: computed(() => refreshPhoneComponent.value)
+      phoneError: computed(() => phoneError.value && !isPhoneValid.value),
+      errorMessage: computed(() => !isPhoneValid.value && infoFormData.value.phone ? amLabels.value.enter_valid_phone_warning : ''),
+      refreshTrigger: computed(() => refreshPhoneComponent.value),
     },
     handlers: {
-      countryPhoneIsoUpdated: (val) => {
-        store.commit('booking/setCustomerCountryPhoneIso', val ? val.toLowerCase() : "")
+      handlePhoneData: (phoneData) => {
+        // If phone data is received without country code, set the default country code
+        if (phoneData && !phoneData.countryCode && !store.getters['booking/getCustomerCountryPhoneIso'] && settings.general.phoneDefaultCountryCode !== 'auto') {
+          store.commit('booking/setCustomerCountryPhoneIso', settings.general.phoneDefaultCountryCode.toLowerCase())
+        }
+
+        // Set national format of phone number because chanvge of coutry code doesn't change the national format
+        store.commit('booking/setCustomerPhone', phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, "") : "")
+
+        isPhoneValid.value = !!phoneData.isValid
       }
     }
   }
@@ -479,7 +498,7 @@ let rules = ref({
     {
       required: amCustomize.infoStep.options.phone.required,
       message: amLabels.value.enter_phone_warning,
-      trigger: 'submit',
+      trigger: ['blur', 'submit'],
     }
   ],
 })
@@ -560,7 +579,7 @@ function submitForm() {
       null
   )
   infoFormRef.value.validate((valid) => {
-    if (valid) {
+    if (valid && (amCustomize.infoStep.options.phone.required ? isPhoneValid.value : true)) {
       phoneError.value = false
       if (!instantBooking.value && !isWaitingListBooking.value) {
         nextStep()
@@ -592,17 +611,28 @@ function submitForm() {
       // * Scroll to the first error field
       let fieldElement
 
-      infoFormRef.value.fields.some((el) => {
-        if (el.validateState === 'error') {
-          fieldElement = el.$el
-          return el.validateState === 'error'
-        }
-      })
-
       let phoneField = infoFormRef.value.fields.find(el => el.prop === 'phone')
+      let shouldFlagPhone = phoneField
+        && amCustomize.infoStep.options.phone.visibility
+        && (amCustomize.infoStep.options.phone.required || !!infoFormData.value.phone)
+        && !isPhoneValid.value
+
+      if (shouldFlagPhone) {
+        phoneField.validateState = 'error'
+      }
       phoneError.value = !!(phoneField && phoneField.validateState === 'error')
 
-      useScrollTo(infoFormWrapperRef.value, fieldElement, 20, 300)
+      nextTick(() => {
+        infoFormRef.value.fields.some((el) => {
+          if (el.validateState === 'error') {
+            fieldElement = el.$el
+            return el.validateState === 'error'
+          }
+        })
+
+        useScrollTo(infoFormWrapperRef.value, fieldElement, 20, 300)
+      })
+
       return false
     }
   })
@@ -644,6 +674,12 @@ function setDataFromSocialLogin(data) {
   infoFormData.value.firstName = data.firstName
   infoFormData.value.lastName = data.lastName
   infoFormData.value.email = data.email
+  if (data.phone) {
+    infoFormData.value.phone = data.phone
+    const normalizedIso = data.countryPhoneIso ? data.countryPhoneIso.trim().toLowerCase() : ''
+    store.commit('booking/setCustomerCountryPhoneIso', normalizedIso)
+    refreshPhoneComponent.value++
+  }
 }
 
 // * Watching when footer button was clicked
@@ -782,6 +818,10 @@ onMounted(() => {
 
   if (couponCode.value) {
     store.commit('booking/setCouponCode', couponCode.value)
+  }
+
+  if (useIvyMapping(store, shortcodeData, infoFormData)) {
+    refreshPhoneComponent.value++
   }
 })
 </script>

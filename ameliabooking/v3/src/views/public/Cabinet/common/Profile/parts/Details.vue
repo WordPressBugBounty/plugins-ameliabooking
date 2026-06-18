@@ -19,8 +19,9 @@
           :is="item.template"
           ref="customerCollectorRef"
           v-model="employeeFormData[name]"
-          v-model:countryPhoneIso="item.countryPhoneIso"
+          v-model:country-code="item.countryCode"
           v-bind="item.props"
+          v-on="'handlers' in item ? item.handlers : {}"
         ></component>
       </template>
     </div>
@@ -114,6 +115,7 @@ let employeeFormRef = ref(null)
 
 // * Phone Error
 let phoneError = ref(false)
+let isPhoneValid = ref(false)
 
 // * Form Data
 let employeeFormData = ref({
@@ -154,6 +156,16 @@ let employeeFormData = ref({
     },
   }),
 })
+
+function setEmployeeCountryPhoneIso (val) {
+  let countryPhoneIso = val ? val.toLowerCase() : ''
+
+  store.commit('auth/setProfileCountryPhoneIso', countryPhoneIso)
+  store.commit('employee/setEmployee', {
+    ...store.getters['employee/getEmployee'],
+    countryPhoneIso,
+  })
+}
 
 // * Form validation rules
 let employeeFormRules = computed(() => {
@@ -220,16 +232,13 @@ let employeeInfoFormConstruction = ref({
     },
   },
   phone: {
-    countryPhoneIso: computed({
+    countryCode: computed({
       get: () =>
         store.getters['auth/getProfile'].countryPhoneIso
-          ? store.getters['auth/getProfile'].countryPhoneIso
+          ? store.getters['auth/getProfile'].countryPhoneIso.toUpperCase()
           : '',
       set: (val) => {
-        store.commit(
-          'auth/setProfileCountryPhoneIso',
-          val ? val.toLowerCase() : ''
-        )
+        setEmployeeCountryPhoneIso(val)
       },
     }),
     template: formFieldsTemplates.phone,
@@ -237,15 +246,22 @@ let employeeInfoFormConstruction = ref({
       itemName: 'phone',
       label: amLabels.phone_colon,
       placeholder: amLabels.enter_phone,
-      defaultCode: computed(() =>
-        store.getters['auth/getProfile'].countryPhoneIso
-          ? store.getters['auth/getProfile'].countryPhoneIso
-          : ''
-      ),
-      phoneError: computed(() => phoneError.value),
+      phoneError: computed(() => phoneError.value && !isPhoneValid.value),
+      errorMessage: computed(() => phoneError.value && !isPhoneValid.value && employeeFormData.value.phone ? amLabels.enter_valid_phone_warning : ''),
       whatsAppLabel: amLabels.whatsapp_opt_in_text,
-      isWhatsApp: amSettings.notifications.whatsAppEnabled,
+      isWhatsApp: computed(() => amSettings.notifications.whatsAppEnabled && !(phoneError.value && !isPhoneValid.value)),
       class: computed(() => `am-caepif__item ${props.responsiveClass}`),
+    },
+    handlers: {
+      handlePhoneData: (phoneData) => {
+        if (phoneData && !phoneData.countryCode && !store.getters['auth/getProfile'].countryPhoneIso && amSettings.general.phoneDefaultCountryCode !== 'auto') {
+          setEmployeeCountryPhoneIso(amSettings.general.phoneDefaultCountryCode)
+        }
+
+        store.commit('employee/setPhone', phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, "") : "")
+
+        isPhoneValid.value = !!phoneData.isValid
+      }
     },
   },
 })

@@ -116,9 +116,6 @@ import {
   useExtrasData
 } from "../../../../../../assets/js/admin/booking";
 import {
-  useAuthorizationHeaderObject
-} from "../../../../../../assets/js/public/panel";
-import {
   useColorTransparency
 } from "../../../../../../assets/js/common/colorManipulation";
 
@@ -189,7 +186,7 @@ function cancelBooking () {
   httpClient.post(
     '/bookings/cancel/' + targetBooking.value.id,
     {type: 'appointment'},
-    Object.assign(useAuthorizationHeaderObject(store), {params: {source: 'cabinet-' + cabinetType.value}})
+    {params: {source: 'cabinet-' + cabinetType.value}}
   ).then(() => {
     targetBooking.value = null
     emits('canceled', {message: amLabels.value.appointment_canceled})

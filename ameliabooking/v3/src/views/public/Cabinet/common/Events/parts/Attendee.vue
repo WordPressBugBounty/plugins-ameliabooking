@@ -16,16 +16,13 @@
       @trigger-close="closeAlert"
     >
       <template #title>
-        <span class="am-icon-clearable"/> {{ alertMessage }}
+        <span class="am-icon-clearable" /> {{ alertMessage }}
       </template>
     </AmAlert>
 
     <el-tabs v-model="activeTab">
       <!-- Details -->
-      <el-tab-pane
-        :label="amLabels.details"
-        name="details"
-      >
+      <el-tab-pane :label="amLabels.details" name="details">
         <AttendeeDetails
           ref="attendeeDetailsRef"
           :event="props.event"
@@ -52,10 +49,7 @@
         :label="amLabels.payment"
         name="payment"
       >
-        <AttendeePayment
-          :event="props.event"
-          :page-width="props.pageWidth"
-        />
+        <AttendeePayment :event="props.event" :page-width="props.pageWidth" />
       </el-tab-pane>
       <!-- /Payment -->
     </el-tabs>
@@ -67,7 +61,9 @@
         :type="'plain'"
         @click="close"
       >
-        {{ amSettings.roles.allowWriteEvents ? amLabels.cancel : amLabels.close }}
+        {{
+          amSettings.roles.allowWriteEvents ? amLabels.cancel : amLabels.close
+        }}
       </AmButton>
       <AmButton
         v-if="amSettings.roles.allowWriteEvents"
@@ -84,7 +80,10 @@
       :description="amLabels.price_changed_message"
       :close-btn-text="amLabels.no"
       :confirm-btn-text="amLabels.yes"
-      :customized-options="{cancelBtn: {buttonType: 'plain'}, confirmBtn: {buttonType: 'filled'}}"
+      :customized-options="{
+        cancelBtn: { buttonType: 'plain' },
+        confirmBtn: { buttonType: 'filled' },
+      }"
       @decline="saveAttendee(false)"
       @confirm="saveAttendee(true)"
       @close="amountChanged = false"
@@ -96,56 +95,52 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  provide,
-  onMounted,
-} from "vue";
+import { ref, computed, inject, provide, onMounted } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * _components
 import Skeleton from '../../Authentication/parts/Skeleton.vue'
-import AmButton from "../../../../../_components/button/AmButton.vue";
-import AmAlert from "../../../../../_components/alert/AmAlert.vue";
+import AmButton from '../../../../../_components/button/AmButton.vue'
+import AmAlert from '../../../../../_components/alert/AmAlert.vue'
 
 // * Dedicated Components
-import AttendeeDetails from "./AttendeeDetails";
-import AttendeeCustomFields from "./AttendeeCustomFields";
-import AttendeePayment from "./AttendeePayment";
-import CancelPopup from "../../parts/CancelPopup.vue";
+import AttendeeDetails from './AttendeeDetails'
+import AttendeeCustomFields from './AttendeeCustomFields'
+import AttendeePayment from './AttendeePayment'
+import CancelPopup from '../../parts/CancelPopup.vue'
 
-import httpClient from "../../../../../../plugins/axios";
+import httpClient from '../../../../../../plugins/axios'
 
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation.js";
-import { useAttendeeAmount, useBackAttendee } from "../../../../../../assets/js/common/attendees";
-import { useAuthorizationHeaderObject } from "../../../../../../assets/js/public/panel";
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation.js'
+import {
+  useAttendeeAmount,
+  useBackAttendee,
+} from '../../../../../../assets/js/common/attendees'
 
 // * Components props
 let props = defineProps({
   title: {
     type: String,
-    default: ''
+    default: '',
   },
   visibility: {
     type: Boolean,
-    default: false
+    default: false,
   },
   isNew: {
     type: Boolean,
-    default: false
+    default: false,
   },
   event: {
     type: Object,
-    default: () => {}
+    default: () => {},
   },
   pageWidth: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 })
 
 // * Component emits
@@ -182,7 +177,7 @@ let alertVisibility = ref(false)
 let alertContainer = ref(null)
 let alertMessage = ref('')
 
-function closeAlert () {
+function closeAlert() {
   alertVisibility.value = false
   alertMessage.value = ''
 }
@@ -202,34 +197,39 @@ function getAmount() {
   return amountData.price - amountData.discount + amountData.tax
 }
 
-function validateSave () {
-  let validData = true
+async function validateSave() {
+  const validations = await Promise.allSettled([
+    attendeeCustomFieldsRef.value?.customFieldsFormRef.validate() || Promise.resolve(true),
+    attendeeDetailsRef.value?.detailsFormRef.validate() || Promise.resolve(true),
+  ])
 
-  attendeeCustomFieldsRef.value?.customFieldsFormRef.validate((valid) => {
-    if (!valid) {
-      activeTab.value = 'customFields'
+  let allValid = true
 
-      validData = false
-    }
-  })
+  // Check custom fields validation
+  if (validations[0].status === 'rejected' || validations[0].value === false) {
+    activeTab.value = 'customFields'
+    allValid = false
+  }
 
-  attendeeDetailsRef.value?.detailsFormRef.validate((valid) => {
-    if (!valid) {
-      activeTab.value = 'details'
+  // Check details validation
+  if (validations[1].status === 'rejected' || validations[1].value === false) {
+    activeTab.value = 'details'
+    allValid = false
+  }
 
-      validData = false
-    }
-  })
-
-  if (!validData) {
+  if (!allValid) {
     return
   }
 
-  let paymentLinksEnabled = amSettings.payments.paymentLinks && amSettings.payments.paymentLinks.enabled
+  let paymentLinksEnabled =
+    amSettings.payments.paymentLinks && amSettings.payments.paymentLinks.enabled
 
-  let eventSettings = props.event.settings ? JSON.parse(props.event.settings) : null
+  let eventSettings = props.event.settings
+    ? JSON.parse(props.event.settings)
+    : null
 
-  if (eventSettings &&
+  if (
+    eventSettings &&
     'payments' in eventSettings &&
     'paymentLinks' in eventSettings.payments &&
     'enabled' in eventSettings.payments.paymentLinks
@@ -237,34 +237,34 @@ function validateSave () {
     paymentLinksEnabled = eventSettings.payments.paymentLinks.enabled
   }
 
-  if (paymentLinksEnabled && store.getters['attendee/getId'] && getAmount() > oldAmount.value) {
+  if (
+    paymentLinksEnabled &&
+    store.getters['attendee/getId'] &&
+    getAmount() > oldAmount.value
+  ) {
     amountChanged.value = true
   } else {
     saveAttendee(false)
   }
 }
 
-function saveAttendee (createPaymentLinks) {
+function saveAttendee(createPaymentLinks) {
   loading.value = true
 
   httpClient
     .post(
-      store.getters['attendee/getId'] ? '/events/bookings/' + store.getters['attendee/getId'] : '/bookings',
-      Object.assign(
-        useBackAttendee(store),
-        {
-          runInstantPostBookingActions: true,
-          createPaymentLinks: createPaymentLinks,
-        }
-      ),
-      Object.assign(
-        useAuthorizationHeaderObject(store),
-        {
-          params: {
-            source: 'cabinet-provider',
-          },
-        }
-      )
+      store.getters['attendee/getId']
+        ? '/events/bookings/' + store.getters['attendee/getId']
+        : '/bookings',
+      Object.assign(useBackAttendee(store), {
+        runInstantPostBookingActions: true,
+        createPaymentLinks: createPaymentLinks,
+      }),
+      {
+        params: {
+          source: 'cabinet-provider',
+        },
+      }
     )
     .then(() => {
       emits('save')
@@ -301,7 +301,10 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-capai-text': amColors.value.colorMainText,
-    '--am-c-capai-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
+    '--am-c-capai-text-op10': useColorTransparency(
+      amColors.value.colorMainText,
+      0.1
+    ),
     '--am-c-capai-primary': amColors.value.colorPrimary,
 
     '--am-c-cust-no1': amColors.value.colorMainText,
@@ -333,7 +336,6 @@ export default {
   // am    - amelia
   // capai - cabinet-panel-appointment-item
   .am-capei-atti {
-
     // Customer
     &-customer {
       &__name {

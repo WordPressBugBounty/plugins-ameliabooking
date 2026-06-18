@@ -1,12 +1,17 @@
 <template>
   <div
     v-if="!loading"
+    ref="signInContainerRef"
     class="am-asi"
     :style="cssVars"
+    role="region"
+    aria-labelledby="am-asi-signin-title"
+    aria-describedby="am-asi-signin-description"
   >
     <div class="am-asi__top">
       <AmAlert
         v-if="profileDeleted"
+        ref="profileDeletedAlertRef"
         class="am-asi__top-message am-asi__top-message-success"
         type="success"
         :title="amLabels.profile_deleted"
@@ -18,6 +23,7 @@
 
       <AmAlert
         v-if="authError"
+        ref="authErrorAlertRef"
         class="am-asi__top-message am-asi__top-message-error"
         type="error"
         :title="authErrorMessage"
@@ -26,11 +32,16 @@
         :closable="true"
         @close="store.commit('auth/setProfileDeleted', false)"
       ></AmAlert>
-
-      <div class="am-asi__header">
+      <div
+        id="am-asi-signin-title"
+        class="am-asi__header"
+      >
         {{ amLabels.welcome_back }}
       </div>
-      <div class="am-asi__text">
+      <div
+        id="am-asi-signin-description"
+        class="am-asi__text"
+      >
         {{ amLabels.enter_credentials }}
       </div>
     </div>
@@ -39,8 +50,8 @@
     <div v-if="(settings.socialLogin.googleLoginEnabled && settings.general.googleClientId) || (settings.socialLogin.facebookLoginEnabled && settings.socialLogin.facebookCredentialsEnabled)">
       <div class="am-asi__social-wrapper">
         <am-social-button
-            :provider="socialProvider"
-            @social-action="onSignupSocial"
+          :provider="socialProvider"
+          @social-action="onSignupSocial"
         />
       </div>
 
@@ -60,6 +71,7 @@
       label-position="top"
       class="am-asi__form"
       :class="responsiveClass"
+      @submit.prevent="submitForm"
     >
       <template v-for="(item, index) in signInFormConstruction" :key="index">
         <component
@@ -84,9 +96,14 @@
       <span class="am-asi__footer-text">
         {{ amLabels.forgot_your_password }}
       </span>
-      <span class="am-asi__footer-link" @click="pageKey = 'sendAccessLink'">
+      <AmButton
+        class="am-asi__footer-reset__btn"
+        type="text"
+        size="small"
+        @click="goToResetPassword"
+      >
         {{ amLabels.reset_password }}
-      </span>
+      </AmButton>
     </div>
 
     <div
@@ -123,6 +140,8 @@ import {
   onMounted,
   markRaw,
   onBeforeMount,
+  watch,
+  nextTick,
 } from 'vue'
 import VueAuthenticate from 'vue-authenticate'
 import {VueRecaptcha} from 'vue-recaptcha'
@@ -132,7 +151,6 @@ import { useStore } from 'vuex'
 
 // * Import from Libraries
 import httpClient from '../../../../../../plugins/axios'
-import { useCookies } from 'vue3-cookies'
 
 // * Composables
 import { useResponsiveClass } from '../../../../../../assets/js/common/responsive.js'
@@ -166,8 +184,6 @@ let licence = inject('licence')
 
 // * Vars
 let store = useStore()
-
-const vueCookies = useCookies()['cookies']
 
 // * Root Settings
 const amSettings = inject('settings')
@@ -269,14 +285,6 @@ function onSignupSocial({ provider, credentials }) {
 }
 
 function setResponseData(response, authenticate) {
-  if ('token' in response.data.data) {
-    const secureCookie = window.location.protocol === 'https:'
-    vueCookies.set('ameliaToken', response.data.data.token, amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'], null, null, secureCookie)
-    vueCookies.set('ameliaUserEmail', response.data.data.user.email, amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'], null, null, secureCookie)
-
-    store.commit('auth/setToken', response.data.data.token)
-  }
-
   if ('user' in response.data.data && response.data.data.user.type === 'provider') {
     setEmployee(response)
   }
@@ -422,16 +430,34 @@ let profileDeleted = computed(() => store.getters['auth/getProfileDeleted'])
 // * Sign in error alert
 let authError = ref(false)
 let authErrorMessage = ref('')
+let signInContainerRef = ref(null)
+let authErrorAlertRef = ref(null)
+let profileDeletedAlertRef = ref(null)
+let hasInitialFocus = ref(false)
 
-function useAuthenticateUser (cookieToken, changePass) {
+function focusFirstInput () {
+  if (!signInContainerRef.value) {
+    return
+  }
+
+  // Focus the first interactive field when form is initially rendered.
+  const firstInput = signInContainerRef.value.querySelector('.am-asi__form input, .am-asi__form textarea, .am-asi__form select')
+  if (firstInput) {
+    firstInput.focus()
+  }
+}
+
+function goToResetPassword () {
+  pageKey.value = 'sendAccessLink'
+}
+
+function useAuthenticateUser (changePass) {
   let urlToken = useUrlQueryParam('token')
 
-  if (cookieToken) {
-    useAuthenticate(cookieToken, false, false, false)
-  } else if (urlToken) {
+  if (urlToken) {
     useAuthenticate(urlToken, true, false, changePass)
   } else {
-    useAuthenticate('', false, true, false)
+    useAuthenticate(null, false, true, false)
   }
 }
 
@@ -632,7 +658,6 @@ function continueWithAuthenticate () {
 
 function authenticate () {
   useAuthenticateUser(
-    vueCookies.get('ameliaToken'),
     'changePass' in useUrlQueryParams(window.location.href)
   )
 }
@@ -661,6 +686,31 @@ onMounted(() => {
       pageKey.value = 'sendAccessLink'
     }
     store.commit('setLoading', false)
+  }
+})
+
+watch(loading, (isLoading) => {
+  if (!isLoading && !hasInitialFocus.value) {
+    hasInitialFocus.value = true
+    nextTick(() => {
+      focusFirstInput()
+    })
+  }
+})
+
+watch(authError, (hasError) => {
+  if (hasError) {
+    nextTick(() => {
+      authErrorAlertRef.value?.focus()
+    })
+  }
+})
+
+watch(profileDeleted, (isDeleted) => {
+  if (isDeleted) {
+    nextTick(() => {
+      profileDeletedAlertRef.value?.focus()
+    })
   }
 })
 /*************
@@ -883,12 +933,13 @@ export default {
         color: var(--am-c-main-text-op70);
       }
 
-      &-link {
-        font-size: 15px;
+      &-reset__btn {
+        padding: 0;
         font-weight: 400;
-        line-height: 1.6;
-        color: var(--am-c-primary);
-        cursor: pointer;
+
+        &:hover {
+          background-color: transparent;
+        }
       }
     }
   }

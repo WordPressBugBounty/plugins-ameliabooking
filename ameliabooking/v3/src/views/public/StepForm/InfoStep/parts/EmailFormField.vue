@@ -13,7 +13,7 @@
       </span>
     </template>
     <AmInput
-      v-model="infoFormData.email"
+      v-model="model"
       name="email"
       type="email"
       :placeholder="amLabels.enter_email"
@@ -25,7 +25,23 @@
 <script setup>
 import AmInput from'../../../../_components/input/AmInput.vue'
 
-import {inject, ref} from "vue";
+import {inject, ref, computed} from "vue";
+
+let props = defineProps({
+  modelValue: {
+    type: String,
+    required: true
+  }
+})
+
+let emits = defineEmits(['update:modelValue'])
+
+let model = computed({
+  get: () => props.modelValue,
+  set: (val) => {
+    emits('update:modelValue', val)
+  }
+})
 
 let primeFieldRef = ref(null)
 
@@ -34,9 +50,6 @@ let amLabels = inject('amLabels')
 
 // * Customize
 let amCustomize = inject('amCustomize')
-
-// * Form field data
-let infoFormData = inject('infoFormData')
 
 defineExpose({
   primeFieldRef

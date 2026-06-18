@@ -226,6 +226,7 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
     urlParams: useUrlQueryParams(window.location.href),
     componentProps: componentProps,
     returnUrl: location.href,
+    ivy: store.getters['getIvy'],
   }
 
   let coupon = null

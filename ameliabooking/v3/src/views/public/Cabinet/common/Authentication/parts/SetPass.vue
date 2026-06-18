@@ -1,14 +1,18 @@
 <template>
   <div
     v-if="!loading"
+    ref="setPassContainerRef"
     class="am-asi"
     :style="cssVars"
+    role="region"
+    aria-labelledby="am-sp-title"
+    aria-describedby="am-sp-description"
   >
     <div class="am-asi__top">
-      <div class="am-asi__header">
+      <div id="am-sp-title" class="am-asi__header">
         {{ amLabels.new_password_set }}
       </div>
-      <div class="am-asi__text">
+      <div id="am-sp-description" class="am-asi__text">
         {{ amLabels.new_password_set_description }}
       </div>
     </div>
@@ -20,6 +24,7 @@
       label-position="top"
       class="am-asi__form"
       :class="responsiveClass"
+      @submit.prevent="submitForm"
     >
       <template v-for="(item, index) in signInFormConstruction" :key="index">
         <component
@@ -50,6 +55,8 @@ import {
   reactive,
   computed,
   inject,
+  watch,
+  nextTick,
 } from 'vue'
 
 // * Import from Vuex
@@ -66,7 +73,6 @@ import Skeleton from './Skeleton'
 // * Composables
 import { useResponsiveClass } from '../../../../../../assets/js/common/responsive.js'
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation.js'
-import { useAuthorizationHeaderObject } from '../../../../../../assets/js/public/panel'
 
 // * Vars
 let store = useStore()
@@ -194,6 +200,30 @@ let loading = computed(() => {
   return store.getters['getLoading']
 })
 
+// * Accessibility refs
+let setPassContainerRef = ref(null)
+let hasInitialFocus = ref(false)
+
+function focusFirstInput () {
+  if (!setPassContainerRef.value) {
+    return
+  }
+  const firstInput = setPassContainerRef.value.querySelector('.am-asi__form input, .am-asi__form textarea, .am-asi__form select')
+  if (firstInput) {
+    firstInput.focus()
+  }
+}
+
+// * Move focus to first field once loading completes
+watch(loading, (isLoading) => {
+  if (!isLoading && !hasInitialFocus.value) {
+    hasInitialFocus.value = true
+    nextTick(() => {
+      focusFirstInput()
+    })
+  }
+}, {immediate: true})
+
 // * Submit Form
 function submitForm() {
   authFormRef.value.validate((valid) => {
@@ -205,7 +235,7 @@ function submitForm() {
       httpClient.post(
         '/users/' + cabinetType.value + 's/' + user.id,
         {password: store.getters['auth/getNewPassword']},
-        Object.assign(useAuthorizationHeaderObject(store), {params: {source: 'cabinet-' + cabinetType.value}})
+        {params: {source: 'cabinet-' + cabinetType.value}}
       ).then(() => {
         store.commit('auth/setAuthenticated', true)
       }).catch(() => {

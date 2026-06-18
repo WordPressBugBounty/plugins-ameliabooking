@@ -22,7 +22,7 @@ import ChangePassSuccess from './parts/SetPassSuccess.vue'
 // * import composable
 import {
   defaultCustomizeSettings
-} from '../../../../../assets/js/common/defaultCustomize.js'
+} from '@/assets/js/common/defaultCustomize'
 
 // * Root Settings
 const amSettings = inject('settings')

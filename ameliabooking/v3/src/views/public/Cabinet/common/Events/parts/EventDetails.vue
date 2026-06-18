@@ -114,7 +114,7 @@
         clearable
         filterable
         multiple
-        :placeholder="amLabels.event_tags_select_or_create"
+        :placeholder="amLabels.event_tags_select"
         :filter-method="filterTags"
       >
         <AmOption

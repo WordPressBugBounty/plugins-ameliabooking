@@ -121,7 +121,9 @@ import {
   ref,
   computed,
   inject,
-  reactive, onMounted
+  reactive,
+  onMounted,
+  onBeforeUnmount,
 } from "vue";
 
 // * Store
@@ -145,9 +147,6 @@ let ameliaContainer = ref(null)
 // * Plugin wrapper width
 let containerWidth = ref(0)
 
-// * window resize listener
-window.addEventListener('resize', resize);
-
 // * resize function
 function resize() {
   if (ameliaContainer.value) {
@@ -156,9 +155,15 @@ function resize() {
 }
 
 onMounted(() => {
+  window.addEventListener('resize', resize)
+
   if (ameliaContainer.value) {
     containerWidth.value = ameliaContainer.value.offsetWidth
   }
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resize)
 })
 
 let itemWidth = computed(() => {

@@ -623,7 +623,13 @@ const cssVars = computed(() => {
   @include am-button-block;
 }
 
+// Dropdown that is used in select component and select options
 .am-select-popper {
+  @include am-button-block;
+}
+
+// Menu dropdown that is used in customer and employee panel
+.am-cc__popper {
   @include am-button-block;
 }
 

@@ -3,12 +3,23 @@
     class="am-ct"
     :class="[{ 'am-readonly': props.readonly }, responsiveClass]"
     :style="cssVars"
+    role="group"
+    :aria-labelledby="ticketHeadingId"
   >
     <div class="am-ct__info">
-      <p class="am-ct__info-name">
+      <p
+        :id="ticketHeadingId"
+        class="am-ct__info-name"
+      >
         {{ props.ticket.name }}
       </p>
-      <p class="am-ct__info-spots">
+      <p
+        :id="ticketStatusId"
+        class="am-ct__info-spots"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         <span v-if="componentWidth <= 500" class="am-ct__info-spots__price">
           {{ useFormattedPrice(props.ticket.price) }}
         </span>
@@ -29,10 +40,14 @@
       </p>
       <AmInputNumber
         v-if="!props.readonly"
+        :id="ticketInputId"
         v-model="spots"
         size="small"
         :min="0"
         :max="selectedEvent.bringingAnyone ? spotsLimitation : 1"
+        :name="`event-ticket-${props.ticket.id}`"
+        :aria-label="ticketInputAriaLabel"
+        :aria-describedby="ticketStatusId"
         :disabled="disableSelection"
         @change="updateSpots"
       />
@@ -98,6 +113,14 @@ let selectedEvent = computed(() =>
     store.getters['eventBooking/getSelectedEventId']
   )
 )
+
+const ticketName = computed(() => props.ticket?.name || '')
+const ticketHeadingId = computed(() => `am-ct-name-${props.ticket?.id || 'default'}`)
+const ticketStatusId = computed(() => `am-ct-status-${props.ticket?.id || 'default'}`)
+const ticketInputId = computed(() => `am-ct-input-${props.ticket?.id || 'default'}`)
+const ticketInputAriaLabel = computed(() => {
+  return `${props.customizedLabels.event_ticket_types || 'Ticket type'}: ${ticketName.value}`
+})
 
 let spots = computed({
   get: () => store.getters['tickets/getTicketNumber'](props.ticket.id),

@@ -159,6 +159,12 @@ const globalLabels = inject('labels')
 // * Customize
 const amCustomize = inject('amCustomize')
 
+let { bringingAnyoneOptions } = inject('bringingOptions', ref({
+  availability: false,
+  min: 0,
+  max: 1,
+}))
+
 // * Package
 let packagesOptions = computed(() =>
   store.getters['entities/filteredPackages'](
@@ -227,7 +233,6 @@ let employeesServices = computed(() => store.getters['entities/getEmployeeServic
 
 let options = computed(() => {
   if (props.inPopup) {
-    let { bringingAnyoneOptions } = inject('bringingOptions')
     return bringingAnyoneOptions.value
   }
 

@@ -1,12 +1,17 @@
 <template>
   <div
     v-if="!loading"
+    ref="sendLinkContainerRef"
     class="am-asi"
     :style="cssVars"
+    role="region"
+    aria-labelledby="am-sal-title"
+    aria-describedby="am-sal-description"
   >
     <div class="am-asi__top">
       <AmAlert
         v-if="authError"
+        ref="authErrorAlertRef"
         class="am-asi__top-message am-asi__top-message-error"
         type="error"
         :title="authErrorMessage"
@@ -14,11 +19,10 @@
         :show-icon="true"
         :closable="true"
       ></AmAlert>
-
-      <div class="am-asi__header">
+      <div id="am-sal-title" class="am-asi__header">
         {{ amLabels.access_link_send }}
       </div>
-      <div class="am-asi__text">
+      <div id="am-sal-description" class="am-asi__text">
         {{ amLabels.access_link_send_description }}
       </div>
     </div>
@@ -30,6 +34,7 @@
       label-position="top"
       class="am-asi__form"
       :class="responsiveClass"
+      @submit.prevent="submitForm"
     >
       <template v-for="(item, index) in signInFormConstruction" :key="index">
         <component
@@ -51,9 +56,13 @@
     </AmButton>
 
     <div v-if="amSettings.roles[cabinetType + 'Cabinet']['loginEnabled']" class="am-asi__footer">
-      <span class="am-asi__footer-link" @click="pageKey = 'signIn'">
+      <AmButton
+        class="am-asi__footer-signin__btn"
+        type="text"
+        @click="goToSignIn"
+      >
         {{ amLabels.sign_in }}
-      </span>
+      </AmButton>
     </div>
 
     <div
@@ -82,6 +91,8 @@ import {
   reactive,
   computed,
   inject,
+  watch,
+  nextTick,
 } from 'vue'
 import {VueRecaptcha} from 'vue-recaptcha'
 
@@ -139,6 +150,35 @@ let amLabels = computed(() => {
 // * Sign in error alert
 let authError = ref(false)
 let authErrorMessage = ref('')
+
+// * Accessibility refs
+let sendLinkContainerRef = ref(null)
+let authErrorAlertRef = ref(null)
+let hasInitialFocus = ref(false)
+
+function focusFirstInput () {
+  if (!sendLinkContainerRef.value) {
+    return
+  }
+  const firstInput = sendLinkContainerRef.value.querySelector('.am-asi__form input, .am-asi__form textarea, .am-asi__form select')
+  if (firstInput) {
+    firstInput.focus()
+  }
+}
+
+function goToSignIn () {
+  pageKey.value = 'signIn'
+}
+
+// * Move focus to error alert when it appears
+watch(authError, (hasError) => {
+  if (hasError) {
+    nextTick(() => {
+      authErrorAlertRef.value?.focus()
+    })
+  }
+})
+
 
 /*************
  * Recaptcha *
@@ -218,6 +258,16 @@ let cabinetType = inject('cabinetType')
 let loading = computed(() => {
   return store.getters['getLoading']
 })
+
+// * Move focus to first field once loading completes
+watch(loading, (isLoading) => {
+  if (!isLoading && !hasInitialFocus.value) {
+    hasInitialFocus.value = true
+    nextTick(() => {
+      focusFirstInput()
+    })
+  }
+}, {immediate: true})
 
 // * Submit Form
 function submitForm() {
@@ -392,12 +442,13 @@ export default {
       align-items: center;
       justify-content: center;
 
-      &-link {
-        font-size: 15px;
+      &-signin__btn {
+        width: 100%;
         font-weight: 400;
-        line-height: 1.6;
-        color: var(--am-c-primary);
-        cursor: pointer;
+
+        &:hover {
+          background-color: transparent;
+        }
       }
     }
   }

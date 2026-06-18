@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, shallowRef, watch } from 'vue'
 
 // Global tracker for window.v3 changes - shared across all components
 let globalWindowV3Tracker = null
@@ -30,12 +30,40 @@ export function useReactiveCustomize() {
   }
 
   // Create reactive amCustomize that responds to both Vue reactivity and manual triggers
-  const amCustomize = computed(() => {
-    // Access the global tracker to create dependency on window.v3 changes
-    globalWindowV3Tracker.value
+  //
+  // WHY shallowRef + two-level spread instead of computed:
+  //   computed(() => window.v3?.customize?.value) returns the SAME object reference every
+  //   time the tracker fires (because Pinia mutates in-place). Newer Vue 3 versions cache
+  //   computed results by reference equality, so dependents never see "a change" and
+  //   templates never re-render.
+  //
+  //   By spreading two levels deep we guarantee:
+  //     • amCustomize.value itself  → new object (shallowRef detects change)
+  //     • amCustomize.value[pageRenderKey] → new object (downstream computed sees change)
+  //   The spread reads current (post-mutation) property values from the Pinia reactive
+  //   proxy, so all nested scalars (e.g. `required`, `visibility`) reflect the update.
+  const amCustomize = shallowRef(null)
+  watch(
+    globalWindowV3Tracker,
+    () => {
+      if (typeof window === 'undefined') {
+        amCustomize.value = null
+        return
+      }
 
-    return window.v3?.customize?.value
-  })
+      const raw = window.v3?.customize?.value
+      if (!raw) {
+        amCustomize.value = null
+        return
+      }
+      // Two-level spread: top-level keys get new objects, so every consumer that holds a
+      // reference to amCustomize.value[someKey] sees a changed value on next access.
+      amCustomize.value = Object.fromEntries(
+        Object.entries(raw).map(([k, v]) => [k, Array.isArray(v) ? [...v] : (v && typeof v === 'object' ? { ...v } : v)])
+      )
+    },
+    { immediate: true }
+  )
 
   const stepIndex = computed(() => {
     globalWindowV3Tracker.value
@@ -93,5 +121,6 @@ export function useReactiveCustomize() {
     langKey,
     pagesType,
     features,
+    globalWindowV3Tracker, // Expose tracker for triggering reactivity
   }
 }

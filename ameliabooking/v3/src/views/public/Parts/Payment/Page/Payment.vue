@@ -51,9 +51,13 @@
           <div
             v-if="available && Object.keys(availablePayments).filter(item => availablePayments[item]).length > 1"
             :key="gateway"
+            tabindex="0"
+            role="button"
             class="am-payments__method-button"
             :class="[{'am-payments__method-button__selected' : paymentGateway === gateway }, responsiveClass, `am-payments__method-button-${paymentList.length}`]"
+            :aria-label="`${getPaymentBtnString(gateway)} ${amLabels.payment_button || 'payment button'}`"
             @click="setPaymentGateway(gateway)"
+            @keydown.enter.space.prevent="setPaymentGateway(gateway)"
           >
             <img
               v-if="available"
@@ -575,6 +579,11 @@ export default {
         flex-direction: column;
         justify-items: center;
         height: fit-content;
+
+        &:focus {
+          border: 1px solid var(--am-c-ps-primary);
+          box-shadow: 0 1px 1px var(--am-c-ps-primary-op06);
+        }
 
         img {
           height: 24px;

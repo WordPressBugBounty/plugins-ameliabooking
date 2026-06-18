@@ -8,7 +8,8 @@ const params = {
 
 const httpClient = axios.create({
   baseURL,
-  params
+  params,
+  withCredentials: true
 })
 
 export default httpClient

@@ -2,17 +2,17 @@
   <div
     ref="pageContainer"
     class="am-cap am-cape-main"
-    :class="{'am-capei-main': eventVisibility || (eventAttendeeVisibility || attendeeOpenFromAttendees)}"
+    :class="{
+      'am-capei-main':
+        eventVisibility || eventAttendeeVisibility || attendeeOpenFromAttendees,
+    }"
     :style="cssVars"
   >
-    <div
-      class="am-cape-main__inner"
-      :class="responsiveClass"
-    >
+    <div class="am-cape-main__inner" :class="responsiveClass">
       <AmAlert
         v-if="alertVisibility"
         ref="alertContainer"
-        :type= "alertType"
+        :type="alertType"
         :show-border="true"
         :close-after="5000"
         custom-class="am-cap__alert"
@@ -25,7 +25,12 @@
       </AmAlert>
 
       <CabinetFilters
-        v-if="!eventAttendeeVisibility && !eventVisibility && !eventAttendeesVisibility && ready"
+        v-if="
+          !eventAttendeeVisibility &&
+          !eventVisibility &&
+          !eventAttendeesVisibility &&
+          ready
+        "
         :step-key="'events'"
         :empty="empty"
         :responsive-class="responsiveClass"
@@ -33,20 +38,34 @@
       />
 
       <div
-        v-if="(shortcodeData.cabinetType === 'employee' && ready && !eventAttendeeVisibility && !eventVisibility && !eventAttendeesVisibility) &&
-          (((licence.isPro || licence.isDeveloper) && amSettings.featuresIntegrations.eTickets.enabled) || amSettings.roles.allowWriteEvents)"
+        v-if="
+          shortcodeData.cabinetType === 'employee' &&
+          ready &&
+          !eventAttendeeVisibility &&
+          !eventVisibility &&
+          !eventAttendeesVisibility &&
+          (((licence.isPro || licence.isDeveloper) &&
+            amSettings.featuresIntegrations.eTickets.enabled &&
+            !employeePanelReadOnly) ||
+            amSettings.roles.allowWriteEvents)
+        "
         class="am-cap__actions"
         :class="responsiveClass"
       >
         <AmButton
-          v-if="(licence.isPro || licence.isDeveloper) && amSettings.featuresIntegrations.eTickets.enabled && (amCustomize.events.options?.scanQrCodeBtn?.visibility ?? true)"
+          v-if="
+            (licence.isPro || licence.isDeveloper) &&
+            amSettings.featuresIntegrations.eTickets.enabled &&
+            !employeePanelReadOnly &&
+            (amCustomize.events.options?.scanQrCodeBtn?.visibility ?? true)
+          "
           prefix="scan-qr-code"
           size="small"
           category="secondary"
           type="plain"
           @click="qrScannerVisibility = true"
         >
-          {{amLabels.scan_e_ticket}}
+          {{ amLabels.scan_e_ticket }}
         </AmButton>
         <AmButton
           v-if="amSettings.roles.allowWriteEvents"
@@ -57,15 +76,28 @@
           :type="amCustomize.events.options.newEvtBtn.buttonType"
           @click="addEvent"
         >
-          <span>{{amLabels.new_event}}</span>
+          <span>{{ amLabels.new_event }}</span>
         </AmButton>
       </div>
 
       <template v-if="!loading && ready">
         <div
-          v-if="!eventAttendeeVisibility && !eventVisibility && !eventAttendeesVisibility && dateGroupedEvents && Object.keys(dateGroupedEvents).length > 0"
+          v-if="
+            !eventAttendeeVisibility &&
+            !eventVisibility &&
+            !eventAttendeesVisibility &&
+            dateGroupedEvents &&
+            Object.keys(dateGroupedEvents).length > 0
+          "
           class="am-cape__wrapper"
-          :class="[{'am-no-border': dateGroupedEvents && Object.keys(dateGroupedEvents).length === 1}, responsiveClass]"
+          :class="[
+            {
+              'am-no-border':
+                dateGroupedEvents &&
+                Object.keys(dateGroupedEvents).length === 1,
+            },
+            responsiveClass,
+          ]"
         >
           <div
             v-for="(item, dateKey) in dateGroupedEvents"
@@ -75,32 +107,70 @@
             <div
               class="am-cape__date"
               :class="[
-                {'am-today': getFrontedFormattedDate(dateKey) === getFrontedFormattedDate(moment().format('YYYY-MM-DD'))},
-                {'am-no-flag': dateGroupedEvents && Object.keys(dateGroupedEvents).length === 1},
-                responsiveClass
+                {
+                  'am-today':
+                    getFrontedFormattedDate(dateKey) ===
+                    getFrontedFormattedDate(moment().format('YYYY-MM-DD')),
+                },
+                {
+                  'am-no-flag':
+                    dateGroupedEvents &&
+                    Object.keys(dateGroupedEvents).length === 1,
+                },
+                responsiveClass,
               ]"
             >
-              {{getFrontedFormattedDate(dateKey)}}
+              {{ getFrontedFormattedDate(dateKey) }}
             </div>
             <CollapseCard
               v-for="(event, index) in item.events"
               :key="index"
-              :start="getFrontedFormattedTime(event.periods[0].periodStart.split(' ')[1].slice(0, 5))"
+              :start="
+                getFrontedFormattedTime(
+                  event.periods[0].periodStart.split(' ')[1].slice(0, 5)
+                )
+              "
               :name="event.name"
               :employee="eventEmployees(event)"
-              :customers="event.bookings.filter(i => i.status !== 'rejected' && i.status !== 'canceled').map(i => i.customer)"
+              :customers="
+                event.bookings
+                  .filter(
+                    (i) => i.status !== 'rejected' && i.status !== 'canceled'
+                  )
+                  .map((i) => i.customer)
+              "
               :price="useEventBookingsPrice(event)"
               :duration="null"
-              :periods="(periods = usePeriodsData(event.periods)) ? periods : []"
+              :periods="
+                (periods = usePeriodsData(event.periods)) ? periods : []
+              "
               :extras="[]"
               :tickets="useTicketsData(event)"
-              :custom-fields="useCustomFieldsData(event.bookings, shortcodeData.cabinetType)"
+              :custom-fields="
+                useCustomFieldsData(event.bookings, shortcodeData.cabinetType)
+              "
               :location="useEventLocation(store, event)"
               :qr-codes="qrCodeTicketsVisibility ? useEventQrCodes(event) : []"
-              :google-meet-link="event.periods.length === 1 && event.periods[0].googleMeetUrl ? event.periods[0].googleMeetUrl : ''"
-              :microsoft-teams-link="event.periods.length === 1 && event.periods[0].microsoftTeamsUrl ? event.periods[0].microsoftTeamsUrl : ''"
-              :zoom-link="event.periods.length === 1 && event.periods[0].zoomMeeting ? event.periods[0].zoomMeeting.joinUrl : ''"
-              :lesson-space-link="event.periods.length === 1 && event.periods[0].lessonSpace ? event.periods[0].lessonSpace : ''"
+              :google-meet-link="
+                event.periods.length === 1 && event.periods[0].googleMeetUrl
+                  ? event.periods[0].googleMeetUrl
+                  : ''
+              "
+              :microsoft-teams-link="
+                event.periods.length === 1 && event.periods[0].microsoftTeamsUrl
+                  ? event.periods[0].microsoftTeamsUrl
+                  : ''
+              "
+              :zoom-link="
+                event.periods.length === 1 && event.periods[0].zoomMeeting
+                  ? event.periods[0].zoomMeeting.joinUrl
+                  : ''
+              "
+              :lesson-space-link="
+                event.periods.length === 1 && event.periods[0].lessonSpace
+                  ? event.periods[0].lessonSpace
+                  : ''
+              "
               :bookable="event"
               :reservation="event"
               :booking="event.bookings[0]"
@@ -110,21 +180,36 @@
               @edit-event="editEvent"
               @add-event-attendee="addEventAttendee"
               @list-event-attendees="listEventAttendees"
-              @cancel-booking="(data) => {
-                targetBooking = data
-              }"
+              @cancel-booking="
+                (data) => {
+                  targetBooking = data
+                }
+              "
             ></CollapseCard>
           </div>
         </div>
 
         <EmptyState
-          v-if="!eventAttendeeVisibility && !eventVisibility && !eventAttendeesVisibility && (dateGroupedEvents === null || Object.keys(dateGroupedEvents).length === 0)"
+          v-if="
+            !eventAttendeeVisibility &&
+            !eventVisibility &&
+            !eventAttendeesVisibility &&
+            (dateGroupedEvents === null ||
+              Object.keys(dateGroupedEvents).length === 0)
+          "
           :heading="amLabels.no_evt_found"
           :text="amLabels.have_no_evt"
         ></EmptyState>
 
         <AmPagination
-          v-if="!eventAttendeeVisibility && !eventVisibility && !eventAttendeesVisibility && dateGroupedEvents && Object.keys(dateGroupedEvents).length > 0 && eventsCount > amSettings.general.itemsPerPage"
+          v-if="
+            !eventAttendeeVisibility &&
+            !eventVisibility &&
+            !eventAttendeesVisibility &&
+            dateGroupedEvents &&
+            Object.keys(dateGroupedEvents).length > 0 &&
+            eventsCount > amSettings.general.itemsPerPage
+          "
           :page-size="amSettings.general.itemsPerPage"
           :pager-count="5"
           layout="prev, pager, next"
@@ -154,7 +239,11 @@
         <Attendee
           v-if="eventAttendeeVisibility"
           :visibility="eventAttendeeVisibility"
-          :title="editAttendeeRecognition ? amLabels.event_edit_attendee : amLabels.event_add_attendee"
+          :title="
+            editAttendeeRecognition
+              ? amLabels.event_edit_attendee
+              : amLabels.event_add_attendee
+          "
           :event="targetEvent"
           :page-width="pageWidth"
           :is-new="!editAttendeeRecognition"
@@ -180,7 +269,7 @@
         <QrCodeScanner
           v-if="qrScannerVisibility"
           v-model:visibility="qrScannerVisibility"
-          @update:visibility="(value) => qrScannerVisibility = value"
+          @update:visibility="(value) => (qrScannerVisibility = value)"
         />
       </template>
       <Skeleton v-else></Skeleton>
@@ -190,40 +279,29 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  reactive,
-  computed,
-  inject,
-  provide,
-  onMounted,
-  watch,
-} from "vue";
+import { ref, reactive, computed, inject, provide, onMounted, watch } from 'vue'
 
-import { useElementSize } from "@vueuse/core";
+import { useElementSize } from '@vueuse/core'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import from Libraries
-import httpClient from "../../../../../plugins/axios";
+import httpClient from '../../../../../plugins/axios'
 
 // * Templates
-import CancelPopup from "../../common/parts/CancelPopup.vue";
-import CollapseCard from "../parts/CollapseCard/CollapseCard.vue";
-import CabinetFilters from "../parts/Filters.vue";
-import Skeleton from "../../common/parts/Skeleton.vue";
-import QrCodeScanner from "../parts/QrCodeScanner.vue";
+import CancelPopup from '../../common/parts/CancelPopup.vue'
+import CollapseCard from '../parts/CollapseCard/CollapseCard.vue'
+import CabinetFilters from '../parts/Filters.vue'
+import Skeleton from '../../common/parts/Skeleton.vue'
+import QrCodeScanner from '../parts/QrCodeScanner.vue'
 
 // * Composables
 import {
-  useAuthorizationHeaderObject
-} from "../../../../../assets/js/public/panel";
-import {
   getDateRange,
   getFrontedFormattedDate,
-  getFrontedFormattedTime
-} from "../../../../../assets/js/common/date";
+  getFrontedFormattedTime,
+} from '../../../../../assets/js/common/date'
 import {
   useParsedEvents,
   useEventBookingsPrice,
@@ -231,36 +309,24 @@ import {
   useTicketsData,
   useEventLocation,
   useEventQrCodes,
-} from "../../../../../assets/js/admin/event";
-import {
-  useFrontEvent,
-} from "../../../../../assets/js/common/events";
-import {
-  useInitAttendee,
-} from "../../../../../assets/js/common/attendees";
-import {
-  useCustomFieldsData,
-} from "../../../../../assets/js/admin/booking";
-import {
-  useResponsiveClass
-} from "../../../../../assets/js/common/responsive";
-import {
-  useColorTransparency
-} from "../../../../../assets/js/common/colorManipulation";
-import {
-  useUrlParams
-} from "../../../../../assets/js/common/helper";
-import moment from "moment";
-import EmptyState from "../parts/EmptyState.vue";
-import AmAlert from "../../../../_components/alert/AmAlert.vue";
-import AmButton from "../../../../_components/button/AmButton.vue";
-import Event from "../Events/parts/Event.vue";
-import EventAttendees from "../Events/parts/Attendees.vue";
-import Attendee from "../Events/parts/Attendee.vue";
-import {useScrollTo} from "../../../../../assets/js/common/scrollElements";
-import IconComponent from "../../../../_components/icons/IconComponent.vue";
-import {usePopulateSettings} from "../../../../../assets/js/common/settings";
-import AmPagination from "../../../../_components/pagination/AmPagination.vue";
+} from '../../../../../assets/js/admin/event'
+import { useFrontEvent } from '../../../../../assets/js/common/events'
+import { useInitAttendee } from '../../../../../assets/js/common/attendees'
+import { useCustomFieldsData } from '../../../../../assets/js/admin/booking'
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
+import { useUrlParams } from '../../../../../assets/js/common/helper'
+import moment from 'moment'
+import EmptyState from '../parts/EmptyState.vue'
+import AmAlert from '../../../../_components/alert/AmAlert.vue'
+import AmButton from '../../../../_components/button/AmButton.vue'
+import Event from '../Events/parts/Event.vue'
+import EventAttendees from '../Events/parts/Attendees.vue'
+import Attendee from '../Events/parts/Attendee.vue'
+import { useScrollTo } from '../../../../../assets/js/common/scrollElements'
+import IconComponent from '../../../../_components/icons/IconComponent.vue'
+import { usePopulateSettings } from '../../../../../assets/js/common/settings'
+import AmPagination from '../../../../_components/pagination/AmPagination.vue'
 
 // * Store
 let store = useStore()
@@ -276,8 +342,8 @@ let responsiveClass = computed(() => {
 
 // * Plus icon
 let plusIcon = {
-  components: {IconComponent},
-  template: `<IconComponent icon="plus"/>`
+  components: { IconComponent },
+  template: `<IconComponent icon="plus"/>`,
 }
 
 // * Plugin Licence
@@ -294,9 +360,16 @@ let amCustomize = inject('amCustomize')
 // * Data in shortcode
 const shortcodeData = inject('shortcodeData')
 
+// * View-only mode for admin/manager in the employee panel
+let employeePanelReadOnly = inject('employeePanelReadOnly', ref(false))
+
 // * Qr Code Tickets visibility
 let qrCodeTicketsVisibility = computed(() => {
-  return shortcodeData.value.cabinetType === 'customer' && (licence.isPro || licence.isDeveloper) && amSettings.featuresIntegrations.eTickets.enabled
+  return (
+    shortcodeData.value.cabinetType === 'customer' &&
+    (licence.isPro || licence.isDeveloper) &&
+    amSettings.featuresIntegrations.eTickets.enabled
+  )
 })
 
 // * labels
@@ -306,17 +379,23 @@ const labels = inject('labels')
 const localLanguage = inject('localLanguage')
 
 // * if local lang is in settings lang
-let langDetection = computed(() => amSettings.general.usedLanguages.includes(localLanguage.value))
+let langDetection = computed(() =>
+  amSettings.general.usedLanguages.includes(localLanguage.value)
+)
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   let customizedLabels = amCustomize.value.events.translations
   if (customizedLabels) {
-    Object.keys(customizedLabels).forEach(labelKey => {
-      if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
-        computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
+    Object.keys(customizedLabels).forEach((labelKey) => {
+      if (
+        customizedLabels[labelKey][localLanguage.value] &&
+        langDetection.value
+      ) {
+        computedLabels[labelKey] =
+          customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
         computedLabels[labelKey] = customizedLabels[labelKey].default
       }
@@ -334,19 +413,23 @@ let alertType = ref('success')
 
 let alertMessage = ref('')
 
-function closeAlert () {
+function closeAlert() {
   alertVisibility.value = false
-  store.commit('cabinet/setPaymentLinkError', {value: false, type: 'event'})
+  store.commit('cabinet/setPaymentLinkError', { value: false, type: 'event' })
 }
 
-function customizedLabels (step) {
-  let computedLabels = reactive({...labels})
+function customizedLabels(step) {
+  let computedLabels = reactive({ ...labels })
 
   let customizedLabels = amCustomize.value[step].translations
   if (customizedLabels) {
-    Object.keys(customizedLabels).forEach(labelKey => {
-      if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
-        computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
+    Object.keys(customizedLabels).forEach((labelKey) => {
+      if (
+        customizedLabels[labelKey][localLanguage.value] &&
+        langDetection.value
+      ) {
+        computedLabels[labelKey] =
+          customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
         computedLabels[labelKey] = customizedLabels[labelKey].default
       }
@@ -355,7 +438,7 @@ function customizedLabels (step) {
   return computedLabels
 }
 
-function customizedOptions (step) {
+function customizedOptions(step) {
   return amCustomize.value[step].options
 }
 
@@ -367,7 +450,7 @@ let ready = computed(() => store.getters['entities/getReady'])
 let props = defineProps({
   loadBookingsCounter: {
     type: Number,
-    default: 0
+    default: 0,
   },
 })
 
@@ -394,14 +477,16 @@ function eventsPageChange(page) {
   getEvents(page)
 }
 
-function getEvents (page = 1) {
+function getEvents(page = 1) {
   targetBooking.value = null
 
   store.commit('cabinet/setEventsLoading', true)
 
   let timeZone = store.getters['cabinet/getTimeZone']
-  let params = JSON.parse(JSON.stringify(store.getters['cabinetFilters/getEventsFilters']))
-  params.dates = params.dates.map(d => moment(d).format('YYYY-MM-DD'))
+  let params = JSON.parse(
+    JSON.stringify(store.getters['cabinetFilters/getEventsFilters'])
+  )
+  params.dates = params.dates.map((d) => moment(d).format('YYYY-MM-DD'))
   params.timeZone = timeZone
   params.source = 'cabinet-' + cabinetType.value
   params.id = params.events
@@ -413,80 +498,82 @@ function getEvents (page = 1) {
     params.customerId = params.customers
   }
 
-  store.commit('auth/setLoadingEventsCounter', store.getters['auth/getLoadingEventsCounter'] + 1)
+  store.commit(
+    'auth/setLoadingEventsCounter',
+    store.getters['auth/getLoadingEventsCounter'] + 1
+  )
 
   let loadingCounter = store.getters['auth/getLoadingEventsCounter']
 
-  httpClient.get(
-    '/events',
-    Object.assign(
-      useAuthorizationHeaderObject(store),
-      {params: useUrlParams(params)}
-    )
-  ).then((response) => {
-    if (loadingCounter !== store.getters['auth/getLoadingEventsCounter']) {
-      return
-    }
+  httpClient
+    .get('/events', { params: useUrlParams(params) })
+    .then((response) => {
+      if (loadingCounter !== store.getters['auth/getLoadingEventsCounter']) {
+        return
+      }
 
-    store.dispatch(
-      'cabinetFilters/injectEventsOptions',
-      response.data.data.events
-    )
+      store.dispatch(
+        'cabinetFilters/injectEventsOptions',
+        response.data.data.events
+      )
 
-    store.commit('auth/setPreloadedEvents', response.data.data.events)
+      store.commit('auth/setPreloadedEvents', response.data.data.events)
 
-    eventsCount.value = response.data.data.count
+      eventsCount.value = response.data.data.count
 
-    store.commit('eventEntities/setEvents', response.data.data.events)
-    dateGroupedEvents.value = useParsedEvents(
-      response.data.data.events,
-      store.getters['cabinet/getTimeZone'],
-      store
-    )
-  }).catch((error) => {
-    if(error?.response?.data?.data?.reauthorize !== undefined && error.response.data.data.reauthorize) {
-      store.dispatch('auth/logout')
-    }
+      store.commit('eventEntities/setEvents', response.data.data.events)
+      dateGroupedEvents.value = useParsedEvents(
+        response.data.data.events,
+        store.getters['cabinet/getTimeZone'],
+        store
+      )
+    })
+    .catch((error) => {
+      if (
+        error?.response?.data?.data?.reauthorize !== undefined &&
+        error.response.data.data.reauthorize
+      ) {
+        store.dispatch('auth/logout')
+      }
 
-    console.log(error)
-  }).finally(() => {
-    if (loadingCounter !== store.getters['auth/getLoadingEventsCounter']) {
-      return
-    }
+      console.log(error)
+    })
+    .finally(() => {
+      if (loadingCounter !== store.getters['auth/getLoadingEventsCounter']) {
+        return
+      }
 
-    store.commit('cabinet/setEventsLoading', false)
-  })
+      store.commit('cabinet/setEventsLoading', false)
+    })
 }
 
 /*********
  * Event *
  *********/
-function editEvent (event) {
+function editEvent(event) {
   store.commit('cabinet/setEventsLoading', true)
 
-  httpClient.get(
-    '/events/' + event.id,
-    Object.assign(
-      {
-        params: {
-          source: 'cabinet-' + cabinetType.value,
-          timeZone: store.getters['cabinet/getTimeZone'],
-        },
+  httpClient
+    .get('/events/' + event.id, {
+      params: {
+        source: 'cabinet-' + cabinetType.value,
+        timeZone: store.getters['cabinet/getTimeZone'],
       },
-      useAuthorizationHeaderObject(store)
-    )
-  ).then((response) => {
-    store.commit(
-      'event/setEvent',
-      useFrontEvent(store, response.data.data.event)
-    )
+    })
+    .then((response) => {
+      store.commit(
+        'event/setEvent',
+        useFrontEvent(store, response.data.data.event)
+      )
 
-    eventVisibility.value = true
-  }).catch((error) => {
-    console.log(error)
-  }).finally(() => {
-    store.commit('cabinet/setEventsLoading', false)
-  })
+      eventVisibility.value = true
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+    .finally(() => {
+      store.commit('cabinet/setEventsLoading', false)
+    })
 }
 
 let eventVisibility = ref(false)
@@ -501,7 +588,7 @@ let attendeeOpenFromAttendees = ref(false)
 
 let targetEvent = ref(null)
 
-function duplicateEvent (event) {
+function duplicateEvent(event) {
   store.commit('cabinet/setEventsLoading', true)
 
   eventVisibility.value = false
@@ -515,7 +602,7 @@ function duplicateEvent (event) {
   }, 500)
 }
 
-function saveEventCallback () {
+function saveEventCallback() {
   alertVisibility.value = true
   alertMessage.value = amLabels.value.event_saved
 
@@ -530,123 +617,147 @@ function saveEventCallback () {
   closeEvent()
 }
 
-function addEvent () {
+function addEvent() {
   resetEvent()
 
   eventVisibility.value = true
 }
 
-function addEventAttendee (event) {
+function addEventAttendee(event) {
   targetEvent.value = event
 
-  resetEventAttendee(useInitAttendee(store, store.getters['attendee/getDefaultAttendee'], event))
+  resetEventAttendee(
+    useInitAttendee(store, store.getters['attendee/getDefaultAttendee'], event)
+  )
 
   eventAttendeeVisibility.value = true
 }
 
-function savedEventAttendee () {
+function savedEventAttendee() {
   getEvents(eventsPage.value)
 
   closedEventAttendee()
 }
 
-function closedEventAttendee () {
+function closedEventAttendee() {
   eventAttendeeVisibility.value = false
   editAttendeeRecognition.value = false
 }
 
-function listEventAttendees (event) {
+function listEventAttendees(event) {
   targetEvent.value = event
 
   eventAttendeesVisibility.value = true
 }
 
-function closeEventAttendees () {
+function closeEventAttendees() {
   targetEvent.value = null
 
   getEvents(eventsPage.value)
 
-  resetEventAttendee(useInitAttendee(store, store.getters['attendee/getDefaultAttendee']))
+  resetEventAttendee(
+    useInitAttendee(store, store.getters['attendee/getDefaultAttendee'])
+  )
 
   eventAttendeesVisibility.value = false
   attendeeOpenFromAttendees.value = false
 }
 
-function openAttendee (open) {
+function openAttendee(open) {
   attendeeOpenFromAttendees.value = open
 }
 
-function resetEventAttendee (payload = {}) {
+function resetEventAttendee(payload = {}) {
   store.commit('attendee/setAttendee', payload)
 }
 
-function closeEvent () {
+function closeEvent() {
   eventVisibility.value = false
 
   resetEvent()
 }
 
-function resetEvent () {
-  store.commit(
-    'event/setEvent',
-    {bookings: [], settings: usePopulateSettings(amSettings, store.getters['event/getSettings'], {}, {})}
-  )
+function resetEvent() {
+  store.commit('event/setEvent', {
+    bookings: [],
+    settings: usePopulateSettings(
+      amSettings,
+      store.getters['event/getSettings'],
+      {},
+      {}
+    ),
+  })
 }
 
 let waitingForCancelation = ref(false)
-function cancelBooking () {
+function cancelBooking() {
   waitingForCancelation.value = true
-  httpClient.post(
-    '/bookings/cancel/' + targetBooking.value.id,
-    {
-      type: 'event',
-      source: 'cabinet-' + cabinetType.value,
-    },
-    Object.assign(useAuthorizationHeaderObject(store), {params: {source: 'cabinet-' + cabinetType.value}})
-  ).then(() => {
-    targetBooking.value = null
-    getEvents()
+  httpClient
+    .post(
+      '/bookings/cancel/' + targetBooking.value.id,
+      {
+        type: 'event',
+        source: 'cabinet-' + cabinetType.value,
+      },
+      {
+        params: { source: 'cabinet-' + cabinetType.value },
+      }
+    )
+    .then(() => {
+      targetBooking.value = null
+      getEvents()
 
-    alertVisibility.value = true
-    alertMessage.value = amLabels.value.event_canceled
-
-    if (pageContainer.value && alertContainer.value) {
-      setTimeout(function () {
-        useScrollTo(pageContainer.value, alertContainer.value.$el, 0, 300)
-      }, 500)
-    }
-  }).catch((error) => {
-    if (!('data' in error.response.data) && 'message' in error.response.data) {
       alertVisibility.value = true
-      alertMessage.value = error.response.data.message
+      alertMessage.value = amLabels.value.event_canceled
 
       if (pageContainer.value && alertContainer.value) {
         setTimeout(function () {
           useScrollTo(pageContainer.value, alertContainer.value.$el, 0, 300)
         }, 500)
       }
-    }
-  }).finally(() => {
-    waitingForCancelation.value = false
-  })
+    })
+    .catch((error) => {
+      if (
+        !('data' in error.response.data) &&
+        'message' in error.response.data
+      ) {
+        alertVisibility.value = true
+        alertMessage.value = error.response.data.message
+
+        if (pageContainer.value && alertContainer.value) {
+          setTimeout(function () {
+            useScrollTo(pageContainer.value, alertContainer.value.$el, 0, 300)
+          }, 500)
+        }
+      }
+    })
+    .finally(() => {
+      waitingForCancelation.value = false
+    })
 }
 
-watch(() => props.loadBookingsCounter, () => {
-  getEvents()
-})
+watch(
+  () => props.loadBookingsCounter,
+  () => {
+    getEvents()
+  }
+)
 
 onMounted(() => {
   getEvents()
 })
 
 // * Event oraganizer
-function eventEmployees (evt) {
+function eventEmployees(evt) {
   let arr = []
   let employees = store.getters['entities/getEmployees']
 
   if (evt.organizerId) {
-    if(employees.find(item => item.id === evt.organizerId)) {
-      let organizer = {...employees.find(item => item.id === evt.organizerId), ...{rank: 'organizer'}}
+    if (employees.find((item) => item.id === evt.organizerId)) {
+      let organizer = {
+        ...employees.find((item) => item.id === evt.organizerId),
+        ...{ rank: 'organizer' },
+      }
       if (!evt.providers.length) return organizer
       arr.push(organizer)
     }
@@ -654,8 +765,11 @@ function eventEmployees (evt) {
 
   if (evt.providers.length) {
     evt.providers.forEach((pro) => {
-      if(pro.id !== evt.organizerId && employees.find(item => item.id === pro.id)) {
-        arr.push(employees.find(item => item.id === pro.id))
+      if (
+        pro.id !== evt.organizerId &&
+        employees.find((item) => item.id === pro.id)
+      ) {
+        arr.push(employees.find((item) => item.id === pro.id))
       }
     })
   }
@@ -704,14 +818,26 @@ let cssVars = computed(() => {
   return {
     '--am-c-cape-bgr': amColors.value.colorMainBgr,
     '--am-c-cape-text': amColors.value.colorMainText,
-    '--am-c-cape-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
-    '--am-c-cape-text-op25': useColorTransparency(amColors.value.colorMainText, 0.25),
+    '--am-c-cape-text-op70': useColorTransparency(
+      amColors.value.colorMainText,
+      0.7
+    ),
+    '--am-c-cape-text-op25': useColorTransparency(
+      amColors.value.colorMainText,
+      0.25
+    ),
     '--am-c-cape-primary': amColors.value.colorPrimary,
 
     '--am-c-cust-no1': amColors.value.colorMainText,
-    '--am-c-cust-no1-bgr': useColorTransparency(amColors.value.colorMainText, 0.1),
+    '--am-c-cust-no1-bgr': useColorTransparency(
+      amColors.value.colorMainText,
+      0.1
+    ),
     '--am-c-cust-no2': amColors.value.colorWarning,
-    '--am-c-cust-no2-bgr': useColorTransparency(amColors.value.colorWarning, 0.1),
+    '--am-c-cust-no2-bgr': useColorTransparency(
+      amColors.value.colorWarning,
+      0.1
+    ),
     '--am-c-cust-no3': amColors.value.colorError,
     '--am-c-cust-no3-bgr': useColorTransparency(amColors.value.colorError, 0.1),
     '--am-c-cust-text': amColors.value.colorMainText,
@@ -723,7 +849,7 @@ let cssVars = computed(() => {
 <script>
 export default {
   name: 'CabinetEvents',
-  key: 'events'
+  key: 'events',
 }
 </script>
 
@@ -745,7 +871,20 @@ export default {
         position: absolute;
         top: 4px;
         left: 8px;
-        background-image: linear-gradient(180deg, transparent, transparent 50%, var(--am-c-cape-bgr) 50%, var(--am-c-cape-bgr) 100%), linear-gradient(180deg, var(--am-c-cape-text-op25), var(--am-c-cape-text-op25), var(--am-c-cape-text-op25), var(--am-c-cape-text-op25));
+        background-image: linear-gradient(
+            180deg,
+            transparent,
+            transparent 50%,
+            var(--am-c-cape-bgr) 50%,
+            var(--am-c-cape-bgr) 100%
+          ),
+          linear-gradient(
+            180deg,
+            var(--am-c-cape-text-op25),
+            var(--am-c-cape-text-op25),
+            var(--am-c-cape-text-op25),
+            var(--am-c-cape-text-op25)
+          );
         background-size: 3px 12px, 100% 20px;
       }
 
@@ -806,7 +945,8 @@ export default {
       }
 
       &.am-no-flag {
-        &:before, &:after {
+        &:before,
+        &:after {
           display: none;
         }
       }
@@ -845,7 +985,8 @@ export default {
       }
 
       .am-button {
-        .am-icon-plus, .am-icon-scan-qr-code {
+        .am-icon-plus,
+        .am-icon-scan-qr-code {
           font-size: 24px;
         }
       }

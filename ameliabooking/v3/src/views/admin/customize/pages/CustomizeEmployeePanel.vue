@@ -492,9 +492,11 @@ let customizedOptions = computed(() => {
 
 // * Colors block
 let amColors = computed(() => {
-  return amCustomize.value[pageRenderKey.value]
+  const colors = amCustomize.value[pageRenderKey.value]
     ? amCustomize.value[pageRenderKey.value].colors
     : defaultCustomizeSettings[pageRenderKey.value].colors
+
+    return { ...colors }
 })
 provide('amColors', amColors)
 

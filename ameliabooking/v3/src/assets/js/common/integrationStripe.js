@@ -1,16 +1,10 @@
 import httpClient from "../../../plugins/axios";
-import {useAuthorizationHeaderObject} from "../public/panel";
 
 function useStripeSync (store) {
   store.commit('auth/setStripeLoading', true)
 
   httpClient.get(
-    '/stripe/accounts/' + store.getters['employee/getId'],
-    Object.assign(
-      {
-      },
-      useAuthorizationHeaderObject(store)
-    )
+    '/stripe/accounts/' + store.getters['employee/getId']
   ).then((response) => {
     if (response.data.data.account) {
       store.commit('auth/setStripeProvider', response.data.data.account)
@@ -32,29 +26,31 @@ function useStripeSync (store) {
 function useStripeConnect (store, accountType) {
   store.commit('auth/setStripeLoading', true)
 
-  httpClient.post(
-    '/stripe/onboard/' + store.getters['auth/getProfile'].id,
-    Object.assign(
-      {
-        returnUrl: window.location.href,
-        accountType: accountType,
-      },
-      useAuthorizationHeaderObject(store)
-    )
-  ).then((response) => {
-    window.location.href = response.data.data.url
-  }).catch((error) => {
-    store.commit('auth/setStripeLoading', false)
-    console.log('response' in error && 'data' in error.response && 'message' in error.response.data ? error.response.data.message : error.message)
-  })
+  httpClient
+    .post('/stripe/onboard/' + store.getters['auth/getProfile'].id, {
+      returnUrl: window.location.href,
+      accountType: accountType,
+    })
+    .then((response) => {
+      window.location.href = response.data.data.url
+    })
+    .catch((error) => {
+      store.commit('auth/setStripeLoading', false)
+      console.log(
+        'response' in error &&
+          'data' in error.response &&
+          'message' in error.response.data
+          ? error.response.data.message
+          : error.message
+      )
+    })
 }
 
 function useStripeDisconnect (store) {
   store.commit('auth/setStripeLoading', true)
 
   httpClient.post(
-    '/stripe/disconnect/' + store.getters['auth/getProfile'].id,
-    useAuthorizationHeaderObject(store)
+    '/stripe/disconnect/' + store.getters['auth/getProfile'].id
   ).then(() => {
     store.commit(
       'auth/setStripeProvider',
@@ -85,8 +81,7 @@ function useStripePreview (store) {
     store.commit('auth/setStripeLoading', false)
   } else if (stripeProvider.type === 'express') {
     httpClient.post(
-      '/stripe/dashboard/' + store.getters['auth/getProfile'].id,
-      useAuthorizationHeaderObject(store)
+      '/stripe/dashboard/' + store.getters['auth/getProfile'].id
     ).then((response) => {
       if (response.data.data.url) {
         window.open(response.data.data.url, '_blank')

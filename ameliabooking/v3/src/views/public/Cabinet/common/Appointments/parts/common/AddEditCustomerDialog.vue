@@ -49,7 +49,8 @@
               :is="field.template"
               v-bind="field.props"
               v-model="customerFormData[key]"
-              v-model:countryPhoneIso="field.countryPhoneIso"
+              v-model:country-code="field.countryCode"
+              v-on="'handlers' in field ? field.handlers : {}"
             />
           </template>
         </el-form>
@@ -126,7 +127,6 @@ import Skeleton from '../../../Authentication/parts/Skeleton.vue'
 
 // * Composables
 import { useBackendCustomer } from "../../../../../../../assets/js/common/customer";
-import { useAuthorizationHeaderObject } from "../../../../../../../assets/js/public/panel";
 import AmAlert from "../../../../../../_components/alert/AmAlert.vue";
 
 // * Props
@@ -204,6 +204,7 @@ let languagesOptions = computed(() => {
 let customerFormRef = ref(null)
 
 let phoneError = ref(false)
+let isPhoneValid = ref(false)
 
 // * Form data
 let customerFormData = ref({
@@ -320,8 +321,11 @@ let customerFormConstruction = ref({
     },
   },
   phone: {
-    countryPhoneIso: computed({
-      get: () => store.getters['customerInfo/getCustomerCountryPhoneIso'] || '',
+    countryCode: computed({
+      get: () => {
+        const iso = store.getters['customerInfo/getCustomerCountryPhoneIso']
+        return iso ? iso.toUpperCase() : ''
+      },
       set: (val) => {
         store.commit(
           'customerInfo/setCustomerCountryPhoneIso',
@@ -334,21 +338,22 @@ let customerFormConstruction = ref({
       itemName: 'phone',
       label: amLabels.value.phone_colon,
       placeholder: amLabels.value.enter_phone,
-      defaultCode: computed(
-        () => {
-          if (store.getters['customerInfo/getCustomerCountryPhoneIso']) {
-            return store.getters['customerInfo/getCustomerCountryPhoneIso']
-          } else if (amSettings.general.phoneDefaultCountryCode && amSettings.general.phoneDefaultCountryCode !== 'auto') {
-            return amSettings.general.phoneDefaultCountryCode
-          } else {
-            return ''
-          }
-        }
-      ),
-      phoneError: computed(() => phoneError.value),
+      phoneError: computed(() => phoneError.value && !isPhoneValid.value),
+      errorMessage: computed(() => phoneError.value && !isPhoneValid.value && customerFormData.value.phone ? amLabels.value.enter_valid_phone_warning : ''),
       whatsAppLabel: amLabels.value.whatsapp_opt_in_text,
-      isWhatsApp: amSettings.notifications.whatsAppEnabled,
+      isWhatsApp: computed(() => amSettings.notifications.whatsAppEnabled && !(phoneError.value && !isPhoneValid.value)),
       class: computed(() => `am-cap-aec__form-item ${props.responsiveClass}`),
+    },
+    handlers: {
+      handlePhoneData: (phoneData) => {
+        if (phoneData && !phoneData.countryCode && !store.getters['customerInfo/getCustomerCountryPhoneIso'] && amSettings.general.phoneDefaultCountryCode !== 'auto') {
+          store.commit('customerInfo/setCustomerCountryPhoneIso', amSettings.general.phoneDefaultCountryCode.toLowerCase())
+        }
+
+        store.commit('customerInfo/setCustomerPhone', phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, "") : "")
+
+        isPhoneValid.value = !!phoneData.isValid
+      }
     },
   },
   language: {
@@ -357,6 +362,7 @@ let customerFormConstruction = ref({
       itemName: 'language',
       label: amLabels.value.notification_language,
       placeholder: amLabels.value.language,
+      teleported: false,
       class: computed(() => `am-cap-aec__form-item ${props.responsiveClass}`),
       prefixIcon: markRaw({
         components: {IconComponent},
@@ -371,6 +377,7 @@ let customerFormConstruction = ref({
     props: {
       itemName: 'gender',
       label: amLabels.value.gender,
+      teleported: false,
       class: computed(() => `am-cap-aec__form-item ${props.responsiveClass}`),
       prefixIcon: markRaw({
         components: {IconComponent},
@@ -447,7 +454,7 @@ function saveCustomer() {
     httpClient.post(
       '/users/customers' + (customer.id ? '/' + customer.id : ''),
       customer,
-      Object.assign(useAuthorizationHeaderObject(store), {params: {source: 'cabinet-provider'}})
+      {params: {source: 'cabinet-provider'}}
     ).then((response) => {
       store.commit(
         'auth/setPreloadedCustomers',

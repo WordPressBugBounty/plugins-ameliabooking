@@ -145,9 +145,6 @@ import httpClient from "../../../../../plugins/axios";
 
 // * Composables
 import {
-  useAuthorizationHeaderObject,
-} from "../../../../../assets/js/public/panel";
-import {
   useBackendEmployee,
 } from "../../../../../assets/js/common/employee";
 import {
@@ -254,7 +251,7 @@ function saveEmployee () {
     httpClient.post(
       '/users/providers/' + employee.value.id,
       useBackendEmployee(store, timeZone.value),
-      Object.assign(useAuthorizationHeaderObject(store), {params: {source: 'cabinet-provider'}})
+      {params: {source: 'cabinet-provider'}}
     ).then((response) => {
       store.commit('employee/setSavedSpecialDayList', JSON.parse(JSON.stringify(response.data.data.user.specialDayList)))
       store.commit('employee/setSavedDayOffList', JSON.parse(JSON.stringify(response.data.data.user.dayOffList)))
@@ -294,10 +291,11 @@ function savePassword () {
 
       httpClient.post(
         '/users/providers/' + user.id,
-        {password: store.getters['auth/getNewPassword']},
-        useAuthorizationHeaderObject(store)
+        {password: store.getters['auth/getNewPassword']}
       ).then(() => {
         message.value = amLabels.password_success
+        messageType.value = 'success'
+        alertVisibility.value = true
 
         changePasswordEnabled.value = false
 

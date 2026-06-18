@@ -45,6 +45,7 @@ class ElementorBlock
 
     public function includes()
     {
+        require_once(AMELIA_PATH . '/src/Infrastructure/WP/Elementor/ElementorSharedShortcodeWidget.php');
         require_once(AMELIA_PATH . '/src/Infrastructure/WP/Elementor/AmeliaStepBookingElementorWidget.php');
         require_once(AMELIA_PATH . '/src/Infrastructure/WP/Elementor/AmeliaStepBookingButtonElementorWidget.php');
         require_once(AMELIA_PATH . '/src/Infrastructure/WP/Elementor/AmeliaCatalogBookingElementorWidget.php');

@@ -1,5 +1,4 @@
 import moment from "moment";
-import { useCookies } from "vue3-cookies";
 import httpClient from "../../plugins/axios";
 
 export default {
@@ -11,7 +10,6 @@ export default {
     newPassword: '',
     confirmPassword: '',
     authenticated: false,
-    token: null,
     profile: null,
     profileDeleted: false,
     loggedOut: false,
@@ -59,10 +57,6 @@ export default {
 
     getAuthenticated (state) {
       return state.authenticated
-    },
-
-    getToken (state) {
-      return state.token
     },
 
     getProfile (state) {
@@ -161,10 +155,6 @@ export default {
 
     setAuthenticated (state, payload) {
       state.authenticated = payload
-    },
-
-    setToken (state, payload) {
-      state.token = payload
     },
 
     setProfile (state, payload) {
@@ -278,10 +268,7 @@ export default {
 
   actions: {
     logout ({commit}) {
-      const vueCookies = useCookies()['cookies']
-      commit('setToken', null)
       commit('setPassword', '')
-      vueCookies.remove('ameliaToken')
       commit('setAuthenticated', false)
       commit('setLoggedOut', true)
       localStorage.removeItem('vue-authenticate.vueauth_token')

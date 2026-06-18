@@ -1,6 +1,5 @@
 import httpClient from "../../../plugins/axios";
 import {useRemoveUrlParameter, useUrlQueryParams} from "./helper";
-import {useAuthorizationHeaderObject} from "../public/panel";
 
 function useGoogleSync (code, successCallback) {
   let redirectURL = useRemoveUrlParameter(
@@ -43,12 +42,9 @@ function useGoogleConnect (store) {
     if (!amSettings.googleCalendar.accessToken) {
       httpClient.get(
           '/google/authorization/url/' + store.getters['employee/getId'],
-          Object.assign(
-              {
-                'redirectUri': cleanUrl.split('?')[0],
-              },
-              useAuthorizationHeaderObject(store)
-          )
+          {
+            redirectUri: cleanUrl.split('?')[0],
+          }
       ).then((response) => {
         window.location.href = response.data.data.authUrl.replace(
             /redirect_uri=.+?&/,

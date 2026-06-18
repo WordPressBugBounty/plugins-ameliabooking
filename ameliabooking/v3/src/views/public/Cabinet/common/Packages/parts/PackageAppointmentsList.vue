@@ -2,6 +2,10 @@
   <div
     class="am-cappa"
     :style="cssVars"
+    role="region"
+    :aria-labelledby="packageNameId"
+    :aria-describedby="packageDateId"
+    :aria-busy="waitingForCancelation ? 'true' : 'false'"
   >
     <AmAlert
         v-if="alertVisibility"
@@ -10,11 +14,13 @@
         :show-border="true"
         :close-after="5000"
         custom-class="am-cap__alert"
+        role="status"
+        aria-live="polite"
         @close="closeAlert"
         @trigger-close="closeAlert"
     >
       <template #title>
-        <span class="am-icon-checkmark-circle-full"></span> {{ alertMessage }}
+        <span class="am-icon-checkmark-circle-full" aria-hidden="true"></span> {{ alertMessage }}
       </template>
     </AmAlert>
 
@@ -43,26 +49,29 @@
         <div
           class="am-cappa__img"
           :style="props.data.packageData.pictureThumbPath ? {backgroundImage: `url(${props.data.packageData.pictureThumbPath})`} : {}"
+          aria-hidden="true"
         >
           <span
             v-if="!props.data.packageData.pictureThumbPath"
             class="am-cappa__img-name"
+            aria-hidden="true"
           >
             {{getNameInitials(props.data.packageData.name)}}
           </span>
-          <span class="am-cappa__img-color" :style="{backgroundColor: props.data.packageData.color}"></span>
+          <span class="am-cappa__img-color" :style="{backgroundColor: props.data.packageData.color}" aria-hidden="true"></span>
         </div>
         <div class="am-cappa__info">
-          <div class="am-cappa__name">
+          <div :id="packageNameId" class="am-cappa__name">
             {{ props.data.packageData.name }}
           </div>
           <div
             v-if="props.data.packageData.end"
+            :id="packageDateId"
             class="am-cappa__date"
           >
             {{ amLabels.package_book_expire}} {{ getFrontedFormattedDate(props.data.packageData.end.split(' ')[0]) }}
           </div>
-          <div v-else class="am-cappa__date">
+          <div v-else :id="packageDateId" class="am-cappa__date">
             {{ `${amLabels.package_book_expiration} ${amLabels.package_book_unlimited}` }}
           </div>
           <div
@@ -102,6 +111,7 @@
     <el-tabs
       v-model="selectedServiceId"
       class="am-cappa__service"
+      :aria-label="servicesTabsAriaLabel"
       @tab-click="selectService"
     >
       <el-tab-pane
@@ -118,25 +128,30 @@
           <div
             class="am-cappa__service-top"
             :class="responsiveClass"
+            role="region"
+            :aria-labelledby="getServiceNameId(serviceId)"
           >
             <div class="am-cappa__service-right">
               <div
                 class="am-cappa__service-img"
                 :style="props.data.services[selectedServiceId].purchaseData.pictureThumbPath ? {backgroundImage: `url(${props.data.services[selectedServiceId].purchaseData.pictureThumbPath})`} : {}"
+                aria-hidden="true"
               >
                 <span
                   v-if="!props.data.services[selectedServiceId].purchaseData.pictureThumbPath"
                   class="am-cappa__service-img__name"
+                  aria-hidden="true"
                 >
                   {{getNameInitials(props.data.services[selectedServiceId].purchaseData.name)}}
                 </span>
                 <span
                   class="am-cappa__service-img__color"
                   :style="{backgroundColor: props.data.services[selectedServiceId].purchaseData.color}"
+                  aria-hidden="true"
                 ></span>
               </div>
               <div class="am-cappa__service-info">
-                <div class="am-cappa__service-name">
+                <div :id="getServiceNameId(serviceId)" class="am-cappa__service-name">
                   {{ props.data.services[selectedServiceId].purchaseData.name }}
                 </div>
                 <div
@@ -154,6 +169,7 @@
               size="small"
               :type="amCustomize.packageAppointmentsList.options.bookBtn.buttonType"
               :disabled="getPurchasedCount(props.data.services, selectedServiceId, 'count') === 0"
+              :aria-label="`${amLabels.book_now}: ${props.data.services[selectedServiceId].purchaseData.name}`"
               @click="bookAppointment"
             >
               {{ amLabels.book_now }}
@@ -227,9 +243,6 @@ import {
   getFrontedFormattedDate
 } from "../../../../../../assets/js/common/date";
 import {
-  useAuthorizationHeaderObject
-} from "../../../../../../assets/js/public/panel";
-import {
   getNameInitials,
 } from "../../../../../../assets/js/common/image";
 import {
@@ -280,6 +293,15 @@ let { selectedPackageCustomerId } = inject('packageSelection')
 let selectedPackage = computed(() => {
   return store.getters['entities/getPackage'](props.data.packageData.id)
 })
+
+const packageBaseId = computed(() => `am-cappa-package-${props.data?.packageData?.id || 'selected'}`)
+const packageNameId = computed(() => `${packageBaseId.value}-name`)
+const packageDateId = computed(() => `${packageBaseId.value}-date`)
+const servicesTabsAriaLabel = computed(() => amLabels.value.package_services || amLabels.value.services || 'Package services')
+
+function getServiceNameId (serviceId) {
+  return `${packageBaseId.value}-service-${serviceId}-name`
+}
 
 let servicesOrderInPackage = computed(() =>
   Object.keys(props.data.services)
@@ -537,8 +559,7 @@ function cancelPurchase () {
     '/packages/customers/' + parseInt(selectedPackageCustomerId.value),
     {
       status: 'canceled'
-    },
-    useAuthorizationHeaderObject(store)
+    }
   ).then(() => {
     activePurchaseCancel.value = false
     emits('canceled', {message: amLabels.value.package_purchase_canceled})
@@ -727,6 +748,7 @@ export default {
     }
 
     &__name {
+      margin: 0;
       width: 100%;
       font-size: 18px;
       font-weight: 500;
@@ -836,6 +858,14 @@ export default {
         &.am-rw-500 {
           width: 100%;
           margin-top: 16px;
+        }
+      }
+    }
+
+    .el-tabs {
+      &__item {
+        &:focus-visible {
+          box-shadow: 0 0 0 2px var(--am-c-cappa-primary) !important;
         }
       }
     }

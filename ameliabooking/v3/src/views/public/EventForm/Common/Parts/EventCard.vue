@@ -3,6 +3,7 @@
     class="am-ec"
     :class="[{'am-no-border': !props.borderVisibility}, responsiveClass]"
     :style="cssVars"
+    role="listitem"
   >
     <!-- Period -->
     <div
@@ -47,6 +48,8 @@
       class="am-ec__image"
       :class="responsiveClass"
       :style="{backgroundImage: `url(${props.event.pictureFullPath ? props.event.pictureFullPath : props.event.gallery[0].pictureFullPath})`}"
+      role="img"
+      :aria-label="props.event.name"
     ></div>
 
     <!-- Info -->
@@ -140,6 +143,7 @@
           :size="componentWidth > 500 ? 'small' : 'medium'"
           :type="bookingBtnType"
           :category="useWaitingListAvailability(props.event) ? 'waiting' : 'primary'"
+          :aria-label="`${useWaitingListAvailability(props.event) ? props.labels.join_waiting_list : eventStatus !== 'open' ? props.labels.event_learn_more : props.labels.event_read_more}: ${props.event.name}`"
           @click="selectEvent(props.event.id)"
         >
           {{ useWaitingListAvailability(props.event) ? props.labels.join_waiting_list : eventStatus !== 'open' ? props.labels.event_learn_more : props.labels.event_read_more }}

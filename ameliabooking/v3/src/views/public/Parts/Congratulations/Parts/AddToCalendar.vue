@@ -3,8 +3,10 @@
     v-if="amSettings.general.addToCalendar && booked && booked.data.length"
     :class="`am-atc-${generatedClass}`"
     :style="cssVars"
+    role="region"
+    :aria-labelledby="headingId"
   >
-    <p>
+    <p :id="headingId">
       {{ props.labels.add_to_calendar }}
     </p>
     <div :class="`am-atc-${generatedClass}-cals`">
@@ -18,14 +20,16 @@
           :key="calPair.type"
           :href="calPair.links[0]"
           :target="(calPair.type === 'apple' || calPair.type === 'outlook') ? '_self' : '_blank'"
+          :rel="(calPair.type === 'apple' || calPair.type === 'outlook') ? undefined : 'noopener noreferrer'"
           :style="{borderColor : 'var(--am-c-atc-text-op10)'}"
           :class="`am-atc-${generatedClass}-cals-card`"
+          :aria-label="getCalendarAriaLabel(calPair)"
           @click="executeIfMultipleLinks(calPair)"
         >
-          <div>
-            <span :class="`am-icon-${calPair.type}`"></span>
+          <div aria-hidden="true">
+            <span :class="`am-icon-${calPair.type}`" aria-hidden="true"></span>
           </div>
-          <p :style="{color : 'var(--am-c-atc-text)'}">
+          <p :style="{color : 'var(--am-c-atc-text)'}" aria-hidden="true">
             {{ calPair.label }}
           </p>
         </a>
@@ -62,7 +66,6 @@ let props = defineProps({
   }
 })
 
-
 let generatedClass = computed(() => {
   if (props.booked.type !== 'event') {
     return 'sbs'
@@ -71,10 +74,24 @@ let generatedClass = computed(() => {
   return 'event'
 })
 
+// * Unique ID for heading linkage – safe for multiple instances on the same page
+const uid = Math.random().toString(36).slice(2, 8)
+const headingId = `am-atc-heading-${uid}`
+
 const store = useStore()
 
 let amSettings = computed(() => store.getters['getSettings'])
 let ajaxUrl = computed(() => store.getters['getBaseUrls'].wpAmeliaPluginAjaxURL)
+
+// * Build a descriptive aria-label for each calendar link
+function getCalendarAriaLabel (calPair) {
+  const opensInNewTab = calPair.type !== 'apple' && calPair.type !== 'outlook'
+  const action = props.labels.add_to_calendar || 'Add to calendar'
+  const openInNewTabLabel = props.labels.opens_in_new_tab || 'opens in new tab'
+  const suffix = opensInNewTab ? `, ${openInNewTabLabel}` : ''
+
+  return `${action}: ${calPair.label}${suffix}`
+}
 
 let calendars = computed(() => {
   return props.ready && props.booked ?
@@ -255,8 +272,6 @@ export default {
   .am-atc {
     // sbs - step by step
     &-sbs {
-      //--am-c-atc-text: var(--am-c-sb-text);
-
       & > p {
         text-align: center;
         font-size: 18px;
@@ -321,6 +336,12 @@ export default {
 
           &:hover {
             background-color: var(--am-c-atc-text-op10);
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--am-c-atc-text);
+            outline-offset: 3px;
+            border-radius: 4px;
           }
         }
       }
@@ -394,6 +415,12 @@ export default {
 
           &:hover {
             background-color: var(--am-c-atc-text-op10);
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--am-c-atc-text);
+            outline-offset: 3px;
+            border-radius: 4px;
           }
         }
       }

@@ -2,16 +2,13 @@
   <div
     ref="pageContainer"
     class="am-cap am-capa-main"
-    :class="{'am-capai-main': appointmentVisibility}"
+    :class="{ 'am-capai-main': appointmentVisibility }"
   >
-    <div
-      class="am-capa-main__inner"
-      :class="responsiveClass"
-    >
+    <div class="am-capa-main__inner" :class="responsiveClass">
       <AmAlert
         v-if="alertVisibility"
         ref="alertContainer"
-        :type= "alertType"
+        :type="alertType"
         :show-border="true"
         :close-after="5000"
         custom-class="am-cap__alert"
@@ -19,7 +16,10 @@
         @trigger-close="closeAlert"
       >
         <template #title>
-          <span v-if="alertType === 'success'" class="am-icon-checkmark-circle-full"></span>
+          <span
+            v-if="alertType === 'success'"
+            class="am-icon-checkmark-circle-full"
+          ></span>
           <span v-if="alertType === 'error'" class="am-icon-clearable"></span>
           {{ alertMessage }}
         </template>
@@ -35,7 +35,12 @@
       />
 
       <div
-        v-if="shortcodeData.cabinetType === 'employee' && amSettings.roles.allowWriteAppointments && !appointmentVisibility && ready"
+        v-if="
+          shortcodeData.cabinetType === 'employee' &&
+          amSettings.roles.allowWriteAppointments &&
+          !appointmentVisibility &&
+          ready
+        "
         class="am-cap__actions"
       >
         <AmButton
@@ -45,13 +50,17 @@
           :type="amCustomize.appointments.options.newAppBtn.buttonType"
           @click="addAppointment"
         >
-          <span>{{amLabels.new_appointment}}</span>
+          <span>{{ amLabels.new_appointment }}</span>
         </AmButton>
       </div>
 
       <template v-if="!loading && ready">
         <AppointmentsList
-          v-if="!appointmentVisibility && dateGroupedAppointments && Object.keys(dateGroupedAppointments).length > 0"
+          v-if="
+            !appointmentVisibility &&
+            dateGroupedAppointments &&
+            Object.keys(dateGroupedAppointments).length > 0
+          "
           :grouped-appointments="dateGroupedAppointments"
           :page-width="pageWidth"
           :responsive-class="responsiveClass"
@@ -67,7 +76,12 @@
           :text="amLabels.have_no_app"
         ></EmptyState>
         <AmPagination
-          v-if="!appointmentVisibility && dateGroupedAppointments && Object.keys(dateGroupedAppointments).length > 0 && appointmentsCount > amSettings.general.itemsPerPage"
+          v-if="
+            !appointmentVisibility &&
+            dateGroupedAppointments &&
+            Object.keys(dateGroupedAppointments).length > 0 &&
+            appointmentsCount > amSettings.general.itemsPerPage
+          "
           :page-size="amSettings.general.itemsPerPage"
           :pager-count="5"
           layout="prev, pager, next"
@@ -92,57 +106,36 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  provide,
-  onMounted,
-  watch,
-  reactive,
-} from "vue";
+import { ref, computed, inject, provide, onMounted, watch, reactive } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import from Libraries
-import httpClient from "../../../../../plugins/axios";
-import moment from "moment";
+import httpClient from '../../../../../plugins/axios'
+import moment from 'moment'
 
 // * Components Width and Height
-import { useElementSize } from '@vueuse/core';
+import { useElementSize } from '@vueuse/core'
 
 // * Components
-import AmAlert from "../../../../_components/alert/AmAlert.vue";
-import AmButton from "../../../../_components/button/AmButton.vue";
-import AmPagination from "../../../../_components/pagination/AmPagination.vue";
+import AmAlert from '../../../../_components/alert/AmAlert.vue'
+import AmButton from '../../../../_components/button/AmButton.vue'
+import AmPagination from '../../../../_components/pagination/AmPagination.vue'
 
 // * Parts
-import CabinetFilters from "../parts/Filters.vue";
-import AppointmentsList from "./parts/AppointmentsList.vue";
-import Appointment from "./parts/Appointment.vue";
-import Skeleton from "../../common/parts/Skeleton.vue";
-import EmptyState from "../parts/EmptyState.vue"
+import CabinetFilters from '../parts/Filters.vue'
+import AppointmentsList from './parts/AppointmentsList.vue'
+import Appointment from './parts/Appointment.vue'
+import Skeleton from '../../common/parts/Skeleton.vue'
+import EmptyState from '../parts/EmptyState.vue'
 
 // * Composables
-import {
-  useAuthorizationHeaderObject
-} from "../../../../../assets/js/public/panel";
-import {
-  getDateRange,
-} from "../../../../../assets/js/common/date";
-import {
-  useParsedAppointments,
-} from "../../../../../assets/js/admin/appointment";
-import {
-  useUrlParams
-} from "../../../../../assets/js/common/helper";
-import {
-  useResponsiveClass
-} from "../../../../../assets/js/common/responsive";
-import {
-  useScrollTo
-} from "../../../../../assets/js/common/scrollElements";
+import { getDateRange } from '../../../../../assets/js/common/date'
+import { useParsedAppointments } from '../../../../../assets/js/admin/appointment'
+import { useUrlParams } from '../../../../../assets/js/common/helper'
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
+import { useScrollTo } from '../../../../../assets/js/common/scrollElements'
 
 // * Store
 let store = useStore()
@@ -163,17 +156,23 @@ const labels = inject('labels')
 const localLanguage = inject('localLanguage')
 
 // * if local lang is in settings lang
-let langDetection = computed(() => amSettings.general.usedLanguages.includes(localLanguage.value))
+let langDetection = computed(() =>
+  amSettings.general.usedLanguages.includes(localLanguage.value)
+)
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   let customizedLabels = amCustomize.value.appointments.translations
   if (customizedLabels) {
-    Object.keys(customizedLabels).forEach(labelKey => {
-      if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
-        computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
+    Object.keys(customizedLabels).forEach((labelKey) => {
+      if (
+        customizedLabels[labelKey][localLanguage.value] &&
+        langDetection.value
+      ) {
+        computedLabels[labelKey] =
+          customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
         computedLabels[labelKey] = customizedLabels[labelKey].default
       }
@@ -201,9 +200,12 @@ let alertType = ref('success')
 
 let alertMessage = ref('')
 
-function closeAlert () {
+function closeAlert() {
   alertVisibility.value = false
-  store.commit('cabinet/setPaymentLinkError', {value: false, type: 'appointment'})
+  store.commit('cabinet/setPaymentLinkError', {
+    value: false,
+    type: 'appointment',
+  })
 }
 
 /********
@@ -212,11 +214,11 @@ function closeAlert () {
 let props = defineProps({
   loadBookingsCounter: {
     type: Number,
-    default: 0
+    default: 0,
   },
   appointments: {
     type: Object,
-    default: null
+    default: null,
   },
 })
 
@@ -241,66 +243,76 @@ function appointmentsPageChange(page) {
   getAppointments(null, page)
 }
 
-function getAppointments (passedData = null, page = 1) {
+function getAppointments(passedData = null, page = 1) {
   store.commit('cabinet/setAppointmentsLoading', true)
 
-  let params = JSON.parse(JSON.stringify(store.getters['cabinetFilters/getAppointmentsFilters']))
+  let params = JSON.parse(
+    JSON.stringify(store.getters['cabinetFilters/getAppointmentsFilters'])
+  )
   let timeZone = store.getters['cabinet/getTimeZone']
 
-  params.dates = params.dates.map(d => moment(d).format('YYYY-MM-DD'))
+  params.dates = params.dates.map((d) => moment(d).format('YYYY-MM-DD'))
   params.timeZone = timeZone
   params.source = 'cabinet-' + cabinetType.value
 
   params.page = page
 
-  store.commit('auth/setLoadingAppointmentsCounter', store.getters['auth/getLoadingAppointmentsCounter'] + 1)
+  store.commit(
+    'auth/setLoadingAppointmentsCounter',
+    store.getters['auth/getLoadingAppointmentsCounter'] + 1
+  )
 
   let loadingCounter = store.getters['auth/getLoadingAppointmentsCounter']
 
-  httpClient.get(
-    '/appointments',
-    Object.assign(
-      useAuthorizationHeaderObject(store),
-      {
-        params: useUrlParams(params)
+  httpClient
+    .get('/appointments', {
+      params: useUrlParams(params),
+    })
+    .then((response) => {
+      if (
+        loadingCounter !== store.getters['auth/getLoadingAppointmentsCounter']
+      ) {
+        return
       }
-    )
-  ).then((response) => {
-    if (loadingCounter !== store.getters['auth/getLoadingAppointmentsCounter']) {
-      return
-    }
 
-    appointmentsCount.value = response.data.data.total
+      appointmentsCount.value = response.data.data.total
 
-    dateGroupedAppointments.value = useParsedAppointments(
-      response.data.data.appointments,
-      timeZone,
-      cabinetType.value === 'provider'
-    )
-  }).catch((error) => {
-    if(error?.response?.data?.data?.reauthorize !== undefined && error.response.data.data.reauthorize) {
-      store.dispatch('auth/logout')
-    }
-
-    console.log(error)
-  }).finally(() => {
-    if (loadingCounter !== store.getters['auth/getLoadingAppointmentsCounter']) {
-      return
-    }
-
-    store.commit('cabinet/setAppointmentsLoading', false)
-    if (passedData && 'message' in passedData) {
-      alertVisibility.value = true
-      alertMessage.value = passedData.message
-      alertType.value = 'success'
-
-      if (pageContainer.value && alertContainer.value) {
-        setTimeout(function () {
-          useScrollTo(pageContainer.value, alertContainer.value.$el, 0, 300)
-        }, 500)
+      dateGroupedAppointments.value = useParsedAppointments(
+        response.data.data.appointments,
+        timeZone,
+        cabinetType.value === 'provider'
+      )
+    })
+    .catch((error) => {
+      if (
+        error?.response?.data?.data?.reauthorize !== undefined &&
+        error.response.data.data.reauthorize
+      ) {
+        store.dispatch('auth/logout')
       }
-    }
-  })
+
+      console.log(error)
+    })
+    .finally(() => {
+      if (
+        loadingCounter !== store.getters['auth/getLoadingAppointmentsCounter']
+      ) {
+        return
+      }
+
+      store.commit('cabinet/setAppointmentsLoading', false)
+      if (passedData && 'message' in passedData) {
+        alertVisibility.value = true
+        alertMessage.value = passedData.message
+        alertType.value = 'success'
+
+        if (pageContainer.value && alertContainer.value) {
+          setTimeout(function () {
+            useScrollTo(pageContainer.value, alertContainer.value.$el, 0, 300)
+          }, 500)
+        }
+      }
+    })
 }
 
 /***************
@@ -308,115 +320,124 @@ function getAppointments (passedData = null, page = 1) {
  ***************/
 let linkedAppointments = ref([])
 
-function editAppointment (appointment) {
+function editAppointment(appointment) {
   store.commit('cabinet/setAppointmentsLoading', true)
 
-  httpClient.get(
-    '/appointments/' + appointment.id,
-    Object.assign(
-      {
-        params: {
-          source: 'cabinet-' + cabinetType.value,
-          timeZone: store.getters['cabinet/getTimeZone'],
-        },
+  httpClient
+    .get('/appointments/' + appointment.id, {
+      params: {
+        source: 'cabinet-' + cabinetType.value,
+        timeZone: store.getters['cabinet/getTimeZone'],
       },
-      useAuthorizationHeaderObject(store)
-    )
-  ).then((response) => {
-    let startDateTime = response.data.data.appointment.bookingStart.split(' ')
+    })
+    .then((response) => {
+      let startDateTime = response.data.data.appointment.bookingStart.split(' ')
 
-    let service = store.getters['entities/getService'](response.data.data.appointment.serviceId)
+      let service = store.getters['entities/getService'](
+        response.data.data.appointment.serviceId
+      )
 
-    let bookings = []
+      let bookings = []
 
-    response.data.data.appointment.bookings.forEach((booking) => {
-      let extras = []
+      response.data.data.appointment.bookings.forEach((booking) => {
+        let extras = []
 
-      service.extras.sort((a, b) => a.position - b.position).forEach((extra) => {
-        extras.push({
-          extraId: extra.id,
-          quantity: 0,
+        service.extras
+          .sort((a, b) => a.position - b.position)
+          .forEach((extra) => {
+            extras.push({
+              extraId: extra.id,
+              quantity: 0,
+            })
+
+            let bookingExtra = booking.extras.find(
+              (i) => i.extraId === extra.id
+            )
+
+            if (typeof bookingExtra !== 'undefined') {
+              extras[extras.length - 1] = bookingExtra
+            }
+          })
+
+        let customFields = booking.customFields
+          ? JSON.parse(booking.customFields)
+          : {}
+
+        store.getters['entities/getCustomFields'].forEach((customField) => {
+          if (
+            customField.allServices ||
+            customField.services.some((e) => e.id === service.id)
+          ) {
+            customFields[customField.id] = customFields[customField.id]
+              ? Object.assign({}, customFields[customField.id], {
+                  value:
+                    customFields[customField.id].type === 'datepicker'
+                      ? customFields[customField.id].value
+                        ? moment(customFields[customField.id].value).toDate()
+                        : ''
+                      : customFields[customField.id].value,
+                })
+              : {
+                  label: customField.label,
+                  type: customField.type,
+                  value: customField.type === 'checkbox' ? [] : '',
+                  position: customField.position,
+                }
+          }
         })
 
-        let bookingExtra = booking.extras.find(i => i.extraId === extra.id)
-
-        if (typeof bookingExtra !== 'undefined') {
-          extras[extras.length - 1] = bookingExtra
-        }
+        bookings.push({
+          id: booking.id,
+          customer: appointment.bookings.find((b) => b.id === booking.id)
+            .customer,
+          persons: booking.persons,
+          status: booking.status,
+          duration: booking.duration ? booking.duration.toString() : null,
+          extras: extras,
+          customFields: customFields,
+          payments: booking.payments,
+          price: booking.price,
+          aggregatedPrice: booking.aggregatedPrice,
+          tax: booking.tax,
+          coupon: booking.coupon,
+        })
       })
 
-      let customFields = booking.customFields ? JSON.parse(booking.customFields) : {}
-
-      store.getters['entities/getCustomFields'].forEach((customField) => {
-        if (customField.allServices ||
-          customField.services.some((e) => e.id === service.id)
-        ) {
-          customFields[customField.id] = customFields[customField.id] ? Object.assign(
-            {},
-            customFields[customField.id],
-            {
-              value: customFields[customField.id].type === 'datepicker'
-                ? (customFields[customField.id].value ? moment(customFields[customField.id].value).toDate() : '')
-                : customFields[customField.id].value,
-            }
-          ) : {
-            label: customField.label,
-            type: customField.type,
-            value: customField.type === 'checkbox' ? [] : '',
-            position: customField.position,
-          }
-        }
-      })
-
-      bookings.push({
-        id: booking.id,
-        customer: appointment.bookings.find(b => b.id === booking.id).customer,
-        persons: booking.persons,
-        status: booking.status,
-        duration: booking.duration ? booking.duration.toString() : null,
-        extras: extras,
-        customFields: customFields,
-        payments: booking.payments,
-        price: booking.price,
-        aggregatedPrice: booking.aggregatedPrice,
-        tax: booking.tax,
-        coupon: booking.coupon,
-      })
-    })
-
-    store.commit(
-      'appointment/setAppointment',
-      {
+      store.commit('appointment/setAppointment', {
         id: response.data.data.appointment.id,
         categoryId: service.categoryId,
         serviceId: response.data.data.appointment.serviceId,
         providerId: response.data.data.appointment.providerId,
         locationId: response.data.data.appointment.locationId,
         internalNotes: response.data.data.appointment.internalNotes,
-        lessonSpace: response.data.data.appointment.lessonSpace !== null
-          ? response.data.data.appointment.lessonSpace.split('https://www.thelessonspace.com/space/')[1]
-          : null,
+        lessonSpace:
+          response.data.data.appointment.lessonSpace !== null
+            ? response.data.data.appointment.lessonSpace.split(
+                'https://www.thelessonspace.com/space/'
+              )[1]
+            : null,
         startDate: moment(startDateTime[0]).toDate(),
         startTime: startDateTime[1].substring(0, 5),
         bookings: bookings,
         notifyParticipants: !!response.data.data.appointment.notifyParticipants,
         createPaymentLinks: !!response.data.data.appointment.createPaymentLinks,
-      }
-    )
+      })
 
-    linkedAppointments.value = response.data.data.recurring
+      linkedAppointments.value = response.data.data.recurring
 
-    appointmentVisibility.value = true
-  }).catch((error) => {
-    console.log(error)
-  }).finally(() => {
-    store.commit('cabinet/setAppointmentsLoading', false)
-  })
+      appointmentVisibility.value = true
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+    .finally(() => {
+      store.commit('cabinet/setAppointmentsLoading', false)
+    })
 }
 
 let appointmentVisibility = ref(false)
 
-function saveAppointmentCallback () {
+function saveAppointmentCallback() {
   alertVisibility.value = true
   alertMessage.value = amLabels.value.appointment_saved
   alertType.value = 'success'
@@ -432,34 +453,39 @@ function saveAppointmentCallback () {
   closeAppointment()
 }
 
-function appointmentStatusChange (message, status) {
+function appointmentStatusChange(message, status) {
   alertMessage.value = message
   alertType.value = status
 
   alertVisibility.value = true
 }
 
-function addAppointment () {
+function addAppointment() {
   resetAppointment()
 
   appointmentVisibility.value = true
 }
 
-function closeAppointment () {
+function closeAppointment() {
   appointmentVisibility.value = false
 
   resetAppointment()
 }
 
-function resetAppointment () {
-  store.commit('appointment/resetAppointment', {providerId: store.getters['auth/getProfile'].id})
+function resetAppointment() {
+  store.commit('appointment/resetAppointment', {
+    providerId: store.getters['auth/getProfile'].id,
+  })
   store.commit('customerInfo/setCustomers', [])
   store.commit('customerInfo/setCustomersIds', [])
 }
 
-watch(() => props.loadBookingsCounter, () => {
-  getAppointments()
-})
+watch(
+  () => props.loadBookingsCounter,
+  () => {
+    getAppointments()
+  }
+)
 
 onMounted(() => {
   getAppointments()
@@ -469,7 +495,7 @@ onMounted(() => {
 <script>
 export default {
   name: 'CabinetAppointments',
-  key: 'appointments'
+  key: 'appointments',
 }
 </script>
 

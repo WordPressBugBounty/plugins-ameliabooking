@@ -36,6 +36,8 @@
       :popper-class="'am-service-dropdown'"
       :placeholder="amLabels.select_service"
       :aria-label="amLabels.select_service"
+      :no-match-text="amLabels.dropdown_empty"
+      :no-data-text="amLabels.dropdown_empty"
       :filter-method="filterService"
       @change="changeOnlyService"
     >

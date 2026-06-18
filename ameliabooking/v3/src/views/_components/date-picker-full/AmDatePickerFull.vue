@@ -682,7 +682,7 @@ $amCalClass: am-dp;
 
                 // Visible keyboard focus ring for navigation buttons
                 &:focus {
-                  outline: 2px solid var(--am-c-primary);
+                  outline: 2px solid var(--am-c-dpf-text);
                   outline-offset: 2px;
                   border: none;
                   box-shadow: none;
@@ -904,7 +904,7 @@ $amCalClass: am-dp;
               &:focus {
                 outline: none;
                 .fc-daygrid-day-frame {
-                  outline: 2px solid var(--am-c-primary);
+                  outline: 2px solid var(--am-c-dpf-text);
                   outline-offset: -2px;
                 }
               }

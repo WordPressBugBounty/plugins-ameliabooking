@@ -12,7 +12,7 @@
       </span>
     </template>
     <AmInput
-      v-model="infoFormData.firstName"
+      v-model="model"
       name="firstName"
       :placeholder="amLabels.enter_first_name"
     />
@@ -22,14 +22,27 @@
 
 <script setup>
 import AmInput from'../../../../_components/input/AmInput.vue'
-import {inject, ref} from "vue";
+import {inject, ref, computed} from "vue";
+
+let props = defineProps({
+  modelValue: {
+    type: String,
+    required: true
+  }
+})
+
+let emits = defineEmits(['update:modelValue'])
+
+let model = computed({
+  get: () => props.modelValue,
+  set: (val) => {
+    emits('update:modelValue', val)
+  }
+})
 
 let primeFieldRef = ref(null)
 
 let amLabels = inject('amLabels')
-
-// * Form field data
-let infoFormData = inject('infoFormData')
 
 defineExpose({
   primeFieldRef

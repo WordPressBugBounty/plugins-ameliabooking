@@ -45,7 +45,11 @@
               :key="item.id"
               :disabled="disableCustomerOption(item.id)"
               :value="item.id"
-              :label="item.email && customerEmailVisibility ? item.email : item.firstName + ' ' + item.lastName"
+              :label="
+                item.email && customerEmailVisibility
+                  ? item.email
+                  : item.firstName + ' ' + item.lastName
+              "
             >
               <div class="am-cap__cust-option">
                 <div class="am-cap__cust-option__heading">
@@ -79,7 +83,10 @@
         prefix="plus"
         icon="plus"
         :icon-only="pageWidth <= 540"
-        :disabled="employeeService?.maxCapacity === appointmentCapacity && !hasWaitingListCapacity()"
+        :disabled="
+          employeeService?.maxCapacity === appointmentCapacity &&
+          !hasWaitingListCapacity()
+        "
         @click="addCustomer"
       >
         {{ amLabels.new_customer }}
@@ -108,12 +115,16 @@
           :parent-class="`am-capai-cuf__bulk-status ${props.responsiveClass}`"
           :prefix-icon="
             bulkBookingStatus
-              ? getBookingStatuses(true).find((i) => i.value === bulkBookingStatus)?.icon
+              ? getBookingStatuses(true).find(
+                  (i) => i.value === bulkBookingStatus
+                )?.icon
               : 'circle-empty'
           "
           :prefix-icon-color="
             bulkBookingStatus
-              ? getBookingStatuses(true).find((i) => i.value === bulkBookingStatus)?.color
+              ? getBookingStatuses(true).find(
+                  (i) => i.value === bulkBookingStatus
+                )?.color
               : 'var(--am-c-select-text-op40)'
           "
           @change="bulkChangeStatus"
@@ -188,13 +199,16 @@
           <AmSelect
             v-model="item.status"
             :prefix-icon="
-              getBookingStatuses(false).find((i) => i.value === item.status)?.icon
+              getBookingStatuses(false).find((i) => i.value === item.status)
+                ?.icon
             "
             :prefix-icon-color="
-              getBookingStatuses(false).find((i) => i.value === item.status)?.color
+              getBookingStatuses(false).find((i) => i.value === item.status)
+                ?.color
             "
             popper-class="am-capai-cuf__popper"
             size="small"
+            append-to=".am-fs__main-content"
             @change="(value) => changeBookingStatus(index, value)"
           >
             <AmOption
@@ -224,6 +238,7 @@
             prefix-icon="users"
             prefix-icon-color="var(--am-c-card-text)"
             size="small"
+            append-to=".am-fs__main-content"
             @change="(value) => changeBookingPersons(index, value)"
           >
             <AmOption
@@ -289,19 +304,13 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  ref,
-  inject,
-  onMounted
-} from 'vue'
+import { computed, ref, inject, onMounted } from 'vue'
 
 // * Import Store
 import { useStore } from 'vuex'
 import httpClient from '../../../../../../plugins/axios'
 
 // * Import Composable
-import { useAuthorizationHeaderObject } from '../../../../../../assets/js/public/panel'
 import { useFrontendCustomer } from '../../../../../../assets/js/common/customer'
 import {
   useFocusCustomers,
@@ -419,7 +428,9 @@ const isWaitingListEnabled = computed(() => {
 })
 
 // * Capacities (regular and waiting list)
-const regularMaxCapacity = computed(() => employeeService.value?.maxCapacity || 0)
+const regularMaxCapacity = computed(
+  () => employeeService.value?.maxCapacity || 0
+)
 const waitingListMaxCapacity = computed(() => {
   if (!isWaitingListEnabled.value) return 0
   return serviceSettings.value?.waitingList?.maxCapacity || 0
@@ -427,14 +438,14 @@ const waitingListMaxCapacity = computed(() => {
 
 // Count current bookings by status
 const currentRegularCount = computed(() => {
-  return (store.getters['appointment/getBookings'] || []).filter(
-    (b) => b.status === 'approved' || b.status === 'pending'
-  ).reduce((acc, b) => acc + (b.persons || 1), 0)
+  return (store.getters['appointment/getBookings'] || [])
+    .filter((b) => b.status === 'approved' || b.status === 'pending')
+    .reduce((acc, b) => acc + (b.persons || 1), 0)
 })
 const currentWaitingCount = computed(() => {
-  return (store.getters['appointment/getBookings'] || []).filter(
-    (b) => b.status === 'waiting'
-  ).reduce((acc, b) => acc + (b.persons || 1), 0)
+  return (store.getters['appointment/getBookings'] || [])
+    .filter((b) => b.status === 'waiting')
+    .reduce((acc, b) => acc + (b.persons || 1), 0)
 })
 
 // * Disable logic for customer select option
@@ -555,12 +566,12 @@ function selectCustomer() {
           : amSettings.general.defaultAppointmentStatus
 
       // recompute current counts (not reactive inside loop)
-      let regCount = (store.getters['appointment/getBookings'] || []).filter(
-        (b) => b.status === 'approved' || b.status === 'pending'
-      ).reduce((acc, b) => acc + (b.persons || 1), 0)
-      let waitCount = (store.getters['appointment/getBookings'] || []).filter(
-        (b) => b.status === 'waiting'
-      ).reduce((acc, b) => acc + (b.persons || 1), 0)
+      let regCount = (store.getters['appointment/getBookings'] || [])
+        .filter((b) => b.status === 'approved' || b.status === 'pending')
+        .reduce((acc, b) => acc + (b.persons || 1), 0)
+      let waitCount = (store.getters['appointment/getBookings'] || [])
+        .filter((b) => b.status === 'waiting')
+        .reduce((acc, b) => acc + (b.persons || 1), 0)
 
       let statusToSet = defaultStatus
       if (regCount >= regularMaxCapacity.value) {
@@ -655,17 +666,11 @@ function editCustomer(id) {
   addEditCustomerDialogVisibility.value = true
 
   httpClient
-    .get(
-      '/users/customers/' + id,
-      Object.assign(
-        {
-          params: {
-            source: 'cabinet-provider',
-          },
-        },
-        useAuthorizationHeaderObject(store)
-      )
-    )
+    .get('/users/customers/' + id, {
+      params: {
+        source: 'cabinet-provider',
+      },
+    })
     .then((response) => {
       store.commit(
         'customerInfo/setCustomer',
@@ -718,7 +723,9 @@ function changeBookingStatus(index, value) {
     // Allow moving to waiting if waiting capacity permits
     if (
       isWaitingListEnabled.value &&
-      currentWaitingCount.value - (booking.status === 'waiting' ? (booking.persons || 1) : 0) + (booking.persons || 1) <=
+      currentWaitingCount.value -
+        (booking.status === 'waiting' ? booking.persons || 1 : 0) +
+        (booking.persons || 1) <=
         waitingListMaxCapacity.value
     ) {
       store.commit('appointment/setBookingStatus', { index, value })
@@ -767,8 +774,8 @@ function personsRange(booking) {
     if (wl.maxExtraPeopleEnabled) {
       return Array.from({ length: wl.maxExtraPeople }, (_, i) => i + 1)
     }
-  // When extra people feature not enabled, only 1 person allowed on waiting booking
-  return [1]
+    // When extra people feature not enabled, only 1 person allowed on waiting booking
+    return [1]
   }
   // regular booking
   return Array.from({ length: regularMaxCapacity.value }, (_, i) => i + 1)
@@ -778,16 +785,19 @@ function personsRange(booking) {
 function disablePersonsOption(booking, personsValue) {
   if (booking.status === 'waiting') {
     // Calculate waiting persons if this booking were set to personsValue
-    const otherWaiting = (store.getters['appointment/getBookings'] || []).filter(
-      (b) => b !== booking && b.status === 'waiting'
-    ).reduce((acc, b) => acc + (b.persons || 1), 0)
+    const otherWaiting = (store.getters['appointment/getBookings'] || [])
+      .filter((b) => b !== booking && b.status === 'waiting')
+      .reduce((acc, b) => acc + (b.persons || 1), 0)
     const newTotal = otherWaiting + personsValue
     return newTotal > waitingListMaxCapacity.value
   }
   // Regular status
-  const otherRegular = (store.getters['appointment/getBookings'] || []).filter(
-    (b) => b !== booking && (b.status === 'approved' || b.status === 'pending')
-  ).reduce((acc, b) => acc + (b.persons || 1), 0)
+  const otherRegular = (store.getters['appointment/getBookings'] || [])
+    .filter(
+      (b) =>
+        b !== booking && (b.status === 'approved' || b.status === 'pending')
+    )
+    .reduce((acc, b) => acc + (b.persons || 1), 0)
   const newTotal = otherRegular + personsValue
   return newTotal > regularMaxCapacity.value
 }
@@ -1073,7 +1083,10 @@ defineExpose({
     line-height: 0;
   }
 
-  .am-icon-info-reverse, .am-icon-close, .am-icon-refresh, .am-icon-check {
+  .am-icon-info-reverse,
+  .am-icon-close,
+  .am-icon-refresh,
+  .am-icon-check {
     font-size: 18px;
     padding: 3px;
   }

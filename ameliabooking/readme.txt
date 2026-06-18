@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.4.1
+Stable tag: 2.4.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,16 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.4.2
+This update includes a new integration, several improvements and bug fixes:
+*Feature: IvyForms integration – Added support for connecting IvyForms as a pre-booking intake form with the ability to map form fields and display intake forms directly in the booking flow.
+*Improvement: Added the ability to sort Customers by Last Booking date and Total Bookings.
+*BugFix: Fixed an issue where the "No data" label was not available for translation.
+*BugFix: Fixed an issue with a missing space before the first linked string in Notification Templates.
+*BugFix: Fixed an issue with the Finance date filter failing on rescheduled appointments and erratic Date Picker offset behavior.
+*BugFix: Fixed an issue where drag-and-drop appointment rescheduling did not update the time and date in the details view.
+*Additional minor bug fixes and overall stability improvements.
+
 v2.4.1
 This update includes a couple of improvements, bug fixes and security fixes. We strongly recommend updating to this version immediately.
 *Improvement: Improved clickable areas in the Catalog booking form for a better user experience.

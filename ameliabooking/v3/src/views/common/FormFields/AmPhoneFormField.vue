@@ -12,15 +12,26 @@
       <span class="am-ff__item-label" v-html="props.label" />
     </template>
     <AmInputPhone
-      :key="`phone-${localDefaultCode}-${props.refreshTrigger}`"
+      :key="`phone-${countryCode}-${props.refreshTrigger}`"
       v-model="model"
-      :name="props.itemName"
+      v-model:country-code="countryCode"
       :placeholder="props.placeholder"
-      :default-code="localDefaultCode"
+      :validation-error="true"
+      :error="props.phoneError"
       :disabled="props.disabled"
+      :phone-input-attributes="{ name: props.itemName }"
       style="position: relative"
-      @country-phone-iso-updated="countryPhoneIsoUpdated"
-    />
+      @data="handleData"
+    >
+      <template v-if="props.noResultsLabel" #no-results>
+        {{ props.noResultsLabel }}
+      </template>
+    </AmInputPhone>
+    <template #error v-if="props.errorMessage">
+      <span class="el-form-item__error">
+        {{ props.errorMessage }}
+      </span>
+    </template>
     <div
       v-if="props.isWhatsApp"
       class="am-whatsapp-opt-in-text"
@@ -40,9 +51,6 @@ import {
   inject,
   ref,
   toRefs,
-  onMounted,
-  watch,
-  nextTick
 } from "vue";
 
 // * Composables
@@ -53,6 +61,10 @@ let props = defineProps({
   modelValue: {
     type: [String, Number, Object, Array],
     required: true
+  },
+  countryCode: {
+    type: String,
+    default: ''
   },
   itemName: {
     type: String,
@@ -87,13 +99,17 @@ let props = defineProps({
     type: [Boolean, String, Number],
     default: false
   },
-  countryPhoneIso: {
-    type: [String, Object, Array, Number],
-    required: true
-  },
   disabled: {
     type: Boolean,
     default: false
+  },
+  errorMessage: {
+    type: String,
+    default: ''
+  },
+  noResultsLabel: {
+    type: String,
+    default: ''
   },
   refreshTrigger: {
     type: Number,
@@ -102,7 +118,7 @@ let props = defineProps({
 })
 
 // * Define Emits
-const emits = defineEmits(['update:modelValue', 'update:countryPhoneIso'])
+const emits = defineEmits(['update:modelValue', 'update:countryCode', 'handlePhoneData'])
 
 // * Component model
 let { modelValue } = toRefs(props)
@@ -113,34 +129,16 @@ let model = computed({
   }
 })
 
-// * Local ref for default code to handle reactivity
-let localDefaultCode = ref(props.defaultCode)
-
-function countryPhoneIsoUpdated (val) {
-  emits('update:countryPhoneIso', val)
-}
-
-// * Watch for refresh trigger to update country code
-watch(() => props.refreshTrigger, () => {
-  nextTick(() => {
-    localDefaultCode.value = props.defaultCode
-    if (props.defaultCode) {
-      emits('update:countryPhoneIso', props.defaultCode.toLowerCase())
-    }
-  })
-})
-
-// * Watch for defaultCode changes
-watch(() => props.defaultCode, (newVal) => {
-  localDefaultCode.value = newVal
-})
-
-onMounted(() => {
-  localDefaultCode.value = props.defaultCode
-  if (props.defaultCode) {
-    emits('update:countryPhoneIso', props.defaultCode.toLowerCase())
+const countryCode = computed({
+  get: () => props.countryCode,
+  set: (val) => {
+    emits('update:countryCode', val)
   }
 })
+
+function handleData (val) {
+  emits('handlePhoneData', val)
+}
 
 // * Colors
 let amColors = inject('amColors')

@@ -2,8 +2,11 @@
 <div
   class="am-ev-empty"
   :style="cssVars"
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
 >
-  <span class="am-icon-search-close"></span>
+  <span class="am-icon-search-close" aria-hidden="true"></span>
   <p>
     {{ labels.no_results }}
   </p>

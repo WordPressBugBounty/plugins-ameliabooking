@@ -63,6 +63,7 @@
                   v-else-if="props.booking && props.parentWidth <= 650"
                   class="am-cc__status"
                   :class="`am-cc__status-${status.class}`"
+                  :aria-label="status.label"
                 >
                   {{ status.label }}
                 </div>
@@ -107,6 +108,7 @@
                   v-else-if="props.booking && props.parentWidth > 650"
                   class="am-cc__status"
                   :class="`am-cc__status-${status.class}`"
+                  :aria-label="status.label"
                 >
                   {{ status.label }}
                 </div>
@@ -129,27 +131,43 @@
                 trigger="click"
               >
                 <template #reference>
-                  <span
+                  <AmButton
                     v-if="props.reservation"
-                    class="am-cc__edit-btn am-icon-dots-vertical"
+                    ref="menuTriggerRef"
+                    class="am-cc__edit-btn"
+                    category="secondary"
+                    type="text"
+                    size="mini"
+                    icon="dots-vertical"
+                    :icon-only="true"
+                    :aria-label="amLabels.edit"
+                    aria-haspopup="menu"
+                    :aria-expanded="editPopVisible ? 'true' : 'false'"
                     @click="editItem"
-                  ></span>
+                    @keydown="onMenuTriggerKeydown"
+                  ></AmButton>
                 </template>
                 <div
                   v-if="(props.reservation.type === 'appointment' && amSettings.roles.allowWriteAppointments) || (props.reservation.type === 'event' && amSettings.roles.allowWriteEvents)"
                   v-click-outside="closeEditItemPopup"
                   class="am-cc__edit"
+                  role="menu"
+                  @keydown="onMenuKeydown"
                 >
                   <!-- Edit Appointment -->
-                  <div
+                  <AmButton
                     class="am-cc__edit-item am-edit"
+                    category="secondary"
+                    type="text"
+                    prefix="edit"
+                    role="menuitem"
+                    :aria-label="amLabels.edit"
                     @click="editReservation(props.reservation.type)"
                   >
-                    <span class="am-icon-edit"/>
                     <span class="am-cc__edit-text">
                       {{ amLabels.edit }}
                     </span>
-                  </div>
+                  </AmButton>
                   <!-- /Edit Appointment -->
                 </div>
 
@@ -158,33 +176,45 @@
                     v-if="amSettings.roles.allowWriteEvents"
                     v-click-outside="closeEditItemPopup"
                     class="am-cc__edit"
+                    role="menu"
+                    @keydown="onMenuKeydown"
                   >
                     <!-- Edit Attendee -->
-                    <div
+                    <AmButton
                       class="am-cc__edit-item am-edit"
+                      category="secondary"
+                      type="text"
+                      prefix="users-plus"
+                      role="menuitem"
+                      :aria-label="amLabels.event_add_attendee"
                       @click="addEventAttendee(props.reservation)"
                     >
-                      <span class="am-icon-users-plus"></span>
                       <span class="am-cc__edit-text">
                         {{ amLabels.event_add_attendee }}
                       </span>
-                    </div>
+                    </AmButton>
                     <!-- /Edit Attendee -->
                   </div>
                   <div
                     v-click-outside="closeEditItemPopup"
                     class="am-cc__edit"
+                    role="menu"
+                    @keydown="onMenuKeydown"
                   >
                     <!-- List Event Attendees -->
-                    <div
+                    <AmButton
                       class="am-cc__edit-item am-edit"
+                      category="secondary"
+                      type="text"
+                      prefix="user"
+                      role="menuitem"
+                      :aria-label="amLabels.attendees"
                       @click="listEventAttendees(props.reservation)"
                     >
-                      <span class="am-icon-user"></span>
                       <span class="am-cc__edit-text">
                         {{ amLabels.attendees }}
                       </span>
-                    </div>
+                    </AmButton>
                     <!-- /List Event Attendees -->
                   </div>
                 </template>
@@ -216,63 +246,91 @@
                 trigger="click"
               >
                 <template #reference>
-                  <span
+                  <AmButton
                     v-if="props.booking"
-                    class="am-cc__edit-btn am-icon-dots-vertical"
+                    ref="menuTriggerRef"
+                    class="am-cc__edit-btn"
+                    category="secondary"
+                    type="text"
+                    size="mini"
+                    icon="dots-vertical"
+                    :icon-only="true"
+                    :aria-label="amLabels.edit"
+                    aria-haspopup="menu"
+                    :aria-expanded="editPopVisible ? 'true' : 'false'"
                     @click="editItem"
-                  ></span>
+                    @keydown="onMenuTriggerKeydown"
+                  ></AmButton>
                 </template>
                 <div
                   v-click-outside="closeEditItemPopup"
                   class="am-cc__edit"
+                  role="menu"
+                  @keydown="onMenuKeydown"
                 >
                   <!-- Reschedule -->
-                  <div
+                  <AmButton
                     v-if="props.reservation.type === 'appointment' && bookingPositiveStatus() && amSettings.roles.allowCustomerReschedule && props.reservation.reschedulable"
                     class="am-cc__edit-item"
+                    category="secondary"
+                    type="text"
+                    prefix="date-time"
+                    role="menuitem"
+                    :aria-label="amLabels.reschedule"
                     @click="rescheduleItem"
                   >
-                    <span class="am-icon-date-time"></span>
                     <span class="am-cc__edit-text">
                       {{ amLabels.reschedule }}
                     </span>
-                  </div>
+                  </AmButton>
                   <!-- /Reschedule -->
 
                   <!-- Invoice -->
-                  <div
-                      v-if="!licence.isStarter && props.booking.status !== 'waiting' && amSettings.featuresIntegrations.invoices.enabled"
-                      class="am-cc__edit-item"
-                      @click="previewInvoice"
+                  <AmButton
+                    v-if="!licence.isStarter && props.booking.status !== 'waiting' && amSettings.featuresIntegrations.invoices.enabled"
+                    class="am-cc__edit-item"
+                    category="secondary"
+                    type="text"
+                    prefix="eye"
+                    role="menuitem"
+                    :aria-label="amLabels['preview_invoice']"
+                    @click="previewInvoice"
                   >
-                    <span class="am-icon-eye"></span>
                     <span class="am-cc__edit-text">
                       {{ amLabels['preview_invoice'] }}
                     </span>
-                  </div>
-                  <div
+                  </AmButton>
+                  <AmButton
                       v-if="!licence.isStarter && props.booking.status !== 'waiting' && amSettings.featuresIntegrations.invoices.enabled"
                       class="am-cc__edit-item"
+                      category="secondary"
+                      type="text"
+                      prefix="download"
+                      role="menuitem"
+                      :aria-label="amLabels['download_invoice']"
                       @click="downloadInvoice"
                   >
-                    <span class="am-icon-download"></span>
                     <span class="am-cc__edit-text">
                       {{ amLabels['download_invoice'] }}
                     </span>
-                  </div>
+                  </AmButton>
                   <!-- /Invoice -->
 
                   <!-- Cancel item -->
-                  <div
+                  <AmButton
                     v-if="props.reservation.cancelable && bookingPositiveStatus()"
                     class="am-cc__edit-item am-delete"
+                    category="secondary"
+                    type="text"
+                    prefix="clearable"
+                    role="menuitem"
+                    :aria-label="amLabels.cancel"
                     @click="cancelItem"
                   >
-                    <span class="am-icon-clearable"></span>
                     <span class="am-cc__edit-text">
                       {{ amLabels.cancel }}
                     </span>
-                  </div>
+                  </AmButton>
                   <!-- /Cancel item -->
                 </div>
               </el-popover>
@@ -294,11 +352,11 @@
                   :content-data="props.employee"
                 >
                   <template #default>
-                    <div class="am-cc__data">
+                    <div class="am-cc__data" tabindex="0">
                       <span class="am-icon-user"></span>
                       <span class="am-cc__data-text">
-                      {{ employeesString(props.employee) }}
-                    </span>
+                        {{ employeesString(props.employee) }}
+                      </span>
                     </div>
                   </template>
                 </CollapseCardPopover>
@@ -314,7 +372,7 @@
                   :content-data="props.customers"
                 >
                   <template #default>
-                    <div class="am-cc__data">
+                    <div class="am-cc__data" tabindex="0">
                       <span class="am-icon-user"></span>
                       <span class="am-cc__data-text">
                       {{ props.customers.length > 1 ? amLabels.customers : amLabels.customer }}
@@ -350,7 +408,7 @@
                 :content-data="props.periods"
               >
                 <template #default>
-                  <div class="am-cc__data">
+                  <div class="am-cc__data" tabindex="0">
                     <span class="am-icon-clock"></span>
                     <span class="am-cc__data-text">
                       {{ amLabels.event_timetable }}
@@ -363,7 +421,7 @@
               <!-- GoogleMeet Link -->
               <div v-if="amSettings.featuresIntegrations.googleCalendar.enabled && props.googleMeetLink" class="am-cc__data link">
                 <span class="am-icon-link"></span>
-                <a class="am-cc__data-text link" :href="props.googleMeetLink" target="_blank" tabindex="-1">
+                <a class="am-cc__data-text link" :href="props.googleMeetLink" target="_blank" rel="noopener noreferrer">
                   {{ amLabels.google_meet_link }}
                 </a>
               </div>
@@ -372,7 +430,7 @@
               <!-- Microsoft Teams Link -->
               <div v-if="amSettings.featuresIntegrations.outlookCalendar.enabled && props.microsoftTeamsLink" class="am-cc__data link">
                 <span class="am-icon-link"></span>
-                <a class="am-cc__data-text link" :href="props.microsoftTeamsLink" target="_blank" tabindex="-1">
+                <a class="am-cc__data-text link" :href="props.microsoftTeamsLink" target="_blank" rel="noopener noreferrer">
                   {{ amLabels.microsoft_teams_link }}
                 </a>
               </div>
@@ -381,7 +439,7 @@
               <!-- Zoom Link -->
               <div v-if="amSettings.featuresIntegrations.zoom.enabled && props.zoomLink" class="am-cc__data link">
                 <span class="am-icon-link"></span>
-                <a class="am-cc__data-text link" :href="props.zoomLink" target="_blank" tabindex="-1">
+                <a class="am-cc__data-text link" :href="props.zoomLink" target="_blank" rel="noopener noreferrer">
                   {{ amLabels.zoom_link }}
                 </a>
               </div>
@@ -390,7 +448,7 @@
               <!-- Lesson Space Link -->
               <div v-if="amSettings.featuresIntegrations.lessonSpace.enabled && props.lessonSpaceLink" class="am-cc__data link">
                 <span class="am-icon-link"></span>
-                <a class="am-cc__data-text link" :href="props.lessonSpaceLink" target="_blank" tabindex="-1">
+                <a class="am-cc__data-text link" :href="props.lessonSpaceLink" target="_blank" rel="noopener noreferrer">
                   {{ amLabels.lesson_space_link }}
                 </a>
               </div>
@@ -404,7 +462,7 @@
                 :content-data="props.extras"
               >
                 <template #default>
-                  <div class="am-cc__data">
+                  <div class="am-cc__data" tabindex="0">
                     <span class="am-icon-border-plus"></span>
                     <span class="am-cc__data-text">
                       {{ `${Object.keys(props.extras).length} ${amLabels.extras}` }}
@@ -422,7 +480,7 @@
                 :content-data="props.customFields"
               >
                 <template #default>
-                  <div class="am-cc__data">
+                  <div class="am-cc__data" tabindex="0">
                     <span class="am-icon-file-text"></span>
                     <span class="am-cc__data-text">
                       {{ amLabels.custom_fields }}
@@ -440,7 +498,7 @@
                 :content-data="props.tickets"
               >
                 <template #default>
-                  <div class="am-cc__data">
+                  <div class="am-cc__data" tabindex="0">
                     <span class="am-icon-tickets"></span>
                     <span class="am-cc__data-text">
                       {{ amLabels.event_tickets }}
@@ -462,7 +520,7 @@
                   class="am-cc__data-text"
                   :href="`https://maps.google.com/?q=${props.location.address}`"
                   target="_blank"
-                  tabindex="-1"
+                  rel="noopener noreferrer"
                 >
                     {{ props.location.name }}
                 </a>
@@ -480,7 +538,7 @@
                 :content-data="props.qrCodes"
               >
                 <template #default>
-                  <div class="am-cc__data">
+                  <div class="am-cc__data" tabindex="0">
                     <span class="am-icon-tickets"></span>
                     <span class="am-cc__data-text">
                       {{ amLabels.e_tickets }}
@@ -503,6 +561,7 @@ import {
   ref,
   computed,
   inject,
+  nextTick,
 } from "vue";
 
 // * Import from Libraries
@@ -521,9 +580,9 @@ import { useFormattedPrice } from "../../../../../../assets/js/common/formatting
 import { useSecondsToDuration } from "../../../../../../assets/js/common/date";
 import { usePaymentFromCustomerPanel } from "../../../../../../assets/js/public/cabinet";
 import httpClient from "../../../../../../plugins/axios";
-import {useAuthorizationHeaderObject} from "../../../../../../assets/js/public/panel";
 import {useStore} from "vuex";
 import {createFileUrlFromResponse} from "../../../../../../assets/js/common/helper";
+import AmButton from "@/views/_components/button/AmButton.vue";
 
 // * Vars
 let store = useStore()
@@ -655,10 +714,105 @@ const amLabels = inject('amLabels')
 let licence = inject('licence')
 
 let editPopVisible = ref(false)
+let menuTriggerRef = ref(null)
 
 function editItem (e) {
   e.stopPropagation()
   editPopVisible.value = !editPopVisible.value
+}
+
+function onMenuTriggerKeydown (e) {
+  const openKeys = ['Enter', ' ', 'Spacebar', 'ArrowDown']
+
+  if (openKeys.includes(e.key)) {
+    e.preventDefault()
+    e.stopPropagation()
+    editPopVisible.value = true
+    focusFirstMenuItem()
+  }
+
+  if (e.key === 'Escape') {
+    e.preventDefault()
+    e.stopPropagation()
+    closeEditItemPopup(true)
+  }
+}
+
+function getVisibleMenuItems (container = null) {
+  const popperRoot = container?.closest('.am-cc__popper') || document.querySelector('.am-cc__popper')
+
+  if (!popperRoot) {
+    return []
+  }
+
+  return Array.from(popperRoot.querySelectorAll('.am-cc__edit-item'))
+    .filter(item => !item.disabled && item.offsetParent !== null)
+}
+
+function focusFirstMenuItem () {
+  nextTick(() => {
+    const firstItem = getVisibleMenuItems()[0]
+
+    if (firstItem) {
+      firstItem.focus()
+    }
+  })
+}
+
+function focusMenuTrigger () {
+  nextTick(() => {
+    const trigger = menuTriggerRef.value?.$el || menuTriggerRef.value
+
+    if (trigger && typeof trigger.focus === 'function') {
+      trigger.focus()
+    }
+  })
+}
+
+function onMenuKeydown (e) {
+  const menuItems = getVisibleMenuItems(e.currentTarget)
+
+  if (!menuItems.length) {
+    return
+  }
+
+  const currentIndex = menuItems.indexOf(document.activeElement)
+
+  if (e.key === 'Escape') {
+    e.preventDefault()
+    e.stopPropagation()
+    closeEditItemPopup(true)
+    return
+  }
+
+  if (e.key === 'Tab') {
+    closeEditItemPopup()
+    return
+  }
+
+  if (e.key === 'Home') {
+    e.preventDefault()
+    menuItems[0].focus()
+    return
+  }
+
+  if (e.key === 'End') {
+    e.preventDefault()
+    menuItems[menuItems.length - 1].focus()
+    return
+  }
+
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault()
+
+    const step = e.key === 'ArrowDown' ? 1 : -1
+    const fallbackIndex = e.key === 'ArrowDown' ? 0 : menuItems.length - 1
+    const nextIndex = currentIndex === -1
+      ? fallbackIndex
+      : (currentIndex + step + menuItems.length) % menuItems.length
+
+    menuItems[nextIndex].focus()
+  }
 }
 
 function menuVisible () {
@@ -680,7 +834,7 @@ function previewInvoice () {
   httpClient.post(
       '/invoices/' + props.reservation.bookings[0].payments[0].id,
       { format: 'pdf' },
-      Object.assign(useAuthorizationHeaderObject(store), {params: {source: 'cabinet-customer'}})
+    {params: {source: 'cabinet-customer'}}
   ).then(response => {
     window.open(createFileUrlFromResponse(response))
   })
@@ -701,7 +855,7 @@ function downloadInvoice () {
   httpClient.post(
       '/invoices/' + props.reservation.bookings[0].payments[0].id,
       { format: format },
-      Object.assign(useAuthorizationHeaderObject(store), {params: {source: 'cabinet-customer'}})
+      {params: {source: 'cabinet-customer'}}
   ).then(response => {
     let url = createFileUrlFromResponse(response, format)
     const a = document.createElement('a')
@@ -720,8 +874,12 @@ function downloadInvoice () {
   })
 }
 
-function closeEditItemPopup () {
+function closeEditItemPopup (focusTrigger = false) {
   editPopVisible.value = false
+
+  if (focusTrigger) {
+    focusMenuTrigger()
+  }
 }
 
 function cancelItem () {
@@ -913,6 +1071,7 @@ export default {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       width: 100%;
 
       &.am-rw-500 {
@@ -954,7 +1113,6 @@ export default {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin: 0 0 0 8px;
 
         &.am-rw-500 {
           width: 100%;
@@ -1130,8 +1288,14 @@ export default {
     &__edit {
       &-btn {
         margin: 0;
+        padding: 0;
+        line-height: 1;
         font-size: 24px;
         color: var(--am-c-cc-text);
+
+        &:hover {
+          background-color: transparent;
+        }
       }
 
       &-item {
@@ -1181,6 +1345,12 @@ export default {
         &:hover {
           color: var(--am-c-cc-primary-op70)
         }
+
+        &:focus-visible {
+          outline: 2px solid var(--am-c-cc-primary);
+          outline-offset: 2px;
+          border-radius: 4px;
+        }
       }
 
       &-text {
@@ -1188,6 +1358,12 @@ export default {
         font-weight: 400;
         line-height: 2;
         color: inherit;
+
+        &:focus-visible {
+          outline: 2px solid var(--am-c-cc-primary);
+          outline-offset: 2px;
+          border-radius: 4px;
+        }
 
         &.link {
           text-decoration: none;
@@ -1197,6 +1373,7 @@ export default {
       [class^="am-icon"] {
         font-size: 28px;
         color: inherit;
+        line-height: 1;
       }
     }
 
@@ -1212,14 +1389,15 @@ export default {
   // cc - collapse card
   .am-cc {
     &__edit {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+
       &-item {
-        display: flex;
-        align-items: center;
+        background: transparent;
         color: var(--am-c-cc-text);
-        border-radius: 4px;
         padding: 4px;
-        cursor: pointer;
-        transition: background-color .3s ease-in-out;
+        justify-content: flex-start;
 
         &:hover {
           background-color: var(--am-c-cc-text-op15);

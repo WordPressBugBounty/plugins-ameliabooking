@@ -1,5 +1,4 @@
 import httpClient from "../../../plugins/axios";
-import { useAuthorizationHeaderObject } from "../public/panel";
 import { ref } from "vue";
 
 let isEmployeeConnectedToPersonalAppleCalendar = ref(false);
@@ -8,8 +7,7 @@ function useAppleSync (store) {
   store.commit('auth/setAppleLoading', true)
 
   httpClient.get(
-    '/apple/calendar-list/' + store.getters['employee/getId'],
-    useAuthorizationHeaderObject(store)
+    '/apple/calendar-list/' + store.getters['employee/getId']
   ).then((response) => {
     store.commit('auth/setAppleCalendars', response.data.data?.calendarList ? response.data.data.calendarList : [])
 

@@ -22,7 +22,7 @@ function setTicketsData(event) {
       eventTicketId: ticket.id,
       persons: 0,
       waiting: 0,
-      price: ticket.dateRangePrice ? ticket.dateRangePrice : ticket.price,
+      price: ticket.dateRangePrice != null ? ticket.dateRangePrice : ticket.price,
     })
   })
   return bookingToEventTickets

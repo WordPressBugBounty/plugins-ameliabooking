@@ -44,6 +44,7 @@ import {
   nextTick,
   computed,
   onMounted,
+  onBeforeUnmount,
 } from 'vue'
 
 // * import from Vuex
@@ -74,9 +75,6 @@ const baseUrls = inject('baseUrls')
 let containerWidth = ref(0)
 provide('containerWidth', containerWidth)
 
-// * window resize listener
-window.addEventListener('resize', resize)
-
 // * resize function
 function resize() {
   if (ameliaContainer.value) {
@@ -85,6 +83,9 @@ function resize() {
 }
 
 onMounted(() => {
+  // * window resize listener
+  window.addEventListener('resize', resize)
+
   store.commit('shortcodeParams/setForm', 'catalogForm')
 
   document
@@ -100,6 +101,10 @@ onMounted(() => {
   useRenderAction('scrollForm', {
     offsetFromTop,
   })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resize)
 })
 
 // * Empty State
@@ -229,7 +234,7 @@ function nextPage() {
 }
 
 function previousPage() {
-  pageIndex.value = pageIndex.value - 1
+  pageIndex.value = Math.max(pageIndex.value - 1, 0)
 }
 
 provide('changingPageFunctions', {

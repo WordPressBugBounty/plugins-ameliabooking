@@ -15,14 +15,25 @@
       </span>
     </template>
     <AmInputPhone
-      :key="`phone-${defaultCountryCode}-${props.refreshTrigger}`"
-      v-model="infoFormData.phone"
+      :key="`phone-${countryCode}-${props.refreshTrigger}`"
+      v-model="model"
+      v-model:country-code="countryCode"
       :placeholder="amLabels.enter_phone"
-      :default-code="defaultCountryCode"
-      name="phone"
+      :validation-error="true"
+      :error="props.phoneError"
+      :phone-input-attributes="{ name: 'phone' }"
       style="position: relative"
-      @country-phone-iso-updated="(val) => {emits('countryPhoneIsoUpdated', val)}"
-    />
+      @data="handleData"
+    >
+      <template #no-results>
+        {{ amLabels.no_results_found }}
+      </template>
+    </AmInputPhone>
+    <template #error v-if="props.errorMessage">
+      <span class="el-form-item__error">
+        {{ props.errorMessage }}
+      </span>
+    </template>
     <div v-if="whatsAppSetUp() && !props.phoneError" class="am-whatsapp-opt-in-text">
       {{ amLabels.whatsapp_opt_in_text }}
     </div>
@@ -39,13 +50,7 @@ import {
   computed,
   inject,
   ref,
-  onMounted,
-  watch,
-  nextTick
 } from "vue";
-
-// * Vuex
-import { useStore } from 'vuex'
 
 // * Composables
 import {
@@ -53,15 +58,24 @@ import {
 } from "../../../../../assets/js/common/colorManipulation";
 
 // * Emits
-const emits = defineEmits([
-  'countryPhoneIsoUpdated',
-])
 
 // * Props
 let props = defineProps({
+  modelValue: {
+    type: String,
+    default: ''
+  },
+  countryCode: {
+    type: String,
+    default: ''
+  },
   phoneError: {
     type: Boolean,
     default: false
+  },
+  errorMessage: {
+    type: String,
+    default: ''
   },
   refreshTrigger: {
     type: Number,
@@ -69,13 +83,24 @@ let props = defineProps({
   }
 })
 
-// * Store
-const store = useStore()
+let emits = defineEmits([
+  'update:modelValue',
+  'update:countryCode',
+  'handlePhoneData'
+])
 
-// * Computed default country code - prioritize saved country ISO
-let defaultCountryCode = computed(() => {
-  const savedCountry = store.getters['booking/getCustomerCountryPhoneIso']
-  return savedCountry || (settings.general.phoneDefaultCountryCode === 'auto' ? '' : settings.general.phoneDefaultCountryCode.toLowerCase())
+const model = computed({
+  get: () => props.modelValue,
+  set: (val) => {
+    emits('update:modelValue', val)
+  }
+})
+
+const countryCode = computed({
+  get: () => props.countryCode,
+  set: (val) => {
+    emits('update:countryCode', val)
+  }
 })
 
 // * Colors
@@ -96,25 +121,13 @@ let amLabels = inject('amLabels')
 // * Customize
 let amCustomize = inject('amCustomize')
 
-// * Form field data
-let infoFormData = inject('infoFormData')
-
 function whatsAppSetUp () {
   return settings.notifications.whatsAppEnabled
 }
 
-onMounted(() => {
-  if (defaultCountryCode.value) {
-    emits('countryPhoneIsoUpdated', defaultCountryCode.value)
-  }
-})
-
-// * Watch for country code changes to emit updates
-watch(defaultCountryCode, (newVal) => {
-  if (newVal) {
-    emits('countryPhoneIsoUpdated', newVal)
-  }
-})
+function handleData(val) {
+  emits('handlePhoneData', val)
+}
 
 defineExpose({
   primeFieldRef

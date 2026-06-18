@@ -1,37 +1,51 @@
 <template>
-  <div class="am-cc__qr-codes">
+  <div
+    ref="qrCodesRef"
+    class="am-cc__qr-codes"
+  >
     <div
       v-if="errorMessage"
       class="am-cc__qr-codes__message"
+      role="alert"
+      aria-live="assertive"
     >
       <span class="am-icon-info-reverse"></span>
       {{errorMessage}}
     </div>
-    <div
+    <ul
+      class="am-cc__qr-codes__list"
+      role="list"
+      aria-label="Available QR code documents"
+    >
+      <li
       v-for="(item, index) in props.data"
       :key="index"
       class="am-cc__qr-codes__item"
-      @click="showQrCodes(item)"
-    >
-      {{
-        `${item.eventName} - ${
-          item.type === 'ticket' ? 'Single Ticket.pdf' : 'Group Ticket.pdf'
-        }`
-      }}
-    </div>
+      >
+        <AmButton
+          class="am-cc__qr-codes__button"
+          :disabled="loading"
+          :aria-busy="loading ? 'true' : 'false'"
+          :aria-label="`Open ${getTicketLabel(item)} PDF`"
+          @click="showQrCodes(item)"
+        >
+          {{ getTicketLabel(item) }}
+        </AmButton>
+      </li>
+    </ul>
   </div>
 </template>
 
 <script setup>
 // * Import from Vue
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
 
 // * Composables
-import { useAuthorizationHeaderObject } from '../../../../../../../../assets/js/public/panel'
 import httpClient from '../../../../../../../../plugins/axios'
+import AmButton from "@/views/_components/button/AmButton.vue";
 
 // * Store
 const store = useStore()
@@ -44,8 +58,21 @@ let props = defineProps({
 })
 
 let errorMessage = ref('')
+let loading = ref(false)
+let qrCodesRef = ref(null)
+
+function getTicketLabel(ticket) {
+  return `${ticket.eventName} - ${ticket.type === 'ticket' ? 'Single Ticket.pdf' : 'Group Ticket.pdf'}`
+}
 
 function showQrCodes(ticket) {
+  if (loading.value) {
+    return
+  }
+
+  loading.value = true
+  errorMessage.value = ''
+
   httpClient
     .get(
       '/etickets',
@@ -58,12 +85,10 @@ function showQrCodes(ticket) {
             bookingId: ticket.bookingId,
             ticketManualCode: ticket.ticketManualCode,
           },
-        },
-        useAuthorizationHeaderObject(store)
+        }
       )
     )
     .then((response) => {
-      errorMessage.value = ''
       window.open(createFileUrlFromResponse(response.data))
     })
     .catch((error) => {
@@ -72,6 +97,9 @@ function showQrCodes(ticket) {
       } else {
         errorMessage.value = 'An error occurred while fetching the QR code.'
       }
+    })
+    .finally(() => {
+      loading.value = false
     })
 }
 
@@ -88,6 +116,11 @@ function createFileUrlFromResponse(pdfData) {
 
 onMounted(() => {
   errorMessage.value = ''
+
+  nextTick(() => {
+    const firstFocusable = qrCodesRef.value?.querySelector('button:not([disabled])')
+    firstFocusable?.focus()
+  })
 })
 </script>
 
@@ -98,6 +131,15 @@ onMounted(() => {
     flex-direction: column;
     max-width: 480px;
     gap: 6px;
+
+    &__list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
     &__message {
       display: flex;
@@ -118,8 +160,15 @@ onMounted(() => {
     }
 
     &__item {
+      margin: 0;
+    }
+
+    &__button {
+      width: 100%;
       padding: 6px 12px;
       border-radius: 4px;
+      border: none;
+      background: transparent;
       cursor: pointer;
       text-align: left;
       font-size: 14px;
@@ -128,6 +177,16 @@ onMounted(() => {
 
       &:hover {
         color: var(--am-c-cc-primary);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--am-c-cc-text);
+        outline-offset: 2px;
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
       }
     }
   }

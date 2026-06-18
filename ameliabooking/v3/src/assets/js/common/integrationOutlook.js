@@ -1,6 +1,5 @@
 import httpClient from "../../../plugins/axios";
 import {useRemoveUrlParameter, useUrlQueryParams} from "./helper";
-import {useAuthorizationHeaderObject} from "../public/panel";
 
 function useOutlookSync (code, successCallback) {
   let redirectURL = useRemoveUrlParameter(
@@ -37,15 +36,9 @@ function useOutlookConnect (store) {
 
     if (!amSettings.outlookCalendar.accessToken) {
       httpClient
-        .get(
-          '/outlook/authorization/url/' + store.getters['employee/getId'],
-          Object.assign(
-            {
-              redirectUri: window.location.href.split('?')[0],
-            },
-            useAuthorizationHeaderObject(store)
-          )
-        )
+        .get('/outlook/authorization/url/' + store.getters['employee/getId'], {
+          redirectUri: window.location.href.split('?')[0],
+        })
         .then((response) => {
           window.location.href = response.data.data.authUrl.replace(
             /redirect_uri=.+?&/,

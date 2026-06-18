@@ -18,6 +18,7 @@
       { 'am-auth': !authenticated },
     ]"
     :style="cssVars"
+    @keydown.esc="menuVisibility = false"
   >
     <Auth v-if="!authenticated"></Auth>
     <template v-if="authenticated">
@@ -34,7 +35,7 @@
         }"
       >
         <template #step-list>
-          <div class="am-fs-sb__page-wrapper am-fs-sb__page-wrapper__cabinet">
+          <nav class="am-fs-sb__page-wrapper am-fs-sb__page-wrapper__cabinet" :aria-label="amLabels.cabinet_navigation || 'Cabinet navigation'">
             <template v-for="(step, index) in sidebarSteps" :key="step.key">
               <div
                 v-if="
@@ -42,15 +43,24 @@
                   store.getters['entities/getPackages'].length
                 "
                 class="am-fs-sb__page"
-                :class="{ selected: pageKey === step.key }"
-                :style="{'pointer-events': shortcodeData.cabinetType === 'employee' && shortcodeData.profile && step.key === 'profile' ? 'none' : ''}"
-                @click="() => {!(shortcodeData.cabinetType === 'employee' && shortcodeData.profile && step.key === 'profile') ? sidebarSelection(step, index) : () => {}}"
+                :class="{
+                  selected: pageKey === step.key,
+                  'is-disabled': isStepDisabled(step),
+                }"
+                role="button"
+                :tabindex="isStepDisabled(step) ? -1 : 0"
+                :aria-disabled="isStepDisabled(step)"
+                :aria-current="pageKey === step.key ? 'page' : undefined"
+                :aria-label="step.label"
+                @click="onSidebarStepInteraction(step, index)"
+                @keydown.enter.prevent="onSidebarStepInteraction(step, index)"
+                @keydown.space.prevent="onSidebarStepInteraction(step, index)"
               >
                 <div
                   class="am-fs-sb__page-inner"
                   :class="{ 'am-collapsed': sidebarCollapsed }"
                 >
-                  <div class="am-fs-sb__page-icon">
+                  <div class="am-fs-sb__page-icon" aria-hidden="true">
                     <span :class="`am-icon-${step.icon}`"></span>
                   </div>
                   <transition name="fade">
@@ -67,6 +77,7 @@
                       v-if="!sidebarCollapsed"
                       class="am-fs-sb__page-indicator"
                       :class="[sidebarCollapseItemsClass, {'am-rtl': isRtl}]"
+                      aria-hidden="true"
                     >
                       <span :class="isRtl ? 'am-icon-arrow-big-left' : 'am-icon-arrow-big-right'"></span>
                     </div>
@@ -75,16 +86,22 @@
               </div>
               <div v-if="index === 0 && sidebarSteps[0].key === 'profile'" class="am-fs-sb__page-divider"></div>
             </template>
-          </div>
+          </nav>
         </template>
         <template #support-info>
           <div ref="sidebarFooterRef" class="am-fs-sb__footer">
             <div
               class="am-fs-sb__page"
-              @click="sidebarCollapsed = !sidebarCollapsed"
+              role="button"
+              tabindex="0"
+              :aria-expanded="!sidebarCollapsed"
+              :aria-label="amLabels.toggle_sidebar"
+              @click="toggleSidebar"
+              @keydown.enter.prevent="toggleSidebar"
+              @keydown.space.prevent="toggleSidebar"
             >
               <div class="am-fs-sb__page-inner">
-                <div class="am-fs-sb__page-icon">
+                <div class="am-fs-sb__page-icon" aria-hidden="true">
                   <span class="am-icon-dashboard"></span>
                 </div>
                 <transition name="fade">
@@ -99,9 +116,17 @@
               </div>
             </div>
             <div class="am-fs-sb__page-divider"></div>
-            <div class="am-fs-sb__page" @click="logout">
+            <div
+              class="am-fs-sb__page"
+              role="button"
+              tabindex="0"
+              :aria-label="amLabels.log_out"
+              @click="logout"
+              @keydown.enter.prevent="logout"
+              @keydown.space.prevent="logout"
+            >
               <div class="am-fs-sb__page-inner">
-                <div class="am-fs-sb__page-icon">
+                <div class="am-fs-sb__page-icon" aria-hidden="true">
                   <span class="am-icon-logout"></span>
                 </div>
                 <transition name="fade">
@@ -129,9 +154,16 @@
                 <div
                   v-if="!sidebarVisibility"
                   class="am-caph__menu"
-                  @click="() => (menuVisibility = !menuVisibility)"
+                  role="button"
+                  tabindex="0"
+                  :aria-expanded="menuVisibility"
+                  :aria-controls="menuDialogId"
+                  :aria-label="amLabels.open_menu || 'Open menu'"
+                  @click="toggleMenu"
+                  @keydown.enter.prevent="toggleMenu"
+                  @keydown.space.prevent="toggleMenu"
                 >
-                  <span class="am-icon-menu"></span>
+                  <span class="am-icon-menu" aria-hidden="true"></span>
                 </div>
                 <TimeZoneSelect
                   v-if="
@@ -141,6 +173,7 @@
                   "
                 />
                 <MenuSlideDialog
+                  :id="menuDialogId"
                   :menu-items="sidebarSteps"
                   :monitor="pageKey"
                   :visibility="menuVisibility"
@@ -190,6 +223,7 @@ import {
   onMounted,
   readonly,
   onBeforeMount,
+  onBeforeUnmount,
 } from 'vue'
 
 // * import from Vuex
@@ -360,10 +394,19 @@ let timeZoneSelectVisibility = computed(() => {
 
 // * Mobile menu
 let menuVisibility = ref(false)
+const menuDialogId = 'am-customer-panel-mobile-menu'
+
+function toggleMenu() {
+  menuVisibility.value = !menuVisibility.value
+}
 
 // * Form Sidebar Collapse
 let sidebarCollapsed = ref(false)
 provide('sidebarCollapsed', readonly(sidebarCollapsed))
+
+function toggleSidebar() {
+  sidebarCollapsed.value = !sidebarCollapsed.value
+}
 
 let sidebarCollapseItemsClass = ref('')
 
@@ -410,6 +453,10 @@ const handleResize = () => {
 }
 
 window.addEventListener('resize', handleResize)
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+})
 
 watch(containerWidth, (current) => {
   menuVisibility.value = current > 481 ? false : menuVisibility.value
@@ -499,59 +546,113 @@ if (
   pagesObj.value.packages = markRaw(Packages)
 }
 
-// * Array of Sidebar steps
-const sidebarSteps = ref([{
-  key: 'profile',
-  icon: 'user',
-  pageLabel: amLabels.value.my_profile,
-  label: computed(() => {
-    if (originKey.value === 'cape') {
-      return `${store.getters['auth/getProfile'].firstName} ${store.getters['auth/getProfile'].lastName}`
-    } else {
-      if (!amCustomize.value.profile.options.lastName.visibility) return `${store.getters['auth/getProfile'].firstName}`
-      return `${store.getters['auth/getProfile'].firstName} ${store.getters['auth/getProfile'].lastName}`
+// * Logged in user Amelia role (provider, admin or manager)
+let loggedInUserRole = computed(() => store.getters['auth/getProfile']?.type)
+
+// * Profile page (and all its tabs) is only available for providers in the employee panel
+let profilePageVisibility = computed(() =>
+  shortcodeData.value.cabinetType !== 'employee' ||
+  loggedInUserRole.value === 'provider'
+)
+
+// * Admin/manager logged into the employee panel may only view appointments and events,
+// * they must not be able to add, edit, reschedule or otherwise manipulate them.
+let employeePanelReadOnly = computed(() =>
+  shortcodeData.value.cabinetType === 'employee' &&
+  !!loggedInUserRole.value &&
+  loggedInUserRole.value !== 'provider'
+)
+provide('employeePanelReadOnly', employeePanelReadOnly)
+
+// * Roles exposed to the panel - all write capabilities are disabled for read-only users
+let panelRoles = computed(() => {
+  if (!employeePanelReadOnly.value) {
+    return amSettings.roles
+  }
+
+  return {
+    ...amSettings.roles,
+    allowWriteAppointments: false,
+    allowWriteEvents: false,
+    allowWriteCustomers: false,
+  }
+})
+
+// * Re-provide settings to the panel subtree so the read-only role overrides take effect
+// * everywhere the cabinet reads `settings.roles.*`, without touching the global settings.
+const panelSettings = new Proxy(amSettings, {
+  get (target, prop) {
+    if (prop === 'roles') {
+      return panelRoles.value
     }
-  }),
-}])
 
-if (shortcodeData.value.appointments || !shortcodeData.value.events) {
-  sidebarSteps.value.push({
-    key: 'appointments',
-    icon: 'service',
-    label: amLabels.value.appointments,
-  })
-}
+    return target[prop]
+  },
+})
+provide('settings', panelSettings)
 
-if (shortcodeData.value.events || !shortcodeData.value.appointments) {
-  sidebarSteps.value.push({
-    key: 'events',
-    icon: 'star-outline',
-    label: amLabels.value.events,
-  })
-}
+// * Array of Sidebar steps
+const sidebarSteps = computed(() => {
+  const steps = []
 
-if (
-  amSettings.featuresIntegrations.packages.enabled &&
-  shortcodeData.value.cabinetType === 'customer' &&
-  (shortcodeData.value.appointments || !shortcodeData.value.events) &&
-  (licence.isPro || licence.isDeveloper)
-) {
-  sidebarSteps.value.push({
-    key: 'packages',
-    icon: 'shipment',
-    label: amLabels.value.packages,
-  })
-}
+  if (profilePageVisibility.value) {
+    const profile = store.getters['auth/getProfile']
+
+    let profileLabel = ''
+    if (profile) {
+      if (originKey.value === 'cape' || amCustomize.value.profile.options.lastName.visibility) {
+        profileLabel = `${profile.firstName} ${profile.lastName}`
+      } else {
+        profileLabel = `${profile.firstName}`
+      }
+    }
+
+    steps.push({
+      key: 'profile',
+      icon: 'user',
+      pageLabel: amLabels.value.my_profile,
+      label: profileLabel,
+    })
+  }
+
+  if (shortcodeData.value.appointments || !shortcodeData.value.events) {
+    steps.push({
+      key: 'appointments',
+      icon: 'service',
+      label: amLabels.value.appointments,
+    })
+  }
+
+  if (shortcodeData.value.events || !shortcodeData.value.appointments) {
+    steps.push({
+      key: 'events',
+      icon: 'star-outline',
+      label: amLabels.value.events,
+    })
+  }
+
+  if (
+    amSettings.featuresIntegrations.packages.enabled &&
+    shortcodeData.value.cabinetType === 'customer' &&
+    (shortcodeData.value.appointments || !shortcodeData.value.events) &&
+    (licence.isPro || licence.isDeveloper)
+  ) {
+    steps.push({
+      key: 'packages',
+      icon: 'shipment',
+      label: amLabels.value.packages,
+    })
+  }
+
+  return steps
+})
 
 provide('sidebarSteps', sidebarSteps)
 
-onMounted(() => {
-  sidebarIndex.value = sidebarSteps.value.findIndex(
-    (a) => a.key === pageKey.value
-  )
+let sidebarIndex = computed(() => {
+  const index = sidebarSteps.value.findIndex((a) => a.key === pageKey.value)
+  return index === -1 ? 0 : index
 })
-
-let sidebarIndex = ref(0)
 
 function sidebarSelection(step, index) {
   if (shortcodeData.value.cabinetType === 'employee') {
@@ -574,8 +675,16 @@ function sidebarSelection(step, index) {
   }
 
   pageKey.value = step.key
-  sidebarIndex.value = index
   store.commit('cabinetFilters/setResetFilters')
+}
+
+function isStepDisabled(step) {
+  return shortcodeData.value.cabinetType === 'employee' && shortcodeData.value.profile && step.key === 'profile'
+}
+
+function onSidebarStepInteraction(step, index) {
+  if (isStepDisabled(step)) return
+  sidebarSelection(step, index)
 }
 
 function menuSelection(obj) {
@@ -857,6 +966,8 @@ export default {
             gap: 0 40px;
 
             &-wrap {
+              overflow: visible;
+
               &:after {
                 background-color: var(--am-c-main-text-op10);
               }
@@ -864,6 +975,10 @@ export default {
               &.is-scrollable {
                 padding: 0 24px;
               }
+            }
+
+            &-scroll {
+              overflow: visible;
             }
 
             &-next,
@@ -896,7 +1011,7 @@ export default {
             }
 
             &:focus-visible {
-              box-shadow: none;
+              box-shadow: 0 0 0 2px var(--am-c-capi-primary);
             }
 
             &:hover {
@@ -939,6 +1054,28 @@ export default {
 
         .am-fs-sb__page {
           max-height: 40px;
+
+          &:focus:not(:focus-visible) {
+            outline: none;
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--am-c-primary);
+            outline-offset: 2px;
+          }
+
+          &.is-disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+        }
+
+        .am-caph__menu {
+          &:focus-visible {
+            outline: 2px solid var(--am-c-primary);
+            outline-offset: 2px;
+            border-radius: 4px;
+          }
         }
       }
     }

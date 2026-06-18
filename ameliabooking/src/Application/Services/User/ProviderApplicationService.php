@@ -1056,6 +1056,19 @@ class ProviderApplicationService
         return array_values($providers);
     }
 
+    public function filterEmployeesByEntitiesRelations(array $employees, array $entitiesRelations): array
+    {
+        $result = [];
+
+        foreach ($employees as $employee) {
+            if (array_key_exists($employee['id'], $entitiesRelations)) {
+                $result[] = $employee;
+            }
+        }
+
+        return $result;
+    }
+
     /**
      * @param Provider $newUser
      * @param array    $googleCalendarData

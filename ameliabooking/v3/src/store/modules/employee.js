@@ -34,7 +34,6 @@ export default {
     },
     stripeConnect: null,
     zoomUserId: '',
-    note: '',
     description: '',
     descriptionMode: 'html',
     weekDayList: [],
@@ -136,10 +135,6 @@ export default {
 
     getStripeConnect (state) {
       return state.stripeConnect
-    },
-
-    getNote (state) {
-      return state.note
     },
 
     getDescription (state) {
@@ -258,10 +253,6 @@ export default {
 
     setStripeConnect (state, payload) {
       state.stripeConnect = payload
-    },
-
-    setNote (state, payload) {
-      state.note = payload
     },
 
     setDescription (state, payload) {

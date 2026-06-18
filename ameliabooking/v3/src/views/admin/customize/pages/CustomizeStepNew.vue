@@ -704,9 +704,11 @@ function labelsDisplay(label, stepKey) {
 // * Colors
 // * Customize colors
 let amColors = computed(() => {
-  return amCustomize.value[pageRenderKey.value]
+  const colors = amCustomize.value[pageRenderKey.value]
     ? amCustomize.value[pageRenderKey.value].colors
     : defaultCustomizeSettings[pageRenderKey.value].colors
+
+    return { ...colors }
 })
 
 let borderCalculation = computed(() => containerWidth.value !== 0 && containerWidth.value > 560 ? amCustomize.value.sbsNew.sidebar.options.self.visibility || sidebarCollapsed.value : false)
