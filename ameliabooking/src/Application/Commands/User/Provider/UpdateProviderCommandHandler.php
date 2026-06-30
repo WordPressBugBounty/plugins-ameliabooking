@@ -223,7 +223,19 @@ class UpdateProviderCommandHandler extends CommandHandler
 
             $providerRepository->updateFieldById($command->getArg('id'), $newPassword->getValue(), 'password');
 
-            if ($newUser->getExternalId() && $newUser->getExternalId()->getValue()) {
+            $isAdmin = $currentUser && $currentUser->getType() === AbstractUser::USER_ROLE_ADMIN;
+            // $currentUser is null in token-only cabinet sessions (get_current_user_id() returns 0).
+            // Fall back to $oldUser which was resolved from the cabinet token and always matches $userId.
+            $callerId     = $currentUser && $currentUser->getId() ? $currentUser->getId()->getValue() : null;
+            $isOwnProfile = $callerId === $userId || ($callerId === null && $oldUser->getId()->getValue() === $userId);
+
+            // Propagate to the linked WP user only when the caller is an admin or the provider
+            // updating their own profile. Blocks a Manager from resetting another provider's WP password.
+            if (
+                $newUser->getExternalId() &&
+                $newUser->getExternalId()->getValue() &&
+                ($isAdmin || $isOwnProfile)
+            ) {
                 add_filter('amelia_user_profile_updated', '__return_true');
                 wp_set_password($command->getField('password'), $newUser->getExternalId()->getValue());
                 remove_filter('amelia_user_profile_updated', '__return_true');

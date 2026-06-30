@@ -245,7 +245,7 @@ employee) or `admin` (an admin using the employee panel). Branch the UI on
 
 - **Plugin:** `tests/phpunit/Application/Commands/LoginNonceExemptionTest.php` locks the
   nonce exemption that lets the mobile app log in without a nonce/API key. Runs in CI via
-  the existing `phpunit` step in `bitbucket-pipelines.yml`.
+  the existing `PHPUnit` job in `.github/workflows/ci.yml`.
 - **Plugin:** `tests/phpunit/Application/Controller/Mobile/GetMobileInfoControllerTest.php`
   pins the `/mobile/info` handshake payload (success + integer `mobileApi.min/max`) the app
   compares against.

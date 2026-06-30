@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.4.2
+Stable tag: 2.4.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,11 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.4.3
+This update includes a security fix and stability improvements. We strongly recommend updating to this version immediately.
+*BugFix: Resolved security vulnerabilities.
+*Additional minor bug fixes and overall stability improvements.
+
 v2.4.2
 This update includes a new integration, several improvements and bug fixes:
 *Feature: IvyForms integration – Added support for connecting IvyForms as a pre-booking intake form with the ability to map form fields and display intake forms directly in the booking flow.

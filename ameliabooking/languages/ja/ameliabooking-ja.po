@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Amelia\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-18 13:01+0200\n"
+"POT-Creation-Date: 2026-06-29 15:14+0200\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -4166,7 +4166,7 @@ msgstr "詳細はこちら"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1088
 msgid "About"
-msgstr "について"
+msgstr "詳細"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1090
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:252
@@ -13192,10 +13192,10 @@ msgstr "サービスを選んでください"
 #~ msgstr "第三{day}"
 
 #~ msgid "This & Future"
-#~ msgstr "これと未来"
+#~ msgstr "今回と今後のすべてに適用"
 
 #~ msgid "This Only"
-#~ msgstr "これのみ"
+#~ msgstr "今回のみ適用"
 
 #~ msgid "This appointment is a part of a package."
 #~ msgstr "この予約はコースの一部です。"

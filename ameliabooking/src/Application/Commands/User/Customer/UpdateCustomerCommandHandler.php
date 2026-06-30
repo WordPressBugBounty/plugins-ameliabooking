@@ -84,6 +84,12 @@ class UpdateCustomerCommandHandler extends CommandHandler
 
                     return $result;
                 }
+
+                // Customers updating their own profile via cabinet token cannot change their role.
+                if ($provider === null && $oldUser !== null) {
+                    $customerData['type'] = $oldUser->getType();
+                    $command->setField('type', $oldUser->getType());
+                }
             } else {
                 throw new AccessDeniedException('You are not allowed to perform this action!');
             }

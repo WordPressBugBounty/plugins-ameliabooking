@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Amelia\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-18 13:01+0200\n"
+"POT-Creation-Date: 2026-06-29 15:14+0200\n"
 "Language: ko_KR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -973,21 +973,24 @@ msgstr ""
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:253
 msgid "Improve Amelia"
-msgstr ""
+msgstr "Amelia 개선"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:254
+#, fuzzy
 msgid "Improve plugin"
-msgstr ""
+msgstr "Amelia 개선"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:255
 msgid "Enable data usage"
-msgstr ""
+msgstr "데이터 사용 활성화"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:256
 msgid ""
 "Help us improve Amelia by sharing anonymous data about your plugin usage. No "
 "personal data is collected."
 msgstr ""
+"플러그인 사용에 대한 익명 데이터를 공유하여 Amelia 개선에 도움을 주세요. 개"
+"인 정보는 수집되지 않습니다."
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:257
 msgid "Send all notifications to additional addresses"
@@ -4499,20 +4502,20 @@ msgstr "속성별 트리거"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1184
 msgid "Install & Activate"
-msgstr ""
+msgstr "설치 및 활성화"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1185
 msgid "PRE-BOOKING INTAKE FORM (IVYFORMS)"
-msgstr ""
+msgstr "사전 예약 접수 양식 (IVYFORMS)"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1186
 msgid "Select which IvyForms form to show before booking"
-msgstr ""
+msgstr "예약 전에 표시할 IvyForms 양식 선택"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1187
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1192
 msgid "Select a form..."
-msgstr ""
+msgstr "양식을 선택하세요..."
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1188
 msgid "IvyForms"
@@ -4522,35 +4525,35 @@ msgstr ""
 msgid ""
 "Collect additional information from your customers before they complete a "
 "booking."
-msgstr ""
+msgstr "고객이 예약을 완료하기 전에 추가 정보를 수집하십시오."
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1190
 msgid "IvyForms Form"
-msgstr ""
+msgstr "IvyForms 양식"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1191
 msgid "Create form"
-msgstr ""
+msgstr "양식 생성"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1193
 msgid "Contact Form"
-msgstr ""
+msgstr "문의 양식"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1194
 msgid "IvyForms Field"
-msgstr ""
+msgstr "IvyForms 필드"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1195
 msgid "IvyForms Entries"
-msgstr ""
+msgstr "IvyForms 항목"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1196
 msgid "Pre-booking form details"
-msgstr ""
+msgstr "사전 예약 양식 세부 정보"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1197
 msgid "Permanently linked"
-msgstr ""
+msgstr "영구적으로 연결됨"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1198
 msgid "Step Booking"
@@ -7711,7 +7714,7 @@ msgstr "웁스..."
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:122
 msgid "opens in new tab"
-msgstr ""
+msgstr "새 탭에서 열기"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:123
 msgid "Online"
@@ -7719,15 +7722,15 @@ msgstr "온라인"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:125
 msgid "Previous step"
-msgstr ""
+msgstr "이전 단계"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:126
 msgid "Loading"
-msgstr ""
+msgstr "로딩 중"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:127
 msgid "Loading header"
-msgstr ""
+msgstr "헤더 로딩 중"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:128
 msgid "Phone:"
@@ -7783,15 +7786,15 @@ msgstr "예약을 완료하시려면 다른 이메일 주소나 전화번호를 
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:145
 msgid "Image navigation"
-msgstr ""
+msgstr "이미지 탐색"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:146
 msgid "Next image"
-msgstr ""
+msgstr "다음 이미지"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:147
 msgid "Previous image"
-msgstr ""
+msgstr "이전 이미지"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:148
 msgid "of"
@@ -7807,11 +7810,11 @@ msgstr "대기 중인 사람"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:151
 msgid "Minimum"
-msgstr ""
+msgstr "최소"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:152
 msgid "Maximum"
-msgstr ""
+msgstr "최대"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:171
 msgid "Email Address"
@@ -7823,7 +7826,7 @@ msgstr "연락하기"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:173
 msgid "IvyForms validation failed."
-msgstr ""
+msgstr "IvyForms 유효성 검사 실패."
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:176
 msgid "Or pay with card"
@@ -7900,7 +7903,7 @@ msgstr "결제 확인 페이지로 리디렉션됩니다."
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:217
 msgid "payment button"
-msgstr ""
+msgstr "결제 버튼"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:218
 msgid "VAT"
@@ -7948,19 +7951,19 @@ msgstr "이벤트 검색"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:258
 msgid "Loading event information"
-msgstr ""
+msgstr "이벤트 정보 로딩 중"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:260
 msgid "Events pagination"
-msgstr ""
+msgstr "이벤트 페이지 매김"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:261
 msgid "Event booking"
-msgstr ""
+msgstr "이벤트 예약"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:262
 msgid "Event image gallery"
-msgstr ""
+msgstr "이벤트 이미지 갤러리"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:263
 msgid "Select the number of tickets that you want to book for each ticket type"
@@ -9935,6 +9938,9 @@ msgstr "서비스 선택"
 #~ msgid "Enter both the application (client) ID and client secret."
 #~ msgstr "애플리케이션(클라이언트) ID와 클라이언트 시크릿을 모두 입력하세요."
 
+#~ msgid "Enter code"
+#~ msgstr "코드 입력"
+
 #~ msgid "Enter date of birth"
 #~ msgstr "생년월일 입력"
 
@@ -10640,6 +10646,9 @@ msgstr "서비스 선택"
 
 #~ msgid "Item status"
 #~ msgstr "아이템 상태"
+
+#~ msgid "Ivy setup"
+#~ msgstr "Ivy 설정"
 
 #~ msgid "Jane Doe"
 #~ msgstr "신원 미상"
@@ -12265,11 +12274,20 @@ msgstr "서비스 선택"
 #~ msgid "Search booked appointments"
 #~ msgstr "예약된 예약 검색"
 
+#~ msgid "Search coupons"
+#~ msgstr "쿠폰 검색"
+
 #~ msgid "Search employees"
 #~ msgstr "담당자 검색"
 
 #~ msgid "Search extras"
 #~ msgstr "부가 서비스 검색"
+
+#~ msgid "Search resources"
+#~ msgstr "리소스 검색"
+
+#~ msgid "Search taxes"
+#~ msgstr "세금 검색"
 
 #~ msgid "Second"
 #~ msgstr "두 번째"

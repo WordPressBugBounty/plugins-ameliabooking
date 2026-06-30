@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Amelia\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-18 13:01+0200\n"
+"POT-Creation-Date: 2026-06-29 15:14+0200\n"
 "Language: cs_CZ\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -979,21 +979,24 @@ msgstr ""
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:253
 msgid "Improve Amelia"
-msgstr ""
+msgstr "Vylepšit aplikaci Amelia"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:254
+#, fuzzy
 msgid "Improve plugin"
-msgstr ""
+msgstr "Vylepšit aplikaci Amelia"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:255
 msgid "Enable data usage"
-msgstr ""
+msgstr "Povolit využívání dat"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:256
 msgid ""
 "Help us improve Amelia by sharing anonymous data about your plugin usage. No "
 "personal data is collected."
 msgstr ""
+"Pomozte nám vylepšit aplikaci Amelia sdílením anonymních dat o vašem "
+"používání pluginu. Neshromažďujeme žádné osobní údaje."
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:257
 msgid "Send all notifications to additional addresses"
@@ -4545,20 +4548,20 @@ msgstr "Spustit podle atributu"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1184
 msgid "Install & Activate"
-msgstr ""
+msgstr "Instalovat & aktivovat"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1185
 msgid "PRE-BOOKING INTAKE FORM (IVYFORMS)"
-msgstr ""
+msgstr "FORMULÁŘ PRO PŘEDBĚŽNOU REZERVACI (IVYFORMS)"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1186
 msgid "Select which IvyForms form to show before booking"
-msgstr ""
+msgstr "Zvolte, který formulář IvyForms se má zobrazit před rezervací"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1187
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1192
 msgid "Select a form..."
-msgstr ""
+msgstr "Zvolit formulář..."
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1188
 msgid "IvyForms"
@@ -4569,34 +4572,36 @@ msgid ""
 "Collect additional information from your customers before they complete a "
 "booking."
 msgstr ""
+"Získejte od svých zákazníků další informace ještě předtím, než dokončí "
+"rezervaci."
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1190
 msgid "IvyForms Form"
-msgstr ""
+msgstr "Formulář IvyForms"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1191
 msgid "Create form"
-msgstr ""
+msgstr "Vytvořit formulář"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1193
 msgid "Contact Form"
-msgstr ""
+msgstr "Kontaktní formulář"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1194
 msgid "IvyForms Field"
-msgstr ""
+msgstr "Pole IvyForms"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1195
 msgid "IvyForms Entries"
-msgstr ""
+msgstr "Záznamy IvyForms"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1196
 msgid "Pre-booking form details"
-msgstr ""
+msgstr "Podrobnosti formuláře pro předběžnou rezervaci"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1197
 msgid "Permanently linked"
-msgstr ""
+msgstr "Trvale propojeno"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1198
 msgid "Step Booking"
@@ -7850,7 +7855,7 @@ msgstr "Promiňte…"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:122
 msgid "opens in new tab"
-msgstr ""
+msgstr "otevře se v nové kartě"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:123
 msgid "Online"
@@ -7858,15 +7863,15 @@ msgstr ""
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:125
 msgid "Previous step"
-msgstr ""
+msgstr "Předchozí krok"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:126
 msgid "Loading"
-msgstr ""
+msgstr "Načítání"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:127
 msgid "Loading header"
-msgstr ""
+msgstr "Záhlaví načítání"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:128
 msgid "Phone:"
@@ -7925,15 +7930,15 @@ msgstr ""
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:145
 msgid "Image navigation"
-msgstr ""
+msgstr "Navigace obrázků"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:146
 msgid "Next image"
-msgstr ""
+msgstr "Další obrázek"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:147
 msgid "Previous image"
-msgstr ""
+msgstr "Předchozí obrázek"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:148
 msgid "of"
@@ -7965,7 +7970,7 @@ msgstr "Kontaktujte nás"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:173
 msgid "IvyForms validation failed."
-msgstr ""
+msgstr "Ověření IvyForms selhalo."
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:176
 msgid "Or pay with card"
@@ -8043,7 +8048,7 @@ msgstr "Budete přesměrováni na pokladnu platby."
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:217
 msgid "payment button"
-msgstr ""
+msgstr "tlačítko platby"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:218
 msgid "VAT"
@@ -8091,19 +8096,19 @@ msgstr "Vyhledat akce"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:258
 msgid "Loading event information"
-msgstr ""
+msgstr "Načítání informací o akci"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:260
 msgid "Events pagination"
-msgstr ""
+msgstr "Stránkování akcí"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:261
 msgid "Event booking"
-msgstr ""
+msgstr "Rezervace akce"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:262
 msgid "Event image gallery"
-msgstr ""
+msgstr "Galerie obrázků akce"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:263
 msgid "Select the number of tickets that you want to book for each ticket type"
@@ -10102,6 +10107,9 @@ msgstr "Zvolte službu"
 #~ msgid "Enter both the application (client) ID and client secret."
 #~ msgstr "Zadejte application (client) ID a client secret."
 
+#~ msgid "Enter code"
+#~ msgstr "Zadat kód"
+
 #~ msgid "Enter date of birth"
 #~ msgstr "Zadejte datum narození"
 
@@ -10797,6 +10805,9 @@ msgstr "Zvolte službu"
 
 #~ msgid "Item status"
 #~ msgstr "Stav položky"
+
+#~ msgid "Ivy setup"
+#~ msgstr "Nastavení Ivy"
 
 #~ msgid "Jane Doe"
 #~ msgstr "Jana Nováková"
@@ -12356,11 +12367,20 @@ msgstr "Zvolte službu"
 #~ msgid "Search booked appointments"
 #~ msgstr "Vyhledat rezervované termíny"
 
+#~ msgid "Search coupons"
+#~ msgstr "Vyhledat slevové kódy"
+
 #~ msgid "Search employees"
 #~ msgstr "Vyhledat pracovníky"
 
 #~ msgid "Search extras"
 #~ msgstr "Vyhledat doplňky"
+
+#~ msgid "Search resources"
+#~ msgstr "Vyhledat zdroje"
+
+#~ msgid "Search taxes"
+#~ msgstr "Vyhledat daně"
 
 #~ msgid "Second"
 #~ msgstr "Druhý"

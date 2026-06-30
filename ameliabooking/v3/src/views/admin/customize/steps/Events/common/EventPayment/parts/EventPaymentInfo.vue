@@ -256,16 +256,13 @@ let tickets = ref([
 ])
 
 // * Total event persons
-let eventPersonsNumber = ref(0)
+let eventPersonsNumber = computed(() => {
+  return tickets.value.reduce((sum, t) => sum + t.persons, 0)
+})
 
 // * Subtotal price
 let eventSubtotalPrice = computed(() => {
-  let price = 0
-  tickets.value.forEach((t) => {
-    price += t.price * t.persons
-    eventPersonsNumber.value += t.persons
-  })
-  return price
+  return tickets.value.reduce((price, t) => price + t.price * t.persons, 0)
 })
 
 let couponFormRef = ref(null)

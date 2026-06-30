@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Amelia\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-18 13:01+0200\n"
+"POT-Creation-Date: 2026-06-29 15:14+0200\n"
 "Language: tr_TR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -983,21 +983,24 @@ msgstr ""
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:253
 msgid "Improve Amelia"
-msgstr ""
+msgstr "Amelia'yı geliştirin"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:254
+#, fuzzy
 msgid "Improve plugin"
-msgstr ""
+msgstr "Amelia'yı geliştirin"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:255
 msgid "Enable data usage"
-msgstr ""
+msgstr "Veri kullanımını etkinleştir"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:256
 msgid ""
 "Help us improve Amelia by sharing anonymous data about your plugin usage. No "
 "personal data is collected."
 msgstr ""
+"Eklenti kullanımınızla ilgili anonim verileri paylaşarak Amelia'yı "
+"geliştirmemize yardımcı olun. Hiçbir kişisel veri toplanmaz."
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:257
 msgid "Send all notifications to additional addresses"
@@ -4551,20 +4554,20 @@ msgstr "Özellikle tetikle"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1184
 msgid "Install & Activate"
-msgstr ""
+msgstr "Yükle ve Etkinleştir"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1185
 msgid "PRE-BOOKING INTAKE FORM (IVYFORMS)"
-msgstr ""
+msgstr "ÖN REZERVASYON FORMU (IVYFORMS)"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1186
 msgid "Select which IvyForms form to show before booking"
-msgstr ""
+msgstr "Rezervasyon öncesinde hangi IvyForms formunun gösterileceğini seçin"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1187
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1192
 msgid "Select a form..."
-msgstr ""
+msgstr "Bir form seçin..."
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1188
 msgid "IvyForms"
@@ -4575,34 +4578,35 @@ msgid ""
 "Collect additional information from your customers before they complete a "
 "booking."
 msgstr ""
+"Müşterilerinizin rezervasyonu tamamlamadan önce ek bilgilerini toplayın."
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1190
 msgid "IvyForms Form"
-msgstr ""
+msgstr "IvyForms Formu"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1191
 msgid "Create form"
-msgstr ""
+msgstr "Form oluştur"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1193
 msgid "Contact Form"
-msgstr ""
+msgstr "İletişim Formu"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1194
 msgid "IvyForms Field"
-msgstr ""
+msgstr "IvyForms Alanı"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1195
 msgid "IvyForms Entries"
-msgstr ""
+msgstr "IvyForms Girdileri"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1196
 msgid "Pre-booking form details"
-msgstr ""
+msgstr "Ön rezervasyon formu ayrıntıları"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1197
 msgid "Permanently linked"
-msgstr ""
+msgstr "Kalıcı bağlantı"
 
 #: src/Infrastructure/WP/Translations/LiteBackendStrings.php:1198
 msgid "Step Booking"
@@ -7888,7 +7892,7 @@ msgstr ""
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:122
 msgid "opens in new tab"
-msgstr ""
+msgstr "yeni sekmede açılır"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:123
 msgid "Online"
@@ -7896,15 +7900,15 @@ msgstr "Çevrimiçi"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:125
 msgid "Previous step"
-msgstr ""
+msgstr "Önceki adım"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:126
 msgid "Loading"
-msgstr ""
+msgstr "Yükleniyor"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:127
 msgid "Loading header"
-msgstr ""
+msgstr "Başlık yükleniyor"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:128
 msgid "Phone:"
@@ -7962,15 +7966,15 @@ msgstr ""
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:145
 msgid "Image navigation"
-msgstr ""
+msgstr "Görsel gezinme"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:146
 msgid "Next image"
-msgstr ""
+msgstr "Sonraki resim"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:147
 msgid "Previous image"
-msgstr ""
+msgstr "Önceki resim"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:148
 msgid "of"
@@ -7990,7 +7994,7 @@ msgstr ""
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:152
 msgid "Maximum"
-msgstr ""
+msgstr "Maksimum"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:171
 msgid "Email Address"
@@ -8002,7 +8006,7 @@ msgstr "İletişime Geçin"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:173
 msgid "IvyForms validation failed."
-msgstr ""
+msgstr "IvyForms doğrulaması başarısız oldu."
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:176
 msgid "Or pay with card"
@@ -8079,7 +8083,7 @@ msgstr "Ödeme sayfasına yönlendirileceksiniz."
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:217
 msgid "payment button"
-msgstr ""
+msgstr "ödeme düğmesi"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:218
 msgid "VAT"
@@ -8127,19 +8131,19 @@ msgstr "Etkinlik Ara"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:258
 msgid "Loading event information"
-msgstr ""
+msgstr "Etkinlik bilgileri yükleniyor"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:260
 msgid "Events pagination"
-msgstr ""
+msgstr "Etkinlik sayfalaması"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:261
 msgid "Event booking"
-msgstr ""
+msgstr "Etkinlik rezervasyonu"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:262
 msgid "Event image gallery"
-msgstr ""
+msgstr "Etkinlik resim galerisi"
 
 #: src/Infrastructure/WP/Translations/LiteFrontendStrings.php:263
 msgid "Select the number of tickets that you want to book for each ticket type"
@@ -10164,6 +10168,9 @@ msgstr "Hizmet Seçin"
 #~ msgstr ""
 #~ "Hem uygulama (istemci) kimliğini hem de istemci gizli anahtarını girin."
 
+#~ msgid "Enter code"
+#~ msgstr "Kodu girin"
+
 #~ msgid "Enter date of birth"
 #~ msgstr "Doğum tarihinizi giriniz"
 
@@ -10881,6 +10888,9 @@ msgstr "Hizmet Seçin"
 
 #~ msgid "Item status"
 #~ msgstr "Öğe durumu"
+
+#~ msgid "Ivy setup"
+#~ msgstr "Ivy kurulumu"
 
 #~ msgid "Jane Doe"
 #~ msgstr "Ayşe Fatma"
@@ -12500,11 +12510,20 @@ msgstr "Hizmet Seçin"
 #~ msgid "Search booked appointments"
 #~ msgstr "Randevularda ara"
 
+#~ msgid "Search coupons"
+#~ msgstr "Kuponlarda ara"
+
 #~ msgid "Search employees"
 #~ msgstr "Çalışanlarda ara"
 
 #~ msgid "Search extras"
 #~ msgstr "Ekstra arama"
+
+#~ msgid "Search resources"
+#~ msgstr "Kaynaklarda ara"
+
+#~ msgid "Search taxes"
+#~ msgstr "Vergilerde ara"
 
 #~ msgid "Second"
 #~ msgstr "İkinci"

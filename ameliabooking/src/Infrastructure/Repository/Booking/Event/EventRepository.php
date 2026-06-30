@@ -412,9 +412,9 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
         $groupBy = 'GROUP BY e.id';
 
         if (isset($criteria['parentId'])) {
-            $params[':parentId'] = $criteria['parentId'];
+            $params[':parentId'] = (int)$criteria['parentId'];
 
-            $params[':originParentId'] = $criteria['parentId'];
+            $params[':originParentId'] = (int)$criteria['parentId'];
 
             $where[] = '(e.parentId = :parentId OR e.id = :originParentId)';
         }
@@ -427,7 +427,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
                 $queryExcludeIds[] = $param;
 
-                $params[$param] = $value;
+                $params[$param] = (int)$value;
             }
 
             $where[] = 'e.id IN (' . implode(', ', $queryExcludeIds) . ')';
@@ -441,7 +441,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
                 $queryExcludeIds[] = $param;
 
-                $params[$param] = $value;
+                $params[$param] = (int)$value;
             }
 
             $where[] = 'e.id NOT IN (' . implode(', ', $queryExcludeIds) . ')';
