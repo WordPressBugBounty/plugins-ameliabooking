@@ -47,34 +47,37 @@
       :item-name="service.name"
       :price="calculateServicePrice(service.id)"
       :price-visibility="customizeOptions.price.visibility"
-      :tax-visibility="customizeOptions.tax.visibility && useTaxVisibility(store, service.id, 'service')"
+      :tax-visibility="
+        customizeOptions.tax.visibility && useTaxVisibility(store, service.id, 'service')
+      "
       :tax-excluded="amSettings.payments.taxes.excluded"
       :info-items="serviceInfoArray(service)"
       :info-btn-visibility="customizeOptions.moreBtn.visibility"
       :packages-btn-visibility="
-        !!(!licence.isLite &&
-        !licence.isStarter &&
-        servicePackage(service.id).length &&
-        shortcodeData.show !== 'services' &&
-        useCart(store).length <= 1) && customizeOptions.packagesBtn.visibility
+        !!(
+          !licence.isLite &&
+          !licence.isStarter &&
+          servicePackage(service.id).length &&
+          shortcodeData.show !== 'services' &&
+          useCart(store).length <= 1
+        ) && customizeOptions.packagesBtn.visibility
       "
       :parent-width="componentWidth"
       :keyboard-selection-disabled="keyboardSelectionDisabled"
       :labels="amLabels"
       @select-item="selectService(service)"
-      @trigger-info-popup="() => {
-        moreInfoVisibility = true
-        selectedService = service
-      }"
+      @trigger-info-popup="
+        () => {
+          moreInfoVisibility = true
+          selectedService = service
+        }
+      "
       @trigger-packages-popup="triggerPackagesPopup(service)"
     />
     <!-- /Card -->
 
     <!-- Empty State -->
-    <EmptyState
-      v-if="serviceOptions.length === 0"
-      :heading="amLabels.no_results_found"
-    />
+    <EmptyState v-if="serviceOptions.length === 0" :heading="amLabels.no_results_found" />
     <!-- /Empty State -->
   </StepCardLayout>
 
@@ -95,7 +98,17 @@
 
 <script setup>
 // * Import from Vue
-import { ref, computed, inject, nextTick, watch, watchEffect, reactive, onMounted, onUnmounted } from 'vue'
+import {
+  ref,
+  computed,
+  inject,
+  nextTick,
+  watch,
+  watchEffect,
+  reactive,
+  onMounted,
+  onUnmounted,
+} from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -123,7 +136,7 @@ import { useFormattedPrice } from '../../../../assets/js/common/formatting'
 import { useElementSize } from '@vueuse/core'
 import { useCart } from '../../../../assets/js/public/cart'
 
-import  { defaultCustomizeSettings } from '../../../../assets/js/common/defaultCustomize'
+import { defaultCustomizeSettings } from '../../../../assets/js/common/defaultCustomize'
 
 // * Store
 const store = useStore()
@@ -141,13 +154,13 @@ const shortcodeData = inject('shortcodeData')
 
 // * Customize
 const amCustomize = inject('amCustomize')
-let customizeOptions =  computed(() => amCustomize.serviceStep?.options || defaultCustomizeSettings.sbsNew.serviceStep.options)
+let customizeOptions = computed(
+  () => amCustomize.serviceStep?.options || defaultCustomizeSettings.sbsNew.serviceStep.options,
+)
 
 // * Component reference
 const stepCardLayoutReference = ref(null)
-const stepCardLayoutDom = computed(
-  () => stepCardLayoutReference.value?.stepCardLayoutRef || null
-)
+const stepCardLayoutDom = computed(() => stepCardLayoutReference.value?.stepCardLayoutRef || null)
 
 // * Component width
 const { width: componentWidth } = useElementSize(stepCardLayoutDom)
@@ -179,7 +192,7 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Labels
 const amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   const customizedLabels = amCustomize.serviceStep?.translations
 
@@ -221,22 +234,25 @@ const locationsRules = computed(() => store.getters['entities/getLocations'].len
 const employeesRules = computed(() => store.getters['entities/getEmployees'].length === 1)
 
 // * Set Service and Category Options from entities
-let initStepOrder = [
-  { id: 'ServiceStep'},
-  { id: 'EmployeeStep' },
-  { id: 'LocationStep' },
-]
+let initStepOrder = [{ id: 'ServiceStep' }, { id: 'EmployeeStep' }, { id: 'LocationStep' }]
 
 let stepOrder = computed(() => {
   return 'order' in amCustomize ? amCustomize.order : initStepOrder
 })
 
-function filterRules (entityName = '') {
-  const idx = stepOrder.value.findIndex(step => step.id === 'ServiceStep')
+function filterRules(entityName = '') {
+  const idx = stepOrder.value.findIndex((step) => step.id === 'ServiceStep')
   let arrRules = stepOrder.value.slice(0, idx)
-  const obj = { serviceId: null, categoryId: entityName === 'category' ? null : categoryFilter.value, providerId: null, locationId: null }
-  if (arrRules.some(step => step.id === 'EmployeeStep') || employeesRules.value) delete obj.providerId
-  if (arrRules.some(step => step.id === 'LocationStep') || locationsRules.value) delete obj.locationId
+  const obj = {
+    serviceId: null,
+    categoryId: entityName === 'category' ? null : categoryFilter.value,
+    providerId: null,
+    locationId: null,
+  }
+  if (arrRules.some((step) => step.id === 'EmployeeStep') || employeesRules.value)
+    delete obj.providerId
+  if (arrRules.some((step) => step.id === 'LocationStep') || locationsRules.value)
+    delete obj.locationId
   return obj
 }
 
@@ -245,7 +261,7 @@ let searchFilter = computed({
   get: () => store.getters['stepByStepFilters/getSearchFilterText'],
   set: (value) => {
     store.commit('stepByStepFilters/setSearchFilterText', value)
-  }
+  },
 })
 
 let iconSearch = {
@@ -270,14 +286,14 @@ const categoryFilter = computed({
   set: (value) => {
     value = value ? value : null
     store.commit('stepByStepFilters/setCategoryFilter', value)
-  }
+  },
 })
 
 // * Set Category Options from entities
 let categoryOptions = computed(() =>
   store.getters['entities/filteredCategories'](
-    Object.assign(store.getters['booking/getSelection'], filterRules('category'))
-  )
+    Object.assign(store.getters['booking/getSelection'], filterRules('category')),
+  ),
 )
 
 let queryLower = ref('')
@@ -287,7 +303,7 @@ function filterCategory(query) {
 
 let filteredCategories = computed(() => {
   if (queryLower.value) {
-    return categoryOptions.value.filter(item => {
+    return categoryOptions.value.filter((item) => {
       return item.name.toLowerCase().includes(queryLower.value)
     })
   }
@@ -296,7 +312,7 @@ let filteredCategories = computed(() => {
 
 let serviceOptions = computed(() => {
   const services = store.getters['entities/filteredServices'](
-    Object.assign(store.getters['booking/getSelection'], filterRules())
+    Object.assign(store.getters['booking/getSelection'], filterRules()),
   )
 
   if (searchFilter.value) {
@@ -322,15 +338,12 @@ function selectService(service = null) {
     reference: 'service',
     // position will depends on fields order
     position: 0,
-    value:
-      service.id !== store.getters['booking/getServiceId'] ? service.name : '',
+    value: service.id !== store.getters['booking/getServiceId'] ? service.name : '',
   }
 
   if (service.id !== store.getters['booking/getServiceId']) {
     store.commit('booking/setServiceId', service.id)
-    let category = categoryOptions.value.find(
-      (item) => item.id === service.categoryId
-    )
+    let category = categoryOptions.value.find((item) => item.id === service.categoryId)
     store.commit('booking/setCategoryId', category ? category.id : null)
   } else {
     store.commit('booking/setServiceId', null)
@@ -354,30 +367,26 @@ function disabledService(service) {
   const employeeId = store.getters['booking/getEmployeeId']
   const locationId = store.getters['booking/getLocationId']
   if (employeeId !== null) {
-    return !displayServiceEmployees(service.id).some(
-      (emp) => emp.id === employeeId
-    )
+    return !displayServiceEmployees(service.id).some((emp) => emp.id === employeeId)
   }
 
   if (locationId !== null) {
-    return !displayServiceLocation(service.id).some(
-      (loc) => loc.id === locationId
-    )
+    return !displayServiceLocation(service.id).some((loc) => loc.id === locationId)
   }
   return false
 }
 
 function servicePackage(serviceId) {
   return store.getters['entities/filteredPackages'](
-    Object.assign(store.getters['booking/getSelection'], {categoryId: null, serviceId: serviceId})
-  ).filter(pack => pack.available && pack.status === 'visible')
+    Object.assign(store.getters['booking/getSelection'], {
+      categoryId: null,
+      serviceId: serviceId,
+    }),
+  ).filter((pack) => pack.available && pack.status === 'visible')
 }
 
 function calculateServicePrice(id) {
-  if (
-    useServicePrice(amEntities.value, id).min ||
-    useServicePrice(amEntities.value, id).max
-  ) {
+  if (useServicePrice(amEntities.value, id).min || useServicePrice(amEntities.value, id).max) {
     return useServicePrice(amEntities.value, id).price
   }
 
@@ -387,9 +396,7 @@ function calculateServicePrice(id) {
 function serviceInfoArray(service) {
   let arr = []
   if (service.categoryId && customizeOptions.value.serviceCategory.visibility) {
-    let category = categoryOptions.value.find(
-      (c) => c.id === service.categoryId
-    )
+    let category = categoryOptions.value.find((c) => c.id === service.categoryId)
     if (category) {
       arr.push({
         icon: 'folder',
@@ -412,12 +419,14 @@ function serviceInfoArray(service) {
     })
   }
 
-  if (customizeOptions.value.serviceLocation.visibility && displayServiceLocationLabel(service.id).length > 0) {
+  if (
+    customizeOptions.value.serviceLocation.visibility &&
+    displayServiceLocationLabel(service.id).length > 0
+  ) {
     arr.push({
       icon: 'locations',
       name: displayServiceLocationLabel(service.id),
     })
-
   }
   return arr
 }
@@ -431,8 +440,7 @@ function displayServiceEmployees(serviceId) {
     if (
       serviceId in amEntities.value.entitiesRelations[employeeId] &&
       amEntities.value.employees.find((a) => a.id === parseInt(employeeId)) &&
-      amEntities.value.employees.find((a) => a.id === parseInt(employeeId))
-        .status === 'visible'
+      amEntities.value.employees.find((a) => a.id === parseInt(employeeId)).status === 'visible'
     ) {
       let employee = amEntities.value.employees.find((a) => a.id === parseInt(employeeId))
       let price = employee ? serviceEmployeePrice(employee) : ''
@@ -447,11 +455,9 @@ let infoEmployeeData = ref([])
 
 function serviceEmployeePrice(employee) {
   if (selectedService.value) {
-    let employeeService = employee.serviceList.find(
-      (a) => a.id === selectedService.value.id
-    )
+    let employeeService = employee.serviceList.find((a) => a.id === selectedService.value.id)
 
-    if (employeeService && (employeeService.price - selectedService.value.price !== 0))
+    if (employeeService && employeeService.price - selectedService.value.price !== 0)
       return `${
         employeeService.price - selectedService.value.price > 0
           ? selectedService.value.price > 0
@@ -470,8 +476,7 @@ function displayServiceLocationLabel(id) {
 
   if (
     locations.length === 1 ||
-    (locations.length &&
-      locations.every((location) => location.id === locations[0].id))
+    (locations.length && locations.every((location) => location.id === locations[0].id))
   ) {
     return locations[0].address ? locations[0].address : locations[0].name
   }
@@ -480,7 +485,7 @@ function displayServiceLocationLabel(id) {
 
 function displayServiceLocation(serviceId) {
   return useServiceLocation(amEntities.value, serviceId).filter(
-    (loc, idx, arr) => arr.findIndex((l) => l.id === loc.id) === idx
+    (loc, idx, arr) => arr.findIndex((l) => l.id === loc.id) === idx,
   )
 }
 

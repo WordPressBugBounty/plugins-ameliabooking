@@ -6,8 +6,7 @@
       { 'am-fs__main-footer-cp': props.secondButtonShow },
       { 'am-fs__main-footer-cp-mobile-s': mobileS && props.secondButtonShow },
       {
-        'am-fs__main-footer__cart':
-          props.addToCartButtonShow || props.backToCartButtonShow,
+        'am-fs__main-footer__cart': props.addToCartButtonShow || props.backToCartButtonShow,
       },
       {
         'am-fs__main-footer__cart-mobile-s':
@@ -137,12 +136,9 @@ const { secondButtonClick } = inject('secondButton', {
   secondButtonClick: () => {},
 })
 
-const { footerButtonClick, footerBtnDisabled } = inject(
-  'changingStepsFunctions',
-  {
-    footerButtonClick: () => {},
-  }
-)
+const { footerButtonClick, footerBtnDisabled } = inject('changingStepsFunctions', {
+  footerButtonClick: () => {},
+})
 
 function removeFocusFromButton(e) {
   if (e.target.classList.value.split(' ').indexOf('am-button') === -1) {
@@ -182,12 +178,11 @@ const shortcodeData = inject(
   'shortcodeData',
   ref({
     counter: 1000,
-  })
+  }),
 )
 
 function displayLabels(label) {
-  return Object.keys(props.customizedLabels).length &&
-    props.customizedLabels[label]
+  return Object.keys(props.customizedLabels).length && props.customizedLabels[label]
     ? props.customizedLabels[label]
     : amLabels[label]
 }
@@ -224,18 +219,12 @@ let amColors = inject(
     colorBtnPrimText: '#FFFFFF',
     colorBtnSec: '#1A2C37',
     colorBtnSecText: '#FFFFFF',
-  })
+  }),
 )
 let cssVars = computed(() => {
   return {
-    '--am-c-main-text-op15': useColorTransparency(
-      amColors.value.colorMainText,
-      0.15
-    ),
-    '--am-c-success-op20': useColorTransparency(
-      amColors.value.colorSuccess,
-      0.2
-    ),
+    '--am-c-main-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15),
+    '--am-c-success-op20': useColorTransparency(amColors.value.colorSuccess, 0.2),
   }
 })
 

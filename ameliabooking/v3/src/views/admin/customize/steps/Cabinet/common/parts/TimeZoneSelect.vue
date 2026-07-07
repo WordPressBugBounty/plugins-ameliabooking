@@ -18,18 +18,14 @@
 
 <script setup>
 // * Import from Vue
-import {
-  inject,
-  onBeforeMount,
-  ref
-} from 'vue'
+import { inject, onBeforeMount, ref } from 'vue'
 
 // * Composables
-import { useCurrentTimeZone } from "../../../../../../../assets/js/common/helper";
+import { useCurrentTimeZone } from '../../../../../../../assets/js/common/helper'
 
 // * _components
-import AmOption from "../../../../../../_components/select/AmOption.vue";
-import AmSelect from "../../../../../../_components/select/AmSelect.vue";
+import AmOption from '../../../../../../_components/select/AmOption.vue'
+import AmSelect from '../../../../../../_components/select/AmSelect.vue'
 
 const amSettings = inject('settings')
 const adminTimeZone = inject('timeZone')
@@ -47,6 +43,4 @@ onBeforeMount(() => {
 })
 </script>
 
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>

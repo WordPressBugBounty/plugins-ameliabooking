@@ -4,9 +4,7 @@
     wrapper-class="am-fcip"
     form-class="am-fcip__form"
     heading-class="am-fcip__header"
-    :content-class="`am-fcip__content ${
-      customizeOptions.pageScroll.visibility ? '' : 'no-scroll'
-    }`"
+    :content-class="`am-fcip__content ${customizeOptions.pageScroll.visibility ? '' : 'no-scroll'}`"
     :style="cssVars"
   >
     <template #header>
@@ -18,7 +16,7 @@
     <template #heading>
       <div
         class="am-fcip__header-top"
-        :class="[{'am-tablet': pageWidth <= 678}, {'am-mobile': pageWidth < 450}]"
+        :class="[{ 'am-tablet': pageWidth <= 678 }, { 'am-mobile': pageWidth < 450 }]"
       >
         <div class="am-fcip__header-text">
           <span class="am-fcip__header-name">
@@ -26,10 +24,7 @@
               {{ pack.name }}
             </span>
           </span>
-          <div
-            v-if="customizeOptions.packageBadge.visibility"
-            class="am-fcip__badge am-package"
-          >
+          <div v-if="customizeOptions.packageBadge.visibility" class="am-fcip__badge am-package">
             <span class="am-icon-shipment"></span>
             <span>
               {{ labelsDisplay('package') }}
@@ -43,15 +38,8 @@
           >
             {{ `${labelsDisplay('save')} ${pack.discount}%` }}
           </span>
-          <span
-            v-if="customizeOptions.packagePrice.visibility"
-            class="am-fcip__header-price"
-          >
-            {{
-              pack.price
-                ? useFormattedPrice(usePackageAmount(pack))
-                : amLabels.free
-            }}
+          <span v-if="customizeOptions.packagePrice.visibility" class="am-fcip__header-price">
+            {{ pack.price ? useFormattedPrice(usePackageAmount(pack)) : amLabels.free }}
           </span>
           <span class="am-fcip__header-btn">
             <AmButton :type="customizeOptions.bookingBtn.buttonType">
@@ -70,22 +58,14 @@
         class="am-fcip__header-bottom"
       >
         <div class="am-fcip__mini-info">
-          <div
-            v-if="customizeOptions.packageCategory.visibility"
-            class="am-fcip__mini-info__inner"
-          >
+          <div v-if="customizeOptions.packageCategory.visibility" class="am-fcip__mini-info__inner">
             <span class="am-icon-folder"></span>
             <span>Category 1</span>
           </div>
-          <div
-            v-if="customizeOptions.packageDuration.visibility"
-            class="am-fcip__mini-info__inner"
-          >
+          <div v-if="customizeOptions.packageDuration.visibility" class="am-fcip__mini-info__inner">
             <span class="am-icon-clock"></span>
             <span v-if="pack.endDate">
-              {{
-                `${labelsDisplay('expires_at')} ${pack.endDate.split(' ')[0]}`
-              }}
+              {{ `${labelsDisplay('expires_at')} ${pack.endDate.split(' ')[0]}` }}
             </span>
             <span v-else-if="pack.durationCount">
               {{
@@ -98,17 +78,11 @@
               {{ labelsDisplay('without_expiration') }}
             </span>
           </div>
-          <div
-            v-if="customizeOptions.packageCapacity.visibility"
-            class="am-fcip__mini-info__inner"
-          >
+          <div v-if="customizeOptions.packageCapacity.visibility" class="am-fcip__mini-info__inner">
             <span class="am-icon-user"></span>
             <span>1/1</span>
           </div>
-          <div
-            v-if="customizeOptions.packageLocation.visibility"
-            class="am-fcip__mini-info__inner"
-          >
+          <div v-if="customizeOptions.packageLocation.visibility" class="am-fcip__mini-info__inner">
             <span class="am-icon-locations"></span>
             <span>
               {{ labelsDisplay('multiple_locations') }}
@@ -122,7 +96,7 @@
       <div v-if="pack.gallery.length" class="am-fcip__gallery">
         <div
           class="am-fcip__gallery-hero"
-          :class="[{'w100': pack.gallery.length === 1}, {'am-mobile w100': pageWidth < 678}]"
+          :class="[{ w100: pack.gallery.length === 1 }, { 'am-mobile w100': pageWidth < 678 }]"
           :style="{
             backgroundImage: `url(${pack.gallery[0].pictureFullPath})`,
           }"
@@ -163,28 +137,18 @@
       >
         <div class="am-gd" :style="cssGalleryDialogVars">
           <div class="am-gd__display-wrapper">
-            <div
-              class="am-gd__arrows"
-              style="display: flex; justify-content: space-between"
-            >
+            <div class="am-gd__arrows" style="display: flex; justify-content: space-between">
               <span
                 class="am-icon-arrow-left"
                 @click="
-                  () =>
-                    (activeImage =
-                      activeImage <= 0
-                        ? pack.gallery.length - 1
-                        : activeImage - 1)
+                  () => (activeImage = activeImage <= 0 ? pack.gallery.length - 1 : activeImage - 1)
                 "
               ></span>
               <span
                 class="am-icon-arrow-right"
                 @click="
                   () =>
-                    (activeImage =
-                      pack.gallery.length - 1 === activeImage
-                        ? 0
-                        : activeImage + 1)
+                    (activeImage = pack.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
                 "
               ></span>
             </div>
@@ -194,11 +158,7 @@
               class="am-gd__display"
               :style="{ display: index === activeImage ? 'flex' : 'none' }"
               @click="
-                () =>
-                  (activeImage =
-                    pack.gallery.length - 1 === activeImage
-                      ? 0
-                      : activeImage + 1)
+                () => (activeImage = pack.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
               "
             >
               <img :src="img.pictureFullPath" :alt="index" />
@@ -231,9 +191,7 @@
       >
         <div class="am-fcip__info-tab__wrapper">
           <div
-            v-if="
-              pack.description && customizeOptions.packageDescription.visibility
-            "
+            v-if="pack.description && customizeOptions.packageDescription.visibility"
             class="am-fcip__info-tab"
             :class="{ 'am-active': tabsActive === 'description' }"
             @click="() => (tabsActive = 'description')"
@@ -252,16 +210,11 @@
         <div class="am-fcip__info-content__wrapper">
           <!-- Description -->
           <div
-            v-if="
-              pack.description && customizeOptions.packageDescription.visibility
-            "
+            v-if="pack.description && customizeOptions.packageDescription.visibility"
             v-show="tabsActive === 'description'"
             class="am-fcip__info-content"
           >
-            <div
-              class="am-fcip__info-service__desc"
-              v-html="pack.description"
-            ></div>
+            <div class="am-fcip__info-service__desc" v-html="pack.description"></div>
           </div>
           <!-- /Description -->
 
@@ -272,11 +225,7 @@
             class="am-fcip__info-content"
           >
             <AmCollapse>
-              <AmCollapseItem
-                v-for="employee in packageEmployees"
-                :key="employee.id"
-                side
-              >
+              <AmCollapseItem v-for="employee in packageEmployees" :key="employee.id" side>
                 <template #heading>
                   <div class="am-fcip__info-employee">
                     <div class="am-fcip__info-employee__hero">
@@ -301,42 +250,26 @@
       </div>
 
       <!-- Available Service in Packages -->
-      <div
-        v-if="customizeOptions.packageServices.visibility"
-        class="am-fcip__include-wrapper"
-      >
+      <div v-if="customizeOptions.packageServices.visibility" class="am-fcip__include-wrapper">
         <div class="am-fcip__include-heading">
           <span class="am-fcip__include-heading__text">
             {{ `${labelsDisplay('package_includes')}:` }}
           </span>
         </div>
         <AmCollapse>
-          <AmCollapseItem
-            v-for="book in pack.services"
-            :key="book.id"
-            :side="true"
-          >
+          <AmCollapseItem v-for="book in pack.services" :key="book.id" :side="true">
             <template #heading>
               <div class="am-fcip__include-service">
-                <div
-                  class="am-fcip__include-service__img"
-                  :style="{ ...cardImage(book) }"
-                >
+                <div class="am-fcip__include-service__img" :style="{ ...cardImage(book) }">
                   {{ cardSign(book) }}
                 </div>
-                {{
-                  book.name +
-                  (!pack.sharedCapacity ? ' x ' + book.quantity : '')
-                }}
+                {{ book.name + (!pack.sharedCapacity ? ' x ' + book.quantity : '') }}
               </div>
             </template>
             <template #default>
               <div class="am-fcip__include-service__info">
                 <span>{{ `${labelsDisplay('tab_employees')}:` }}</span>
-                <template
-                  v-for="employee in packageEmployees"
-                  :key="employee.id"
-                >
+                <template v-for="employee in packageEmployees" :key="employee.id">
                   <div
                     class="am-fcip__include-service__employee"
                     :style="{ ...cardImage(employee) }"
@@ -375,14 +308,7 @@ import AmCollapse from '../../../_components/collapse/AmCollapse.vue'
 import AmCollapseItem from '../../../_components/collapse/AmCollapseItem.vue'
 
 // * Vue
-import {
-  ref,
-  inject,
-  computed,
-  onMounted,
-  watchEffect,
-  onBeforeUnmount,
-} from 'vue'
+import { ref, inject, computed, onMounted, watchEffect, onBeforeUnmount } from 'vue'
 
 // * Composables
 import { useFormattedPrice } from '../../../../assets/js/common/formatting.js'
@@ -487,10 +413,8 @@ let pack = ref({
 let tabsActive = ref('description')
 
 watchEffect(() => {
-  if (!customizeOptions.value.packageDescription.visibility)
-    tabsActive.value = 'employees'
-  if (!customizeOptions.value.packageEmployees.visibility)
-    tabsActive.value = 'description'
+  if (!customizeOptions.value.packageDescription.visibility) tabsActive.value = 'employees'
+  if (!customizeOptions.value.packageEmployees.visibility) tabsActive.value = 'description'
 })
 
 onBeforeUnmount(() => {
@@ -541,13 +465,10 @@ let packageEmployees = ref([
 ])
 
 function employeeImage(employee) {
-  if (employee.pictureFullPath)
-    return { backgroundImage: `url(${employee.pictureFullPath})` }
+  if (employee.pictureFullPath) return { backgroundImage: `url(${employee.pictureFullPath})` }
 
   return {
-    backgroundColor: `${
-      amCardColors.value[Math.floor(Math.random() * amCardColors.value.length)]
-    }`,
+    backgroundColor: `${amCardColors.value[Math.floor(Math.random() * amCardColors.value.length)]}`,
   }
 }
 
@@ -569,9 +490,7 @@ let activeImage = ref(0)
 let galleryDialog = ref(false)
 
 let packageThumbsGallery = computed(() => {
-  let thumbs = pack.value.gallery.length
-    ? JSON.parse(JSON.stringify(pack.value.gallery))
-    : []
+  let thumbs = pack.value.gallery.length ? JSON.parse(JSON.stringify(pack.value.gallery)) : []
   if (pack.value.gallery.length === 1) return []
   thumbs.shift()
   if (thumbs.length > 2) thumbs.splice(2, thumbs.length - 2)
@@ -579,20 +498,16 @@ let packageThumbsGallery = computed(() => {
 })
 
 function cardImage(info) {
-  if (info.pictureFullPath)
-    return { backgroundImage: `url(${info.pictureFullPath})` }
+  if (info.pictureFullPath) return { backgroundImage: `url(${info.pictureFullPath})` }
 
   return {
-    backgroundColor: `${
-      amCardColors.value[Math.floor(Math.random() * amCardColors.value.length)]
-    }`,
+    backgroundColor: `${amCardColors.value[Math.floor(Math.random() * amCardColors.value.length)]}`,
   }
 }
 
 function cardSign(info) {
   if (!info.pictureFullPath) {
-    let name =
-      'firstName' in info ? `${info.firstName} ${info.lastName}` : info.name
+    let name = 'firstName' in info ? `${info.firstName} ${info.lastName}` : info.name
     return name
       .split(' ')
       .map((s) => s.charAt(0))
@@ -611,9 +526,7 @@ let amLabels = inject('labels')
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
     let translations = amCustomize.value.cbf.categoryPackage.translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -643,30 +556,12 @@ let amColors = inject('amColors')
 
 let cssVars = computed(() => {
   return {
-    '--am-c-fcip-success-op20': useColorTransparency(
-      amColors.value.colorSuccess,
-      0.2
-    ),
-    '--am-c-fcip-primary-op20': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.2
-    ),
-    '--am-c-fcip-text-op80': useColorTransparency(
-      amColors.value.colorMainText,
-      0.8
-    ),
-    '--am-c-fcip-text-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
-    '--am-c-fcip-text-op03': useColorTransparency(
-      amColors.value.colorMainText,
-      0.03
-    ),
-    '--am-c-fcip-btn-op50': useColorTransparency(
-      amColors.value.colorBtnSec,
-      0.5
-    ),
+    '--am-c-fcip-success-op20': useColorTransparency(amColors.value.colorSuccess, 0.2),
+    '--am-c-fcip-primary-op20': useColorTransparency(amColors.value.colorPrimary, 0.2),
+    '--am-c-fcip-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
+    '--am-c-fcip-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-fcip-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03),
+    '--am-c-fcip-btn-op50': useColorTransparency(amColors.value.colorBtnSec, 0.5),
   }
 })
 
@@ -676,14 +571,8 @@ let cssGalleryDialogVars = computed(() => {
     '--am-c-fcip-text': amColors.value.colorMainText,
     '--am-c-fcip-success': amColors.value.colorSuccess,
     '--am-c-fcip-primary': amColors.value.colorPrimary,
-    '--am-c-scroll-op30': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.3
-    ),
-    '--am-c-scroll-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
     '--am-font-family': amFonts.fontFamily,
   }
 })
@@ -754,7 +643,9 @@ export default {
                   flex-wrap: wrap;
                 }
 
-                &-discount, &-price, &-tax {
+                &-discount,
+                &-price,
+                &-tax {
                   margin-bottom: 6px;
                 }
 
@@ -783,7 +674,7 @@ export default {
         &-name {
           display: inline-flex;
 
-          span  {
+          span {
             display: -webkit-box;
             font-size: 28px;
             font-weight: 500;
@@ -858,7 +749,11 @@ export default {
         margin-left: 10px;
 
         &.am-package {
-          background: linear-gradient(95.75deg, var(--am-c-fcip-bgr) -110.8%,  var(--am-c-warning) 114.33%);
+          background: linear-gradient(
+            95.75deg,
+            var(--am-c-fcip-bgr) -110.8%,
+            var(--am-c-warning) 114.33%
+          );
           span {
             color: var(--am-c-fcip-bgr);
           }
@@ -870,7 +765,7 @@ export default {
           font-weight: 400;
           line-height: 1;
 
-          &[class*="am-icon"] {
+          &[class*='am-icon'] {
             font-size: 24px;
           }
         }
@@ -901,7 +796,7 @@ export default {
             white-space: nowrap;
             overflow: hidden;
 
-            &[class*="am-icon"] {
+            &[class*='am-icon'] {
               flex: 0 0 auto;
               font-size: 24px;
               color: var(--am-c-fcip-primary);
@@ -967,7 +862,8 @@ export default {
             max-width: 264px;
             position: relative;
 
-            &:after, &:before {
+            &:after,
+            &:before {
               content: '';
               display: block;
               clear: both;
@@ -1051,14 +947,18 @@ export default {
             $count: 100;
             @for $i from 0 through $count {
               &:nth-child(#{$i + 1}) {
-                animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+                animation: 600ms
+                  cubic-bezier(0.45, 1, 0.4, 1.2)
+                  #{$i *
+                  100}ms
+                  am-animation-slide-up;
                 animation-fill-mode: both;
               }
             }
 
             &__heading {
               padding: 12px;
-              transition-delay: .5s;
+              transition-delay: 0.5s;
 
               &-side {
                 transition-delay: 0s;
@@ -1133,7 +1033,7 @@ export default {
           }
 
           &__badge {
-            color: #FFF;
+            color: #fff;
             border-radius: 4px;
             padding: 0 4px;
             font-size: 13px;
@@ -1175,14 +1075,18 @@ export default {
             $count: 100;
             @for $i from 0 through $count {
               &:nth-child(#{$i + 1}) {
-                animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+                animation: 600ms
+                  cubic-bezier(0.45, 1, 0.4, 1.2)
+                  #{$i *
+                  100}ms
+                  am-animation-slide-up;
                 animation-fill-mode: both;
               }
             }
 
             &__heading {
               padding: 8px;
-              transition-delay: .5s;
+              transition-delay: 0.5s;
 
               &-side {
                 transition-delay: 0s;
@@ -1295,7 +1199,7 @@ export default {
               margin: 16px 0 0;
 
               & * {
-                color: var(--am-c-fcip-text-op80)
+                color: var(--am-c-fcip-text-op80);
               }
             }
 

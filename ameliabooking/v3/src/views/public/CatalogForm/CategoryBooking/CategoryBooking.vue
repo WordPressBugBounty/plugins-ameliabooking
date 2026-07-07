@@ -1,31 +1,41 @@
 <template>
   <template v-if="!amFonts.customFontSelected">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" type="text/css" :href="`${baseUrls.wpAmeliaPluginURL}v3/src/assets/scss/common/fonts/font.css`" media="all">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      :href="`${baseUrls.wpAmeliaPluginURL}v3/src/assets/scss/common/fonts/font.css`"
+      media="all"
+    />
   </template>
   <div
     v-if="!empty"
     id="amelia-container"
     ref="ameliaContainer"
     class="am-fs__wrapper"
-    :class="{'am-collapsed': sidebarCollapsed}"
+    :class="{ 'am-collapsed': sidebarCollapsed }"
     :style="cssVars"
   >
     <SideBar
       v-if="containerWidth > 560 && sidebarVisibility"
       class="am-fs-sb"
-      :class="{'am-collapsed': sidebarCollapsed}"
-      :style="{width: !sidebarCollapsed ? '240px' : '72px', paddingBottom: `${sidebarFooterHeight + 16}px` }"
+      :class="{ 'am-collapsed': sidebarCollapsed }"
+      :style="{
+        width: !sidebarCollapsed ? '240px' : '72px',
+        paddingBottom: `${sidebarFooterHeight + 16}px`,
+      }"
     >
       <template #step-list>
         <div class="am-fs-sb__step-wrapper" tabindex="0">
-          <template v-if="stepsArray[stepIndex] !== congratulationsStep || !amSettings.general.addToCalendar || (booked && booked.data.length === 0)">
-            <div
-              v-for="step in sidebarSteps"
-              :key="step.key"
-              class="am-fs-sb__step"
-            >
+          <template
+            v-if="
+              stepsArray[stepIndex] !== congratulationsStep ||
+              !amSettings.general.addToCalendar ||
+              (booked && booked.data.length === 0)
+            "
+          >
+            <div v-for="step in sidebarSteps" :key="step.key" class="am-fs-sb__step">
               <div class="am-fs-sb__step-inner">
                 <div class="am-fs-sb__step-icon">
                   <span :class="`am-icon-${step.icon}`"></span>
@@ -34,7 +44,7 @@
                     class="am-fs-sb__step-icon__number"
                     :class="sidebarCollapseItemsClass"
                   >
-                    {{useCartHasItems(store)}}
+                    {{ useCartHasItems(store) }}
                   </span>
                 </div>
                 <transition name="fade">
@@ -48,7 +58,10 @@
                 </transition>
                 <div
                   class="am-fs-sb__step-checker"
-                  :class="[{'am-fs-sb__step-checker-selected': step.selected}, sidebarCollapseItemsClass]"
+                  :class="[
+                    { 'am-fs-sb__step-checker-selected': step.selected },
+                    sidebarCollapseItemsClass,
+                  ]"
                 >
                   <transition name="fade">
                     <span v-if="step.finished" class="am-icon-check"></span>
@@ -60,7 +73,10 @@
                 name="fade"
                 appear
                 class="am-fs-sb__step-selection__wrapper"
-                :class="{'am-fs-sb__step-selection-packages': step.key === packageAppointmentsStep.key && step.stepSelectedData.length > 3 }"
+                :class="{
+                  'am-fs-sb__step-selection-packages':
+                    step.key === packageAppointmentsStep.key && step.stepSelectedData.length > 3,
+                }"
               >
                 <template v-if="!sidebarCollapsed">
                   <p
@@ -91,10 +107,19 @@
                   </div>
                   <div
                     class="am-fs-sb__step-checker"
-                    :class="[{'am-fs-sb__step-checker-selected': stepsArray[stepIndex].sidebarData.selected}, sidebarCollapseItemsClass]"
+                    :class="[
+                      {
+                        'am-fs-sb__step-checker-selected':
+                          stepsArray[stepIndex].sidebarData.selected,
+                      },
+                      sidebarCollapseItemsClass,
+                    ]"
                   >
                     <transition name="fade">
-                      <span v-if="stepsArray[stepIndex].sidebarData.finished" class="am-icon-check"></span>
+                      <span
+                        v-if="stepsArray[stepIndex].sidebarData.finished"
+                        class="am-icon-check"
+                      ></span>
                     </transition>
                   </div>
                 </div>
@@ -104,13 +129,14 @@
         </div>
       </template>
       <template #support-info>
-        <div
-          ref="sidebarFooterRef"
-          class="am-fs-sb__footer"
-        >
+        <div ref="sidebarFooterRef" class="am-fs-sb__footer">
           <div
-            v-if="(amSettings.company.email || amSettings.company.phone)
-            && (footerCustomizeOptions.heading || footerCustomizeOptions.phone || footerCustomizeOptions.email)"
+            v-if="
+              (amSettings.company.email || amSettings.company.phone) &&
+              (footerCustomizeOptions.heading ||
+                footerCustomizeOptions.phone ||
+                footerCustomizeOptions.email)
+            "
             class="am-fs-sb__support"
           >
             <transition name="fade">
@@ -155,10 +181,7 @@
             @click="sidebarCollapsed = !sidebarCollapsed"
           >
             <Transition name="fade">
-              <span
-                v-if="!sidebarCollapsed"
-                class="am-fs-sb__menu-text"
-              >
+              <span v-if="!sidebarCollapsed" class="am-fs-sb__menu-text">
                 {{ amLabels.collapse_menu }}
               </span>
             </Transition>
@@ -172,13 +195,27 @@
         <MainContentHeader :sidebar-visible="sidebarVisibility" :ready="ready"></MainContentHeader>
       </template>
       <template #step>
-        <component :is="stepsArray[stepIndex]" global-class="am-fs__main-content" :show-cart="props.showCart && stepsArray[stepIndex] === dateTimeStep"></component>
+        <component
+          :is="stepsArray[stepIndex]"
+          global-class="am-fs__main-content"
+          :show-cart="props.showCart && stepsArray[stepIndex] === dateTimeStep"
+        ></component>
       </template>
       <template #footer>
         <MainContentFooter
-          :second-button-show="stepsArray[stepIndex] === congratulationsStep && !!amSettings.roles.customerCabinet.pageUrl"
+          :second-button-show="
+            stepsArray[stepIndex] === congratulationsStep &&
+            !!amSettings.roles.customerCabinet.pageUrl
+          "
           :add-to-cart-button-show="useCartStep(store) && stepsArray[stepIndex] === cartStep"
-          :back-to-cart-button-show="useCartStep(store) && cart.length > 1 && stepsArray[stepIndex] !== cartStep && stepsArray[stepIndex] !== infoStep && stepsArray[stepIndex] !== paymentStep && stepsArray[stepIndex] !== congratulationsStep"
+          :back-to-cart-button-show="
+            useCartStep(store) &&
+            cart.length > 1 &&
+            stepsArray[stepIndex] !== cartStep &&
+            stepsArray[stepIndex] !== infoStep &&
+            stepsArray[stepIndex] !== paymentStep &&
+            stepsArray[stepIndex] !== congratulationsStep
+          "
           :booked="booked"
           :loading="loading"
           :ready="ready"
@@ -198,19 +235,19 @@
   <template v-else>
     <div class="am-no-services">
       <img
-        :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/am-empty-booking.svg'"
-        style="margin-top: 10px;"
+        :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/am-empty-booking.svg'"
+        style="margin-top: 10px"
         :alt="amLabels.no_services_employees"
-      >
-      <h1>{{amLabels.oops}}</h1>
-      <h3>{{amLabels.no_services_employees}}</h3>
-      <p>{{amLabels.add_services_employees}}</p>
+      />
+      <h1>{{ amLabels.oops }}</h1>
+      <h3>{{ amLabels.no_services_employees }}</h3>
+      <p>{{ amLabels.add_services_employees }}</p>
       <a href="https://wpamelia.com/services-and-categories/" rel="nofollow">
-        {{amLabels.add_services_url}}&nbsp;
+        {{ amLabels.add_services_url }}&nbsp;
       </a>
-      <span style="font-size:14px">{{amLabels.and}}&nbsp;</span>
+      <span style="font-size: 14px">{{ amLabels.and }}&nbsp;</span>
       <a href="https://wpamelia.com/employees/" rel="nofollow">
-        {{amLabels.add_employees_url}}
+        {{ amLabels.add_employees_url }}
       </a>
     </div>
   </template>
@@ -252,21 +289,21 @@ import {
   onBeforeMount,
   onMounted,
   watchEffect,
-  nextTick
+  nextTick,
 } from 'vue'
 // * import from Vuex
 import { useStore } from 'vuex'
 // * import composable
 import { useBuildPackage } from '../../../../assets/js/public/package.js'
 import { defaultCustomizeSettings } from '../../../../assets/js/common/defaultCustomize.js'
-import useAction from "../../../../assets/js/public/actions";
-import { useColorTransparency } from "../../../../assets/js/common/colorManipulation";
+import useAction from '../../../../assets/js/public/actions'
+import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
 import {
   useCapacity,
   usePrepaidPrice,
   useCheckingIfAllNotFree,
-} from "../../../../assets/js/common/appointments";
-import { useRenderAction } from "../../../../assets/js/public/renderActions";
+} from '../../../../assets/js/common/appointments'
+import { useRenderAction } from '../../../../assets/js/public/renderActions'
 import {
   useAddToCart,
   useCart,
@@ -274,18 +311,18 @@ import {
   useCartStep,
   useGoToCartStep,
   useInitCartItem,
-  useInitSelection
+  useInitSelection,
 } from '../../../../assets/js/public/cart'
 
 let props = defineProps({
   newBooking: {
     type: Boolean,
-    default: false
+    default: false,
   },
   showCart: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const emits = defineEmits(['addToCart', 'emptiedCart'])
@@ -299,7 +336,7 @@ provide('containerWidth', containerWidth)
 let empty = ref(false)
 
 // * window resize listener
-window.addEventListener('resize', resize);
+window.addEventListener('resize', resize)
 // * resize function
 function resize() {
   if (ameliaContainer.value) {
@@ -309,19 +346,22 @@ function resize() {
 
 onMounted(() => {
   nextTick(() => {
-    if(ameliaContainer.value) {
+    if (ameliaContainer.value) {
       containerWidth.value = ameliaContainer.value.offsetWidth
     }
   })
 
-  useAction(store, {containerWidth}, 'ContainerWidth', 'appointment', null, null)
+  useAction(store, { containerWidth }, 'ContainerWidth', 'appointment', null, null)
 })
 
 // * Root Settings
 const amSettings = inject('settings')
 
 // * Customize
-const amCustomize = (amSettings.customizedData && amSettings.customizedData.sbsNew) ? amSettings.customizedData.sbsNew : defaultCustomizeSettings.sbsNew
+const amCustomize =
+  amSettings.customizedData && amSettings.customizedData.sbsNew
+    ? amSettings.customizedData.sbsNew
+    : defaultCustomizeSettings.sbsNew
 if (amCustomize) {
   provide('amCustomize', amCustomize)
 }
@@ -330,7 +370,7 @@ let footerCustomizeOptions = computed(() => {
   let obj = {
     heading: true,
     phone: true,
-    email: true
+    email: true,
   }
 
   if ('supportHeading' in amCustomize.sidebar.options) {
@@ -349,7 +389,9 @@ let footerCustomizeOptions = computed(() => {
 })
 
 // * Fonts
-const amFonts = ref(amSettings.customizedData ? amSettings.customizedData.fonts : defaultCustomizeSettings.fonts)
+const amFonts = ref(
+  amSettings.customizedData ? amSettings.customizedData.fonts : defaultCustomizeSettings.fonts,
+)
 provide('amFonts', amFonts)
 
 // * Form Sidebar Collapse
@@ -360,7 +402,7 @@ let sidebarCollapseItemsClass = ref('')
 
 let bookingDialogWidth = inject('bookingDialogWidth')
 
-watch(sidebarCollapsed ,(current) => {
+watch(sidebarCollapsed, (current) => {
   if (current) {
     setTimeout(() => {
       sidebarCollapseItemsClass.value = 'am-collapsed'
@@ -398,7 +440,9 @@ onMounted(() => {
 })
 
 // * Form Sidebar Visibility
-let sidebarVisibility = ref(amCustomize.sidebar ? amCustomize.sidebar.options.self.visibility : true)
+let sidebarVisibility = ref(
+  amCustomize.sidebar ? amCustomize.sidebar.options.self.visibility : true,
+)
 
 // * Root Urls
 const baseUrls = inject('baseUrls')
@@ -410,15 +454,23 @@ let preselected = computed(() => {
   let originalPreselected = store.getters['entities/getOriginalPreselected']
 
   let bookingPreselected = {
-    category: store.state.booking.appointment.categoryId ? [store.state.booking.appointment.categoryId] : [],
+    category: store.state.booking.appointment.categoryId
+      ? [store.state.booking.appointment.categoryId]
+      : [],
     counter: store.state.entities.preselected.counter,
-    employee: store.state.booking.appointment.providerId ? [store.state.booking.appointment.providerId] : [],
+    employee: store.state.booking.appointment.providerId
+      ? [store.state.booking.appointment.providerId]
+      : [],
     hasApiCall: store.state.entities.preselected.hasApiCall,
-    location: store.state.booking.appointment.locationId ? [store.state.booking.appointment.locationId] : [],
-    service: store.state.booking.appointment.serviceId ? [store.state.booking.appointment.serviceId] : [],
+    location: store.state.booking.appointment.locationId
+      ? [store.state.booking.appointment.locationId]
+      : [],
+    service: store.state.booking.appointment.serviceId
+      ? [store.state.booking.appointment.serviceId]
+      : [],
     package: store.state.booking.packageId ? [store.state.booking.packageId] : [],
     show: store.state.booking.appointment.type === 'package' ? 'packages' : 'services',
-    trigger: "",
+    trigger: '',
   }
 
   Object.keys(originalPreselected).forEach((key) => {
@@ -452,18 +504,9 @@ const bringingAnyone = markRaw(BringingAnyone)
 
 // * Array of step components
 const stepsArray = ref(
-  useCartStep(store) ? [
-    initStep,
-    dateTimeStep,
-    cartStep,
-    infoStep,
-    congratulationsStep
-  ] : [
-    initStep,
-    dateTimeStep,
-    infoStep,
-    congratulationsStep
-  ]
+  useCartStep(store)
+    ? [initStep, dateTimeStep, cartStep, infoStep, congratulationsStep]
+    : [initStep, dateTimeStep, infoStep, congratulationsStep],
 )
 
 provide('stepsArray', stepsArray)
@@ -481,13 +524,13 @@ let cart = useCart(store)
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   if (amSettings.customizedData && amSettings.customizedData.sbsNew) {
-    Object.keys(amSettings.customizedData.sbsNew).forEach(stepKey => {
+    Object.keys(amSettings.customizedData.sbsNew).forEach((stepKey) => {
       if (stepKey !== 'colors' && amSettings.customizedData.sbsNew[stepKey].translations) {
         let customizedLabels = amSettings.customizedData.sbsNew[stepKey].translations
-        Object.keys(customizedLabels).forEach(labelKey => {
+        Object.keys(customizedLabels).forEach((labelKey) => {
           if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
             computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
           } else if (customizedLabels[labelKey].default) {
@@ -505,11 +548,11 @@ provide('amLabels', amLabels)
 let footerLabels = computed(() => {
   let customLabels = {}
   if (amSettings.customizedData && amSettings.customizedData.sbsNew) {
-    let customizedLabels = amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key] ?
-      amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key].translations :
-      null
+    let customizedLabels = amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key]
+      ? amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key].translations
+      : null
     if (amSettings.customizedData && customizedLabels) {
-      Object.keys(customizedLabels).forEach(labelKey => {
+      Object.keys(customizedLabels).forEach((labelKey) => {
         if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
           customLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
         } else if (customizedLabels[labelKey].default) {
@@ -524,10 +567,14 @@ let footerLabels = computed(() => {
 
 let primFooterBtnType = computed(() => {
   let btnType = 'filled'
-  if (amSettings.customizedData &&
-      amSettings.customizedData.sbsNew &&
-      amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key]) {
-    btnType = amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key].options.primaryFooterButton.buttonType
+  if (
+    amSettings.customizedData &&
+    amSettings.customizedData.sbsNew &&
+    amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key]
+  ) {
+    btnType =
+      amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key].options
+        .primaryFooterButton.buttonType
   }
 
   return btnType
@@ -543,16 +590,23 @@ let secFooterBtnType = computed(() => {
     amSettings.customizedData &&
     amSettings.customizedData.sbsNew &&
     amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key] &&
-    amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key].options.secondaryFooterButton
+    amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key].options
+      .secondaryFooterButton
   ) {
-    btnType = amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key].options.secondaryFooterButton.buttonType
+    btnType =
+      amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key].options
+        .secondaryFooterButton.buttonType
   }
 
   return btnType
 })
 
 let addToCartBtnType = computed(() => {
-  if (amSettings.customizedData && amSettings.customizedData.sbsNew && amSettings.customizedData.sbsNew['cartStep']) {
+  if (
+    amSettings.customizedData &&
+    amSettings.customizedData.sbsNew &&
+    amSettings.customizedData.sbsNew['cartStep']
+  ) {
     return amSettings.customizedData.sbsNew['cartStep'].options['addToCart'].buttonType
   }
 
@@ -560,21 +614,29 @@ let addToCartBtnType = computed(() => {
 })
 
 let backToCartBtnType = computed(() => {
-  if (amSettings.customizedData && amSettings.customizedData.sbsNew && amSettings.customizedData.sbsNew['cartStep']) {
+  if (
+    amSettings.customizedData &&
+    amSettings.customizedData.sbsNew &&
+    amSettings.customizedData.sbsNew['cartStep']
+  ) {
     return amSettings.customizedData.sbsNew['cartStep'].options['backToCart'].buttonType
   }
 
   return 'text'
 })
 
-function dedicatedStepLabel (labelKey, stepKey) {
+function dedicatedStepLabel(labelKey, stepKey) {
   let customLabel = ''
   if (amSettings.customizedData && amSettings.customizedData.sbsNew) {
-    let customizedLabels =  amSettings.customizedData.sbsNew[stepKey] ?
-      amSettings.customizedData.sbsNew[stepKey].translations :
-      null
+    let customizedLabels = amSettings.customizedData.sbsNew[stepKey]
+      ? amSettings.customizedData.sbsNew[stepKey].translations
+      : null
     if (amSettings.customizedData && customizedLabels && customizedLabels[labelKey]) {
-      if (customLabel === '' && customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
+      if (
+        customLabel === '' &&
+        customizedLabels[labelKey][localLanguage.value] &&
+        langDetection.value
+      ) {
         customLabel = customizedLabels[labelKey][localLanguage.value]
       } else if (customLabel === '' && customizedLabels[labelKey].default) {
         customLabel = customizedLabels[labelKey].default
@@ -587,13 +649,11 @@ function dedicatedStepLabel (labelKey, stepKey) {
 
 let bringingAnyoneOptions = computed(() => {
   return useCapacity(
-    store.getters['entities/getEmployeeServices'](
-      store.getters['booking/getSelection']
-    )
+    store.getters['entities/getEmployeeServices'](store.getters['booking/getSelection']),
   )
 })
 
-function setShortcodeParams () {
+function setShortcodeParams() {
   let preselected = store.getters['entities/getPreselected']
 
   if (preselected.show === 'packages') {
@@ -605,9 +665,11 @@ function setShortcodeParams () {
     sidebarDataUpdate()
   } else {
     changeInitStepDataService()
-    let employeeOptions = store.getters["entities/filteredEmployees"](store.getters['booking/getSelection']).length <= 1
+    let employeeOptions =
+      store.getters['entities/filteredEmployees'](store.getters['booking/getSelection']).length <= 1
     let employeeVisibility = !amCustomize.initStep.options.employee.visibility
-    let locationOptions = store.getters['entities/filteredLocations'](store.getters['booking/getSelection']).length <= 1
+    let locationOptions =
+      store.getters['entities/filteredLocations'](store.getters['booking/getSelection']).length <= 1
     let locationVisibility = !amCustomize.initStep.options.location.visibility
 
     if (
@@ -616,7 +678,7 @@ function setShortcodeParams () {
       (preselected.location.length > 0 || locationOptions || locationVisibility)
     ) {
       if (bringingAnyoneOptions.value.availability) {
-        stepsArray.value.splice(0, 1, bringingAnyone);
+        stepsArray.value.splice(0, 1, bringingAnyone)
         sidebarSteps.value.splice(0, 1)
       } else {
         stepsArray.value.splice(0, 1)
@@ -627,22 +689,26 @@ function setShortcodeParams () {
   }
 }
 
-function stepChanger (steps, stepsNamesToRemove, stepsToAdd, startIndex) {
-  let removeIndexes = steps.value.map(
-    (item, index) => (stepsNamesToRemove.includes(item.name)) ? index : null
-  ).filter(item => item !== null).reverse()
+function stepChanger(steps, stepsNamesToRemove, stepsToAdd, startIndex) {
+  let removeIndexes = steps.value
+    .map((item, index) => (stepsNamesToRemove.includes(item.name) ? index : null))
+    .filter((item) => item !== null)
+    .reverse()
 
   removeIndexes.forEach((item) => {
     steps.value.splice(item, 1)
   })
 
   let stepIndex = {
-    value: startIndex
+    value: startIndex,
   }
 
   stepsToAdd.forEach((item) => {
     if (steps.value.indexOf(item) === -1) {
-      if (store.getters['entities/getPreselected'].show === 'packages' && store.getters['entities/getPreselected'].package.length > 0) {
+      if (
+        store.getters['entities/getPreselected'].show === 'packages' &&
+        store.getters['entities/getPreselected'].package.length > 0
+      ) {
         steps.value.splice(stepIndex.value, 0, item)
       } else {
         steps.value.splice(stepIndex.value + 1, 0, item)
@@ -651,15 +717,18 @@ function stepChanger (steps, stepsNamesToRemove, stepsToAdd, startIndex) {
   })
 }
 
-provide('goToPackageStep', {goToPackageStep})
+provide('goToPackageStep', { goToPackageStep })
 
-function goToPackageStep (pack) {
+function goToPackageStep(pack) {
   store.commit('booking/setPackageId', pack.id)
   store.commit('booking/setBookableType', 'package')
   store.commit('booking/setMultipleAppointments', useBuildPackage(0, pack))
   store.commit('booking/setMultipleAppointmentsIndex', 0)
 
-  let bookingCount = pack.bookable.reduce((partialSum, book) => partialSum + book.maximumScheduled, 0)
+  let bookingCount = pack.bookable.reduce(
+    (partialSum, book) => partialSum + book.maximumScheduled,
+    0,
+  )
 
   let removeSteps = []
   let addSteps = []
@@ -677,67 +746,60 @@ function goToPackageStep (pack) {
   }
 
   if (bookingCount > 0) {
-    addSteps = addSteps.concat([packageAppointmentsListStep, packageAppointmentsStep, packageInfoStep])
+    addSteps = addSteps.concat([
+      packageAppointmentsListStep,
+      packageAppointmentsStep,
+      packageInfoStep,
+    ])
   } else {
     addSteps.push(packageInfoStep)
   }
 
-  stepChanger(
-    stepsArray,
-    removeSteps,
-    addSteps,
-    stepIndex.value
-  )
+  stepChanger(stepsArray, removeSteps, addSteps, stepIndex.value)
 
-  stepChanger(
-    sidebarSteps,
-    removeSteps,
-    [],
-    stepIndex.value
-  )
+  stepChanger(sidebarSteps, removeSteps, [], stepIndex.value)
 
   sidebarDataUpdate()
   nextStep()
 }
 
-function selectionFromAvailablePackages () {
-  let pack = store.state.entities.packages.find(a => a.id === store.getters['booking/getPackageId'])
-  let bookingCount = pack.bookable.reduce((partialSum, book) => partialSum + book.maximumScheduled, 0)
+function selectionFromAvailablePackages() {
+  let pack = store.state.entities.packages.find(
+    (a) => a.id === store.getters['booking/getPackageId'],
+  )
+  let bookingCount = pack.bookable.reduce(
+    (partialSum, book) => partialSum + book.maximumScheduled,
+    0,
+  )
 
   let removeSteps = []
   let addSteps = []
-  if (stepsArray.value.find(a => a.name === 'ExtrasStep')) {
+  if (stepsArray.value.find((a) => a.name === 'ExtrasStep')) {
     removeSteps.push('ExtrasStep')
   }
-  if (stepsArray.value.find(a => a.name === 'DateTimeStep')) {
+  if (stepsArray.value.find((a) => a.name === 'DateTimeStep')) {
     removeSteps.push('DateTimeStep')
   }
 
   if (bookingCount > 0) {
-    addSteps = addSteps.concat([packageAppointmentsListStep, packageAppointmentsStep, packageInfoStep])
+    addSteps = addSteps.concat([
+      packageAppointmentsListStep,
+      packageAppointmentsStep,
+      packageInfoStep,
+    ])
   } else {
     addSteps.push(packageInfoStep)
   }
 
-  stepChanger(
-    stepsArray,
-    removeSteps,
-    addSteps,
-    stepIndex.value
-  )
+  stepChanger(stepsArray, removeSteps, addSteps, stepIndex.value)
 
-  stepChanger(
-    sidebarSteps,
-    removeSteps,
-    [],
-    stepIndex.value
-  )
+  stepChanger(sidebarSteps, removeSteps, [], stepIndex.value)
 
   sidebarDataUpdate()
   nextStep()
 }
 
-function removePackageStep () {
+function removePackageStep() {
   store.commit('booking/setBookableType', 'appointment')
 
   store.commit('booking/setMultipleAppointments', [
@@ -746,7 +808,7 @@ function removePackageStep () {
       serviceId: null,
       index: 0,
       services: {},
-    }
+    },
   ])
 
   store.commit('booking/setPackageId', null)
@@ -765,7 +827,11 @@ function removePackageStep () {
     addSteps.push(dateTimeStep)
   }
 
-  if (stepsArray.value[0] !== extras && selectedServiceExtras.value && selectedServiceExtras.value.length) {
+  if (
+    stepsArray.value[0] !== extras &&
+    selectedServiceExtras.value &&
+    selectedServiceExtras.value.length
+  ) {
     addSteps.push(extras)
   }
 
@@ -773,24 +839,24 @@ function removePackageStep () {
     stepsArray,
     ['PackageInfoStep', 'PackageAppointmentsStep', 'PackageAppointmentsListStep'],
     addSteps,
-    stepIndex.value - 1
+    stepIndex.value - 1,
   )
 
   stepChanger(
     sidebarSteps,
     ['PackageInfoStep', 'PackageAppointmentsStep', 'PackageAppointmentsListStep'],
     [],
-    stepIndex.value
+    stepIndex.value,
   )
 
   sidebarDataUpdate()
 }
 
-provide('goToRecurringStep', {goToRecurringStep})
+provide('goToRecurringStep', { goToRecurringStep })
 
-provide('removeRecurringStep', {removeRecurringStep})
+provide('removeRecurringStep', { removeRecurringStep })
 
-function goToRecurringStep () {
+function goToRecurringStep() {
   if (useCartStep(store)) {
     removeCartStep()
   }
@@ -805,18 +871,21 @@ function goToRecurringStep () {
     }
   }
 
-  stepsArray.value.splice( startIndex + 1, 0, recurringStep)
-  stepsArray.value.splice( startIndex + 2, 0, recurringSummary)
+  stepsArray.value.splice(startIndex + 1, 0, recurringStep)
+  stepsArray.value.splice(startIndex + 2, 0, recurringSummary)
 
   sidebarDataUpdate()
 
   nextStep()
 }
 
-function removeRecurringStep () {
+function removeRecurringStep() {
   for (let i = stepsArray.value.length - 1; i >= 0; i--) {
-    if (stepsArray.value[i].name === 'RecurringStep' || stepsArray.value[i].name === 'RecurringSummary') {
-      stepsArray.value.splice( i + 1, 1)
+    if (
+      stepsArray.value[i].name === 'RecurringStep' ||
+      stepsArray.value[i].name === 'RecurringSummary'
+    ) {
+      stepsArray.value.splice(i + 1, 1)
     }
   }
 
@@ -832,9 +901,7 @@ function removeRecurringStep () {
  * @type {any}
  */
 let selectedServiceExtras = computed(() => {
-  let service = store.getters['entities/getService'](
-    store.getters['booking/getServiceId']
-  )
+  let service = store.getters['entities/getService'](store.getters['booking/getServiceId'])
 
   return service ? service.extras : []
 })
@@ -842,14 +909,20 @@ let selectedServiceExtras = computed(() => {
 /**
  * Add or Remove steps from Steps Array
  */
-function changeInitStepDataService () {
-  if (selectedServiceExtras.value.length && !stepsArray.value.find(step => step.name === 'ExtrasStep')) {
-    stepsArray.value.splice( stepIndex.value + 1, 0, extras)
+function changeInitStepDataService() {
+  if (
+    selectedServiceExtras.value.length &&
+    !stepsArray.value.find((step) => step.name === 'ExtrasStep')
+  ) {
+    stepsArray.value.splice(stepIndex.value + 1, 0, extras)
 
     sidebarDataUpdate()
   }
 
-  if (sidebarSteps.value.find(step => step.name === 'ExtrasStep') && !Object.keys(selectedServiceExtras.value).length) {
+  if (
+    sidebarSteps.value.find((step) => step.name === 'ExtrasStep') &&
+    !Object.keys(selectedServiceExtras.value).length
+  ) {
     stepsArray.value.splice(1, 1)
     sidebarSteps.value.splice(1, 1)
   }
@@ -860,7 +933,7 @@ function changeInitStepDataService () {
 }
 
 provide('initDataChanges', {
-  changeInitStepDataService
+  changeInitStepDataService,
 })
 
 // * Step index
@@ -893,7 +966,7 @@ provide('removeCartStep', { removeCartStep })
 /**
  * Move to previous Form Step
  */
-function previousStep () {
+function previousStep() {
   footerBtnDisabledUpdater(false)
 
   if (!navigateInsideStep.value) {
@@ -908,12 +981,7 @@ function previousStep () {
       if (useCartStep(store)) {
         stepsArray.value.splice(stepIndex.value, 0, cartStep)
 
-        stepChanger(
-          sidebarSteps,
-          [],
-          [],
-          stepIndex.value
-        )
+        stepChanger(sidebarSteps, [], [], stepIndex.value)
 
         sidebarDataUpdate()
       }
@@ -932,7 +1000,7 @@ function previousStep () {
 /**
  * Move to next Form Step
  */
-function nextStep () {
+function nextStep() {
   if (!navigateInsideStep.value) {
     sidebarSteps.value[stepIndex.value].finished = true
     stepIndex.value = stepIndex.value + 1
@@ -957,32 +1025,32 @@ let headerButtonPreviousClicked = ref(false)
 /**
  * Footer btn clicked
  */
-function footerButtonClick () {
+function footerButtonClick() {
   footerButtonClicked.value = true
 }
 
 /**
  * Footer btn reset
  */
-function footerButtonReset () {
+function footerButtonReset() {
   footerButtonClicked.value = false
 }
 
 /**
  * Header btn previous clicked
  */
-function headerButtonPreviousClick () {
+function headerButtonPreviousClick() {
   headerButtonPreviousClicked.value = true
 }
 
 /**
  * Header btn previous reset
  */
-function headerButtonPreviousReset () {
+function headerButtonPreviousReset() {
   headerButtonPreviousClicked.value = false
 }
 
-function footerBtnDisabledUpdater (data) {
+function footerBtnDisabledUpdater(data) {
   footerBtnDisabled.value = data
 }
 
@@ -997,7 +1065,7 @@ function secondButtonClick() {
 }
 
 provide('secondButton', {
-  secondButtonClick
+  secondButtonClick,
 })
 
 let navigateInsideStep = ref(false)
@@ -1024,17 +1092,21 @@ provide('sidebarSteps', sidebarSteps)
  * Collecting and rearranging selected data in form sidebar based on item position in form
  * @param data
  */
-function sidebarDataCollector (data) {
+function sidebarDataCollector(data) {
   // Determines are selected data already exists
-  if (sidebarSteps.value[stepIndex.value].stepSelectedData.filter(item => item.reference === data.reference).length) {
+  if (
+    sidebarSteps.value[stepIndex.value].stepSelectedData.filter(
+      (item) => item.reference === data.reference,
+    ).length
+  ) {
     sidebarSteps.value[stepIndex.value].stepSelectedData.forEach((item, index, array) => {
       // Handles changing value of existing data
-      if ((item.reference === data.reference) && data.value && data.value !== item.value) {
+      if (item.reference === data.reference && data.value && data.value !== item.value) {
         item.value = data.value
       }
 
       // Removes un-selected form data from sidebar array
-      if ((item.reference === data.reference) && !data.value) {
+      if (item.reference === data.reference && !data.value) {
         array.splice(index, 1)
       }
     })
@@ -1053,9 +1125,9 @@ function sidebarDataCollector (data) {
 /**
  * Function that creates Data Array for SideBar
  */
-function sidebarDataCreator () {
+function sidebarDataCreator() {
   stepsArray.value.forEach((item, index) => {
-    if (item.name !== "CongratulationsStep") {
+    if (item.name !== 'CongratulationsStep') {
       let labelKey = item.sidebarData.label
       let step = {
         name: item.name,
@@ -1082,7 +1154,7 @@ onBeforeMount(() => {
 
 onMounted(() => {
   switch (store.getters['booking/getBookableType']) {
-    case ('appointment'):
+    case 'appointment':
       if (!props.showCart) {
         useInitCartItem(store)
       }
@@ -1103,64 +1175,64 @@ onMounted(() => {
 
     restore.value.steps.forEach((key) => {
       switch (key) {
-        case ('packageStep'):
+        case 'packageStep':
           stepsArray.value.push(packagesStep)
           break
 
-        case ('bringingAnyone'):
+        case 'bringingAnyone':
           stepsArray.value.push(bringingAnyone)
           break
 
-        case ('initStep'):
+        case 'initStep':
           stepsArray.value.push(initStep)
           break
 
-        case ('packageInfoStep'):
+        case 'packageInfoStep':
           stepsArray.value.push(packageInfoStep)
           break
 
-        case ('packageAppointmentsStep'):
+        case 'packageAppointmentsStep':
           stepsArray.value.push(packageAppointmentsStep)
           break
 
-        case ('packageAppointmentsListStep'):
+        case 'packageAppointmentsListStep':
           stepsArray.value.push(packageAppointmentsListStep)
           break
 
-        case ('extrasStep'):
+        case 'extrasStep':
           stepsArray.value.push(extras)
           break
 
-        case ('dateTimeStep'):
+        case 'dateTimeStep':
           stepsArray.value.push(dateTimeStep)
           break
 
-        case ('recurringStep'):
+        case 'recurringStep':
           stepsArray.value.push(recurringStep)
           break
 
-        case ('recurringSummary'):
+        case 'recurringSummary':
           stepsArray.value.push(recurringSummary)
           break
 
-        case ('cartStep'):
+        case 'cartStep':
           stepsArray.value.push(cartStep)
           break
 
-        case ('infoStep'):
+        case 'infoStep':
           stepsArray.value.push(infoStep)
           break
 
-        case ('paymentStep'):
+        case 'paymentStep':
           stepsArray.value.push(paymentStep)
           break
 
-        case ('congratulations'):
+        case 'congratulations':
           stepsArray.value.push(congratulationsStep)
           break
       }
 
-      let sideBarItem = restore.value.sidebar.find(i => i.key === key)
+      let sideBarItem = restore.value.sidebar.find((i) => i.key === key)
 
       sidebarDataUpdate()
 
@@ -1170,7 +1242,7 @@ onMounted(() => {
             sidebarDataCollector({
               reference: i.reference,
               position: i.position,
-              value: i.value
+              value: i.value,
             })
           })
         }
@@ -1210,12 +1282,12 @@ onMounted(() => {
 /**
  * Function that update SideBar Data Array when some component are dynamically added
  */
-function sidebarDataUpdate () {
+function sidebarDataUpdate() {
   stepsArray.value.forEach((item, index) => {
     if (item.name === 'CongratulationsStep') {
       return
     }
-    if (!sidebarSteps.value.find(block => block.labelKey === item.sidebarData.label)) {
+    if (!sidebarSteps.value.find((block) => block.labelKey === item.sidebarData.label)) {
       let labelKey = item.sidebarData.label
       let step = {
         name: item.name,
@@ -1232,102 +1304,79 @@ function sidebarDataUpdate () {
   })
 }
 provide('sidebarStepsFunctions', {
-  sidebarDataCollector
+  sidebarDataCollector,
 })
 
-provide('addPaymentsStep', {addPaymentsStep})
+provide('addPaymentsStep', { addPaymentsStep })
 
-provide('removePaymentsStep', {removePaymentsStep})
+provide('removePaymentsStep', { removePaymentsStep })
 
-function addPaymentsStep () {
+function addPaymentsStep() {
   stepsArray.value.splice(stepsArray.value.length - 1, 0, paymentStep)
 
   sidebarDataUpdate()
 }
 
-function removePaymentsStep () {
+function removePaymentsStep() {
   let removeSteps = ['PaymentStep']
 
-  stepChanger(
-    stepsArray,
-    removeSteps,
-    [],
-    stepIndex.value
-  )
+  stepChanger(stepsArray, removeSteps, [], stepIndex.value)
 
-  stepChanger(
-    sidebarSteps,
-    removeSteps,
-    [],
-    stepIndex.value
-  )
+  stepChanger(sidebarSteps, removeSteps, [], stepIndex.value)
 }
 
-function addCartStep (index) {
-  stepChanger(
-    stepsArray,
-    [],
-    [cartStep],
-    index
-  )
+function addCartStep(index) {
+  stepChanger(stepsArray, [], [cartStep], index)
 
-  stepChanger(
-    sidebarSteps,
-    [],
-    [],
-    index
-  )
+  stepChanger(sidebarSteps, [], [], index)
 
   sidebarDataUpdate()
 }
 
-function removeCartStep () {
-  stepChanger(
-    stepsArray,
-    ['CartStep'],
-    [],
-    stepIndex.value
-  )
+function removeCartStep() {
+  stepChanger(stepsArray, ['CartStep'], [], stepIndex.value)
 
-  stepChanger(
-    sidebarSteps,
-    ['CartStep'],
-    [],
-    stepIndex.value
-  )
+  stepChanger(sidebarSteps, ['CartStep'], [], stepIndex.value)
 
   sidebarDataUpdate()
 }
 
-let keepPaymentStep = computed(() => useCart(store).length ? usePrepaidPrice(store) !== 0 : useCheckingIfAllNotFree(store))
+let keepPaymentStep = computed(() =>
+  useCart(store).length ? usePrepaidPrice(store) !== 0 : useCheckingIfAllNotFree(store),
+)
 
 // Appointment waiting list flag
-const isWaitingListBooking = computed(() => store.getters['appointmentWaitingListOptions/getIsWaitingListSlot'])
+const isWaitingListBooking = computed(
+  () => store.getters['appointmentWaitingListOptions/getIsWaitingListSlot'],
+)
 
-watchEffect(() => {
-  // If waiting list, remove payment step
-  if (isWaitingListBooking.value) {
-    removePaymentsStep()
-    return
-  }
-
-  let cart = useCart(store)
-
-  if (!cart[0].serviceId && Object.keys(cart[0].services).length === 0) {
-    emits('emptiedCart')
-  }
-
-  if (!restore.value && !keepPaymentStep.value) {
-    removePaymentsStep()
-  } else if (!restore.value) {
-    if (stepsArray.value.indexOf(paymentStep) === -1) {
-      addPaymentsStep()
+watchEffect(
+  () => {
+    // If waiting list, remove payment step
+    if (isWaitingListBooking.value) {
+      removePaymentsStep()
+      return
     }
-  }
-}, {flush: 'post'})
+
+    let cart = useCart(store)
+
+    if (!cart[0].serviceId && Object.keys(cart[0].services).length === 0) {
+      emits('emptiedCart')
+    }
+
+    if (!restore.value && !keepPaymentStep.value) {
+      removePaymentsStep()
+    } else if (!restore.value) {
+      if (stepsArray.value.indexOf(paymentStep) === -1) {
+        addPaymentsStep()
+      }
+    }
+  },
+  { flush: 'post' },
+)
 
 // * Cart
-function addToCart () {
+function addToCart() {
   sidebarSteps.value.forEach((item) => {
     item.finished = false
     item.selected = false
@@ -1349,7 +1398,7 @@ function addToCart () {
   emits('addToCart')
 }
 
-function backToCart () {
+function backToCart() {
   let currentCartItem = store.getters['booking/getCurrentCartItem']
 
   let items = store.getters['booking/getAllMultipleAppointments']
@@ -1367,9 +1416,15 @@ function backToCart () {
 
     store.commit('booking/setServiceId', items[items.length - 1].serviceId)
 
-    store.commit('booking/setEmployeeId', items[items.length - 1].services[items[items.length - 1].serviceId].providerId)
+    store.commit(
+      'booking/setEmployeeId',
+      items[items.length - 1].services[items[items.length - 1].serviceId].providerId,
+    )
 
-    store.commit('booking/setLocationId', items[items.length - 1].services[items[items.length - 1].serviceId].locationId)
+    store.commit(
+      'booking/setLocationId',
+      items[items.length - 1].services[items[items.length - 1].serviceId].locationId,
+    )
   }
 
   useGoToCartStep(stepsArray, stepIndex)
@@ -1377,9 +1432,11 @@ function backToCart () {
 
 // * Colors block
 let amColors = computed(() => {
-  return (amSettings.customizedData && amSettings.customizedData.sbsNew) ? amSettings.customizedData.sbsNew.colors : defaultCustomizeSettings.sbsNew.colors
+  return amSettings.customizedData && amSettings.customizedData.sbsNew
+    ? amSettings.customizedData.sbsNew.colors
+    : defaultCustomizeSettings.sbsNew.colors
 })
-provide('amColors', amColors);
+provide('amColors', amColors)
 
 let cssVars = computed(() => {
   return {
@@ -1409,12 +1466,16 @@ let cssVars = computed(() => {
     // css properties
     // -mw- max width
     // -brad- border-radius
-    '--am-mw-main': sidebarVisibility.value ? sidebarCollapsed.value ? '592px' : '760px' : '520px',
-    '--am-brad-main': sidebarVisibility.value ? '0 0.5rem 0.5rem 0' : '0.5rem'
+    '--am-mw-main': sidebarVisibility.value
+      ? sidebarCollapsed.value
+        ? '592px'
+        : '760px'
+      : '520px',
+    '--am-brad-main': sidebarVisibility.value ? '0 0.5rem 0.5rem 0' : '0.5rem',
   }
 })
 
-function activateCustomFontStyles () {
+function activateCustomFontStyles() {
   let head = document.head || document.getElementsByTagName('head')[0]
   if (head.querySelector('#amCustomFont')) {
     head.querySelector('#amCustomFont').remove()
@@ -1436,30 +1497,27 @@ let amDesignProperties = computed(() => {
     colorInputBorderRadius: '6px',
   }
 })
-provide('amDesignProperties', amDesignProperties);
+provide('amDesignProperties', amDesignProperties)
 
 onMounted(() => {
-  useRenderAction(
-    'renderForm',
-    {
-      ameliaContainer,
-      containerWidth,
-      empty,
-      amCustomize,
-      amFonts,
-      sidebarCollapsed,
-      sidebarCollapseItemsClass,
-      sidebarFooterRef,
-      sidebarFooterHeight,
-      sidebarVisibility
-    },
-  )
+  useRenderAction('renderForm', {
+    ameliaContainer,
+    containerWidth,
+    empty,
+    amCustomize,
+    amFonts,
+    sidebarCollapsed,
+    sidebarCollapseItemsClass,
+    sidebarFooterRef,
+    sidebarFooterHeight,
+    sidebarVisibility,
+  })
 })
 </script>
 
 <script>
 export default {
-  name: "CategoryBooking"
+  name: 'CategoryBooking',
 }
 </script>
 
@@ -1486,7 +1544,7 @@ export default {
   --am-c-main-heading-text: #{$shade-800};
   --am-c-main-text: #{$shade-900};
   // sidebar container colors - left part of the form
-  --am-c-sb-bgr: #17295A;
+  --am-c-sb-bgr: #17295a;
   --am-c-sb-text: #{$am-white};
   // input global colors - usage input, textarea, checkbox, radio button, select input, adv select input
   --am-c-inp-bgr: #{$am-white};

@@ -2,15 +2,15 @@
   <!-- Radio Group -->
   <div class="am-checkbox-group-wrapper">
     <el-checkbox-group
-        ref="AmCheckboxGroup"
-        v-model="model"
-        class="am-checkbox-group"
-        v-bind="$props"
-        :min="min"
-        :max="max"
-        :text-color="textColor"
-        :fill="fill"
-        @change="(eventLabel) => $emit('change', eventLabel)"
+      ref="AmCheckboxGroup"
+      v-model="model"
+      class="am-checkbox-group"
+      v-bind="$props"
+      :min="min"
+      :max="max"
+      :text-color="textColor"
+      :fill="fill"
+      @change="(eventLabel) => $emit('change', eventLabel)"
     >
       <slot />
     </el-checkbox-group>
@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { computed, ref, toRefs } from "vue";
+import { computed, ref, toRefs } from 'vue'
 
 /**
  * Component Props
@@ -26,30 +26,30 @@ import { computed, ref, toRefs } from "vue";
 const props = defineProps({
   modelValue: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   size: {
     type: String,
     default: 'default',
     validator(value) {
       return ['default', 'medium', 'small'].includes(value)
-    }
+    },
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   min: {
-    type: Number
+    type: Number,
   },
   max: {
-    type: Number
+    type: Number,
   },
   textColor: {
-    type: String
+    type: String,
   },
   fill: {
-    type: String
+    type: String,
   },
 })
 
@@ -66,18 +66,18 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 /**
  * Component reference
  */
 const AmCheckboxGroup = ref()
-
 </script>
 
 <style lang="scss">
 .am-checkbox-group-wrapper {
-  .am-checkbox-group {}
+  .am-checkbox-group {
+  }
 }
 </style>

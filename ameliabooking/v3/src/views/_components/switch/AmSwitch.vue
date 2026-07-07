@@ -1,49 +1,40 @@
 <template>
-<div
-  class="am-switch-wrapper"
-  :class="parentClass"
-  :style="cssVars"
->
-  <el-switch
-    :id="id"
-    ref="amSwitch"
-    v-model="model"
-    class="am-switch"
-    :class="props.class"
-    :name="name"
-    :width="width"
-    :size="size"
-    :validate-event="validateEvent"
-    :loading="loading"
-    :disabled="disabled"
-    :active-color="activeColor"
-    :inactive-color="inactiveColor"
-    :active-text="activeText"
-    :inactive-text="inactiveText"
-    :active-value="activeValue"
-    :inactive-value="inactiveValue"
-    :active-icon-class="activeIconClass"
-    :inactive-icon-class="inactiveIconClass"
-    :active-icon="activeIcon"
-    :inactive-icon="inactiveIcon"
-    :before-change="beforeChange"
-    :border-color="borderColor"
-    :inline-prompt="inlinePrompt"
-    :aria-label="ariaLabel"
-    @change="(e) => emits('change', e)"
-  >
-  </el-switch>
-</div>
+  <div class="am-switch-wrapper" :class="parentClass" :style="cssVars">
+    <el-switch
+      :id="id"
+      ref="amSwitch"
+      v-model="model"
+      class="am-switch"
+      :class="props.class"
+      :name="name"
+      :width="width"
+      :size="size"
+      :validate-event="validateEvent"
+      :loading="loading"
+      :disabled="disabled"
+      :active-color="activeColor"
+      :inactive-color="inactiveColor"
+      :active-text="activeText"
+      :inactive-text="inactiveText"
+      :active-value="activeValue"
+      :inactive-value="inactiveValue"
+      :active-icon-class="activeIconClass"
+      :inactive-icon-class="inactiveIconClass"
+      :active-icon="activeIcon"
+      :inactive-icon="inactiveIcon"
+      :before-change="beforeChange"
+      :border-color="borderColor"
+      :inline-prompt="inlinePrompt"
+      :aria-label="ariaLabel"
+      @change="(e) => emits('change', e)"
+    >
+    </el-switch>
+  </div>
 </template>
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  toRefs,
-  computed,
-  inject,
-} from 'vue';
+import { ref, toRefs, computed, inject } from 'vue'
 
 /**
  * Component Props
@@ -51,10 +42,10 @@ import {
 const props = defineProps({
   modelValue: {
     type: [Boolean, String, Number],
-    default: false
+    default: false,
   },
   id: {
-    type: String
+    type: String,
   },
   name: {
     type: String,
@@ -67,19 +58,19 @@ const props = defineProps({
     default: 'default',
     validator(value) {
       return ['large', 'default', 'small'].includes(value)
-    }
+    },
   },
   validateEvent: {
     type: Boolean,
-    default: true
+    default: true,
   },
   loading: {
     type: Boolean,
-    default: false
+    default: false,
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   activeColor: {
     type: String,
@@ -95,11 +86,11 @@ const props = defineProps({
   },
   activeValue: {
     type: [Boolean, String, Number],
-    default: true
+    default: true,
   },
   inactiveValue: {
     type: [Boolean, String, Number],
-    default: false
+    default: false,
   },
   activeIconClass: {
     type: String,
@@ -115,14 +106,14 @@ const props = defineProps({
   },
   beforeChange: {
     type: [Function, Boolean],
-    default: () => {}
+    default: () => {},
   },
   borderColor: {
     type: String,
   },
   inlinePrompt: {
     type: Boolean,
-    default: false
+    default: false,
   },
   parentClass: {
     type: String,
@@ -146,7 +137,7 @@ const emits = defineEmits(['update:modelValue', 'change'])
 const { modelValue } = toRefs(props)
 const model = computed({
   get: () => modelValue.value,
-  set: (value) => emits('update:modelValue', value)
+  set: (value) => emits('update:modelValue', value),
 })
 
 /**
@@ -155,32 +146,35 @@ const model = computed({
 const amSwitch = ref(null)
 
 // * Color vars
-const amColors = inject('amColors', ref({
-  colorPrimary: '#1246D6',
-  colorSuccess: '#019719',
-  colorError: '#B4190F',
-  colorWarning: '#CCA20C',
-  colorMainBgr: '#FFFFFF',
-  colorMainHeadingText: '#33434C',
-  colorMainText: '#1A2C37',
-  colorSbBgr: '#17295A',
-  colorSbText: '#FFFFFF',
-  colorInpBgr: '#FFFFFF',
-  colorInpBorder: '#D1D5D7',
-  colorInpText: '#1A2C37',
-  colorInpPlaceHolder: '#1A2C37',
-  colorDropBgr: '#FFFFFF',
-  colorDropBorder: '#D1D5D7',
-  colorDropText: '#0E1920',
-  colorBtnPrim: '#265CF2',
-  colorBtnPrimText: '#FFFFFF',
-  colorBtnSec: '#1A2C37',
-  colorBtnSecText: '#FFFFFF',
-  colorBtnWaiting: '#CCA20C',
-  colorBtnWaitingText: '#FFFFFF',
-  colorBtnDanger: '#B4190F',
-  colorBtnDangerText: '#FFFFFF',
-}))
+const amColors = inject(
+  'amColors',
+  ref({
+    colorPrimary: '#1246D6',
+    colorSuccess: '#019719',
+    colorError: '#B4190F',
+    colorWarning: '#CCA20C',
+    colorMainBgr: '#FFFFFF',
+    colorMainHeadingText: '#33434C',
+    colorMainText: '#1A2C37',
+    colorSbBgr: '#17295A',
+    colorSbText: '#FFFFFF',
+    colorInpBgr: '#FFFFFF',
+    colorInpBorder: '#D1D5D7',
+    colorInpText: '#1A2C37',
+    colorInpPlaceHolder: '#1A2C37',
+    colorDropBgr: '#FFFFFF',
+    colorDropBorder: '#D1D5D7',
+    colorDropText: '#0E1920',
+    colorBtnPrim: '#265CF2',
+    colorBtnPrimText: '#FFFFFF',
+    colorBtnSec: '#1A2C37',
+    colorBtnSecText: '#FFFFFF',
+    colorBtnWaiting: '#CCA20C',
+    colorBtnWaitingText: '#FFFFFF',
+    colorBtnDanger: '#B4190F',
+    colorBtnDangerText: '#FFFFFF',
+  }),
+)
 
 // * CSS Variables
 const cssVars = computed(() => {

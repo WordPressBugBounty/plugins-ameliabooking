@@ -32,27 +32,24 @@
         :closable="true"
         @close="store.commit('auth/setProfileDeleted', false)"
       ></AmAlert>
-      <div
-        id="am-asi-signin-title"
-        class="am-asi__header"
-      >
+      <div id="am-asi-signin-title" class="am-asi__header">
         {{ amLabels.welcome_back }}
       </div>
-      <div
-        id="am-asi-signin-description"
-        class="am-asi__text"
-      >
+      <div id="am-asi-signin-description" class="am-asi__text">
         {{ amLabels.enter_credentials }}
       </div>
     </div>
 
     <!-- Social Buttons -->
-    <div v-if="(settings.socialLogin.googleLoginEnabled && settings.general.googleClientId) || (settings.socialLogin.facebookLoginEnabled && settings.socialLogin.facebookCredentialsEnabled)">
+    <div
+      v-if="
+        (settings.socialLogin.googleLoginEnabled && settings.general.googleClientId) ||
+        (settings.socialLogin.facebookLoginEnabled &&
+          settings.socialLogin.facebookCredentialsEnabled)
+      "
+    >
       <div class="am-asi__social-wrapper">
-        <am-social-button
-          :provider="socialProvider"
-          @social-action="onSignupSocial"
-        />
+        <am-social-button :provider="socialProvider" @social-action="onSignupSocial" />
       </div>
 
       <!-- Social Divider -->
@@ -60,7 +57,6 @@
         <span class="par-sm">{{ amLabels.or_enter_details_below }}</span>
       </div>
       <!-- /Social Divider -->
-
     </div>
     <!-- /Social Buttons -->
 
@@ -107,7 +103,10 @@
     </div>
 
     <div
-      v-if="amSettings.general.googleRecaptcha.enabled && amSettings.roles[cabinetType + 'Cabinet'].googleRecaptcha"
+      v-if="
+        amSettings.general.googleRecaptcha.enabled &&
+        amSettings.roles[cabinetType + 'Cabinet'].googleRecaptcha
+      "
       id="am-recaptcha"
       class="am-recaptcha-holder"
     >
@@ -122,12 +121,7 @@
       </vue-recaptcha>
     </div>
   </div>
-  <Skeleton
-    v-else
-    :count="4"
-    :center-first="true"
-    :main-class="'am-asi-sign-in am-asi'"
-  ></Skeleton>
+  <Skeleton v-else :count="4" :center-first="true" :main-class="'am-asi-sign-in am-asi'"></Skeleton>
 </template>
 
 <script setup>
@@ -144,7 +138,7 @@ import {
   nextTick,
 } from 'vue'
 import VueAuthenticate from 'vue-authenticate'
-import {VueRecaptcha} from 'vue-recaptcha'
+import { VueRecaptcha } from 'vue-recaptcha'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -155,7 +149,11 @@ import httpClient from '../../../../../../plugins/axios'
 // * Composables
 import { useResponsiveClass } from '../../../../../../assets/js/common/responsive.js'
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
-import { useRemoveUrlParameter, useUrlQueryParams, useUrlQueryParam } from '../../../../../../assets/js/common/helper'
+import {
+  useRemoveUrlParameter,
+  useUrlQueryParams,
+  useUrlQueryParam,
+} from '../../../../../../assets/js/common/helper'
 import { useDisableAuthorizationHeader } from '../../../../../../assets/js/public/panel'
 import { SocialAuthOptions } from '../../../../../../assets/js/admin/socialAuthOptions'
 import {
@@ -170,14 +168,14 @@ import { formFieldsTemplates } from '../../../../../../assets/js/common/formFiel
 import AmButton from '../../../../../_components/button/AmButton.vue'
 import Skeleton from './Skeleton'
 import AmAlert from '../../../../../_components/alert/AmAlert.vue'
-import IconComponent from "../../../../../_components/icons/IconComponent.vue";
-import { useGoogleSync } from "../../../../../../assets/js/common/integrationGoogle";
-import { useOutlookSync } from "../../../../../../assets/js/common/integrationOutlook";
-import { useZoomUsers } from "../../../../../../assets/js/common/integrationZoom";
-import { useStripeSync } from "../../../../../../assets/js/common/integrationStripe";
-import { useAppleSync } from "../../../../../../assets/js/common/integrationApple";
-import AmSocialButton from "../../../../../common/FormFields/AmSocialButton.vue";
-import {settings} from "../../../../../../plugins/settings";
+import IconComponent from '../../../../../_components/icons/IconComponent.vue'
+import { useGoogleSync } from '../../../../../../assets/js/common/integrationGoogle'
+import { useOutlookSync } from '../../../../../../assets/js/common/integrationOutlook'
+import { useZoomUsers } from '../../../../../../assets/js/common/integrationZoom'
+import { useStripeSync } from '../../../../../../assets/js/common/integrationStripe'
+import { useAppleSync } from '../../../../../../assets/js/common/integrationApple'
+import AmSocialButton from '../../../../../common/FormFields/AmSocialButton.vue'
+import { settings } from '../../../../../../plugins/settings'
 
 // * Plugin Licence
 let licence = inject('licence')
@@ -202,11 +200,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   let customizedLabels = amCustomize.value.signIn.translations
   if (customizedLabels) {
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -219,13 +217,13 @@ let amLabels = computed(() => {
 
 // * Icon components
 let emailIcon = {
-  components: {IconComponent},
-  template: `<IconComponent icon="email"></IconComponent>`
+  components: { IconComponent },
+  template: `<IconComponent icon="email"></IconComponent>`,
 }
 
 let passwordIcon = {
-  components: {IconComponent},
-  template: `<IconComponent icon="password"></IconComponent>`
+  components: { IconComponent },
+  template: `<IconComponent icon="password"></IconComponent>`,
 }
 
 let socialProvider = ref('')
@@ -245,42 +243,48 @@ function onSignupSocial({ provider, credentials }) {
     data.redirectUri = VueAuthenticateInstance.options.providers[provider].redirectUri
     VueAuthenticateInstance.options.providers[provider].url = `${socialCheckUrl}`
     store.commit('setLoading', false)
-    VueAuthenticateInstance.authenticate(provider, data).then((response) => {
-      infoFormData.value.email = response.data.data.user.email
-      setResponseData(response, true)
-    }).catch((error) => {
-      if (!VueAuthenticateInstance.isAuthenticated()) {
-        authError.value = true
-        authErrorMessage.value = 'User is not authenticated.'
+    VueAuthenticateInstance.authenticate(provider, data)
+      .then((response) => {
+        infoFormData.value.email = response.data.data.user.email
+        setResponseData(response, true)
+      })
+      .catch((error) => {
+        if (!VueAuthenticateInstance.isAuthenticated()) {
+          authError.value = true
+          authErrorMessage.value = 'User is not authenticated.'
+          store.commit('setLoading', false)
+        }
+        if (error.response?.data) {
+          authError.value = true
+          authErrorMessage.value = error.response.data.message
+        }
         store.commit('setLoading', false)
-      }
-      if (error.response?.data) {
-        authError.value = true
-        authErrorMessage.value = error.response.data.message
-      }
-      store.commit('setLoading', false)
-    })
+      })
   }
 
   if (provider === 'google') {
     data.code = credentials
-    httpClient.post(`${socialCheckUrl}`, data).then(response => {
-      infoFormData.value.email = response.data.data.user.email
-      setResponseData(response, true)
-    }).catch((error) => {
-      if (!('data' in error.response.data) && 'message' in error.response.data) {
-        authError.value = true
-        authErrorMessage.value = error.response.data.message
-        return
-      }
+    httpClient
+      .post(`${socialCheckUrl}`, data)
+      .then((response) => {
+        infoFormData.value.email = response.data.data.user.email
+        setResponseData(response, true)
+      })
+      .catch((error) => {
+        if (!('data' in error.response.data) && 'message' in error.response.data) {
+          authError.value = true
+          authErrorMessage.value = error.response.data.message
+          return
+        }
 
-      if ('invalid_credentials' in error.response.data.data) {
-        authError.value = true
-        authErrorMessage.value = amLabels.value.invalid_credentials
-      }
-    }).finally(() => {
-      store.commit('setLoading', false)
-    })
+        if ('invalid_credentials' in error.response.data.data) {
+          authError.value = true
+          authErrorMessage.value = amLabels.value.invalid_credentials
+        }
+      })
+      .finally(() => {
+        store.commit('setLoading', false)
+      })
   }
 }
 
@@ -295,7 +299,11 @@ function setResponseData(response, authenticate) {
     store.commit('cabinet/setTimeZone', response.data.data.user.timeZone)
   }
 
-  if (!response.data.data.user.countryPhoneIso && amSettings.general.phoneDefaultCountryCode && amSettings.general.phoneDefaultCountryCode !== 'auto') {
+  if (
+    !response.data.data.user.countryPhoneIso &&
+    amSettings.general.phoneDefaultCountryCode &&
+    amSettings.general.phoneDefaultCountryCode !== 'auto'
+  ) {
     store.commit('auth/setProfileCountryPhoneIso', amSettings.general.phoneDefaultCountryCode)
   }
 
@@ -303,17 +311,15 @@ function setResponseData(response, authenticate) {
     store.commit('auth/setAuthenticated', authenticate)
   }
 
-  let tokenValidTime = cabinetType.value === 'customer'
+  let tokenValidTime =
+    cabinetType.value === 'customer'
       ? amSettings.roles.customerCabinet.tokenValidTime * 1000
       : amSettings.roles.providerCabinet.tokenValidTime * 1000
 
   if (tokenValidTime > 0 && tokenValidTime < 1814400000) {
-    setTimeout(
-        () => {
-          store.dispatch('auth/logout')
-        },
-        tokenValidTime
-    )
+    setTimeout(() => {
+      store.dispatch('auth/logout')
+    }, tokenValidTime)
   }
 
   if (window?.ameliaBooking?.cabinet?.userLoggedIn) {
@@ -331,14 +337,14 @@ let recaptchaValid = ref(false)
 
 let recaptchaResponse = ref(null)
 
-function onRecaptchaExpired () {
+function onRecaptchaExpired() {
   recaptchaValid.value = false
 
   authError.value = true
   authErrorMessage.value = amLabels.value.recaptcha_invalid_error
 }
 
-function onRecaptchaVerify (response) {
+function onRecaptchaVerify(response) {
   recaptchaValid.value = true
 
   recaptchaResponse.value = response
@@ -360,13 +366,13 @@ let infoFormData = ref({
     get: () => store.getters['auth/getEmail'],
     set: (val) => {
       store.commit('auth/setEmail', val ? val : '')
-    }
+    },
   }),
   password: computed({
     get: () => store.getters['auth/getPassword'],
     set: (val) => {
       store.commit('auth/setPassword', val ? val : '')
-    }
+    },
   }),
 })
 
@@ -377,14 +383,14 @@ let infoFormRules = ref({
       required: true,
       message: amLabels.value.enter_email_or_username_warning,
       trigger: 'submit',
-    }
+    },
   ],
   password: [
     {
       required: true,
       message: amLabels.value.enter_password_warning,
       trigger: 'submit',
-    }
+    },
   ],
 })
 
@@ -397,8 +403,8 @@ let signInFormConstruction = ref({
       label: amLabels.value.email_or_username,
       prefixIcon: markRaw(emailIcon),
       placeholder: '',
-      class: 'am-asi__item'
-    }
+      class: 'am-asi__item',
+    },
   },
   password: {
     template: formFieldsTemplates.text,
@@ -409,8 +415,8 @@ let signInFormConstruction = ref({
       label: amLabels.value.password,
       prefixIcon: markRaw(passwordIcon),
       placeholder: '',
-      class: 'am-asi__item'
-    }
+      class: 'am-asi__item',
+    },
   },
 })
 
@@ -435,23 +441,25 @@ let authErrorAlertRef = ref(null)
 let profileDeletedAlertRef = ref(null)
 let hasInitialFocus = ref(false)
 
-function focusFirstInput () {
+function focusFirstInput() {
   if (!signInContainerRef.value) {
     return
   }
 
   // Focus the first interactive field when form is initially rendered.
-  const firstInput = signInContainerRef.value.querySelector('.am-asi__form input, .am-asi__form textarea, .am-asi__form select')
+  const firstInput = signInContainerRef.value.querySelector(
+    '.am-asi__form input, .am-asi__form textarea, .am-asi__form select',
+  )
   if (firstInput) {
     firstInput.focus()
   }
 }
 
-function goToResetPassword () {
+function goToResetPassword() {
   pageKey.value = 'sendAccessLink'
 }
 
-function useAuthenticateUser (changePass) {
+function useAuthenticateUser(changePass) {
   let urlToken = useUrlQueryParam('token')
 
   if (urlToken) {
@@ -461,7 +469,7 @@ function useAuthenticateUser (changePass) {
   }
 }
 
-function setEmployee (response) {
+function setEmployee(response) {
   let employee = {
     id: response.data.data.user.id,
     firstName: response.data.data.user.firstName,
@@ -470,24 +478,46 @@ function setEmployee (response) {
     phone: response.data.data.user.phone,
     countryPhoneIso: response.data.data.user.countryPhoneIso,
     googleCalendar: {
-      id: 'id' in response.data.data.user.googleCalendar ? response.data.data.user.googleCalendar.id : null,
-      calendarId: response.data.data.user.googleCalendar.calendarId ? response.data.data.user.googleCalendar.calendarId : '',
-      token: 'token' in response.data.data.user.googleCalendar ? response.data.data.user.googleCalendar.token : null,
+      id:
+        'id' in response.data.data.user.googleCalendar
+          ? response.data.data.user.googleCalendar.id
+          : null,
+      calendarId: response.data.data.user.googleCalendar.calendarId
+        ? response.data.data.user.googleCalendar.calendarId
+        : '',
+      token:
+        'token' in response.data.data.user.googleCalendar
+          ? response.data.data.user.googleCalendar.token
+          : null,
       accounts: response.data.data.user.googleCalendar.accounts || [],
       blockedCalendars: response.data.data.user.googleCalendar.blockedCalendars || [],
       calendarList: response.data.data.user.googleCalendar.calendarList || [],
     },
     outlookCalendar: {
-      id: 'id' in response.data.data.user.outlookCalendar ? response.data.data.user.outlookCalendar.id : null,
-      calendarId: response.data.data.user.outlookCalendar.calendarId ? response.data.data.user.outlookCalendar.calendarId : '',
-      token: 'token' in response.data.data.user.outlookCalendar ? response.data.data.user.outlookCalendar.token : null,
+      id:
+        'id' in response.data.data.user.outlookCalendar
+          ? response.data.data.user.outlookCalendar.id
+          : null,
+      calendarId: response.data.data.user.outlookCalendar.calendarId
+        ? response.data.data.user.outlookCalendar.calendarId
+        : '',
+      token:
+        'token' in response.data.data.user.outlookCalendar
+          ? response.data.data.user.outlookCalendar.token
+          : null,
       accounts: response.data.data.user.outlookCalendar.accounts || [],
       blockedCalendars: response.data.data.user.outlookCalendar.blockedCalendars || [],
       calendarList: response.data.data.user.outlookCalendar.calendarList || [],
     },
-    appleCalendarId: response.data.data.user.appleCalendarId ? response.data.data.user.appleCalendarId : '',
-    googleCalendarId: response.data.data.user.googleCalendarId ? response.data.data.user.googleCalendarId : '',
-    outlookCalendarId: response.data.data.user.outlookCalendarId ? response.data.data.user.outlookCalendarId : '',
+    appleCalendarId: response.data.data.user.appleCalendarId
+      ? response.data.data.user.appleCalendarId
+      : '',
+    googleCalendarId: response.data.data.user.googleCalendarId
+      ? response.data.data.user.googleCalendarId
+      : '',
+    outlookCalendarId: response.data.data.user.outlookCalendarId
+      ? response.data.data.user.outlookCalendarId
+      : '',
     stripeConnect: response.data.data.user.stripeConnect,
     zoomUserId: response.data.data.user.zoomUserId ? response.data.data.user.zoomUserId : '',
     locationId: response.data.data.user.locationId,
@@ -505,11 +535,17 @@ function setEmployee (response) {
     useFeaturesAndIntegrations(employeeService, true)
   })
 
-  store.commit('employee/setSavedSpecialDayList', JSON.parse(JSON.stringify(response.data.data.user.specialDayList)))
+  store.commit(
+    'employee/setSavedSpecialDayList',
+    JSON.parse(JSON.stringify(response.data.data.user.specialDayList)),
+  )
 
-  store.commit('employee/setSavedDayOffList', JSON.parse(JSON.stringify(response.data.data.user.dayOffList)))
+  store.commit(
+    'employee/setSavedDayOffList',
+    JSON.parse(JSON.stringify(response.data.data.user.dayOffList)),
+  )
 
-  employee.serviceList.forEach(employeeService => {
+  employee.serviceList.forEach((employeeService) => {
     useParsedCustomPricing(employeeService)
   })
 
@@ -522,41 +558,40 @@ function setEmployee (response) {
   store.commit('employee/setEmployee', useFrontendEmployee(store, employee))
 
   store.commit(
-      'auth/setOutlookCalendars',
-      response.data.data.user.outlookCalendar?.calendarList ? response.data.data.user.outlookCalendar.calendarList : []
+    'auth/setOutlookCalendars',
+    response.data.data.user.outlookCalendar?.calendarList
+      ? response.data.data.user.outlookCalendar.calendarList
+      : [],
   )
 
   store.commit(
-      'auth/setGoogleCalendars',
-      response.data.data.user.googleCalendar?.calendarList ? response.data.data.user.googleCalendar.calendarList : []
+    'auth/setGoogleCalendars',
+    response.data.data.user.googleCalendar?.calendarList
+      ? response.data.data.user.googleCalendar.calendarList
+      : [],
   )
 
-  if (amSettings.appleCalendar.enabled &&
-      !licence.isLite &&
-      !licence.isStarter
-  ) {
+  if (amSettings.appleCalendar.enabled && !licence.isLite && !licence.isStarter) {
     useAppleSync(store)
   }
 
-  if (amSettings.payments.stripe.enabled &&
-      amSettings.payments.stripe.connect.enabled &&
-      !licence.isLite &&
-      !licence.isStarter &&
-      !licence.isBasic
+  if (
+    amSettings.payments.stripe.enabled &&
+    amSettings.payments.stripe.connect.enabled &&
+    !licence.isLite &&
+    !licence.isStarter &&
+    !licence.isBasic
   ) {
     useStripeSync(store)
   }
 
-  if (amSettings.zoom.enabled &&
-      !licence.isLite &&
-      !licence.isStarter
-  ) {
+  if (amSettings.zoom.enabled && !licence.isLite && !licence.isStarter) {
     useZoomUsers(store)
   }
 }
 
-function useAuthenticate (tokenValue, isUrlToken, checkIfWpUser, changePass) {
-  let params = {cabinetType: cabinetType.value, changePass: changePass}
+function useAuthenticate(tokenValue, isUrlToken, checkIfWpUser, changePass) {
+  let params = { cabinetType: cabinetType.value, changePass: changePass }
 
   if (recaptchaResponse.value !== null) {
     params.recaptcha = recaptchaResponse.value
@@ -579,58 +614,71 @@ function useAuthenticate (tokenValue, isUrlToken, checkIfWpUser, changePass) {
     params.token = tokenValue
   }
 
-  httpClient.post(
-    '/users/authenticate',
-    params,
-    tokenValue !== null && !useDisableAuthorizationHeader() ? {headers: {Authorization: 'Bearer ' + tokenValue}} : {}
-  ).then((response) => {
-    if ('authentication_required' in response.data.data) {
-      if (!amSettings.roles[cabinetType.value + 'Cabinet']['loginEnabled']) {
-        pageKey.value = 'sendAccessLink'
+  httpClient
+    .post(
+      '/users/authenticate',
+      params,
+      tokenValue !== null && !useDisableAuthorizationHeader()
+        ? { headers: { Authorization: 'Bearer ' + tokenValue } }
+        : {},
+    )
+    .then((response) => {
+      if ('authentication_required' in response.data.data) {
+        if (!amSettings.roles[cabinetType.value + 'Cabinet']['loginEnabled']) {
+          pageKey.value = 'sendAccessLink'
+        }
+
+        return
       }
 
-      return
-    }
+      setResponseData(response, false)
 
-    setResponseData(response, false)
+      if (useUrlQueryParam('token')) {
+        window.history.replaceState(
+          null,
+          null,
+          useRemoveUrlParameter(window.location.href, 'token'),
+        )
+      }
 
-    if (useUrlQueryParam('token')) {
-      window.history.replaceState(null, null, useRemoveUrlParameter(window.location.href, 'token'))
-    }
+      if ('set_password' in response.data.data && response.data.data.set_password) {
+        pageKey.value = 'setPassword'
+      } else if ('change_password' in response.data.data && response.data.data.change_password) {
+        pageKey.value = 'setPassword'
+      } else {
+        store.commit('auth/setAuthenticated', true)
+      }
+    })
+    .catch((error) => {
+      if (!('data' in error.response.data) && 'message' in error.response.data) {
+        authError.value = true
+        authErrorMessage.value = error.response.data.message
+        return
+      }
 
-    if ('set_password' in response.data.data && response.data.data.set_password) {
-      pageKey.value = 'setPassword'
-    } else if ('change_password' in response.data.data && response.data.data.change_password) {
-      pageKey.value = 'setPassword'
-    } else {
-      store.commit('auth/setAuthenticated', true)
-    }
-  }).catch((error) => {
-    if (!('data' in error.response.data) && 'message' in error.response.data) {
-      authError.value = true
-      authErrorMessage.value = error.response.data.message
-      return
-    }
+      if ('invalid_credentials' in error.response.data.data) {
+        authError.value = true
+        authErrorMessage.value = amLabels.value.invalid_credentials
+      }
 
-    if ('invalid_credentials' in error.response.data.data) {
-      authError.value = true
-      authErrorMessage.value = amLabels.value.invalid_credentials
-    }
-
-    if ('recaptcha_error' in error.response.data.data) {
-      authError.value = true
-      authErrorMessage.value = amLabels.value.recaptcha_error
-    }
-  }).finally(() => {
-    store.commit('setLoading', false)
-  })
+      if ('recaptcha_error' in error.response.data.data) {
+        authError.value = true
+        authErrorMessage.value = amLabels.value.recaptcha_error
+      }
+    })
+    .finally(() => {
+      store.commit('setLoading', false)
+    })
 }
 
 // * Submit Form
 function submitForm() {
   authFormRef.value.validate((valid) => {
     if (valid) {
-      if (amSettings.general.googleRecaptcha.enabled && amSettings.roles[cabinetType.value + 'Cabinet'].googleRecaptcha) {
+      if (
+        amSettings.general.googleRecaptcha.enabled &&
+        amSettings.roles[cabinetType.value + 'Cabinet'].googleRecaptcha
+      ) {
         if (amSettings.general.googleRecaptcha.invisible) {
           recaptchaRef.value.execute()
         } else if (!recaptchaValid.value) {
@@ -650,16 +698,14 @@ function submitForm() {
   })
 }
 
-function continueWithAuthenticate () {
+function continueWithAuthenticate() {
   store.commit('setLoading', true)
 
   useAuthenticate(null, false, false, false)
 }
 
-function authenticate () {
-  useAuthenticateUser(
-    'changePass' in useUrlQueryParams(window.location.href)
-  )
+function authenticate() {
+  useAuthenticateUser('changePass' in useUrlQueryParams(window.location.href))
 }
 
 onBeforeMount(() => {
@@ -674,9 +720,21 @@ onMounted(() => {
       window.history.replaceState(null, null, useRemoveUrlParameter(window.location.href, 'iss'))
     }
 
-    if (amSettings.googleCalendar.enabled && cabinetType.value === 'provider' && queryParams && queryParams['code'] && queryParams['scope']) {
+    if (
+      amSettings.googleCalendar.enabled &&
+      cabinetType.value === 'provider' &&
+      queryParams &&
+      queryParams['code'] &&
+      queryParams['scope']
+    ) {
       useGoogleSync(queryParams['code'], authenticate)
-    } else if (amSettings.outlookCalendar.enabled && cabinetType.value === 'provider' && queryParams && queryParams['code'] && queryParams['state']) {
+    } else if (
+      amSettings.outlookCalendar.enabled &&
+      cabinetType.value === 'provider' &&
+      queryParams &&
+      queryParams['code'] &&
+      queryParams['state']
+    ) {
       useOutlookSync(queryParams['code'], authenticate)
     } else {
       authenticate()
@@ -771,7 +829,9 @@ export default {
     max-width: 400px;
     width: 100%;
     background-color: var(--am-c-main-bgr);
-    box-shadow: 0 0 9px -4px var(--am-c-main-text-op40), 0px 17px 35px -12px var(--am-c-main-text-op25);
+    box-shadow:
+      0 0 9px -4px var(--am-c-main-text-op40),
+      0px 17px 35px -12px var(--am-c-main-text-op25);
     border-radius: 12px;
     padding: 32px 24px 24px;
     margin: 0 auto;
@@ -814,7 +874,7 @@ export default {
       // Before & After
       &:before,
       &:after {
-        background: var(--shade-250, #D1D5D7);
+        background: var(--shade-250, #d1d5d7);
         content: '';
         height: 1px;
         width: 100%;
@@ -826,7 +886,7 @@ export default {
         font-style: normal;
         font-weight: 400;
         line-height: 24px;
-        color: var(--shade-500, #808A90);
+        color: var(--shade-500, #808a90);
         margin-left: 8px;
         margin-right: 8px;
       }
@@ -859,7 +919,8 @@ export default {
         }
 
         .el-alert {
-          &--success, &--error {
+          &--success,
+          &--error {
             border: none;
           }
 

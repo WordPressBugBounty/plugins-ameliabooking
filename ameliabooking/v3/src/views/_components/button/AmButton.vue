@@ -14,11 +14,11 @@
         'is-disabled': disabled,
         'is-loading': loading,
         'is-round': round,
-        'is-circle': circle
+        'is-circle': circle,
       },
-      customClass
+      customClass,
     ]"
-    :style="{...cssVars, ...style}"
+    :style="{ ...cssVars, ...style }"
     @click="handleClick"
   >
     <!-- Loading slot -->
@@ -53,28 +53,28 @@
 </template>
 
 <script setup>
-import { useColorTransparency } from '../../../assets/js/common/colorManipulation';
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
 
-import { computed, ref, inject } from "vue";
+import { computed, ref, inject } from 'vue'
 
 /**
  * Component props
  */
 const props = defineProps({
   id: {
-    type: String
+    type: String,
   },
   customClass: {
     type: String,
-    default: ''
+    default: '',
   },
   innerClass: {
     type: String,
-    default: ''
+    default: '',
   },
   iconOnly: {
     type: Boolean,
-    default: false
+    default: false,
   },
   size: {
     // default / medium / small / mini / micro
@@ -82,15 +82,17 @@ const props = defineProps({
     default: 'default',
     validator(value) {
       return ['default', 'medium', 'small', 'mini', 'micro'].includes(value)
-    }
+    },
   },
   category: {
     // primary / secondary / success / warning / danger / error
     type: String,
     default: 'primary',
     validator(value) {
-      return ['primary', 'secondary', 'success', 'warning', 'danger', 'error', 'waiting'].includes(value)
-    }
+      return ['primary', 'secondary', 'success', 'warning', 'danger', 'error', 'waiting'].includes(
+        value,
+      )
+    },
   },
   type: {
     // filled / plain / text
@@ -98,7 +100,7 @@ const props = defineProps({
     default: 'filled',
     validator(value) {
       return ['filled', 'plain', 'text'].includes(value)
-    }
+    },
   },
   nativeType: {
     // button / submit / reset
@@ -106,59 +108,59 @@ const props = defineProps({
     default: 'button',
     validator(value) {
       return ['button', 'submit', 'reset'].includes(value)
-    }
+    },
   },
   round: {
     type: Boolean,
-    default: false
+    default: false,
   },
   circle: {
     type: Boolean,
-    default: false
+    default: false,
   },
   loading: {
     type: Boolean,
-    default: false
+    default: false,
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   autofocus: {
     type: Boolean,
-    default: false
+    default: false,
   },
   prefix: {
     type: [String, Object, Function],
-    default: ''
+    default: '',
   },
   suffix: {
     type: [String, Object, Function],
-    default: ''
+    default: '',
   },
   icon: {
     type: [String, Object, Function],
-    default: ''
+    default: '',
   },
   loadingIcon: {
     type: [String, Object, Function],
-    default: ''
+    default: '',
   },
   style: {
     type: Object,
     default: () => {
       return {}
-    }
-  }
+    },
+  },
 })
 
 // Create filtered properties
 const bindProps = computed(() => {
-  const filterObj = {...props};
-  const arrayProp = ['id'];
+  const filterObj = { ...props }
+  const arrayProp = ['id']
 
-  return Object.fromEntries(Object.entries(filterObj).filter(([key]) => arrayProp.includes(key)));
-});
+  return Object.fromEntries(Object.entries(filterObj).filter(([key]) => arrayProp.includes(key)))
+})
 
 /**
  * Component emits
@@ -175,32 +177,35 @@ function handleClick(evt) {
 }
 
 // * Color Vars
-let amColors = inject('amColors', ref({
-  colorPrimary: '#1246D6',
-  colorSuccess: '#019719',
-  colorError: '#B4190F',
-  colorWarning: '#CCA20C',
-  colorMainBgr: '#FFFFFF',
-  colorMainHeadingText: '#33434C',
-  colorMainText: '#1A2C37',
-  colorSbBgr: '#17295A',
-  colorSbText: '#FFFFFF',
-  colorInpBgr: '#FFFFFF',
-  colorInpBorder: '#D1D5D7',
-  colorInpText: '#1A2C37',
-  colorInpPlaceHolder: '#1A2C37',
-  colorDropBgr: '#FFFFFF',
-  colorDropBorder: '#D1D5D7',
-  colorDropText: '#0E1920',
-  colorBtnPrim: '#265CF2',
-  colorBtnPrimText: '#FFFFFF',
-  colorBtnSec: '#1A2C37',
-  colorBtnSecText: '#FFFFFF',
-  colorBtnWaiting: '#CCA20C',
-  colorBtnWaitingText: '#FFFFFF',
-  colorBtnDanger: '#B4190F',
-  colorBtnDangerText: '#FFFFFF',
-}))
+let amColors = inject(
+  'amColors',
+  ref({
+    colorPrimary: '#1246D6',
+    colorSuccess: '#019719',
+    colorError: '#B4190F',
+    colorWarning: '#CCA20C',
+    colorMainBgr: '#FFFFFF',
+    colorMainHeadingText: '#33434C',
+    colorMainText: '#1A2C37',
+    colorSbBgr: '#17295A',
+    colorSbText: '#FFFFFF',
+    colorInpBgr: '#FFFFFF',
+    colorInpBorder: '#D1D5D7',
+    colorInpText: '#1A2C37',
+    colorInpPlaceHolder: '#1A2C37',
+    colorDropBgr: '#FFFFFF',
+    colorDropBorder: '#D1D5D7',
+    colorDropText: '#0E1920',
+    colorBtnPrim: '#265CF2',
+    colorBtnPrimText: '#FFFFFF',
+    colorBtnSec: '#1A2C37',
+    colorBtnSecText: '#FFFFFF',
+    colorBtnWaiting: '#CCA20C',
+    colorBtnWaitingText: '#FFFFFF',
+    colorBtnDanger: '#B4190F',
+    colorBtnDangerText: '#FFFFFF',
+  }),
+)
 
 const cssVars = computed(() => {
   let cssVariables = {}
@@ -441,12 +446,18 @@ const cssVars = computed(() => {
 
       // Category - primary / secondary / success / warning / danger / error
       // classes usage to change css variables
-      &--primary {}
-      &--secondary {}
-      &--success {}
-      &--warning {}
-      &--danger {}
-      &--error {}
+      &--primary {
+      }
+      &--secondary {
+      }
+      &--success {
+      }
+      &--warning {
+      }
+      &--danger {
+      }
+      &--error {
+      }
 
       // Circle
       &.is-circle {
@@ -464,7 +475,8 @@ const cssVars = computed(() => {
         cursor: not-allowed;
       }
 
-      &--waiting-list { // TODO
+      &--waiting-list {
+        // TODO
       }
     }
 

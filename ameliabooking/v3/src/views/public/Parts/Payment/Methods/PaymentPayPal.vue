@@ -1,20 +1,12 @@
 <template>
-  <div class="am-fs__payment_payPal" :style="cssVars">
-  </div>
+  <div class="am-fs__payment_payPal" :style="cssVars"></div>
 </template>
 
 <script setup>
-import {
-  settings,
-  ajaxUrl
-} from '../../../../../plugins/settings.js'
+import { settings, ajaxUrl } from '../../../../../plugins/settings.js'
 
 // * Import from Vue
-import {
-  inject,
-  computed,
-  onMounted,
-} from 'vue'
+import { inject, computed, onMounted } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -26,7 +18,7 @@ import {
   useCreateBooking,
   useCreateBookingSuccess,
   useCreateBookingError,
-  getErrorMessage
+  getErrorMessage,
 } from '../../../../../assets/js/public/booking.js'
 
 const store = useStore()
@@ -34,18 +26,16 @@ const store = useStore()
 // * Labels
 const amLabels = inject('amLabels')
 
-
 // * Step Functions
 const { nextStep } = inject('changingStepsFunctions', {
-  nextStep: () => {}
+  nextStep: () => {},
 })
 
 // * Colors
 // let amColors = inject('amColors')
 //
 let cssVars = computed(() => {
-  return {
-  }
+  return {}
 })
 
 // * Payment Part
@@ -53,7 +43,7 @@ let transactionReference = null
 
 const shortcodeData = inject('shortcodeData')
 
-function payPalPaymentInit () {
+function payPalPaymentInit() {
   const selector = '#am-paypal-element-' + shortcodeData.value.counter
   const el = document.getElementById('am-paypal-element-' + shortcodeData.value.counter)
 
@@ -75,7 +65,7 @@ function payPalPaymentInit () {
         color: 'gold',
         shape: 'rect',
         tagline: false,
-        height: 40
+        height: 40,
       },
 
       onClick: function (data, actions) {
@@ -91,17 +81,17 @@ function payPalPaymentInit () {
         return fetch(ajaxUrl + '/payment/payPal', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-          body: JSON.stringify(useBookingData(store, null, true, {}, null)['data'])
+          body: JSON.stringify(useBookingData(store, null, true, {}, null)['data']),
         })
-          .then(r => {
+          .then((r) => {
             if (!r.ok) return Promise.reject(new Error('HTTP ' + r.status))
             return r.json()
           })
-          .then(response => {
+          .then((response) => {
             transactionReference = response.data.transactionReference
             return response.data.paymentID
           })
-          .catch(error => {
+          .catch((error) => {
             payPalError(error)
           })
       },
@@ -118,20 +108,16 @@ function payPalPaymentInit () {
             {
               transactionReference: transactionReference,
               PaymentId: data.orderID,
-              PayerId: data.payerID
+              PayerId: data.payerID,
             },
-            null
+            null,
           ),
           successBooking,
-          error => {
-            useCreateBookingError(
-              store,
-              error.response.data,
-              () => {
-                emits('payment-error', getErrorMessage())
-              }
-            )
-          }
+          (error) => {
+            useCreateBookingError(store, error.response.data, () => {
+              emits('payment-error', getErrorMessage())
+            })
+          },
         )
       },
 
@@ -141,7 +127,7 @@ function payPalPaymentInit () {
 
       onError: function (error) {
         payPalError(error)
-      }
+      },
     })
   } catch (e) {
     setTimeout(payPalPaymentInit, 100)
@@ -160,51 +146,36 @@ function payPalError(error) {
 
   let response = JSON.parse(
     JSON.stringify(
-      JSON.parse(errorString.substring(errorString.indexOf('{'),
-      errorString.lastIndexOf('}') + 1))
-    )
+      JSON.parse(errorString.substring(errorString.indexOf('{'), errorString.lastIndexOf('}') + 1)),
+    ),
   )
 
   if (typeof response === 'object' && response.hasOwnProperty('data')) {
     errorBooking(response)
   } else if (typeof response === 'object' && response.hasOwnProperty('message')) {
-    usePaymentError(
-      store,
-      function () {
-        emits('payment-error', response.message)
-      }
-    )
+    usePaymentError(store, function () {
+      emits('payment-error', response.message)
+    })
   } else {
-    usePaymentError(
-      store,
-      function () {
-        emits('payment-error', errorString)
-      }
-    )
+    usePaymentError(store, function () {
+      emits('payment-error', errorString)
+    })
   }
 }
 
-function successBooking (response) {
-  useCreateBookingSuccess(
-    store,
-    response,
-    function () {
-      nextStep()
-    }
-  )
+function successBooking(response) {
+  useCreateBookingSuccess(store, response, function () {
+    nextStep()
+  })
 }
 
 // * Components Emits
 const emits = defineEmits(['payment-error'])
 
-function errorBooking (error) {
-  useCreateBookingError(
-    store,
-    error,
-    () => {
-      emits('payment-error', getErrorMessage())
-    }
-  )
+function errorBooking(error) {
+  useCreateBookingError(store, error, () => {
+    emits('payment-error', getErrorMessage())
+  })
 }
 
 onMounted(() => {
@@ -214,7 +185,7 @@ onMounted(() => {
 
 <script>
 export default {
-  name: 'PaymentPayPal'
+  name: 'PaymentPayPal',
 }
 </script>
 

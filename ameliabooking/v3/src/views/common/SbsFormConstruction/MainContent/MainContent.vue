@@ -1,10 +1,5 @@
 <template>
-  <div
-    class="am-fs__main"
-    :style="cssVars"
-    :class="responsiveClass"
-    role="main"
-  >
+  <div class="am-fs__main" :style="cssVars" :class="responsiveClass" role="main">
     <div class="am-fs__main-inner">
       <slot name="header"></slot>
       <slot name="step"></slot>
@@ -15,15 +10,11 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  computed,
-  inject
-} from 'vue';
+import { ref, computed, inject } from 'vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../assets/js/common/colorManipulation";
-import { useResponsiveClass } from "../../../../assets/js/common/responsive";
+import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
+import { useResponsiveClass } from '../../../../assets/js/common/responsive'
 
 let props = defineProps({
   maxWidth: {
@@ -32,15 +23,17 @@ let props = defineProps({
   },
   oldResponsive: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 })
 
 // * Container Width
 let cWidth = inject('containerWidth', 0)
 // am-fs__main-mobile
 let checkScreen = computed(() => {
-  return cWidth.value < 560 || (cWidth.value > 560 && cWidth.value < 640) ? 'am-fs__main-mobile' : ''
+  return cWidth.value < 560 || (cWidth.value > 560 && cWidth.value < 640)
+    ? 'am-fs__main-mobile'
+    : ''
 })
 
 let responsiveClass = computed(() => {
@@ -48,28 +41,31 @@ let responsiveClass = computed(() => {
 })
 
 // * Color Vars
-let amColors = inject('amColors', ref({
-  colorPrimary: '#1246D6',
-  colorSuccess: '#019719',
-  colorError: '#B4190F',
-  colorWarning: '#CCA20C',
-  colorMainBgr: '#FFFFFF',
-  colorMainHeadingText: '#33434C',
-  colorMainText: '#1A2C37',
-  colorSbBgr: '#17295A',
-  colorSbText: '#FFFFFF',
-  colorInpBgr: '#FFFFFF',
-  colorInpBorder: '#D1D5D7',
-  colorInpText: '#1A2C37',
-  colorInpPlaceHolder: '#1A2C37',
-  colorDropBgr: '#FFFFFF',
-  colorDropBorder: '#D1D5D7',
-  colorDropText: '#0E1920',
-  colorBtnPrim: '#265CF2',
-  colorBtnPrimText: '#FFFFFF',
-  colorBtnSec: '#1A2C37',
-  colorBtnSecText: '#FFFFFF',
-}))
+let amColors = inject(
+  'amColors',
+  ref({
+    colorPrimary: '#1246D6',
+    colorSuccess: '#019719',
+    colorError: '#B4190F',
+    colorWarning: '#CCA20C',
+    colorMainBgr: '#FFFFFF',
+    colorMainHeadingText: '#33434C',
+    colorMainText: '#1A2C37',
+    colorSbBgr: '#17295A',
+    colorSbText: '#FFFFFF',
+    colorInpBgr: '#FFFFFF',
+    colorInpBorder: '#D1D5D7',
+    colorInpText: '#1A2C37',
+    colorInpPlaceHolder: '#1A2C37',
+    colorDropBgr: '#FFFFFF',
+    colorDropBorder: '#D1D5D7',
+    colorDropText: '#0E1920',
+    colorBtnPrim: '#265CF2',
+    colorBtnPrimText: '#FFFFFF',
+    colorBtnSec: '#1A2C37',
+    colorBtnSecText: '#FFFFFF',
+  }),
+)
 
 // * Css Variables
 let cssVars = computed(() => {
@@ -91,7 +87,6 @@ let cssVars = computed(() => {
   // cap -- cabinet panel
   // Amelia Form Steps
   .am-fs {
-
     // Main Container
     &__main {
       --am-brad-main-default: 0 0.5rem 0.5rem 0;
@@ -116,7 +111,8 @@ let cssVars = computed(() => {
           height: calc(100% - 72px);
         }
 
-        &.am-capi, &.am-caep {
+        &.am-capi,
+        &.am-caep {
           padding: 0;
           height: calc(100% - 136px);
         }
@@ -151,7 +147,8 @@ let cssVars = computed(() => {
         .am-fs__main-content {
           padding: 16px;
 
-          &.am-capi, &.am-caep {
+          &.am-capi,
+          &.am-caep {
             padding: 0;
           }
         }

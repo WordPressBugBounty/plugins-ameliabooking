@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { inject } from "vue";
+import { inject } from 'vue'
 
 let amSettings = inject('settings')
 

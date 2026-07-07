@@ -4,10 +4,7 @@
     id="amelia-container"
     ref="ameliaContainer"
     class="am-cap__wrapper"
-    :class="[
-      { 'am-collapsed': sidebarCollapsed },
-      { 'am-auth': pagesType === 'auth' },
-    ]"
+    :class="[{ 'am-collapsed': sidebarCollapsed }, { 'am-auth': pagesType === 'auth' }]"
     :style="cssVars"
   >
     <template v-if="pagesType === 'auth'">
@@ -32,16 +29,12 @@
                   { selected: stepName === step.key },
                   {
                     selected:
-                      (stepName === 'packagesList' ||
-                        stepName === 'packageAppointmentsList') &&
+                      (stepName === 'packagesList' || stepName === 'packageAppointmentsList') &&
                       step.key === 'packages',
                   },
                 ]"
               >
-                <div
-                  class="am-fs-sb__page-inner"
-                  :class="{ 'am-collapsed': sidebarCollapsed }"
-                >
+                <div class="am-fs-sb__page-inner" :class="{ 'am-collapsed': sidebarCollapsed }">
                   <div class="am-fs-sb__page-icon">
                     <span :class="`am-icon-${step.icon}`"></span>
                   </div>
@@ -71,10 +64,7 @@
         </template>
         <template #support-info>
           <div ref="sidebarFooterRef" class="am-fs-sb__footer">
-            <div
-              class="am-fs-sb__page"
-              @click="sidebarCollapsed = !sidebarCollapsed"
-            >
+            <div class="am-fs-sb__page" @click="sidebarCollapsed = !sidebarCollapsed">
               <div class="am-fs-sb__page-inner">
                 <div class="am-fs-sb__page-icon">
                   <span class="am-icon-dashboard"></span>
@@ -148,10 +138,7 @@
           </MainPanelHeader>
         </template>
         <template #step>
-          <component
-            :is="stepsArray[stepIndex]"
-            class="am-fs__main-content"
-          ></component>
+          <component :is="stepsArray[stepIndex]" class="am-fs__main-content"></component>
         </template>
       </MainContent>
     </template>
@@ -356,8 +343,7 @@ function resize() {
       ? ameliaContainer.value.offsetWidth <= 600
       : toggleSidebar.value
     sidebarVisibility.value = ameliaContainer.value.offsetWidth > 480
-    menuVisibility.value =
-      ameliaContainer.value.offsetWidth > 481 ? false : menuVisibility.value
+    menuVisibility.value = ameliaContainer.value.offsetWidth > 481 ? false : menuVisibility.value
   }
 }
 
@@ -388,9 +374,7 @@ provide('sidebarSteps', sidebarSteps)
 let sidebarIndex = ref(0)
 
 onMounted(() => {
-  sidebarIndex.value = sidebarSteps.value.findIndex(
-    (a) => a.key === stepName.value
-  )
+  sidebarIndex.value = sidebarSteps.value.findIndex((a) => a.key === stepName.value)
 })
 
 watchEffect(() => {
@@ -449,12 +433,8 @@ function labelsDisplay(label, stepKey) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value][stepKey].translations &&
       amCustomize.value[pageRenderKey.value][stepKey].translations[label] &&
-      amCustomize.value[pageRenderKey.value][stepKey].translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -464,17 +444,11 @@ function labelsDisplay(label, stepKey) {
 // * Step labels passed to inner components
 function globalStepLabels(step) {
   let stepLabels = {}
-  let customizedLabels = step
-    ? amCustomize.value[pageRenderKey.value][step].translations
-    : null
+  let customizedLabels = step ? amCustomize.value[pageRenderKey.value][step].translations : null
   if (customizedLabels && Object.keys(customizedLabels)) {
-    Object.keys(
-      amCustomize.value[pageRenderKey.value][step].translations
-    ).forEach((label) => {
+    Object.keys(amCustomize.value[pageRenderKey.value][step].translations).forEach((label) => {
       stepLabels[label] =
-        amCustomize.value[pageRenderKey.value][step].translations[label][
-          langKey.value
-        ]
+        amCustomize.value[pageRenderKey.value][step].translations[label][langKey.value]
     })
   } else {
     stepLabels = {}
@@ -496,7 +470,7 @@ let amColors = computed(() => {
     ? amCustomize.value[pageRenderKey.value].colors
     : defaultCustomizeSettings[pageRenderKey.value].colors
 
-    return { ...colors }
+  return { ...colors }
 })
 provide('amColors', amColors)
 
@@ -521,22 +495,10 @@ let cssVars = computed(() => {
     '--am-c-btn-prim-text': amColors.value.colorBtnPrimText,
     '--am-c-btn-sec': amColors.value.colorBtnSec,
     '--am-c-btn-sec-text': amColors.value.colorBtnSecText,
-    '--am-c-skeleton-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
-    '--am-c-skeleton-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
-    '--am-c-skeleton-sb-op20': useColorTransparency(
-      amColors.value.colorSbText,
-      0.2
-    ),
-    '--am-c-skeleton-sb-op60': useColorTransparency(
-      amColors.value.colorSbText,
-      0.6
-    ),
+    '--am-c-skeleton-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
+    '--am-c-skeleton-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-skeleton-sb-op20': useColorTransparency(amColors.value.colorSbText, 0.2),
+    '--am-c-skeleton-sb-op60': useColorTransparency(amColors.value.colorSbText, 0.6),
     '--am-font-family': amFonts.value.fontFamily,
 
     // css properties
@@ -557,18 +519,9 @@ let cssSideMenu = computed(() => {
   return {
     '--am-c-msd-bgr': amColors.value.colorSbBgr,
     '--am-c-msd-text': amColors.value.colorSbText,
-    '--am-c-msd-text-op05': useColorTransparency(
-      amColors.value.colorSbText,
-      0.05
-    ),
-    '--am-c-msd-text-op10': useColorTransparency(
-      amColors.value.colorSbText,
-      0.1
-    ),
-    '--am-c-msd-text-op60': useColorTransparency(
-      amColors.value.colorSbText,
-      0.6
-    ),
+    '--am-c-msd-text-op05': useColorTransparency(amColors.value.colorSbText, 0.05),
+    '--am-c-msd-text-op10': useColorTransparency(amColors.value.colorSbText, 0.1),
+    '--am-c-msd-text-op60': useColorTransparency(amColors.value.colorSbText, 0.6),
   }
 })
 </script>

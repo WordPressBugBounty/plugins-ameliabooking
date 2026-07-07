@@ -1,17 +1,12 @@
 <template>
   <!-- Address Field -->
-  <div
-    v-if="googleMapsLoaded()"
-    ref="wrapperElement"
-    class="am-input-wrapper"
-    :style="cssVars"
-  >
+  <div v-if="googleMapsLoaded()" ref="wrapperElement" class="am-input-wrapper" :style="cssVars">
     <div class="el-input am-input am-input--default">
       <div
         v-click-outside="handleClickOutside"
         class="el-input__wrapper"
-        :class="{'is-focus': isFocus}"
-        @click="() => isFocus = true"
+        :class="{ 'is-focus': isFocus }"
+        @click="() => (isFocus = true)"
       >
         <input
           :id="`amelia-address-autocomplete-${props.id}`"
@@ -28,11 +23,7 @@
       </div>
     </div>
   </div>
-  <AmInput
-    v-else
-    v-model="model"
-    :placeholder="props.placeholder"
-  />
+  <AmInput v-else v-model="model" :placeholder="props.placeholder" />
   <!-- /Address Field -->
 
   <!-- Autocomplete dropdown (Teleported to body) -->
@@ -61,27 +52,19 @@
 
 <script setup>
 // * Vue imports
-import {
-  computed,
-  ref,
-  toRefs,
-  onMounted,
-  onUnmounted,
-  inject,
-  watch
-} from "vue";
+import { computed, ref, toRefs, onMounted, onUnmounted, inject, watch } from 'vue'
 
 // * Element Plus
-import { ClickOutside as vClickOutside} from "element-plus";
+import { ClickOutside as vClickOutside } from 'element-plus'
 
 // * Components
-import AmInput from "../input/AmInput.vue";
+import AmInput from '../input/AmInput.vue'
 
 // * Composables
-import { useColorTransparency} from "../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Store
 let store = useStore()
@@ -91,19 +74,19 @@ const props = defineProps({
   modelValue: {
     type: [String, Array, Object, Number],
     default: '',
-    required: true
+    required: true,
   },
   id: {
     type: [String, Number],
-    required: true
+    required: true,
   },
   placeholder: {
     type: String,
-    default: ''
+    default: '',
   },
   ariaLabel: {
     type: String,
-    default: 'address input'
+    default: 'address input',
   },
 })
 
@@ -120,7 +103,7 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 // * Local state
@@ -150,7 +133,7 @@ function suppressGoogleMapsErrors() {
   errorSuppressionActive = true
 }
 
-function googleMapsLoaded () {
+function googleMapsLoaded() {
   return window.google && window.google.maps?.places && store.state.settings.general.gMapApiKey
 }
 
@@ -195,8 +178,8 @@ async function fetchPredictions(input) {
 
     if (suggestions && suggestions.length > 0) {
       predictions.value = suggestions
-        .filter(s => s.placePrediction)
-        .map(s => {
+        .filter((s) => s.placePrediction)
+        .map((s) => {
           const p = s.placePrediction
           const fullText = p.text?.toString() || ''
           let mainText = fullText
@@ -231,13 +214,15 @@ async function fetchPredictions(input) {
   } catch (err) {
     const errorMessage = err?.message || err?.toString() || ''
     // Mark as permanent error for 403 or API errors and suppress future errors
-    if (errorMessage.includes('AutocompleteSuggestion') ||
-        errorMessage.includes('NOT_FOUND') ||
-        errorMessage.includes('Places API') ||
-        errorMessage.includes('Forbidden') ||
-        errorMessage.includes('403') ||
-        err?.code === 'NOT_FOUND' ||
-        err?.status === 403) {
+    if (
+      errorMessage.includes('AutocompleteSuggestion') ||
+      errorMessage.includes('NOT_FOUND') ||
+      errorMessage.includes('Places API') ||
+      errorMessage.includes('Forbidden') ||
+      errorMessage.includes('403') ||
+      err?.code === 'NOT_FOUND' ||
+      err?.status === 403
+    ) {
       hasPermanentError.value = true
       suppressGoogleMapsErrors()
     }
@@ -272,7 +257,7 @@ async function selectPrediction(prediction) {
 
     // Fetch place fields (this concludes the session)
     await place.fetchFields({
-      fields: ['formattedAddress', 'addressComponents']
+      fields: ['formattedAddress', 'addressComponents'],
     })
 
     if (place.formattedAddress) {
@@ -282,10 +267,10 @@ async function selectPrediction(prediction) {
 
     // Emit address components if available
     if (place.addressComponents) {
-      const addressComponents = place.addressComponents.map(component => ({
+      const addressComponents = place.addressComponents.map((component) => ({
         long_name: component.longText,
         short_name: component.shortText,
-        types: component.types
+        types: component.types,
       }))
       emits('address-selected', addressComponents)
     }
@@ -395,7 +380,7 @@ onMounted(() => {
     }
 
     try {
-      await window.google.maps.importLibrary("places")
+      await window.google.maps.importLibrary('places')
 
       if (window.google?.maps?.places?.AutocompleteSuggestion) {
         initializeSessionToken()
@@ -448,7 +433,7 @@ let amColors = inject(
     colorBtnPrimText: '#FFFFFF',
     colorBtnSec: '#1A2C37',
     colorBtnSecText: '#FFFFFF',
-  })
+  }),
 )
 
 // * Css Variables
@@ -457,22 +442,10 @@ let cssVars = computed(() => {
     '--am-c-inp-bgr': amColors.value.colorInpBgr,
     '--am-c-inp-border': amColors.value.colorInpBorder,
     '--am-c-inp-text': amColors.value.colorInpText,
-    '--am-c-inp-text-op03': useColorTransparency(
-      amColors.value.colorInpText,
-      0.03
-    ),
-    '--am-c-inp-text-op05': useColorTransparency(
-      amColors.value.colorInpText,
-      0.05
-    ),
-    '--am-c-inp-text-op40': useColorTransparency(
-      amColors.value.colorInpText,
-      0.4
-    ),
-    '--am-c-inp-text-op60': useColorTransparency(
-      amColors.value.colorInpText,
-      0.6
-    ),
+    '--am-c-inp-text-op03': useColorTransparency(amColors.value.colorInpText, 0.03),
+    '--am-c-inp-text-op05': useColorTransparency(amColors.value.colorInpText, 0.05),
+    '--am-c-inp-text-op40': useColorTransparency(amColors.value.colorInpText, 0.4),
+    '--am-c-inp-text-op60': useColorTransparency(amColors.value.colorInpText, 0.6),
     '--am-c-inp-placeholder': amColors.value.colorInpPlaceHolder,
     '--am-c-drop-bgr': amColors.value.colorDropBgr,
     '--am-c-drop-border': amColors.value.colorDropBorder,

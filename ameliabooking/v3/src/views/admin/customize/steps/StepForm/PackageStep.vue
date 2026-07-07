@@ -24,11 +24,7 @@
           </div>
         </div>
         <div class="am-fs__ps-item__services">
-          <span
-            v-for="book in pack.bookable"
-            :key="book.id"
-            class="am-fs__ps-item__services-inner"
-          >
+          <span v-for="book in pack.bookable" :key="book.id" class="am-fs__ps-item__services-inner">
             {{ `${book.serviceName} x ${book.quantity}` }}
           </span>
         </div>
@@ -162,12 +158,8 @@ function labelsDisplay(label) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value].packageStep.translations &&
       amCustomize.value[pageRenderKey.value].packageStep.translations[label] &&
-      amCustomize.value[pageRenderKey.value].packageStep.translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value].packageStep.translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value].packageStep.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].packageStep.translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -179,34 +171,13 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-ps-text': amColors.value.colorMainText,
-    '--am-c-ps-text-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
-    '--am-c-ps-text-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
-    '--am-c-ps-text-op06': useColorTransparency(
-      amColors.value.colorMainText,
-      0.06
-    ),
-    '--am-c-primary-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
-    '--am-c-scroll-op30': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.3
-    ),
-    '--am-c-scroll-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
-    '--am-c-success-op10': useColorTransparency(
-      amColors.value.colorSuccess,
-      0.1
-    ),
+    '--am-c-ps-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-ps-text-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
+    '--am-c-ps-text-op06': useColorTransparency(amColors.value.colorMainText, 0.06),
+    '--am-c-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
+    '--am-c-success-op10': useColorTransparency(amColors.value.colorSuccess, 0.1),
   }
 })
 </script>

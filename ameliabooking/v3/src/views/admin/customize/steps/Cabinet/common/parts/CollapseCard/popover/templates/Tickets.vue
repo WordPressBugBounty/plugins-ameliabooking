@@ -1,19 +1,15 @@
 <template>
-  <div
-    class="am-cc__tickets"
-    :class="responsiveClass"
-  >
-    <template
-      v-for="(item, index) in props.data"
-      :key="index"
-    >
+  <div class="am-cc__tickets" :class="responsiveClass">
+    <template v-for="(item, index) in props.data" :key="index">
       <div class="am-cc__tickets-item">
         <div class="am-cc__tickets-item_inner">
           <span class="am-cc__tickets-name">
             {{ item.name }}
           </span>
           <span class="am-cc__tickets-calc">
-            {{ `${item.persons} ${item.persons > 1 ? amLabels.event_tickets : amLabels.event_ticket} x ${useFormattedPrice(item.price)}` }}
+            {{
+              `${item.persons} ${item.persons > 1 ? amLabels.event_tickets : amLabels.event_ticket} x ${useFormattedPrice(item.price)}`
+            }}
           </span>
         </div>
 
@@ -27,22 +23,19 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject
-} from "vue";
+import { computed, inject } from 'vue'
 
 // * Composables
-import { useResponsiveClass } from "../../../../../../../../../../assets/js/common/responsive.js";
-import { useFormattedPrice } from "../../../../../../../../../../assets/js/common/formatting";
+import { useResponsiveClass } from '../../../../../../../../../../assets/js/common/responsive.js'
+import { useFormattedPrice } from '../../../../../../../../../../assets/js/common/formatting'
 
 // * Vars
 const amLabels = inject('labels')
 
 let props = defineProps({
   data: {
-    type: [Array, Object, String]
-  }
+    type: [Array, Object, String],
+  },
 })
 
 let cWidth = inject('containerWidth')
@@ -54,7 +47,7 @@ let responsiveClass = computed(() => {
 
 <script>
 export default {
-  name: "TemplateTickets"
+  name: 'TemplateTickets',
 }
 </script>
 

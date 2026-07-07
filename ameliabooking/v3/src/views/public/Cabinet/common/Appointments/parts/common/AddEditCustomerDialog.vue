@@ -18,7 +18,7 @@
     <AmAlert
       v-if="alertVisibility"
       ref="alertContainer"
-      :type= "alertType"
+      :type="alertType"
       :show-border="true"
       :close-after="5000"
       custom-class="am-cap__alert"
@@ -32,11 +32,7 @@
 
     <!-- Content -->
     <el-tabs v-if="!loading" v-model="activeTab">
-      <el-tab-pane
-        class="am-cap__tabs-item"
-        :label="amLabels.details"
-        name="details"
-      >
+      <el-tab-pane class="am-cap__tabs-item" :label="amLabels.details" name="details">
         <el-form
           ref="customerFormRef"
           :model="customerFormData"
@@ -54,7 +50,6 @@
             />
           </template>
         </el-form>
-
       </el-tab-pane>
       <el-tab-pane
         v-if="Object.keys(customFields).length"
@@ -80,7 +75,6 @@
             </template>
           </el-form>
         </template>
-
       </el-tab-pane>
     </el-tabs>
     <Skeleton v-else></Skeleton>
@@ -88,11 +82,7 @@
 
     <!-- Footer -->
     <template #footer>
-      <AmButton
-        type="plain"
-        category="secondary"
-        @click="closeDialog"
-      >
+      <AmButton type="plain" category="secondary" @click="closeDialog">
         {{ amLabels.cancel }}
       </AmButton>
       <AmButton @click="saveCustomer">
@@ -111,10 +101,10 @@ import { useStore } from 'vuex'
 import moment from 'moment'
 
 // * Import from Vue
-import {ref, inject, computed, markRaw, reactive, watchEffect} from 'vue'
+import { ref, inject, computed, markRaw, reactive, watchEffect } from 'vue'
 
 // * Import from Libraries
-import httpClient from "../../../../../../../plugins/axios";
+import httpClient from '../../../../../../../plugins/axios'
 
 // * Form Fields Templates
 import { formFieldsTemplates } from '../../../../../../../assets/js/common/formFieldsTemplates'
@@ -126,8 +116,9 @@ import IconComponent from '../../../../../../_components/icons/IconComponent.vue
 import Skeleton from '../../../Authentication/parts/Skeleton.vue'
 
 // * Composables
-import { useBackendCustomer } from "../../../../../../../assets/js/common/customer";
-import AmAlert from "../../../../../../_components/alert/AmAlert.vue";
+import { useBackendCustomer } from '../../../../../../../assets/js/common/customer'
+import { getInternationalPhoneValue } from '../../../../../../../assets/js/common/phone'
+import AmAlert from '../../../../../../_components/alert/AmAlert.vue'
 
 // * Props
 const props = defineProps({
@@ -166,9 +157,9 @@ let alertType = ref('success')
 
 let alertMessage = ref('')
 
-function closeAlert () {
+function closeAlert() {
   alertVisibility.value = false
-  store.commit('cabinet/setPaymentLinkError', {value: false, type: 'event'})
+  store.commit('cabinet/setPaymentLinkError', { value: false, type: 'event' })
 }
 
 let customerId = computed(() => store.getters['customerInfo/getCustomerId'])
@@ -247,10 +238,7 @@ let customerFormData = ref({
   birthday: computed({
     get: () => store.getters['customerInfo/getCustomerBirthday'] || '',
     set: (val) => {
-      store.commit(
-        'customerInfo/setCustomerBirthday',
-        val ? moment(val).format('YYYY-MM-DD') : ''
-      )
+      store.commit('customerInfo/setCustomerBirthday', val ? moment(val).format('YYYY-MM-DD') : '')
     },
   }),
   note: computed({
@@ -327,10 +315,7 @@ let customerFormConstruction = ref({
         return iso ? iso.toUpperCase() : ''
       },
       set: (val) => {
-        store.commit(
-          'customerInfo/setCustomerCountryPhoneIso',
-          val ? val.toLowerCase() : ''
-        )
+        store.commit('customerInfo/setCustomerCountryPhoneIso', val ? val.toLowerCase() : '')
       },
     }),
     template: formFieldsTemplates.phone,
@@ -339,21 +324,39 @@ let customerFormConstruction = ref({
       label: amLabels.value.phone_colon,
       placeholder: amLabels.value.enter_phone,
       phoneError: computed(() => phoneError.value && !isPhoneValid.value),
-      errorMessage: computed(() => phoneError.value && !isPhoneValid.value && customerFormData.value.phone ? amLabels.value.enter_valid_phone_warning : ''),
+      errorMessage: computed(() =>
+        phoneError.value && !isPhoneValid.value && customerFormData.value.phone
+          ? amLabels.value.enter_valid_phone_warning
+          : '',
+      ),
       whatsAppLabel: amLabels.value.whatsapp_opt_in_text,
-      isWhatsApp: computed(() => amSettings.notifications.whatsAppEnabled && !(phoneError.value && !isPhoneValid.value)),
+      isWhatsApp: computed(
+        () =>
+          amSettings.notifications.whatsAppEnabled && !(phoneError.value && !isPhoneValid.value),
+      ),
       class: computed(() => `am-cap-aec__form-item ${props.responsiveClass}`),
     },
     handlers: {
       handlePhoneData: (phoneData) => {
-        if (phoneData && !phoneData.countryCode && !store.getters['customerInfo/getCustomerCountryPhoneIso'] && amSettings.general.phoneDefaultCountryCode !== 'auto') {
-          store.commit('customerInfo/setCustomerCountryPhoneIso', amSettings.general.phoneDefaultCountryCode.toLowerCase())
+        if (
+          phoneData &&
+          !phoneData.countryCode &&
+          !store.getters['customerInfo/getCustomerCountryPhoneIso'] &&
+          amSettings.general.phoneDefaultCountryCode !== 'auto'
+        ) {
+          store.commit(
+            'customerInfo/setCustomerCountryPhoneIso',
+            amSettings.general.phoneDefaultCountryCode.toLowerCase(),
+          )
         }
 
-        store.commit('customerInfo/setCustomerPhone', phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, "") : "")
+        store.commit(
+          'customerInfo/setCustomerPhone',
+          getInternationalPhoneValue(phoneData?.phoneNumber ?? phoneData?.e164, phoneData, phoneData?.countryCode)
+        )
 
         isPhoneValid.value = !!phoneData.isValid
-      }
+      },
     },
   },
   language: {
@@ -365,7 +368,7 @@ let customerFormConstruction = ref({
       teleported: false,
       class: computed(() => `am-cap-aec__form-item ${props.responsiveClass}`),
       prefixIcon: markRaw({
-        components: {IconComponent},
+        components: { IconComponent },
         template: `
           <IconComponent icon="pennant"/>`,
       }),
@@ -380,7 +383,7 @@ let customerFormConstruction = ref({
       teleported: false,
       class: computed(() => `am-cap-aec__form-item ${props.responsiveClass}`),
       prefixIcon: markRaw({
-        components: {IconComponent},
+        components: { IconComponent },
         template: `
           <IconComponent icon="gender"/>`,
       }),
@@ -451,29 +454,31 @@ function saveCustomer() {
 
     customer.customFields = JSON.stringify(customFieldData)
 
-    httpClient.post(
-      '/users/customers' + (customer.id ? '/' + customer.id : ''),
-      customer,
-      {params: {source: 'cabinet-provider'}}
-    ).then((response) => {
-      store.commit(
-        'auth/setPreloadedCustomers',
-        store.getters['auth/getPreloadedCustomers'].concat(
-          [response.data.data.user]
-        ).sort((a, b) => a.id - b.id)
-      )
+    httpClient
+      .post('/users/customers' + (customer.id ? '/' + customer.id : ''), customer, {
+        params: { source: 'cabinet-provider' },
+      })
+      .then((response) => {
+        store.commit(
+          'auth/setPreloadedCustomers',
+          store.getters['auth/getPreloadedCustomers']
+            .concat([response.data.data.user])
+            .sort((a, b) => a.id - b.id),
+        )
 
-      emits('addedCustomer', response.data.data.user)
+        emits('addedCustomer', response.data.data.user)
 
-      closeDialog()
-    }).catch((error) => {
-      if ('response' in error && error.response) {
-        alertMessage.value = error.response.data.message
-        alertVisibility.value = true
-      }
-    }).finally(() => {
-      store.commit('customerInfo/setLoading', false)
-    })
+        closeDialog()
+      })
+      .catch((error) => {
+        if ('response' in error && error.response) {
+          alertMessage.value = error.response.data.message
+          alertVisibility.value = true
+        }
+      })
+      .finally(() => {
+        store.commit('customerInfo/setLoading', false)
+      })
   })
 }
 
@@ -514,14 +519,14 @@ function setCustomerCustomFieldsFormConstruction(field, id) {
   }
 
   if (field.type === 'file') {
-    let profileId =  store.getters['auth/getProfile'] ? store.getters['auth/getProfile'].id : null
+    let profileId = store.getters['auth/getProfile'] ? store.getters['auth/getProfile'].id : null
     cfFormConstruction[id].props = {
       ...cfFormConstruction[id].props,
       ...{
         btnLabel: amLabels.value.upload_file_here,
         isUpload: true,
         bookingId: profileId,
-        source: 'cabinet-customer'
+        source: 'cabinet-customer',
       },
     }
   }
@@ -532,14 +537,15 @@ function setInitCustomerCustomFields() {
 
   const savedCustomFields = computed(() => {
     const customFields = store.getters['customerInfo/getCustomerCustomFields']
-    return customFields ? JSON.parse(customFields) : null;
+    return customFields ? JSON.parse(customFields) : null
   })
 
   allFields
-    .filter(field => field.saveType === 'customer' && field.type !== 'content')
-    .forEach(field => {
+    .filter((field) => field.saveType === 'customer' && field.type !== 'content')
+    .forEach((field) => {
       const { id } = field
-      const savedValue = (customerId.value && savedCustomFields.value) ? savedCustomFields.value[id]?.value : null
+      const savedValue =
+        customerId.value && savedCustomFields.value ? savedCustomFields.value[id]?.value : null
 
       customFields[id] = {
         ...field,
@@ -648,7 +654,6 @@ let cssVars = computed(() => {
             }
           }
         }
-
 
         .el-form-item {
           // Form Error

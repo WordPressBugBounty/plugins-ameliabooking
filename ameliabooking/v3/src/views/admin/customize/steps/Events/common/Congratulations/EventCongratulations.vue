@@ -1,10 +1,6 @@
 <template>
   <div class="am-elf__main-content am-elf__congrats" :class="props.globalClass">
-    <Congratulations
-      type="event"
-      :selected-item="selectedItem"
-      :customer="customer"
-    >
+    <Congratulations type="event" :selected-item="selectedItem" :customer="customer">
       <template #positionBottom>
         <AddToCalendar
           class="am-congrats__main-atc"
@@ -60,11 +56,8 @@ let amLabels = inject('labels')
 
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    let translations =
-      amCustomize.value[pageRenderKey.value][stepName.value].translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    let translations = amCustomize.value[pageRenderKey.value][stepName.value].translations
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })

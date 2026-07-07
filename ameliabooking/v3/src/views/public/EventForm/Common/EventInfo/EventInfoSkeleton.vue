@@ -1,8 +1,5 @@
 <template>
-  <el-skeleton
-    animated
-    class="am-efi-skel"
-  >
+  <el-skeleton animated class="am-efi-skel">
     <template #template>
       <el-skeleton-item class="am-efi-skel__heading" variant="text"></el-skeleton-item>
       <div>
@@ -16,7 +13,7 @@
 
 <script>
 export default {
-  name: "EventInfoSkeleton"
+  name: 'EventInfoSkeleton',
 }
 </script>
 

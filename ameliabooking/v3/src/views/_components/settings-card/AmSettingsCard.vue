@@ -30,23 +30,23 @@
 const props = defineProps({
   header: {
     type: String,
-    default: ''
+    default: '',
   },
   content: {
     type: String,
-    default: ''
+    default: '',
   },
   draggable: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 const emits = defineEmits(['click'])
 </script>
 
 <script>
 export default {
-  name: "AmSettingsCard"
+  name: 'AmSettingsCard',
 }
 </script>
 

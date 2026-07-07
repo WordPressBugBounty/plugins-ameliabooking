@@ -1,24 +1,10 @@
 <template>
-  <div
-    class="am-elf__bringing"
-    :style="cssVars"
-    role="group"
-    :aria-labelledby="headingId"
-  >
-    <div
-      class="am-elf__bringing-main"
-      :class="responsiveClass"
-    >
-      <div
-        :id="headingId"
-        class="am-elf__bringing-heading"
-      >
+  <div class="am-elf__bringing" :style="cssVars" role="group" :aria-labelledby="headingId">
+    <div class="am-elf__bringing-main" :class="responsiveClass">
+      <div :id="headingId" class="am-elf__bringing-heading">
         {{ amLabels.event_bringing }}
       </div>
-      <div
-        class="am-elf__bringing-content"
-        :class="responsiveClass"
-      >
+      <div class="am-elf__bringing-content" :class="responsiveClass">
         <AmInputNumber
           :id="inputId"
           v-model="persons"
@@ -29,10 +15,7 @@
           :aria-label="amLabels.event_bringing"
           :aria-describedby="inputHelpId"
         />
-        <span
-          :id="inputHelpId"
-          class="am-elf__bringing-sr-only"
-        >
+        <span :id="inputHelpId" class="am-elf__bringing-sr-only">
           {{ inputAssistiveText }}
         </span>
       </div>
@@ -42,21 +25,17 @@
 
 <script setup>
 // * Import from Vue
-import {
-  reactive,
-  computed,
-  inject
-} from "vue";
+import { reactive, computed, inject } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * _components
 import AmInputNumber from '../../../../_components/input-number/AmInputNumber.vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
-import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
 
 let store = useStore()
 
@@ -64,7 +43,7 @@ let store = useStore()
 let options = computed(() => {
   return {
     min: store.getters['persons/getMinPersons'],
-    max:  store.getters['persons/getMaxPersons']
+    max: store.getters['persons/getMaxPersons'],
   }
 })
 
@@ -72,7 +51,7 @@ let persons = computed({
   get: () => store.getters['persons/getPersons'],
   set: (val) => {
     store.commit('persons/setPersons', val)
-  }
+  },
 })
 
 // * IDs for ARIA linkage
@@ -110,11 +89,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   if (customizedDataForm.value.bringingAnyone.translations) {
     let customizedLabels = customizedDataForm.value.bringingAnyone.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -129,7 +108,7 @@ let amLabels = computed(() => {
 let amFonts = inject('amFonts')
 
 // * Global colors
-let amColors = inject('amColors');
+let amColors = inject('amColors')
 
 // * Css Vars
 let cssVars = computed(() => {
@@ -143,7 +122,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: 'BringingAnyone'
+  name: 'BringingAnyone',
 }
 </script>
 

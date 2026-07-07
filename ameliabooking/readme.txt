@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.4.3
+Stable tag: 2.4.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,12 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.4.4
+This update includes a couple of bug fixes and stability improvements.
+*BugFix: Fixed an issue where the country code was stripped from phone numbers on the booking form, causing incorrect display and empty fields when editing customers.
+*BugFix: Resolved security vulnerability.
+*Additional minor bug fixes and overall stability improvements.
+
 v2.4.3
 This update includes a security fix and stability improvements. We strongly recommend updating to this version immediately.
 *BugFix: Resolved security vulnerabilities.

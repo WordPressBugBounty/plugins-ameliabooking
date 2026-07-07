@@ -4,16 +4,16 @@
       v-show="visibility"
       class="am-slide-popup__block"
       :class="`am-position-${position}`"
-      :style="{...cssVars, ...customCss}"
+      :style="{ ...cssVars, ...customCss }"
     >
       <div
         ref="dialogRef"
         v-click-outside="onClickOutside"
         class="am-slide-popup__block-inner"
         :class="[
-          {'am-slide-popup__up-inner-mobile': checkScreen},
+          { 'am-slide-popup__up-inner-mobile': checkScreen },
           customClass,
-          `am-position-${position}`
+          `am-position-${position}`,
         ]"
         role="dialog"
         aria-modal="true"
@@ -46,62 +46,54 @@
 
 <script setup>
 // * Import from Vue
-import {
-  inject,
-  computed,
-  useSlots,
-  ref,
-  watch,
-  nextTick,
-  onMounted,
-} from 'vue';
+import { inject, computed, useSlots, ref, watch, nextTick, onMounted } from 'vue'
 
 // * Import from Libraries
-import { ClickOutside as vClickOutside } from "element-plus";
+import { ClickOutside as vClickOutside } from 'element-plus'
 
 // * Composables
-import { useColorTransparency } from "../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
 
 // * Components Props
 let props = defineProps({
   visibility: {
     type: Boolean,
     default: false,
-    required: true
+    required: true,
   },
   customClass: {
     type: String,
-    default: ''
+    default: '',
   },
   position: {
     type: String,
     default: 'bottom',
     validator(value) {
       return ['bottom', 'top', 'left', 'right', 'center'].includes(value)
-    }
+    },
   },
   closeOutside: {
     type: Boolean,
-    default: false
+    default: false,
   },
   customCss: {
     type: Object,
-    default: () => {}
+    default: () => {},
   },
   footerVisibility: {
     type: Boolean,
-    default: true
+    default: true,
   },
   // Accessible name for the dialog — provide one of these two props.
   // ariaLabel: plain string label (e.g. "Filter options").
   // ariaLabelledby: id of a visible heading element inside the dialog.
   ariaLabel: {
     type: String,
-    default: ''
+    default: '',
   },
   ariaLabelledby: {
     type: String,
-    default: ''
+    default: '',
   },
 })
 
@@ -122,23 +114,23 @@ let triggerEl = null
  * Returns every keyboard-reachable element inside the dialog.
  * Elements that are hidden (display:none / hidden attribute) are excluded.
  */
-function getFocusableElements () {
+function getFocusableElements() {
   if (!dialogRef.value) return []
   return Array.from(
     dialogRef.value.querySelectorAll(
       'a[href], area[href], ' +
-      'input:not([disabled]):not([type="hidden"]), ' +
-      'select:not([disabled]), ' +
-      'textarea:not([disabled]), ' +
-      'button:not([disabled]), ' +
-      '[tabindex]:not([tabindex="-1"]), ' +
-      '[contenteditable]'
-    )
-  ).filter(el => !el.hasAttribute('hidden') && !el.closest('[hidden]'))
+        'input:not([disabled]):not([type="hidden"]), ' +
+        'select:not([disabled]), ' +
+        'textarea:not([disabled]), ' +
+        'button:not([disabled]), ' +
+        '[tabindex]:not([tabindex="-1"]), ' +
+        '[contenteditable]',
+    ),
+  ).filter((el) => !el.hasAttribute('hidden') && !el.closest('[hidden]'))
 }
 
 /** Moves focus to the first interactive child, or the dialog container itself. */
-function focusFirstElement () {
+function focusFirstElement() {
   const focusable = getFocusableElements()
   if (focusable.length) {
     focusable[0].focus()
@@ -152,7 +144,7 @@ function focusFirstElement () {
  * Attached to @keydown.tab on the dialog container so it catches the event
  * wherever focus currently sits inside the dialog.
  */
-function onTab (event) {
+function onTab(event) {
   const focusable = getFocusableElements()
   if (!focusable.length) {
     event.preventDefault()
@@ -160,7 +152,7 @@ function onTab (event) {
   }
 
   const first = focusable[0]
-  const last  = focusable[focusable.length - 1]
+  const last = focusable[focusable.length - 1]
 
   if (event.shiftKey) {
     // Shift+Tab from the first focusable (or the container): wrap to last
@@ -178,22 +170,25 @@ function onTab (event) {
 }
 
 /** Escape closes the dialog (standard dialog keyboard pattern). */
-function onEscape () {
+function onEscape() {
   emits('update:visibility', false)
 }
 
 // Save the triggering element when the dialog opens; restore it when it closes
-watch(() => props.visibility, (isVisible) => {
-  if (isVisible) {
-    triggerEl = document.activeElement
-    nextTick(focusFirstElement)
-  } else {
-    nextTick(() => {
-      triggerEl?.focus()
-      triggerEl = null
-    })
-  }
-})
+watch(
+  () => props.visibility,
+  (isVisible) => {
+    if (isVisible) {
+      triggerEl = document.activeElement
+      nextTick(focusFirstElement)
+    } else {
+      nextTick(() => {
+        triggerEl?.focus()
+        triggerEl = null
+      })
+    }
+  },
+)
 
 // Handle the case where the popup is already open at mount time
 onMounted(() => {
@@ -205,7 +200,7 @@ onMounted(() => {
 const slots = useSlots()
 
 // * Click outside of menu
-function onClickOutside () {
+function onClickOutside() {
   emits('click-outside')
   if (props.closeOutside) {
     emits('update:visibility', false)
@@ -214,21 +209,23 @@ function onClickOutside () {
 
 // * Container Width
 let cWidth = inject('containerWidth', 0)
-let checkScreen = computed(() => cWidth.value < 460 || (cWidth.value > 560 && cWidth.value - 240 < 460))
+let checkScreen = computed(
+  () => cWidth.value < 460 || (cWidth.value > 560 && cWidth.value - 240 < 460),
+)
 
 let popupHeaderVisibility = computed(() => {
   return !!slots.header?.()
 })
 
 // * Components Colors
-let amColors = inject('amColors');
+let amColors = inject('amColors')
 
 // * Css Variables
 let cssVars = computed(() => {
   return {
     '--am-c-spb-bgr': amColors.value.colorMainBgr,
     '--am-c-spb-text': amColors.value.colorMainText,
-    '--am-c-spb-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1)
+    '--am-c-spb-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
   }
 })
 </script>
@@ -358,7 +355,8 @@ let cssVars = computed(() => {
       }
     }
 
-    &.nested-enter-active, &.nested-leave-active {
+    &.nested-enter-active,
+    &.nested-leave-active {
       transition: all 0.3s ease-in-out;
 
       #{$classP}-inner {
@@ -366,7 +364,8 @@ let cssVars = computed(() => {
       }
     }
 
-    &.nested-enter-from, &.nested-leave-to {
+    &.nested-enter-from,
+    &.nested-leave-to {
       opacity: 0;
 
       &.am-position-top {
@@ -381,7 +380,8 @@ let cssVars = computed(() => {
         transform: translateX(-30px);
       }
 
-      &.am-position-bottom, &.am-position-center {
+      &.am-position-bottom,
+      &.am-position-center {
         transform: translateY(30px);
       }
 

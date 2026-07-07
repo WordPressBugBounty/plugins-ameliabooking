@@ -1,13 +1,14 @@
-import moment from "moment";
-import {useCartItem} from "../public/cart";
-import {useSortedDateStrings} from "./helper";
+import moment from 'moment'
+import { useCartItem } from '../public/cart'
+import { useSortedDateStrings } from './helper'
 
-function getFutureMonthDate (dateString, interval) {
+function getFutureMonthDate(dateString, interval) {
   let date = moment(dateString, 'YYYY-MM-DD')
   let futureMonthDate = moment(date).add(interval, 'M')
   let futureMonthDateEnd = moment(futureMonthDate).startOf('month')
 
-  if (date.date() !== futureMonthDate.date() &&
+  if (
+    date.date() !== futureMonthDate.date() &&
     futureMonthDate.isSame(futureMonthDateEnd.format('YYYY-MM-DD'))
   ) {
     futureMonthDate.subtract(1, 'd')
@@ -16,7 +17,7 @@ function getFutureMonthDate (dateString, interval) {
   return futureMonthDate
 }
 
-function getGivenDateOfMonth (date, monthWeek, weekDay) {
+function getGivenDateOfMonth(date, monthWeek, weekDay) {
   let firstWeek = moment(date, 'YYYY-MM-DD').startOf('month').day(weekDay)
 
   if (firstWeek.format('M') !== date.format('M')) {
@@ -32,7 +33,16 @@ function getGivenDateOfMonth (date, monthWeek, weekDay) {
   return resultDate
 }
 
-function useExpectedDates (lastAvailableDate, startDate, endDate, maxDays, type, interval, weekDays, monthRule) {
+function useExpectedDates(
+  lastAvailableDate,
+  startDate,
+  endDate,
+  maxDays,
+  type,
+  interval,
+  weekDays,
+  monthRule,
+) {
   let lastDate = endDate ? moment(endDate) : moment().add(maxDays, 'days')
 
   let selectedDate = moment(startDate, 'YYYY-MM-DD')
@@ -42,12 +52,12 @@ function useExpectedDates (lastAvailableDate, startDate, endDate, maxDays, type,
   let expectedDatesArray = []
 
   switch (type) {
-    case ('daily'):
+    case 'daily':
       expectedDatesArray.push(moment(startDate, 'YYYY-MM-DD'))
 
       break
 
-    case ('weekly'):
+    case 'weekly':
       let selectedDateIndex = moment(startDate, 'YYYY-MM-DD').isoWeekday()
 
       weekDays.forEach((item, index) => {
@@ -73,7 +83,7 @@ function useExpectedDates (lastAvailableDate, startDate, endDate, maxDays, type,
 
       break
 
-    case ('monthly'):
+    case 'monthly':
       expectedDatesArray.push(moment(startDate, 'YYYY-MM-DD'))
 
       break
@@ -84,31 +94,29 @@ function useExpectedDates (lastAvailableDate, startDate, endDate, maxDays, type,
   while (isValidExpected) {
     for (let i = 0; i < expectedDatesArray.length; i++) {
       switch (type) {
-        case ('daily'):
+        case 'daily':
           expectedDatesArray[i].add(interval, 'days')
 
           break
 
-        case ('weekly'):
+        case 'weekly':
           expectedDatesArray[i].add(interval * 7, 'days')
 
           break
 
-        case ('monthly'):
+        case 'monthly':
           let weekDayIndex = expectedDatesArray[i].isoWeekday()
-          expectedDatesArray[i] = monthRule === 0 ?
-            getFutureMonthDate(
-              expectedDatesArray[i].format('YYYY-MM-DD'),
-              interval
-            ) :
-            getGivenDateOfMonth(
-              getFutureMonthDate(
-                expectedDatesArray[i].startOf('month').format('YYYY-MM-DD'),
-                interval
-              ),
-              monthRule,
-              weekDayIndex
-            )
+          expectedDatesArray[i] =
+            monthRule === 0
+              ? getFutureMonthDate(expectedDatesArray[i].format('YYYY-MM-DD'), interval)
+              : getGivenDateOfMonth(
+                  getFutureMonthDate(
+                    expectedDatesArray[i].startOf('month').format('YYYY-MM-DD'),
+                    interval,
+                  ),
+                  monthRule,
+                  weekDayIndex,
+                )
 
           break
       }
@@ -116,7 +124,9 @@ function useExpectedDates (lastAvailableDate, startDate, endDate, maxDays, type,
       isValidExpected = expectedDatesArray[i].isSameOrBefore(lastDate)
 
       if (isValidExpected) {
-        expectedDates[moment(expectedDatesArray[i]).format('YYYY-MM-DD')] = moment(expectedDatesArray[i])
+        expectedDates[moment(expectedDatesArray[i]).format('YYYY-MM-DD')] = moment(
+          expectedDatesArray[i],
+        )
       }
     }
   }
@@ -124,7 +134,7 @@ function useExpectedDates (lastAvailableDate, startDate, endDate, maxDays, type,
   return expectedDates
 }
 
-function useProposedDates (service, slots, expectedDates, startDate, startTime, endDate, count) {
+function useProposedDates(service, slots, expectedDates, startDate, startTime, endDate, count) {
   let recurringStartDate = moment(startDate, 'YYYY-MM-DD')
   let recurringEndDate = endDate ? moment(endDate, 'YYYY-MM-DD') : null
 
@@ -142,7 +152,8 @@ function useProposedDates (service, slots, expectedDates, startDate, startTime, 
 
     let isBefore = recurringEndDate ? expectedDate.isSameOrBefore(recurringEndDate) : true
 
-    if (expectedDateString in slots &&
+    if (
+      expectedDateString in slots &&
       Object.keys(slots[expectedDateString]).length &&
       !(expectedDateString in proposedDates) &&
       isBefore
@@ -158,12 +169,17 @@ function useProposedDates (service, slots, expectedDates, startDate, startTime, 
         times: Object.keys(slots[expectedDateString]),
         slot: slots[expectedDateString][expectedTime],
       }
-    } else if (expectedDateString !== bookingStartString && !(expectedDateString in proposedDates) && isBefore) {
+    } else if (
+      expectedDateString !== bookingStartString &&
+      !(expectedDateString in proposedDates) &&
+      isBefore
+    ) {
       let previousDate = null
       let nextDate = null
 
       for (let availableDateString in availableDates) {
-        if ((service.recurringSub === 'past' || service.recurringSub === 'both') &&
+        if (
+          (service.recurringSub === 'past' || service.recurringSub === 'both') &&
           availableDates[availableDateString].isBefore(expectedDates[expectedDateString]) &&
           availableDates[availableDateString].isAfter(recurringStartDate) &&
           availableDateString !== expectedDateString &&
@@ -172,7 +188,8 @@ function useProposedDates (service, slots, expectedDates, startDate, startTime, 
           previousDate = availableDates[availableDateString]
         }
 
-        if ((service.recurringSub === 'future' || service.recurringSub === 'both') &&
+        if (
+          (service.recurringSub === 'future' || service.recurringSub === 'both') &&
           availableDates[availableDateString].isAfter(expectedDates[expectedDateString]) &&
           availableDateString !== expectedDateString &&
           !(availableDateString in proposedDates)
@@ -183,11 +200,13 @@ function useProposedDates (service, slots, expectedDates, startDate, startTime, 
         }
       }
 
-      let previousDateTimeDiff = previousDate !== null ?
-        moment(expectedDates[expectedDateString]).diff(previousDate, 'days') : null
+      let previousDateTimeDiff =
+        previousDate !== null
+          ? moment(expectedDates[expectedDateString]).diff(previousDate, 'days')
+          : null
 
-      let nextDateTimeDiff = nextDate !== null ?
-        moment(nextDate).diff(expectedDates[expectedDateString], 'days') : null
+      let nextDateTimeDiff =
+        nextDate !== null ? moment(nextDate).diff(expectedDates[expectedDateString], 'days') : null
 
       let substituteDate = null
 
@@ -199,18 +218,22 @@ function useProposedDates (service, slots, expectedDates, startDate, startTime, 
         substituteDate = nextDate
       }
 
-      if (substituteDate !== null &&
+      if (
+        substituteDate !== null &&
         (recurringEndDate ? moment(substituteDate).isSameOrBefore(recurringEndDate) : true)
       ) {
         let substituteDateString = moment(substituteDate).format('YYYY-MM-DD')
 
-        if (substituteDateString in slots &&
+        if (
+          substituteDateString in slots &&
           !(expectedDateString in proposedDates) &&
           !(substituteDateString in expectedDates)
         ) {
           let isAvailableTime = startTime in slots[substituteDateString]
 
-          let substituteTime = isAvailableTime ? startTime : Object.keys(slots[substituteDateString])[0]
+          let substituteTime = isAvailableTime
+            ? startTime
+            : Object.keys(slots[substituteDateString])[0]
 
           proposedDates[substituteDateString] = {
             isSubstituteDate: true,
@@ -223,7 +246,11 @@ function useProposedDates (service, slots, expectedDates, startDate, startTime, 
       }
     }
 
-    if (recurringEndDate ? !isBefore : useSortedDateStrings(Object.keys(proposedDates)).length >= count) {
+    if (
+      recurringEndDate
+        ? !isBefore
+        : useSortedDateStrings(Object.keys(proposedDates)).length >= count
+    ) {
       break
     }
   }
@@ -231,7 +258,4 @@ function useProposedDates (service, slots, expectedDates, startDate, startTime, 
   return proposedDates
 }
 
-export {
-  useProposedDates,
-  useExpectedDates,
-}
+export { useProposedDates, useExpectedDates }

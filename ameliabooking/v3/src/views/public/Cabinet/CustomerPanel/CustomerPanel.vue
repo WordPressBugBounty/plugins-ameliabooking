@@ -13,10 +13,7 @@
     id="amelia-container"
     ref="ameliaContainer"
     class="am-cap__wrapper"
-    :class="[
-      { 'am-collapsed': sidebarCollapsed },
-      { 'am-auth': !authenticated },
-    ]"
+    :class="[{ 'am-collapsed': sidebarCollapsed }, { 'am-auth': !authenticated }]"
     :style="cssVars"
     @keydown.esc="menuVisibility = false"
   >
@@ -25,23 +22,20 @@
       <SideBar
         v-if="sidebarVisibility"
         class="am-fs-sb"
-        :class="[
-          { 'am-collapsed': sidebarCollapsed },
-          { 'am-rtl': isRtl }
-        ]"
+        :class="[{ 'am-collapsed': sidebarCollapsed }, { 'am-rtl': isRtl }]"
         :style="{
           width: !sidebarCollapsed ? '240px' : '72px',
           paddingBottom: `${sidebarFooterHeight + 16}px`,
         }"
       >
         <template #step-list>
-          <nav class="am-fs-sb__page-wrapper am-fs-sb__page-wrapper__cabinet" :aria-label="amLabels.cabinet_navigation || 'Cabinet navigation'">
+          <nav
+            class="am-fs-sb__page-wrapper am-fs-sb__page-wrapper__cabinet"
+            :aria-label="amLabels.cabinet_navigation || 'Cabinet navigation'"
+          >
             <template v-for="(step, index) in sidebarSteps" :key="step.key">
               <div
-                v-if="
-                  step.key !== 'packages' ||
-                  store.getters['entities/getPackages'].length
-                "
+                v-if="step.key !== 'packages' || store.getters['entities/getPackages'].length"
                 class="am-fs-sb__page"
                 :class="{
                   selected: pageKey === step.key,
@@ -56,10 +50,7 @@
                 @keydown.enter.prevent="onSidebarStepInteraction(step, index)"
                 @keydown.space.prevent="onSidebarStepInteraction(step, index)"
               >
-                <div
-                  class="am-fs-sb__page-inner"
-                  :class="{ 'am-collapsed': sidebarCollapsed }"
-                >
+                <div class="am-fs-sb__page-inner" :class="{ 'am-collapsed': sidebarCollapsed }">
                   <div class="am-fs-sb__page-icon" aria-hidden="true">
                     <span :class="`am-icon-${step.icon}`"></span>
                   </div>
@@ -67,7 +58,7 @@
                     <p
                       v-if="!sidebarCollapsed"
                       class="am-fs-sb__page-heading"
-                      :class="[sidebarCollapseItemsClass, {'am-rtl': isRtl}]"
+                      :class="[sidebarCollapseItemsClass, { 'am-rtl': isRtl }]"
                     >
                       {{ step.label }}
                     </p>
@@ -76,15 +67,20 @@
                     <div
                       v-if="!sidebarCollapsed"
                       class="am-fs-sb__page-indicator"
-                      :class="[sidebarCollapseItemsClass, {'am-rtl': isRtl}]"
+                      :class="[sidebarCollapseItemsClass, { 'am-rtl': isRtl }]"
                       aria-hidden="true"
                     >
-                      <span :class="isRtl ? 'am-icon-arrow-big-left' : 'am-icon-arrow-big-right'"></span>
+                      <span
+                        :class="isRtl ? 'am-icon-arrow-big-left' : 'am-icon-arrow-big-right'"
+                      ></span>
                     </div>
                   </transition>
                 </div>
               </div>
-              <div v-if="index === 0 && sidebarSteps[0].key === 'profile'" class="am-fs-sb__page-divider"></div>
+              <div
+                v-if="index === 0 && sidebarSteps[0].key === 'profile'"
+                class="am-fs-sb__page-divider"
+              ></div>
             </template>
           </nav>
         </template>
@@ -166,11 +162,7 @@
                   <span class="am-icon-menu" aria-hidden="true"></span>
                 </div>
                 <TimeZoneSelect
-                  v-if="
-                    entitiesReady &&
-                    sidebarVisibility &&
-                    timeZoneSelectVisibility
-                  "
+                  v-if="entitiesReady && sidebarVisibility && timeZoneSelectVisibility"
                 />
                 <MenuSlideDialog
                   :id="menuDialogId"
@@ -273,9 +265,7 @@ watch(authenticated, (current) => {
 })
 
 // * Cabinet Type
-let cabinetType = ref(
-  shortcodeData.value.cabinetType === 'employee' ? 'provider' : 'customer'
-)
+let cabinetType = ref(shortcodeData.value.cabinetType === 'employee' ? 'provider' : 'customer')
 provide('cabinetType', cabinetType)
 
 // * Plugin Licence
@@ -299,9 +289,7 @@ provide('containerWidth', containerWidth)
 const amSettings = inject('settings')
 
 let pageKey = ref(
-  shortcodeData.value.appointments || !shortcodeData.value.events
-    ? 'appointments'
-    : 'events'
+  shortcodeData.value.appointments || !shortcodeData.value.events ? 'appointments' : 'events',
 )
 
 // * Customize
@@ -314,9 +302,7 @@ provide('amCustomize', amCustomize)
 
 // * Fonts
 const amFonts = ref(
-  amSettings.customizedData
-    ? amSettings.customizedData.fonts
-    : defaultCustomizeSettings.fonts
+  amSettings.customizedData ? amSettings.customizedData.fonts : defaultCustomizeSettings.fonts,
 )
 provide('amFonts', amFonts)
 
@@ -329,9 +315,7 @@ provide('amLabels', labels)
 const localLanguage = inject('localLanguage')
 
 // * if local lang is in settings lang
-let langDetection = computed(() =>
-  amSettings.general.usedLanguages.includes(localLanguage.value)
-)
+let langDetection = computed(() => amSettings.general.usedLanguages.includes(localLanguage.value))
 
 // * Computed labels
 let amLabels = computed(() => {
@@ -342,12 +326,8 @@ let amLabels = computed(() => {
       if (stepKey !== 'colors' && amCustomize.value[stepKey].translations) {
         let customizedLabels = amCustomize.value[stepKey].translations
         Object.keys(customizedLabels).forEach((labelKey) => {
-          if (
-            customizedLabels[labelKey][localLanguage.value] &&
-            langDetection.value
-          ) {
-            computedLabels[labelKey] =
-              customizedLabels[labelKey][localLanguage.value]
+          if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
+            computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
           } else if (customizedLabels[labelKey].default) {
             computedLabels[labelKey] = customizedLabels[labelKey].default
           }
@@ -359,7 +339,7 @@ let amLabels = computed(() => {
 })
 
 // * Activate custom font styles
-function activateCustomFontStyles () {
+function activateCustomFontStyles() {
   let head = document.head || document.getElementsByTagName('head')[0]
   if (head.querySelector('#amCustomFont')) {
     head.querySelector('#amCustomFont').remove()
@@ -377,8 +357,7 @@ if (amFonts.value.customFontSelected) activateCustomFontStyles()
 
 // * Customized Options
 let customizedOptions = computed(() => {
-  if (pageKey.value === 'packages')
-    return amCustomize.value.packagesList.options
+  if (pageKey.value === 'packages') return amCustomize.value.packagesList.options
   return amCustomize.value[pageKey.value].options
 })
 
@@ -389,7 +368,9 @@ let timeZoneSelectVisibility = computed(() => {
     return key !== 'profile' ? customizedOptions.value.timeZone.visibility : true
   }
 
-  return key === 'appointments' || key === 'events' ? customizedOptions.value.timeZone.visibility : true
+  return key === 'appointments' || key === 'events'
+    ? customizedOptions.value.timeZone.visibility
+    : true
 })
 
 // * Mobile menu
@@ -435,9 +416,7 @@ onMounted(() => {
 
   setTimeout(() => {
     sidebarCollapsed.value =
-      containerWidth.value <= 600
-        ? true
-        : amCustomize.value.sidebar.options.toggle.visibility
+      containerWidth.value <= 600 ? true : amCustomize.value.sidebar.options.toggle.visibility
   }, 1300)
 })
 
@@ -462,22 +441,22 @@ watch(containerWidth, (current) => {
   menuVisibility.value = current > 481 ? false : menuVisibility.value
 })
 
-function populateFilterOptions () {
+function populateFilterOptions() {
   store.dispatch(
     'cabinetFilters/injectServiceOptions',
-    store.getters['entities/getServices'].filter(s => s.show).map(i => i.id)
+    store.getters['entities/getServices'].filter((s) => s.show).map((i) => i.id),
   )
 
   store.dispatch(
     'cabinetFilters/injectProviderOptions',
     cabinetType.value === 'customer'
-      ? store.getters['entities/getEmployees'].filter(e => e.show).map(i => i.id)
-      : []
+      ? store.getters['entities/getEmployees'].filter((e) => e.show).map((i) => i.id)
+      : [],
   )
 
   store.dispatch(
     'cabinetFilters/injectLocationOptions',
-    store.getters['entities/getLocations'].map(i => i.id)
+    store.getters['entities/getLocations'].map((i) => i.id),
   )
 }
 
@@ -487,9 +466,14 @@ watch(entitiesReady, (ready) => {
     if (shortcodeData.value.cabinetType === 'employee' && store.getters['employee/getId']) {
       let employee = store.getters['employee/getEmployee']
 
-      store.commit('employee/setServiceList', useFrontendEmployeeServiceList(store, employee.serviceList))
+      store.commit(
+        'employee/setServiceList',
+        useFrontendEmployeeServiceList(store, employee.serviceList),
+      )
 
-      store.commit('entities/setEmployees', [store.getters['entities/getEmployee'](store.getters['employee/getId'])])
+      store.commit('entities/setEmployees', [
+        store.getters['entities/getEmployee'](store.getters['employee/getId']),
+      ])
     }
 
     populateFilterOptions()
@@ -525,9 +509,7 @@ let ready = computed(() => store.getters['getReady'])
 
 // * Panel Fluid Pages
 let pagesObj = ref({
-  profile: markRaw(
-    shortcodeData.value.cabinetType === 'employee' ? EmployeeProfile : Profile
-  ),
+  profile: markRaw(shortcodeData.value.cabinetType === 'employee' ? EmployeeProfile : Profile),
 })
 
 if (shortcodeData.value.appointments || !shortcodeData.value.events) {
@@ -550,17 +532,17 @@ if (
 let loggedInUserRole = computed(() => store.getters['auth/getProfile']?.type)
 
 // * Profile page (and all its tabs) is only available for providers in the employee panel
-let profilePageVisibility = computed(() =>
-  shortcodeData.value.cabinetType !== 'employee' ||
-  loggedInUserRole.value === 'provider'
+let profilePageVisibility = computed(
+  () => shortcodeData.value.cabinetType !== 'employee' || loggedInUserRole.value === 'provider',
 )
 
 // * Admin/manager logged into the employee panel may only view appointments and events,
 // * they must not be able to add, edit, reschedule or otherwise manipulate them.
-let employeePanelReadOnly = computed(() =>
-  shortcodeData.value.cabinetType === 'employee' &&
-  !!loggedInUserRole.value &&
-  loggedInUserRole.value !== 'provider'
+let employeePanelReadOnly = computed(
+  () =>
+    shortcodeData.value.cabinetType === 'employee' &&
+    !!loggedInUserRole.value &&
+    loggedInUserRole.value !== 'provider',
 )
 provide('employeePanelReadOnly', employeePanelReadOnly)
 
@@ -581,7 +563,7 @@ let panelRoles = computed(() => {
 // * Re-provide settings to the panel subtree so the read-only role overrides take effect
 // * everywhere the cabinet reads `settings.roles.*`, without touching the global settings.
 const panelSettings = new Proxy(amSettings, {
-  get (target, prop) {
+  get(target, prop) {
     if (prop === 'roles') {
       return panelRoles.value
     }
@@ -657,16 +639,23 @@ let sidebarIndex = computed(() => {
 function sidebarSelection(step, index) {
   if (shortcodeData.value.cabinetType === 'employee') {
     if (step.key !== 'appointments') {
-      store.commit('appointment/resetAppointment', {providerId: store.getters['auth/getProfile'].id, categoryId: null, serviceId: null, locationId: null})
+      store.commit('appointment/resetAppointment', {
+        providerId: store.getters['auth/getProfile'].id,
+        categoryId: null,
+        serviceId: null,
+        locationId: null,
+      })
     }
 
     if (step.key !== 'events') {
-      store.commit(
-        'event/setEvent',
-        {settings: usePopulateSettings(amSettings, store.getters['event/getSettings'], {}, {})}
-      )
+      store.commit('event/setEvent', {
+        settings: usePopulateSettings(amSettings, store.getters['event/getSettings'], {}, {}),
+      })
 
-      store.commit('attendee/setAttendee', useInitAttendee(store, store.getters['attendee/getDefaultAttendee']))
+      store.commit(
+        'attendee/setAttendee',
+        useInitAttendee(store, store.getters['attendee/getDefaultAttendee']),
+      )
     }
   }
 
@@ -679,7 +668,11 @@ function sidebarSelection(step, index) {
 }
 
 function isStepDisabled(step) {
-  return shortcodeData.value.cabinetType === 'employee' && shortcodeData.value.profile && step.key === 'profile'
+  return (
+    shortcodeData.value.cabinetType === 'employee' &&
+    shortcodeData.value.profile &&
+    step.key === 'profile'
+  )
 }
 
 function onSidebarStepInteraction(step, index) {
@@ -688,7 +681,12 @@ function onSidebarStepInteraction(step, index) {
 }
 
 function menuSelection(obj) {
-  if (shortcodeData.value.cabinetType === 'employee' && shortcodeData.value.profile && obj.step.key === 'profile') return
+  if (
+    shortcodeData.value.cabinetType === 'employee' &&
+    shortcodeData.value.profile &&
+    obj.step.key === 'profile'
+  )
+    return
   sidebarSelection(obj.step, obj.index)
   store.commit('cabinetFilters/setResetFilters')
 }
@@ -714,21 +712,15 @@ let header = computed(() => {
       return sidebarSteps.value[sidebarIndex.value].pageLabel
 
     case 'appointments':
-      if (
-        store.getters['appointment/getActive'] &&
-        !store.getters['appointment/getId']
-      ) {
+      if (store.getters['appointment/getActive'] && !store.getters['appointment/getId']) {
         return amLabels.value.new_appointment
-      } else if (
-        store.getters['appointment/getActive'] &&
-        store.getters['appointment/getId']
-      ) {
+      } else if (store.getters['appointment/getActive'] && store.getters['appointment/getId']) {
         return amLabels.value.edit_appointment
       } else {
         return sidebarSteps.value[sidebarIndex.value].label
       }
 
-    case ('events'):
+    case 'events':
       if (store.getters['attendee/getActive'] && !store.getters['attendee/getId']) {
         return amLabels.value.event_add_attendee
       } else if (store.getters['attendee/getActive'] && store.getters['attendee/getId']) {
@@ -737,7 +729,7 @@ let header = computed(() => {
         return amLabels.value.new_event
       } else if (store.getters['event/getActive'] && store.getters['event/getId']) {
         return amLabels.value.edit_event
-      }  else {
+      } else {
         return sidebarSteps.value[sidebarIndex.value].label
       }
 
@@ -797,30 +789,12 @@ let cssVars = computed(() => {
     '--am-c-btn-sec-text': amColors.value.colorBtnSecText,
     '--am-c-btn-danger': amColors.value.colorBtnDanger,
     '--am-c-btn-danger-text': amColors.value.colorBtnDangerText,
-    '--am-c-skeleton-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
-    '--am-c-skeleton-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
-    '--am-c-skeleton-sb-op20': useColorTransparency(
-      amColors.value.colorSbText,
-      0.2
-    ),
-    '--am-c-skeleton-sb-op60': useColorTransparency(
-      amColors.value.colorSbText,
-      0.6
-    ),
-    '--am-c-scroll-op30': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.3
-    ),
-    '--am-c-scroll-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
+    '--am-c-skeleton-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
+    '--am-c-skeleton-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-skeleton-sb-op20': useColorTransparency(amColors.value.colorSbText, 0.2),
+    '--am-c-skeleton-sb-op60': useColorTransparency(amColors.value.colorSbText, 0.6),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
     '--am-font-family': amFonts.value.fontFamily,
 
     // css properties
@@ -841,18 +815,9 @@ let cssSideMenu = computed(() => {
   return {
     '--am-c-msd-bgr': amColors.value.colorSbBgr,
     '--am-c-msd-text': amColors.value.colorSbText,
-    '--am-c-msd-text-op05': useColorTransparency(
-      amColors.value.colorSbText,
-      0.05
-    ),
-    '--am-c-msd-text-op10': useColorTransparency(
-      amColors.value.colorSbText,
-      0.1
-    ),
-    '--am-c-msd-text-op60': useColorTransparency(
-      amColors.value.colorSbText,
-      0.6
-    ),
+    '--am-c-msd-text-op05': useColorTransparency(amColors.value.colorSbText, 0.05),
+    '--am-c-msd-text-op10': useColorTransparency(amColors.value.colorSbText, 0.1),
+    '--am-c-msd-text-op60': useColorTransparency(amColors.value.colorSbText, 0.6),
   }
 })
 </script>

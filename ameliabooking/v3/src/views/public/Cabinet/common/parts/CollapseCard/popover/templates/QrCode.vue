@@ -1,27 +1,11 @@
 <template>
-  <div
-    ref="qrCodesRef"
-    class="am-cc__qr-codes"
-  >
-    <div
-      v-if="errorMessage"
-      class="am-cc__qr-codes__message"
-      role="alert"
-      aria-live="assertive"
-    >
+  <div ref="qrCodesRef" class="am-cc__qr-codes">
+    <div v-if="errorMessage" class="am-cc__qr-codes__message" role="alert" aria-live="assertive">
       <span class="am-icon-info-reverse"></span>
-      {{errorMessage}}
+      {{ errorMessage }}
     </div>
-    <ul
-      class="am-cc__qr-codes__list"
-      role="list"
-      aria-label="Available QR code documents"
-    >
-      <li
-      v-for="(item, index) in props.data"
-      :key="index"
-      class="am-cc__qr-codes__item"
-      >
+    <ul class="am-cc__qr-codes__list" role="list" aria-label="Available QR code documents">
+      <li v-for="(item, index) in props.data" :key="index" class="am-cc__qr-codes__item">
         <AmButton
           class="am-cc__qr-codes__button"
           :disabled="loading"
@@ -45,7 +29,7 @@ import { useStore } from 'vuex'
 
 // * Composables
 import httpClient from '../../../../../../../../plugins/axios'
-import AmButton from "@/views/_components/button/AmButton.vue";
+import AmButton from '@/views/_components/button/AmButton.vue'
 
 // * Store
 const store = useStore()
@@ -76,17 +60,15 @@ function showQrCodes(ticket) {
   httpClient
     .get(
       '/etickets',
-      Object.assign(
-        {
-          params: {
-            source: 'cabinet-customer',
-            timeZone: store.getters['cabinet/getTimeZone'],
-            eventId: ticket.eventId,
-            bookingId: ticket.bookingId,
-            ticketManualCode: ticket.ticketManualCode,
-          },
-        }
-      )
+      Object.assign({
+        params: {
+          source: 'cabinet-customer',
+          timeZone: store.getters['cabinet/getTimeZone'],
+          eventId: ticket.eventId,
+          bookingId: ticket.bookingId,
+          ticketManualCode: ticket.ticketManualCode,
+        },
+      }),
     )
     .then((response) => {
       window.open(createFileUrlFromResponse(response.data))

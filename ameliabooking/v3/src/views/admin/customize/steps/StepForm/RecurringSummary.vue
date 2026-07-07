@@ -37,9 +37,7 @@
         </template>
 
         <template #icon-end>
-          <SideMenu
-            :cancel-label="labelsDisplay('recurring_delete')"
-          ></SideMenu>
+          <SideMenu :cancel-label="labelsDisplay('recurring_delete')"></SideMenu>
         </template>
 
         <template #default>
@@ -49,13 +47,27 @@
               :id="0"
               :slots="calendarEvents"
               :calendar-minimum-date="moment().format('YYYY-MM-DD hh:mm')"
-              :calendar-maximum-date="moment().add(1,'year').format('YYYY-MM-DD hh:mm')"
-              :time-zone="features.timeZones && amCustomize[pageRenderKey].recurringSummary.options.timeZoneVisibility.visibility"
-              :show-estimated-pricing="amCustomize[pageRenderKey].recurringSummary.options.estimatedPricingVisibility.visibility"
-              :show-indicator-pricing="amCustomize[pageRenderKey].recurringSummary.options.indicatorPricingVisibility.visibility"
-              :show-slot-pricing="amCustomize[pageRenderKey].recurringSummary.options.slotPricingVisibility.visibility"
+              :calendar-maximum-date="moment().add(1, 'year').format('YYYY-MM-DD hh:mm')"
+              :time-zone="
+                features.timeZones &&
+                amCustomize[pageRenderKey].recurringSummary.options.timeZoneVisibility.visibility
+              "
+              :show-estimated-pricing="
+                amCustomize[pageRenderKey].recurringSummary.options.estimatedPricingVisibility
+                  .visibility
+              "
+              :show-indicator-pricing="
+                amCustomize[pageRenderKey].recurringSummary.options.indicatorPricingVisibility
+                  .visibility
+              "
+              :show-slot-pricing="
+                amCustomize[pageRenderKey].recurringSummary.options.slotPricingVisibility.visibility
+              "
               :show-people-waiting="false"
-              :show-calendar-date-busyness="amCustomize[pageRenderKey].recurringSummary.options.calendarDateBusynessVisibility?.visibility ?? true"
+              :show-calendar-date-busyness="
+                amCustomize[pageRenderKey].recurringSummary.options.calendarDateBusynessVisibility
+                  ?.visibility ?? true
+              "
               :label-slots-selected="labelsDisplay('recurring_slots_selected')"
               :period-pricing="periodPricing"
               :busyness="previewCalendarBusyness"
@@ -118,17 +130,10 @@ let previewCalendarBusyness = computed(() => {
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value].recurringSummary
-      .translations &&
-      amCustomize.value[pageRenderKey.value].recurringSummary.translations[
-        label
-      ] &&
-      amCustomize.value[pageRenderKey.value].recurringSummary.translations[
-        label
-      ][langKey.value]
-      ? amCustomize.value[pageRenderKey.value].recurringSummary.translations[
-          label
-        ][langKey.value]
+    return amCustomize.value[pageRenderKey.value].recurringSummary.translations &&
+      amCustomize.value[pageRenderKey.value].recurringSummary.translations[label] &&
+      amCustomize.value[pageRenderKey.value].recurringSummary.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].recurringSummary.translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -159,53 +164,56 @@ let showCalendar = ref(false)
 
 let periodPricing = ref({})
 
-function getCustomPeriodsPricing () {
+function getCustomPeriodsPricing() {
   let result = {}
   let today = moment()
 
   let current = today.clone()
 
   for (let i = 0; i <= 31; i++) {
-    let type = current.day() === 6 || current.day() === 0
-      ? 'high'
-      : (current.day() === 1 || current.day() === 2 ? 'low' : 'mid')
+    let type =
+      current.day() === 6 || current.day() === 0
+        ? 'high'
+        : current.day() === 1 || current.day() === 2
+          ? 'low'
+          : 'mid'
 
     result[current.format('YYYY-MM-DD')] = {
       type: type,
       slots: {
         '09:00': {
           type: type === 'mid' ? 'low' : type,
-          price: type === 'mid' ? 5 : (type === 'low' ? 5 : 15)
+          price: type === 'mid' ? 5 : type === 'low' ? 5 : 15,
         },
         '09:30': {
           type: type === 'mid' ? 'low' : type,
-          price: type === 'mid' ? 5 : (type === 'low' ? 5 : 15)
+          price: type === 'mid' ? 5 : type === 'low' ? 5 : 15,
         },
         '10:00': {
           type: type,
-          price: type === 'mid' ? 10 : (type === 'low' ? 5 : 15)
+          price: type === 'mid' ? 10 : type === 'low' ? 5 : 15,
         },
         '10:30': {
           type: type,
-          price: type === 'mid' ? 10 : (type === 'low' ? 5 : 15)
+          price: type === 'mid' ? 10 : type === 'low' ? 5 : 15,
         },
         '11:00': {
           type: type,
-          price: type === 'mid' ? 10 : (type === 'low' ? 5 : 15)
+          price: type === 'mid' ? 10 : type === 'low' ? 5 : 15,
         },
         '11:30': {
           type: type,
-          price: type === 'mid' ? 10 : (type === 'low' ? 5 : 15)
+          price: type === 'mid' ? 10 : type === 'low' ? 5 : 15,
         },
         '12:00': {
           type: type === 'mid' ? 'high' : type,
-          price: type === 'mid' ? 15 : (type === 'high' ? 15 : 5)
+          price: type === 'mid' ? 15 : type === 'high' ? 15 : 5,
         },
         '12:30': {
           type: type === 'mid' ? 'high' : type,
-          price: type === 'mid' ? 15 : (type === 'high' ? 15 : 5)
+          price: type === 'mid' ? 15 : type === 'high' ? 15 : 5,
         },
-      }
+      },
     }
 
     current.add(1, 'day')
@@ -218,9 +226,9 @@ function getCustomPeriodsPricing () {
       high: 15,
       uniqueMin: true,
       uniqueMid: true,
-      uniqueMax: true
+      uniqueMax: true,
     },
-    dates: result
+    dates: result,
   }
 }
 
@@ -270,7 +278,8 @@ provide('calendarSlotDuration', calendarSlotDuration)
 let recurringList = ref([])
 
 onMounted(() => {
-  periodPricing.value = !licence.isBasic && !licence.isStarter && !licence.isLite ? getCustomPeriodsPricing() : {}
+  periodPricing.value =
+    !licence.isBasic && !licence.isStarter && !licence.isLite ? getCustomPeriodsPricing() : {}
 
   showCalendar.value = true
 
@@ -281,14 +290,8 @@ let amColors = inject('amColors')
 
 let cssVars = computed(() => {
   return {
-    '--am-c-ro-warning-op10': useColorTransparency(
-      amColors.value.colorWarning,
-      0.1
-    ),
-    '--am-c-ro-warning-op60': useColorTransparency(
-      amColors.value.colorWarning,
-      0.6
-    ),
+    '--am-c-ro-warning-op10': useColorTransparency(amColors.value.colorWarning, 0.1),
+    '--am-c-ro-warning-op60': useColorTransparency(amColors.value.colorWarning, 0.6),
   }
 })
 </script>

@@ -13,22 +13,16 @@
     </div>
     <div class="am-fs__payment-stripe__card">
       <div>
-        <p>
-          {{ amLabels.card_number_colon }}:
-        </p>
+        <p>{{ amLabels.card_number_colon }}:</p>
         <div :id="'am-stripe-cn-' + shortcodeData.counter" class="am-stripe-cn"></div>
       </div>
       <div>
         <div>
-          <p>
-            {{ amLabels.expires_date_colon }}:
-          </p>
+          <p>{{ amLabels.expires_date_colon }}:</p>
           <div :id="'am-stripe-ed-' + shortcodeData.counter" class="am-stripe-ed"></div>
         </div>
         <div>
-          <p>
-            CVC:
-          </p>
+          <p>CVC:</p>
           <div :id="'am-stripe-cvc-' + shortcodeData.counter" class="am-stripe-cvc"></div>
         </div>
       </div>
@@ -37,48 +31,50 @@
       <p>
         {{ amLabels.payment_protected_policy }}
       </p>
-      <img :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/icons/stripe.svg'" alt="Stripe policy">
+      <img
+        :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/stripe.svg'"
+        alt="Stripe policy"
+      />
       <span>
         {{ amLabels.stripe }}
       </span>
     </div>
 
     <div
-        v-if="amSettings.general.googleRecaptcha.enabled"
-        :id="'recaptcha-' + shortcodeData.counter"
-        class="am-recaptcha-holder"
+      v-if="amSettings.general.googleRecaptcha.enabled"
+      :id="'recaptcha-' + shortcodeData.counter"
+      class="am-recaptcha-holder"
     >
       <vue-recaptcha
-          ref="recaptchaRef"
-          :size="amSettings.general.googleRecaptcha.invisible ? 'invisible' : null"
-          :load-recaptcha-script="true"
-          :sitekey="amSettings.general.googleRecaptcha.siteKey"
-          @verify="onRecaptchaVerify"
-          @expired="onRecaptchaExpired"
+        ref="recaptchaRef"
+        :size="amSettings.general.googleRecaptcha.invisible ? 'invisible' : null"
+        :load-recaptcha-script="true"
+        :sitekey="amSettings.general.googleRecaptcha.siteKey"
+        @verify="onRecaptchaVerify"
+        @expired="onRecaptchaExpired"
       >
       </vue-recaptcha>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import {computed, onMounted, inject, watchEffect, ref, watch, nextTick} from 'vue'
+import { computed, onMounted, inject, watchEffect, ref, watch, nextTick } from 'vue'
 import {
   usePaymentError,
   useBookingData,
   useCreateBooking,
   useCreateBookingSuccess,
   useCreateBookingError,
-  getErrorMessage
+  getErrorMessage,
 } from '../../../../../assets/js/public/booking.js'
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation.js'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
-import {useScrollTo} from "../../../../../assets/js/common/scrollElements";
-import { VueRecaptcha } from "vue-recaptcha";
-import httpClient from "../../../../../plugins/axios"
+import { useScrollTo } from '../../../../../assets/js/common/scrollElements'
+import { VueRecaptcha } from 'vue-recaptcha'
+import httpClient from '../../../../../plugins/axios'
 
 const store = useStore()
 
@@ -97,16 +93,12 @@ const baseUrls = inject('baseUrls')
 const shortcodeData = inject('shortcodeData')
 
 // * Step Functions
-const {
-  nextStep,
-  footerButtonReset,
-  footerButtonClicked
-} = inject('changingStepsFunctions', {
+const { nextStep, footerButtonReset, footerButtonClicked } = inject('changingStepsFunctions', {
   nextStep: () => {},
   footerButtonReset: () => {},
   footerButtonClicked: {
-    value: false
-  }
+    value: false,
+  },
 })
 
 // * Components Emits
@@ -131,29 +123,23 @@ let paymentRequestAvailable = ref(false)
 async function initializeExpressCheckout(update = false) {
   let checkoutPaymentData = null
 
-  await httpClient.post(
-    '/payments/amount',
-    useBookingData(
-      store,
-      null,
-      true,
-      {},
-      null
-    )['data']
-  ).then((response) => {
-    checkoutPaymentData = response.data.data
-  }).catch(e => {
-    const message = e?.response?.data?.message || e.message || 'Unknown error'
-    emits('payment-error', message)
-  })
+  await httpClient
+    .post('/payments/amount', useBookingData(store, null, true, {}, null)['data'])
+    .then((response) => {
+      checkoutPaymentData = response.data.data
+    })
+    .catch((e) => {
+      const message = e?.response?.data?.message || e.message || 'Unknown error'
+      emits('payment-error', message)
+    })
 
   if (!update) {
     stripePaymentInit(
       checkoutPaymentData?.transfers?.accounts &&
-      Object.keys(checkoutPaymentData.transfers.accounts).length === 1 &&
-      checkoutPaymentData?.transfers?.method === 'direct'
+        Object.keys(checkoutPaymentData.transfers.accounts).length === 1 &&
+        checkoutPaymentData?.transfers?.method === 'direct'
         ? Object.keys(checkoutPaymentData.transfers.accounts)[0]
-        : null
+        : null,
     )
   }
 
@@ -166,7 +152,10 @@ async function initializeExpressCheckout(update = false) {
     currency: checkoutPaymentData.currency,
   }).formatToParts(checkoutPaymentData.amount)
 
-  const IntegerPart = totalPriceParts.filter((part) => part.type === 'integer').map(part => part.value).join('')
+  const IntegerPart = totalPriceParts
+    .filter((part) => part.type === 'integer')
+    .map((part) => part.value)
+    .join('')
   const fractionPart = totalPriceParts.find((part) => part.type === 'fraction')?.value || ''
   const totalPriceInMinorUnits = Number.parseInt(`${IntegerPart}${fractionPart}`)
 
@@ -175,45 +164,46 @@ async function initializeExpressCheckout(update = false) {
     currency: checkoutPaymentData.currency.toLowerCase(),
     total: {
       label: 'total',
-      amount: totalPriceInMinorUnits
+      amount: totalPriceInMinorUnits,
     },
     requestPayerName: true,
-    requestPayerEmail: true
+    requestPayerEmail: true,
   })
 
-  paymentRequest.canMakePayment().then(function (result) {
-    if (result) {
-      paymentRequestAvailable.value = true
+  paymentRequest
+    .canMakePayment()
+    .then(function (result) {
+      if (result) {
+        paymentRequestAvailable.value = true
 
-      paymentRequestButton = stripeObject.elements().create('paymentRequestButton', {
-        paymentRequest: paymentRequest,
-        style: {
-          paymentRequestButton: {
-            type: 'default',
-            theme: 'dark',
-            height: '40px',
+        paymentRequestButton = stripeObject.elements().create('paymentRequestButton', {
+          paymentRequest: paymentRequest,
+          style: {
+            paymentRequestButton: {
+              type: 'default',
+              theme: 'dark',
+              height: '40px',
+            },
           },
-        },
-      })
+        })
 
-      paymentRequestButton.mount('#am-stripe-prb-' + shortcodeData.value.counter)
+        paymentRequestButton.mount('#am-stripe-prb-' + shortcodeData.value.counter)
 
-      paymentRequest.on('paymentmethod', handleExpressCheckout)
-    } else {
+        paymentRequest.on('paymentmethod', handleExpressCheckout)
+      } else {
+        paymentRequestAvailable.value = false
+      }
+    })
+    .catch((error) => {
+      console.error('Error checking payment capabilities:', error)
       paymentRequestAvailable.value = false
-    }
-  }).catch(error => {
-    console.error('Error checking payment capabilities:', error)
-    paymentRequestAvailable.value = false
-  })
+    })
 }
 
 async function handleExpressCheckout(event) {
   try {
     const { paymentMethod } = event
-    const addressResult = amSettings.payments.stripe.address
-        ? await address.getValue()
-        : null
+    const addressResult = amSettings.payments.stripe.address ? await address.getValue() : null
 
     useCreateBooking(
       store,
@@ -225,13 +215,13 @@ async function handleExpressCheckout(event) {
           paymentMethodId: paymentMethod.id,
           address: addressResult ? addressResult.value : null,
         },
-        recaptchaResponse.value
+        recaptchaResponse.value,
       ),
       function (response) {
         if (response.data.data.requiresAction) {
           stripePaymentActionRequired({
             ...response.data.data,
-            expressCheckoutEvent: event
+            expressCheckoutEvent: event,
           })
           return
         }
@@ -241,7 +231,7 @@ async function handleExpressCheckout(event) {
       (response) => {
         event.complete('fail')
         errorBooking(response)
-      }
+      },
     )
   } catch (error) {
     event.complete('fail')
@@ -249,32 +239,23 @@ async function handleExpressCheckout(event) {
   }
 }
 
-function onRecaptchaExpired () {
+function onRecaptchaExpired() {
   recaptchaValid.value = false
 
   emits('payment-error', amLabels.recaptcha_error)
 }
 
-function onRecaptchaVerify (response) {
+function onRecaptchaVerify(response) {
   recaptchaValid.value = true
 
   recaptchaResponse.value = response
 
   if (amSettings.general.googleRecaptcha.invisible) {
-    stripePaymentCreate(
-      useBookingData(
-        store,
-        null,
-        false,
-        {},
-        recaptchaResponse.value
-      )
-    )
+    stripePaymentCreate(useBookingData(store, null, false, {}, recaptchaResponse.value))
 
     return false
   }
 }
-
 
 // * Payment Part
 let stripeObject = null
@@ -289,9 +270,9 @@ let address = null
 let amColors = inject('amColors')
 let amFonts = inject('amFonts')
 
-function stripePaymentInit (accountId) {
+function stripePaymentInit(accountId) {
   const options = {
-    locale: localLanguage.value.replace('_', '-')
+    locale: localLanguage.value.replace('_', '-'),
   }
 
   if (accountId) {
@@ -301,7 +282,8 @@ function stripePaymentInit (accountId) {
   stripeObject = Stripe(
     amSettings.payments.stripe.testMode === false
       ? amSettings.payments.stripe.livePublishableKey
-      : amSettings.payments.stripe.testPublishableKey, options
+      : amSettings.payments.stripe.testPublishableKey,
+    options,
   )
 
   let elements = stripeObject.elements()
@@ -314,25 +296,29 @@ function stripePaymentInit (accountId) {
     base: {
       color: amColors.value.colorInpText,
       fontSize: '15px',
-      fontFamily: amFonts.value.fontFamily
-    }
+      fontFamily: amFonts.value.fontFamily,
+    },
   }
 
-  cardNum = elements.create('cardNumber', {style})
+  cardNum = elements.create('cardNumber', { style })
   cardNum.mount('#am-stripe-cn-' + shortcodeData.value.counter)
-  cardEd = elements.create('cardExpiry', {style})
+  cardEd = elements.create('cardExpiry', { style })
   cardEd.mount('#am-stripe-ed-' + shortcodeData.value.counter)
-  cardCvc = elements.create('cardCvc', {style})
+  cardCvc = elements.create('cardCvc', { style })
   cardCvc.mount('#am-stripe-cvc-' + shortcodeData.value.counter)
 
   if (amSettings.payments.stripe.address) {
-    address = elements.create('address', { mode: 'billing',  });
+    address = elements.create('address', { mode: 'billing' })
     address.mount('#am-stripe-address-' + shortcodeData.value.counter)
   }
 }
 
-async function stripePaymentCreate () {
-  if (amSettings.general.googleRecaptcha.enabled && !amSettings.general.googleRecaptcha.invisible && !recaptchaValid.value) {
+async function stripePaymentCreate() {
+  if (
+    amSettings.general.googleRecaptcha.enabled &&
+    !amSettings.general.googleRecaptcha.invisible &&
+    !recaptchaValid.value
+  ) {
     emits('payment-error', amLabels.recaptcha_error)
 
     return false
@@ -343,16 +329,13 @@ async function stripePaymentCreate () {
     addressResult = await address.getValue()
   }
 
-  stripeObject.createPaymentMethod(
-    'card',
-    cardNum,
-    {
+  stripeObject
+    .createPaymentMethod('card', cardNum, {
       billing_details: {
-        ...(addressResult ? addressResult.value : {})
-      }
-    }
-  ).then(
-    function (result) {
+        ...(addressResult ? addressResult.value : {}),
+      },
+    })
+    .then(function (result) {
       if (stripeError(result, addressResult)) {
         store.commit('setLoading', false)
         return
@@ -366,9 +349,9 @@ async function stripePaymentCreate () {
           false,
           {
             paymentMethodId: result.paymentMethod.id,
-            address: addressResult ? addressResult.value : null
+            address: addressResult ? addressResult.value : null,
           },
-          recaptchaResponse.value
+          recaptchaResponse.value,
         ),
         function (response) {
           if (response.data.data.requiresAction) {
@@ -383,21 +366,19 @@ async function stripePaymentCreate () {
         (response) => {
           store.commit('setLoading', false)
           errorBooking(response)
-        }
+        },
       )
-
-
-    }
-  )
+    })
 }
 
-function stripePaymentActionRequired (response) {
+function stripePaymentActionRequired(response) {
   const { expressCheckoutEvent } = response || {}
 
-  stripeObject.handleNextAction({
-    clientSecret: response.paymentIntentClientSecret
-  }).then(
-    async function (result) {
+  stripeObject
+    .handleNextAction({
+      clientSecret: response.paymentIntentClientSecret,
+    })
+    .then(async function (result) {
       let addressResult = null
       if (amSettings.payments.stripe.address && address && !expressCheckoutEvent) {
         addressResult = await address.getValue()
@@ -418,9 +399,9 @@ function stripePaymentActionRequired (response) {
           false,
           {
             paymentIntentId: result.paymentIntent.id,
-            address: addressResult ? addressResult.value : null
+            address: addressResult ? addressResult.value : null,
           },
-          null
+          null,
         ),
         function (response) {
           if (expressCheckoutEvent) {
@@ -433,55 +414,44 @@ function stripePaymentActionRequired (response) {
             expressCheckoutEvent.complete('fail')
           }
           errorBooking(error)
-        }
+        },
       )
-    }
-  ).catch((error) => {
-    if (expressCheckoutEvent) {
-      expressCheckoutEvent.complete('fail')
-    }
-    emits('payment-error', error.message || 'Authentication failed')
-  })
+    })
+    .catch((error) => {
+      if (expressCheckoutEvent) {
+        expressCheckoutEvent.complete('fail')
+      }
+      emits('payment-error', error.message || 'Authentication failed')
+    })
 }
 
-function stripeError (result, addressResult) {
+function stripeError(result, addressResult) {
   let addressError = addressResult && !addressResult.complete
   if (result.error || addressError) {
-    usePaymentError(
-      store,
-      function () {
-        emits('payment-error', addressError ? amLabels.payment_address_error : result.error.message)
-      }
-    )
+    usePaymentError(store, function () {
+      emits('payment-error', addressError ? amLabels.payment_address_error : result.error.message)
+    })
     return true
   }
 
   return false
 }
 
-function successBooking (response) {
-  useCreateBookingSuccess(
-    store,
-    response,
-    function () {
-      nextStep()
-    }
-  )
+function successBooking(response) {
+  useCreateBookingSuccess(store, response, function () {
+    nextStep()
+  })
 }
 
-function errorBooking (error) {
-  useCreateBookingError(
-    store,
-    error.response.data,
-    () => {
-      emits('payment-error', getErrorMessage())
-    }
-  )
+function errorBooking(error) {
+  useCreateBookingError(store, error.response.data, () => {
+    emits('payment-error', getErrorMessage())
+  })
 }
 
 let paymentStepRef = inject('paymentRef')
 
-function continueWithBooking () {
+function continueWithBooking() {
   footerButtonReset()
 
   store.commit('setLoading', true)
@@ -501,17 +471,20 @@ function continueWithBooking () {
 }
 
 // * Watching when footer button was clicked
-watchEffect(() => {
-  if(footerButtonClicked.value) {
-    if (!store.getters['coupon/getCouponValidated']) {
-      footerButtonReset()
-      useScrollTo(paymentStepRef.value, paymentStepRef.value, 20, 300)
-      emits('payment-error', amLabels.value.coupon_mandatory)
-    } else {
-      continueWithBooking()
+watchEffect(
+  () => {
+    if (footerButtonClicked.value) {
+      if (!store.getters['coupon/getCouponValidated']) {
+        footerButtonReset()
+        useScrollTo(paymentStepRef.value, paymentStepRef.value, 20, 300)
+        emits('payment-error', amLabels.value.coupon_mandatory)
+      } else {
+        continueWithBooking()
+      }
     }
-  }
-}, {flush: 'post'})
+  },
+  { flush: 'post' },
+)
 
 // * Watch coupon and payment deposit changes and update paymentRequest amount
 watch(
@@ -520,16 +493,19 @@ watch(
     const [newCoupon, newDeposit] = newValues || []
     const [oldCoupon, oldDeposit] = oldValues || []
 
-    if (paymentRequest && ((newCoupon.deduction || newCoupon.discount) || newDeposit !== oldDeposit)) {
+    if (
+      paymentRequest &&
+      (newCoupon.deduction || newCoupon.discount || newDeposit !== oldDeposit)
+    ) {
       if (paymentRequestButton) {
-        paymentRequestButton.unmount();
-        paymentRequestButton = null;
+        paymentRequestButton.unmount()
+        paymentRequestButton = null
       }
       // Wait for next tick to ensure DOM is updated
       await nextTick()
       initializeExpressCheckout(true)
     }
-  }
+  },
 )
 
 onMounted(() => {
@@ -540,14 +516,14 @@ onMounted(() => {
 let cssVars = computed(() => {
   return {
     '--am-c-pay-text': amColors.value.colorMainText,
-    '--am-c-pay-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6)
+    '--am-c-pay-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
   }
 })
 </script>
 
 <script>
 export default {
-  name: 'PaymentStripe'
+  name: 'PaymentStripe',
 }
 </script>
 
@@ -580,11 +556,12 @@ export default {
           font-size: 14px;
           font-weight: 500;
           line-height: 1.42857;
-          color: #6772E5;
+          color: #6772e5;
         }
       }
 
-      &__card, &__address {
+      &__card,
+      &__address {
         p {
           font-size: 15px;
           font-weight: 500;
@@ -598,15 +575,17 @@ export default {
           gap: 16px;
 
           & > div:first-child {
-            width: 60%
+            width: 60%;
           }
 
           & > div:nth-child(2) {
-            width: 40%
+            width: 40%;
           }
         }
 
-        .am-stripe-cn, .am-stripe-ed, .am-stripe-cvc {
+        .am-stripe-cn,
+        .am-stripe-ed,
+        .am-stripe-cvc {
           background-color: var(--am-c-inp-bgr);
           border: 1px solid var(--am-c-inp-border);
           border-radius: 6px;
@@ -659,7 +638,7 @@ export default {
 
       .am-fs__payment-divider::before,
       .am-fs__payment-divider::after {
-        content: "";
+        content: '';
         flex-grow: 1;
         height: 1px;
         background-color: var(--am-c-pay-text-op60);

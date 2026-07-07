@@ -1,44 +1,21 @@
-import moment from "moment";
-import {useAppointmentsAmountInfo} from "../common/appointments";
-import {useCart} from "./cart";
-import httpClient from "../../../plugins/axios.js";
-import {
-  settings,
-  locale
-} from "../../../plugins/settings.js"
-import {
-  useUtcValue,
-  useLocalValue,
-  useUtcValueOffset,
-  useStringFromDate
-} from "../common/date.js";
-import {
-  reactive,
-  ref,
-  computed
-} from "vue";
-import {
-  useCartItem
-} from "./cart";
-import {
-  useServices
-} from "../common/appointments";
-import {
-  usePackageAmount
-} from "./package";
-import useAction from "./actions";
-import {
-  useUrlQueryParams
-} from "../common/helper";
-import {
-  useAmount,
-  useEntityTax
-} from "../common/pricing";
+import moment from 'moment'
+import { useAppointmentsAmountInfo } from '../common/appointments'
+import { useCart } from './cart'
+import httpClient from '../../../plugins/axios.js'
+import { settings, locale } from '../../../plugins/settings.js'
+import { useUtcValue, useLocalValue, useUtcValueOffset, useStringFromDate } from '../common/date.js'
+import { reactive, ref, computed } from 'vue'
+import { useCartItem } from './cart'
+import { useServices } from '../common/appointments'
+import { usePackageAmount } from './package'
+import useAction from './actions'
+import { useUrlQueryParams } from '../common/helper'
+import { useAmount, useEntityTax } from '../common/pricing'
 
 const globalLabels = reactive(window.wpAmeliaLabels)
 let errorMessage = ref()
 
-function normalizeDatepickerValue (value) {
+function normalizeDatepickerValue(value) {
   if (!value) {
     return null
   }
@@ -55,15 +32,15 @@ function normalizeDatepickerValue (value) {
   return useStringFromDate(dateObject)
 }
 
-function usePaymentError (store, callback) {
+function usePaymentError(store, callback) {
   store.commit('booking/setLoading', false)
 
   callback()
 }
 
-function buildFormData (formData, data, parentKey) {
+function buildFormData(formData, data, parentKey) {
   if (data && typeof data === 'object' && !(data instanceof Date) && !(data instanceof File)) {
-    Object.keys(data).forEach(key => {
+    Object.keys(data).forEach((key) => {
       buildFormData(formData, data[key], parentKey ? `${parentKey}[${key}]` : key)
     })
   } else {
@@ -71,39 +48,55 @@ function buildFormData (formData, data, parentKey) {
   }
 }
 
-function useBookingData (store, formData, mandatoryJson = false, paymentData = {}, recaptcha = null) {
-  let bookableType = store.getters['bookableType/getType'] ? store.getters['bookableType/getType'] : store.getters['booking/getBookableType']
+function useBookingData(
+  store,
+  formData,
+  mandatoryJson = false,
+  paymentData = {},
+  recaptcha = null,
+) {
+  let bookableType = store.getters['bookableType/getType']
+    ? store.getters['bookableType/getType']
+    : store.getters['booking/getBookableType']
 
   let customFields = {}
 
   let customerCustomFields = {}
 
-  let bookableTypeCustomFields = bookableType !== 'event' ? store.getters['entities/getCustomFields'] : store.getters['customFields/getFilteredCustomFieldsArray']
+  let bookableTypeCustomFields =
+    bookableType !== 'event'
+      ? store.getters['entities/getCustomFields']
+      : store.getters['customFields/getFilteredCustomFieldsArray']
 
   let allCustomFields = bookableTypeCustomFields.reduce((acc, field) => {
     acc[field.id] = field
     return acc
   }, {})
 
-  let availableCustomFields = bookableType !== 'event' ? store.getters['booking/getAvailableCustomFields'] : store.getters['customFields/getCustomFields']
+  let availableCustomFields =
+    bookableType !== 'event'
+      ? store.getters['booking/getAvailableCustomFields']
+      : store.getters['customFields/getCustomFields']
 
   let attachments = bookableType !== 'event' ? store.getters['booking/getAttachments'] : {}
 
   if (bookableType !== 'event') {
     for (let id in availableCustomFields) {
-      if (availableCustomFields[id].type === 'file' &&
+      if (
+        availableCustomFields[id].type === 'file' &&
         Object.keys(attachments).length &&
-        id in attachments && attachments[id].length
+        id in attachments &&
+        attachments[id].length
       ) {
         let uploadCustomField = {
           label: availableCustomFields[id].label,
           value: [],
-          type: 'file'
+          type: 'file',
         }
 
         for (let i = 0; i < attachments[id].length; i++) {
           uploadCustomField.value.push({
-            name: attachments[id][i].name
+            name: attachments[id][i].name,
           })
         }
 
@@ -123,7 +116,7 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
           label: availableCustomFields[key].label,
           type: availableCustomFields[key].type,
           value: availableCustomFields[key].value,
-          components: availableCustomFields[key].components
+          components: availableCustomFields[key].components,
         }
       }
 
@@ -134,31 +127,37 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
         }
         for (let i = 0; i < availableCustomFields[key].value.length; i++) {
           customFields[availableCustomFields[key].id].value.push({
-            name: availableCustomFields[key].value[i].name
+            name: availableCustomFields[key].value[i].name,
           })
         }
       }
 
       if (availableCustomFields[key].type === 'datepicker') {
-        customFields[availableCustomFields[key].id].value =
-          normalizeDatepickerValue(availableCustomFields[key].value)
+        customFields[availableCustomFields[key].id].value = normalizeDatepickerValue(
+          availableCustomFields[key].value,
+        )
       }
     }
   }
 
   for (let key in customFields) {
-    if (allCustomFields[key].saveType === "customer") {
+    if (allCustomFields[key].saveType === 'customer') {
       customerCustomFields[key] = customFields[key]
       delete customFields[key]
     }
   }
 
-  let deposit = bookableType !== 'event' ? !store.getters['booking/getPaymentDeposit'] : !store.getters['payment/getPaymentDeposit']
+  let deposit =
+    bookableType !== 'event'
+      ? !store.getters['booking/getPaymentDeposit']
+      : !store.getters['payment/getPaymentDeposit']
 
-  let componentProps = formData ? {
-    state: bookableType !== 'event' ? store.state.booking : useEventsStoreData(store),
-    form: formData,
-  } : null
+  let componentProps = formData
+    ? {
+        state: bookableType !== 'event' ? store.state.booking : useEventsStoreData(store),
+        form: formData,
+      }
+    : null
 
   if (formData && 'form' in componentProps && 'sidebar' in componentProps.form) {
     componentProps.form.sidebar.forEach((item) => {
@@ -170,7 +169,12 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
     })
   }
 
-  if (formData && 'state' in componentProps && 'customFields' in componentProps.state && 'customFields' in componentProps.state.customFields) {
+  if (
+    formData &&
+    'state' in componentProps &&
+    'customFields' in componentProps.state &&
+    'customFields' in componentProps.state.customFields
+  ) {
     Object.keys(componentProps.state.customFields.customFields).forEach((key) => {
       if ('options' in componentProps.state.customFields.customFields[key]) {
         delete componentProps.state.customFields.customFields[key].options
@@ -178,7 +182,12 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
     })
   }
 
-  if (formData && 'state' in componentProps && 'tickets' in componentProps.state && 'tickets' in componentProps.state.tickets) {
+  if (
+    formData &&
+    'state' in componentProps &&
+    'tickets' in componentProps.state &&
+    'tickets' in componentProps.state.tickets
+  ) {
     componentProps.state.tickets.tickets.forEach((ticket, index) => {
       if ('translations' in ticket) {
         delete componentProps.state.tickets.tickets[index].translations
@@ -186,7 +195,10 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
     })
   }
 
-  const gateway = bookableType !== 'event' ? store.getters['booking/getPaymentGateway'] : store.getters['payment/getPaymentGateway']
+  const gateway =
+    bookableType !== 'event'
+      ? store.getters['booking/getPaymentGateway']
+      : store.getters['payment/getPaymentGateway']
 
   let jsonData = {
     type: bookableType,
@@ -196,20 +208,47 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
         deposit: deposit,
         locale: locale,
         utcOffset: null,
-        customerId: bookableType !== 'event' ? store.getters['booking/getCustomerId'] : store.getters['customerInfo/getCustomerId'],
+        customerId:
+          bookableType !== 'event'
+            ? store.getters['booking/getCustomerId']
+            : store.getters['customerInfo/getCustomerId'],
         customer: {
-          id: bookableType !== 'event' ? store.getters['booking/getCustomerId'] : store.getters['customerInfo/getCustomerId'],
-          firstName: bookableType !== 'event' ? store.getters['booking/getCustomerFirstName'] : store.getters['customerInfo/getCustomerFirstName'],
-          lastName: bookableType !== 'event' ? store.getters['booking/getCustomerLastName'] : store.getters['customerInfo/getCustomerLastName'],
-          email: bookableType !== 'event' ? store.getters['booking/getCustomerEmail'] : store.getters['customerInfo/getCustomerEmail'],
-          phone: bookableType !== 'event' ? store.getters['booking/getCustomerPhone'] : store.getters['customerInfo/getCustomerPhone'],
-          subscribeToMailchimp: bookableType !== 'event' ? store.getters['booking/getCustomerSubscribe'] : store.getters['customerInfo/getCustomerSubscribe'],
-          countryPhoneIso: bookableType !== 'event' ? store.getters['booking/getCustomerCountryPhoneIso'] : store.getters['customerInfo/getCustomerCountryPhoneIso'],
-          externalId: bookableType !== 'event' ? store.getters['booking/getCustomerExternalId'] : store.getters['customerInfo/getCustomerExternalId'],
+          id:
+            bookableType !== 'event'
+              ? store.getters['booking/getCustomerId']
+              : store.getters['customerInfo/getCustomerId'],
+          firstName:
+            bookableType !== 'event'
+              ? store.getters['booking/getCustomerFirstName']
+              : store.getters['customerInfo/getCustomerFirstName'],
+          lastName:
+            bookableType !== 'event'
+              ? store.getters['booking/getCustomerLastName']
+              : store.getters['customerInfo/getCustomerLastName'],
+          email:
+            bookableType !== 'event'
+              ? store.getters['booking/getCustomerEmail']
+              : store.getters['customerInfo/getCustomerEmail'],
+          phone:
+            bookableType !== 'event'
+              ? store.getters['booking/getCustomerPhone']
+              : store.getters['customerInfo/getCustomerPhone'],
+          subscribeToMailchimp:
+            bookableType !== 'event'
+              ? store.getters['booking/getCustomerSubscribe']
+              : store.getters['customerInfo/getCustomerSubscribe'],
+          countryPhoneIso:
+            bookableType !== 'event'
+              ? store.getters['booking/getCustomerCountryPhoneIso']
+              : store.getters['customerInfo/getCustomerCountryPhoneIso'],
+          externalId:
+            bookableType !== 'event'
+              ? store.getters['booking/getCustomerExternalId']
+              : store.getters['customerInfo/getCustomerExternalId'],
           translations: store.getters['booking/getCustomerTranslations'],
           customFields: customerCustomFields,
-        }
-      }
+        },
+      },
     ],
     payment: Object.assign(
       {
@@ -217,8 +256,8 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
         currency: settings.payments.currencyCode,
       },
       {
-        data: paymentData
-      }
+        data: paymentData,
+      },
     ),
     recaptcha: recaptcha,
     locale: locale,
@@ -232,10 +271,11 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
   let coupon = null
 
   switch (bookableType) {
-    case ('appointment'): {
+    case 'appointment': {
       coupon = store.getters['booking/getCoupon']
 
-      jsonData.couponCode = coupon && (coupon.required || (coupon.discount || coupon.deduction)) ? coupon.code : null
+      jsonData.couponCode =
+        coupon && (coupon.required || coupon.discount || coupon.deduction) ? coupon.code : null
 
       jsonData.notifyParticipants = 1
 
@@ -264,33 +304,38 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
       break
     }
 
-    case ('package'):
+    case 'package':
       jsonData = Object.assign(jsonData, usePackageBookingData(store))
       jsonData.bookings[0].extras = []
       jsonData.bookings[0].persons = 1
 
       break
 
-    case ('event'):
+    case 'event':
       jsonData = Object.assign(jsonData, {
-        eventId: store.getters['eventBooking/getSelectedEventId']
+        eventId: store.getters['eventBooking/getSelectedEventId'],
       })
 
       coupon = store.getters['coupon/getCoupon']
 
       jsonData = Object.assign(jsonData, {
-        couponCode: coupon && (coupon.required || (coupon.discount || coupon.deduction)) ? coupon.code : null,
+        couponCode:
+          coupon && (coupon.required || coupon.discount || coupon.deduction) ? coupon.code : null,
       })
 
       jsonData.bookings[0] = Object.assign(jsonData.bookings[0], {
-        ticketsData: store.getters['tickets/getTicketsData']
+        ticketsData: store.getters['tickets/getTicketsData'],
       })
 
       jsonData.bookings[0].persons = store.getters['persons/getPersons']
 
-      jsonData.bookings[0].utcOffset = settings.general.showClientTimeZone ?
-          useUtcValueOffset(store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId'])['periods'][0]['periodStart']) :
-          null
+      jsonData.bookings[0].utcOffset = settings.general.showClientTimeZone
+        ? useUtcValueOffset(
+            store.getters['eventEntities/getEvent'](
+              store.getters['eventBooking/getSelectedEventId'],
+            )['periods'][0]['periodStart'],
+          )
+        : null
 
       if (store.getters['eventWaitingListOptions/getAvailability']) {
         jsonData.bookings[0].status = 'waiting'
@@ -302,14 +347,10 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
   let bookingData = jsonData
   let requestOptions = {}
 
-  if (
-      bookingData.componentProps
-      && bookingData.componentProps.state
-      && bookableType !== 'event'
-  ) {
-    bookingData.componentProps.state.appointments.forEach(a => {
-      Object.keys(a.services).forEach(s => {
-        a.services[s].slots = [];
+  if (bookingData.componentProps && bookingData.componentProps.state && bookableType !== 'event') {
+    bookingData.componentProps.state.appointments.forEach((a) => {
+      Object.keys(a.services).forEach((s) => {
+        a.services[s].slots = []
       })
     })
   }
@@ -329,22 +370,25 @@ function useBookingData (store, formData, mandatoryJson = false, paymentData = {
 
     requestOptions = {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        'Content-Type': 'multipart/form-data',
+      },
     }
   }
 
   if (gateway === 'mollie' || gateway === 'wc' || gateway === 'barion') {
-    sessionStorage.setItem("ameliaCacheData", JSON.stringify({request: cacheComponentProps, paymentMethod: gateway, type: bookableType}));
+    sessionStorage.setItem(
+      'ameliaCacheData',
+      JSON.stringify({ request: cacheComponentProps, paymentMethod: gateway, type: bookableType }),
+    )
   }
 
   return {
     data: bookingData,
-    options: requestOptions
+    options: requestOptions,
   }
 }
 
-function useEventsStoreData (store) {
+function useEventsStoreData(store) {
   return {
     eventId: store.getters['eventBooking/getSelectedEventId'],
     bookableType: store.getters['bookableType/getType'],
@@ -356,30 +400,30 @@ function useEventsStoreData (store) {
     persons: store.getters['persons/getAllData'],
     pagination: store.getters['pagination/getAllData'],
     params: store.getters['params/getAllData'],
-    eventsDisplay: store.getters['eventEntities/getEventsDisplay']
+    eventsDisplay: store.getters['eventEntities/getEventsDisplay'],
   }
 }
 
-function useAppointmentBookingData (store) {
+function useAppointmentBookingData(store) {
   let appointments = []
 
   useCart(store).forEach((item) => {
-    if (item.serviceId && (item.serviceId in item.services)) {
+    if (item.serviceId && item.serviceId in item.services) {
       item.services[item.serviceId].list.forEach((appointment) => {
-        let bookingStart = appointment.date ? (appointment.date + ' ' + appointment.time) : null
+        let bookingStart = appointment.date ? appointment.date + ' ' + appointment.time : null
 
-        appointments.push(
-          {
-            serviceId: item.serviceId,
-            providerId: appointment.providerId,
-            locationId: appointment.locationId,
-            bookingStart: settings.general.showClientTimeZone ? useUtcValue(bookingStart) : bookingStart,
-            utcOffset: settings.general.showClientTimeZone ? useUtcValueOffset(bookingStart) : null,
-            extras: appointment.extras,
-            persons: appointment.persons,
-            duration: appointment.duration,
-          }
-        )
+        appointments.push({
+          serviceId: item.serviceId,
+          providerId: appointment.providerId,
+          locationId: appointment.locationId,
+          bookingStart: settings.general.showClientTimeZone
+            ? useUtcValue(bookingStart)
+            : bookingStart,
+          utcOffset: settings.general.showClientTimeZone ? useUtcValueOffset(bookingStart) : null,
+          extras: appointment.extras,
+          persons: appointment.persons,
+          duration: appointment.duration,
+        })
       })
     }
   })
@@ -387,7 +431,7 @@ function useAppointmentBookingData (store) {
   return appointments
 }
 
-function usePackageBookingData (store) {
+function usePackageBookingData(store) {
   let appointments = []
 
   let rules = []
@@ -422,8 +466,12 @@ function usePackageBookingData (store) {
 
     rules.push({
       serviceId: parseInt(serviceId),
-      providerId: activeItemServices[serviceId].providerId ? activeItemServices[serviceId].providerId : null,
-      locationId: activeItemServices[serviceId].locationId ? activeItemServices[serviceId].locationId : null
+      providerId: activeItemServices[serviceId].providerId
+        ? activeItemServices[serviceId].providerId
+        : null,
+      locationId: activeItemServices[serviceId].locationId
+        ? activeItemServices[serviceId].locationId
+        : null,
     })
   }
 
@@ -435,42 +483,40 @@ function usePackageBookingData (store) {
     packageRules: rules,
     utcOffset: useUtcValueOffset(null),
     deposit: !store.getters['booking/getPaymentDeposit'],
-    couponCode: coupon && (coupon.required || (coupon.discount || coupon.deduction)) ? coupon.code : null
+    couponCode:
+      coupon && (coupon.required || coupon.discount || coupon.deduction) ? coupon.code : null,
   }
 }
 
-function createBooking (store, requestData, successCallback, errorCallback) {
-  httpClient.post(
-    '/bookings',
-    requestData.data,
-    requestData.options
-  ).then(successCallback).catch(errorCallback)
+function createBooking(store, requestData, successCallback, errorCallback) {
+  httpClient
+    .post('/bookings', requestData.data, requestData.options)
+    .then(successCallback)
+    .catch(errorCallback)
 }
 
-function useCreateBooking (store, requestData, successCallback, errorCallback) {
-  let bookableType = store.getters['bookableType/getType'] ? store.getters['bookableType/getType'] : store.getters['booking/getBookableType']
+function useCreateBooking(store, requestData, successCallback, errorCallback) {
+  let bookableType = store.getters['bookableType/getType']
+    ? store.getters['bookableType/getType']
+    : store.getters['booking/getBookableType']
   useAction(
     store,
-    useBookingData(
-      store,
-      null,
-      true,
-      {},
-      null
-    ).data,
+    useBookingData(store, null, true, {}, null).data,
     'beforeBooking',
     bookableType,
     () => {
       createBooking(store, requestData, successCallback, errorCallback)
     },
-    message => {
-      errorCallback({response:{data:{data:{message: message}}}})
-    }
+    (message) => {
+      errorCallback({ response: { data: { data: { message: message } } } })
+    },
   )
 }
 
-function useBookingError (response, store) {
-  let bookableType = store.getters['bookableType/getType'] ? store.getters['bookableType/getType'] : store.getters['booking/getBookableType']
+function useBookingError(response, store) {
+  let bookableType = store.getters['bookableType/getType']
+    ? store.getters['bookableType/getType']
+    : store.getters['booking/getBookableType']
   let message = globalLabels['payment_error_default']
 
   if ('onSitePayment' in response.data && response.data.onSitePayment === true) {
@@ -479,14 +525,29 @@ function useBookingError (response, store) {
 
   if ('data' in response) {
     if ('customerAlreadyBooked' in response.data && response.data.customerAlreadyBooked === true) {
-      message = bookableType === 'event' ? globalLabels['customer_already_booked_ev'] : globalLabels['customer_already_booked_app']
-    } else if ('timeSlotUnavailable' in response.data && response.data.timeSlotUnavailable === true) {
-      message = bookableType === 'event' ? globalLabels['maximum_capacity_reached'] : globalLabels['time_slot_unavailable']
-    }  else if ('customerBlocked' in response.data && response.data.customerBlocked === true) {
+      message =
+        bookableType === 'event'
+          ? globalLabels['customer_already_booked_ev']
+          : globalLabels['customer_already_booked_app']
+    } else if (
+      'timeSlotUnavailable' in response.data &&
+      response.data.timeSlotUnavailable === true
+    ) {
+      message =
+        bookableType === 'event'
+          ? globalLabels['maximum_capacity_reached']
+          : globalLabels['time_slot_unavailable']
+    } else if ('customerBlocked' in response.data && response.data.customerBlocked === true) {
       message = globalLabels['customer_blocked']
-    } else if ('bookingsLimitReached' in response.data && response.data.bookingsLimitReached === true) {
+    } else if (
+      'bookingsLimitReached' in response.data &&
+      response.data.bookingsLimitReached === true
+    ) {
       message = globalLabels['bookings_limit_reached']
-    } else if ('eventBookingUnavailable' in response.data && response.data.eventBookingUnavailable === true) {
+    } else if (
+      'eventBookingUnavailable' in response.data &&
+      response.data.eventBookingUnavailable === true
+    ) {
       message = globalLabels['event_booking_unavailable']
     } else if ('emailError' in response.data && response.data.emailError === true) {
       message = globalLabels['email_exist_error']
@@ -508,13 +569,19 @@ function useBookingError (response, store) {
       } else {
         message = globalLabels['payment_error']
       }
-    } else if ('bookingAlreadyInWcCart' in response.data && response.data.bookingAlreadyInWcCart === true) {
+    } else if (
+      'bookingAlreadyInWcCart' in response.data &&
+      response.data.bookingAlreadyInWcCart === true
+    ) {
       message = globalLabels['booking_already_in_wc_cart']
     } else if ('wcError' in response.data && response.data.wcError === true) {
       message = globalLabels['wc_error']
     } else if ('recaptchaError' in response.data && response.data.recaptchaError === true) {
       message = globalLabels['recaptcha_invalid_error']
-    } else if ('packageBookingUnavailable' in response.data && response.data.packageBookingUnavailable === true) {
+    } else if (
+      'packageBookingUnavailable' in response.data &&
+      response.data.packageBookingUnavailable === true
+    ) {
       message = globalLabels['package_booking_unavailable']
     } else if ('message' in response.data && response.data.message) {
       message = response.data.message
@@ -524,46 +591,47 @@ function useBookingError (response, store) {
   return message
 }
 
-function useNotify (store, response, success, error) {
+function useNotify(store, response, success, error) {
   if (!settings.general.runInstantPostBookingActions) {
     let request = {}
 
     switch (response.type) {
-      case ('appointment'):
+      case 'appointment':
         request = getAppointmentNotifyData(store, response)
 
         break
 
-      case('package'):
+      case 'package':
         request = getPackageNotifyData(response)
 
-      break
+        break
 
-      case ('event'):
+      case 'event':
         request = getEventNotifyData(response)
 
         break
     }
 
-    httpClient.post(
-        '/bookings/success/' + request.id + '&nocache=' + (new Date().getTime()),
+    httpClient
+      .post(
+        '/bookings/success/' + request.id + '&nocache=' + new Date().getTime(),
         request.data,
-        {}
-    ).then(success).catch(error)
+        {},
+      )
+      .then(success)
+      .catch(error)
   }
 }
 
-function getAppointmentNotifyData (store, response) {
+function getAppointmentNotifyData(store, response) {
   let recurringData = []
 
   response.recurring.forEach((recurring) => {
-    recurringData.push(
-      {
-        type: 'appointment',
-        id: recurring.booking.id,
-        appointmentStatusChanged: recurring.appointmentStatusChanged
-      }
-    )
+    recurringData.push({
+      type: 'appointment',
+      id: recurring.booking.id,
+      appointmentStatusChanged: recurring.appointmentStatusChanged,
+    })
   })
 
   return {
@@ -576,23 +644,21 @@ function getAppointmentNotifyData (store, response) {
       customer: response.customer,
       paymentId: 'paymentId' in response && response.paymentId ? response.paymentId : null,
       packageCustomerId: null,
-      isPackageAppointment: response.isPackageAppointment
-    }
+      isPackageAppointment: response.isPackageAppointment,
+    },
   }
 }
 
-function getPackageNotifyData (response) {
-  let bookings  = []
+function getPackageNotifyData(response) {
+  let bookings = []
   let bookingId = 0
   response.package.forEach((packData, index) => {
     if (index > 0) {
-      bookings.push(
-          {
-            type: 'appointment',
-            id: packData.booking.id,
-            appointmentStatusChanged: packData.appointmentStatusChanged
-          }
-      )
+      bookings.push({
+        type: 'appointment',
+        id: packData.booking.id,
+        appointmentStatusChanged: packData.appointmentStatusChanged,
+      })
     } else {
       bookingId = packData.booking.id
     }
@@ -608,26 +674,26 @@ function getPackageNotifyData (response) {
       customer: response.customer,
       paymentId: 'paymentId' in response && response.paymentId ? response.paymentId : null,
       packageCustomerId: response.packageCustomerId,
-      isPackageAppointment: true
-    }
+      isPackageAppointment: true,
+    },
   }
 }
 
-function getEventNotifyData (response) {
+function getEventNotifyData(response) {
   return {
     id: response.booking.id,
     data: {
       type: 'event',
       appointmentStatusChanged: response.appointmentStatusChanged,
-      paymentId: 'paymentId' in response && response.paymentId ? response.paymentId : null
-    }
+      paymentId: 'paymentId' in response && response.paymentId ? response.paymentId : null,
+    },
   }
 }
 
-function getSingleAppointmentData (store, date, data) {
+function getSingleAppointmentData(store, date, data) {
   let services = useServices(store)
 
-  let bookable = services.find(i => i.id === data.appointment.serviceId)
+  let bookable = services.find((i) => i.id === data.appointment.serviceId)
 
   return {
     appointmentId: data.appointment ? data.appointment.id : '',
@@ -638,20 +704,24 @@ function getSingleAppointmentData (store, date, data) {
     locationId: data.appointment.locationId,
     title: bookable.name,
     description: bookable.description,
-    start: settings.general.showClientTimeZone ? useLocalValue(date.start) : data.appointment.bookingStart,
-    end: settings.general.showClientTimeZone ? useLocalValue(date.end) : data.appointment.bookingEnd,
+    start: settings.general.showClientTimeZone
+      ? useLocalValue(date.start)
+      : data.appointment.bookingStart,
+    end: settings.general.showClientTimeZone
+      ? useLocalValue(date.end)
+      : data.appointment.bookingEnd,
     utcStart: moment.utc(date.start.replace(/ /g, 'T')).toDate(),
     utcEnd: moment.utc(date.end.replace(/ /g, 'T')).toDate(),
-    cfAddress: getAddressFromCF(store)
+    cfAddress: getAddressFromCF(store),
   }
 }
 
-function runAction (store, response) {
+function runAction(store, response) {
   useAction(
     store,
     {
       appointmentId: response.appointment ? response.appointment.id : null,
-      payment: Object.assign(response.payment, {currency: settings.payments.currencyCode}),
+      payment: Object.assign(response.payment, { currency: settings.payments.currencyCode }),
       ...(response.type === 'event' && {
         event: response.event || null,
         number_of_persons: response.booking ? response.booking.persons : null,
@@ -660,13 +730,13 @@ function runAction (store, response) {
         providerId: response.appointment ? response.appointment.providerId : null,
         locationId: response.appointment ? response.appointment.locationId : null,
         serviceId: response.appointment ? response.appointment.serviceId : null,
-        isCartAppointment: response.isCart
-      })
+        isCartAppointment: response.isCart,
+      }),
     },
     response.payment.gateway === 'onSite' ? 'Schedule' : 'Purchase',
     response.type,
     null,
-    null
+    null,
   )
 
   if (response.recurring.length) {
@@ -675,24 +745,26 @@ function runAction (store, response) {
         store,
         {
           appointmentId: item.appointment ? item.appointment.id : null,
-          payment: Object.assign(item.booking.payments[0], {currency: settings.payments.currencyCode}),
+          payment: Object.assign(item.booking.payments[0], {
+            currency: settings.payments.currencyCode,
+          }),
           ...(response.isCart && {
             providerId: item.appointment ? item.appointment.providerId : null,
             locationId: item.appointment ? item.appointment.locationId : null,
             serviceId: item.appointment ? item.appointment.serviceId : null,
-            isCartAppointment: true
-          })
+            isCartAppointment: true,
+          }),
         },
         item.booking.payments[0].gateway === 'onSite' ? 'Schedule' : 'Purchase',
         item.type,
         null,
-        null
+        null,
       )
     })
   }
 }
 
-function getAddressFromCF (store) {
+function getAddressFromCF(store) {
   let bookingCustomFields = store.getters['booking/getAvailableCustomFields']
   if (bookingCustomFields) {
     for (let i = 0; i < Object.values(bookingCustomFields).length; i++) {
@@ -707,7 +779,7 @@ function getAddressFromCF (store) {
   return null
 }
 
-function useAppointmentCalendarData (store, response) {
+function useAppointmentCalendarData(store, response) {
   let appointments = []
 
   let payments = []
@@ -740,9 +812,13 @@ function useAppointmentCalendarData (store, response) {
   let totalAmount = 0
 
   amountInfo.forEach((item) => {
-    totalAmount += item.prepaid.totalAmount + item.postpaid.totalAmount -
-      item.prepaid.discountAmount - item.postpaid.discountAmount +
-      item.prepaid.taxAmount + item.postpaid.taxAmount
+    totalAmount +=
+      item.prepaid.totalAmount +
+      item.postpaid.totalAmount -
+      item.prepaid.discountAmount -
+      item.postpaid.discountAmount +
+      item.prepaid.taxAmount +
+      item.postpaid.taxAmount
   })
 
   return {
@@ -756,7 +832,7 @@ function useAppointmentCalendarData (store, response) {
   }
 }
 
-function usePackageCalendarData (store, response) {
+function usePackageCalendarData(store, response) {
   let token = ''
 
   let appointments = []
@@ -773,18 +849,18 @@ function usePackageCalendarData (store, response) {
 
   runAction(store, response)
 
-  let pack = store.getters['entities/getPackage'](
-    store.getters['booking/getPackageId']
-  )
+  let pack = store.getters['entities/getPackage'](store.getters['booking/getPackageId'])
 
   let tax = useEntityTax(store, store.getters['booking/getPackageId'], 'package')
 
   let amountData = useAmount(
-      pack,
-      store.getters['booking/getCoupon'],
-      tax && settings.payments.taxes.enabled ? Object.assign({}, tax, {excluded: settings.payments.taxes.excluded}) : null,
-      usePackageAmount(pack),
-      false
+    pack,
+    store.getters['booking/getCoupon'],
+    tax && settings.payments.taxes.enabled
+      ? Object.assign({}, tax, { excluded: settings.payments.taxes.excluded })
+      : null,
+    usePackageAmount(pack),
+    false,
   )
 
   return {
@@ -794,12 +870,15 @@ function usePackageCalendarData (store, response) {
     payments: [response.payment],
     paymentAmount: response.payment.amount,
     payment: response.payment,
-    price: amountData.deposit && response.payment.gateway !== 'onSite' ? amountData.deposit : amountData.price - amountData.discount + amountData.tax,
+    price:
+      amountData.deposit && response.payment.gateway !== 'onSite'
+        ? amountData.deposit
+        : amountData.price - amountData.discount + amountData.tax,
     customerCabinetUrl: response.customerCabinetUrl,
   }
 }
 
-function useEventCalendarData (store, response) {
+function useEventCalendarData(store, response) {
   let locationAddress = ''
 
   if (response.event.location) {
@@ -810,12 +889,14 @@ function useEventCalendarData (store, response) {
 
   let data = []
 
-  let responsePeriods = settings.general.showClientTimeZone ? response.utcTime : response.event.periods
+  let responsePeriods = settings.general.showClientTimeZone
+    ? response.utcTime
+    : response.event.periods
 
   let periodsArr = []
   responsePeriods.forEach(function (date) {
-    let keyStart =  settings.general.showClientTimeZone ? 'start' : 'periodStart'
-    let keyEnd =  settings.general.showClientTimeZone ? 'end' : 'periodEnd'
+    let keyStart = settings.general.showClientTimeZone ? 'start' : 'periodStart'
+    let keyEnd = settings.general.showClientTimeZone ? 'end' : 'periodEnd'
     let periodStartDate = moment(date[keyStart].split(' ')[0], 'YYYY-MM-DD')
     let periodEndDate = moment(date[keyEnd].split(' ')[0], 'YYYY-MM-DD')
     let periodStartTime = moment(date[keyStart].split(' ')[1], 'HH:mm:ss').format('HH:mm:ss')
@@ -835,44 +916,51 @@ function useEventCalendarData (store, response) {
         periodStartDate.add(1, 'days')
       }
 
-      periodDates.forEach(dayPeriod => {
+      periodDates.forEach((dayPeriod) => {
         periodsArr.push({
-          start: settings.general.showClientTimeZone ? useLocalValue(dayPeriod + ' ' + periodStartTime) : dayPeriod + ' ' + periodStartTime,
-          end: settings.general.showClientTimeZone ? useLocalValue(dayPeriod + ' ' + periodEndTime) : dayPeriod + ' ' + periodEndTime
+          start: settings.general.showClientTimeZone
+            ? useLocalValue(dayPeriod + ' ' + periodStartTime)
+            : dayPeriod + ' ' + periodStartTime,
+          end: settings.general.showClientTimeZone
+            ? useLocalValue(dayPeriod + ' ' + periodEndTime)
+            : dayPeriod + ' ' + periodEndTime,
         })
       })
     } else {
       periodsArr.push({
-        start: settings.general.showClientTimeZone ? useLocalValue(periodStartDate.format('YYYY-MM-DD') + ' ' + periodStartTime) : periodStartDate.format('YYYY-MM-DD') + ' ' + periodStartTime,
-        end: settings.general.showClientTimeZone ? useLocalValue(periodEndDate.format('YYYY-MM-DD') + ' ' + periodEndTime) : periodEndDate.format('YYYY-MM-DD') + ' ' + periodEndTime
+        start: settings.general.showClientTimeZone
+          ? useLocalValue(periodStartDate.format('YYYY-MM-DD') + ' ' + periodStartTime)
+          : periodStartDate.format('YYYY-MM-DD') + ' ' + periodStartTime,
+        end: settings.general.showClientTimeZone
+          ? useLocalValue(periodEndDate.format('YYYY-MM-DD') + ' ' + periodEndTime)
+          : periodEndDate.format('YYYY-MM-DD') + ' ' + periodEndTime,
       })
     }
   })
 
-  periodsArr.sort((a, b) => moment(a.start, 'YYYY-MM-DD HH:mm:ss') - moment(b.start, 'YYYY-MM-DD HH:mm:ss'))
-    .forEach(item => {
-      data.push(
-        {
-          eventId: response.event.id,
-          bookingId: response.booking.id,
-          locationId: response.event.locationId,
-          organizerId: response.event.organizerId,
-          title: response.event.name,
-          description: response.event.description,
-          start: item.start,
-          end: item.end,
-          utcStart: moment.utc(item.start.replace(/ /g, 'T')).toDate(),
-          utcEnd: moment.utc(item.end.replace(/ /g, 'T')).toDate(),
-          cfAddress: getAddressFromCF(store)
-        }
-      )
+  periodsArr
+    .sort((a, b) => moment(a.start, 'YYYY-MM-DD HH:mm:ss') - moment(b.start, 'YYYY-MM-DD HH:mm:ss'))
+    .forEach((item) => {
+      data.push({
+        eventId: response.event.id,
+        bookingId: response.booking.id,
+        locationId: response.event.locationId,
+        organizerId: response.event.organizerId,
+        title: response.event.name,
+        description: response.event.description,
+        start: item.start,
+        end: item.end,
+        utcStart: moment.utc(item.start.replace(/ /g, 'T')).toDate(),
+        utcEnd: moment.utc(item.end.replace(/ /g, 'T')).toDate(),
+        cfAddress: getAddressFromCF(store),
+      })
     })
 
   let ticketsData = []
 
-  response.booking.ticketsData.forEach(ticket => {
+  response.booking.ticketsData.forEach((ticket) => {
     if (ticket.persons) {
-      let ticketInEvent = response.event.customTickets.find(t => t.id === ticket.eventTicketId)
+      let ticketInEvent = response.event.customTickets.find((t) => t.id === ticket.eventTicketId)
       ticket.name = ticketInEvent.name
 
       ticketsData.push(ticket)
@@ -881,12 +969,14 @@ function useEventCalendarData (store, response) {
 
   let amSettings = computed(() => store.getters['getSettings'])
   let afterBookingUrl = computed(() => {
-    let entitySettings = response.event.settings ? JSON.parse(response.event.settings) : amSettings.value
+    let entitySettings = response.event.settings
+      ? JSON.parse(response.event.settings)
+      : amSettings.value
     let url = ''
     if (
-      'general' in entitySettings
-      && 'redirectUrlAfterAppointment' in entitySettings.general
-      && entitySettings.general.redirectUrlAfterAppointment
+      'general' in entitySettings &&
+      'redirectUrlAfterAppointment' in entitySettings.general &&
+      entitySettings.general.redirectUrlAfterAppointment
     ) {
       url = entitySettings.general.redirectUrlAfterAppointment
     } else if (amSettings.value.general.redirectUrlAfterAppointment) {
@@ -896,13 +986,15 @@ function useEventCalendarData (store, response) {
     return url
   })
   let customerPanelUrl = computed(() => {
-    let entitySettings = response.event.settings ? JSON.parse(response.event.settings) : amSettings.value
+    let entitySettings = response.event.settings
+      ? JSON.parse(response.event.settings)
+      : amSettings.value
     let url = ''
     if (
-      'roles' in entitySettings
-      && 'customerCabinet' in entitySettings.roles
-      && 'pageUrl' in entitySettings.roles.customerCabinet
-      && entitySettings.roles.customerCabinet.pageUrl
+      'roles' in entitySettings &&
+      'customerCabinet' in entitySettings.roles &&
+      'pageUrl' in entitySettings.roles.customerCabinet &&
+      entitySettings.roles.customerCabinet.pageUrl
     ) {
       url = entitySettings.roles.customerCabinet.pageUrl
     } else if (amSettings.value.roles.customerCabinet.pageUrl) {
@@ -919,7 +1011,7 @@ function useEventCalendarData (store, response) {
   let price = 0
 
   if (event.customPricing) {
-    response.booking.ticketsData.forEach(t => {
+    response.booking.ticketsData.forEach((t) => {
       if (t.persons) {
         price += event.aggregatedPrice ? t.price * t.persons : t.price
       }
@@ -931,11 +1023,13 @@ function useEventCalendarData (store, response) {
   let tax = useEntityTax(store, store.getters['eventBooking/getSelectedEventId'], 'event')
 
   let amountData = useAmount(
-      event,
-      store.getters['coupon/getCoupon'],
-      settings.payments.taxes.enabled ? Object.assign({}, tax, {excluded: settings.payments.taxes.excluded}) : null,
-      price,
-      false
+    event,
+    store.getters['coupon/getCoupon'],
+    settings.payments.taxes.enabled
+      ? Object.assign({}, tax, { excluded: settings.payments.taxes.excluded })
+      : null,
+    price,
+    false,
   )
 
   return {
@@ -951,57 +1045,66 @@ function useEventCalendarData (store, response) {
     persons: response.booking.persons,
     payments: [response.payment],
     paymentAmount: response.payment.amount,
-    price: amountData.deposit && response.payment.gateway !== 'onSite' ? amountData.deposit : amountData.price - amountData.discount + amountData.tax,
+    price:
+      amountData.deposit && response.payment.gateway !== 'onSite'
+        ? amountData.deposit
+        : amountData.price - amountData.discount + amountData.tax,
     redirectAfterBookingUrl: afterBookingUrl.value,
     customerCabinetUrl: customerPanelUrl.value,
   }
 }
 
-function useCreateBookingSuccess (store, response, callback) {
+function useCreateBookingSuccess(store, response, callback) {
   if (response.data.data) {
-    let bookableType = store.getters['bookableType/getType'] ? store.getters['bookableType/getType'] : store.getters['booking/getBookableType']
-    store.commit((bookableType === 'event' ? 'setLoading' : 'booking/setLoading'), false)
+    let bookableType = store.getters['bookableType/getType']
+      ? store.getters['bookableType/getType']
+      : store.getters['booking/getBookableType']
+    store.commit(bookableType === 'event' ? 'setLoading' : 'booking/setLoading', false)
 
     switch (bookableType) {
-      case ('appointment'):
+      case 'appointment':
         store.commit('booking/setBooked', useAppointmentCalendarData(store, response.data.data))
 
         break
 
-      case ('package'):
+      case 'package':
         store.commit('booking/setBooked', usePackageCalendarData(store, response.data.data))
 
         break
 
-      case ('event'):
+      case 'event':
         store.commit('eventBooking/setBooked', useEventCalendarData(store, response.data.data))
 
         break
     }
 
-    useNotify(store, response.data.data, () => {}, () => {})
+    useNotify(
+      store,
+      response.data.data,
+      () => {},
+      () => {},
+    )
   }
 
   if (typeof callback !== 'undefined') {
     callback()
   }
-
 }
 
-function useCreateBookingError (store, response, callback) {
-  const bookingErrorResponse = response &&
+function useCreateBookingError(store, response, callback) {
+  const bookingErrorResponse =
+    response &&
     typeof response === 'object' &&
     'data' in response &&
     response.data &&
     typeof response.data === 'object' &&
     'data' in response.data
-    ? response.data
-    : response
+      ? response.data
+      : response
 
   if (bookingErrorResponse && typeof bookingErrorResponse === 'object') {
-    const normalizedBookingErrorResponse = 'data' in bookingErrorResponse
-      ? bookingErrorResponse
-      : {data: bookingErrorResponse}
+    const normalizedBookingErrorResponse =
+      'data' in bookingErrorResponse ? bookingErrorResponse : { data: bookingErrorResponse }
 
     errorMessage.value = useBookingError(normalizedBookingErrorResponse, store)
   }
@@ -1017,7 +1120,7 @@ function useCreateBookingError (store, response, callback) {
   }
 }
 
-function getErrorMessage () {
+function getErrorMessage() {
   return errorMessage.value
 }
 
@@ -1034,5 +1137,5 @@ export {
   useBookingError,
   useNotify,
   useAppointmentBookingData,
-  usePackageBookingData
+  usePackageBookingData,
 }

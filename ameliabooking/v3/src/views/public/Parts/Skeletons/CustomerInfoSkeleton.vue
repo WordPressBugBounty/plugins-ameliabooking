@@ -1,19 +1,9 @@
 <template>
   <el-skeleton v-show="loading" animated class="am-skeleton-ci">
     <template #template>
-      <div
-        v-for="(item) in new Array(10)"
-        :key="item"
-        class="am-skeleton-ci__inner"
-      >
-        <el-skeleton-item
-          class="am-skeleton-ci__label"
-          variant="text"
-        />
-        <el-skeleton-item
-          class="am-skeleton-ci__input"
-          variant="text"
-        />
+      <div v-for="item in new Array(10)" :key="item" class="am-skeleton-ci__inner">
+        <el-skeleton-item class="am-skeleton-ci__label" variant="text" />
+        <el-skeleton-item class="am-skeleton-ci__input" variant="text" />
       </div>
     </template>
   </el-skeleton>
@@ -21,10 +11,10 @@
 
 <script setup>
 // * Import from Vue
-import { computed } from "vue";
+import { computed } from 'vue'
 
 // * Import from Store
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 const store = useStore()
 

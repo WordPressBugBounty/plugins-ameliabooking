@@ -3,16 +3,10 @@
     v-if="loaded"
     ref="stepCardLayoutRef"
     class="am-fs-scl"
-    :class="[
-      props.customClass,
-      { 'am-oxvisible': bringingAnyoneVisibility || packagesVisibility },
-    ]"
+    :class="[props.customClass, { 'am-oxvisible': bringingAnyoneVisibility || packagesVisibility }]"
     :style="cssVars"
   >
-    <div
-      class="am-fs-scl__filters"
-      :class="responsiveClass"
-    >
+    <div class="am-fs-scl__filters" :class="responsiveClass">
       <slot name="filters" />
     </div>
     <div class="am-fs-scl__content">
@@ -46,8 +40,7 @@
           :type="amCustomize.bringingAnyone.options.secondaryButton.buttonType"
           :disabled="
             bringingAnyoneOptions.min === bringingAnyoneOptions.max ||
-            (!amSettings.appointments.allowBookingIfNotMin &&
-              bringingAnyoneOptions.min > 0)
+            (!amSettings.appointments.allowBookingIfNotMin && bringingAnyoneOptions.min > 0)
           "
           @click="noOneBringWith"
         >
@@ -58,14 +51,11 @@
             bringingAnyoneOptions.min !== bringingAnyoneOptions.max &&
             bringingAnyoneOptions.min <= 0
               ? amCustomize.bringingAnyone.options.primaryButton.buttonType
-              : amCustomize.bringingAnyone.options.primaryFooterButton
-                  .buttonType
+              : amCustomize.bringingAnyone.options.primaryFooterButton.buttonType
           "
           :disabled="
             bookingPersons ===
-            (amSettings.appointments.bringingAnyoneLogic === 'additional'
-              ? 1
-              : 0)
+            (amSettings.appointments.bringingAnyoneLogic === 'additional' ? 1 : 0)
           "
           @click="bringPeopleWithYou"
         >
@@ -163,24 +153,17 @@ const globalLabels = inject('labels')
 const localLanguage = inject('localLanguage')
 
 // * if local lang is in settings lang
-let langDetection = computed(() =>
-  amSettings.general.usedLanguages.includes(localLanguage.value)
-)
+let langDetection = computed(() => amSettings.general.usedLanguages.includes(localLanguage.value))
 
 // * Computed labels
 let amLabels = computed(() => {
   let computedLabels = reactive({ ...globalLabels })
 
   if (amSettings.customizedData?.sbsNew?.initStep?.translations) {
-    let customizedLabels =
-      amSettings.customizedData.sbsNew.initStep.translations
+    let customizedLabels = amSettings.customizedData.sbsNew.initStep.translations
     Object.keys(customizedLabels).forEach((labelKey) => {
-      if (
-        customizedLabels[labelKey][localLanguage.value] &&
-        langDetection.value
-      ) {
-        computedLabels[labelKey] =
-          customizedLabels[labelKey][localLanguage.value]
+      if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
+        computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
         computedLabels[labelKey] = customizedLabels[labelKey].default
       }
@@ -195,15 +178,10 @@ let bringingLabels = computed(() => {
   let computedLabels = reactive({ ...globalLabels })
 
   if (amSettings.customizedData?.sbsNew?.bringingAnyone?.translations) {
-    let customizedLabels =
-      amSettings.customizedData.sbsNew.bringingAnyone.translations
+    let customizedLabels = amSettings.customizedData.sbsNew.bringingAnyone.translations
     Object.keys(customizedLabels).forEach((labelKey) => {
-      if (
-        customizedLabels[labelKey][localLanguage.value] &&
-        langDetection.value
-      ) {
-        computedLabels[labelKey] =
-          customizedLabels[labelKey][localLanguage.value]
+      if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
+        computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
         computedLabels[labelKey] = customizedLabels[labelKey].default
       }
@@ -219,23 +197,20 @@ let amCustomize = inject('amCustomize')
 let isRtl = computed(() => store.getters['getIsRtl'])
 
 // * Step Functions
-const { nextStep, footerButtonReset, footerButtonClicked } = inject(
-  'changingStepsFunctions',
-  {
-    nextStep: () => {},
-    footerButtonReset: () => {},
-    footerButtonClicked: {
-      value: false,
-    },
-  }
-)
+const { nextStep, footerButtonReset, footerButtonClicked } = inject('changingStepsFunctions', {
+  nextStep: () => {},
+  footerButtonReset: () => {},
+  footerButtonClicked: {
+    value: false,
+  },
+})
 
 // * Bringing Anyone block
 let bringingAnyoneOptions = computed(() => {
   return useCapacity(
     store.getters['entities/getEmployeeServices'](
-      store.getters['booking/getServiceProviderSelection']
-    )
+      store.getters['booking/getServiceProviderSelection'],
+    ),
   )
 })
 
@@ -298,11 +273,11 @@ async function focusSelectedOrFirstItem() {
   }
 
   const selectedItem = layoutElement.querySelector(
-    '.am-fs__init-item.am--selected:not(.am--disabled)[tabindex="0"]'
+    '.am-fs__init-item.am--selected:not(.am--disabled)[tabindex="0"]',
   )
 
   const firstFocusableItem = layoutElement.querySelector(
-    '.am-fs__init-item:not(.am--disabled)[tabindex="0"]'
+    '.am-fs__init-item:not(.am--disabled)[tabindex="0"]',
   )
 
   ;(selectedItem || firstFocusableItem)?.focus()
@@ -310,9 +285,7 @@ async function focusSelectedOrFirstItem() {
 
 // * Package popup
 let packagesOptions = computed(() =>
-  store.getters['entities/filteredPackages'](
-    store.getters['booking/getSelection']
-  )
+  store.getters['entities/filteredPackages'](store.getters['booking/getSelection']),
 )
 
 let packagesPopupFooterVisibility = ref(true)
@@ -376,32 +349,20 @@ const amColors = inject(
     colorBtnPrimText: '#FFFFFF',
     colorBtnSec: '#1A2C37',
     colorBtnSecText: '#FFFFFF',
-  })
+  }),
 )
 
 let cssVars = computed(() => {
   return {
     '--am-c-primary': amColors.value.colorPrimary,
-    '--am-c-primary-op05': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.05
-    ),
+    '--am-c-primary-op05': useColorTransparency(amColors.value.colorPrimary, 0.05),
     '--am-c-main-bgr': amColors.value.colorMainBgr,
     '--am-c-main-heading-text': amColors.value.colorMainHeadingText,
     '--am-c-main-text': amColors.value.colorMainText,
-    '--am-c-main-text-op80': useColorTransparency(
-      amColors.value.colorMainText,
-      0.8
-    ),
+    '--am-c-main-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
     '--am-c-inp-border': amColors.value.colorInpBorder,
-    '--am-c-scroll-op30': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.3
-    ),
-    '--am-c-scroll-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
   }
 })
 </script>

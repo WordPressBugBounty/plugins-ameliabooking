@@ -29,25 +29,23 @@
             class="am-capi__form"
             :class="responsiveClass"
           >
-            <template
-              v-for="item in amCustomize.capc.profile.order"
-              :key="item.id"
-            >
+            <template v-for="item in amCustomize.capc.profile.order" :key="item.id">
               <component
                 :is="infoFormConstruction[item.id].template"
                 v-if="
                   amCustomize[pageRenderKey].profile.options[item.id]
-                    ? amCustomize[pageRenderKey].profile.options[item.id]
-                        .visibility
+                    ? amCustomize[pageRenderKey].profile.options[item.id].visibility
                     : true
                 "
                 ref="customerCollectorRef"
                 v-model="infoFormData[item.id]"
-                v-model:country-code="
-                  infoFormConstruction[item.id].countryPhoneIso
-                "
+                v-model:country-code="infoFormConstruction[item.id].countryPhoneIso"
                 v-bind="infoFormConstruction[item.id].props"
-                v-on="'handlers' in infoFormConstruction[item.id] ? infoFormConstruction[item.id].handlers : {}"
+                v-on="
+                  'handlers' in infoFormConstruction[item.id]
+                    ? infoFormConstruction[item.id].handlers
+                    : {}
+                "
               ></component>
             </template>
           </el-form>
@@ -65,10 +63,7 @@
             class="am-capi__form"
             :class="responsiveClass"
           >
-            <template
-              v-for="(item, key) in passFormConstruction"
-              :key="item.props.itemName"
-            >
+            <template v-for="(item, key) in passFormConstruction" :key="item.props.itemName">
               <component
                 :is="item.template"
                 ref="customerPassCollectorRef"
@@ -89,15 +84,9 @@
       <MainProfileFooter
         :display="activeTab"
         :customized-labels="globalStepLabels('profile')"
-        :delete-footer-type="
-          amCustomize.capc.profile.options.deleteFooterButton.buttonType
-        "
-        :save-footer-button="
-          amCustomize.capc.profile.options.saveFooterButton.buttonType
-        "
-        :pass-footer-button="
-          amCustomize.capc.profile.options.passFooterButton.buttonType
-        "
+        :delete-footer-type="amCustomize.capc.profile.options.deleteFooterButton.buttonType"
+        :save-footer-button="amCustomize.capc.profile.options.saveFooterButton.buttonType"
+        :pass-footer-button="amCustomize.capc.profile.options.passFooterButton.buttonType"
       />
     </div>
   </div>
@@ -121,6 +110,7 @@ import { useReactiveCustomize } from '../../../../../../../assets/js/admin/useRe
 // * Form Fields Templates
 import { formFieldsTemplates } from '../../../../../../../assets/js/common/formFieldsTemplates'
 import { useColorTransparency } from '../../../../../../../assets/js/common/colorManipulation'
+import { getInternationalPhoneValue } from '../../../../../../../assets/js/common/phone'
 
 // * Customize
 const { amCustomize } = useReactiveCustomize()
@@ -180,17 +170,10 @@ let pageRenderKey = inject('pageRenderKey')
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepName.value]
-      .translations &&
-      amCustomize.value[pageRenderKey.value][stepName.value].translations[
-        label
-      ] &&
-      amCustomize.value[pageRenderKey.value][stepName.value].translations[
-        label
-      ][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[
-          label
-        ][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepName.value].translations &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -199,17 +182,11 @@ function labelsDisplay(label) {
 
 function globalStepLabels(step) {
   let stepLabels = {}
-  let customizedLabels = step
-    ? amCustomize.value[pageRenderKey.value][step].translations
-    : null
+  let customizedLabels = step ? amCustomize.value[pageRenderKey.value][step].translations : null
   if (customizedLabels && Object.keys(customizedLabels)) {
-    Object.keys(
-      amCustomize.value[pageRenderKey.value][step].translations
-    ).forEach((label) => {
+    Object.keys(amCustomize.value[pageRenderKey.value][step].translations).forEach((label) => {
       stepLabels[label] =
-        amCustomize.value[pageRenderKey.value][step].translations[label][
-          langKey.value
-        ]
+        amCustomize.value[pageRenderKey.value][step].translations[label][langKey.value]
     })
   } else {
     stepLabels = {}
@@ -295,7 +272,11 @@ let infoFormConstruction = computed(() => {
       },
       handlers: {
         handlePhoneData: (phoneData) => {
-          infoFormData.value.phone = phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, '') : ''
+          infoFormData.value.phone = getInternationalPhoneValue(
+            phoneData?.phoneNumber ?? phoneData?.e164,
+            phoneData,
+            phoneData?.countryCode
+          )
         },
       },
     },
@@ -325,18 +306,14 @@ let infoFormRules = computed(() => {
     ],
     lastName: [
       {
-        required:
-          amCustomize.value[pageRenderKey.value][stepName.value].options
-            .lastName.required,
+        required: amCustomize.value[pageRenderKey.value][stepName.value].options.lastName.required,
         message: labelsDisplay('enter_last_name_warning'),
         trigger: 'submit',
       },
     ],
     email: [
       {
-        required:
-          amCustomize.value[pageRenderKey.value][stepName.value].options.email
-            .required,
+        required: amCustomize.value[pageRenderKey.value][stepName.value].options.email.required,
         type: 'email',
         message: labelsDisplay('enter_valid_email_warning'),
         trigger: 'submit',
@@ -344,18 +321,14 @@ let infoFormRules = computed(() => {
     ],
     phone: [
       {
-        required:
-          amCustomize.value[pageRenderKey.value][stepName.value].options.phone
-            .required,
+        required: amCustomize.value[pageRenderKey.value][stepName.value].options.phone.required,
         message: labelsDisplay('enter_phone_warning'),
         trigger: 'submit',
       },
     ],
     birthday: [
       {
-        required:
-          amCustomize.value[pageRenderKey.value][stepName.value].options
-            .birthday.required,
+        required: amCustomize.value[pageRenderKey.value][stepName.value].options.birthday.required,
         message: labelsDisplay('enter_date_of_birth_warning'),
         trigger: 'submit',
       },
@@ -453,8 +426,7 @@ let passFormRules = computed(() => {
         trigger: 'submit',
       },
       {
-        validator: () =>
-          passFormData.value.newPass === passFormData.value.confirmPass,
+        validator: () => passFormData.value.newPass === passFormData.value.confirmPass,
         message: labelsDisplay('passwords_not_match'),
         trigger: 'submit',
       },
@@ -485,10 +457,7 @@ let cssVars = computed(() => {
   return {
     '--am-c-capi-primary': amColors.value.colorPrimary,
     '--am-c-capi-text': amColors.value.colorMainText,
-    '--am-c-capi-text-op10': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
+    '--am-c-capi-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
   }
 })
 </script>
@@ -555,11 +524,7 @@ export default {
         $count: 100;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms
-              cubic-bezier(0.45, 1, 0.4, 1.2)
-              #{$i *
-              100}ms
-              am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }

@@ -1,19 +1,18 @@
 <template>
-  <div class="am-fs__payment_default">
-  </div>
+  <div class="am-fs__payment_default"></div>
 </template>
 
 <script setup>
-import {useStore} from "vuex";
-import {inject, watchEffect} from "vue";
-import httpClient from "../../../../plugins/axios";
+import { useStore } from 'vuex'
+import { inject, watchEffect } from 'vue'
+import httpClient from '../../../../plugins/axios'
 import {
   useBookingData,
   useCreateBooking,
   useCreateBookingSuccess,
   useCreateBookingError,
   getErrorMessage,
-} from "../../../../assets/js/public/booking.js";
+} from '../../../../assets/js/public/booking.js'
 
 const store = useStore()
 
@@ -33,8 +32,8 @@ const { nextStep, footerButtonReset, footerButtonClicked } = inject('changingSte
   nextStep: () => {},
   footerButtonReset: () => {},
   footerButtonClicked: {
-    value: false
-  }
+    value: false,
+  },
 })
 
 // * Labels
@@ -51,12 +50,11 @@ watchEffect(() => {
   }
 })
 
-
 /***********
  * Payment *
  **********/
 
-function razorpayVerify (paymentId, signature, orderId) {
+function razorpayVerify(paymentId, signature, orderId) {
   let bookingData = useBookingData(
     store,
     null,
@@ -64,134 +62,121 @@ function razorpayVerify (paymentId, signature, orderId) {
     {
       paymentId: paymentId,
       signature: signature,
-      orderId: orderId
+      orderId: orderId,
     },
-    null
+    null,
   )
 
   useCreateBooking(
     store,
     bookingData,
-    response => {
+    (response) => {
       useCreateBookingSuccess(store, response, () => {
         nextStep()
       })
     },
-    error => {
-      useCreateBookingError(
-        store,
-        error.response.data,
-        () => {
-          emits('payment-error', getErrorMessage())
-        }
-      )
-    }
+    (error) => {
+      useCreateBookingError(store, error.response.data, () => {
+        emits('payment-error', getErrorMessage())
+      })
+    },
   )
 }
 
-function continueWithBooking () {
+function continueWithBooking() {
   footerButtonReset()
 
   let gateway = store.getters['booking/getPaymentGateway']
 
   let bookingData = useBookingData(
     store,
-    gateway === 'mollie' || gateway === 'barion' ? {
-      shortcode: shortcodeData.value,
-      steps: stepsArray.value.map(i => i.key),
-      sidebar: sidebarSteps.value.map(i => Object.assign({key: i.key, data: i.stepSelectedData})),
-    } : null,
+    gateway === 'mollie' || gateway === 'barion'
+      ? {
+          shortcode: shortcodeData.value,
+          steps: stepsArray.value.map((i) => i.key),
+          sidebar: sidebarSteps.value.map((i) =>
+            Object.assign({ key: i.key, data: i.stepSelectedData }),
+          ),
+        }
+      : null,
     false,
     {},
-    null
+    null,
   )
 
   store.commit('booking/setLoading', true)
 
   switch (gateway) {
-    case ('mollie'):
-      payment(
-        '/payment/mollie',
-        bookingData,
-        function (response) {
-          const bookings = response.data.data.bookings
-          if (sessionStorage.getItem('ameliaCacheData')) {
-            const ameliaCacheData = JSON.parse(sessionStorage.getItem('ameliaCacheData'))
-            ameliaCacheData.bookings = bookings
-            ameliaCacheData.packageCustomer = response.data.data.packageCustomer
-            sessionStorage.setItem('ameliaCacheData', JSON.stringify(ameliaCacheData))
-          }
-          window.location = response.data.data.redirectUrl
+    case 'mollie':
+      payment('/payment/mollie', bookingData, function (response) {
+        const bookings = response.data.data.bookings
+        if (sessionStorage.getItem('ameliaCacheData')) {
+          const ameliaCacheData = JSON.parse(sessionStorage.getItem('ameliaCacheData'))
+          ameliaCacheData.bookings = bookings
+          ameliaCacheData.packageCustomer = response.data.data.packageCustomer
+          sessionStorage.setItem('ameliaCacheData', JSON.stringify(ameliaCacheData))
         }
-      )
+        window.location = response.data.data.redirectUrl
+      })
 
       break
 
-    case ('razorpay'):
-      payment(
-        '/payment/razorpay',
-        bookingData,
-        function (response) {
-          let options = response.data.data.data
+    case 'razorpay':
+      payment('/payment/razorpay', bookingData, function (response) {
+        let options = response.data.data.data
 
-          options.handler = function (razorpayResponse) {
-            razorpayVerify(razorpayResponse.razorpay_payment_id, razorpayResponse.razorpay_signature, options.order_id)
-          }
-
-          options.modal = {
-            ondismiss: function () {
-              emits('payment-abandoned')
-            }
-          }
-
-          let razorpay = new Razorpay(options)
-
-          razorpay.open()
+        options.handler = function (razorpayResponse) {
+          razorpayVerify(
+            razorpayResponse.razorpay_payment_id,
+            razorpayResponse.razorpay_signature,
+            options.order_id,
+          )
         }
-      )
+
+        options.modal = {
+          ondismiss: function () {
+            emits('payment-abandoned')
+          },
+        }
+
+        let razorpay = new Razorpay(options)
+
+        razorpay.open()
+      })
 
       break
 
-    case ('barion'):
-      payment(
-        '/payment/barion',
-        bookingData,
-        function (response) {
-          const bookings = response.data.data.bookings
-          if (sessionStorage.getItem('ameliaCacheData')) {
-            const ameliaCacheData = JSON.parse(sessionStorage.getItem('ameliaCacheData'))
-            ameliaCacheData.bookings = bookings
-            ameliaCacheData.packageCustomer = response.data.data.packageCustomer
-            sessionStorage.setItem('ameliaCacheData', JSON.stringify(ameliaCacheData))
-          }
-          window.location = response.data.data.redirectUrl
+    case 'barion':
+      payment('/payment/barion', bookingData, function (response) {
+        const bookings = response.data.data.bookings
+        if (sessionStorage.getItem('ameliaCacheData')) {
+          const ameliaCacheData = JSON.parse(sessionStorage.getItem('ameliaCacheData'))
+          ameliaCacheData.bookings = bookings
+          ameliaCacheData.packageCustomer = response.data.data.packageCustomer
+          sessionStorage.setItem('ameliaCacheData', JSON.stringify(ameliaCacheData))
         }
-      )
+        window.location = response.data.data.redirectUrl
+      })
 
       break
   }
 }
 
-function payment (endpoint, bookingData, success) {
-  httpClient.post(
-    endpoint,
-    bookingData.data,
-    bookingData.options
-  ).then(success).catch(error => {
-    useCreateBookingError(
-      store,
-      error.response.data,
-      () => {
+function payment(endpoint, bookingData, success) {
+  httpClient
+    .post(endpoint, bookingData.data, bookingData.options)
+    .then(success)
+    .catch((error) => {
+      useCreateBookingError(store, error.response.data, () => {
         emits('payment-error', getErrorMessage())
-      }
-    )}
-  )
+      })
+    })
 }
 </script>
 
 <script>
 export default {
-  name: 'PaymentCommon'
+  name: 'PaymentCommon',
 }
 </script>
 

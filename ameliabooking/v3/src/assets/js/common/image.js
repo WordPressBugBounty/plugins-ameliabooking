@@ -13,10 +13,10 @@ let colors = [
   '31CDF3',
   '6AB76C',
   'FD5FA1',
-  'A697C5'
+  'A697C5',
 ]
 
-function usePictureLoad (baseUrls, entity, isPerson) {
+function usePictureLoad(baseUrls, entity, isPerson) {
   if (entity !== null) {
     let name = isPerson === true ? entity.firstName + ' ' + entity.lastName : entity.name
     if (typeof name !== 'undefined') {
@@ -26,11 +26,17 @@ function usePictureLoad (baseUrls, entity, isPerson) {
   }
 }
 
-function  getNameInitials (name) {
-  return name.split(' ').map((s) => s.charAt(0)).join('').toUpperCase().substring(0, 3).replace(/[^\w\s]/g, '')
+function getNameInitials(name) {
+  return name
+    .split(' ')
+    .map((s) => s.charAt(0))
+    .join('')
+    .toUpperCase()
+    .substring(0, 3)
+    .replace(/[^\w\s]/g, '')
 }
 
-function imageFromText (baseUrls, name, entity = {}, error = false) {
+function imageFromText(baseUrls, name, entity = {}, error = false) {
   let initials = getNameInitials(name)
   let colorIndex = Math.floor(Math.random() * colors.length)
   let colorHex = colors[colorIndex]
@@ -51,27 +57,24 @@ function imageFromText (baseUrls, name, entity = {}, error = false) {
   }
 
   // Make canvas
-  const canvas = document.createElement('canvas');
-  canvas.width = 100;
-  canvas.height = 100;
-  const ctx = canvas.getContext('2d');
+  const canvas = document.createElement('canvas')
+  canvas.width = 100
+  canvas.height = 100
+  const ctx = canvas.getContext('2d')
 
   // Draw background color
   ctx.fillStyle = `#${colorHex}` // Background color
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   // Draw initials text
-  ctx.font = '40px Arial';
-  ctx.fillStyle = '#ffffff'; // Text color
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(initials, canvas.width / 2, canvas.height / 2);
+  ctx.font = '40px Arial'
+  ctx.fillStyle = '#ffffff' // Text color
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(initials, canvas.width / 2, canvas.height / 2)
 
   // Convert canvas to data URL (as image source)
-  return canvas.toDataURL('image/png');
+  return canvas.toDataURL('image/png')
 }
 
-export {
-  usePictureLoad,
-  getNameInitials
-}
+export { usePictureLoad, getNameInitials }

@@ -12,7 +12,7 @@
       <span class="am-ff__item-label" v-html="props.label" />
     </template>
     <AmInputPhone
-      :key="`phone-${countryCode}-${props.refreshTrigger}`"
+      :key="`phone-${props.refreshTrigger}`"
       v-model="model"
       v-model:country-code="countryCode"
       :placeholder="props.placeholder"
@@ -27,15 +27,12 @@
         {{ props.noResultsLabel }}
       </template>
     </AmInputPhone>
-    <template #error v-if="props.errorMessage">
+    <template v-if="props.errorMessage" #error>
       <span class="el-form-item__error">
         {{ props.errorMessage }}
       </span>
     </template>
-    <div
-      v-if="props.isWhatsApp"
-      class="am-whatsapp-opt-in-text"
-    >
+    <div v-if="props.isWhatsApp" class="am-whatsapp-opt-in-text">
       {{ props.whatsAppLabel }}
     </div>
   </el-form-item>
@@ -46,75 +43,70 @@
 import AmInputPhone from '../../_components/input-phone/AmInputPhone.vue'
 
 // * Import from Vue
-import {
-  computed,
-  inject,
-  ref,
-  toRefs,
-} from "vue";
+import { computed, inject, ref, toRefs } from 'vue'
 
 // * Composables
-import { useColorTransparency } from "../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
 
 // * Form Item Props
 let props = defineProps({
   modelValue: {
     type: [String, Number, Object, Array],
-    required: true
+    required: true,
   },
   countryCode: {
     type: String,
-    default: ''
+    default: '',
   },
   itemName: {
     type: String,
-    required: true
+    required: true,
   },
   label: {
-    type: String
+    type: String,
   },
   whatsAppLabel: {
-    type: String
+    type: String,
   },
   labelPosition: {
     type: String,
-    default: 'top'
+    default: 'top',
   },
   placeholder: {
-    type: String
+    type: String,
   },
   phoneError: {
     type: Boolean,
-    default: false
+    default: false,
   },
   visible: {
     type: Boolean,
-    default: true
+    default: true,
   },
   defaultCode: {
     type: String,
-    default: ''
+    default: '',
   },
   isWhatsApp: {
     type: [Boolean, String, Number],
-    default: false
+    default: false,
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   errorMessage: {
     type: String,
-    default: ''
+    default: '',
   },
   noResultsLabel: {
     type: String,
-    default: ''
+    default: '',
   },
   refreshTrigger: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 })
 
 // * Define Emits
@@ -126,17 +118,17 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val ? val : '')
-  }
+  },
 })
 
 const countryCode = computed({
   get: () => props.countryCode,
   set: (val) => {
     emits('update:countryCode', val)
-  }
+  },
 })
 
-function handleData (val) {
+function handleData(val) {
   emits('handlePhoneData', val)
 }
 
@@ -147,27 +139,28 @@ let cssVars = computed(() => {
     // is - Info Step, wa - WhatsApp
     '--am-c-is-wa-text': useColorTransparency(amColors.value.colorMainText, 0.5),
     // ! Inline styles need to be removed
-    'margin-bottom': props.isWhatsApp && !props.phoneError ? '10px' : '24px'
+    'margin-bottom': props.isWhatsApp && !props.phoneError ? '10px' : '24px',
   }
 })
 
 let formFieldRef = ref(null)
 
 defineExpose({
-  formFieldRef
+  formFieldRef,
 })
 </script>
 
 <script>
 export default {
-  name: "PhoneFormField"
+  name: 'PhoneFormField',
 }
 </script>
 
 <style lang="scss">
 .amelia-v2-booking {
   #amelia-container {
-    .am-fs__info-form__item, .am-ff__item {
+    .am-fs__info-form__item,
+    .am-ff__item {
       .am-whatsapp-opt-in-text {
         color: var(--am-c-is-wa-text);
         font-weight: 400;

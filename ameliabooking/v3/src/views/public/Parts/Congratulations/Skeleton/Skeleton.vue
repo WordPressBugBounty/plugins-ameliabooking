@@ -1,9 +1,6 @@
 <template>
   <!-- Skeleton -->
-  <el-skeleton
-    animated
-    class="am-skeleton-congratz"
-  >
+  <el-skeleton animated class="am-skeleton-congratz">
     <template #template>
       <div class="am-skeleton-congratz-heading">
         <el-skeleton-item variant="circle" />
@@ -14,9 +11,16 @@
         <div
           v-for="(item, i) in new Array(10)"
           :key="item"
-          :class="{'am-customer-info': (i === 6)}">
-            <el-skeleton-item variant="text" :style="{width: `${useRandomIntFromInterval(14, 36)}%`}"/>
-            <el-skeleton-item variant="text" :style="{width: `${useRandomIntFromInterval(14, 36)}%`}"/>
+          :class="{ 'am-customer-info': i === 6 }"
+        >
+          <el-skeleton-item
+            variant="text"
+            :style="{ width: `${useRandomIntFromInterval(14, 36)}%` }"
+          />
+          <el-skeleton-item
+            variant="text"
+            :style="{ width: `${useRandomIntFromInterval(14, 36)}%` }"
+          />
         </div>
       </div>
     </template>
@@ -26,19 +30,18 @@
 
 <script setup>
 // * Composables
-import { useRandomIntFromInterval } from "../../../../../assets/js/common/formatting.js";
+import { useRandomIntFromInterval } from '../../../../../assets/js/common/formatting.js'
 </script>
 
 <script>
 export default {
-  name: "LoadingSkeleton"
+  name: 'LoadingSkeleton',
 }
 </script>
 
 <style lang="scss">
 @mixin congrats-skeleton-block {
   .am-skeleton-congratz {
-
     &-heading {
       display: flex;
       flex-direction: column;
@@ -72,7 +75,6 @@ export default {
         .el-skeleton__item {
           height: 20px;
         }
-
       }
 
       .am-customer-info {

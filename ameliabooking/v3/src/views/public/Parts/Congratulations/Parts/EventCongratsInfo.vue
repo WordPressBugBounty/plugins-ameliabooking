@@ -6,22 +6,19 @@
     class="am-congrats__info-item am-fs__congrats-info-event-date-start"
     :class="responsiveClass"
   >
-    <span class="am-congrats__info-item__label">
-      {{props.labels.event_start}}:
-    </span>
+    <span class="am-congrats__info-item__label"> {{ props.labels.event_start }}: </span>
     <span class="am-congrats__info-item__value">
-      {{ `${getFrontedFormattedDate(dateStart)} ${props.labels.event_at} ${getEventFrontedFormattedTime(timeStart)}` }}
+      {{
+        `${getFrontedFormattedDate(dateStart)} ${props.labels.event_at} ${getEventFrontedFormattedTime(timeStart)}`
+      }}
     </span>
   </div>
-  <div
-    class="am-congrats__info-item am-fs__congrats-info-event-date-end"
-    :class="responsiveClass"
-  >
-    <span class="am-congrats__info-item__label">
-      {{props.labels.event_end}}:
-    </span>
+  <div class="am-congrats__info-item am-fs__congrats-info-event-date-end" :class="responsiveClass">
+    <span class="am-congrats__info-item__label"> {{ props.labels.event_end }}: </span>
     <span class="am-congrats__info-item__value">
-      {{ `${getFrontedFormattedDate(dateEnd)} ${props.labels.event_at} ${getEventFrontedFormattedTime(timeEnd)}` }}
+      {{
+        `${getFrontedFormattedDate(dateEnd)} ${props.labels.event_at} ${getEventFrontedFormattedTime(timeEnd)}`
+      }}
     </span>
   </div>
   <div
@@ -29,9 +26,7 @@
     class="am-congrats__info-item am-fs__congrats-info-event-location"
     :class="responsiveClass"
   >
-    <span class="am-congrats__info-item__label">
-      {{ props.labels.event_location }}:
-    </span>
+    <span class="am-congrats__info-item__label"> {{ props.labels.event_location }}: </span>
     <span class="am-congrats__info-item__value">
       {{ props.booked.address }}
     </span>
@@ -41,13 +36,8 @@
     class="am-congrats__info-item am-fs__congrats-info-event-tickets"
     :class="responsiveClass"
   >
-    <span class="am-congrats__info-item__label">
-      {{props.labels.event_tickets}}:
-    </span>
-    <span
-      class="am-congrats__info-item__value"
-      @click="showTickets"
-    >
+    <span class="am-congrats__info-item__label"> {{ props.labels.event_tickets }}: </span>
+    <span class="am-congrats__info-item__value" @click="showTickets">
       <span>{{ `x${ticketNumber} ` }}</span>
       <AmButton
         type="text"
@@ -67,10 +57,7 @@
     class="am-congrats__info-item am-fs__congrats-info-event-tickets"
   >
     <span class="am-congrats__info-item__value collapsable">
-      <span
-        v-for="(ticket, index) in props.booked.ticketsData"
-        :key="index"
-      >
+      <span v-for="(ticket, index) in props.booked.ticketsData" :key="index">
         {{ `${ticket.persons} x ${ticket.name}(${useFormattedPrice(ticket.price)})` }}
       </span>
     </span>
@@ -80,49 +67,48 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  getCurrentInstance
-} from 'vue'
+import { ref, computed, inject, getCurrentInstance } from 'vue'
 
 // * Composables
 import {
   getFrontedFormattedDate,
-  getEventFrontedFormattedTime
+  getEventFrontedFormattedTime,
 } from '../../../../../assets/js/common/date'
-import { useFormattedPrice } from "../../../../../assets/js/common/formatting";
-import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
+import { useFormattedPrice } from '../../../../../assets/js/common/formatting'
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
 
 // * Componets
-import AmButton from '../../../../_components/button/AmButton.vue';
+import AmButton from '../../../../_components/button/AmButton.vue'
 
 // * Component prop
 let props = defineProps({
   booked: {
     type: Object,
-    required: true
+    required: true,
   },
   labels: {
     type: Object,
-    required: true
+    required: true,
   },
   inDialog: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
-let dateStart = computed(() => props.booked ? props.booked.data[0].start.split(' ')[0] : '')
-let timeStart = computed(() => props.booked ? props.booked.data[0].start.split(' ')[1] : '')
+let dateStart = computed(() => (props.booked ? props.booked.data[0].start.split(' ')[0] : ''))
+let timeStart = computed(() => (props.booked ? props.booked.data[0].start.split(' ')[1] : ''))
 
-let dateEnd = computed(() => props.booked ? props.booked.data[props.booked.data.length - 1].end.split(' ')[0] : '')
-let timeEnd = computed(() => props.booked ? props.booked.data[props.booked.data.length - 1].end.split(' ')[1] : '')
+let dateEnd = computed(() =>
+  props.booked ? props.booked.data[props.booked.data.length - 1].end.split(' ')[0] : '',
+)
+let timeEnd = computed(() =>
+  props.booked ? props.booked.data[props.booked.data.length - 1].end.split(' ')[1] : '',
+)
 
 let ticketNumber = computed(() => {
   let number = 0
-  props.booked.ticketsData.forEach(t => {
+  props.booked.ticketsData.forEach((t) => {
     number += t.persons
   })
 
@@ -133,9 +119,11 @@ let showLabel = ref(props.labels.event_show_more)
 let ticketVisible = ref(false)
 const ticketsDetailId = `am-congrats-tickets-detail-${getCurrentInstance()?.uid ?? '0'}`
 
-function showTickets () {
+function showTickets() {
   ticketVisible.value = !ticketVisible.value
-  showLabel.value = ticketVisible.value ? props.labels.event_show_less : props.labels.event_show_more
+  showLabel.value = ticketVisible.value
+    ? props.labels.event_show_less
+    : props.labels.event_show_more
 }
 
 // * Responsive - Container Width
@@ -151,7 +139,7 @@ let responsiveClass = computed(() => useResponsiveClass(componentWidth.value))
 
 <script>
 export default {
-  name: "EventCongratsInfo"
+  name: 'EventCongratsInfo',
 }
 </script>
 
@@ -208,7 +196,7 @@ export default {
           padding: 0 2px;
 
           &:hover {
-            background-color: transparent
+            background-color: transparent;
           }
 
           &:focus-visible {

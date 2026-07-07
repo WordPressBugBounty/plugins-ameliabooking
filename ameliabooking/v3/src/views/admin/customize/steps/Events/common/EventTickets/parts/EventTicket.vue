@@ -1,39 +1,30 @@
 <template>
-  <div
-    class="am-ct"
-    :class="[{'am-readonly' : props.readonly}, responsiveClass]"
-    :style="cssVars"
-  >
+  <div class="am-ct" :class="[{ 'am-readonly': props.readonly }, responsiveClass]" :style="cssVars">
     <div class="am-ct__info">
       <p class="am-ct__info-name">
         {{ props.ticket.name }}
       </p>
       <p
-        v-if="!props.capacity && (props.ticket.spots - props.ticket.sold - spots > 0 || !props.readonly)"
+        v-if="
+          !props.capacity && (props.ticket.spots - props.ticket.sold - spots > 0 || !props.readonly)
+        "
         class="am-ct__info-spots"
       >
-        <span
-          v-if="componentWidth <= 500"
-          class="am-ct__info-spots__price"
-        >
+        <span v-if="componentWidth <= 500" class="am-ct__info-spots__price">
           {{ useFormattedPrice(props.ticket.price) }}
         </span>
         <span class="am-ct__info-spots__number">
-          {{ isWaiting ? ticketCalculation() > 0 ? ticketCalculation() : '' : ticketCalculation() }}
+          {{
+            isWaiting ? (ticketCalculation() > 0 ? ticketCalculation() : '') : ticketCalculation()
+          }}
         </span>
         <span class="am-ct__info-spots__text">
           {{ ticketText() }}
         </span>
       </p>
     </div>
-    <div
-      class="am-ct__action"
-      :class="[{'am-readonly' : props.readonly}, responsiveClass]"
-    >
-      <p
-        v-if="componentWidth > 500"
-        class="am-ct__action-price"
-      >
+    <div class="am-ct__action" :class="[{ 'am-readonly': props.readonly }, responsiveClass]">
+      <p v-if="componentWidth > 500" class="am-ct__action-price">
         {{ useFormattedPrice(props.ticket.price) }}
       </p>
       <AmInputNumber
@@ -50,19 +41,15 @@
 
 <script setup>
 // * _components
-import AmInputNumber from "../../../../../../../_components/input-number/AmInputNumber.vue";
+import AmInputNumber from '../../../../../../../_components/input-number/AmInputNumber.vue'
 
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject
-} from "vue";
+import { ref, computed, inject } from 'vue'
 
 // * Composables
-import { useFormattedPrice } from "../../../../../../../../assets/js/common/formatting";
-import { useResponsiveClass } from "../../../../../../../../assets/js/common/responsive";
-import { useColorTransparency } from "../../../../../../../../assets/js/common/colorManipulation";
+import { useFormattedPrice } from '../../../../../../../../assets/js/common/formatting'
+import { useResponsiveClass } from '../../../../../../../../assets/js/common/responsive'
+import { useColorTransparency } from '../../../../../../../../assets/js/common/colorManipulation'
 
 /**
  * Component Props
@@ -70,25 +57,25 @@ import { useColorTransparency } from "../../../../../../../../assets/js/common/c
 const props = defineProps({
   customizedLabels: {
     type: Object,
-    required: true
+    required: true,
   },
   ticket: {
-    type: Object
+    type: Object,
   },
   capacity: {
-    type: Number
+    type: Number,
   },
   extraPeople: {
-    type: Number
+    type: Number,
   },
   readonly: {
     type: Boolean,
-    default: false
+    default: false,
   },
   inDialog: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 // * Root Settings
@@ -106,7 +93,7 @@ let isWaiting = computed(() => {
 
 let spots = ref(0)
 
-function updateSpots () {}
+function updateSpots() {}
 
 function ticketCalculation() {
   if (isWaiting.value) {

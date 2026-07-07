@@ -1,10 +1,5 @@
 <template>
-  <div
-    v-if="!loading"
-    class="am-capei"
-    :class="props.responsiveClass"
-    :style="cssVars"
-  >
+  <div v-if="!loading" class="am-capei" :class="props.responsiveClass" :style="cssVars">
     <el-tabs v-model="activeTab" class="am-ap__tabs">
       <!-- Details -->
       <el-tab-pane :label="amLabels.details" name="details">
@@ -19,11 +14,7 @@
       <!-- /Periods -->
 
       <!-- Recurring -->
-      <el-tab-pane
-        v-if="!licence.isStarter"
-        :label="amLabels.recurring"
-        name="recurring"
-      >
+      <el-tab-pane v-if="!licence.isStarter" :label="amLabels.recurring" name="recurring">
         <EventRecurring
           ref="eventRecurringRef"
           :page-width="props.pageWidth"
@@ -67,10 +58,7 @@
 
     <div
       class="am-capei__footer"
-      :class="[
-        { 'am-capei__footer_new': !store.getters['event/getId'] },
-        props.responsiveClass,
-      ]"
+      :class="[{ 'am-capei__footer_new': !store.getters['event/getId'] }, props.responsiveClass]"
     >
       <AmButton
         v-if="store.getters['event/getId']"
@@ -148,10 +136,7 @@ import httpClient from '../../../../../../plugins/axios'
 
 // * Composables
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
-import {
-  useBackEvent,
-  useEventPeriods,
-} from '../../../../../../assets/js/common/events'
+import { useBackEvent, useEventPeriods } from '../../../../../../assets/js/common/events'
 import { useUpdateStashEntities } from '../../../../../../assets/js/common/settings'
 
 // * Components
@@ -223,7 +208,7 @@ function duplicateEvent() {
     Object.assign(JSON.parse(JSON.stringify(store.getters['event/getEvent'])), {
       id: null,
       bookings: [],
-    })
+    }),
   )
 }
 
@@ -286,16 +271,13 @@ function saveEvent(updateFollowing) {
 
   httpClient
     .post(
-      '/events' +
-        (store.getters['event/getId']
-          ? '/' + store.getters['event/getId']
-          : ''),
+      '/events' + (store.getters['event/getId'] ? '/' + store.getters['event/getId'] : ''),
       Object.assign(useBackEvent(store), {
         applyGlobally: updateFollowing,
       }),
       {
         params: { source: 'cabinet-provider' },
-      }
+      },
     )
     .then(() => {
       useUpdateStashEntities()
@@ -328,30 +310,23 @@ function validateCalendarConflict(callback) {
   if (organizer && (organizer.googleCalendar || organizer.outlookCalendar)) {
     loading.value = true
 
-    let providers = store.getters['event/getProviders'].map(
-      (i) => new Object({ id: i.id })
-    )
+    let providers = store.getters['event/getProviders'].map((i) => new Object({ id: i.id }))
 
     httpClient
       .post(
         '/events/calendar',
         {
           providers:
-            store.getters['event/getProviders']
-              .map((i) => i.id)
-              .indexOf(organizer.id) === -1
+            store.getters['event/getProviders'].map((i) => i.id).indexOf(organizer.id) === -1
               ? providers.concat([{ id: organizer.id }])
               : providers,
           periods: useEventPeriods(store),
-          eventIds: [
-            store.getters['event/getId'],
-            store.getters['event/getParentId'],
-          ],
+          eventIds: [store.getters['event/getId'], store.getters['event/getParentId']],
           recurring: store.getters['event/getRecurring'],
         },
         {
           params: { source: 'cabinet-provider' },
-        }
+        },
       )
       .then(() => {
         callback(false)
@@ -373,12 +348,9 @@ function close(type) {
 }
 
 onMounted(() => {
-  if (
-    store.getters['event/getId'] &&
-    store.getters['event/getRecurringUntil']
-  ) {
+  if (store.getters['event/getId'] && store.getters['event/getRecurringUntil']) {
     recurringUntil.value = moment(
-      store.getters['event/getRecurringUntil'].toISOString().split('T')[0]
+      store.getters['event/getRecurringUntil'].toISOString().split('T')[0],
     )
   }
 
@@ -394,23 +366,14 @@ let cssVars = computed(() => {
   return {
     // * Event item css variables
     '--am-c-capei-text': amColors.value.colorMainText,
-    '--am-c-capei-text-op10': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
+    '--am-c-capei-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
     '--am-c-capei-primary': amColors.value.colorPrimary,
 
     // * Customer css variables
     '--am-c-cust-no1': amColors.value.colorMainText,
-    '--am-c-cust-no1-bgr': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
+    '--am-c-cust-no1-bgr': useColorTransparency(amColors.value.colorMainText, 0.1),
     '--am-c-cust-no2': amColors.value.colorWarning,
-    '--am-c-cust-no2-bgr': useColorTransparency(
-      amColors.value.colorWarning,
-      0.1
-    ),
+    '--am-c-cust-no2-bgr': useColorTransparency(amColors.value.colorWarning, 0.1),
     '--am-c-cust-no3': amColors.value.colorError,
     '--am-c-cust-no3-bgr': useColorTransparency(amColors.value.colorError, 0.1),
     '--am-c-cust-link': useColorTransparency(amColors.value.colorMainText, 0.5),

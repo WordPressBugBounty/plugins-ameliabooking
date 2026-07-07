@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="am-asi"
-    :style="cssVars"
-  >
+  <div class="am-asi" :style="cssVars">
     <div class="am-asi__top">
       <div class="am-asi__img">
         <span class="am-icon-check"></span>
@@ -27,11 +24,7 @@
 
 <script setup>
 // * import from Vue
-import {
-  reactive,
-  computed,
-  inject,
-} from 'vue'
+import { reactive, computed, inject } from 'vue'
 
 // * Composables
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation.js'
@@ -56,11 +49,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   let customizedLabels = amCustomize.value.setPassSuccess.translations
   if (customizedLabels) {
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -113,7 +106,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: 'ChangePassSuccess'
+  name: 'ChangePassSuccess',
 }
 </script>
 
@@ -126,7 +119,9 @@ export default {
     max-width: 400px;
     width: 100%;
     background-color: var(--am-c-main-bgr);
-    box-shadow: 0 0 9px -4px var(--am-c-main-text-op40), 0px 17px 35px -12px var(--am-c-main-text-op25);
+    box-shadow:
+      0 0 9px -4px var(--am-c-main-text-op40),
+      0px 17px 35px -12px var(--am-c-main-text-op25);
     border-radius: 12px;
     padding: 32px 24px 24px;
     margin: 0 auto;

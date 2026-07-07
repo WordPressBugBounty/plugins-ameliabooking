@@ -19,27 +19,27 @@
 </template>
 
 <script setup>
-import {useStore} from "vuex";
-import {inject, watchEffect, ref} from "vue";
-import {VueRecaptcha} from "vue-recaptcha";
-import {settings} from "../../../../plugins/settings";
+import { useStore } from 'vuex'
+import { inject, watchEffect, ref } from 'vue'
+import { VueRecaptcha } from 'vue-recaptcha'
+import { settings } from '../../../../plugins/settings'
 import {
   useBookingData,
   useCreateBooking,
   useCreateBookingSuccess,
   useCreateBookingError,
   getErrorMessage,
-} from "../../../../assets/js/public/booking.js";
+} from '../../../../assets/js/public/booking.js'
 
 let props = defineProps({
   instantBooking: {
     type: Boolean,
-    default: false
+    default: false,
   },
   showRecaptcha: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 })
 
 const store = useStore()
@@ -58,12 +58,12 @@ const { nextStep, footerButtonReset, footerButtonClicked } = inject('changingSte
   nextStep: () => {},
   footerButtonReset: () => {},
   footerButtonClicked: {
-    value: false
-  }
+    value: false,
+  },
 })
 
 defineExpose({
-  continueWithBooking
+  continueWithBooking,
 })
 
 watchEffect(() => {
@@ -77,7 +77,6 @@ watchEffect(() => {
   }
 })
 
-
 /*************
  * Recaptcha *
  ************/
@@ -88,39 +87,35 @@ let recaptchaValid = ref(false)
 
 let recaptchaResponse = ref(null)
 
-function onRecaptchaExpired () {
+function onRecaptchaExpired() {
   recaptchaValid.value = false
 
   emits('payment-error', amLabels.recaptcha_error)
 }
 
-function onRecaptchaVerify (response) {
+function onRecaptchaVerify(response) {
   recaptchaValid.value = true
 
   recaptchaResponse.value = response
 
   if (settings.general.googleRecaptcha.invisible) {
-    onSiteBooking(
-      useBookingData(
-        store,
-        null,
-        false,
-        {},
-        recaptchaResponse.value
-      )
-    )
+    onSiteBooking(useBookingData(store, null, false, {}, recaptchaResponse.value))
 
     return false
   }
 }
 
-
 /***********
  * Payment *
  **********/
 
-function onSiteBooking (bookingData) {
-  if (settings.general.googleRecaptcha.enabled && props.showRecaptcha && !settings.general.googleRecaptcha.invisible && !recaptchaValid.value) {
+function onSiteBooking(bookingData) {
+  if (
+    settings.general.googleRecaptcha.enabled &&
+    props.showRecaptcha &&
+    !settings.general.googleRecaptcha.invisible &&
+    !recaptchaValid.value
+  ) {
     emits('payment-error', amLabels.recaptcha_error)
 
     return false
@@ -129,39 +124,33 @@ function onSiteBooking (bookingData) {
   useCreateBooking(
     store,
     bookingData,
-    response => {
+    (response) => {
       useCreateBookingSuccess(store, response, () => {
         nextStep()
       })
     },
-    error => {
+    (error) => {
       console.log(error)
 
-      useCreateBookingError(
-        store,
-        error.response.data,
-        () => {
-          if (settings.general.googleRecaptcha.enabled && props.showRecaptcha && settings.general.googleRecaptcha.invisible) {
-            recaptchaRef.value.reset()
-          }
-
-          emits('payment-error', getErrorMessage())
+      useCreateBookingError(store, error.response.data, () => {
+        if (
+          settings.general.googleRecaptcha.enabled &&
+          props.showRecaptcha &&
+          settings.general.googleRecaptcha.invisible
+        ) {
+          recaptchaRef.value.reset()
         }
-      )
-    }
+
+        emits('payment-error', getErrorMessage())
+      })
+    },
   )
 }
 
-function continueWithBooking () {
+function continueWithBooking() {
   footerButtonReset()
 
-  let bookingData = useBookingData(
-    store,
-    null,
-    false,
-    {},
-    recaptchaResponse.value
-  )
+  let bookingData = useBookingData(store, null, false, {}, recaptchaResponse.value)
 
   store.commit('booking/setLoading', true)
 
@@ -183,7 +172,7 @@ function continueWithBooking () {
 
 <script>
 export default {
-  name: 'PaymentOnSite'
+  name: 'PaymentOnSite',
 }
 </script>
 

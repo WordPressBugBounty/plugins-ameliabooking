@@ -15,7 +15,7 @@
       </span>
     </template>
     <AmInputPhone
-      :key="`phone-${countryCode}-${props.refreshTrigger}`"
+      :key="`phone-${props.refreshTrigger}`"
       v-model="model"
       v-model:country-code="countryCode"
       :placeholder="amLabels.enter_phone"
@@ -43,19 +43,13 @@
 
 <script setup>
 import AmInputPhone from '../../../../_components/input-phone/AmInputPhone.vue'
-import { settings } from "../../../../../plugins/settings";
+import { settings } from '../../../../../plugins/settings'
 
 // * Vue
-import {
-  computed,
-  inject,
-  ref,
-} from "vue";
+import { computed, inject, ref } from 'vue'
 
 // * Composables
-import {
-  useColorTransparency
-} from "../../../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
 
 // * Emits
 
@@ -63,44 +57,40 @@ import {
 let props = defineProps({
   modelValue: {
     type: String,
-    default: ''
+    default: '',
   },
   countryCode: {
     type: String,
-    default: ''
+    default: '',
   },
   phoneError: {
     type: Boolean,
-    default: false
+    default: false,
   },
   errorMessage: {
     type: String,
-    default: ''
+    default: '',
   },
   refreshTrigger: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 })
 
-let emits = defineEmits([
-  'update:modelValue',
-  'update:countryCode',
-  'handlePhoneData'
-])
+let emits = defineEmits(['update:modelValue', 'update:countryCode', 'handlePhoneData'])
 
 const model = computed({
   get: () => props.modelValue,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 const countryCode = computed({
   get: () => props.countryCode,
   set: (val) => {
     emits('update:countryCode', val)
-  }
+  },
 })
 
 // * Colors
@@ -109,7 +99,7 @@ let cssVars = computed(() => {
   return {
     // is - Info Step, wa - WhatsApp
     '--am-c-is-wa-text': useColorTransparency(amColors.value.colorMainText, 0.5),
-    'margin-bottom': whatsAppSetUp() && !props.phoneError ? '10px' : '24px'
+    'margin-bottom': whatsAppSetUp() && !props.phoneError ? '10px' : '24px',
   }
 })
 
@@ -121,7 +111,7 @@ let amLabels = inject('amLabels')
 // * Customize
 let amCustomize = inject('amCustomize')
 
-function whatsAppSetUp () {
+function whatsAppSetUp() {
   return settings.notifications.whatsAppEnabled
 }
 
@@ -130,20 +120,21 @@ function handleData(val) {
 }
 
 defineExpose({
-  primeFieldRef
+  primeFieldRef,
 })
 </script>
 
 <script>
 export default {
-  name: "PhoneFormField"
+  name: 'PhoneFormField',
 }
 </script>
 
 <style lang="scss">
 .amelia-v2-booking {
   #amelia-container {
-    .am-fs__info-form__item, .am-elfci__item {
+    .am-fs__info-form__item,
+    .am-elfci__item {
       .am-whatsapp-opt-in-text {
         color: var(--am-c-is-wa-text);
         font-weight: 400;
@@ -154,5 +145,4 @@ export default {
     }
   }
 }
-
 </style>

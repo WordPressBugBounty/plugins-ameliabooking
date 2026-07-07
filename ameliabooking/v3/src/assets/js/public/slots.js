@@ -5,7 +5,7 @@ import { settings } from '../../../plugins/settings'
 import { useAvailableSlots, useDuration } from '../common/appointments'
 import { useCartItem } from './cart'
 
-function useLocalFromUtcSlots (slots) {
+function useLocalFromUtcSlots(slots) {
   let formattedSlots = {}
 
   for (let date in slots) {
@@ -27,46 +27,53 @@ function useLocalFromUtcSlots (slots) {
   return formattedSlots
 }
 
-function useAppointmentParams (store) {
+function useAppointmentParams(store) {
   let employeeId = store.getters['booking/getEmployeeId']
 
   return {
-    queryTimeZone: settings.general.showClientTimeZone ? Intl.DateTimeFormat().resolvedOptions().timeZone : null,
+    queryTimeZone: settings.general.showClientTimeZone
+      ? Intl.DateTimeFormat().resolvedOptions().timeZone
+      : null,
     monthsLoad: 1,
     locationId: store.getters['booking/getLocationId'],
     serviceId: store.getters['booking/getServiceId'],
     serviceDuration: store.getters['booking/getBookingDuration'],
-    providerIds: !employeeId ? store.getters['entities/filteredEmployees'](
-      store.getters['booking/getSelection']
-    ).map(item => item.id) : [employeeId],
+    providerIds: !employeeId
+      ? store.getters['entities/filteredEmployees'](store.getters['booking/getSelection']).map(
+          (item) => item.id,
+        )
+      : [employeeId],
     extras: JSON.stringify(
-      store.getters['entities/getService'](
-        store.getters['booking/getServiceId']
-      ).extras.map(
-        extra => extra.quantity ? (
-          {
-            id: extra.id,
-            quantity: extra.quantity
-          }
-        ) : null
-      ).filter(
-        extra => extra !== null
-      )
+      store.getters['entities/getService'](store.getters['booking/getServiceId'])
+        .extras.map((extra) =>
+          extra.quantity
+            ? {
+                id: extra.id,
+                quantity: extra.quantity,
+              }
+            : null,
+        )
+        .filter((extra) => extra !== null),
     ),
     group: 1,
     page: 'booking',
     structured: true,
-    persons: store.getters['booking/getBookingPersons']
+    persons: store.getters['booking/getBookingPersons'],
   }
 }
 
-function useAppointmentSlots (params, fetchedSlots, callback, customCallback, waitingListOptions = null) {
-  httpClient.get(
-    '/slots',
-    {params: useUrlParams(params)}
-  ).then(response => {
-    let resultSlots = 'queryTimeZone' in params && params.queryTimeZone
-      ? useLocalFromUtcSlots(response.data.data.slots) : response.data.data.slots
+function useAppointmentSlots(
+  params,
+  fetchedSlots,
+  callback,
+  customCallback,
+  waitingListOptions = null,
+) {
+  httpClient.get('/slots', { params: useUrlParams(params) }).then((response) => {
+    let resultSlots =
+      'queryTimeZone' in params && params.queryTimeZone
+        ? useLocalFromUtcSlots(response.data.data.slots)
+        : response.data.data.slots
 
     let slots = fetchedSlots !== null ? fetchedSlots : resultSlots
 
@@ -76,8 +83,10 @@ function useAppointmentSlots (params, fetchedSlots, callback, customCallback, wa
       })
     }
 
-    let occupied = 'queryTimeZone' in params && params.queryTimeZone
-      ? useLocalFromUtcSlots(response.data.data.occupied) : response.data.data.occupied
+    let occupied =
+      'queryTimeZone' in params && params.queryTimeZone
+        ? useLocalFromUtcSlots(response.data.data.occupied)
+        : response.data.data.occupied
 
     // Waiting list slots provided by backend (preferred)
     let waitingListSlots = {}
@@ -86,46 +95,45 @@ function useAppointmentSlots (params, fetchedSlots, callback, customCallback, wa
     if (!Object.keys(waitingListSlots).length) {
       const wlEnabled = !!(waitingListOptions && waitingListOptions.enabled)
       if (wlEnabled) {
-        Object.keys(occupied || {}).forEach(date => {
-          Object.keys(occupied[date] || {}).forEach(time => {
+        Object.keys(occupied || {}).forEach((date) => {
+          Object.keys(occupied[date] || {}).forEach((time) => {
             if (!(date in slots) || !(time in slots[date])) {
               const providersData = occupied[date][time] || []
               const serviceId = params.serviceId
               const duration = params.serviceDuration
               // Consider only rows for this service; require at least one match
-              let serviceRows = providersData.filter(p => p.s === serviceId)
+              let serviceRows = providersData.filter((p) => p.s === serviceId)
               if (
                 'locationId' in params &&
                 params.locationId !== null &&
                 params.locationId !== ''
               ) {
                 serviceRows = serviceRows.filter(
-                  (p) => p.l != null && p.l !== '' && String(p.l) === String(params.locationId)
+                  (p) => p.l != null && p.l !== '' && String(p.l) === String(params.locationId),
                 )
               }
               if (!serviceRows.length) return
               if (duration) {
                 const expectedDuration = duration / 60
-                serviceRows = serviceRows.filter(
-                  (p) => Number(p.d) === Number(expectedDuration)
-                )
+                serviceRows = serviceRows.filter((p) => Number(p.d) === Number(expectedDuration))
                 if (!serviceRows.length) return
               }
               // Filter for selected providers only
-              const selectedProviderRows = params.providerIds && params.providerIds.length
-                ? serviceRows.filter(p => params.providerIds.includes(p.e))
-                : serviceRows
+              const selectedProviderRows =
+                params.providerIds && params.providerIds.length
+                  ? serviceRows.filter((p) => params.providerIds.includes(p.e))
+                  : serviceRows
 
               // Check if ALL selected providers are fully booked (no capacity available)
-              const allFullyBooked = selectedProviderRows.length > 0 && selectedProviderRows.every(p => p.c <= 0)
+              const allFullyBooked =
+                selectedProviderRows.length > 0 && selectedProviderRows.every((p) => p.c <= 0)
 
               if (!allFullyBooked) return
 
               // Filter providers that have waiting list capacity
-              const waitingListProviders = selectedProviderRows.filter(p => {
+              const waitingListProviders = selectedProviderRows.filter((p) => {
                 return (
-                  !waitingListOptions.maxCapacity ||
-                  (p.w || 0) < waitingListOptions.maxCapacity
+                  !waitingListOptions.maxCapacity || (p.w || 0) < waitingListOptions.maxCapacity
                 )
               })
 
@@ -152,9 +160,9 @@ function useAppointmentSlots (params, fetchedSlots, callback, customCallback, wa
       response.data.data.maximum,
       response.data.data.busyness,
       response.data.data.appCount,
-      {providerId: response.data.data.lastProvider, fromBackend: true},
+      { providerId: response.data.data.lastProvider, fromBackend: true },
       customCallback,
-      waitingListSlots
+      waitingListSlots,
     )
   })
 }
@@ -170,9 +178,12 @@ function useSelectedDuration(store, value) {
 
   let service = store.getters['entities/getService'](cartItem.serviceId)
 
-  let extrasIds = store.getters['booking/getSelectedExtras'].map(i => i.extraId)
+  let extrasIds = store.getters['booking/getSelectedExtras'].map((i) => i.extraId)
 
-  return useDuration(value, service.extras.filter(i => extrasIds.includes(i.id)))
+  return useDuration(
+    value,
+    service.extras.filter((i) => extrasIds.includes(i.id)),
+  )
 }
 
 function useSelectedDate(store, date, range) {
@@ -203,7 +214,7 @@ function useSlotsCallback(
   appCount,
   lastBookedProviderId,
   searchStart,
-  searchEnd
+  searchEnd,
 ) {
   store.commit('booking/setMultipleAppointmentsSlots', slots)
   store.commit('booking/setMultipleAppointmentsOccupied', occupied)
@@ -222,9 +233,14 @@ function useSlotsCallback(
     let dates = useSortedDateStrings(Object.keys(slots))
 
     result['calendarStartDate'] = activeService.list[cartItem.index].date
-      ? activeService.list[cartItem.index].date : (dates.length ? dates[0] : null)
+      ? activeService.list[cartItem.index].date
+      : dates.length
+        ? dates[0]
+        : null
 
-    result['calendarEventDate'] = activeService.list[cartItem.index].date ? activeService.list[cartItem.index].date : ''
+    result['calendarEventDate'] = activeService.list[cartItem.index].date
+      ? activeService.list[cartItem.index].date
+      : ''
 
     if (!(activeService.list[cartItem.index].date in slots)) {
       store.commit('booking/setMultipleAppointmentsDate', null)
@@ -233,8 +249,8 @@ function useSlotsCallback(
       result['calendarEventSlot'] = ''
 
       result['calendarEventSlots'] = []
-
-    } else if (activeService.list.length &&
+    } else if (
+      activeService.list.length &&
       !(activeService.list[cartItem.index].time in slots[activeService.list[cartItem.index].date])
     ) {
       store.commit('booking/setMultipleAppointmentsTime', null)
@@ -242,16 +258,22 @@ function useSlotsCallback(
       result['calendarEventSlot'] = ''
     }
 
-    if (activeService.list.length &&
+    if (
+      activeService.list.length &&
       activeService.list[cartItem.index].date &&
-      (searchStart.value ? moment(activeService.list[cartItem.index].date).isSameOrAfter(searchStart.value) : true) &&
-      (searchEnd.value ? moment(activeService.list[cartItem.index].date).isSameOrBefore(searchEnd.value) : true)
+      (searchStart.value
+        ? moment(activeService.list[cartItem.index].date).isSameOrAfter(searchStart.value)
+        : true) &&
+      (searchEnd.value
+        ? moment(activeService.list[cartItem.index].date).isSameOrBefore(searchEnd.value)
+        : true)
     ) {
       if (activeService.list[cartItem.index].date in activeService.slots) {
         let availableSlots = useAvailableSlots(store)
 
-        result['calendarEventSlots'] = availableSlots.length ?
-          availableSlots : Object.keys(activeService.slots[activeService.list[cartItem.index].date])
+        result['calendarEventSlots'] = availableSlots.length
+          ? availableSlots
+          : Object.keys(activeService.slots[activeService.list[cartItem.index].date])
 
         if (activeService.list[cartItem.index].time) {
           result['calendarEventSlot'] = activeService.list[cartItem.index].time
@@ -263,14 +285,14 @@ function useSlotsCallback(
   return result
 }
 
-function useSlotsPricing (store, slots, serviceId) {
+function useSlotsPricing(store, slots, serviceId) {
   let employeesPrices = {}
 
   store.getters['entities/getEmployees'].forEach((item) => {
-    let employeeService = item.serviceList.find(i => i.id === serviceId)
+    let employeeService = item.serviceList.find((i) => i.id === serviceId)
 
     if (typeof employeeService !== 'undefined') {
-      employeesPrices[item.id] = item.serviceList.find(i => i.id === serviceId).price
+      employeesPrices[item.id] = item.serviceList.find((i) => i.id === serviceId).price
     }
   })
 
@@ -289,7 +311,7 @@ function useSlotsPricing (store, slots, serviceId) {
   let multipleMax = false
 
   Object.keys(slots).forEach((date) => {
-    result[date] = {slots: {}}
+    result[date] = { slots: {} }
 
     Object.keys(slots[date]).forEach((time) => {
       let haveHigh = false
@@ -347,18 +369,24 @@ function useSlotsPricing (store, slots, serviceId) {
       })
 
       result[date].slots[time] = {
-        type: haveLow && !haveHigh && !haveMid ? 'low' : (haveHigh && !haveLow && !haveMid ? 'high' : 'mid'),
-        price: minDatePrice
+        type:
+          haveLow && !haveHigh && !haveMid
+            ? 'low'
+            : haveHigh && !haveLow && !haveMid
+              ? 'high'
+              : 'mid',
+        price: minDatePrice,
       }
     })
 
-    result[date].price = Object.values(result[date].slots).filter(i => i.price === null).length === 0
+    result[date].price =
+      Object.values(result[date].slots).filter((i) => i.price === null).length === 0
 
-    let types = Object.values(result[date].slots).map(i => i.type)
+    let types = Object.values(result[date].slots).map((i) => i.type)
 
-    if (types.filter(i => i === 'low').length === types.length) {
+    if (types.filter((i) => i === 'low').length === types.length) {
       result[date].type = 'low'
-    } else if (types.filter(i => i === 'high').length === types.length) {
+    } else if (types.filter((i) => i === 'high').length === types.length) {
       result[date].type = 'high'
     } else {
       result[date].type = 'mid'
@@ -372,9 +400,9 @@ function useSlotsPricing (store, slots, serviceId) {
       high: maxPrice,
       uniqueMin: !multipleMin,
       uniqueMid: !multipleMid,
-      uniqueMax: !multipleMax
+      uniqueMax: !multipleMax,
     },
-    dates: result
+    dates: result,
   }
 }
 

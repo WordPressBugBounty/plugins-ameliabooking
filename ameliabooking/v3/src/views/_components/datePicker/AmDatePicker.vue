@@ -1,33 +1,19 @@
 <template>
-
   <!-- Date Picker -->
-  <div
-    class="am-date-picker__wrapper"
-    :class="{'is-disabled': props.disabled}"
-    :style="cssVars"
-  >
+  <div class="am-date-picker__wrapper" :class="{ 'is-disabled': props.disabled }" :style="cssVars">
     <div
       class="am-date-picker__input"
-      :class="[`am-${props.type}`, {'is-disabled': props.disabled}]"
+      :class="[`am-${props.type}`, { 'is-disabled': props.disabled }]"
       @click="triggerCalendar"
     >
-      <div
-        v-if="props.type === 'date' && model"
-        class="am-date-picker__input-date"
-      >
+      <div v-if="props.type === 'date' && model" class="am-date-picker__input-date">
         {{ getFrontedFormattedDate(moment(model).format('YYYY-MM-DD')) }}
       </div>
 
-      <div
-        v-if="props.type === 'daterange' && model[0]"
-        class="am-date-picker__input-start"
-      >
+      <div v-if="props.type === 'daterange' && model[0]" class="am-date-picker__input-start">
         {{ getFrontedFormattedDate(moment(model[0]).format('YYYY-MM-DD')) }}
       </div>
-      <div
-        v-if="props.type === 'daterange' && model[1]"
-        class="am-date-picker__input-end"
-      >
+      <div v-if="props.type === 'daterange' && model[1]" class="am-date-picker__input-end">
         {{ getFrontedFormattedDate(moment(model[1]).format('YYYY-MM-DD')) }}
       </div>
     </div>
@@ -66,10 +52,7 @@
         :fallback-placements="props.fallbackPlacements"
         :placement="props.placement"
         class="am-date-picker"
-        :class="[
-          `am-date-picker--${size}`,
-          {'am-date-picker--disabled': props.disabled}
-        ]"
+        :class="[`am-date-picker--${size}`, { 'am-date-picker--disabled': props.disabled }]"
         @change="(eventValue) => $emit('change', eventValue)"
         @blur="(e) => $emit('blur', e)"
         @focus="(e) => $emit('focus', e)"
@@ -82,27 +65,20 @@
     </el-config-provider>
   </div>
   <!-- /Date Picker -->
-
 </template>
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  ref,
-  toRefs,
-  inject,
-  markRaw,
-} from "vue";
+import { computed, ref, toRefs, inject, markRaw } from 'vue'
 
 // * Libraries
-import moment from "moment";
+import moment from 'moment'
 
 // * Composables
-import { useColorTransparency } from "../../../assets/js/common/colorManipulation";
-import { elementPlusTranslations } from "../../../assets/js/common/translationsElementPlus";
-import { getFrontedFormattedDate } from "../../../assets/js/common/date";
-import IconComponent from "../icons/IconComponent.vue";
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
+import { elementPlusTranslations } from '../../../assets/js/common/translationsElementPlus'
+import { getFrontedFormattedDate } from '../../../assets/js/common/date'
+import IconComponent from '../icons/IconComponent.vue'
 
 /**
  * Component Props
@@ -114,12 +90,12 @@ const props = defineProps({
   readonly: {
     // * whether DatePicker is read only
     type: Boolean,
-    default: false
+    default: false,
   },
   disabled: {
     // * whether DatePicker is disabled
     type: Boolean,
-    default: false
+    default: false,
   },
   size: {
     // default / medium / small / mini / micro
@@ -127,22 +103,22 @@ const props = defineProps({
     default: 'default',
     validator(value) {
       return ['default', 'medium', 'small', 'mini', 'micro'].includes(value)
-    }
+    },
   },
   editable: {
     // * whether the input is editable
     type: Boolean,
-    default: true
+    default: true,
   },
   clearable: {
     // * whether the input is clearable and whether to show clear button
     type: Boolean,
-    default: false
+    default: false,
   },
   placeholder: {
     // * placeholder in non-range mode
     type: String,
-    default: ''
+    default: '',
   },
   startPlaceholder: {
     // * placeholder in range mode
@@ -157,27 +133,40 @@ const props = defineProps({
     type: String,
     default: 'date',
     validator(value) {
-      return ['year', 'years','month', 'months', 'date', 'dates', 'datetime', 'week', 'datetimerange', 'daterange', 'monthrange', 'yearrange'].includes(value)
-    }
+      return [
+        'year',
+        'years',
+        'month',
+        'months',
+        'date',
+        'dates',
+        'datetime',
+        'week',
+        'datetimerange',
+        'daterange',
+        'monthrange',
+        'yearrange',
+      ].includes(value)
+    },
   },
   format: {
     // * format of the displayed value in the input box
-    type: String
+    type: String,
   },
   popperClass: {
     // * custom class name for DatePicker's dropdown
     type: String,
-    default: ''
+    default: '',
   },
   popperOptions: {
     // * options for the popper.js instance
     type: Object,
-    default: () => {}
+    default: () => {},
   },
   rangeSeparator: {
     // * separator between two date inputs in range mode
     type: String,
-    default: '-'
+    default: '-',
   },
   defaultValue: {
     // * optional, default date of the calendar
@@ -189,7 +178,7 @@ const props = defineProps({
   },
   valueFormat: {
     // * optional, format of binding value. If not specified, the binding value will be a Date object
-    type: String
+    type: String,
   },
   id: {
     // * same as id in native input
@@ -202,7 +191,7 @@ const props = defineProps({
   unlinkPanels: {
     // * whether to unlink the two panels in range mode
     type: Boolean,
-    default: false
+    default: false,
   },
   prefixIcon: {
     type: [String, Object, Function],
@@ -221,17 +210,17 @@ const props = defineProps({
   validateEvent: {
     // * whether to trigger validation when the value changes
     type: Boolean,
-    default: true
+    default: true,
   },
   disabledDate: {
     // * a function determining if a date is disabled with that date as its parameter. Should return a Boolean
     type: Function,
-    default: () => {}
+    default: () => {},
   },
   shortcuts: {
     // * an array of objects to set shortcut options
     type: Array,
-    default: () => []
+    default: () => [],
   },
   cellClassName: {
     // * a function determining the class name of a date cell with that date as its parameter. Should return a String
@@ -240,7 +229,7 @@ const props = defineProps({
   teleported: {
     // * empty values of component
     type: Boolean,
-    default: true
+    default: true,
   },
   emptyValues: {
     // * whether to show empty values
@@ -249,7 +238,7 @@ const props = defineProps({
   valueOnClear: {
     // * clear return value
     type: [String, Number, Boolean, Function],
-    default: ''
+    default: '',
   },
   fallbackPlacements: {
     // * list of possible positions for Tooltip, fallback placements for the popper.js instance
@@ -260,19 +249,41 @@ const props = defineProps({
     type: String,
     default: 'bottom',
     validator(value) {
-      return ['top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left', 'left-start', 'left-end', 'right', 'right-start', 'right-end'].includes(value)
-    }
+      return [
+        'top',
+        'top-start',
+        'top-end',
+        'bottom',
+        'bottom-start',
+        'bottom-end',
+        'left',
+        'left-start',
+        'left-end',
+        'right',
+        'right-start',
+        'right-end',
+      ].includes(value)
+    },
   },
   lang: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 /**
  * Component Emits
  * */
-const emits = defineEmits(['update:modelValue', 'change', 'blur', 'focus', 'clear', 'calendar-change', 'panel-change', 'visible-change'])
+const emits = defineEmits([
+  'update:modelValue',
+  'change',
+  'blur',
+  'focus',
+  'clear',
+  'calendar-change',
+  'panel-change',
+  'visible-change',
+])
 
 /**
  * Component model
@@ -282,7 +293,7 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 /**
@@ -290,14 +301,14 @@ let model = computed({
  */
 const amDatePicker = ref(null)
 
-function triggerCalendar () {
+function triggerCalendar() {
   if (amDatePicker.value) {
     amDatePicker.value.focus()
   }
 }
 
 // * Colors block
-let amColors = inject('amColors');
+let amColors = inject('amColors')
 
 let cssVars = computed(() => {
   return {
@@ -329,7 +340,6 @@ let cssVars = computed(() => {
 
 <style lang="scss">
 @mixin am-datepicker-block {
-
   // Date Picker
   .am-date-picker {
     &__wrapper {
@@ -448,7 +458,8 @@ let cssVars = computed(() => {
             --am-c-dpicker-border: var(--am-c-inp-text-op40);
           }
 
-          &.is-active:not(.is-disabled), &.is-focus:not(.is-disabled) {
+          &.is-active:not(.is-disabled),
+          &.is-focus:not(.is-disabled) {
             --am-c-dpicker-border: var(--am-c-primary);
           }
 
@@ -500,7 +511,8 @@ let cssVars = computed(() => {
             --am-padd-dpicker: 0 8px 0 12px;
           }
 
-          &--prefix, &--suffix {
+          &--prefix,
+          &--suffix {
             --am-padd-dpicker: 0 8px;
           }
 
@@ -523,7 +535,8 @@ let cssVars = computed(() => {
             box-sizing: border-box;
             transition: box-shadow 0.3s ease-in-out;
 
-            &.is-focus:not(.is-disabled), &.is-active:not(.is-disabled) {
+            &.is-focus:not(.is-disabled),
+            &.is-active:not(.is-disabled) {
               --am-c-dpicker-border: var(--am-c-primary);
             }
           }
@@ -544,23 +557,28 @@ let cssVars = computed(() => {
               color: var(--am-c-dpicker-placeholder);
               opacity: 1; /* Ensures it’s not transparent */
             }
-            &::-webkit-input-placeholder { /* Chrome, Safari */
+            &::-webkit-input-placeholder {
+              /* Chrome, Safari */
               color: var(--am-c-dpicker-placeholder);
             }
-            &:-moz-placeholder { /* Firefox 4-18 */
-              color: var(--am-c-dpicker-placeholder);
-              opacity: 1;
-            }
-            &::-moz-placeholder { /* Firefox 19+ */
+            &:-moz-placeholder {
+              /* Firefox 4-18 */
               color: var(--am-c-dpicker-placeholder);
               opacity: 1;
             }
-            &:-ms-input-placeholder { /* IE 10-11 */
+            &::-moz-placeholder {
+              /* Firefox 19+ */
+              color: var(--am-c-dpicker-placeholder);
+              opacity: 1;
+            }
+            &:-ms-input-placeholder {
+              /* IE 10-11 */
               color: var(--am-c-dpicker-placeholder);
             }
           }
 
-          &__prefix, &__suffix {
+          &__prefix,
+          &__suffix {
             font-size: 24px;
             line-height: 1;
             color: var(--am-c-dpicker-text);
@@ -590,7 +608,7 @@ let cssVars = computed(() => {
     color: var(--am-c-drop-text);
 
     &:hover {
-      color: var(--am-c-btn-prim)
+      color: var(--am-c-btn-prim);
     }
   }
 
@@ -598,7 +616,10 @@ let cssVars = computed(() => {
     &.is-left {
       border-right: 1px solid var(--am-c-drop-text-op10);
     }
-    table, table td, table tr, table tr:is(.el-date-table__row) {
+    table,
+    table td,
+    table tr,
+    table tr:is(.el-date-table__row) {
       border: none !important;
     }
     table tr:not(.el-date-table__row) th {
@@ -624,14 +645,16 @@ let cssVars = computed(() => {
       td.in-range:hover > .el-date-table-cell {
         background-color: var(--am-c-drop-text-op50);
       }
-      td.end-date .el-date-table-cell__text, td.start-date .el-date-table-cell__text {
+      td.end-date .el-date-table-cell__text,
+      td.start-date .el-date-table-cell__text {
         color: var(--am-c-drop-bgr);
         background-color: var(--am-c-drop-text-op80);
       }
       td.today.start-date .el-date-table-cell__text {
         color: var(--am-c-drop-bgr);
       }
-      td.prev-month, td.next-month {
+      td.prev-month,
+      td.next-month {
         color: var(--am-c-drop-text-op30);
       }
 
@@ -642,7 +665,8 @@ let cssVars = computed(() => {
     }
   }
 
-  .d-arrow-left, .d-arrow-right {
+  .d-arrow-left,
+  .d-arrow-right {
     display: none;
   }
 }
@@ -675,7 +699,8 @@ let cssVars = computed(() => {
     &__next-btn {
       float: right;
     }
-    &__prev-btn:focus, &__next-btn:focus {
+    &__prev-btn:focus,
+    &__next-btn:focus {
       //background: transparent;
       outline: none;
     }
@@ -687,10 +712,10 @@ let cssVars = computed(() => {
 
 .el-popper {
   &.el-picker__popper {
-    &[data-popper-placement^="top"],
-    &[data-popper-placement^="bottom"],
-    &[data-popper-placement^="left"],
-    &[data-popper-placement^="right"] {
+    &[data-popper-placement^='top'],
+    &[data-popper-placement^='bottom'],
+    &[data-popper-placement^='left'],
+    &[data-popper-placement^='right'] {
       .el-popper__arrow {
         display: none;
       }

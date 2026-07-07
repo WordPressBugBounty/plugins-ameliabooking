@@ -13,10 +13,7 @@
     </template>
 
     <div class="am-cc__popover-inner">
-      <div
-        v-if="props.headerText"
-        class="am-cc__popover-heading"
-      >
+      <div v-if="props.headerText" class="am-cc__popover-heading">
         {{ props.headerText }}
       </div>
       <component
@@ -32,38 +29,33 @@
 
 <script setup>
 // * templates
-import Periods from "./templates/Periods.vue";
-import Extras from "./templates/Extras.vue";
-import Tickets from "./templates/Tickets.vue";
-import CustomFields from "./templates/CustomFields.vue";
-import Employee from "./templates/Employee.vue";
-import Customers from "../../../../../../../../public/Cabinet/common/parts/CollapseCard/popover/templates/Customers.vue";
-import QrCode from "./templates/QrCode.vue";
+import Periods from './templates/Periods.vue'
+import Extras from './templates/Extras.vue'
+import Tickets from './templates/Tickets.vue'
+import CustomFields from './templates/CustomFields.vue'
+import Employee from './templates/Employee.vue'
+import Customers from '../../../../../../../../public/Cabinet/common/parts/CollapseCard/popover/templates/Customers.vue'
+import QrCode from './templates/QrCode.vue'
 
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  markRaw
-} from "vue"
+import { ref, computed, inject, markRaw } from 'vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../../../../../assets/js/common/colorManipulation.js"
+import { useColorTransparency } from '../../../../../../../../../assets/js/common/colorManipulation.js'
 
 let props = defineProps({
   headerText: {
     type: String,
-    default: ''
+    default: '',
   },
   type: {
     type: String,
-    required: true
+    required: true,
   },
   contentData: {
     type: [Array, Object, String],
-    default: ''
-  }
+    default: '',
+  },
 })
 
 let templates = ref({
@@ -107,7 +99,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: "CollapseCardPopoverTemplate"
+  name: 'CollapseCardPopoverTemplate',
 }
 </script>
 
@@ -126,7 +118,8 @@ export default {
   }
 
   .am-cc__popover {
-    &-inner {}
+    &-inner {
+    }
 
     &-heading {
       font-size: 15px;
@@ -136,7 +129,8 @@ export default {
       margin: 0 0 16px;
     }
 
-    &-content {}
+    &-content {
+    }
   }
 }
 

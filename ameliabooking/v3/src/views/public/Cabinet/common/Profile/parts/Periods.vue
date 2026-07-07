@@ -1,9 +1,5 @@
 <template>
-  <div
-    v-show="props.enabled"
-    class="am-caeper"
-    :style="cssVars"
-  >
+  <div v-show="props.enabled" class="am-caeper" :style="cssVars">
     <div
       v-if="props.headerVisible && periods.length"
       class="am-caeper__heading"
@@ -20,28 +16,29 @@
       </div>
     </div>
 
-    <div
-      v-for="(period, periodIndex) in periods"
-      :key="periodIndex"
-      class="am-caeper__content"
-    >
-      <div
-        class="am-caeper__content-item am-w-20"
-        :class="props.responsiveClass"
-      >
-        {{ period.startTime ? period.startTime.substring(0, 5) : '' }} - {{ period.endTime ? period.endTime.substring(0, 5) : '' }}
+    <div v-for="(period, periodIndex) in periods" :key="periodIndex" class="am-caeper__content">
+      <div class="am-caeper__content-item am-w-20" :class="props.responsiveClass">
+        {{ period.startTime ? period.startTime.substring(0, 5) : '' }} -
+        {{ period.endTime ? period.endTime.substring(0, 5) : '' }}
       </div>
       <div
         class="am-caeper__content-item am-w-40"
-        :class="[props.responsiveClass, {'am-cabinet-empty': !period.periodServiceList.length}]"
+        :class="[props.responsiveClass, { 'am-cabinet-empty': !period.periodServiceList.length }]"
       >
-        {{ period.periodServiceList.filter(id => employeeServices.map(i => i.id).indexOf(id) !== -1).map(id => services.find(s => s.id === id).name).join(', ') }}
+        {{
+          period.periodServiceList
+            .filter((id) => employeeServices.map((i) => i.id).indexOf(id) !== -1)
+            .map((id) => services.find((s) => s.id === id).name)
+            .join(', ')
+        }}
       </div>
       <div
         class="am-caeper__content-item am-w-40"
-        :class="[props.responsiveClass, {'am-cabinet-empty': !period.periodLocationList.length}]"
+        :class="[props.responsiveClass, { 'am-cabinet-empty': !period.periodLocationList.length }]"
       >
-        {{ period.periodLocationList.map(id => locations.find(l => l.id === id).name).join(', ') }}
+        {{
+          period.periodLocationList.map((id) => locations.find((l) => l.id === id).name).join(', ')
+        }}
       </div>
       <DotsPopup
         v-if="props.editVisible"
@@ -64,16 +61,10 @@
       </div>
     </div>
 
-    <div
-      v-for="(timeOut, breakIndex) in timeOuts"
-      :key="breakIndex"
-      class="am-caeper__content"
-    >
-      <div
-        class="am-caeper__content-item am-w-20"
-        :class="props.responsiveClass"
-      >
-        {{ timeOut.startTime ? timeOut.startTime.substring(0, 5) : '' }} - {{ timeOut.endTime ? timeOut.endTime.substring(0, 5) : '' }}
+    <div v-for="(timeOut, breakIndex) in timeOuts" :key="breakIndex" class="am-caeper__content">
+      <div class="am-caeper__content-item am-w-20" :class="props.responsiveClass">
+        {{ timeOut.startTime ? timeOut.startTime.substring(0, 5) : '' }} -
+        {{ timeOut.endTime ? timeOut.endTime.substring(0, 5) : '' }}
       </div>
       <DotsPopup
         v-if="props.editVisible"
@@ -92,22 +83,17 @@
       <div v-if="props.error" class="am-caeper__error">
         {{ props.error }}
       </div>
-      <AmButton
-        v-if="canAddPeriod()"
-        prefix="plus"
-        size="small"
-        @click="addPeriod()"
-      >
+      <AmButton v-if="canAddPeriod()" prefix="plus" size="small" @click="addPeriod()">
         {{ amLabels.add_period }}
       </AmButton>
-<!--      <AmButton-->
-<!--        v-if="periods.length"-->
-<!--        prefix="plus"-->
-<!--        size="small"-->
-<!--        @click="addBreak()"-->
-<!--      >-->
-<!--        {{ amLabels.add_break }}-->
-<!--      </AmButton>-->
+      <!--      <AmButton-->
+      <!--        v-if="periods.length"-->
+      <!--        prefix="plus"-->
+      <!--        size="small"-->
+      <!--        @click="addBreak()"-->
+      <!--      >-->
+      <!--        {{ amLabels.add_break }}-->
+      <!--      </AmButton>-->
       <AmButton
         v-if="props.applyToAllDaysVisible"
         size="small"
@@ -126,10 +112,12 @@
       :period-index="editedPeriodIndex"
       :origin-index="index"
       :is-new="isNew"
-      @close="() => {
-        editedPeriodIndex = null
-        isNew = null
-      }"
+      @close="
+        () => {
+          editedPeriodIndex = null
+          isNew = null
+        }
+      "
     >
     </Period>
 
@@ -141,9 +129,11 @@
       :origin-index="index"
       :is-new="false"
       :is-break="true"
-      @close="() => {
-        editedTimeOutIndex = null
-      }"
+      @close="
+        () => {
+          editedTimeOutIndex = null
+        }
+      "
     >
     </TimeOut>
   </div>
@@ -151,67 +141,63 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  inject,
-  computed,
-} from "vue";
+import { ref, inject, computed } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Composables
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation";
-import { useEmployeeServices } from "../../../../../../assets/js/common/employee";
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
+import { useEmployeeServices } from '../../../../../../assets/js/common/employee'
 
 // * Dedicated components
-import Period from "./Period.vue";
-import TimeOut from "./TimeOut.vue";
-import DotsPopup from "../../../../Parts/DotsPopup.vue";
-import AmButton from "../../../../../_components/button/AmButton.vue";
+import Period from './Period.vue'
+import TimeOut from './TimeOut.vue'
+import DotsPopup from '../../../../Parts/DotsPopup.vue'
+import AmButton from '../../../../../_components/button/AmButton.vue'
 
 // * Component properties
 let props = defineProps({
   title: {
     type: String,
-    default: ''
+    default: '',
   },
   type: {
     type: String,
-    default: ''
+    default: '',
   },
   index: {
     type: Number,
-    default: 0
+    default: 0,
   },
   enabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   headerVisible: {
     type: Boolean,
-    default: true
+    default: true,
   },
   applyToAllDaysVisible: {
     type: Boolean,
-    default: true
+    default: true,
   },
   footerVisible: {
     type: Boolean,
-    default: true
+    default: true,
   },
   editVisible: {
     type: Boolean,
-    default: true
+    default: true,
   },
   error: {
     type: String,
-    default: ''
+    default: '',
   },
   responsiveClass: {
     type: String,
     default: '',
-  }
+  },
 })
 
 // * Emits
@@ -259,7 +245,7 @@ let editedTimeOutIndex = ref(null)
 
 let isNew = ref(null)
 
-function addPeriod () {
+function addPeriod() {
   periods.value.push({
     id: null,
     locationId: null,
@@ -288,7 +274,7 @@ function addPeriod () {
 //   editedTimeOutIndex.value = timeOuts.value.length - 1
 // }
 
-function applyToAllDays () {
+function applyToAllDays() {
   let clonedPeriods = []
 
   store.getters['employee/getEmployee'].weekDayList[props.index].periodList.forEach((period) => {
@@ -310,10 +296,12 @@ function applyToAllDays () {
   })
 }
 
-function canAddPeriod () {
-  return !periods.value.length ||
-    !periods.value.filter(i => i.startTime && i.endTime).length ||
+function canAddPeriod() {
+  return (
+    !periods.value.length ||
+    !periods.value.filter((i) => i.startTime && i.endTime).length ||
     periods.value[periods.value.length - 1].endTime !== '00:00'
+  )
 }
 
 // * Colors
@@ -330,7 +318,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: 'WorkPeriods'
+  name: 'WorkPeriods',
 }
 </script>
 
@@ -449,7 +437,8 @@ export default {
         justify-content: space-between;
       }
 
-      [class^="am-icon-"], [class*=" am-icon-"] {
+      [class^='am-icon-'],
+      [class*=' am-icon-'] {
         font-size: 22px;
         line-height: 20px;
       }

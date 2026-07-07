@@ -42,7 +42,7 @@
     </template>
     <slot />
     <template #footer>
-      <slot name="footer"/>
+      <slot name="footer" />
     </template>
   </el-dialog>
 </template>
@@ -51,12 +51,7 @@
 import AmeliaIconClose from '../icons/IconClose.vue'
 
 // * Import from Vue
-import {
-  toRefs,
-  computed,
-  ref,
-  onMounted
-} from "vue";
+import { toRefs, computed, ref, onMounted } from 'vue'
 
 /**
  * Component Props
@@ -67,114 +62,114 @@ const props = defineProps({
   },
   modalClass: {
     type: String,
-    default: ''
+    default: '',
   },
   title: {
     type: String,
-    default: ''
+    default: '',
   },
   width: {
     type: [String, Number],
-    default: '50%'
+    default: '50%',
   },
   fullscreen: {
     type: Boolean,
-    default: false
+    default: false,
   },
   top: {
     type: String,
-    default: '15vh'
+    default: '15vh',
   },
   modal: {
     type: Boolean,
-    default: true
+    default: true,
   },
   appendToBody: {
     type: Boolean,
-    default: false
+    default: false,
   },
   appendTo: {
     type: [String, Object],
-    default: undefined
+    default: undefined,
   },
   alignCenter: {
     type: Boolean,
-    default: true
+    default: true,
   },
   lockScroll: {
     type: Boolean,
-    default: true
+    default: true,
   },
   customClass: {
     type: String,
-    default: ''
+    default: '',
   },
   openDelay: {
     type: Number,
-    default: 0
+    default: 0,
   },
   closeDelay: {
     type: Number,
-    default: 0
+    default: 0,
   },
   closeOnClickModal: {
     type: Boolean,
-    default: true
+    default: true,
   },
   closeOnPressEscape: {
     type: Boolean,
-    default: true
+    default: true,
   },
   showClose: {
     type: Boolean,
-    default: true
+    default: true,
   },
   beforeClose: {
-    type: Function
+    type: Function,
   },
   center: {
     type: Boolean,
-    default: false
+    default: false,
   },
   destroyOnClose: {
     type: Boolean,
-    default: false
+    default: false,
   },
   closeIcon: {
     type: [Object, Function],
-    default: AmeliaIconClose
+    default: AmeliaIconClose,
   },
   draggable: {
     type: Boolean,
-    default: false
+    default: false,
   },
   overflow: {
     type: Boolean,
-    default: false
+    default: false,
   },
   zIndex: {
     type: Number,
-    default: undefined
+    default: undefined,
   },
   headerClass: {
     type: String,
-    default: ''
+    default: '',
   },
   bodyClass: {
     type: String,
-    default: ''
+    default: '',
   },
   footerClass: {
     type: String,
-    default: ''
+    default: '',
   },
   customStyles: {
-    type: Object
+    type: Object,
   },
   usedForShortcode: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const amDialogRef = ref(null)
@@ -195,7 +190,7 @@ const emits = defineEmits([
   'opened',
   'open-auto-focus',
   'close-auto-focus',
-  'update:modelValue'
+  'update:modelValue',
 ])
 
 /**
@@ -206,9 +201,8 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
-
 </script>
 
 <script>

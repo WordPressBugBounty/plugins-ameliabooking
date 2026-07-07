@@ -2,9 +2,7 @@
   <StepCardLayout
     ref="stepCardLayoutReference"
     :custom-class="[props.globalClass, 'am-fs-location-step']"
-    :card-selected="
-      store.getters['booking/getLocationId'] !== null || anyLocation
-    "
+    :card-selected="store.getters['booking/getLocationId'] !== null || anyLocation"
     :allow-popup="
       serviceStepsIndex < 0 && stepIndex === 0 && store.getters['booking/getServiceId'] !== null
     "
@@ -48,7 +46,7 @@
               {
                 icon: 'locations',
                 name: location.address,
-                isLink: true
+                isLink: true,
               },
             ]
           : []
@@ -127,9 +125,7 @@ const amCustomize = inject('amCustomize')
 
 // * Component References
 const stepCardLayoutReference = ref(null)
-const stepCardLayoutDom = computed(
-  () => stepCardLayoutReference.value?.stepCardLayoutRef || null
-)
+const stepCardLayoutDom = computed(() => stepCardLayoutReference.value?.stepCardLayoutRef || null)
 
 // * Component width
 const { width: componentWidth } = useElementSize(stepCardLayoutDom)
@@ -142,7 +138,7 @@ let responsiveClass = computed(() => {
 // * Steps Array
 const stepsArray = inject('stepsArray', ref([]))
 const serviceStepsIndex = computed(() => {
-  return stepsArray.value.findIndex(step => step.name === 'ServiceStep')
+  return stepsArray.value.findIndex((step) => step.name === 'ServiceStep')
 })
 
 // * Step Index
@@ -159,7 +155,7 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Labels
 const amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   const customizedLabels = amCustomize.locationStep?.translations
 
@@ -188,26 +184,24 @@ const { footerBtnDisabledUpdater } = inject('changingStepsFunctions', {
   footerBtnDisabledUpdater: () => {},
 })
 
-let customizeOptions = computed(() => amCustomize.locationStep?.options || defaultCustomizeSettings.sbsNew.locationStep.options)
+let customizeOptions = computed(
+  () => amCustomize.locationStep?.options || defaultCustomizeSettings.sbsNew.locationStep.options,
+)
 
 // * Any Employee
 let anyLocation = computed(() => !store.getters['booking/getLocationId'])
 
-let initStepOrder = [
-  { id: 'ServiceStep'},
-  { id: 'EmployeeStep' },
-  { id: 'LocationStep' },
-]
+let initStepOrder = [{ id: 'ServiceStep' }, { id: 'EmployeeStep' }, { id: 'LocationStep' }]
 let stepOrder = computed(() => {
   return 'order' in amCustomize ? amCustomize.order : initStepOrder
 })
 
 const filterRules = computed(() => {
-  const idx = stepOrder.value.findIndex(step => step.id === 'LocationStep')
+  const idx = stepOrder.value.findIndex((step) => step.id === 'LocationStep')
   let arrRules = stepOrder.value.slice(0, idx)
   const obj = { serviceId: null, providerId: null, locationId: null }
-  if (arrRules.some(step => step.id === 'ServiceStep')) delete obj.serviceId
-  if (arrRules.some(step => step.id === 'EmployeeStep')) delete obj.providerId
+  if (arrRules.some((step) => step.id === 'ServiceStep')) delete obj.serviceId
+  if (arrRules.some((step) => step.id === 'EmployeeStep')) delete obj.providerId
   return obj
 })
 
@@ -218,16 +212,16 @@ let locationOptions = computed(() => {
   // Collect connected location IDs
   const locationIdSet = new Set(
     Object.values(relations)
-      .flatMap(emp => Object.values(emp).flat())
-      .map(id => parseInt(id))
+      .flatMap((emp) => Object.values(emp).flat())
+      .map((id) => parseInt(id)),
   )
 
   const locations = store.getters['entities/filteredLocations'](
-    Object.assign(store.getters['booking/getSelection'], filterRules.value)
+    Object.assign(store.getters['booking/getSelection'], filterRules.value),
   )
 
   // Filter locations by connected IDs
-  return locations.filter(loc => locationIdSet.has(parseInt(loc.id)))
+  return locations.filter((loc) => locationIdSet.has(parseInt(loc.id)))
 })
 
 function selectLocation(location) {
@@ -237,10 +231,7 @@ function selectLocation(location) {
     reference: 'location',
     // position will depends on fields order
     position: 0,
-    value:
-      location.id !== store.getters['booking/getLocationId']
-        ? location.name
-        : '',
+    value: location.id !== store.getters['booking/getLocationId'] ? location.name : '',
   }
 
   if (location.id !== store.getters['booking/getLocationId']) {
@@ -259,16 +250,19 @@ function disabledLocation(locationId) {
 
   if (employeeId) {
     if (serviceId) {
-      return serviceId in relations[employeeId] ? !relations[employeeId][serviceId].some(locId => parseInt(locId) === locationId) : true
+      return serviceId in relations[employeeId]
+        ? !relations[employeeId][serviceId].some((locId) => parseInt(locId) === locationId)
+        : true
     }
     return Object.values(relations[employeeId]).every(
-      sIds => !sIds.some(lId => parseInt(lId) === locationId)
+      (sIds) => !sIds.some((lId) => parseInt(lId) === locationId),
     )
   }
 
   if (serviceId) {
     return Object.values(relations).every(
-      emp => !(serviceId in emp) || !emp[serviceId].some(locId => parseInt(locId) === locationId)
+      (emp) =>
+        !(serviceId in emp) || !emp[serviceId].some((locId) => parseInt(locId) === locationId),
     )
   }
 
@@ -322,7 +316,10 @@ watch(moreInfoVisibility, (isVisible, wasVisible) => {
 
 // * Mounted hook
 onMounted(() => {
-  if (!!customizeOptions.value.location.required && store.getters['booking/getLocationId'] === null) {
+  if (
+    !!customizeOptions.value.location.required &&
+    store.getters['booking/getLocationId'] === null
+  ) {
     footerBtnDisabledUpdater(true)
   }
 })

@@ -7,9 +7,9 @@
       class="am-time-select"
       :class="[
         `am-time-select--${size}`,
-        {'am-time-select--disabled': disabled },
-        {'am-time-select--prefix': props.prefixIcon },
-        {'am-time-select--suffix': props.suffixIcon || (props.clearIcon && pross.clearable)},
+        { 'am-time-select--disabled': disabled },
+        { 'am-time-select--prefix': props.prefixIcon },
+        { 'am-time-select--suffix': props.suffixIcon || (props.clearIcon && pross.clearable) },
         props.class,
       ]"
       :disabled="props.disabled"
@@ -184,7 +184,7 @@ let amFonts = inject(
     customFontFamily: '',
     fontFormat: '',
     customFontSelected: false,
-  })
+  }),
 )
 
 // * Color Vars
@@ -211,7 +211,7 @@ let amColors = inject(
     colorBtnPrimText: '#FFFFFF',
     colorBtnSec: '#1A2C37',
     colorBtnSecText: '#FFFFFF',
-  })
+  }),
 )
 
 // * Css Variables
@@ -226,15 +226,27 @@ let cssVars = computed(() => {
 })
 
 onMounted(() => {
-  const popperWrapper = document.querySelector("[id^='el-popper-container']");
+  const popperWrapper = document.querySelector("[id^='el-popper-container']")
   popperWrapper.style.setProperty('--am-c-option-bgr', amColors.value.colorDropBgr)
   popperWrapper.style.setProperty('--am-c-option-border', amColors.value.colorDropBorder)
   popperWrapper.style.setProperty('--am-c-option-text', amColors.value.colorDropText)
-  popperWrapper.style.setProperty('--am-c-option-text-op65', useColorTransparency(amColors.value.colorDropText, 0.65))
-  popperWrapper.style.setProperty('--am-c-option-text-op50', useColorTransparency(amColors.value.colorDropText, 0.50))
-  popperWrapper.style.setProperty('--am-c-option-hover', useColorTransparency(amColors.value.colorDropText, 0.1))
+  popperWrapper.style.setProperty(
+    '--am-c-option-text-op65',
+    useColorTransparency(amColors.value.colorDropText, 0.65),
+  )
+  popperWrapper.style.setProperty(
+    '--am-c-option-text-op50',
+    useColorTransparency(amColors.value.colorDropText, 0.5),
+  )
+  popperWrapper.style.setProperty(
+    '--am-c-option-hover',
+    useColorTransparency(amColors.value.colorDropText, 0.1),
+  )
   popperWrapper.style.setProperty('--am-c-option-selected', amColors.value.colorPrimary)
-  popperWrapper.style.setProperty('--am-c-option-selected-op10', useColorTransparency(amColors.value.colorPrimary, 0.1))
+  popperWrapper.style.setProperty(
+    '--am-c-option-selected-op10',
+    useColorTransparency(amColors.value.colorPrimary, 0.1),
+  )
   popperWrapper.style.setProperty('--am-c-option-img-bgr', amColors.value.colorSuccess)
   popperWrapper.style.setProperty('--am-c-option-img-text', amColors.value.colorMainBgr)
   popperWrapper.style.setProperty('--am-font-family', amFonts.value.fontFamily)
@@ -341,18 +353,22 @@ onMounted(() => {
           color: var(--am-c-timeselect-placeholder);
           opacity: 1; /* Ensures it’s not transparent */
         }
-        &::-webkit-input-placeholder { /* Chrome, Safari */
+        &::-webkit-input-placeholder {
+          /* Chrome, Safari */
           color: var(--am-c-timeselect-placeholder);
         }
-        &:-moz-placeholder { /* Firefox 4-18 */
-          color: var(--am-c-timeselect-placeholder);
-          opacity: 1;
-        }
-        &::-moz-placeholder { /* Firefox 19+ */
+        &:-moz-placeholder {
+          /* Firefox 4-18 */
           color: var(--am-c-timeselect-placeholder);
           opacity: 1;
         }
-        &:-ms-input-placeholder { /* IE 10-11 */
+        &::-moz-placeholder {
+          /* Firefox 19+ */
+          color: var(--am-c-timeselect-placeholder);
+          opacity: 1;
+        }
+        &:-ms-input-placeholder {
+          /* IE 10-11 */
           color: var(--am-c-timeselect-placeholder);
         }
       }
@@ -372,7 +388,8 @@ onMounted(() => {
       }
 
       // Prefix and Suffix icon
-      &__prefix, &__suffix {
+      &__prefix,
+      &__suffix {
         .el-icon {
           width: auto;
           height: auto;
@@ -381,10 +398,11 @@ onMounted(() => {
         [class^='am-icon'] {
           font-size: 24px;
           line-height: 1;
-          color: var(--am-c-timeselect-text)
+          color: var(--am-c-timeselect-text);
         }
 
-        .am-icon-arrow-up, .am-icon-close {
+        .am-icon-arrow-up,
+        .am-icon-close {
           font-size: 18px;
         }
       }

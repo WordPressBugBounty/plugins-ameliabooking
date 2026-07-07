@@ -87,11 +87,8 @@ let amLabels = inject('labels')
 
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    let translations =
-      amCustomize.value[pageRenderKey.value].tickets.translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    let translations = amCustomize.value[pageRenderKey.value].tickets.translations
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -104,8 +101,7 @@ let customLabels = computed(() => {
   let computedLabels = reactive({ ...amLabels })
 
   if (amCustomize.value[pageRenderKey.value].tickets.translations) {
-    let customizedLabels =
-      amCustomize.value[pageRenderKey.value].tickets.translations
+    let customizedLabels = amCustomize.value[pageRenderKey.value].tickets.translations
     Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][langKey.value]) {
         computedLabels[labelKey] = customizedLabels[labelKey][langKey.value]
@@ -128,14 +124,8 @@ let cssVars = computed(() => {
   return {
     '--am-c-font-family': amFonts.value.fontFamily,
     '--am-c-elt-text': amColors.value.colorMainText,
-    '--am-c-elt-text-op90': useColorTransparency(
-      amColors.value.colorMainText,
-      0.9
-    ),
-    '--am-c-elt-text-op80': useColorTransparency(
-      amColors.value.colorMainText,
-      0.8
-    ),
+    '--am-c-elt-text-op90': useColorTransparency(amColors.value.colorMainText, 0.9),
+    '--am-c-elt-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
   }
 })
 </script>
@@ -159,11 +149,7 @@ export default {
       $count: 100;
       @for $i from 0 through $count {
         &:nth-child(#{$i + 1}) {
-          animation: 600ms
-            cubic-bezier(0.45, 1, 0.4, 1.2)
-            #{$i *
-            100}ms
-            am-animation-slide-up;
+          animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
           animation-fill-mode: both;
         }
       }

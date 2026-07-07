@@ -4,9 +4,7 @@
     wrapper-class="am-fcis"
     form-class="am-fcis__form"
     heading-class="am-fcis__header"
-    :content-class="`am-fcis__content ${
-      customizeOptions.pageScroll.visibility ? '' : 'no-scroll'
-    }`"
+    :content-class="`am-fcis__content ${customizeOptions.pageScroll.visibility ? '' : 'no-scroll'}`"
     :style="cssVars"
   >
     <template #header>
@@ -17,17 +15,14 @@
     </template>
     <template #heading>
       <div
-        :class="[{'am-tablet': pageWidth <= 678}, {'am-mobile': pageWidth < 450}]"
+        :class="[{ 'am-tablet': pageWidth <= 678 }, { 'am-mobile': pageWidth < 450 }]"
         class="am-fcis__header-top"
       >
         <div class="am-fcis__header-text">
           <span class="am-fcis__header-name">
             {{ service.name }}
           </span>
-          <div
-            v-if="customizeOptions.serviceBadge.visibility"
-            class="am-fcis__badge am-service"
-          >
+          <div v-if="customizeOptions.serviceBadge.visibility" class="am-fcis__badge am-service">
             <span class="am-icon-service"></span>
             <span>
               {{ labelsDisplay('heading_service') }}
@@ -35,15 +30,8 @@
           </div>
         </div>
         <div class="am-fcis__header-action">
-          <span
-            v-if="customizeOptions.servicePrice.visibility"
-            class="am-fcis__header-price"
-          >
-            {{
-              service.price
-                ? useFormattedPrice(service.price)
-                : labelsDisplay('free')
-            }}
+          <span v-if="customizeOptions.servicePrice.visibility" class="am-fcis__header-price">
+            {{ service.price ? useFormattedPrice(service.price) : labelsDisplay('free') }}
           </span>
           <span class="am-fcis__header-btn">
             <AmButton :type="customizeOptions.bookingBtn.buttonType">
@@ -62,24 +50,16 @@
         class="am-fcis__header-bottom"
       >
         <div class="am-fcis__mini-info">
-          <div
-            v-if="customizeOptions.serviceCategory.visibility"
-            class="am-fcis__mini-info__inner"
-          >
+          <div v-if="customizeOptions.serviceCategory.visibility" class="am-fcis__mini-info__inner">
             <span class="am-icon-folder"></span>
             <span>{{ category.name }}</span>
           </div>
-          <div
-            v-if="customizeOptions.serviceDuration.visibility"
-            class="am-fcis__mini-info__inner"
-          >
+          <div v-if="customizeOptions.serviceDuration.visibility" class="am-fcis__mini-info__inner">
             <span class="am-icon-clock"></span>
             <span>{{ serviceDuration(service.duration) }}</span>
           </div>
           <div
-            v-if="
-              customizeOptions.serviceCapacity.visibility && !licence.isLite
-            "
+            v-if="customizeOptions.serviceCapacity.visibility && !licence.isLite"
             class="am-fcis__mini-info__inner"
           >
             <span class="am-icon-user"></span>
@@ -87,17 +67,13 @@
           </div>
           <div
             v-if="
-              customizeOptions.serviceLocation.visibility &&
-              !licence.isLite &&
-              !licence.isStarter
+              customizeOptions.serviceLocation.visibility && !licence.isLite && !licence.isStarter
             "
             class="am-fcis__mini-info__inner"
           >
             <span class="am-icon-locations"></span>
             <span>{{
-              service.location
-                ? service.location
-                : labelsDisplay('multiple_locations')
+              service.location ? service.location : labelsDisplay('multiple_locations')
             }}</span>
           </div>
         </div>
@@ -108,7 +84,7 @@
       <div v-if="service.gallery.length" class="am-fcis__gallery">
         <div
           class="am-fcis__gallery-hero"
-          :class="[{'w100': service.gallery.length === 1}, {'am-mobile w100': pageWidth < 678}]"
+          :class="[{ w100: service.gallery.length === 1 }, { 'am-mobile w100': pageWidth < 678 }]"
           :style="{
             backgroundImage: `url(${service.gallery[0].pictureFullPath})`,
           }"
@@ -133,8 +109,8 @@
         >
           <span class="am-icon-gallery"></span>
           <span>
-              {{ labelsDisplay('view_all_photos') }}
-            </span>
+            {{ labelsDisplay('view_all_photos') }}
+          </span>
         </AmButton>
       </div>
       <!-- Service Gallery -->
@@ -149,28 +125,19 @@
       >
         <div class="am-gd" :style="cssGalleryDialogVars">
           <div class="am-gd__display-wrapper">
-            <div
-              class="am-gd__arrows"
-              style="display: flex; justify-content: space-between"
-            >
+            <div class="am-gd__arrows" style="display: flex; justify-content: space-between">
               <span
                 class="am-icon-arrow-left"
                 @click="
                   () =>
-                    (activeImage =
-                      activeImage <= 0
-                        ? service.gallery.length - 1
-                        : activeImage - 1)
+                    (activeImage = activeImage <= 0 ? service.gallery.length - 1 : activeImage - 1)
                 "
               ></span>
               <span
                 class="am-icon-arrow-right"
                 @click="
                   () =>
-                    (activeImage =
-                      service.gallery.length - 1 === activeImage
-                        ? 0
-                        : activeImage + 1)
+                    (activeImage = service.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
                 "
               ></span>
             </div>
@@ -181,10 +148,7 @@
               :style="{ display: index === activeImage ? 'flex' : 'none' }"
               @click="
                 () =>
-                  (activeImage =
-                    service.gallery.length - 1 === activeImage
-                      ? 0
-                      : activeImage + 1)
+                  (activeImage = service.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
               "
             >
               <img :src="img.pictureFullPath" :alt="index" />
@@ -217,10 +181,7 @@
       >
         <div class="am-fcis__info-tab__wrapper">
           <div
-            v-if="
-              service.description &&
-              customizeOptions.serviceDescription.visibility
-            "
+            v-if="service.description && customizeOptions.serviceDescription.visibility"
             class="am-fcis__info-tab"
             :class="{ 'am-active': tabsActive === 'description' }"
             @click="() => (tabsActive = 'description')"
@@ -228,9 +189,7 @@
             {{ labelsDisplay('about_service') }}
           </div>
           <div
-            v-if="
-              customizeOptions.serviceEmployees.visibility && !licence.isLite
-            "
+            v-if="customizeOptions.serviceEmployees.visibility && !licence.isLite"
             :class="{ 'am-active': tabsActive === 'employees' }"
             class="am-fcis__info-tab"
             @click="() => (tabsActive = 'employees')"
@@ -247,39 +206,24 @@
         >
           <!-- Description -->
           <div
-            v-if="
-              service.description &&
-              customizeOptions.serviceDescription.visibility
-            "
+            v-if="service.description && customizeOptions.serviceDescription.visibility"
             v-show="tabsActive === 'description'"
             class="am-fcis__info-content"
           >
-            <div
-              class="am-fcis__info-service__desc"
-              v-html="service.description"
-            ></div>
+            <div class="am-fcis__info-service__desc" v-html="service.description"></div>
           </div>
           <!-- /Description -->
 
           <!-- Employees -->
           <div
-            v-if="
-              customizeOptions.serviceEmployees.visibility && !licence.isLite
-            "
+            v-if="customizeOptions.serviceEmployees.visibility && !licence.isLite"
             v-show="tabsActive === 'employees'"
             class="am-fcis__info-content"
           >
             <AmCollapse>
-              <AmCollapseItem
-                v-for="employee in serviceEmployees"
-                :key="employee.id"
-                side
-              >
+              <AmCollapseItem v-for="employee in serviceEmployees" :key="employee.id" side>
                 <template #heading>
-                  <div
-                    :class="{'am-mobile': pageWidth < 451}"
-                    class="am-fcis__info-employee"
-                  >
+                  <div :class="{ 'am-mobile': pageWidth < 451 }" class="am-fcis__info-employee">
                     <div class="am-fcis__info-employee__hero">
                       <div
                         class="am-fcis__info-employee__img"
@@ -293,9 +237,9 @@
                     </div>
                     <div
                       v-if="
-                  serviceEmployeePrice(employee) &&
-                  customizeOptions.serviceEmployeePrice.visibility
-                "
+                        serviceEmployeePrice(employee) &&
+                        customizeOptions.serviceEmployeePrice.visibility
+                      "
                       class="am-fcis__info-employee__price"
                     >
                       {{ serviceEmployeePrice(employee) }}
@@ -313,10 +257,7 @@
 
       <!-- Available Service in Packages -->
       <div
-        v-if="
-          customizeOptions.servicePackages.visibility &&
-          features.packages
-        "
+        v-if="customizeOptions.servicePackages.visibility && features.packages"
         class="am-fcis__include-wrapper"
       >
         <div class="am-fcis__include-heading">
@@ -335,11 +276,7 @@
             </template>
           </span>
         </div>
-        <div
-          v-for="pack in displayServicePackages"
-          :key="pack.id"
-          class="am-fcis__include"
-        >
+        <div v-for="pack in displayServicePackages" :key="pack.id" class="am-fcis__include">
           <div class="am-fcis__include-hero">
             <div
               v-if="pageWidth > 450"
@@ -348,32 +285,18 @@
             >
               {{ !pack.pictureFullPath ? pack.name.charAt(0) : '' }}
             </div>
-            <div
-              class="am-fcis__include-text"
-              :class="{'am-mobile': pageWidth < 451}"
-            >
-              <div
-                class="am-fcis__include-header"
-                :class="{'am-mobile': pageWidth < 600}"
-              >
-                <div
-                  class="am-fcis__include-name"
-                  :class="{'am-mobile': pageWidth < 600}"
-                >
+            <div class="am-fcis__include-text" :class="{ 'am-mobile': pageWidth < 451 }">
+              <div class="am-fcis__include-header" :class="{ 'am-mobile': pageWidth < 600 }">
+                <div class="am-fcis__include-name" :class="{ 'am-mobile': pageWidth < 600 }">
                   {{ pack.name }}
                 </div>
-                <div
-                  v-if="customizeOptions.packagePrice.visibility"
-                  class="am-fcis__include-cost"
-                >
+                <div v-if="customizeOptions.packagePrice.visibility" class="am-fcis__include-cost">
                   <span v-if="pack.discount" class="am-fcis__include-discount">
                     {{ `${labelsDisplay('save')} ${pack.discount}%` }}
                   </span>
                   <span class="am-fcis__include-price">
                     {{
-                      pack.price
-                        ? useFormattedPrice(usePackageAmount(pack))
-                        : labelsDisplay('free')
+                      pack.price ? useFormattedPrice(usePackageAmount(pack)) : labelsDisplay('free')
                     }}
                   </span>
                 </div>
@@ -392,19 +315,13 @@
                 >
                   <span class="am-icon-clock"></span>
                   <span v-if="pack.endDate">
-                    {{
-                      `${labelsDisplay('expires_at')} ${
-                        pack.endDate.split(' ')[0]
-                      }`
-                    }}
+                    {{ `${labelsDisplay('expires_at')} ${pack.endDate.split(' ')[0]}` }}
                   </span>
                   <span v-else-if="pack.durationCount">
                     {{
-                      `${labelsDisplay('expires_after')} ${
-                        pack.durationCount
-                      } ${durationTypeLabel(
+                      `${labelsDisplay('expires_after')} ${pack.durationCount} ${durationTypeLabel(
                         pack.durationCount,
-                        pack.durationType
+                        pack.durationType,
                       )}`
                     }}
                   </span>
@@ -420,10 +337,7 @@
                   <span>1/1</span>
                 </div>
                 <div
-                  v-if="
-                    pack.locations.length &&
-                    customizeOptions.packageLocation.visibility
-                  "
+                  v-if="pack.locations.length && customizeOptions.packageLocation.visibility"
                   class="am-fcis__include-info__inner"
                 >
                   <span class="am-icon-locations"></span>
@@ -464,14 +378,7 @@ import AmButton from '../../../_components/button/AmButton.vue'
 import AmDialog from '../../../_components/dialog/AmDialog.vue'
 
 // * Vue
-import {
-  ref,
-  inject,
-  computed,
-  onMounted,
-  onBeforeUnmount,
-  watchEffect,
-} from 'vue'
+import { ref, inject, computed, onMounted, onBeforeUnmount, watchEffect } from 'vue'
 
 // * Composables
 import { useFormattedPrice } from '../../../../assets/js/common/formatting.js'
@@ -481,8 +388,8 @@ import {
 } from '../../../../assets/js/common/colorManipulation.js'
 import { usePackageAmount } from '../../../../assets/js/public/package.js'
 import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
-import AmCollapse from "../../../_components/collapse/AmCollapse.vue";
-import AmCollapseItem from "../../../_components/collapse/AmCollapseItem.vue";
+import AmCollapse from '../../../_components/collapse/AmCollapse.vue'
+import AmCollapseItem from '../../../_components/collapse/AmCollapseItem.vue'
 
 // * Plugin Licence
 let licence = inject('licence')
@@ -518,10 +425,8 @@ let category = ref({
 let tabsActive = ref('description')
 
 watchEffect(() => {
-  if (!customizeOptions.value.serviceDescription.visibility)
-    tabsActive.value = 'employees'
-  if (!customizeOptions.value.serviceEmployees.visibility)
-    tabsActive.value = 'description'
+  if (!customizeOptions.value.serviceDescription.visibility) tabsActive.value = 'employees'
+  if (!customizeOptions.value.serviceEmployees.visibility) tabsActive.value = 'description'
 })
 
 onBeforeUnmount(() => {
@@ -633,13 +538,10 @@ let serviceEmployees = ref([
 ])
 
 function employeeImage(employee) {
-  if (employee.pictureFullPath)
-    return { backgroundImage: `url(${employee.pictureFullPath})` }
+  if (employee.pictureFullPath) return { backgroundImage: `url(${employee.pictureFullPath})` }
 
   return {
-    backgroundColor: `${
-      amCardColors.value[Math.floor(Math.random() * amCardColors.value.length)]
-    }`,
+    backgroundColor: `${amCardColors.value[Math.floor(Math.random() * amCardColors.value.length)]}`,
   }
 }
 
@@ -671,9 +573,7 @@ onMounted(() => {
 })
 
 let serviceThumbsGallery = computed(() => {
-  let thumbs = service.value.gallery.length
-    ? JSON.parse(JSON.stringify(service.value.gallery))
-    : []
+  let thumbs = service.value.gallery.length ? JSON.parse(JSON.stringify(service.value.gallery)) : []
   if (service.value.gallery.length === 1) return []
   thumbs.shift()
   if (thumbs.length > 2) thumbs.splice(2, thumbs.length - 2)
@@ -891,8 +791,7 @@ let displayServicePackages = computed(() => {
 })
 
 function packageImage(pack) {
-  if (pack.pictureFullPath)
-    return { backgroundImage: `url(${pack.pictureFullPath})` }
+  if (pack.pictureFullPath) return { backgroundImage: `url(${pack.pictureFullPath})` }
 
   return { backgroundColor: pack.color }
 }
@@ -906,9 +805,7 @@ let amLabels = inject('labels')
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
     let translations = amCustomize.value.cbf.categoryService.translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -934,11 +831,7 @@ function serviceDuration(seconds) {
   let hours = Math.floor(seconds / 3600)
   let minutes = (seconds / 60) % 60
 
-  return (
-    (hours ? hours + amLabels.h + ' ' : '') +
-    ' ' +
-    (minutes ? minutes + amLabels.min : '')
-  )
+  return (hours ? hours + amLabels.h + ' ' : '') + ' ' + (minutes ? minutes + amLabels.min : '')
 }
 
 // * Fonts
@@ -949,26 +842,11 @@ let amColors = inject('amColors')
 
 let cssVars = computed(() => {
   return {
-    '--am-c-fcis-success-op20': useColorTransparency(
-      amColors.value.colorSuccess,
-      0.2
-    ),
-    '--am-c-fcis-primary-op20': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.2
-    ),
-    '--am-c-fcis-text-op80': useColorTransparency(
-      amColors.value.colorMainText,
-      0.8
-    ),
-    '--am-c-fcis-text-op03': useColorTransparency(
-      amColors.value.colorMainText,
-      0.03
-    ),
-    '--am-c-fcis-btn-op50': useColorTransparency(
-      amColors.value.colorBtnSec,
-      0.5
-    ),
+    '--am-c-fcis-success-op20': useColorTransparency(amColors.value.colorSuccess, 0.2),
+    '--am-c-fcis-primary-op20': useColorTransparency(amColors.value.colorPrimary, 0.2),
+    '--am-c-fcis-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
+    '--am-c-fcis-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03),
+    '--am-c-fcis-btn-op50': useColorTransparency(amColors.value.colorBtnSec, 0.5),
   }
 })
 
@@ -978,14 +856,8 @@ let cssGalleryDialogVars = computed(() => {
     '--am-c-fcis-text': amColors.value.colorMainText,
     '--am-c-fcis-success': amColors.value.colorSuccess,
     '--am-c-fcis-primary': amColors.value.colorPrimary,
-    '--am-c-scroll-op30': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.3
-    ),
-    '--am-c-scroll-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
     '--am-font-family': amFonts.fontFamily,
   }
 })
@@ -1113,7 +985,7 @@ export default {
           padding: 0 8px;
           margin-right: 10px;
           background-color: var(--am-c-fcis-primary-op20);
-          color: var(--am-c-fcis-primary)
+          color: var(--am-c-fcis-primary);
         }
 
         &-bottom {
@@ -1140,7 +1012,7 @@ export default {
         &.am-service {
           background-color: var(--am-c-fcis-success-op20);
           span {
-            color:  var(--am-c-fcis-success);
+            color: var(--am-c-fcis-success);
           }
         }
 
@@ -1150,7 +1022,7 @@ export default {
           font-weight: 400;
           line-height: 1;
 
-          &[class*="am-icon"] {
+          &[class*='am-icon'] {
             font-size: 24px;
           }
         }
@@ -1181,7 +1053,7 @@ export default {
             white-space: nowrap;
             overflow: hidden;
 
-            &[class*="am-icon"] {
+            &[class*='am-icon'] {
               flex: 0 0 auto;
               font-size: 24px;
               color: var(--am-c-fcis-primary);
@@ -1247,7 +1119,8 @@ export default {
             max-width: 264px;
             position: relative;
 
-            &:after, &:before {
+            &:after,
+            &:before {
               content: '';
               display: block;
               clear: both;
@@ -1326,18 +1199,21 @@ export default {
           padding: 24px 0;
 
           .am-collapse-item {
-
             $count: 100;
             @for $i from 0 through $count {
               &:nth-child(#{$i + 1}) {
-                animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+                animation: 600ms
+                  cubic-bezier(0.45, 1, 0.4, 1.2)
+                  #{$i *
+                  100}ms
+                  am-animation-slide-up;
                 animation-fill-mode: both;
               }
             }
 
             &__heading {
               padding: 12px;
-              transition-delay: .5s;
+              transition-delay: 0.5s;
 
               &-side {
                 transition-delay: 0s;
@@ -1420,7 +1296,7 @@ export default {
           }
 
           &__badge {
-            color: #FFF;
+            color: #fff;
             border-radius: 4px;
             padding: 0 4px;
             font-size: 13px;
@@ -1609,7 +1485,7 @@ export default {
               color: var(--am-c-fcis-text-op80);
               flex-wrap: wrap;
 
-              &[class*="am-icon"] {
+              &[class*='am-icon'] {
                 flex: 0 0 auto;
                 font-size: 24px;
                 color: var(--am-c-fcis-primary);
@@ -1646,7 +1522,8 @@ export default {
                 border-radius: 50%;
               }
 
-              &:first-child, &:nth-child(2) {
+              &:first-child,
+              &:nth-child(2) {
                 padding-right: 2px;
 
                 &::after {

@@ -3,20 +3,26 @@
     <div class="am-congrats__main">
       <img
         v-if="props.booked.type !== 'event'"
-        :src="props.baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/congratulations/congratulations.svg'"
+        :src="
+          props.baseUrls.wpAmeliaPluginURL +
+          '/v3/src/assets/img/congratulations/congratulations.svg'
+        "
         :alt="props.labels.congratulations"
-      >
+      />
 
       <p v-if="props.booked.type !== 'event'" class="am-congrats__main-heading">
         {{ props.labels.congratulations }}
       </p>
 
       <div v-if="props.booked.type === 'event'" class="am-congrats__main-heading-waiting-list">
-
         <!-- Waiting List info -->
-        <p v-if="props.booked.event.bookings[0].status === 'waiting'" class="am-congrats__main-heading">
-          {{ props.labels.your_position_on_waiting_list }} {{ '#' + (event.waitingList.peopleWaiting + 1) }}
-          <br/>
+        <p
+          v-if="props.booked.event.bookings[0].status === 'waiting'"
+          class="am-congrats__main-heading"
+        >
+          {{ props.labels.your_position_on_waiting_list }}
+          {{ '#' + (event.waitingList.peopleWaiting + 1) }}
+          <br />
           <span>
             {{ props.labels.waiting_list_notify_message }}
           </span>
@@ -26,7 +32,6 @@
         <p class="am-congrats__main-heading">
           {{ event.name }}
         </p>
-
       </div>
 
       <span v-if="itemIdLabel">
@@ -67,45 +72,42 @@
 
 <script setup>
 // * Parts
-import CongratsInfo from "../Parts/CongratsInfo.vue";
-import EventCongratsInfo from "../Parts/EventCongratsInfo.vue";
-import PaymentCongratsInfo from "../Parts/PaymentCongratsInfo.vue";
+import CongratsInfo from '../Parts/CongratsInfo.vue'
+import EventCongratsInfo from '../Parts/EventCongratsInfo.vue'
+import PaymentCongratsInfo from '../Parts/PaymentCongratsInfo.vue'
 
 // * Import from Vue
-import {
-  computed,
-  markRaw
-} from "vue";
-import CustomerCongratsInfo from "../Parts/CustomerCongratsInfo.vue";
-import { useStore } from "vuex";
+import { computed, markRaw } from 'vue'
+import CustomerCongratsInfo from '../Parts/CustomerCongratsInfo.vue'
+import { useStore } from 'vuex'
 
 let store = useStore()
 
 let props = defineProps({
   baseUrls: {
     type: Object,
-    required: true
+    required: true,
   },
   labels: {
     type: Object,
-    required: true
+    required: true,
   },
   booked: {
     type: Object,
-    required: true
+    required: true,
   },
   customer: {
     type: Object,
-    required: true
+    required: true,
   },
   coupon: {
     type: Object,
-    required: true
+    required: true,
   },
   inDialog: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 let event = computed(() => {
@@ -122,9 +124,9 @@ const componentTypes = {
     props: {
       booked: props.booked,
       labels: props.labels,
-      'in-dialog': props.inDialog
-    }
-  }
+      'in-dialog': props.inDialog,
+    },
+  },
 }
 
 let itemIdLabel = computed(() => {
@@ -144,7 +146,7 @@ let itemIdLabel = computed(() => {
 
 <script>
 export default {
-  name: "CongratulationsPage"
+  name: 'CongratulationsPage',
 }
 </script>
 
@@ -163,14 +165,14 @@ export default {
         $count: 5;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }
       }
 
       & img {
-        width:54px;
+        width: 54px;
         margin-bottom: 8px;
       }
 
@@ -187,7 +189,7 @@ export default {
       }
 
       &-atc {
-        margin-top: 16px
+        margin-top: 16px;
       }
 
       & span {

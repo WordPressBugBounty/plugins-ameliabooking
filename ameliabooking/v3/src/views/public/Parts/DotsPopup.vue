@@ -16,16 +16,9 @@
         @click="clickItem"
       ></span>
     </template>
-    <div
-      v-click-outside="close"
-      class="am-cc__edit"
-    >
+    <div v-click-outside="close" class="am-cc__edit">
       <!-- Edit -->
-      <div
-        v-if="props.haveEdit"
-        class="am-cc__edit-item"
-        @click="editItem"
-      >
+      <div v-if="props.haveEdit" class="am-cc__edit-item" @click="editItem">
         <span class="am-icon-edit"></span>
         <span class="am-cc__edit-text">
           {{ amLabels.edit }}
@@ -34,11 +27,7 @@
       <!-- /Edit -->
 
       <!-- View -->
-      <div
-        v-if="props.haveView"
-        class="am-cc__edit-item"
-        @click="editItem"
-      >
+      <div v-if="props.haveView" class="am-cc__edit-item" @click="editItem">
         <span class="am-icon-search"></span>
         <span class="am-cc__edit-text">
           {{ amLabels.view }}
@@ -47,11 +36,7 @@
       <!-- /View -->
 
       <!-- Delete -->
-      <div
-        v-if="props.haveDelete"
-        class="am-cc__edit-item am-delete"
-        @click="removeItem"
-      >
+      <div v-if="props.haveDelete" class="am-cc__edit-item am-delete" @click="removeItem">
         <span class="am-icon-clearable"></span>
         <span class="am-cc__edit-text">
           {{ amLabels.delete }}
@@ -60,11 +45,7 @@
       <!-- /Delete -->
 
       <!-- Duplicate -->
-      <div
-        v-if="props.haveDuplicate"
-        class="am-cc__edit-item am-clone"
-        @click="duplicateItem"
-      >
+      <div v-if="props.haveDuplicate" class="am-cc__edit-item am-clone" @click="duplicateItem">
         <span class="am-icon-clearable"></span>
         <span class="am-cc__edit-text">
           {{ amLabels.duplicate }}
@@ -77,80 +58,72 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  inject,
-  computed,
-} from "vue";
+import { ref, inject, computed } from 'vue'
 
 // * Dedicated components
-import { ClickOutside as vClickOutside } from "element-plus";
-import { useColorTransparency } from "../../../assets/js/common/colorManipulation";
+import { ClickOutside as vClickOutside } from 'element-plus'
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
 
 // * Component properties
 let props = defineProps({
   index: {
     type: Number,
-    default: 0
+    default: 0,
   },
   referenceClass: {
     type: String,
-    default: ''
+    default: '',
   },
   haveDuplicate: {
     type: Boolean,
-    default: false
+    default: false,
   },
   haveDelete: {
     type: Boolean,
-    default: true
+    default: true,
   },
   haveEdit: {
     type: Boolean,
-    default: true
+    default: true,
   },
   haveView: {
     type: Boolean,
-    default: false
+    default: false,
   },
 })
 
 // * Components emits
-let emits = defineEmits([
-  'remove',
-  'edit',
-  'duplicate',
-])
+let emits = defineEmits(['remove', 'edit', 'duplicate'])
 
 // * Labels
 let amLabels = inject('amLabels')
 
 let editPopVisible = ref(false)
 
-function clickItem () {
+function clickItem() {
   editPopVisible.value = true
 }
 
-function editItem () {
+function editItem() {
   emits('edit', props.index)
 
   close()
 }
 
-function removeItem () {
+function removeItem() {
   emits('remove', props.index)
 
   close()
 }
 
-function duplicateItem () {
+function duplicateItem() {
   emits('duplicate', props.index)
 
   close()
 }
 
-function close () {
-  editPopVisible.value= false
+function close() {
+  editPopVisible.value = false
 }
 
 /*************
@@ -177,7 +150,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: 'DotsPopup'
+  name: 'DotsPopup',
 }
 </script>
 

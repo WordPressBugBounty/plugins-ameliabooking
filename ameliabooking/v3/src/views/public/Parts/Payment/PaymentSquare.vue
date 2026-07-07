@@ -10,11 +10,11 @@
     <!-- Credit Card via Square-->
     <div v-show="!squareLoading" class="am-fs__payment-square" :style="cssVars">
       <div class="am-fs__payment-square__google-pay">
-        <div id="google-pay-button"/>
+        <div id="google-pay-button" />
       </div>
 
       <div v-if="applePayReady" class="am-fs__payment-square__apple-pay">
-        <div id="apple-pay-button"/>
+        <div id="apple-pay-button" />
       </div>
 
       <div class="am-fs__payment-divider">
@@ -26,11 +26,10 @@
     </div>
     <!-- /Credit Card via Square-->
   </div>
-
 </template>
 
 <script setup>
-import {computed, inject, onMounted, ref, watchEffect, nextTick, watch} from 'vue'
+import { computed, inject, onMounted, ref, watchEffect, nextTick, watch } from 'vue'
 import {
   getErrorMessage,
   useBookingData,
@@ -38,10 +37,10 @@ import {
   useCreateBookingError,
   useCreateBookingSuccess,
 } from '../../../../assets/js/public/booking.js'
-import {useColorTransparency} from '../../../../assets/js/common/colorManipulation.js'
-import {useStore} from "vuex"
-import httpClient from "../../../../plugins/axios"
-import {useScrollTo} from "../../../../assets/js/common/scrollElements";
+import { useColorTransparency } from '../../../../assets/js/common/colorManipulation.js'
+import { useStore } from 'vuex'
+import httpClient from '../../../../plugins/axios'
+import { useScrollTo } from '../../../../assets/js/common/scrollElements'
 
 // * Global settings
 const amSettings = inject('settings')
@@ -57,7 +56,7 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-pay-text': amColors.value.colorMainText,
-    '--am-c-pay-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6)
+    '--am-c-pay-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
   }
 })
 
@@ -68,13 +67,13 @@ const { nextStep, footerButtonReset, footerButtonClicked } = inject('changingSte
   nextStep: () => {},
   footerButtonReset: () => {},
   footerButtonClicked: {
-    value: false
-  }
+    value: false,
+  },
 })
 
 const cardInstance = ref(null)
 
-async function continueWithBooking () {
+async function continueWithBooking() {
   footerButtonReset()
   store.commit('booking/setLoading', true)
 
@@ -106,58 +105,51 @@ watchEffect(() => {
 const cardReady = ref(false)
 const googlePayReady = ref(false)
 const applePayReady = ref(true)
-const squareLoading = computed(() => !(cardReady.value))
+const squareLoading = computed(() => !cardReady.value)
 const paymentTotalAmount = ref(null)
 
 let paymentRequest = null
-const walletInstance = ref({googlePay: null, applePay: null})
+const walletInstance = ref({ googlePay: null, applePay: null })
 
 // * Watch coupon changes and payment deposit changes to update paymentRequest amount
 // Apple Pay - No async operations can be called between the user gesture (click) and tokenize().
 watch(
-    [() => store.getters['booking/getCoupon'], () => store.getters['booking/getPaymentDeposit']],
-    async () => {
-      if (paymentRequest && store.getters['booking/getCouponValidated']) {
-        // Wait for next tick to ensure DOM is updated
-        await nextTick()
-        paymentRequest = await buildPaymentRequest()
+  [() => store.getters['booking/getCoupon'], () => store.getters['booking/getPaymentDeposit']],
+  async () => {
+    if (paymentRequest && store.getters['booking/getCouponValidated']) {
+      // Wait for next tick to ensure DOM is updated
+      await nextTick()
+      paymentRequest = await buildPaymentRequest()
 
-        const initWallet = async (method, target, onError) => {
-          try {
-            walletInstance.value[target] = await payments[method](paymentRequest)
-          } catch (err) {
-            console.log(err)
-            if (onError) onError()
-          }
+      const initWallet = async (method, target, onError) => {
+        try {
+          walletInstance.value[target] = await payments[method](paymentRequest)
+        } catch (err) {
+          console.log(err)
+          if (onError) onError()
         }
-
-        await initWallet('googlePay', 'googlePay')
-        await initWallet('applePay', 'applePay', () => {
-          applePayReady.value = false
-        })
       }
-    }
-)
 
+      await initWallet('googlePay', 'googlePay')
+      await initWallet('applePay', 'applePay', () => {
+        applePayReady.value = false
+      })
+    }
+  },
+)
 
 async function getAmountToPay() {
   let checkoutPaymentData = null
 
-  await httpClient.post(
-      '/payments/amount',
-      useBookingData(
-          store,
-          null,
-          true,
-          {},
-          null
-      )['data']
-  ).then((response) => {
-    checkoutPaymentData = response.data.data
-  }).catch(e => {
-    const message = e?.response?.data?.message || e.message || 'Unknown error'
-    emits('payment-error', message)
-  })
+  await httpClient
+    .post('/payments/amount', useBookingData(store, null, true, {}, null)['data'])
+    .then((response) => {
+      checkoutPaymentData = response.data.data
+    })
+    .catch((e) => {
+      const message = e?.response?.data?.message || e.message || 'Unknown error'
+      emits('payment-error', message)
+    })
 
   const totalPriceParts = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -182,7 +174,7 @@ async function payingNow() {
 }
 
 onMounted(async () => {
-// Defer mounting logic until DOM is visible
+  // Defer mounting logic until DOM is visible
   cardReady.value = false
   googlePayReady.value = false
 
@@ -191,21 +183,17 @@ onMounted(async () => {
 })
 
 const squareLocationId = amSettings.payments.square.locationId
-const squareClientId = amSettings.payments.square.testMode ? amSettings.payments.square.clientTestId : amSettings.payments.square.clientLiveId
+const squareClientId = amSettings.payments.square.testMode
+  ? amSettings.payments.square.clientTestId
+  : amSettings.payments.square.clientLiveId
 
-const bookingData =  useBookingData(
-    store,
-    null,
-    true,
-    {},
-    null
-)
+const bookingData = useBookingData(store, null, true, {}, null)
 
 let paymentStepRef = inject('paymentRef')
 
 const payments = window.Square.payments(squareClientId, squareLocationId)
 
-async function buildPaymentRequest () {
+async function buildPaymentRequest() {
   try {
     const paymentInfo = await payingNow()
     if (!paymentInfo) return null
@@ -214,8 +202,8 @@ async function buildPaymentRequest () {
       currencyCode: bookingData.data.payment.currency,
       total: {
         amount: paymentInfo.formattedAmount.toString(),
-        label: 'Total'
-      }
+        label: 'Total',
+      },
     })
   } catch (e) {
     console.log(e)
@@ -223,7 +211,7 @@ async function buildPaymentRequest () {
   }
 }
 
-async function setupDigitalWallet ({ buttonId, type, readyRef }) {
+async function setupDigitalWallet({ buttonId, type, readyRef }) {
   try {
     const btnEl = document.getElementById(buttonId)
     if (!btnEl) return
@@ -268,7 +256,7 @@ async function initSquarePayment() {
     '.input-container': {
       borderColor: '#d9d9d9',
       borderRadius: '6px',
-    }
+    },
   }
 
   try {
@@ -277,7 +265,7 @@ async function initSquarePayment() {
       cardContainer.innerHTML = ''
     }
     const card = await payments.card({
-      style: squareCardStyle
+      style: squareCardStyle,
     })
     await card.attach('#card-container')
     cardInstance.value = card
@@ -296,32 +284,39 @@ async function initSquarePayment() {
   }
 
   paymentRequest = await buildPaymentRequest()
-  await setupDigitalWallet({ buttonId: 'google-pay-button', type: 'googlePay', readyRef: googlePayReady })
-  await setupDigitalWallet({ buttonId: 'apple-pay-button', type: 'applePay', readyRef: applePayReady })
+  await setupDigitalWallet({
+    buttonId: 'google-pay-button',
+    type: 'googlePay',
+    readyRef: googlePayReady,
+  })
+  await setupDigitalWallet({
+    buttonId: 'apple-pay-button',
+    type: 'applePay',
+    readyRef: applePayReady,
+  })
 }
 
 const squareTokenize = async (payments, totalAmount) => {
   try {
-    const {token, status, errors} = await payments.tokenize({
-        amount: totalAmount.toString(),
-        billingContact: {
-          familyName: bookingData.data.bookings[0].customer.lastName,
-          givenName: bookingData.data.bookings[0].customer.firstName,
-          email: bookingData.data.bookings[0].customer.email,
-          phone: bookingData.data.bookings[0].customer.phone,
-        },
-        customerInitiated: true,
-        sellerKeyedIn: false,
-        currencyCode: bookingData.data.payment.currency,
-        intent: 'CHARGE',
-      }
-    )
+    const { token, status, errors } = await payments.tokenize({
+      amount: totalAmount.toString(),
+      billingContact: {
+        familyName: bookingData.data.bookings[0].customer.lastName,
+        givenName: bookingData.data.bookings[0].customer.firstName,
+        email: bookingData.data.bookings[0].customer.email,
+        phone: bookingData.data.bookings[0].customer.phone,
+      },
+      customerInitiated: true,
+      sellerKeyedIn: false,
+      currencyCode: bookingData.data.payment.currency,
+      intent: 'CHARGE',
+    })
 
     if (status === 'OK') {
-      return token;
+      return token
     } else if (status === 'Invalid' && errors.length > 0) {
       const messages = errors.map((err) => err.message)
-      emits('payment-error',  messages.join(', '))
+      emits('payment-error', messages.join(', '))
       useScrollTo(paymentStepRef.value, paymentStepRef.value, 20, 300)
       return ''
     }
@@ -345,29 +340,24 @@ const createSquarePayment = async (token) => {
         sourceId: token,
         idempotencyKey: window.crypto.randomUUID(),
       },
-      null
+      null,
     ),
     function (response) {
       successBooking(response)
     },
     (response) => {
       errorBooking(response)
-    }
+    },
   )
 }
 
-
-function successBooking (response) {
-  useCreateBookingSuccess(
-    store,
-    response,
-    function () {
-      nextStep()
-    }
-  )
+function successBooking(response) {
+  useCreateBookingSuccess(store, response, function () {
+    nextStep()
+  })
 }
 
-function getSquareBookingErrorResponse (error) {
+function getSquareBookingErrorResponse(error) {
   if (error?.response?.data) {
     return error.response.data
   }
@@ -385,20 +375,16 @@ function getSquareBookingErrorResponse (error) {
   }
 }
 
-function errorBooking (error) {
-  useCreateBookingError(
-    store,
-    getSquareBookingErrorResponse(error),
-    () => {
-      emits('payment-error', getErrorMessage())
-    }
-  )
+function errorBooking(error) {
+  useCreateBookingError(store, getSquareBookingErrorResponse(error), () => {
+    emits('payment-error', getErrorMessage())
+  })
 }
 </script>
 
 <script>
 export default {
-  name: 'PaymentSquare'
+  name: 'PaymentSquare',
 }
 </script>
 
@@ -436,7 +422,7 @@ export default {
         font-size: 14px;
         font-weight: 500;
         line-height: 1.42857;
-        color: #6772E5;
+        color: #6772e5;
       }
 
       &__google-pay {
@@ -483,7 +469,7 @@ export default {
 
       .am-fs__payment-divider::before,
       .am-fs__payment-divider::after {
-        content: "";
+        content: '';
         flex-grow: 1;
         height: 1px;
         background-color: var(--am-c-pay-text-op60);

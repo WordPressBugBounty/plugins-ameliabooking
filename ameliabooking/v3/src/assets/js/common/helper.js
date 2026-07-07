@@ -1,17 +1,17 @@
-import { settings } from "../../../plugins/settings.js"
+import { settings } from '../../../plugins/settings.js'
 
-function useCurrentTimeZone () {
+function useCurrentTimeZone() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone
 }
 
-function useRemoveUrlParameter (url, parameter) {
+function useRemoveUrlParameter(url, parameter) {
   let urlParts = url.split('?')
 
   if (urlParts.length >= 2) {
     let prefix = encodeURIComponent(parameter) + '='
     let pars = urlParts[1].split(/[&;]/g)
 
-    for (let i = pars.length; i-- > 0;) {
+    for (let i = pars.length; i-- > 0; ) {
       if (pars[i].lastIndexOf(prefix, 0) !== -1) {
         pars.splice(i, 1)
       }
@@ -23,7 +23,7 @@ function useRemoveUrlParameter (url, parameter) {
   return url
 }
 
-function useUrlParams (params) {
+function useUrlParams(params) {
   if (!settings.activation.disableUrlParams) {
     return params
   }
@@ -62,7 +62,11 @@ function useUrlParams (params) {
       convertedParams['extras'] = extras.length ? extras : null
     }
 
-    if (name in convertedParams && Array.isArray(convertedParams[name]) && convertedParams[name].length) {
+    if (
+      name in convertedParams &&
+      Array.isArray(convertedParams[name]) &&
+      convertedParams[name].length
+    ) {
       convertedParams[name] = convertedParams[name].join(',')
     }
   })
@@ -70,18 +74,17 @@ function useUrlParams (params) {
   return convertedParams
 }
 
-function useSortedDateStrings (dates) {
-  return dates.sort((a,b) =>  new Date(a) - new Date(b))
+function useSortedDateStrings(dates) {
+  return dates.sort((a, b) => new Date(a) - new Date(b))
 }
 
-function useSortedTimeStrings (times) {
-  return times.sort((a,b) =>  new Date(`2000-01-01T${a}`) - new Date(`2000-01-01T${b}`))
+function useSortedTimeStrings(times) {
+  return times.sort((a, b) => new Date(`2000-01-01T${a}`) - new Date(`2000-01-01T${b}`))
 }
 
-function useUrlQueryParams (url) {
-  let queryString = url.indexOf('#') > 0
-    ? url.substring(0, url.indexOf('#')).split('?')[1]
-    : url.split('?')[1]
+function useUrlQueryParams(url) {
+  let queryString =
+    url.indexOf('#') > 0 ? url.substring(0, url.indexOf('#')).split('?')[1] : url.split('?')[1]
 
   if (queryString) {
     let keyValuePairs = queryString.split('&')
@@ -100,66 +103,68 @@ function useUrlQueryParams (url) {
   return {}
 }
 
-function useUrlQueryParam (param) {
+function useUrlQueryParam(param) {
   let queryParams = useUrlQueryParams(window.location.href)
 
   return param in queryParams ? queryParams[param] : null
 }
 
-function useDescriptionVisibility (text) {
+function useDescriptionVisibility(text) {
   if (text && text.length) {
-    return !text.includes('<!-- Content -->') || (text.includes('<!-- Content -->') && text.length > 16)
+    return (
+      !text.includes('<!-- Content -->') || (text.includes('<!-- Content -->') && text.length > 16)
+    )
   }
 
   return false
 }
 function mapAddressComponentsForXML(components) {
-  const result = {};
+  const result = {}
 
-  components.forEach(component => {
-    const types = component.types;
+  components.forEach((component) => {
+    const types = component.types
 
     if (types.includes('street_number')) {
-      result.BuildingNumber = component.long_name;
+      result.BuildingNumber = component.long_name
     }
 
     if (types.includes('route')) {
-      result.StreetName = component.long_name;
+      result.StreetName = component.long_name
     }
 
     if (types.includes('postal_code')) {
-      result.PostalZone = component.long_name;
+      result.PostalZone = component.long_name
     }
 
     if (types.includes('locality')) {
-      result.CityName = component.long_name;
+      result.CityName = component.long_name
     }
 
     if (types.includes('administrative_area_level_1')) {
-      result.CountrySubentity = component.long_name;
+      result.CountrySubentity = component.long_name
     }
 
     if (types.includes('administrative_area_level_2') && !result.CountrySubentity) {
-      result.CountrySubentity = component.long_name;
+      result.CountrySubentity = component.long_name
     }
 
     if (types.includes('country')) {
-      result.CountryCode = component.short_name;
+      result.CountryCode = component.short_name
     }
 
     if (types.includes('premise')) {
-      result.Premise = component.long_name;
+      result.Premise = component.long_name
     }
 
     if (types.includes('sublocality') || types.includes('neighborhood')) {
-      result.AdditionalStreetName = component.long_name;
+      result.AdditionalStreetName = component.long_name
     }
-  });
+  })
 
-  return result;
+  return result
 }
 
-function createFileUrlFromResponse (response, format = 'pdf') {
+function createFileUrlFromResponse(response, format = 'pdf') {
   const byteCharacters = atob(response.data)
   const byteNumbers = new Array(byteCharacters.length)
   for (let i = 0; i < byteCharacters.length; i++) {
@@ -180,5 +185,5 @@ export {
   useSortedTimeStrings,
   useDescriptionVisibility,
   createFileUrlFromResponse,
-  mapAddressComponentsForXML
+  mapAddressComponentsForXML,
 }

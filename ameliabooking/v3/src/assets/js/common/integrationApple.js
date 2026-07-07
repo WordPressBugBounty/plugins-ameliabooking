@@ -1,31 +1,37 @@
-import httpClient from "../../../plugins/axios";
-import { ref } from "vue";
+import httpClient from '../../../plugins/axios'
+import { ref } from 'vue'
 
-let isEmployeeConnectedToPersonalAppleCalendar = ref(false);
+let isEmployeeConnectedToPersonalAppleCalendar = ref(false)
 
-function useAppleSync (store) {
+function useAppleSync(store) {
   store.commit('auth/setAppleLoading', true)
 
-  httpClient.get(
-    '/apple/calendar-list/' + store.getters['employee/getId']
-  ).then((response) => {
-    store.commit('auth/setAppleCalendars', response.data.data?.calendarList ? response.data.data.calendarList : [])
+  httpClient
+    .get('/apple/calendar-list/' + store.getters['employee/getId'])
+    .then((response) => {
+      store.commit(
+        'auth/setAppleCalendars',
+        response.data.data?.calendarList ? response.data.data.calendarList : [],
+      )
 
-    if (store.getters['auth/getAppleCalendars'].map(i => i.id).indexOf(store.getters['employee/getAppleCalendarId']) === -1) {
-      store.commit('employee/setAppleCalendarId', '')
-    }
-    store.commit('employee/setAppleCalendarId', response.data.data?.appleCalendarId)
+      if (
+        store.getters['auth/getAppleCalendars']
+          .map((i) => i.id)
+          .indexOf(store.getters['employee/getAppleCalendarId']) === -1
+      ) {
+        store.commit('employee/setAppleCalendarId', '')
+      }
+      store.commit('employee/setAppleCalendarId', response.data.data?.appleCalendarId)
 
-    isEmployeeConnectedToPersonalAppleCalendar.value =
+      isEmployeeConnectedToPersonalAppleCalendar.value =
         response.data.data.isEmployeeConnectedToPersonalAppleCalendar
-  }).catch((error) => {
-    console.log(error)
-  }).finally(() => {
-    store.commit('auth/setAppleLoading', false)
-  })
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+    .finally(() => {
+      store.commit('auth/setAppleLoading', false)
+    })
 }
 
-export {
-  isEmployeeConnectedToPersonalAppleCalendar,
-  useAppleSync
-}
+export { isEmployeeConnectedToPersonalAppleCalendar, useAppleSync }

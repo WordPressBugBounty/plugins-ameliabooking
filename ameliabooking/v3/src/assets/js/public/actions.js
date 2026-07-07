@@ -62,16 +62,12 @@ function trackAmeliaData(data, marketing, type, action) {
             (property) =>
               analytics === 'googleAnalytics' ||
               analytics === 'facebookPixel' ||
-              property !== 'type'
+              property !== 'type',
           )
           .forEach((property) => {
             let originalValue = trackingEventData[property]
 
-            let itemProperties = originalValue
-              .replace(/\s\s+/g, ' ')
-              .split('%')
-              .join('')
-              .split(' ')
+            let itemProperties = originalValue.replace(/\s\s+/g, ' ').split('%').join('').split(' ')
 
             itemProperties.forEach((value) => {
               if (
@@ -83,11 +79,7 @@ function trackAmeliaData(data, marketing, type, action) {
                 let pathParts = value.split('_')
 
                 let referenceObject =
-                  pathParts[0] === 'window'
-                    ? window
-                    : data === null
-                    ? window
-                    : data
+                  pathParts[0] === 'window' ? window : data === null ? window : data
 
                 if (pathParts.length > 1) {
                   if (value.includes('custom_field')) {
@@ -136,10 +128,7 @@ function trackAmeliaData(data, marketing, type, action) {
                     }
                   })
 
-                  if (
-                    !Array.isArray(referenceObject) &&
-                    !(typeof referenceObject === 'object')
-                  ) {
+                  if (!Array.isArray(referenceObject) && !(typeof referenceObject === 'object')) {
                     if (
                       value === 'payment_amount' &&
                       referenceObject.toString().endsWith('.00') &&
@@ -153,7 +142,7 @@ function trackAmeliaData(data, marketing, type, action) {
                       referenceObject = useSecondsToDuration(
                         referenceObject,
                         window.wpAmeliaLabels['h'],
-                        window.wpAmeliaLabels['min']
+                        window.wpAmeliaLabels['min'],
                       )
                     }
 
@@ -167,10 +156,7 @@ function trackAmeliaData(data, marketing, type, action) {
                       .join('')
                       .trim()
                   }
-                } else if (
-                  typeof referenceObject !== 'undefined' &&
-                  value in referenceObject
-                ) {
+                } else if (typeof referenceObject !== 'undefined' && value in referenceObject) {
                   if (
                     !Array.isArray(referenceObject[value]) &&
                     !(typeof referenceObject[value] === 'object')
@@ -228,14 +214,7 @@ function trackAmeliaData(data, marketing, type, action) {
   })
 }
 
-function useAction(
-  store,
-  additionalData,
-  action,
-  type,
-  successCallback,
-  errorCallback
-) {
+function useAction(store, additionalData, action, type, successCallback, errorCallback) {
   let data = {}
 
   switch (type) {
@@ -256,42 +235,34 @@ function useAction(
           : null
 
         if (data.employee) {
-          data.employee.fullName =
-            data.employee.firstName + ' ' + data.employee.lastName
+          data.employee.fullName = data.employee.firstName + ' ' + data.employee.lastName
         }
       } else {
         data.service = store.getters['booking/getServiceId']
-          ? store.getters['entities/getService'](
-              store.getters['booking/getServiceId']
-            )
+          ? store.getters['entities/getService'](store.getters['booking/getServiceId'])
           : null
 
         data.employee = store.getters['booking/getEmployeeId']
-          ? store.getters['entities/getEmployee'](
-              store.getters['booking/getEmployeeId']
-            )
+          ? store.getters['entities/getEmployee'](store.getters['booking/getEmployeeId'])
           : null
 
         if (data.employee) {
-          data.employee.fullName =
-            data.employee.firstName + ' ' + data.employee.lastName
+          data.employee.fullName = data.employee.firstName + ' ' + data.employee.lastName
         }
 
         data.location = store.getters['booking/getLocationId']
-          ? store.getters['entities/getLocation'](
-              store.getters['booking/getLocationId']
-            )
+          ? store.getters['entities/getLocation'](store.getters['booking/getLocationId'])
           : null
 
-      data.category = store.getters['booking/getCategoryId'] ? store.getters['entities/getCategory'](
-          store.getters['booking/getCategoryId']
-      ) : null
+        data.category = store.getters['booking/getCategoryId']
+          ? store.getters['entities/getCategory'](store.getters['booking/getCategoryId'])
+          : null
 
-      if (!data.category) {
-        data.category = data.service ? store.getters['entities/getCategory'](
-            data.service.categoryId
-        ) : null
-      }
+        if (!data.category) {
+          data.category = data.service
+            ? store.getters['entities/getCategory'](data.service.categoryId)
+            : null
+        }
 
         if (data.service) {
           let cartItem = useCartItem(store)
@@ -303,26 +274,26 @@ function useAction(
             cartItem.services[data.service.id].list.length
           ) {
             if (!data.employee) {
-              data.employee = cartItem.services[data.service.id].list[0]
-                .providerId
+              data.employee = cartItem.services[data.service.id].list[0].providerId
                 ? store.getters['entities/getEmployee'](
-                    cartItem.services[data.service.id].list[0].providerId
+                    cartItem.services[data.service.id].list[0].providerId,
                   )
                 : null
             }
 
             if (data.employee) {
-              data.employee.fullName =
-                data.employee.firstName + ' ' + data.employee.lastName
+              data.employee.fullName = data.employee.firstName + ' ' + data.employee.lastName
             }
 
-          if (!data.location) {
-            data.location = cartItem.services[data.service.id].list[0].locationId ? store.getters['entities/getLocation'](
-                cartItem.services[data.service.id].list[0].locationId
-            ) : null
+            if (!data.location) {
+              data.location = cartItem.services[data.service.id].list[0].locationId
+                ? store.getters['entities/getLocation'](
+                    cartItem.services[data.service.id].list[0].locationId,
+                  )
+                : null
+            }
           }
         }
-      }
 
         data.booking = store.getters['booking/getBooking']
 
@@ -333,9 +304,7 @@ function useAction(
 
     case 'package':
       data.package = store.getters['entities/getPackage']
-        ? store.getters['entities/getPackage'](
-            store.getters['booking/getPackageId']
-          )
+        ? store.getters['entities/getPackage'](store.getters['booking/getPackageId'])
         : null
 
       data.booking = store.getters['booking/getBooking']
@@ -348,9 +317,7 @@ function useAction(
       data.booking = {
         customer: store.getters['customerInfo/getAllData'],
         customFields: Object.values(
-          customFieldsData && customFieldsData.customFields
-            ? customFieldsData.customFields
-            : {}
+          customFieldsData && customFieldsData.customFields ? customFieldsData.customFields : {},
         ),
         persons: store.getters['persons/getPersons'],
       }
@@ -358,7 +325,7 @@ function useAction(
         additionalData && additionalData.event
           ? additionalData.event
           : store.getters['eventEntities/getEvent'](
-              store.getters['eventBooking/getSelectedEventId']
+              store.getters['eventBooking/getSelectedEventId'],
             )
       break
     }
@@ -368,7 +335,7 @@ function useAction(
     Object.assign(data, additionalData),
     { facebookPixel: true, googleAnalytics: true, googleTag: true },
     type,
-    action
+    action,
   )
 
   if ('ameliaActions' in window && action in window.ameliaActions) {

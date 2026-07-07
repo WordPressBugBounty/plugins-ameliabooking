@@ -23,11 +23,7 @@
             autoplay
             playsinline
           />
-          <canvas
-            ref="canvasElement"
-            class="am-cqcs__canvas"
-            style="display: none"
-          />
+          <canvas ref="canvasElement" class="am-cqcs__canvas" style="display: none" />
 
           <!-- Scanner overlay -->
           <div class="am-cqcs__video-overlay">
@@ -49,30 +45,17 @@
           <div v-if="responseData.eventName" class="am-cqcs__response-name">
             {{ responseData.eventName }}
           </div>
-          <div
-            v-if="responseData.ticketManualCode"
-            class="am-cqcs__response-item"
-          >
-            <span>{{ amLabels.ticket_id }}:</span> #{{
-              responseData.ticketManualCode
-            }}
+          <div v-if="responseData.ticketManualCode" class="am-cqcs__response-item">
+            <span>{{ amLabels.ticket_id }}:</span> #{{ responseData.ticketManualCode }}
           </div>
-          <div
-            v-if="responseData.eventTicketName"
-            class="am-cqcs__response-item"
-          >
+          <div v-if="responseData.eventTicketName" class="am-cqcs__response-item">
             <span>{{ amLabels.ticket_name }}:</span>
             {{ responseData.eventTicketName }}
           </div>
           <div v-if="responseData.bookingId" class="am-cqcs__response-item">
-            <span>{{ amLabels.booking_id }}:</span> #{{
-              responseData.bookingId
-            }}
+            <span>{{ amLabels.booking_id }}:</span> #{{ responseData.bookingId }}
           </div>
-          <div
-            v-if="responseData.ticketControlNumber"
-            class="am-cqcs__response-item"
-          >
+          <div v-if="responseData.ticketControlNumber" class="am-cqcs__response-item">
             <span>{{ amLabels.attendees_allowed }}:</span>
             {{ responseData.ticketControlNumber }}
           </div>
@@ -84,18 +67,8 @@
         </div>
 
         <div class="am-cqcs__controls">
-          <AmButton
-            v-if="torchSupported"
-            category="primary"
-            @click="toggleTorch"
-          >
-            <span
-              :class="
-                torchActive
-                  ? 'am-icon-bolt-lightning'
-                  : 'am-icon-bolt-lightning-fill'
-              "
-            />
+          <AmButton v-if="torchSupported" category="primary" @click="toggleTorch">
+            <span :class="torchActive ? 'am-icon-bolt-lightning' : 'am-icon-bolt-lightning-fill'" />
             {{ torchActive ? amLabels.torch_off : amLabels.torch_on }}
           </AmButton>
 
@@ -104,11 +77,7 @@
             {{ amLabels.switch_camera }}
           </AmButton>
 
-          <AmButton
-            v-if="!isScanning"
-            category="primary"
-            @click="startScanning"
-          >
+          <AmButton v-if="!isScanning" category="primary" @click="startScanning">
             <span class="am-icon-mobile" />
             {{ amLabels.start_scanner }}
           </AmButton>
@@ -121,10 +90,7 @@
 
         <!-- Manual form -->
         <AmCollapse class="am-cqcs__collapse">
-          <AmCollapseItem
-            ref="manualCodeCollapse"
-            class="am-cqcs__collapse-item"
-          >
+          <AmCollapseItem ref="manualCodeCollapse" class="am-cqcs__collapse-item">
             <template #heading>
               {{ amLabels.enter_ticket_manually }}
             </template>
@@ -135,15 +101,8 @@
               class="am-cqcs__form"
               @submit.prevent="processManualInput"
             >
-              <template
-                v-for="(item, name) in manualCodeConstruction"
-                :key="name"
-              >
-                <component
-                  :is="item.template"
-                  v-model="manualCode[name]"
-                  v-bind="item.props"
-                />
+              <template v-for="(item, name) in manualCodeConstruction" :key="name">
+                <component :is="item.template" v-model="manualCode[name]" v-bind="item.props" />
               </template>
               <el-form-item>
                 <AmButton category="primary" @click="processManualInput">
@@ -270,20 +229,20 @@ async function initializeCamera() {
 
     if (!isSecureContext) {
       throw new Error(
-        'Camera access requires HTTPS or localhost. Please access this page over a secure connection or use localhost.'
+        'Camera access requires HTTPS or localhost. Please access this page over a secure connection or use localhost.',
       )
     }
 
     // Check if MediaDevices API is supported
     if (!navigator.mediaDevices) {
       throw new Error(
-        'MediaDevices API not supported in this browser. Please update your browser or try Chrome/Firefox.'
+        'MediaDevices API not supported in this browser. Please update your browser or try Chrome/Firefox.',
       )
     }
 
     if (!navigator.mediaDevices.getUserMedia) {
       throw new Error(
-        'getUserMedia not supported in this browser. Please update your browser or try Chrome/Firefox.'
+        'getUserMedia not supported in this browser. Please update your browser or try Chrome/Firefox.',
       )
     }
 
@@ -403,10 +362,7 @@ function startQRDetection() {
   const scan = () => {
     if (!isScanning.value) return
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      if (
-        canvas.width !== video.videoWidth ||
-        canvas.height !== video.videoHeight
-      ) {
+      if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
         canvas.width = video.videoWidth
         canvas.height = video.videoHeight
       }
@@ -450,8 +406,7 @@ async function toggleTorch() {
 async function switchCamera() {
   if (cameras.value.length <= 1) return
 
-  currentCameraIndex.value =
-    (currentCameraIndex.value + 1) % cameras.value.length
+  currentCameraIndex.value = (currentCameraIndex.value + 1) % cameras.value.length
   await startScanning()
 }
 
@@ -514,7 +469,7 @@ function sendTicketData(ticketData) {
         params: {
           source: 'cabinet-provider',
         },
-      }
+      },
     )
     .then((response) => {
       if (response.data && response.data.data) {
@@ -530,9 +485,7 @@ function sendTicketData(ticketData) {
         }
 
         if (getResponseEventTicketName(response.data.data)) {
-          responseData.value.eventTicketName = getResponseEventTicketName(
-            response.data.data
-          )
+          responseData.value.eventTicketName = getResponseEventTicketName(response.data.data)
         }
       }
     })
@@ -563,17 +516,13 @@ function sendTicketData(ticketData) {
 }
 
 function getResponseEventName(data) {
-  let qrItem = data.qrCodes.find(
-    (qr) => qr.ticketManualCode === data.ticketManualCode
-  )
+  let qrItem = data.qrCodes.find((qr) => qr.ticketManualCode === data.ticketManualCode)
 
   return qrItem.eventName || ''
 }
 
 function getResponseEventTicketName(data) {
-  let qrItem = data.qrCodes.find(
-    (qr) => qr.ticketManualCode === data.ticketManualCode
-  )
+  let qrItem = data.qrCodes.find((qr) => qr.ticketManualCode === data.ticketManualCode)
 
   return qrItem.eventTicketName || ''
 }
@@ -602,7 +551,7 @@ onMounted(() => {
         stopScanning()
       }
     },
-    { immediate: true }
+    { immediate: true },
   )
 })
 

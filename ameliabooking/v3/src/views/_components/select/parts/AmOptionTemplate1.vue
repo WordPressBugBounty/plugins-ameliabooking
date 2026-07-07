@@ -4,23 +4,32 @@
       <span v-if="!props.iconString" class="am-oitf__img">
         <span
           class="am-oitf__img-placeholder"
-          :style="{ backgroundImage: `url(${props.imageThumb})`, backgroundColor: (props.imageThumb ? 'var(--am-c-option-bgr)': 'var(--am-c-option-img-bgr)')}"
+          :style="{
+            backgroundImage: `url(${props.imageThumb})`,
+            backgroundColor: props.imageThumb
+              ? 'var(--am-c-option-bgr)'
+              : 'var(--am-c-option-img-bgr)',
+          }"
         >
           <span v-if="!props.imageThumb">
             {{ imagePlaceholder() }}
           </span>
         </span>
       </span>
-      <span v-if="props.iconString" class="am-oitf__icon" :class="`am-icon-${props.iconString}`"></span>
+      <span
+        v-if="props.iconString"
+        class="am-oitf__icon"
+        :class="`am-icon-${props.iconString}`"
+      ></span>
       <span class="am-oitf__data">
         <span class="am-oitf__data-label">
           {{ props.label }}
         </span>
         <span v-if="props.price" class="am-oitf__data-price">
-        {{ `${(props.price > 0 ? '+' : '-') + useFormattedPrice(props.price)}` }}
+          {{ `${(props.price > 0 ? '+' : '-') + useFormattedPrice(props.price)}` }}
         </span>
         <span v-if="!props.price && props.priceString" class="am-oitf__data-price-string">
-        {{ `${props.priceString}` }}
+          {{ `${props.priceString}` }}
         </span>
       </span>
     </span>
@@ -30,45 +39,44 @@
 <script setup>
 import { useFormattedPrice } from '../../../../assets/js/common/formatting'
 
-
 /**
  * Component Props
  */
 let props = defineProps({
   identifier: {
     type: [String, Number],
-    required: true
+    required: true,
   },
   imageThumb: {
     type: String,
-    default: ''
+    default: '',
   },
   label: {
     type: [String, Number],
-    required: true
+    required: true,
   },
   description: {
     type: String,
-    default: ''
+    default: '',
   },
   price: {
     type: [String, Number],
-    default: ''
+    default: '',
   },
   iconString: {
     type: String,
-    default: ''
+    default: '',
   },
   priceString: {
     type: String,
-    default: ''
+    default: '',
   },
 })
 
-function imagePlaceholder () {
+function imagePlaceholder() {
   if (props.label) {
     let shortLabel = ''
-    props.label.split(' ').forEach(item => {
+    props.label.split(' ').forEach((item) => {
       shortLabel += item.charAt(0).toUpperCase()
     })
 

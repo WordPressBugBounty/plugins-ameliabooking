@@ -15,41 +15,40 @@
 </template>
 
 <script setup>
-import { computed, ref, toRefs } from "vue";
+import { computed, ref, toRefs } from 'vue'
 
 const props = defineProps({
   modelValue: {
-    type: [String, Number, Boolean]
+    type: [String, Number, Boolean],
   },
   size: {
     type: String,
     default: 'default',
     validator(value) {
       return ['default', 'medium', 'small'].includes(value)
-    }
+    },
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   textColor: {
-    type: String
+    type: String,
   },
   fill: {
-    type: String
+    type: String,
   },
   validateEvent: {
     type: Boolean,
-    default: true
+    default: true,
   },
   ariaLabel: {
-    type: String
+    type: String,
   },
   id: {
-    type: String
+    type: String,
   },
 })
-
 
 /**
  * Component Emits
@@ -65,15 +64,13 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 /**
  * Component reference
  */
 const amRadioGroup = ref()
-
-
 </script>
 
 <style lang="scss">

@@ -1,8 +1,8 @@
-import { reactive } from "vue";
+import { reactive } from 'vue'
 
 const globalLabels = reactive(window.wpAmeliaLabels)
 
-function useStatuses () {
+function useStatuses() {
   return [
     {
       value: 'approved',
@@ -43,6 +43,4 @@ function useStatuses () {
   ]
 }
 
-export {
-  useStatuses,
-}
+export { useStatuses }

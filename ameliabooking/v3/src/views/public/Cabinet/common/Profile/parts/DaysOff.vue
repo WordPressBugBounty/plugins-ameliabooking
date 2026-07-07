@@ -1,12 +1,6 @@
 <template>
-  <div
-    class="am-caedo"
-    :style="cssVars"
-  >
-    <span
-      v-if="globalDayOffList.length"
-      class="am-caedo__title_emp"
-    >
+  <div class="am-caedo" :style="cssVars">
+    <span v-if="globalDayOffList.length" class="am-caedo__title_emp">
       {{ amLabels.employee_days_off }}
     </span>
 
@@ -26,46 +20,24 @@
       </div>
     </div>
 
-    <div
-      v-for="(dayOff, dayOffIndex) in dayOffList"
-      :key="dayOffIndex"
-      class="am-caedo__content"
-    >
+    <div v-for="(dayOff, dayOffIndex) in dayOffList" :key="dayOffIndex" class="am-caedo__content">
       <div class="am-caedo__content-item">
-        <div
-          class="am-caedo__content-item__inner am-w-50"
-          :class="props.responsiveClass"
-        >
-          <div
-            class="am-caedo__content-item__label"
-            :class="props.responsiveClass"
-          >
+        <div class="am-caedo__content-item__inner am-w-50" :class="props.responsiveClass">
+          <div class="am-caedo__content-item__label" :class="props.responsiveClass">
             {{ amLabels.date }}
           </div>
           {{ datesDisplay(dayOff) }}
         </div>
 
-        <div
-          class="am-caedo__content-item__inner am-w-30"
-          :class="props.responsiveClass"
-        >
-          <div
-            class="am-caedo__content-item__label"
-            :class="props.responsiveClass"
-          >
+        <div class="am-caedo__content-item__inner am-w-30" :class="props.responsiveClass">
+          <div class="am-caedo__content-item__label" :class="props.responsiveClass">
             {{ amLabels.name }}
           </div>
           {{ dayOff.name }}
         </div>
 
-        <div
-          class="am-caedo__content-item__inner am-w-20"
-          :class="props.responsiveClass"
-        >
-          <div
-            class="am-caedo__content-item__label"
-            :class="props.responsiveClass"
-          >
+        <div class="am-caedo__content-item__inner am-w-20" :class="props.responsiveClass">
+          <div class="am-caedo__content-item__label" :class="props.responsiveClass">
             {{ amLabels.days_off_repeat_yearly }}
           </div>
           {{ dayOff.repeat ? amLabels.yes : amLabels.no }}
@@ -79,21 +51,15 @@
         />
       </div>
 
-      <div
-        v-if="editedDayOff.index === dayOffIndex"
-        class="am-caedo__wrapper"
-      >
+      <div v-if="editedDayOff.index === dayOffIndex" class="am-caedo__wrapper">
         <el-form
-          :ref="el => setFormRef(el, dayOffIndex)"
+          :ref="(el) => setFormRef(el, dayOffIndex)"
           class="am-caedo__form"
           :rules="rules"
           :model="dayOffFormData"
           label-position="top"
         >
-          <el-form-item
-            :label="`${amLabels.date}:`"
-            :prop="'range'"
-          >
+          <el-form-item :label="`${amLabels.date}:`" :prop="'range'">
             <AmDatePicker
               v-model="dayOffFormData.range"
               type="daterange"
@@ -104,22 +70,12 @@
             />
           </el-form-item>
 
-          <el-form-item
-            :label="`${amLabels.name}:`"
-            :prop="'name'"
-          >
-            <AmInput
-              v-model="dayOffFormData.name"
-            />
+          <el-form-item :label="`${amLabels.name}:`" :prop="'name'">
+            <AmInput v-model="dayOffFormData.name" />
           </el-form-item>
 
-          <el-form-item
-            :prop="'repeat'"
-          >
-            <AmCheckbox
-              v-model="dayOffFormData.repeat"
-              :label="amLabels.days_off_repeat_yearly"
-            >
+          <el-form-item :prop="'repeat'">
+            <AmCheckbox v-model="dayOffFormData.repeat" :label="amLabels.days_off_repeat_yearly">
             </AmCheckbox>
           </el-form-item>
         </el-form>
@@ -134,10 +90,7 @@
             {{ amLabels.cancel }}
           </AmButton>
 
-          <AmButton
-            :size="'small'"
-            @click="saveDayOff(dayOffIndex)"
-          >
+          <AmButton :size="'small'" @click="saveDayOff(dayOffIndex)">
             {{ amLabels.save }}
           </AmButton>
         </div>
@@ -149,27 +102,20 @@
       :heading="amLabels.no_days_off_yet"
     />
 
-    <div v-if="editedDayOff.index === null" :class="dayOffList.length === 0 && globalDayOffList.length === 0 ? 'add-btn' : ''">
-      <AmButton
-        :size="'small'"
-        @click="addDayOff()"
-      >
+    <div
+      v-if="editedDayOff.index === null"
+      :class="dayOffList.length === 0 && globalDayOffList.length === 0 ? 'add-btn' : ''"
+    >
+      <AmButton :size="'small'" @click="addDayOff()">
         {{ amLabels.add_day_off }}
       </AmButton>
     </div>
 
-    <span
-      v-if="globalDayOffList.length"
-      class="am-caedo__title_global"
-    >
+    <span v-if="globalDayOffList.length" class="am-caedo__title_global">
       {{ amLabels.company_days_off }}
     </span>
 
-    <div
-      v-if="globalDayOffList.length"
-      class="am-caedo__heading"
-      :class="props.responsiveClass"
-    >
+    <div v-if="globalDayOffList.length" class="am-caedo__heading" :class="props.responsiveClass">
       <div class="am-caedo__heading-item am-w-50">
         {{ amLabels.date }}
       </div>
@@ -187,40 +133,22 @@
       class="am-caedo__content"
     >
       <div class="am-caedo__content-item">
-        <div
-          class="am-caedo__content-item__inner am-w-50"
-          :class="props.responsiveClass"
-        >
-          <div
-            class="am-caedo__content-item__label"
-            :class="props.responsiveClass"
-          >
+        <div class="am-caedo__content-item__inner am-w-50" :class="props.responsiveClass">
+          <div class="am-caedo__content-item__label" :class="props.responsiveClass">
             {{ amLabels.date }}
           </div>
           {{ datesDisplay(dayOff) }}
         </div>
 
-        <div
-          class="am-caedo__content-item__inner am-w-30"
-          :class="props.responsiveClass"
-        >
-          <div
-            class="am-caedo__content-item__label"
-            :class="props.responsiveClass"
-          >
+        <div class="am-caedo__content-item__inner am-w-30" :class="props.responsiveClass">
+          <div class="am-caedo__content-item__label" :class="props.responsiveClass">
             {{ amLabels.name }}
           </div>
           {{ dayOff.name }}
         </div>
 
-        <div
-          class="am-caedo__content-item__inner am-w-20"
-          :class="props.responsiveClass"
-        >
-          <div
-            class="am-caedo__content-item__label"
-            :class="props.responsiveClass"
-          >
+        <div class="am-caedo__content-item__inner am-w-20" :class="props.responsiveClass">
+          <div class="am-caedo__content-item__label" :class="props.responsiveClass">
             {{ amLabels.days_off_repeat_yearly }}
           </div>
           {{ dayOff.repeat ? amLabels.yes : amLabels.no }}
@@ -232,39 +160,30 @@
 
 <script setup>
 // * Import from Vue
-import {
-  reactive,
-  ref,
-  inject,
-  computed,
-  onMounted
-} from "vue";
+import { reactive, ref, inject, computed, onMounted } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
-import moment from "moment";
+import moment from 'moment'
 
 // * Composables
-import {
-  getFrontedFormattedDate,
-  momentDateFormat,
-} from "../../../../../../assets/js/common/date";
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation";
+import { getFrontedFormattedDate, momentDateFormat } from '../../../../../../assets/js/common/date'
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 
 // * Dedicated components
-import AmDatePicker from "../../../../../_components/datePicker/AmDatePicker.vue";
-import DotsPopup from "../../../../Parts/DotsPopup.vue";
-import AmButton from "../../../../../_components/button/AmButton.vue";
-import AmInput from "../../../../../_components/input/AmInput.vue";
-import AmCheckbox from "../../../../../_components/checkbox/AmCheckbox.vue";
+import AmDatePicker from '../../../../../_components/datePicker/AmDatePicker.vue'
+import DotsPopup from '../../../../Parts/DotsPopup.vue'
+import AmButton from '../../../../../_components/button/AmButton.vue'
+import AmInput from '../../../../../_components/input/AmInput.vue'
+import AmCheckbox from '../../../../../_components/checkbox/AmCheckbox.vue'
 import EmptyState from '../../parts/EmptyState.vue'
 
 let props = defineProps({
   responsiveClass: {
     type: String,
     default: '',
-  }
+  },
 })
 
 let store = useStore()
@@ -294,19 +213,19 @@ let dayOffFormData = ref({
     get: () => store.getters['employee/getEmployee'].dayOffList[editedDayOff.index].range,
     set: (val) => {
       store.getters['employee/getEmployee'].dayOffList[editedDayOff.index].range = val
-    }
+    },
   }),
   name: computed({
     get: () => store.getters['employee/getEmployee'].dayOffList[editedDayOff.index].name,
     set: (val) => {
       store.getters['employee/getEmployee'].dayOffList[editedDayOff.index].name = val
-    }
+    },
   }),
   repeat: computed({
     get: () => store.getters['employee/getEmployee'].dayOffList[editedDayOff.index].repeat,
     set: (val) => {
       store.getters['employee/getEmployee'].dayOffList[editedDayOff.index].repeat = val
-    }
+    },
   }),
 })
 
@@ -319,29 +238,29 @@ let rules = computed(() => {
         required: true,
         message: amLabels.select_date_warning,
         trigger: ['submit', 'change'],
-      }
+      },
     ],
     name: [
       {
         required: true,
         message: amLabels.days_off_name_warning,
         trigger: ['submit', 'change'],
-      }
+      },
     ],
   }
 })
 
-function removeDayOff (dayOffIndex) {
+function removeDayOff(dayOffIndex) {
   dayOffList.value.splice(dayOffIndex, 1)
 }
 
-function editDayOff (dayOffIndex) {
+function editDayOff(dayOffIndex) {
   editedDayOff.index = dayOffIndex
 
   editedDayOff.data = JSON.parse(JSON.stringify(dayOffList.value[dayOffIndex]))
 }
 
-function saveDayOff (index) {
+function saveDayOff(index) {
   dayOffFormRef.value[index].validate((valid) => {
     if (valid) {
       editedDayOff.index = null
@@ -351,7 +270,7 @@ function saveDayOff (index) {
   })
 }
 
-function cancelEditDayOff (dayOffIndex) {
+function cancelEditDayOff(dayOffIndex) {
   if (Object.keys(editedDayOff.data).length === 0) {
     dayOffList.value.pop()
   } else {
@@ -363,7 +282,7 @@ function cancelEditDayOff (dayOffIndex) {
   editedDayOff.data = null
 }
 
-function addDayOff () {
+function addDayOff() {
   dayOffList.value.push({
     id: null,
     name: '',
@@ -376,21 +295,25 @@ function addDayOff () {
   editedDayOff.data = {}
 }
 
-function datesDisplay (dayOff) {
-  let dayFirst = dayOff.range[0] ? (getFrontedFormattedDate(moment(dayOff.range[0]).format('YYYY-MM-DD'))) : ''
-  let dayLast = dayOff.range[1] ? (getFrontedFormattedDate(moment(dayOff.range[1]).format('YYYY-MM-DD'))) : ''
-  return  `${dayFirst} - ${dayLast}`
+function datesDisplay(dayOff) {
+  let dayFirst = dayOff.range[0]
+    ? getFrontedFormattedDate(moment(dayOff.range[0]).format('YYYY-MM-DD'))
+    : ''
+  let dayLast = dayOff.range[1]
+    ? getFrontedFormattedDate(moment(dayOff.range[1]).format('YYYY-MM-DD'))
+    : ''
+  return `${dayFirst} - ${dayLast}`
 }
 
-function setFormRef (el, index) {
+function setFormRef(el, index) {
   if (el) {
-    dayOffFormRef.value[index] = el;
+    dayOffFormRef.value[index] = el
   } else {
-    dayOffFormRef.value.splice(index, 1);
+    dayOffFormRef.value.splice(index, 1)
   }
 }
 
-function validate () {
+function validate() {
   return new Promise((resolve) => {
     if (editedDayOff.index !== null && dayOffFormRef.value[editedDayOff.index]) {
       dayOffFormRef.value[editedDayOff.index].validate((valid) => {
@@ -402,7 +325,7 @@ function validate () {
   })
 }
 
-function commitEditedState () {
+function commitEditedState() {
   editedDayOff.index = null
   editedDayOff.data = null
 }
@@ -414,11 +337,12 @@ defineExpose({
 
 onMounted(() => {
   globalDayOffList.value = amSettings.daysOff.map(
-    i => new Object({
-      range: [i.startDate, i.endDate],
-      name: i.name,
-      repeat: i.repeat,
-    })
+    (i) =>
+      new Object({
+        range: [i.startDate, i.endDate],
+        name: i.name,
+        repeat: i.repeat,
+      }),
   )
 })
 
@@ -437,7 +361,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: 'DaysOff'
+  name: 'DaysOff',
 }
 </script>
 

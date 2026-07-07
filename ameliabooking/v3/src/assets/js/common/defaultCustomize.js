@@ -1,4 +1,4 @@
-import { reactive } from "vue";
+import { reactive } from 'vue'
 
 const globalLabels = reactive(window.wpAmeliaLabels)
 
@@ -215,7 +215,7 @@ let defaultCustomizeSettings = {
         },
         bringingPrice: {
           name: globalLabels.bringing_price,
-          visibility: true
+          visibility: true,
         },
         primaryButton: {
           name: globalLabels.primary_button_type,
@@ -360,19 +360,19 @@ let defaultCustomizeSettings = {
         },
         estimatedPricingVisibility: {
           name: globalLabels.show_estimated_pricing,
-          visibility: false
+          visibility: false,
         },
         slotPricingVisibility: {
           name: globalLabels.show_slot_pricing,
-          visibility: false
+          visibility: false,
         },
         indicatorPricingVisibility: {
           name: globalLabels.show_indicator_pricing,
-          visibility: false
+          visibility: false,
         },
         peopleWaitingVisibility: {
           name: globalLabels.show_people_waiting,
-          visibility: true
+          visibility: true,
         },
         busyTimeSlotsVisibility: {
           name: globalLabels.show_busy_slots,
@@ -459,15 +459,15 @@ let defaultCustomizeSettings = {
         },
         estimatedPricingVisibility: {
           name: globalLabels.show_estimated_pricing,
-          visibility: false
+          visibility: false,
         },
         slotPricingVisibility: {
           name: globalLabels.show_slot_pricing,
-          visibility: false
+          visibility: false,
         },
         indicatorPricingVisibility: {
           name: globalLabels.show_indicator_pricing,
-          visibility: false
+          visibility: false,
         },
         busyTimeSlotsVisibility: {
           name: globalLabels.show_busy_slots,
@@ -1326,15 +1326,15 @@ let defaultCustomizeSettings = {
         },
         estimatedPricingVisibility: {
           name: globalLabels.show_estimated_pricing,
-          visibility: false
+          visibility: false,
         },
         slotPricingVisibility: {
           name: globalLabels.show_slot_pricing,
-          visibility: false
+          visibility: false,
         },
         indicatorPricingVisibility: {
           name: globalLabels.show_indicator_pricing,
-          visibility: false
+          visibility: false,
         },
         endTimeVisibility: {
           name: globalLabels.calendar_slot_end_time,
@@ -1973,8 +1973,8 @@ let defaultTranslations = {
       header: {
         name: globalLabels.step_title,
         labels: {
-          service_selection: null
-        }
+          service_selection: null,
+        },
       },
       input: {
         name: globalLabels.input_fields,
@@ -1988,7 +1988,7 @@ let defaultTranslations = {
           employee_colon: null,
           select_employee: null,
           please_select_employee: null,
-        }
+        },
       },
       dropdown: {
         name: globalLabels.dropdowns,
@@ -1997,29 +1997,29 @@ let defaultTranslations = {
           dropdown_items_heading: null,
           dropdown_empty: null,
           total_tax_colon: null,
-          incl_tax:null
-        }
+          incl_tax: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
-          continue: null
-        }
+          continue: null,
+        },
       },
       employeeDescription: {
         name: globalLabels.employee_description,
         labels: {
           employee_information: null,
-          select_this_employee: null
-        }
-      }
+          select_this_employee: null,
+        },
+      },
     },
     serviceStep: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          service_selection: null
-        }
+          service_selection: null,
+        },
       },
       filter: {
         name: globalLabels.step_filters,
@@ -2028,18 +2028,18 @@ let defaultTranslations = {
           select_service_category: null,
           dropdown_empty: null,
           no_results_found: null,
-        }
+        },
       },
       card: {
         name: globalLabels.card_field,
         labels: {
           free: null,
           total_tax_colon: null,
-          incl_tax:null,
+          incl_tax: null,
           multiple_locations: null,
           learn_more: null,
           view_in_package: null,
-        }
+        },
       },
       popup: {
         name: globalLabels.popup_content,
@@ -2047,80 +2047,80 @@ let defaultTranslations = {
           service_information: null,
           employees: null,
           locations: null,
-        }
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
-          continue: null
-        }
+          continue: null,
+        },
       },
     },
     employeeStep: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          employee_selection: null
-        }
+          employee_selection: null,
+        },
       },
       card: {
         name: globalLabels.card_field,
         labels: {
           any_employee: null,
           learn_more: null,
-        }
+        },
       },
       popup: {
         name: globalLabels.popup_content,
         labels: {
           employee_information: null,
-        }
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
-          continue: null
-        }
+          continue: null,
+        },
       },
     },
     locationStep: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          location_selection: null
-        }
+          location_selection: null,
+        },
       },
       card: {
         name: globalLabels.card_field,
         labels: {
           any_location: null,
           learn_more: null,
-        }
+        },
       },
       popup: {
         name: globalLabels.popup_content,
         labels: {
           location_information: null,
-        }
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
-          continue: null
-        }
-      }
+          continue: null,
+        },
+      },
     },
     bringingAnyone: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          bringing_anyone: null
-        }
+          bringing_anyone: null,
+        },
       },
       heading: {
         name: globalLabels.sub_step_title,
         labels: {
-          bringing_anyone_title: null
+          bringing_anyone_title: null,
         },
       },
       content: {
@@ -2130,29 +2130,29 @@ let defaultTranslations = {
           add_people: null,
           bringing_price: null,
           bringing_people_total: null,
-          add_people_total: null
-        }
+          add_people_total: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           continue: null,
           bringing_yes: null,
-          bringing_no: null
-        }
-      }
+          bringing_no: null,
+        },
+      },
     },
     packageStep: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          package_selection: null
-        }
+          package_selection: null,
+        },
       },
       heading: {
         name: globalLabels.sub_step_title,
         labels: {
-          package_heading: null
+          package_heading: null,
         },
       },
       content: {
@@ -2161,23 +2161,23 @@ let defaultTranslations = {
           discount_save: null,
           separator_or: null,
           total_tax_colon: null,
-          incl_tax:null
-        }
+          incl_tax: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           continue_without_package: null,
-          continue: null
-        }
-      }
+          continue: null,
+        },
+      },
     },
     packageInfoStep: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          package_info_step: null
-        }
+          package_info_step: null,
+        },
       },
       heading: {
         name: globalLabels.heading_content,
@@ -2197,36 +2197,36 @@ let defaultTranslations = {
           show_more: null,
           show_less: null,
           total_tax_colon: null,
-          incl_tax:null
+          incl_tax: null,
         },
       },
       content: {
         name: globalLabels.main_content,
         labels: {
           package_info_includes: null,
-          package_info_employees: null
-        }
+          package_info_employees: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
-          continue: null
-        }
-      }
+          continue: null,
+        },
+      },
     },
     packageAppointmentsStep: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          package_appointment_step: null
-        }
+          package_appointment_step: null,
+        },
       },
       heading: {
         name: globalLabels.step_heading,
         labels: {
           package_appointment_required: null,
-          package_appointment_remaining: null
-        }
+          package_appointment_remaining: null,
+        },
       },
       inputs: {
         name: globalLabels.input_field,
@@ -2234,15 +2234,15 @@ let defaultTranslations = {
           package_appointment_employee: null,
           package_select_employee: null,
           package_appointment_location: null,
-          package_select_location: null
-        }
+          package_select_location: null,
+        },
       },
       employeeDescriptionPackage: {
         name: globalLabels.employee_description,
         labels: {
           employee_information_package: null,
-          select_this_employee_package: null
-        }
+          select_this_employee_package: null,
+        },
       },
       content: {
         name: globalLabels.cards_and_buttons,
@@ -2252,22 +2252,22 @@ let defaultTranslations = {
           package_appointments_select: null,
           package_appointments_selected: null,
           package_appointments_add_more: null,
-          package_appointments_slots_selected: null
-        }
+          package_appointments_slots_selected: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
-          continue: null
-        }
-      }
+          continue: null,
+        },
+      },
     },
     packageAppointmentsListStep: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          package_booking_overview: null
-        }
+          package_booking_overview: null,
+        },
       },
       content: {
         name: globalLabels.page_content,
@@ -2280,29 +2280,29 @@ let defaultTranslations = {
           package_overview_employee: null,
           package_overview_location: null,
           total_tax_colon: null,
-          incl_tax:null
-        }
+          incl_tax: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
-          continue: null
-        }
-      }
+          continue: null,
+        },
+      },
     },
     extrasStep: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          extras: null
-        }
+          extras: null,
+        },
       },
       heading: {
         name: globalLabels.heading_content,
         labels: {
           extras_available: null,
-          min_req_extras_colon: null
-        }
+          min_req_extras_colon: null,
+        },
       },
       card: {
         name: globalLabels.card_field,
@@ -2311,51 +2311,51 @@ let defaultTranslations = {
           extras_card_close: null,
           duration_colon: null,
           total_tax_colon: null,
-          incl_tax:null
-        }
+          incl_tax: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
-          continue: null
-        }
-      }
+          continue: null,
+        },
+      },
     },
     dateTimeStep: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          date_time: null
-        }
+          date_time: null,
+        },
       },
       content: {
         name: globalLabels.step_content,
         labels: {
           date_time_slots_selected: null,
           total_tax_colon: null,
-          incl_tax:null,
-          waiting_list: null
-        }
+          incl_tax: null,
+          waiting_list: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
-          continue: null
-        }
-      }
+          continue: null,
+        },
+      },
     },
     cartStep: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          cart_step: null
-        }
+          cart_step: null,
+        },
       },
       content: {
         name: globalLabels.step_content,
         labels: {
-          cart_title: null
-        }
+          cart_title: null,
+        },
       },
       card: {
         name: globalLabels.card_field,
@@ -2371,31 +2371,31 @@ let defaultTranslations = {
           delete: null,
           edit: null,
           total_tax_colon: null,
-          incl_tax:null
-        }
+          incl_tax: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           continue: null,
           cart_add_button: null,
-          cancel: null
-        }
-      }
+          cancel: null,
+        },
+      },
     },
     recurringStep: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          recurring_step: null
-        }
+          recurring_step: null,
+        },
       },
       heading: {
         name: globalLabels.heading_content,
         labels: {
           recurrence: null,
-          recurrence_choosing_time: null
-        }
+          recurrence_choosing_time: null,
+        },
       },
       content: {
         name: globalLabels.page_content,
@@ -2427,84 +2427,84 @@ let defaultTranslations = {
           repeats_at: null,
           number_of_recurrences: null,
           ends_on: null,
-        }
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
-          continue: null
-        }
-      }
+          continue: null,
+        },
+      },
     },
     recurringSummary: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          recurring_summary: null
-        }
+          recurring_summary: null,
+        },
       },
       alert: {
         name: globalLabels.alert_content,
         labels: {
           recurring_unavailable_slots: null,
-          recurring_alert_content: null
-        }
+          recurring_alert_content: null,
+        },
       },
       content: {
         name: globalLabels.card_content,
         labels: {
           recurring_chose_date: null,
           recurring_delete: null,
-          recurring_slots_selected: null
-        }
+          recurring_slots_selected: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
-          continue: null
-        }
-      }
+          continue: null,
+        },
+      },
     },
     recurringPopup: {
       header: {
         name: globalLabels.popup_title,
         labels: {
           repeat_appointment: null,
-        }
+        },
       },
       content: {
         name: globalLabels.popup_content,
         labels: {
-          repeat_appointment_quest: null
-        }
+          repeat_appointment_quest: null,
+        },
       },
       footer: {
         name: globalLabels.popup_buttons,
         labels: {
           yes: null,
-          no: null
-        }
-      }
+          no: null,
+        },
+      },
     },
     infoStep: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          info_step: null
-        }
+          info_step: null,
+        },
       },
       social: {
         name: globalLabels.social_login,
         labels: {
           auto_fill_your_details: null,
           or_enter_details_below: null,
-        }
+        },
       },
       subscribe: {
         name: globalLabels.mailchimp,
         labels: {
           subscribe_to_mailing_list: null,
-        }
+        },
       },
       input: {
         name: globalLabels.input_fields,
@@ -2521,21 +2521,21 @@ let defaultTranslations = {
           phone_colon: null,
           enter_phone: null,
           enter_phone_warning: null,
-        }
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
-          continue: null
-        }
-      }
+          continue: null,
+        },
+      },
     },
     paymentStep: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          payment_step: null
-        }
+          payment_step: null,
+        },
       },
       summarySegment: {
         name: globalLabels.summary_segment,
@@ -2560,8 +2560,8 @@ let defaultTranslations = {
           paying_later: null,
           full_amount_consent: null,
           total_tax_colon: null,
-          incl_tax:null
-        }
+          incl_tax: null,
+        },
       },
       paymentSegment: {
         name: globalLabels.payment_segment,
@@ -2572,15 +2572,15 @@ let defaultTranslations = {
           expires_date_colon: null,
           payment_protected_policy: null,
           payment_onsite_sentence: null,
-          payment_wc_mollie_sentence: null
-        }
+          payment_wc_mollie_sentence: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
-          continue: null
-        }
-      }
+          continue: null,
+        },
+      },
     },
     congratulations: {
       heading: {
@@ -2589,8 +2589,8 @@ let defaultTranslations = {
           congratulations: null,
           appointment_id: null,
           your_position_on_waiting_list: null,
-          appointment_waiting_list_notify_message: null
-        }
+          appointment_waiting_list_notify_message: null,
+        },
       },
       content: {
         name: globalLabels.content,
@@ -2608,47 +2608,47 @@ let defaultTranslations = {
           your_name_colon: null,
           email_address_colon: null,
           phone_number_colon: null,
-        }
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           finish_appointment: null,
-          congrats_panel: null
-        }
-      }
+          congrats_panel: null,
+        },
+      },
     },
     sidebar: {
       content: {
         name: globalLabels.content,
         labels: {
           plus_more: null,
-        }
+        },
       },
       footer: {
         name: globalLabels.sidebar_footer,
         labels: {
           get_in_touch: null,
-          collapse_menu: null
-        }
-      }
-    }
+          collapse_menu: null,
+        },
+      },
+    },
   },
   cbf: {
     categoriesList: {
       cardFooter: {
         name: globalLabels.cl_btn,
         labels: {
-          view_all: null
-        }
-      }
+          view_all: null,
+        },
+      },
     },
     categoryItemsList: {
       backBtn: {
         name: globalLabels.back_btn_heading,
         labels: {
-          back_btn: null
-        }
+          back_btn: null,
+        },
       },
       filterBlock: {
         name: globalLabels.cil_filter_block,
@@ -2659,14 +2659,14 @@ let defaultTranslations = {
           filter_all: null,
           filter_packages: null,
           filter_services: null,
-        }
+        },
       },
       sideMenu: {
         name: globalLabels.cil_side_menu_block,
         labels: {
           get_in_touch: null,
-          collapse_menu: null
-        }
+          collapse_menu: null,
+        },
       },
       page: {
         name: globalLabels.cil_main_content,
@@ -2693,17 +2693,17 @@ let defaultTranslations = {
           view_employees: null,
           continue: null,
           total_tax_colon: null,
-          incl_tax: null
-        }
+          incl_tax: null,
+        },
       },
       employeeDialog: {
         name: globalLabels.employee_dialog,
         labels: {
           employee_info: null,
           book_service: null,
-          book_package: null
-        }
-      }
+          book_package: null,
+        },
+      },
     },
     categoryService: {
       header: {
@@ -2714,7 +2714,7 @@ let defaultTranslations = {
           book_now: null,
           free: null,
           multiple_locations: null,
-        }
+        },
       },
       page: {
         name: globalLabels.cil_main_content,
@@ -2723,8 +2723,8 @@ let defaultTranslations = {
           about_service: null,
           tab_employees: null,
           total_tax_colon: null,
-          incl_tax: null
-        }
+          incl_tax: null,
+        },
       },
       packBlock: {
         name: globalLabels.package_block,
@@ -2742,9 +2742,9 @@ let defaultTranslations = {
           expires_month: null,
           expires_months: null,
           without_expiration: null,
-          in_package: null
-        }
-      }
+          in_package: null,
+        },
+      },
     },
     categoryPackage: {
       header: {
@@ -2765,7 +2765,7 @@ let defaultTranslations = {
           expires_months: null,
           without_expiration: null,
           multiple_locations: null,
-        }
+        },
       },
       page: {
         name: globalLabels.cil_main_content,
@@ -2776,10 +2776,10 @@ let defaultTranslations = {
           package_includes: null,
           package_book_service: null,
           total_tax_colon: null,
-          incl_tax:null
-        }
+          incl_tax: null,
+        },
       },
-    }
+    },
   },
   elf: {
     list: {
@@ -2787,8 +2787,8 @@ let defaultTranslations = {
         name: globalLabels.step_title,
         labels: {
           event_available: null,
-          events_available: null
-        }
+          events_available: null,
+        },
       },
       filter: {
         name: globalLabels.step_filters,
@@ -2796,8 +2796,8 @@ let defaultTranslations = {
           event_search: null,
           event_filters: null,
           event_type: null,
-          event_location: null
-        }
+          event_location: null,
+        },
       },
       card: {
         name: globalLabels.event_card,
@@ -2815,18 +2815,18 @@ let defaultTranslations = {
           closed: null,
           canceled: null,
           total_tax_colon: null,
-          incl_tax:null,
+          incl_tax: null,
           person_waiting: null,
           people_waiting: null,
-          join_waiting_list: null
-        }
+          join_waiting_list: null,
+        },
       },
       pagination: {
         name: globalLabels.step_pagination,
         labels: {
-          event_page: null
-        }
-      }
+          event_page: null,
+        },
+      },
     },
     info: {
       header: {
@@ -2843,10 +2843,10 @@ let defaultTranslations = {
           closed: null,
           canceled: null,
           total_tax_colon: null,
-          incl_tax:null,
+          incl_tax: null,
           person_waiting: null,
           people_waiting: null,
-        }
+        },
       },
       tabInfo: {
         name: globalLabels.step_info_tab,
@@ -2858,54 +2858,54 @@ let defaultTranslations = {
           show_less: null,
           event_organizer: null,
           about: null,
-        }
+        },
       },
       tabTickets: {
         name: globalLabels.step_tickets_tab,
         labels: {
           event_tickets: null,
           event_tickets_left: null,
-          event_ticket_left: null
-        }
+          event_ticket_left: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           event_book_event: null,
           event_close: null,
-          join_waiting_list: null
-        }
-      }
+          join_waiting_list: null,
+        },
+      },
     },
     bringingAnyone: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          event_bringing: null
-        }
+          event_bringing: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           back_btn: null,
           continue: null,
-        }
-      }
+        },
+      },
     },
     tickets: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          event_select_tickets: null
-        }
+          event_select_tickets: null,
+        },
       },
       heading: {
         name: globalLabels.step_heading,
         labels: {
           event_tickets: null,
           event_tickets_context: null,
-          event_ticket_types: null
-        }
+          event_ticket_types: null,
+        },
       },
       content: {
         name: globalLabels.step_content,
@@ -2914,7 +2914,7 @@ let defaultTranslations = {
           event_tickets_left: null,
           person_waiting: null,
           people_waiting: null,
-        }
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
@@ -2922,28 +2922,28 @@ let defaultTranslations = {
           continue: null,
           event_close: null,
           join_waiting_list: null,
-        }
-      }
+        },
+      },
     },
     customerInfo: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          event_customer_info: null
-        }
+          event_customer_info: null,
+        },
       },
       social: {
         name: globalLabels.social_login,
         labels: {
           auto_fill_your_details: null,
-          or_enter_details_below: null
-        }
+          or_enter_details_below: null,
+        },
       },
       subscribe: {
         name: globalLabels.mailchimp,
         labels: {
           subscribe_to_mailing_list: null,
-        }
+        },
       },
       input: {
         name: globalLabels.input_fields,
@@ -2960,22 +2960,22 @@ let defaultTranslations = {
           phone_colon: null,
           enter_phone: null,
           enter_phone_warning: null,
-        }
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           continue: null,
-          event_close: null
-        }
-      }
+          event_close: null,
+        },
+      },
     },
     payment: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          event_payment: null
-        }
+          event_payment: null,
+        },
       },
       summarySegment: {
         name: globalLabels.summary_segment,
@@ -2991,8 +2991,8 @@ let defaultTranslations = {
           paying_later: null,
           full_amount_consent: null,
           total_tax_colon: null,
-          incl_tax:null
-        }
+          incl_tax: null,
+        },
       },
       coupon: {
         name: globalLabels.coupon_segment,
@@ -3000,7 +3000,7 @@ let defaultTranslations = {
           coupon: null,
           add_coupon_btn: null,
           coupons_used: null,
-        }
+        },
       },
       paymentSegment: {
         name: globalLabels.payment_segment,
@@ -3011,16 +3011,16 @@ let defaultTranslations = {
           expires_date_colon: null,
           payment_protected_policy: null,
           payment_onsite_sentence: null,
-          payment_wc_mollie_sentence: null
-        }
+          payment_wc_mollie_sentence: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           event_book_event: null,
-          event_close: null
-        }
-      }
+          event_close: null,
+        },
+      },
     },
     congrats: {
       heading: {
@@ -3028,8 +3028,8 @@ let defaultTranslations = {
         labels: {
           event_congrats: null,
           your_position_on_waiting_list: null,
-          waiting_list_notify_message: null
-        }
+          waiting_list_notify_message: null,
+        },
       },
       content: {
         name: globalLabels.content,
@@ -3048,47 +3048,47 @@ let defaultTranslations = {
           your_name_colon: null,
           email_address_colon: null,
           phone_number_colon: null,
-          add_to_calendar: null
-        }
+          add_to_calendar: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           finish_appointment: null,
-          congrats_panel: null
-        }
-      }
-    }
+          congrats_panel: null,
+        },
+      },
+    },
   },
   capc: {
     sidebar: {
       menu: {
         name: globalLabels.mobile_menu,
         labels: {
-          menu_title: null
-        }
+          menu_title: null,
+        },
       },
       footer: {
         name: globalLabels.sidebar_footer,
         labels: {
           toggle_sidebar: null,
-          log_out: null
-        }
-      }
+          log_out: null,
+        },
+      },
     },
     profile: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          my_profile: null
-        }
+          my_profile: null,
+        },
       },
       tab: {
         name: globalLabels.tab_title,
         labels: {
           personal_info: null,
           password_tab: null,
-        }
+        },
       },
       input: {
         name: globalLabels.input_fields,
@@ -3112,52 +3112,52 @@ let defaultTranslations = {
           new_password_required: null,
           new_password_length: null,
           new_password_colon_retype: null,
-          passwords_not_match: null
-        }
+          passwords_not_match: null,
+        },
       },
       message: {
         name: globalLabels.step_message,
         labels: {
           profile_data_success: null,
-          password_success: null
-        }
+          password_success: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           delete_profile: null,
           save_changes: null,
-          change_password: null
-        }
-      }
+          change_password: null,
+        },
+      },
     },
     deleteProfile: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
-          delete_profile: null
-        }
+          delete_profile: null,
+        },
       },
       content: {
         name: globalLabels.content,
         labels: {
-          delete_profile_description: null
-        }
+          delete_profile_description: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           close: null,
-          delete: null
-        }
-      }
+          delete: null,
+        },
+      },
     },
     appointments: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
-          appointments: null
-        }
+          appointments: null,
+        },
       },
       filter: {
         name: globalLabels.step_filters,
@@ -3166,16 +3166,16 @@ let defaultTranslations = {
           services_dropdown: null,
           providers_dropdown: null,
           locations_dropdown: null,
-        }
+        },
       },
       status: {
         name: globalLabels.item_status,
         labels: {
-          approved:null,
+          approved: null,
           pending: null,
           canceled: null,
-          rejected: null
-        }
+          rejected: null,
+        },
       },
       card: {
         name: globalLabels.page_card,
@@ -3192,82 +3192,82 @@ let defaultTranslations = {
           zoom_link: null,
           lesson_space_link: null,
           extras: null,
-          custom_fields: null
-        }
+          custom_fields: null,
+        },
       },
       messages: {
         name: globalLabels.page_messages,
         labels: {
           appointment_rescheduled: null,
           appointment_canceled: null,
-        }
+        },
       },
       emptyState: {
         name: globalLabels.cust_empty_state,
         labels: {
           no_app_found: null,
-          have_no_app: null
-        }
-      }
+          have_no_app: null,
+        },
+      },
     },
     rescheduleAppointment: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
-          no_selected_slot_requirements: null
-        }
+          no_selected_slot_requirements: null,
+        },
       },
       content: {
         name: globalLabels.content,
         labels: {
           date_time_slots_selected: null,
           time_slot_unavailable: null,
-          booking_reschedule_exception: null
-        }
+          booking_reschedule_exception: null,
+        },
       },
       message: {
         name: globalLabels.step_message,
         labels: {
           booking_cancel_exception: null,
           time_slot_unavailable: null,
-          booking_reschedule_exception: null
-        }
+          booking_reschedule_exception: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           cancel: null,
-          continue: null
-        }
+          continue: null,
+        },
       },
     },
     cancelAppointment: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
-          cancel_appointment: null
-        }
+          cancel_appointment: null,
+        },
       },
       content: {
         name: globalLabels.content,
         labels: {
-          confirm_cancel_appointment: null
-        }
+          confirm_cancel_appointment: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           close: null,
-          confirm: null
-        }
-      }
+          confirm: null,
+        },
+      },
     },
     events: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
-          events: null
-        }
+          events: null,
+        },
       },
       filter: {
         name: globalLabels.step_filters,
@@ -3276,15 +3276,15 @@ let defaultTranslations = {
           events_dropdown: null,
           providers_dropdown: null,
           locations_dropdown: null,
-        }
+        },
       },
       status: {
         name: globalLabels.item_status,
         labels: {
-          approved:null,
+          approved: null,
           canceled: null,
-          rejected: null
-        }
+          rejected: null,
+        },
       },
       card: {
         name: globalLabels.page_card,
@@ -3306,49 +3306,49 @@ let defaultTranslations = {
           event_tickets: null,
           event_ticket: null,
           e_tickets: null,
-        }
+        },
       },
       messages: {
         name: globalLabels.page_messages,
         labels: {
-          event_canceled: null
-        }
+          event_canceled: null,
+        },
       },
       emptyState: {
         name: globalLabels.cust_empty_state,
         labels: {
           no_evt_found: null,
-          have_no_evt: null
-        }
-      }
+          have_no_evt: null,
+        },
+      },
     },
     cancelEvent: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
-          cancel_event: null
-        }
+          cancel_event: null,
+        },
       },
       content: {
         name: globalLabels.content,
         labels: {
-          confirm_cancel_event: null
-        }
+          confirm_cancel_event: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           close: null,
-          confirm: null
-        }
-      }
+          confirm: null,
+        },
+      },
     },
     packagesList: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
-          packages: null
-        }
+          packages: null,
+        },
       },
       filter: {
         name: globalLabels.step_filters,
@@ -3358,7 +3358,7 @@ let defaultTranslations = {
           services_dropdown: null,
           providers_dropdown: null,
           locations_dropdown: null,
-        }
+        },
       },
       card: {
         name: globalLabels.page_card,
@@ -3373,22 +3373,22 @@ let defaultTranslations = {
           package_deal_expire_in: null,
           expires_days: null,
           appointments_deal_expire: null,
-        }
+        },
       },
       emptyState: {
         name: globalLabels.cust_empty_state,
         labels: {
           no_pack_found: null,
-          have_no_pack: null
-        }
-      }
+          have_no_pack: null,
+        },
+      },
     },
     packageAppointmentsList: {
       backBtn: {
         name: globalLabels.back_btn_heading,
         labels: {
-          back_btn: null
-        }
+          back_btn: null,
+        },
       },
       content: {
         name: globalLabels.content,
@@ -3401,17 +3401,17 @@ let defaultTranslations = {
           package_cancel: null,
           pay_now_btn: null,
           paid: null,
-          book_now: null
-        }
+          book_now: null,
+        },
       },
       status: {
         name: globalLabels.item_status,
         labels: {
-          approved:null,
+          approved: null,
           pending: null,
           canceled: null,
-          rejected: null
-        }
+          rejected: null,
+        },
       },
       card: {
         name: globalLabels.page_card,
@@ -3425,23 +3425,23 @@ let defaultTranslations = {
           zoom_link: null,
           lesson_space_link: null,
           extras: null,
-          custom_fields: null
-        }
+          custom_fields: null,
+        },
       },
       messages: {
         name: globalLabels.page_messages,
         labels: {
           booking_added_success: null,
-          package_purchase_canceled: null
-        }
-      }
+          package_purchase_canceled: null,
+        },
+      },
     },
     bookAppointment: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
-          no_selected_slot_requirements: null
-        }
+          no_selected_slot_requirements: null,
+        },
       },
       input: {
         name: globalLabels.input_fields,
@@ -3453,73 +3453,73 @@ let defaultTranslations = {
           select_this_employee_package: null,
           package_appointment_location: null,
           package_select_location: null,
-          please_select_location: null
-        }
+          please_select_location: null,
+        },
       },
       content: {
         name: globalLabels.content,
         labels: {
           date_time_slots_selected: null,
           time_slot_unavailable: null,
-          package_booking_unavailable: null
-        }
+          package_booking_unavailable: null,
+        },
       },
       message: {
         name: globalLabels.step_message,
         labels: {
           customer_already_booked_app: null,
           time_slot_unavailable: null,
-          package_booking_unavailable: null
-        }
+          package_booking_unavailable: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           cancel: null,
-          continue: null
-        }
-      }
+          continue: null,
+        },
+      },
     },
     cancelPackage: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
-          cancel_package: null
-        }
+          cancel_package: null,
+        },
       },
       content: {
         name: globalLabels.content,
         labels: {
-          confirm_cancel_package: null
-        }
+          confirm_cancel_package: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           close: null,
-          confirm: null
-        }
-      }
+          confirm: null,
+        },
+      },
     },
     signIn: {
       alert: {
         name: globalLabels.alert_message,
         labels: {
-          profile_deleted: null
-        }
+          profile_deleted: null,
+        },
       },
       heading: {
         name: globalLabels.heading_title,
         labels: {
           welcome_back: null,
-          enter_credentials: null
-        }
+          enter_credentials: null,
+        },
       },
       social: {
         name: globalLabels.social_login,
         labels: {
           or_enter_details_below: null,
-        }
+        },
       },
       input: {
         name: globalLabels.input_fields,
@@ -3527,8 +3527,8 @@ let defaultTranslations = {
           email_or_username: null,
           enter_email_or_username_warning: null,
           password: null,
-          enter_password_warning: null
-        }
+          enter_password_warning: null,
+        },
       },
       footer: {
         name: globalLabels.footer_content,
@@ -3536,55 +3536,55 @@ let defaultTranslations = {
           sign_in: null,
           forgot_your_password: null,
           reset_password: null,
-        }
-      }
+        },
+      },
     },
     accessLink: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
           access_link_send: null,
-          access_link_send_description: null
-        }
+          access_link_send_description: null,
+        },
       },
       input: {
         name: globalLabels.input_fields,
         labels: {
           email: null,
-          enter_email_warning: null
-        }
+          enter_email_warning: null,
+        },
       },
       footer: {
         name: globalLabels.footer_content,
         labels: {
           send: null,
-          sign_in: null
-        }
-      }
+          sign_in: null,
+        },
+      },
     },
     accessLinkSuccess: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
           access_link_send_check: null,
-          access_link_send_click: null
-        }
+          access_link_send_click: null,
+        },
       },
       footer: {
         name: globalLabels.footer_content,
         labels: {
           access_link_send_inbox: null,
-          access_link_send_retry: null
-        }
-      }
+          access_link_send_retry: null,
+        },
+      },
     },
     setPass: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
           new_password_set: null,
-          new_password_set_description: null
-        }
+          new_password_set_description: null,
+        },
       },
       input: {
         name: globalLabels.input_fields,
@@ -3592,37 +3592,37 @@ let defaultTranslations = {
           new_password_colon: null,
           new_password_required: null,
           new_password_length: null,
-          new_password_colon_retype: null
-        }
+          new_password_colon_retype: null,
+        },
       },
       footer: {
         name: globalLabels.footer_content,
         labels: {
-          new_password_set_action: null
-        }
-      }
-    }
+          new_password_set_action: null,
+        },
+      },
+    },
   },
   cape: {
     signIn: {
       alert: {
         name: globalLabels.alert_message,
         labels: {
-          profile_deleted: null
-        }
+          profile_deleted: null,
+        },
       },
       heading: {
         name: globalLabels.heading_title,
         labels: {
           welcome_back: null,
-          enter_credentials: null
-        }
+          enter_credentials: null,
+        },
       },
       social: {
         name: globalLabels.social_login,
         labels: {
           or_enter_details_below: null,
-        }
+        },
       },
       input: {
         name: globalLabels.input_fields,
@@ -3630,8 +3630,8 @@ let defaultTranslations = {
           email_or_username: null,
           enter_email_or_username_warning: null,
           password: null,
-          enter_password_warning: null
-        }
+          enter_password_warning: null,
+        },
       },
       footer: {
         name: globalLabels.footer_content,
@@ -3639,55 +3639,55 @@ let defaultTranslations = {
           sign_in: null,
           forgot_your_password: null,
           reset_password: null,
-        }
-      }
+        },
+      },
     },
     accessLink: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
           access_link_send: null,
-          access_link_send_description: null
-        }
+          access_link_send_description: null,
+        },
       },
       input: {
         name: globalLabels.input_fields,
         labels: {
           email: null,
-          enter_email_warning: null
-        }
+          enter_email_warning: null,
+        },
       },
       footer: {
         name: globalLabels.footer_content,
         labels: {
           send: null,
-          sign_in: null
-        }
-      }
+          sign_in: null,
+        },
+      },
     },
     accessLinkSuccess: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
           access_link_send_check: null,
-          access_link_send_click: null
-        }
+          access_link_send_click: null,
+        },
       },
       footer: {
         name: globalLabels.footer_content,
         labels: {
           access_link_send_inbox: null,
-          access_link_send_retry: null
-        }
-      }
+          access_link_send_retry: null,
+        },
+      },
     },
     setPass: {
       heading: {
         name: globalLabels.heading_title,
         labels: {
           new_password_set: null,
-          new_password_set_description: null
-        }
+          new_password_set_description: null,
+        },
       },
       input: {
         name: globalLabels.input_fields,
@@ -3695,16 +3695,16 @@ let defaultTranslations = {
           new_password_colon: null,
           new_password_required: null,
           new_password_length: null,
-          new_password_colon_retype: null
-        }
+          new_password_colon_retype: null,
+        },
       },
       footer: {
         name: globalLabels.footer_content,
         labels: {
-          new_password_set_action: null
-        }
-      }
-    }
+          new_password_set_action: null,
+        },
+      },
+    },
   },
   ecf: {
     calendar: {
@@ -3722,13 +3722,13 @@ let defaultTranslations = {
           upcoming: null,
           closed: null,
           canceled: null,
-        }
+        },
       },
       heading: {
         name: globalLabels.step_heading,
         labels: {
-          event_today: null
-        }
+          event_today: null,
+        },
       },
       page: {
         name: globalLabels.step_content,
@@ -3737,7 +3737,7 @@ let defaultTranslations = {
           event_slots_left: null,
           event_no_spots: null,
           join_waiting_list: null,
-          waiting_list:  null,
+          waiting_list: null,
           person_waiting: null,
           people_waiting: null,
           events: null,
@@ -3748,10 +3748,10 @@ let defaultTranslations = {
           event_free: null,
           from: null,
           total_tax_colon: null,
-          incl_tax:null,
-          evt_empty_message: null
-        }
-      }
+          incl_tax: null,
+          evt_empty_message: null,
+        },
+      },
     },
     info: {
       header: {
@@ -3768,10 +3768,10 @@ let defaultTranslations = {
           closed: null,
           canceled: null,
           total_tax_colon: null,
-          incl_tax:null,
+          incl_tax: null,
           person_waiting: null,
           people_waiting: null,
-        }
+        },
       },
       tabInfo: {
         name: globalLabels.step_info_tab,
@@ -3783,7 +3783,7 @@ let defaultTranslations = {
           show_less: null,
           event_organizer: null,
           about: null,
-        }
+        },
       },
       tabTickets: {
         name: globalLabels.step_tickets_tab,
@@ -3793,7 +3793,7 @@ let defaultTranslations = {
           event_ticket_left: null,
           person_waiting: null,
           people_waiting: null,
-        }
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
@@ -3801,38 +3801,38 @@ let defaultTranslations = {
           event_book_event: null,
           event_close: null,
           join_waiting_list: null,
-        }
-      }
+        },
+      },
     },
     bringingAnyone: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          event_bringing: null
-        }
+          event_bringing: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           back_btn: null,
           continue: null,
-        }
-      }
+        },
+      },
     },
     tickets: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          event_select_tickets: null
-        }
+          event_select_tickets: null,
+        },
       },
       heading: {
         name: globalLabels.step_heading,
         labels: {
           event_tickets: null,
           event_tickets_context: null,
-          event_ticket_types: null
-        }
+          event_ticket_types: null,
+        },
       },
       content: {
         name: globalLabels.step_content,
@@ -3841,7 +3841,7 @@ let defaultTranslations = {
           event_tickets_left: null,
           person_waiting: null,
           people_waiting: null,
-        }
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
@@ -3849,28 +3849,28 @@ let defaultTranslations = {
           continue: null,
           event_close: null,
           join_waiting_list: null,
-        }
-      }
+        },
+      },
     },
     customerInfo: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          event_customer_info: null
-        }
+          event_customer_info: null,
+        },
       },
       social: {
         name: globalLabels.social_login,
         labels: {
           auto_fill_your_details: null,
           or_enter_details_below: null,
-        }
+        },
       },
       subscribe: {
         name: globalLabels.mailchimp,
         labels: {
           subscribe_to_mailing_list: null,
-        }
+        },
       },
       input: {
         name: globalLabels.input_fields,
@@ -3887,22 +3887,22 @@ let defaultTranslations = {
           phone_colon: null,
           enter_phone: null,
           enter_phone_warning: null,
-        }
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           continue: null,
-          event_close: null
-        }
-      }
+          event_close: null,
+        },
+      },
     },
     payment: {
       header: {
         name: globalLabels.step_title,
         labels: {
-          event_payment: null
-        }
+          event_payment: null,
+        },
       },
       summarySegment: {
         name: globalLabels.summary_segment,
@@ -3918,8 +3918,8 @@ let defaultTranslations = {
           paying_later: null,
           full_amount_consent: null,
           total_tax_colon: null,
-          incl_tax:null
-        }
+          incl_tax: null,
+        },
       },
       coupon: {
         name: globalLabels.coupon_segment,
@@ -3927,7 +3927,7 @@ let defaultTranslations = {
           coupon: null,
           add_coupon_btn: null,
           coupons_used: null,
-        }
+        },
       },
       paymentSegment: {
         name: globalLabels.payment_segment,
@@ -3938,16 +3938,16 @@ let defaultTranslations = {
           expires_date_colon: null,
           payment_protected_policy: null,
           payment_onsite_sentence: null,
-          payment_wc_mollie_sentence: null
-        }
+          payment_wc_mollie_sentence: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           event_book_event: null,
-          event_close: null
-        }
-      }
+          event_close: null,
+        },
+      },
     },
     congrats: {
       heading: {
@@ -3955,8 +3955,8 @@ let defaultTranslations = {
         labels: {
           event_congrats: null,
           your_position_on_waiting_list: null,
-          waiting_list_notify_message: null
-        }
+          waiting_list_notify_message: null,
+        },
       },
       content: {
         name: globalLabels.content,
@@ -3975,18 +3975,18 @@ let defaultTranslations = {
           your_name_colon: null,
           email_address_colon: null,
           phone_number_colon: null,
-          add_to_calendar: null
-        }
+          add_to_calendar: null,
+        },
       },
       footer: {
         name: globalLabels.footer_buttons,
         labels: {
           finish_appointment: null,
-          congrats_panel: null
-        }
-      }
-    }
-  }
+          congrats_panel: null,
+        },
+      },
+    },
+  },
 }
 
 export { defaultCustomizeSettings, defaultTranslations }

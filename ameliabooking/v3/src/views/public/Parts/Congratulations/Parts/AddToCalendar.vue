@@ -19,9 +19,13 @@
           v-for="calPair in cal"
           :key="calPair.type"
           :href="calPair.links[0]"
-          :target="(calPair.type === 'apple' || calPair.type === 'outlook') ? '_self' : '_blank'"
-          :rel="(calPair.type === 'apple' || calPair.type === 'outlook') ? undefined : 'noopener noreferrer'"
-          :style="{borderColor : 'var(--am-c-atc-text-op10)'}"
+          :target="calPair.type === 'apple' || calPair.type === 'outlook' ? '_self' : '_blank'"
+          :rel="
+            calPair.type === 'apple' || calPair.type === 'outlook'
+              ? undefined
+              : 'noopener noreferrer'
+          "
+          :style="{ borderColor: 'var(--am-c-atc-text-op10)' }"
           :class="`am-atc-${generatedClass}-cals-card`"
           :aria-label="getCalendarAriaLabel(calPair)"
           @click="executeIfMultipleLinks(calPair)"
@@ -29,7 +33,7 @@
           <div aria-hidden="true">
             <span :class="`am-icon-${calPair.type}`" aria-hidden="true"></span>
           </div>
-          <p :style="{color : 'var(--am-c-atc-text)'}" aria-hidden="true">
+          <p :style="{ color: 'var(--am-c-atc-text)' }" aria-hidden="true">
             {{ calPair.label }}
           </p>
         </a>
@@ -40,10 +44,7 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject
-} from 'vue'
+import { computed, inject } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -54,16 +55,16 @@ import { useColorTransparency } from '../../../../../assets/js/common/colorManip
 let props = defineProps({
   labels: {
     type: Object,
-    required: true
+    required: true,
   },
   booked: {
     type: Object,
-    required: true
+    required: true,
   },
   ready: {
     type: Boolean,
-    required: true
-  }
+    required: true,
+  },
 })
 
 let generatedClass = computed(() => {
@@ -84,7 +85,7 @@ let amSettings = computed(() => store.getters['getSettings'])
 let ajaxUrl = computed(() => store.getters['getBaseUrls'].wpAmeliaPluginAjaxURL)
 
 // * Build a descriptive aria-label for each calendar link
-function getCalendarAriaLabel (calPair) {
+function getCalendarAriaLabel(calPair) {
   const opensInNewTab = calPair.type !== 'apple' && calPair.type !== 'outlook'
   const action = props.labels.add_to_calendar || 'Add to calendar'
   const openInNewTabLabel = props.labels.opens_in_new_tab || 'opens in new tab'
@@ -94,36 +95,47 @@ function getCalendarAriaLabel (calPair) {
 }
 
 let calendars = computed(() => {
-  return props.ready && props.booked ?
-    [
-      [
-        getCalendarLinkData(props.booked.data, 'google'),
-        {
-          type: 'outlook',
-          label: 'Outlook',
-          links: [
-            ajaxUrl.value + '/bookings/ics/' + (props.booked.data.length ? props.booked.data[0].bookingId : 0) +
-            '&type=' + (props.booked.type === 'package' ? 'appointment' : props.booked.type) + getRecurringIdsParams(props.booked) +
-            '&token=' + props.booked.token
-          ]
-        }
-      ],
-      [
-        getCalendarLinkData(props.booked.data, 'yahoo'),
-        {
-          type: 'apple',
-          label: 'Apple',
-          links: [
-            ajaxUrl.value + '/bookings/ics/' + (props.booked.data.length ? props.booked.data[0].bookingId : 0) +
-            '&type=' + (props.booked.type === 'package' ? 'appointment' : props.booked.type) + getRecurringIdsParams(props.booked) +
-            '&token=' + props.booked.token
-          ]
-        }
+  return props.ready && props.booked
+    ? [
+        [
+          getCalendarLinkData(props.booked.data, 'google'),
+          {
+            type: 'outlook',
+            label: 'Outlook',
+            links: [
+              ajaxUrl.value +
+                '/bookings/ics/' +
+                (props.booked.data.length ? props.booked.data[0].bookingId : 0) +
+                '&type=' +
+                (props.booked.type === 'package' ? 'appointment' : props.booked.type) +
+                getRecurringIdsParams(props.booked) +
+                '&token=' +
+                props.booked.token,
+            ],
+          },
+        ],
+        [
+          getCalendarLinkData(props.booked.data, 'yahoo'),
+          {
+            type: 'apple',
+            label: 'Apple',
+            links: [
+              ajaxUrl.value +
+                '/bookings/ics/' +
+                (props.booked.data.length ? props.booked.data[0].bookingId : 0) +
+                '&type=' +
+                (props.booked.type === 'package' ? 'appointment' : props.booked.type) +
+                getRecurringIdsParams(props.booked) +
+                '&token=' +
+                props.booked.token,
+            ],
+          },
+        ],
       ]
-    ] : []
+    : []
 })
 
-function executeIfMultipleLinks (calendar) {
+function executeIfMultipleLinks(calendar) {
   if (calendar.links.length > 1) {
     let popupBlocked = false
     setTimeout(function () {
@@ -133,8 +145,7 @@ function executeIfMultipleLinks (calendar) {
             let newWin = window.open(link, '_blank')
             try {
               newWin.addEventListener('load', function () {})
-            }
-            catch (e) {
+            } catch (e) {
               popupBlocked = true
               alert(props.labels.disable_popup_blocker)
             }
@@ -149,7 +160,7 @@ function executeIfMultipleLinks (calendar) {
   return true
 }
 
-function getRecurringIdsParams (booked) {
+function getRecurringIdsParams(booked) {
   let recurringIdsParams = ''
 
   if (props.booked.type !== 'event') {
@@ -167,56 +178,72 @@ function getCalendarLinkData(eventData, type) {
   let links = []
 
   switch (type) {
-    case ('yahoo'):
+    case 'yahoo':
       eventData.forEach(function (data) {
-        let location = data.locationId ?
-            store.getters['eventEntities/getLocation'](
-              data.locationId
-            ) : ''
+        let location = data.locationId
+          ? store.getters['eventEntities/getLocation'](data.locationId)
+          : ''
 
-        let address = data.cfAddress ? data.cfAddress : (location ? (location.address ? location.address : location.name) : '')
+        let address = data.cfAddress
+          ? data.cfAddress
+          : location
+            ? location.address
+              ? location.address
+              : location.name
+            : ''
 
         let duration = (data.utcEnd.getTime() - data.utcStart.getTime()) / (60 * 1000)
 
-        duration = (duration < 600 ? '0' + Math.floor((duration / 60)) : Math.floor((duration / 60)) + '') +
-            (duration % 60 < 10 ? '0' + duration % 60 : duration % 60 + '')
+        duration =
+          (duration < 600 ? '0' + Math.floor(duration / 60) : Math.floor(duration / 60) + '') +
+          (duration % 60 < 10 ? '0' + (duration % 60) : (duration % 60) + '')
 
         let startInClientTZ = new Date(data.start)
 
-        let st = formatTime(new Date(startInClientTZ - (startInClientTZ.getTimezoneOffset() * (60 * 1000))))
+        let st = formatTime(
+          new Date(startInClientTZ - startInClientTZ.getTimezoneOffset() * (60 * 1000)),
+        )
 
         links.push(
-            encodeURI([
+          encodeURI(
+            [
               'http://calendar.yahoo.com/?v=60&view=d&type=20',
               '&title=' + (data.title || ''),
               '&st=' + st,
               '&dur=' + (duration || ''),
               '&desc=' + (data.description || ''),
-              '&in_loc=' + address
-            ].join(''))
+              '&in_loc=' + address,
+            ].join(''),
+          ),
         )
       })
 
       return {
         type: 'yahoo',
         label: 'Yahoo',
-        links: links
+        links: links,
       }
 
-    case ('google'):
+    case 'google':
       eventData.forEach(function (data) {
-        let location = data.locationId ?
-          store.getters['eventEntities/getLocation'](
-            data.locationId
-          ) : ''
+        let location = data.locationId
+          ? store.getters['eventEntities/getLocation'](data.locationId)
+          : ''
 
-        let address = data.cfAddress ? data.cfAddress : (location ? (location.address ? location.address : location.name) : '')
+        let address = data.cfAddress
+          ? data.cfAddress
+          : location
+            ? location.address
+              ? location.address
+              : location.name
+            : ''
 
         let startTime = formatTime(new Date(data.start))
         let endTime = formatTime(new Date(data.end))
 
         links.push(
-            encodeURI([
+          encodeURI(
+            [
               'https://www.google.com/calendar/render',
               '?action=TEMPLATE',
               '&text=' + (data.title || ''),
@@ -224,20 +251,21 @@ function getCalendarLinkData(eventData, type) {
               '/' + (endTime || ''),
               '&details=' + (data.description || ''),
               '&location=' + address,
-              '&sprop=&sprop=name:'
-            ].join(''))
+              '&sprop=&sprop=name:',
+            ].join(''),
+          ),
         )
       })
 
       return {
         type: 'google',
         label: 'Google',
-        links: links
+        links: links,
       }
   }
 }
 
-function formatTime (date) {
+function formatTime(date) {
   return date.toISOString().replace(/-|:|\.\d+/g, '')
 }
 
@@ -248,21 +276,21 @@ const cssVars = computed(() => {
     return {
       '--am-c-atc-text': amColors.value.colorSbText,
       '--am-c-atc-text-op10': useColorTransparency(amColors.value.colorSbText, 0.1),
-      '--am-c-atc-text-op50': useColorTransparency(amColors.value.colorSbText, 0.05)
+      '--am-c-atc-text-op50': useColorTransparency(amColors.value.colorSbText, 0.05),
     }
   }
 
   return {
     '--am-c-atc-text': amColors.value.colorMainText,
     '--am-c-atc-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
-    '--am-c-atc-text-op50': useColorTransparency(amColors.value.colorMainText, 0.05)
+    '--am-c-atc-text-op50': useColorTransparency(amColors.value.colorMainText, 0.05),
   }
 })
 </script>
 
 <script>
 export default {
-  name: 'AddToCalendar'
+  name: 'AddToCalendar',
 }
 </script>
 
@@ -330,7 +358,7 @@ export default {
             }
 
             .am-icon-yahoo {
-              font-size: 17px
+              font-size: 17px;
             }
           }
 
@@ -409,7 +437,7 @@ export default {
             }
 
             .am-icon-yahoo {
-              font-size: 17px
+              font-size: 17px;
             }
           }
 

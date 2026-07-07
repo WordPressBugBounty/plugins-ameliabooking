@@ -1,11 +1,11 @@
-import moment from 'moment';
-import {useUrlQueryParams} from "../../assets/js/common/helper";
+import moment from 'moment'
+import { useUrlQueryParams } from '../../assets/js/common/helper'
 
-function getDateString (date) {
+function getDateString(date) {
   return moment(date).format('YYYY-MM-DD')
 }
 
-function formatDateRange (dateArray) {
+function formatDateRange(dateArray) {
   if (!dateArray.length) return []
 
   // Handle single date case
@@ -39,87 +39,96 @@ export default {
     shortcodeParams: {
       ids: null,
       tags: null,
-      locations: null
-    }
+      locations: null,
+    },
   }),
 
   getters: {
-    getTag (state) {
+    getTag(state) {
       return state.params.tag
     },
 
-    getSearch (state) {
+    getSearch(state) {
       return state.params.search
     },
 
-    getLocationIdParam (state) {
+    getLocationIdParam(state) {
       return state.params.locationId
     },
 
-    getLocations (state) {
+    getLocations(state) {
       return state.params.locations
     },
 
-    getEmployees (state) {
+    getEmployees(state) {
       return state.params.providers
     },
 
-    getDates (state) {
+    getDates(state) {
       return state.params.dates
     },
 
-    getUpcomingDates (state) {
+    getUpcomingDates(state) {
       return state.params.upcomingDates
     },
 
-    getEventParams (state) {
-      let locations = state.params.locationId && !state.params.locations
-        ? { locationId: state.params.locationId }
-        : state.params.locations && !state.params.locationId
-          ? { locations: state.params.locations }
-          : { locations: state.shortcodeParams.locations };
+    getEventParams(state) {
+      let locations =
+        state.params.locationId && !state.params.locations
+          ? { locationId: state.params.locationId }
+          : state.params.locations && !state.params.locationId
+            ? { locations: state.params.locations }
+            : { locations: state.shortcodeParams.locations }
 
-      return Object.assign({
+      return Object.assign(
+        {
           dates: formatDateRange(state.params.dates),
           id: state.params.id ? state.params.id : state.shortcodeParams.ids,
           search: state.params.search,
           tag: state.params.tag ? state.params.tag : state.shortcodeParams.tags,
           recurring: state.params.recurring,
           providers: state.params.providers,
-          range: state.params.range
+          range: state.params.range,
         },
-        locations
+        locations,
       )
     },
 
-    getUpcomingEventParams (state) {
-      let locations = state.params.locationId && !state.params.locations
-        ? { locationId: state.params.locationId }
-        : state.params.locations && !state.params.locationId
-          ? { locations: state.params.locations }
-          : { locations: state.shortcodeParams.locations };
+    getUpcomingEventParams(state) {
+      let locations =
+        state.params.locationId && !state.params.locations
+          ? { locationId: state.params.locationId }
+          : state.params.locations && !state.params.locationId
+            ? { locations: state.params.locations }
+            : { locations: state.shortcodeParams.locations }
 
-      return Object.assign({
-          dates: state.params.upcomingDates[1] ? [getDateString(state.params.upcomingDates[0]), getDateString(state.params.upcomingDates[1])] : [getDateString(state.params.upcomingDates[0])],
+      return Object.assign(
+        {
+          dates: state.params.upcomingDates[1]
+            ? [
+                getDateString(state.params.upcomingDates[0]),
+                getDateString(state.params.upcomingDates[1]),
+              ]
+            : [getDateString(state.params.upcomingDates[0])],
           id: state.params.id ? state.params.id : state.shortcodeParams.ids,
           search: state.params.search,
           tag: state.params.tag ? state.params.tag : state.shortcodeParams.tags,
           recurring: state.params.recurring,
-          providers: state.params.providers
+          providers: state.params.providers,
         },
-        locations
+        locations,
       )
     },
 
-    getShortcodeParams (state) {
+    getShortcodeParams(state) {
       return {
         ids: state.shortcodeParams.ids,
         tags: state.shortcodeParams.tags,
-        locations: state.shortcodeParams.locations
+        locations: state.shortcodeParams.locations,
       }
     },
 
-    getAllData (state) {
+    getAllData(state) {
       return {
         dates: state.params.dates,
         upcomingDates: state.params.upcomingDates,
@@ -128,35 +137,35 @@ export default {
         locationId: state.params.locationId,
         tag: state.params.tag,
         recurring: state.params.recurring,
-        providers: state.params.providers
+        providers: state.params.providers,
       }
-    }
+    },
   },
 
   mutations: {
-    setTag (state, payload) {
+    setTag(state, payload) {
       state.params.tag = payload ? payload : null
     },
 
-    setLocationIdParam (state, payload) {
+    setLocationIdParam(state, payload) {
       state.params.locationId = payload ? payload : null
     },
 
-    setLocations (state, payload) {
+    setLocations(state, payload) {
       state.params.locations = payload ? payload : null
     },
 
-    setEmployees (state, payload) {
+    setEmployees(state, payload) {
       state.params.providers = payload ? payload : null
     },
 
-    setId (state, payload) {
+    setId(state, payload) {
       state.params.id = payload
     },
 
     // * Params for Events
     // ! needs to change name of function
-    setParams (state, payload) {
+    setParams(state, payload) {
       let urlParameters = useUrlQueryParams(window.location.href)
 
       if (payload.eventId) {
@@ -167,7 +176,10 @@ export default {
       }
 
       if (payload.eventTag) {
-        state.shortcodeParams.tags = payload.eventTag.split("{").map(e => e.replace('},', '').replace('}', '')).filter(e => e !== '')
+        state.shortcodeParams.tags = payload.eventTag
+          .split('{')
+          .map((e) => e.replace('},', '').replace('}', ''))
+          .filter((e) => e !== '')
       }
       if (urlParameters && urlParameters.ameliaEventTag) {
         state.shortcodeParams.tags = urlParameters.ameliaEventTag.split(',')
@@ -191,24 +203,26 @@ export default {
         }
 
         if (payload.range.includes(' - ')) {
-          state.params.range = payload.range.split(' - ').map(date => moment(date.trim()).format('YYYY-MM-DD'))
+          state.params.range = payload.range
+            .split(' - ')
+            .map((date) => moment(date.trim()).format('YYYY-MM-DD'))
         }
       }
     },
 
-    setSearch (state, payload) {
+    setSearch(state, payload) {
       state.params.search = payload ? payload : null
     },
 
-    setDates (state, payload) {
+    setDates(state, payload) {
       state.params.dates = payload
     },
 
-    setUpcomingDates (state, payload) {
+    setUpcomingDates(state, payload) {
       state.params.upcomingDates = payload
     },
 
-    setAllData (state, payload) {
+    setAllData(state, payload) {
       state.params = {
         dates: payload.dates,
         upcomingDates: payload.upcomingDates,
@@ -217,10 +231,10 @@ export default {
         locationId: payload.locationId ? parseInt(payload.locationId) : null,
         tag: payload.tag,
         recurring: payload.recurring,
-        providers: payload.providers
+        providers: payload.providers,
       }
-    }
+    },
   },
 
-  actions: {}
+  actions: {},
 }

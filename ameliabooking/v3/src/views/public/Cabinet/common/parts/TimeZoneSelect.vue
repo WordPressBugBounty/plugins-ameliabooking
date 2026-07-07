@@ -23,18 +23,14 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject
-} from 'vue'
+import { ref, computed, inject } from 'vue'
 
 // * Component properties
 let props = defineProps({
   size: {
     type: String,
-    default: 'default'
-  }
+    default: 'default',
+  },
 })
 
 // * Import from Libraries
@@ -44,11 +40,11 @@ import { useCookies } from 'vue3-cookies'
 const vueCookies = useCookies()['cookies']
 
 // * Composables
-import { useCurrentTimeZone } from "../../../../../assets/js/common/helper";
+import { useCurrentTimeZone } from '../../../../../assets/js/common/helper'
 
 // * _components
-import AmOption from "../../../../_components/select/AmOption.vue";
-import AmSelect from "../../../../_components/select/AmSelect.vue";
+import AmOption from '../../../../_components/select/AmOption.vue'
+import AmSelect from '../../../../_components/select/AmSelect.vue'
 
 // * Root Settings
 const amSettings = inject('settings')
@@ -56,7 +52,7 @@ const amSettings = inject('settings')
 let cabinetType = inject('cabinetType')
 
 let { bookingsCounterChanger } = inject('bookingsCounterChanger', {
-  bookingsCounterChanger: () => {}
+  bookingsCounterChanger: () => {},
 })
 
 // * import from Vuex
@@ -69,30 +65,35 @@ let timeZoneSelection = computed({
   get: () => store.getters['cabinet/getTimeZone'],
   set: (val) => {
     store.commit('cabinet/setTimeZone', val ? val : '')
-  }
+  },
 })
 
-let activeBooking = computed(() => store.getters['appointment/getActive'] || store.getters['event/getActive'] || store.getters['attendee/getActive'])
+let activeBooking = computed(
+  () =>
+    store.getters['appointment/getActive'] ||
+    store.getters['event/getActive'] ||
+    store.getters['attendee/getActive'],
+)
 
 const adminTimeZone = inject('timeZone')
 
 const timeZones = inject('timeZones')
 
 let queryLower = ref('')
-function filterTimeZone (query) {
+function filterTimeZone(query) {
   queryLower.value = query.toLowerCase()
 }
 
 let filteredTimeZones = computed(() => {
   if (queryLower.value) {
-    return timeZones.filter(item => {
+    return timeZones.filter((item) => {
       return item.toLowerCase().includes(queryLower.value)
     })
   }
   return timeZones
 })
 
-function returnToDefault () {
+function returnToDefault() {
   let initialTimeZone
   if (!amSettings.general.showClientTimeZone) {
     initialTimeZone = adminTimeZone.value
@@ -103,7 +104,7 @@ function returnToDefault () {
   vueCookies.set(
     'ameliaUserTimeZone',
     initialTimeZone,
-    amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime']
+    amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'],
   )
 
   bookingsCounterChanger()
@@ -111,11 +112,11 @@ function returnToDefault () {
   store.commit('cabinet/setTimeZone', initialTimeZone)
 }
 
-function timeZoneChanged (selection) {
+function timeZoneChanged(selection) {
   vueCookies.set(
     'ameliaUserTimeZone',
     selection,
-    amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime']
+    amSettings.roles[cabinetType.value + 'Cabinet']['tokenValidTime'],
   )
 
   bookingsCounterChanger()
@@ -139,7 +140,6 @@ function timeZoneChanged (selection) {
     }
   }
 }
-
 
 // public
 .amelia-v2-booking #amelia-container {

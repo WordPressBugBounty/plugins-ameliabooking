@@ -41,7 +41,6 @@
       :style="cssVars"
       @country-code="handleCountryCode"
       @data="handlePhoneData"
-
     >
       <template v-if="$slots['no-results']" #no-results>
         <span class="am-input-phone-no-results">
@@ -62,167 +61,165 @@
 
 <script setup>
 import { MazInputPhoneNumber } from 'maz-ui/components'
-import { computed, inject, useAttrs, onBeforeUnmount, watch } from 'vue'
+import { computed, inject, ref, useAttrs, onBeforeUnmount, watch } from 'vue'
 import { useColorTransparency } from '@/assets/js/common/colorManipulation'
+import { getInternationalPhoneValue } from '@/assets/js/common/phone'
 
 /**
  * Component Props
  */
 const props = defineProps({
   modelValue: {
-    type: String
+    type: String,
   },
   countryCode: {
     type: String,
-    default: undefined
+    default: undefined,
   },
   id: {
     type: String,
-    default: ''
+    default: '',
   },
   name: {
     type: String,
-    default: ''
+    default: '',
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   placeholder: {
     type: String,
-    default: 'Enter phone'
+    default: 'Enter phone',
   },
   label: {
     type: String,
-    default: undefined
+    default: undefined,
   },
   preferredCountries: {
     type: Array,
-    default: undefined
+    default: undefined,
   },
   ignoredCountries: {
     type: Array,
-    default: undefined
+    default: undefined,
   },
   onlyCountries: {
     type: Array,
-    default: undefined
+    default: undefined,
   },
   translations: {
     type: Object,
-    default: undefined
+    default: undefined,
   },
   listPosition: {
     type: String,
-    default: undefined
+    default: undefined,
   },
   color: {
     type: String,
-    default: undefined
+    default: undefined,
   },
   size: {
     type: String,
-    default: 'md'
+    default: 'md',
   },
   hideFlags: {
     type: Boolean,
-    default: false
+    default: false,
   },
   required: {
     type: Boolean,
-    default: false
+    default: false,
   },
   example: {
     type: Boolean,
-    default: true
+    default: true,
   },
   search: {
     type: Boolean,
-    default: true
+    default: true,
   },
   searchThreshold: {
     type: Number,
-    default: 0.75
+    default: 0.75,
   },
   useBrowserLocale: {
     type: Boolean,
-    default: true
+    default: true,
   },
   fetchCountry: {
     type: Boolean,
-    default: false
+    default: false,
   },
   hideCountrySelect: {
     type: Boolean,
-    default: false
+    default: false,
   },
   showCodeInList: {
     type: Boolean,
-    default: true
+    default: true,
   },
   customCountriesList: {
     type: Object,
-    default: undefined
+    default: undefined,
   },
   autoFormat: {
     type: [String, Boolean],
-    default: 'blur'
+    default: 'blur',
   },
   countryLocale: {
     type: String,
-    default: undefined
+    default: undefined,
   },
   validationError: {
     type: Boolean,
-    default: false
+    default: false,
   },
   validationSuccess: {
     type: Boolean,
-    default: true
+    default: true,
   },
   success: {
     type: Boolean,
-    default: false
+    default: false,
   },
   error: {
     type: Boolean,
-    default: false
+    default: false,
   },
   displayCountryName: {
     type: Boolean,
-    default: false
+    default: false,
   },
   block: {
     type: Boolean,
-    default: false
+    default: false,
   },
   orientation: {
     type: String,
-    default: 'row'
+    default: 'row',
   },
   countrySelectAttributes: {
     type: Object,
-    default: undefined
+    default: undefined,
   },
   phoneInputAttributes: {
     type: Object,
-    default: undefined
-  }
+    default: undefined,
+  },
 })
 
 /**
  * Component Emits
  * */
-const emits = defineEmits([
-  'update:modelValue',
-  'country-code',
-  'update:countryCode',
-  'data'
-])
+const emits = defineEmits(['update:modelValue', 'country-code', 'update:countryCode', 'data'])
 
 const attrs = useAttrs()
 
-const isRtl = computed(() => typeof document !== 'undefined' && document.documentElement?.dir === 'rtl')
+const isRtl = computed(
+  () => typeof document !== 'undefined' && document.documentElement?.dir === 'rtl',
+)
 
 /**
  * Component model
@@ -235,7 +232,7 @@ const resolvedPhoneInputAttributes = computed(() => {
   const resolvedAttributes = {
     autocomplete: 'tel',
     inputmode: 'tel',
-    ...(props.phoneInputAttributes || {})
+    ...(props.phoneInputAttributes || {}),
   }
 
   if (!hasPhoneInputAttributes && !hasLegacyName.value) {
@@ -252,13 +249,18 @@ const resolvedPhoneInputAttributes = computed(() => {
 const forwardedAttrs = computed(() => attrs)
 
 const inputClasses = computed(() => ({
-  'am-rtl': isRtl.value
+  'am-rtl': isRtl.value,
 }))
+
+const lastPhoneData = ref(null)
 
 const model = computed({
   get: () => props.modelValue,
   set: (val) => {
-    emits('update:modelValue', val)
+    emits(
+      'update:modelValue',
+      getInternationalPhoneValue(val, lastPhoneData.value, props.countryCode)
+    )
   }
 })
 
@@ -266,21 +268,33 @@ const countryCode = computed({
   get: () => props.countryCode,
   set: (val) => {
     emits('update:countryCode', val)
-  }
+  },
 })
 
-function handleCountryCode (val) {
+function handleCountryCode(val) {
   emits('country-code', val)
 }
 
-function handlePhoneData (val) {
+function handlePhoneData(val) {
+  lastPhoneData.value = val
+
   emits('data', val)
+
+  const internationalValue = getInternationalPhoneValue(
+    val?.phoneNumber ?? val?.e164 ?? props.modelValue,
+    val,
+    props.countryCode
+  )
+
+  if (internationalValue !== props.modelValue) {
+    emits('update:modelValue', internationalValue)
+  }
 }
 
 const amColors = inject('amColors')
 const cssVars = computed(() => {
   return {
-    '--am-c-ph-drop-text-op10': useColorTransparency(amColors.value.colorDropText, 0.1)
+    '--am-c-ph-drop-text-op10': useColorTransparency(amColors.value.colorDropText, 0.1),
   }
 })
 
@@ -294,14 +308,14 @@ const cssDropVars = computed(() => {
     '--am-c-phone-border': amColors.value.colorDropText,
     '--am-c-phone-hover': useColorTransparency(amColors.value.colorDropText, 0.1),
     '--am-c-phone-input': useColorTransparency(amColors.value.colorDropText, 0.3),
-    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.30),
-    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.10),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
   }
 })
 
 const instanceDropKeys = new Set()
 
-function applyDropdownVars (vars) {
+function applyDropdownVars(vars) {
   if (typeof document === 'undefined') {
     return
   }
@@ -324,14 +338,18 @@ function clearDropdownVars() {
   instanceDropKeys.clear()
 }
 
-const stopDropVarSync = watch(cssDropVars, (vars) => {
-  instanceDropKeys.clear()
-  Object.keys(vars).forEach((key) => {
-    instanceDropKeys.add(key)
-  })
+const stopDropVarSync = watch(
+  cssDropVars,
+  (vars) => {
+    instanceDropKeys.clear()
+    Object.keys(vars).forEach((key) => {
+      instanceDropKeys.add(key)
+    })
 
-  applyDropdownVars(vars)
-}, { immediate: true })
+    applyDropdownVars(vars)
+  },
+  { immediate: true },
+)
 
 onBeforeUnmount(() => {
   stopDropVarSync()
@@ -341,7 +359,7 @@ onBeforeUnmount(() => {
 
 <script>
 export default {
-  inheritAttrs: false
+  inheritAttrs: false,
 }
 </script>
 
@@ -552,7 +570,8 @@ export default {
     }
 
     .m-select-list-item {
-      &:hover, &:focus {
+      &:hover,
+      &:focus {
         background-color: var(--am-c-phone-hover, hsl(0 0% 0% / 0.05));
       }
 

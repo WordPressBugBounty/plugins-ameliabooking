@@ -1,8 +1,8 @@
-import { reactive } from "vue";
+import { reactive } from 'vue'
 
 const globalLabels = reactive(window.wpAmeliaLabels)
 
-function usePaymentGatewayName (payment) {
+function usePaymentGatewayName(payment) {
   if (payment.gateway === 'onSite') {
     return globalLabels.on_site
   }
@@ -16,49 +16,45 @@ function usePaymentGatewayName (payment) {
   }
 }
 
-function usePaymentStatusName (status) {
+function usePaymentStatusName(status) {
   switch (status) {
-    case ('paid'):
+    case 'paid':
       return globalLabels.paid
 
-    case ('pending'):
+    case 'pending':
       return globalLabels.pending
 
-    case ('partiallyPaid'):
+    case 'partiallyPaid':
       return globalLabels.partially_paid
 
-    case ('refunded'):
+    case 'refunded':
       return globalLabels.refunded
   }
 }
 
-function usePaymentStatusIcon (status, amColors) {
+function usePaymentStatusIcon(status, amColors) {
   switch (status) {
     case 'paid':
       return {
         icon: 'am-icon-checkmark-circle',
-        color: amColors.colorSuccess
+        color: amColors.colorSuccess,
       }
     case 'pending':
       return {
         icon: 'am-icon-refresh',
-        color: amColors.colorWarning
+        color: amColors.colorWarning,
       }
     case 'partiallyPaid':
       return {
-        icon:'am-icon-prepaid',
-        color: amColors.colorPrimary
+        icon: 'am-icon-prepaid',
+        color: amColors.colorPrimary,
       }
     case 'refunded':
       return {
-        icon:'am-icon-refund',
-        color: amColors.colorError
+        icon: 'am-icon-refund',
+        color: amColors.colorError,
       }
   }
 }
 
-export {
-  usePaymentGatewayName,
-  usePaymentStatusName,
-  usePaymentStatusIcon,
-}
+export { usePaymentGatewayName, usePaymentStatusName, usePaymentStatusIcon }

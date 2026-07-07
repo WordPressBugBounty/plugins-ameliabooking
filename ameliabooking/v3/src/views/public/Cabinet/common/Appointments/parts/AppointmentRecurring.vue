@@ -1,17 +1,12 @@
 <template>
   <div class="am-capai-recurr" :style="cssVars">
     <div class="am-capai-recurr__enable">
-      <AmCheckbox
-        v-model="enableRecurring"
-        :label="'Enable Recurring appointment'"
-      />
+      <AmCheckbox v-model="enableRecurring" :label="'Enable Recurring appointment'" />
     </div>
     <div v-if="enableRecurring" class="am-capai-recurr__content">
       <RecurringSetup
         v-if="!recurringLoading && !recurringList"
-        :start-date="
-          moment(store.getters['appointment/getStartDate']).format('YYYY-MM-DD')
-        "
+        :start-date="moment(store.getters['appointment/getStartDate']).format('YYYY-MM-DD')"
         :start-time="store.getters['appointment/getStartTime']"
         :max-date="props.maximumBookingStartDate"
         :service="employeeService"
@@ -25,8 +20,15 @@
               <span class="am-icon-refresh"></span>
               <div>{{ `${recurringList.length} appointments total` }}</div>
             </div>
-            <div class="am-capai-recurr__list-heading__action" @click="() => { showRecurringList = !showRecurringList}">
-              {{ showRecurringList ? amLabels.show_less : amLabels.show_more}}
+            <div
+              class="am-capai-recurr__list-heading__action"
+              @click="
+                () => {
+                  showRecurringList = !showRecurringList
+                }
+              "
+            >
+              {{ showRecurringList ? amLabels.show_less : amLabels.show_more }}
             </div>
           </div>
 
@@ -46,13 +48,13 @@
                 v-for="(item, index) in recurringList"
                 :key="index"
                 class="am-capai-recurr__row"
-                :class="[{'am-warn': item.isSubstituteDate || item.isSubstituteTime}, props.responsiveClass]"
+                :class="[
+                  { 'am-warn': item.isSubstituteDate || item.isSubstituteTime },
+                  props.responsiveClass,
+                ]"
               >
                 <!-- Index -->
-                <div
-                  class="am-capai-recurr__row-num"
-                  :class="props.responsiveClass"
-                >
+                <div class="am-capai-recurr__row-num" :class="props.responsiveClass">
                   {{ index + 1 }}
                 </div>
                 <!-- /Index -->
@@ -69,9 +71,17 @@
                     placeholder="Pick a day"
                     size="small"
                     :lang="localLanguage"
-                    :disabled-date="(date, monthOrYear) => {return props.isDisabledDate(date, item.editing, false, monthOrYear)}"
+                    :disabled-date="
+                      (date, monthOrYear) => {
+                        return props.isDisabledDate(date, item.editing, false, monthOrYear)
+                      }
+                    "
                     :popper-class="props.slotsLoading ? 'slots-loader' : ''"
-                    @panel-change="(date) => {fetchSlots(date, index, true)}"
+                    @panel-change="
+                      (date) => {
+                        fetchSlots(date, index, true)
+                      }
+                    "
                     @change="selectRecurringDate(index)"
                     @focus="fetchSlots(item.date, index, true)"
                   />
@@ -91,8 +101,8 @@
                   >
                     <AmOption
                       v-for="slot in item.editing
-                      ? props.getFreeTimes(index, recurringList[index], false)
-                      : recurringList[index].times"
+                        ? props.getFreeTimes(index, recurringList[index], false)
+                        : recurringList[index].times"
                       :key="slot"
                       :value="slot"
                       :label="slot"
@@ -102,10 +112,7 @@
                 <!-- /Time -->
 
                 <!-- Row Actions -->
-                <div
-                  class="am-capai-recurr__row-actions"
-                  :class="props.responsiveClass"
-                >
+                <div class="am-capai-recurr__row-actions" :class="props.responsiveClass">
                   <DotsPopup
                     v-if="!item.editing"
                     :index="index"
@@ -166,10 +173,7 @@ import { useStore } from 'vuex'
 
 // * Import Composables
 import { momentDateFormat } from '../../../../../../assets/js/common/date'
-import {
-  useExpectedDates,
-  useProposedDates,
-} from '../../../../../../assets/js/common/recurring'
+import { useExpectedDates, useProposedDates } from '../../../../../../assets/js/common/recurring'
 import { useSortedDateStrings } from '../../../../../../assets/js/common/helper'
 import { useAppointmentSlots } from '../../../../../../assets/js/public/slots'
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
@@ -185,7 +189,7 @@ import AmCheckbox from '../../../../../_components/checkbox/AmCheckbox.vue'
 import RecurringSetup from '../../../../Parts/RecurringSetup.vue'
 import Skeleton from '../../Authentication/parts/Skeleton.vue'
 import DotsPopup from '../../../../Parts/DotsPopup.vue'
-import WarningBlock from "./common/WarningBlock.vue";
+import WarningBlock from './common/WarningBlock.vue'
 
 // * Props
 let props = defineProps({
@@ -239,9 +243,7 @@ let amLabels = inject('amLabels')
 let localLanguage = inject('localLanguage')
 
 // * Employee Service
-let employeeService = computed(
-  () => store.getters['appointment/getEmployeeService']
-)
+let employeeService = computed(() => store.getters['appointment/getEmployeeService'])
 
 let enableRecurring = ref(false)
 
@@ -256,9 +258,7 @@ let showRecurringList = ref(true)
 function setRecurringAppointments() {
   let endDate =
     store.getters['recurring/getOccurrenceType'] === 'On'
-      ? moment(store.getters['recurring/getOccurrenceDate']).format(
-          'YYYY-MM-DD'
-        )
+      ? moment(store.getters['recurring/getOccurrenceDate']).format('YYYY-MM-DD')
       : null
 
   let expectedDates = useExpectedDates(
@@ -269,7 +269,7 @@ function setRecurringAppointments() {
     store.getters['recurring/getRepeatType'],
     store.getters['recurring/getRepeatInterval'],
     store.getters['recurring/getDays'],
-    store.getters['recurring/getMonthly']
+    store.getters['recurring/getMonthly'],
   )
 
   expectedDatesCount.value =
@@ -297,7 +297,7 @@ function setRecurringAppointments() {
               .add(amSettings.general.numberOfDaysAvailableForBooking, 'days')
               .format('YYYY-MM-DD'),
       },
-      props.slotsProps
+      props.slotsProps,
     ),
     null,
     (slots) => {
@@ -310,7 +310,7 @@ function setRecurringAppointments() {
         endDate,
         store.getters['recurring/getOccurrenceType'] === 'After'
           ? store.getters['recurring/getOccurrenceCount']
-          : null
+          : null,
       )
 
       recurringList.value = []
@@ -322,13 +322,13 @@ function setRecurringAppointments() {
               date: moment(date).toDate(),
               editing: false,
             },
-            proposedDates[date]
-          )
+            proposedDates[date],
+          ),
         )
       })
 
       recurringLoading.value = false
-    }
+    },
   )
 }
 
@@ -343,10 +343,7 @@ function selectRecurringDate(index) {
 
   let selectedDatesTimes = props.getSelectedDatesTimes(index, false)
 
-  if (
-    date in selectedDatesTimes &&
-    recurringList.value[index].time in selectedDatesTimes[date]
-  ) {
+  if (date in selectedDatesTimes && recurringList.value[index].time in selectedDatesTimes[date]) {
     recurringList.value[index].time = ''
   }
 }
@@ -365,7 +362,7 @@ function saveRecurringAppointment(index) {
 
 let targetedDate = ref(null)
 
-function fetchSlots (selectedDate, recurringIndex, isNavigation = false) {
+function fetchSlots(selectedDate, recurringIndex, isNavigation = false) {
   if (!selectedDate && !targetedDate.value) {
     selectedDate = moment().toDate()
   } else if (!selectedDate && targetedDate.value) {
@@ -382,18 +379,9 @@ let amColors = inject('amColors')
 // * CSS Variables
 let cssVars = computed(() => {
   return {
-    '--am-c-recurr-bgr-op05': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.05
-    ),
-    '--am-c-warning-op10': useColorTransparency(
-      amColors.value.colorWarning,
-      0.1
-    ),
-    '--am-c-main-text-op10': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
+    '--am-c-recurr-bgr-op05': useColorTransparency(amColors.value.colorPrimary, 0.05),
+    '--am-c-warning-op10': useColorTransparency(amColors.value.colorWarning, 0.1),
+    '--am-c-main-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
   }
 })
 

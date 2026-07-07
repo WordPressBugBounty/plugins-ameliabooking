@@ -8,16 +8,16 @@
     :aria-busy="waitingForCancelation ? 'true' : 'false'"
   >
     <AmAlert
-        v-if="alertVisibility"
-        ref="alertContainer"
-        :type= "alertType"
-        :show-border="true"
-        :close-after="5000"
-        custom-class="am-cap__alert"
-        role="status"
-        aria-live="polite"
-        @close="closeAlert"
-        @trigger-close="closeAlert"
+      v-if="alertVisibility"
+      ref="alertContainer"
+      :type="alertType"
+      :show-border="true"
+      :close-after="5000"
+      custom-class="am-cap__alert"
+      role="status"
+      aria-live="polite"
+      @close="closeAlert"
+      @trigger-close="closeAlert"
     >
       <template #title>
         <span class="am-icon-checkmark-circle-full" aria-hidden="true"></span> {{ alertMessage }}
@@ -41,14 +41,15 @@
     </div>
 
     <!-- Cabinet Package card heading -->
-    <div
-      class="am-cappa__heading"
-      :class="responsiveClass"
-    >
+    <div class="am-cappa__heading" :class="responsiveClass">
       <div class="am-cappa__heading-left">
         <div
           class="am-cappa__img"
-          :style="props.data.packageData.pictureThumbPath ? {backgroundImage: `url(${props.data.packageData.pictureThumbPath})`} : {}"
+          :style="
+            props.data.packageData.pictureThumbPath
+              ? { backgroundImage: `url(${props.data.packageData.pictureThumbPath})` }
+              : {}
+          "
           aria-hidden="true"
         >
           <span
@@ -56,43 +57,45 @@
             class="am-cappa__img-name"
             aria-hidden="true"
           >
-            {{getNameInitials(props.data.packageData.name)}}
+            {{ getNameInitials(props.data.packageData.name) }}
           </span>
-          <span class="am-cappa__img-color" :style="{backgroundColor: props.data.packageData.color}" aria-hidden="true"></span>
+          <span
+            class="am-cappa__img-color"
+            :style="{ backgroundColor: props.data.packageData.color }"
+            aria-hidden="true"
+          ></span>
         </div>
         <div class="am-cappa__info">
           <div :id="packageNameId" class="am-cappa__name">
             {{ props.data.packageData.name }}
           </div>
-          <div
-            v-if="props.data.packageData.end"
-            :id="packageDateId"
-            class="am-cappa__date"
-          >
-            {{ amLabels.package_book_expire}} {{ getFrontedFormattedDate(props.data.packageData.end.split(' ')[0]) }}
+          <div v-if="props.data.packageData.end" :id="packageDateId" class="am-cappa__date">
+            {{ amLabels.package_book_expire }}
+            {{ getFrontedFormattedDate(props.data.packageData.end.split(' ')[0]) }}
           </div>
           <div v-else :id="packageDateId" class="am-cappa__date">
             {{ `${amLabels.package_book_expiration} ${amLabels.package_book_unlimited}` }}
           </div>
-          <div
-            v-if="Object.keys(props.data.services).length > 1"
-            class="am-cappa__capacity"
-          >
+          <div v-if="Object.keys(props.data.services).length > 1" class="am-cappa__capacity">
             {{ packagesSlotsCalculation(props.data) }}
           </div>
         </div>
       </div>
-      <div
-        class="am-cappa__heading-right"
-        :class="responsiveClass"
-      >
+      <div class="am-cappa__heading-right" :class="responsiveClass">
         <AmButton
-          v-if="amSettings.roles.allowCustomerCancelPackages && props.data.packageData.status !== 'canceled'"
+          v-if="
+            amSettings.roles.allowCustomerCancelPackages &&
+            props.data.packageData.status !== 'canceled'
+          "
           :category="'danger'"
           :size="'small'"
           :class="['am-cappa__actions', responsiveClass]"
           :type="amCustomize.packageAppointmentsList.options.cancelBtn.buttonType"
-          @click="() => { activePurchaseCancel = true }"
+          @click="
+            () => {
+              activePurchaseCancel = true
+            }
+          "
         >
           {{ amLabels.cancel }}
         </AmButton>
@@ -114,11 +117,7 @@
       :aria-label="servicesTabsAriaLabel"
       @tab-click="selectService"
     >
-      <el-tab-pane
-        v-for="serviceId in servicesOrderInPackage"
-        :key="serviceId"
-        :name="serviceId"
-      >
+      <el-tab-pane v-for="serviceId in servicesOrderInPackage" :key="serviceId" :name="serviceId">
         <template #label>
           <div class="am-cappa__service-heading">
             {{ props.data.services[serviceId].purchaseData.name }}
@@ -134,7 +133,13 @@
             <div class="am-cappa__service-right">
               <div
                 class="am-cappa__service-img"
-                :style="props.data.services[selectedServiceId].purchaseData.pictureThumbPath ? {backgroundImage: `url(${props.data.services[selectedServiceId].purchaseData.pictureThumbPath})`} : {}"
+                :style="
+                  props.data.services[selectedServiceId].purchaseData.pictureThumbPath
+                    ? {
+                        backgroundImage: `url(${props.data.services[selectedServiceId].purchaseData.pictureThumbPath})`,
+                      }
+                    : {}
+                "
                 aria-hidden="true"
               >
                 <span
@@ -142,11 +147,13 @@
                   class="am-cappa__service-img__name"
                   aria-hidden="true"
                 >
-                  {{getNameInitials(props.data.services[selectedServiceId].purchaseData.name)}}
+                  {{ getNameInitials(props.data.services[selectedServiceId].purchaseData.name) }}
                 </span>
                 <span
                   class="am-cappa__service-img__color"
-                  :style="{backgroundColor: props.data.services[selectedServiceId].purchaseData.color}"
+                  :style="{
+                    backgroundColor: props.data.services[selectedServiceId].purchaseData.color,
+                  }"
                   aria-hidden="true"
                 ></span>
               </div>
@@ -197,8 +204,16 @@
       :close-btn-text="customizedLabels('cancelPackage').close"
       :confirm-btn-text="customizedLabels('cancelPackage').confirm"
       :customized-options="customizedOptions('cancelPackage')"
-      @close="() => { activePurchaseCancel = false }"
-      @decline="() => { activePurchaseCancel = false }"
+      @close="
+        () => {
+          activePurchaseCancel = false
+        }
+      "
+      @decline="
+        () => {
+          activePurchaseCancel = false
+        }
+      "
       @confirm="cancelPurchase"
     >
     </CancelPopup>
@@ -214,8 +229,8 @@
       @close="targetAppointment = null"
       @success="managedAppointment"
       @error="() => {}"
-      @employee-selection="(val) => selectedEmployee = val"
-      @location-selection="(val) => selectedLocation = val"
+      @employee-selection="(val) => (selectedEmployee = val)"
+      @location-selection="(val) => (selectedLocation = val)"
     >
     </AppointmentBooking>
   </div>
@@ -223,56 +238,43 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  provide,
-  onMounted,
-  reactive
-} from "vue";
+import { ref, computed, inject, provide, onMounted, reactive } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import from Libraries
-import httpClient from "../../../../../../plugins/axios";
+import httpClient from '../../../../../../plugins/axios'
 
 // * Composables
-import {
-  getFrontedFormattedDate
-} from "../../../../../../assets/js/common/date";
-import {
-  getNameInitials,
-} from "../../../../../../assets/js/common/image";
-import {
-  useColorTransparency
-} from "../../../../../../assets/js/common/colorManipulation";
+import { getFrontedFormattedDate } from '../../../../../../assets/js/common/date'
+import { getNameInitials } from '../../../../../../assets/js/common/image'
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 
 // * _components
-import AmButton from "../../../../../_components/button/AmButton.vue";
-import IconComponent from "../../../../../_components/icons/IconComponent.vue";
+import AmButton from '../../../../../_components/button/AmButton.vue'
+import IconComponent from '../../../../../_components/icons/IconComponent.vue'
 
 // * Dedicated components
-import CancelPopup from "../../parts/CancelPopup.vue";
-import AppointmentsList from "../../Appointments/parts/AppointmentsList.vue";
-import AppointmentBooking from "../../parts/AppointmentBooking.vue";
-import PaymentButton from "../../parts/PaymentButton.vue";
-import AmAlert from "../../../../../_components/alert/AmAlert.vue";
+import CancelPopup from '../../parts/CancelPopup.vue'
+import AppointmentsList from '../../Appointments/parts/AppointmentsList.vue'
+import AppointmentBooking from '../../parts/AppointmentBooking.vue'
+import PaymentButton from '../../parts/PaymentButton.vue'
+import AmAlert from '../../../../../_components/alert/AmAlert.vue'
 
 // * Component props
 let props = defineProps({
   data: {
     type: [Object, Array],
-    default: () => {}
+    default: () => {},
   },
   responsiveClass: {
     type: String,
-    default: ''
+    default: '',
   },
   pageWidth: {
-    type: Number
-  }
+    type: Number,
+  },
 })
 
 // * Component emits
@@ -284,8 +286,8 @@ let store = useStore()
 let amSettings = computed(() => store.getters['getSettings'])
 
 let arrowLeft = {
-  components: {IconComponent},
-  template: `<IconComponent icon="arrow-left"></IconComponent>`
+  components: { IconComponent },
+  template: `<IconComponent icon="arrow-left"></IconComponent>`,
 }
 
 let { selectedPackageCustomerId } = inject('packageSelection')
@@ -294,21 +296,28 @@ let selectedPackage = computed(() => {
   return store.getters['entities/getPackage'](props.data.packageData.id)
 })
 
-const packageBaseId = computed(() => `am-cappa-package-${props.data?.packageData?.id || 'selected'}`)
+const packageBaseId = computed(
+  () => `am-cappa-package-${props.data?.packageData?.id || 'selected'}`,
+)
 const packageNameId = computed(() => `${packageBaseId.value}-name`)
 const packageDateId = computed(() => `${packageBaseId.value}-date`)
-const servicesTabsAriaLabel = computed(() => amLabels.value.package_services || amLabels.value.services || 'Package services')
+const servicesTabsAriaLabel = computed(
+  () => amLabels.value.package_services || amLabels.value.services || 'Package services',
+)
 
-function getServiceNameId (serviceId) {
+function getServiceNameId(serviceId) {
   return `${packageBaseId.value}-service-${serviceId}-name`
 }
 
 let servicesOrderInPackage = computed(() =>
-  Object.keys(props.data.services)
-    .map(id => id.toString())
+  Object.keys(props.data.services).map((id) => id.toString()),
 )
 
-let bookable = computed(() => selectedPackage.value.bookable.find(i => parseInt(i.service.id) === parseInt(selectedServiceId.value)))
+let bookable = computed(() =>
+  selectedPackage.value.bookable.find(
+    (i) => parseInt(i.service.id) === parseInt(selectedServiceId.value),
+  ),
+)
 let selectedEmployee = ref(null)
 let selectedLocation = ref(null)
 
@@ -323,7 +332,9 @@ let employees = computed(() => {
         if (
           targetAppointment.value &&
           targetAppointment.value.serviceId in relations[employeeId] &&
-          relations[employeeId][parseInt(targetAppointment.value.serviceId)].indexOf(selectedLocation.value) !== -1
+          relations[employeeId][parseInt(targetAppointment.value.serviceId)].indexOf(
+            selectedLocation.value,
+          ) !== -1
         ) {
           employeesIds.push(parseInt(employeeId))
         }
@@ -332,7 +343,7 @@ let employees = computed(() => {
       let locationsIds = []
 
       if (bookable.value.locations.length) {
-        locationsIds = bookable.value.locations.map(item => item.id)
+        locationsIds = bookable.value.locations.map((item) => item.id)
       } else {
         for (let employeeId in relations) {
           if (bookable.value.service.id in relations[employeeId]) {
@@ -343,7 +354,7 @@ let employees = computed(() => {
 
       for (let employeeId in relations) {
         if (bookable.value.service.id in relations[employeeId]) {
-          locationsIds.forEach(locationId => {
+          locationsIds.forEach((locationId) => {
             if (relations[employeeId][bookable.value.service.id].indexOf(locationId) !== -1) {
               employeesIds.push(parseInt(employeeId))
             }
@@ -352,14 +363,15 @@ let employees = computed(() => {
       }
     }
 
-    let availableEmployeesIds = bookable.value.providers.length ?
-      bookable.value.providers.map(item => item.id) : unfilteredEmployees.map(item => item.id)
+    let availableEmployeesIds = bookable.value.providers.length
+      ? bookable.value.providers.map((item) => item.id)
+      : unfilteredEmployees.map((item) => item.id)
 
-
-    return unfilteredEmployees.filter(item =>
-      availableEmployeesIds.indexOf(item.id) !== -1 &&
-      employeesIds.indexOf(item.id) !== -1 &&
-      (store.getters['entities/getShowHidden'] || (item.status === 'visible' && item.show))
+    return unfilteredEmployees.filter(
+      (item) =>
+        availableEmployeesIds.indexOf(item.id) !== -1 &&
+        employeesIds.indexOf(item.id) !== -1 &&
+        (store.getters['entities/getShowHidden'] || (item.status === 'visible' && item.show)),
     )
   }
 
@@ -375,32 +387,37 @@ let locations = computed(() => {
     if (selectedEmployee.value) {
       locationsIds = relations[selectedEmployee.value][bookable.value.service.id]
     } else {
-    let employeesIds = []
+      let employeesIds = []
 
-    if (bookable.value.providers.length) {
-      employeesIds = bookable.value.providers.map(item => item.id)
-    } else {
+      if (bookable.value.providers.length) {
+        employeesIds = bookable.value.providers.map((item) => item.id)
+      } else {
+        for (let employeeId in relations) {
+          if (bookable.value.service.id in relations[employeeId]) {
+            employeesIds.push(parseInt(employeeId))
+          }
+        }
+      }
+
       for (let employeeId in relations) {
-        if (bookable.value.service.id in relations[employeeId]) {
-          employeesIds.push(parseInt(employeeId))
+        if (
+          bookable.value.service.id in relations[employeeId] &&
+          employeesIds.indexOf(parseInt(employeeId)) !== -1
+        ) {
+          locationsIds = locationsIds.concat(relations[employeeId][bookable.value.service.id])
         }
       }
     }
 
-    for (let employeeId in relations) {
-      if (bookable.value.service.id in relations[employeeId] && employeesIds.indexOf(parseInt(employeeId)) !== -1) {
-        locationsIds = locationsIds.concat(relations[employeeId][bookable.value.service.id])
-      }
-    }
-  }
+    let availableLocationsIds = bookable.value.locations.length
+      ? bookable.value.locations.map((item) => item.id)
+      : unfilteredLocations.map((item) => item.id)
 
-    let availableLocationsIds = bookable.value.locations.length ?
-      bookable.value.locations.map(item => item.id) : unfilteredLocations.map(item => item.id)
-
-    return unfilteredLocations.filter(item =>
-      availableLocationsIds.indexOf(item.id) !== -1 &&
-      locationsIds.indexOf(item.id) !== -1 &&
-      (store.getters['entities/getShowHidden'] || item.status === 'visible')
+    return unfilteredLocations.filter(
+      (item) =>
+        availableLocationsIds.indexOf(item.id) !== -1 &&
+        locationsIds.indexOf(item.id) !== -1 &&
+        (store.getters['entities/getShowHidden'] || item.status === 'visible'),
     )
   }
 
@@ -434,7 +451,7 @@ let targetPurchase = computed(() => {
     tax: props.data.packageData.tax,
     coupon: props.data.packageData.coupon,
     discount: props.data.packageData.discount,
-    end: props.data.packageData.end
+    end: props.data.packageData.end,
   }
 })
 
@@ -450,7 +467,7 @@ onMounted(() => {
   selectedServiceId.value = servicesOrderInPackage.value[0]
 })
 
-function getPurchasedCount (purchaseServiceData, id, type) {
+function getPurchasedCount(purchaseServiceData, id, type) {
   let count = 0
 
   Object.keys(purchaseServiceData).forEach((serviceId) => {
@@ -462,22 +479,26 @@ function getPurchasedCount (purchaseServiceData, id, type) {
   return count
 }
 
-function bookedNumberText (numb) {
+function bookedNumberText(numb) {
   return numb === 1 ? amLabels.value.appointment_booked : amLabels.value.appointments_booked
 }
 
 function packagesSlotsCalculation(data, id = null) {
-  let notBooked = data.packageData.sharedCapacity ? data.packageData.sharedCount : getPurchasedCount(data.services, id, 'count')
-  let capacity = data.packageData.sharedCapacity ? data.packageData.sharedTotal : getPurchasedCount(data.services, id, 'total')
+  let notBooked = data.packageData.sharedCapacity
+    ? data.packageData.sharedCount
+    : getPurchasedCount(data.services, id, 'count')
+  let capacity = data.packageData.sharedCapacity
+    ? data.packageData.sharedTotal
+    : getPurchasedCount(data.services, id, 'total')
 
   return `${capacity - notBooked}/${capacity} ${bookedNumberText(capacity - notBooked)}`
 }
 
-function selectService (tab) {
+function selectService(tab) {
   selectedServiceId.value = tab.paneName
 }
 
-function bookAppointment () {
+function bookAppointment() {
   let user = store.getters['auth/getProfile']
 
   let timeZone = store.getters['cabinet/getTimeZone'] ? store.getters['cabinet/getTimeZone'] : 'UTC'
@@ -487,17 +508,17 @@ function bookAppointment () {
     group: 1,
     timeZone: store.getters['cabinet/getTimeZone'],
     structured: true,
-    page: 'cabinet'
+    page: 'cabinet',
   }
 
   let bookable = selectedPackage.value.bookable.find(
-    i => parseInt(i.service.id) === parseInt(selectedServiceId.value)
+    (i) => parseInt(i.service.id) === parseInt(selectedServiceId.value),
   )
 
   // Return employees for this specific service if service is removed from the package, but it is in the "package booking"
   let employeeIds = bookable
-    ? bookable.providers.map(i => i.id)
-    : store.getters['entities/getServiceEmployees'](selectedServiceId.value).map(i => i.id)
+    ? bookable.providers.map((i) => i.id)
+    : store.getters['entities/getServiceEmployees'](selectedServiceId.value).map((i) => i.id)
 
   if (employeeIds.length) {
     params.providerIds = employeeIds
@@ -512,7 +533,7 @@ function bookAppointment () {
     bookings: [
       {
         packageCustomerService: {
-          id: props.data.services[selectedServiceId.value].purchaseData.packageCustomerServiceId
+          id: props.data.services[selectedServiceId.value].purchaseData.packageCustomerServiceId,
         },
         customer: {
           id: user.id,
@@ -522,14 +543,14 @@ function bookAppointment () {
           phone: user.phone,
           countryPhoneIso: user.countryPhoneIso,
           externalId: user.externalId,
-          translations: user.translations
+          translations: user.translations,
         },
         customerId: user.id,
         customFields: null,
         persons: 1,
         extras: [],
         deposit: 0,
-      }
+      },
     ],
     serviceId: selectedServiceId.value,
     locationId: props.data.services[selectedServiceId.value].purchaseData.locitionId,
@@ -545,7 +566,7 @@ function bookAppointment () {
   }
 }
 
-function managedAppointment (passedData) {
+function managedAppointment(passedData) {
   targetAppointment.value = null
 
   emits('booked', passedData)
@@ -553,30 +574,31 @@ function managedAppointment (passedData) {
 
 let waitingForCancelation = ref(false)
 
-function cancelPurchase () {
+function cancelPurchase() {
   waitingForCancelation.value = true
-  httpClient.post(
-    '/packages/customers/' + parseInt(selectedPackageCustomerId.value),
-    {
-      status: 'canceled'
-    }
-  ).then(() => {
-    activePurchaseCancel.value = false
-    emits('canceled', {message: amLabels.value.package_purchase_canceled})
-  }).catch((error) => {
-    if (error.response) {
-      emits('cancelError', error.response.data)
-    }
-  }).finally(() => {
-    waitingForCancelation.value = false
-  })
+  httpClient
+    .post('/packages/customers/' + parseInt(selectedPackageCustomerId.value), {
+      status: 'canceled',
+    })
+    .then(() => {
+      activePurchaseCancel.value = false
+      emits('canceled', { message: amLabels.value.package_purchase_canceled })
+    })
+    .catch((error) => {
+      if (error.response) {
+        emits('cancelError', error.response.data)
+      }
+    })
+    .finally(() => {
+      waitingForCancelation.value = false
+    })
 }
 
-function getPackageAppointments (passedData) {
+function getPackageAppointments(passedData) {
   emits('booked', passedData)
 }
 
-function goBack () {
+function goBack() {
   emits('goBack')
 }
 
@@ -590,15 +612,17 @@ const labels = inject('labels')
 const localLanguage = inject('localLanguage')
 
 // * if local lang is in settings lang
-let langDetection = computed(() => amSettings.value.general.usedLanguages.includes(localLanguage.value))
+let langDetection = computed(() =>
+  amSettings.value.general.usedLanguages.includes(localLanguage.value),
+)
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   let customizedLabels = amCustomize.value.packageAppointmentsList.translations
   if (customizedLabels) {
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -611,7 +635,6 @@ let amLabels = computed(() => {
 
 provide('amLabels', amLabels)
 
-
 let alertVisibility = computed(() => {
   return store.getters['cabinet/getPaymentLinkError'].package
 })
@@ -619,17 +642,17 @@ let alertType = ref('error')
 
 let alertMessage = ref(amLabels.value.payment_link_error)
 
-function closeAlert () {
+function closeAlert() {
   alertVisibility.value = false
-  store.commit('cabinet/setPaymentLinkError', {value: false, type: 'package'})
+  store.commit('cabinet/setPaymentLinkError', { value: false, type: 'package' })
 }
 
-function customizedLabels (step) {
-  let computedLabels = reactive({...labels})
+function customizedLabels(step) {
+  let computedLabels = reactive({ ...labels })
 
   let customizedLabels = amCustomize.value[step].translations
   if (customizedLabels) {
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -640,7 +663,7 @@ function customizedLabels (step) {
   return computedLabels
 }
 
-function customizedOptions (step) {
+function customizedOptions(step) {
   return amCustomize.value[step].options
 }
 
@@ -654,7 +677,7 @@ let cssVars = computed(() => {
     '--am-c-cappa-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
     '--am-c-cappa-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
     '--am-c-cappa-text-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
-    '--am-c-cappa-primary': amColors.value.colorPrimary
+    '--am-c-cappa-primary': amColors.value.colorPrimary,
   }
 })
 </script>
@@ -671,7 +694,6 @@ export default {
   // am - amelia
   // cappa - cabinet panel package appointments
   .am-cappa {
-
     &__back {
       display: flex;
       align-items: center;
@@ -697,7 +719,8 @@ export default {
         flex-wrap: wrap;
       }
 
-      &-left, &-right {
+      &-left,
+      &-right {
         display: flex;
         align-items: center;
       }

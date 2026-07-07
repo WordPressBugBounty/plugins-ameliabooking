@@ -1,6 +1,6 @@
 <template>
   <div class="am-fs__congrats-info-cart">
-    <span>{{amLabels.congrats_cart}}:</span>
+    <span>{{ amLabels.congrats_cart }}:</span>
     <span>{{ cart.length }}</span>
   </div>
 </template>
@@ -14,15 +14,13 @@ const store = useStore()
 
 const amLabels = inject('amLabels')
 
-let cart = computed(() => useCart(store).filter(i => i.serviceId && i.serviceId in i.services))
+let cart = computed(() => useCart(store).filter((i) => i.serviceId && i.serviceId in i.services))
 </script>
 
 <script>
 export default {
-  name: 'CartInfoService'
+  name: 'CartInfoService',
 }
 </script>
 
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>

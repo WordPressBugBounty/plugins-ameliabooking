@@ -1,17 +1,11 @@
 <template>
   <div class="am-cc" :style="cssVars">
     <AmCollapse>
-      <AmCollapseItem
-        heading-class="am-cc__heading-wrapper"
-        :side="props.parentWidth > 500"
-      >
+      <AmCollapseItem heading-class="am-cc__heading-wrapper" :side="props.parentWidth > 500">
         <template #heading>
           <div class="am-cc__heading" :class="props.responsiveClass">
             <div class="am-cc__heading-info" :class="props.responsiveClass">
-              <div
-                class="am-cc__heading-info__part"
-                :class="props.responsiveClass"
-              >
+              <div class="am-cc__heading-info__part" :class="props.responsiveClass">
                 <div class="am-cc__time">
                   {{ props.start }}
                 </div>
@@ -26,10 +20,7 @@
                   {{ labelsDisplay(props.booking.status) }}
                 </div>
               </div>
-              <div
-                class="am-cc__heading-info__part"
-                :class="props.responsiveClass"
-              >
+              <div class="am-cc__heading-info__part" :class="props.responsiveClass">
                 <div v-if="props.parentWidth <= 650" class="am-cc__name">
                   {{ props.name }}
                 </div>
@@ -43,20 +34,25 @@
               </div>
             </div>
             <div
-              v-if="(props.booking.status === 'approved' || props.booking.status === 'pending') &&
-              (!props.isPackageBooking || (props.reservation.cancelable || props.reservation.reschedulable) || !licence.isStarter)"
+              v-if="
+                (props.booking.status === 'approved' || props.booking.status === 'pending') &&
+                (!props.isPackageBooking ||
+                  props.reservation.cancelable ||
+                  props.reservation.reschedulable ||
+                  !licence.isStarter)
+              "
               class="am-cc__heading-actions"
               :class="props.responsiveClass"
             >
               <PaymentButton
-                v-if="
-                  !props.isPackageBooking &&
-                  !licence.isStarter &&
-                  pageRenderKey !== 'cape'
-                "
+                v-if="!props.isPackageBooking && !licence.isStarter && pageRenderKey !== 'cape'"
               />
               <el-popover
-                v-if="props.reservation.cancelable || props.reservation.reschedulable || !licence.isStarter"
+                v-if="
+                  props.reservation.cancelable ||
+                  props.reservation.reschedulable ||
+                  !licence.isStarter
+                "
                 ref="editRef"
                 :visible="editPopVisible"
                 :persistent="false"
@@ -81,8 +77,7 @@
                   <!-- Reschedule -->
                   <div
                     v-if="
-                      props.reservation.type === 'appointment' &&
-                      props.reservation.reschedulable
+                      props.reservation.type === 'appointment' && props.reservation.reschedulable
                     "
                     class="am-cc__edit-item"
                     @click="rescheduleItem"
@@ -95,20 +90,14 @@
                   <!-- /Reschedule -->
 
                   <!-- Invoice -->
-                  <div
-                      v-if="features.invoices"
-                      class="am-cc__edit-item"
-                  >
+                  <div v-if="features.invoices" class="am-cc__edit-item">
                     <span class="am-icon-eye"></span>
                     <span class="am-cc__edit-text">
                       {{ labelsDisplay('preview_invoice') }}
                     </span>
                   </div>
 
-                  <div
-                      v-if="features.invoices"
-                      class="am-cc__edit-item"
-                  >
+                  <div v-if="features.invoices" class="am-cc__edit-item">
                     <span class="am-icon-download"></span>
                     <span class="am-cc__edit-text">
                       {{ labelsDisplay('download_invoice') }}
@@ -143,10 +132,7 @@
                   </div>
 
                   <template v-if="props.reservation.type === 'event'">
-                    <div
-                      v-click-outside="closeEditItemPopup"
-                      class="am-cc__edit"
-                    >
+                    <div v-click-outside="closeEditItemPopup" class="am-cc__edit">
                       <!-- Edit Attendee -->
                       <div class="am-cc__edit-item am-edit">
                         <span class="am-icon-users-plus"></span>
@@ -156,10 +142,7 @@
                       </div>
                       <!-- /Edit Attendee -->
                     </div>
-                    <div
-                      v-click-outside="closeEditItemPopup"
-                      class="am-cc__edit"
-                    >
+                    <div v-click-outside="closeEditItemPopup" class="am-cc__edit">
                       <!-- List Event Attendees -->
                       <div class="am-cc__edit-item am-edit">
                         <span class="am-icon-user"></span>
@@ -213,19 +196,33 @@
               <!-- /Employee -->
 
               <!-- Customers -->
-              <template v-if="pageRenderKey === 'cape' && props.reservation.type === 'appointment' && props.customizedOptions.customer.visibility">
+              <template
+                v-if="
+                  pageRenderKey === 'cape' &&
+                  props.reservation.type === 'appointment' &&
+                  props.customizedOptions.customer.visibility
+                "
+              >
                 <CollapseCardPopover
-                    v-if="props.customers.length"
-                    :header-text="props.customers.length > 1 ? labelsDisplay('customers') : labelsDisplay('customer') "
-                    type="customers"
-                    :content-data="props.customers"
+                  v-if="props.customers.length"
+                  :header-text="
+                    props.customers.length > 1
+                      ? labelsDisplay('customers')
+                      : labelsDisplay('customer')
+                  "
+                  type="customers"
+                  :content-data="props.customers"
                 >
                   <template #default>
                     <div class="am-cc__data">
                       <span class="am-icon-user"></span>
                       <span class="am-cc__data-text">
-                      {{ props.customers.length > 1 ? labelsDisplay('customers') : labelsDisplay('customer') }}
-                    </span>
+                        {{
+                          props.customers.length > 1
+                            ? labelsDisplay('customers')
+                            : labelsDisplay('customer')
+                        }}
+                      </span>
                     </div>
                   </template>
                 </CollapseCardPopover>
@@ -233,14 +230,9 @@
               <!-- /Customers -->
 
               <!-- Price -->
-              <div
-                v-if="props.customizedOptions.price.visibility"
-                class="am-cc__data"
-              >
+              <div v-if="props.customizedOptions.price.visibility" class="am-cc__data">
                 <span class="am-icon-payments"></span>
-                <span class="am-cc__data-text">{{
-                  useFormattedPrice(props.price)
-                }}</span>
+                <span class="am-cc__data-text">{{ useFormattedPrice(props.price) }}</span>
               </div>
               <!-- /Price -->
 
@@ -272,10 +264,7 @@
               <!-- /Periods -->
 
               <!-- GoogleMeet Link -->
-              <div
-                v-if="props.googleMeetLink && features.googleCalendar"
-                class="am-cc__data link"
-              >
+              <div v-if="props.googleMeetLink && features.googleCalendar" class="am-cc__data link">
                 <span class="am-icon-link"></span>
                 <a class="am-cc__data-text link">
                   {{ labelsDisplay('google_meet_link') }}
@@ -296,10 +285,7 @@
               <!-- /Microsoft Teams link -->
 
               <!-- Zoom Link -->
-              <div
-                v-if="props.zoomLink && features.zoom"
-                class="am-cc__data link"
-              >
+              <div v-if="props.zoomLink && features.zoom" class="am-cc__data link">
                 <span class="am-icon-link"></span>
                 <a class="am-cc__data-text link">
                   {{ labelsDisplay('zoom_link') }}
@@ -319,9 +305,7 @@
               <!-- Extras -->
               <CollapseCardPopover
                 v-if="props.extras.length && features.extras"
-                :header-text="`${props.extras.length} ${labelsDisplay(
-                  'extras'
-                )}`"
+                :header-text="`${props.extras.length} ${labelsDisplay('extras')}`"
                 type="extras"
                 :content-data="props.extras"
               >
@@ -373,10 +357,7 @@
               <!-- /Tickets -->
 
               <!-- Location -->
-              <div
-                v-if="location !== null && !licence.isStarter"
-                class="am-cc__data link"
-              >
+              <div v-if="location !== null && !licence.isStarter" class="am-cc__data link">
                 <span class="am-icon-locations"></span>
                 <a class="am-cc__data-text">
                   {{ props.location }}
@@ -444,7 +425,7 @@ let props = defineProps({
   },
   customers: {
     type: [Array],
-    default: () => []
+    default: () => [],
   },
   location: {
     type: [String, Object],
@@ -546,17 +527,10 @@ let stepName = inject('stepName')
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepName.value]
-      .translations &&
-      amCustomize.value[pageRenderKey.value][stepName.value].translations[
-        label
-      ] &&
-      amCustomize.value[pageRenderKey.value][stepName.value].translations[
-        label
-      ][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[
-          label
-        ][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepName.value].translations &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -606,47 +580,20 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-cc-primary': amColors.value.colorPrimary,
-    '--am-c-cc-primary-op70': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.7
-    ),
+    '--am-c-cc-primary-op70': useColorTransparency(amColors.value.colorPrimary, 0.7),
     '--am-c-cc-error': amColors.value.colorError,
-    '--am-c-cc-error-op15': useColorTransparency(
-      amColors.value.colorError,
-      0.15
-    ),
+    '--am-c-cc-error-op15': useColorTransparency(amColors.value.colorError, 0.15),
     '--am-c-cc-warning': amColors.value.colorWarning,
-    '--am-c-cc-warning-op15': useColorTransparency(
-      amColors.value.colorWarning,
-      0.15
-    ),
+    '--am-c-cc-warning-op15': useColorTransparency(amColors.value.colorWarning, 0.15),
     '--am-c-cc-success': amColors.value.colorSuccess,
-    '--am-c-cc-success-op15': useColorTransparency(
-      amColors.value.colorSuccess,
-      0.15
-    ),
+    '--am-c-cc-success-op15': useColorTransparency(amColors.value.colorSuccess, 0.15),
     '--am-c-cc-bgr': amColors.value.colorMainBgr,
     '--am-c-cc-text': amColors.value.colorMainText,
-    '--am-c-cc-text-op03': useColorTransparency(
-      amColors.value.colorMainText,
-      0.03
-    ),
-    '--am-c-cc-text-op10': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
-    '--am-c-cc-text-op15': useColorTransparency(
-      amColors.value.colorMainText,
-      0.15
-    ),
-    '--am-c-cc-text-op70': useColorTransparency(
-      amColors.value.colorMainText,
-      0.7
-    ),
-    '--am-c-cc-text-op90': useColorTransparency(
-      amColors.value.colorMainText,
-      0.9
-    ),
+    '--am-c-cc-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03),
+    '--am-c-cc-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
+    '--am-c-cc-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15),
+    '--am-c-cc-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
+    '--am-c-cc-text-op90': useColorTransparency(amColors.value.colorMainText, 0.9),
     '--am-font-family': amFonts.value.fontFamily,
 
     // css properties

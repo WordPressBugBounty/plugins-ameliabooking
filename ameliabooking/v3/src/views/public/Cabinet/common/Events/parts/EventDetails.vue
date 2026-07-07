@@ -1,20 +1,8 @@
 <template>
-  <el-form
-    ref="detailsFormRef"
-    :model="formData"
-    :rules="rules"
-    class="am-capei-def"
-  >
+  <el-form ref="detailsFormRef" :model="formData" :rules="rules" class="am-capei-def">
     <!-- Event Name -->
-    <el-form-item
-      :prop="'name'"
-      :label="`${amLabels.name}:`"
-      class="am-capei-def__item"
-    >
-      <AmInput
-        v-model="formData.name"
-        :placeholder="amLabels.enter_event_name"
-      />
+    <el-form-item :prop="'name'" :label="`${amLabels.name}:`" class="am-capei-def__item">
+      <AmInput v-model="formData.name" :placeholder="amLabels.enter_event_name" />
     </el-form-item>
     <!-- /Event Name -->
 
@@ -24,15 +12,8 @@
       :label="`${amLabels.event_select_address}:`"
       class="am-capei-def__item"
     >
-      <AmSelect
-        v-model="formData.locationId"
-        :placeholder="amLabels.select"
-      >
-        <AmOption
-          :key="0"
-          :value="0"
-          :label="amLabels.event_custom_address"
-        />
+      <AmSelect v-model="formData.locationId" :placeholder="amLabels.select">
+        <AmOption :key="0" :value="0" :label="amLabels.event_custom_address" />
         <AmOption
           v-for="entity in locations"
           :key="entity.id"
@@ -49,9 +30,7 @@
       :label="`${amLabels.event_custom_address}:`"
       class="am-capei-def__item"
     >
-      <AmInput
-        v-model="formData.customLocation"
-      />
+      <AmInput v-model="formData.customLocation" />
     </el-form-item>
     <!-- /Custom Location -->
 
@@ -78,22 +57,27 @@
 
     <!-- Event Organizer -->
     <el-form-item
-      v-if="!licence.isStarter &&
-        (amSettings.googleCalendar.enabled || amSettings.outlookCalendar.enabled || amSettings.appleCalendar.enabled) &&
-        (store.getters['employee/getGoogleCalendarId'] || store.getters['employee/getOutlookCalendarId'] || store.getters['employee/getAppleCalendarId'])"
+      v-if="
+        !licence.isStarter &&
+        (amSettings.googleCalendar.enabled ||
+          amSettings.outlookCalendar.enabled ||
+          amSettings.appleCalendar.enabled) &&
+        (store.getters['employee/getGoogleCalendarId'] ||
+          store.getters['employee/getOutlookCalendarId'] ||
+          store.getters['employee/getAppleCalendarId'])
+      "
       class="am-capei-def__item am-capei-def__item-tool"
     >
       <AmSwitch
         v-model="isOrganizer"
-        :disabled="formData.organizerId && formData.organizerId !== store.getters['auth/getProfile'].id"
+        :disabled="
+          formData.organizerId && formData.organizerId !== store.getters['auth/getProfile'].id
+        "
         :active-text="amLabels.event_organizer"
         :aria-label="amLabels.event_organizer"
         @change="toggleOrganizer"
       />
-      <el-tooltip
-        effect="dark"
-        placement="top"
-      >
+      <el-tooltip effect="dark" placement="top">
         <template #content>
           <div v-html="amLabels.event_organizer_tooltip"></div>
         </template>
@@ -134,16 +118,12 @@
         :active-text="amLabels.notify_attendees"
         :aria-label="amLabels.notify_attendees"
       />
-      <el-tooltip
-        effect="dark"
-        placement="top"
-      >
+      <el-tooltip effect="dark" placement="top">
         <template #content>
           <div v-html="amLabels.notify_attendees_tooltip"></div>
         </template>
         <IconComponent class="am-tooltip__trigger" icon="info-reverse" />
       </el-tooltip>
-
     </el-form-item>
 
     <!-- Event Description -->
@@ -163,25 +143,21 @@
 
 <script setup>
 // * Import form Vue
-import {
-  computed,
-  ref,
-  inject,
-} from "vue";
+import { computed, ref, inject } from 'vue'
 
 // * Import Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import Components
-import AmInput from "@/views/_components/input/AmInput.vue";
-import AmSelect from "@/views/_components/select/AmSelect.vue";
-import AmOption from "@/views/_components/select/AmOption.vue";
-import AmSwitch from "@/views/_components/switch/AmSwitch.vue";
-import IconComponent from "@/views/_components/icons/IconComponent.vue";
-import DescriptionEditor from "../../parts/DescriptionEditor.vue";
+import AmInput from '@/views/_components/input/AmInput.vue'
+import AmSelect from '@/views/_components/select/AmSelect.vue'
+import AmOption from '@/views/_components/select/AmOption.vue'
+import AmSwitch from '@/views/_components/switch/AmSwitch.vue'
+import IconComponent from '@/views/_components/icons/IconComponent.vue'
+import DescriptionEditor from '../../parts/DescriptionEditor.vue'
 
 // * Store
-let store = useStore();
+let store = useStore()
 
 // * Labels
 let amLabels = inject('amLabels')
@@ -197,7 +173,7 @@ let locations = ref(store.getters['entities/getLocations'])
 let tags = ref(store.getters['entities/getTags'])
 
 let queryTags = ref('')
-function filterTags (query) {
+function filterTags(query) {
   queryTags.value = query.toLowerCase()
 }
 
@@ -220,55 +196,55 @@ let formData = ref({
     get: () => store.getters['event/getName'],
     set: (val) => {
       store.commit('event/setName', val)
-    }
+    },
   }),
   locationId: computed({
     get: () => store.getters['event/getLocationId'],
     set: (val) => {
       store.commit('event/setLocationId', val)
-    }
+    },
   }),
   customLocation: computed({
     get: () => store.getters['event/getCustomLocation'],
     set: (val) => {
       store.commit('event/setCustomLocation', val)
-    }
+    },
   }),
   organizerId: computed({
     get: () => store.getters['event/getOrganizerId'],
     set: (val) => {
       store.commit('event/setOrganizerId', val)
-    }
+    },
   }),
   zoomUserId: computed({
     get: () => store.getters['event/getZoomUserId'],
     set: (val) => {
       store.commit('event/setZoomUserId', val)
-    }
+    },
   }),
   tags: computed({
     get: () => store.getters['event/getTags'],
     set: (val) => {
       store.commit('event/setTags', val)
-    }
+    },
   }),
   notifyParticipants: computed({
     get: () => store.getters['event/getNotifyParticipants'],
     set: (val) => {
       store.commit('event/setNotifyParticipants', val)
-    }
+    },
   }),
   description: computed({
     get: () => store.getters['event/getDescription'],
     set: (val) => {
       store.commit('event/setDescription', val ? val : '')
-    }
+    },
   }),
 })
 
 let isOrganizer = computed(() => formData.value.organizerId !== null)
 
-function toggleOrganizer (val) {
+function toggleOrganizer(val) {
   store.commit('event/setOrganizerId', val ? store.getters['auth/getProfile'].id : null)
 }
 
@@ -280,7 +256,7 @@ let rules = computed(() => {
         required: true,
         message: amLabels.value.please_enter_name,
         trigger: ['submit', 'change'],
-      }
+      },
     ],
   }
 })
@@ -289,7 +265,7 @@ let rules = computed(() => {
 let zoomOptions = computed(() => {
   let users = store.getters['auth/getZoomUsers']
 
-  if (users.length){
+  if (users.length) {
     return users.map((user) => {
       return {
         value: user.id,
@@ -303,7 +279,7 @@ let zoomOptions = computed(() => {
 
 // * Expose
 defineExpose({
-  detailsFormRef
+  detailsFormRef,
 })
 </script>
 
@@ -334,7 +310,7 @@ defineExpose({
 
       &-tool {
         .el-form-item {
-          &__content{
+          &__content {
             gap: 8px;
           }
         }

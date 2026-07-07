@@ -1,14 +1,10 @@
 <template>
   <span></span>
 </template>
-<script setup>
-
-</script>
+<script setup></script>
 <script>
 export default {
-  name: "EmptyState"
+  name: 'EmptyState',
 }
 </script>
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>

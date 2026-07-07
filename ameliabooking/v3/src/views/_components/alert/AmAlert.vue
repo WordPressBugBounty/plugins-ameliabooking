@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="am-alert-wrapper"
-    :class="props.customClass"
-    :style="cssVars"
-  >
+  <div class="am-alert-wrapper" :class="props.customClass" :style="cssVars">
     <el-alert
       ref="amAlert"
       :title="props.title"
@@ -15,7 +11,7 @@
       :show-icon="props.showIcon"
       :effect="props.effect"
       class="am-alert"
-      :class="{'am-border': showBorder}"
+      :class="{ 'am-border': showBorder }"
       :style="cssVars"
       @close="() => $emit('close')"
     >
@@ -31,13 +27,8 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject,
-  ref,
-  useSlots
-} from 'vue';
-import { useColorTransparency } from "../../../assets/js/common/colorManipulation";
+import { computed, inject, ref, useSlots } from 'vue'
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
 
 const slots = useSlots()
 
@@ -47,51 +38,51 @@ const slots = useSlots()
 const props = defineProps({
   title: {
     type: String,
-    default: ''
+    default: '',
   },
   type: {
     type: String,
     default: 'info',
     validator(value) {
       return ['success', 'warning', 'info', 'error'].includes(value)
-    }
+    },
   },
   description: {
     type: String,
-    default: ''
+    default: '',
   },
   closable: {
     type: Boolean,
-    default: true
+    default: true,
   },
   center: {
     type: Boolean,
-    default: false
+    default: false,
   },
   closeText: {
     type: String,
-    default: ''
+    default: '',
   },
   showIcon: {
     type: Boolean,
-    default: false
+    default: false,
   },
   effect: {
     type: String,
-    default: 'light'
+    default: 'light',
   },
   showBorder: {
     type: Boolean,
-    default: false
+    default: false,
   },
   customClass: {
     type: String,
-    default: ''
+    default: '',
   },
   closeAfter: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 })
 
 /**
@@ -115,8 +106,8 @@ let amColors = inject('amColors', {
   amColors: {
     value: {
       colorInpText: '#1A2C37',
-    }
-  }
+    },
+  },
 })
 
 // * Css Variables
@@ -142,10 +133,9 @@ let cssVars = computed(() => {
     // error
     '--am-c-alerte-bgr': amColors.value.colorError,
     '--am-c-alerte-bgr-op10': useColorTransparency(amColors.value.colorError, 0.1),
-    '--am-c-alerte-bgr-op60': useColorTransparency(amColors.value.colorError, 0.6)
+    '--am-c-alerte-bgr-op60': useColorTransparency(amColors.value.colorError, 0.6),
   }
 })
-
 </script>
 
 <style lang="scss">
@@ -224,7 +214,7 @@ let cssVars = computed(() => {
         color: var(--am-c-alert-text);
       }
 
-      &__icon{
+      &__icon {
         margin-right: 11px;
       }
 

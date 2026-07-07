@@ -112,10 +112,8 @@
         <span class="am-icon-clock"></span>
         <span>
           {{
-            `${getFrontedFormattedTime(
-              props.data.service.time
-            )} - ${getFrontedFormattedTime(
-              addSeconds(props.data.service.time, duration)
+            `${getFrontedFormattedTime(props.data.service.time)} - ${getFrontedFormattedTime(
+              addSeconds(props.data.service.time, duration),
             )}`
           }}
         </span>
@@ -123,9 +121,7 @@
       <div class="am-fs__ci-info__el">
         <span class="am-icon-user"></span>
         <span>
-          {{
-            `${props.data.service.employee.firstName} ${props.data.service.employee.lastName}`
-          }}
+          {{ `${props.data.service.employee.firstName} ${props.data.service.employee.lastName}` }}
         </span>
       </div>
       <div class="am-fs__ci-info__el">
@@ -143,9 +139,7 @@
       <div class="am-fs__ci-info__el">
         <span class="am-icon-users-plus"></span>
         <span>
-          {{
-            `${props.data.service.persons} / ${props.data.service.maxCapacity}`
-          }}
+          {{ `${props.data.service.persons} / ${props.data.service.maxCapacity}` }}
         </span>
       </div>
     </div>
@@ -214,12 +208,8 @@ function labelsDisplay(label, stepKey) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value][stepKey].translations &&
       amCustomize.value[pageRenderKey.value][stepKey].translations[label] &&
-      amCustomize.value[pageRenderKey.value][stepKey].translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -251,9 +241,11 @@ function extrasTotalPrice() {
 
 let duration = ref(
   props.data.service.duration +
-  (features.extras ? props.data.extras.reduce((accumulator, extra) => {
-      return accumulator + extra.duration * extra.quantity
-    }, 0) : 0)
+    (features.extras
+      ? props.data.extras.reduce((accumulator, extra) => {
+          return accumulator + extra.duration * extra.quantity
+        }, 0)
+      : 0),
 )
 
 let amColors = inject('amColors')
@@ -265,22 +257,10 @@ let cssVars = computed(() => {
     // ci - cart item
     // op - opacity
     '--am-c-ci-text': amColors.value.colorMainText,
-    '--am-c-ci-text-op80': useColorTransparency(
-      amColors.value.colorMainText,
-      0.8
-    ),
-    '--am-c-ci-text-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
-    '--am-c-ci-text-op30': useColorTransparency(
-      amColors.value.colorMainText,
-      0.3
-    ),
-    '--am-c-ci-text-op05': useColorTransparency(
-      amColors.value.colorMainText,
-      0.05
-    ),
+    '--am-c-ci-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
+    '--am-c-ci-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-ci-text-op30': useColorTransparency(amColors.value.colorMainText, 0.3),
+    '--am-c-ci-text-op05': useColorTransparency(amColors.value.colorMainText, 0.05),
     '--am-c-ci-success': amColors.value.colorSuccess,
     '--am-c-ci-primary': amColors.value.colorPrimary,
     '--am-c-ci-error': amColors.value.colorError,

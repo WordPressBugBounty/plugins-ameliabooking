@@ -6,9 +6,7 @@
     :style="cssVars"
   >
     <span
-      v-if="
-        stepIndex in sidebarSteps && 'label' in sidebarSteps[stepIndex] && ready
-      "
+      v-if="stepIndex in sidebarSteps && 'label' in sidebarSteps[stepIndex] && ready"
       class="am-fs__main-heading-inner"
     >
       <AmButton
@@ -17,9 +15,7 @@
         class="am-heading-prev"
         :icon="{
           components: { IconComponent },
-          template: `<IconComponent icon=${
-            isRtl ? 'arrow-right' : 'arrow-left'
-          } />`,
+          template: `<IconComponent icon=${isRtl ? 'arrow-right' : 'arrow-left'} />`,
         }"
         :icon-only="true"
         aria-label="previous step"
@@ -52,13 +48,7 @@
         v-for="(step, i) in marks"
         :key="i"
         class="am-step"
-        :class="
-          i === sliderValue
-            ? 'am-current-step'
-            : i < sliderValue
-            ? 'am-passed-step'
-            : ''
-        "
+        :class="i === sliderValue ? 'am-current-step' : i < sliderValue ? 'am-passed-step' : ''"
       >
       </span>
     </div>
@@ -146,38 +136,37 @@ let amColors = inject(
     colorBtnPrimText: '#FFFFFF',
     colorBtnSec: '#1A2C37',
     colorBtnSecText: '#FFFFFF',
-  })
+  }),
 )
 
 // * Calculate Step Width
 let cssVars = computed(() => {
   return {
     '--am-step-length': `${100 / marks.length}%`,
-    '--am-c-main-heading-text-op15': useColorTransparency(
-      amColors.value.colorMainText,
-      0.15
-    ),
+    '--am-c-main-heading-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15),
   }
 })
 
-watch(() => stepIndex.value, async () => {
-  if (stepIndex.value <= 0 || loading.value) {
-    return
-  }
+watch(
+  () => stepIndex.value,
+  async () => {
+    if (stepIndex.value <= 0 || loading.value) {
+      return
+    }
 
-  await nextTick()
+    await nextTick()
 
-  const backButtonElement = backButtonRef.value?.$el || backButtonRef.value
-  const focusTarget =
-    backButtonElement && typeof backButtonElement.querySelector === 'function'
-      ? backButtonElement.querySelector('button') || backButtonElement
-      : backButtonElement
+    const backButtonElement = backButtonRef.value?.$el || backButtonRef.value
+    const focusTarget =
+      backButtonElement && typeof backButtonElement.querySelector === 'function'
+        ? backButtonElement.querySelector('button') || backButtonElement
+        : backButtonElement
 
-  if (focusTarget && typeof focusTarget.focus === 'function') {
-    focusTarget.focus()
-  }
-})
-
+    if (focusTarget && typeof focusTarget.focus === 'function') {
+      focusTarget.focus()
+    }
+  },
+)
 </script>
 
 <style lang="scss">

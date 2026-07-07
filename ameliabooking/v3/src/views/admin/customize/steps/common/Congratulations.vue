@@ -3,10 +3,7 @@
     <div class="am-congrats__main">
       <img
         v-if="props.type !== 'event'"
-        :src="
-          baseUrls.wpAmeliaPluginURL +
-          '/v3/src/assets/img/congratulations/congratulations.svg'
-        "
+        :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/congratulations/congratulations.svg'"
       />
 
       <p v-if="type !== 'event'" class="am-congrats__main-heading">
@@ -87,11 +84,8 @@ let amLabels = inject('labels')
 
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    let translations =
-      amCustomize.value[pageRenderKey.value][stepName.value].translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    let translations = amCustomize.value[pageRenderKey.value][stepName.value].translations
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -129,17 +123,11 @@ let cssVars = computed(() => {
     '--am-c-congrats-heading-text': amColors.value.colorMainHeadingText,
     '--am-c-congrats-heading-text-op40': useColorTransparency(
       amColors.value.colorMainHeadingText,
-      0.4
+      0.4,
     ),
     '--am-c-congrats-text': amColors.value.colorMainText,
-    '--am-c-congrats-text-op30': useColorTransparency(
-      amColors.value.colorMainText,
-      0.3
-    ),
-    '--am-c-congrats-text-op40': useColorTransparency(
-      amColors.value.colorMainText,
-      0.4
-    ),
+    '--am-c-congrats-text-op30': useColorTransparency(amColors.value.colorMainText, 0.3),
+    '--am-c-congrats-text-op40': useColorTransparency(amColors.value.colorMainText, 0.4),
     '--am-c-congrats-primary': amColors.value.colorPrimary,
   }
 })
@@ -160,11 +148,7 @@ let cssVars = computed(() => {
         $count: 5;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms
-              cubic-bezier(0.45, 1, 0.4, 1.2)
-              #{$i *
-              100}ms
-              am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }

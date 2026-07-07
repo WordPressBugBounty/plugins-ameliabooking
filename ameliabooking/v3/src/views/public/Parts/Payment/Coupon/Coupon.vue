@@ -1,48 +1,34 @@
 <template>
-  <el-form
-    ref="couponFormRef"
-    :rules="rules"
-    :model="couponFormData"
-  >
-    <div
-      class="am-fs__coupon"
-      :class="{'am-fs__coupon-mobile-s': mobileS}"
-      :style="cssVars"
-    >
-      <el-form-item
-        :prop="'coupon'"
-        class="am-fs__coupon-form-item"
-      >
+  <el-form ref="couponFormRef" :rules="rules" :model="couponFormData">
+    <div class="am-fs__coupon" :class="{ 'am-fs__coupon-mobile-s': mobileS }" :style="cssVars">
+      <el-form-item :prop="'coupon'" class="am-fs__coupon-form-item">
         <template #label>
           <span>{{ `${amLabels.coupon}:` }}</span>
         </template>
         <AmInput
           v-model="couponFormData.coupon"
           size="small"
-          :class="{'am-fs__coupon-invalid': coupon.limit === 0}"
+          :class="{ 'am-fs__coupon-invalid': coupon.limit === 0 }"
           :prefix-icon="couponIcon"
           :suffix-icon="validateIcon"
           @input="clearValidation"
-          @keydown.enter="(e) => {e.preventDefault()}"
+          @keydown.enter="
+            (e) => {
+              e.preventDefault()
+            }
+          "
         />
       </el-form-item>
-      <AmButton
-        size="small"
-        @click="validate"
-      >
+      <AmButton size="small" @click="validate">
         {{ amLabels.add_coupon_btn }}
       </AmButton>
     </div>
   </el-form>
 
   <!-- Coupons Used Message -->
-  <el-row
-    v-if="props.bookableType !== 'event'"
-    class="am-coupon-limit"
-    :style="cssVars"
-  >
+  <el-row v-if="props.bookableType !== 'event'" class="am-coupon-limit" :style="cssVars">
     <el-col :sm="2" :xs="4">
-      <div style="display: inline-block;">
+      <div style="display: inline-block">
         <span class="am-icon-coupon-limit"></span>
       </div>
     </el-col>
@@ -64,28 +50,24 @@
 <script setup>
 import AmInput from '../../../../_components/input/AmInput.vue'
 import AmButton from '../../../../_components/button/AmButton.vue'
-import IconComponent from "../../../../_components/icons/IconComponent.vue";
+import IconComponent from '../../../../_components/icons/IconComponent.vue'
 
 // * Import from Vue
-import {
-  inject,
-  computed,
-  onMounted, ref
-} from 'vue'
+import { inject, computed, onMounted, ref } from 'vue'
 
 // * Composables
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation.js'
 
 // * Import from Store
 import { useStore } from 'vuex'
-import {defaultCustomizeSettings} from "../../../../../assets/js/common/defaultCustomize";
-import {validateCoupon} from "../../../../../assets/js/public/coupon";
+import { defaultCustomizeSettings } from '../../../../../assets/js/common/defaultCustomize'
+import { validateCoupon } from '../../../../../assets/js/public/coupon'
 const store = useStore()
 
 let props = defineProps({
   entityId: {
     type: [Number, String],
-    required: true
+    required: true,
   },
   bookableType: {
     type: String,
@@ -93,16 +75,16 @@ let props = defineProps({
   },
   bookingsCount: {
     type: Number,
-    required: true
-  }
+    required: true,
+  },
 })
 
 let coupon = computed(() => store.getters['coupon/getCoupon'])
 
 // * Coupon icon
 let couponIcon = {
-  components: {IconComponent},
-  template: `<IconComponent icon="coupon" />`
+  components: { IconComponent },
+  template: `<IconComponent icon="coupon" />`,
 }
 
 // * Computed labels
@@ -118,7 +100,7 @@ let couponFormData = ref({
     get: () => store.getters['coupon/getCoupon'].code,
     set: (val) => {
       store.commit('coupon/setCode', val)
-    }
+    },
   }),
 })
 
@@ -135,8 +117,8 @@ let rules = ref({
     {
       required: couponRequired.value,
       trigger: 'submit',
-    }
-  ]
+    },
+  ],
 })
 
 onMounted(() => {
@@ -150,7 +132,7 @@ const emits = defineEmits(['couponApplied'])
 
 let validateIcon = ref('')
 
-function clearValidation () {
+function clearValidation() {
   let err = store.getters['coupon/getError']
   if (err) {
     store.commit('coupon/setError', '')
@@ -159,7 +141,7 @@ function clearValidation () {
   couponFormRef.value.clearValidate()
 }
 
-function validate () {
+function validate() {
   validateCoupon(store, () => {
     let couponNew = store.getters['coupon/getCoupon']
     if (couponNew.code && (couponNew.discount || couponNew.deduction)) {
@@ -180,19 +162,19 @@ let cWidth = inject('containerWidth', 0)
 let mobileS = computed(() => cWidth.value < 340)
 
 // * Global colors
-let amColors = inject('amColors');
+let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-coupon-primary': amColors.value.colorPrimary,
-    '--am-c-coupon-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.10),
-    '--am-c-coupon-primary-op40': useColorTransparency(amColors.value.colorPrimary, 0.40),
+    '--am-c-coupon-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
+    '--am-c-coupon-primary-op40': useColorTransparency(amColors.value.colorPrimary, 0.4),
   }
 })
 </script>
 
 <script>
 export default {
-  name: 'CouponCode'
+  name: 'CouponCode',
 }
 </script>
 
@@ -222,7 +204,8 @@ export default {
           padding-bottom: 6px;
         }
 
-        p, strong {
+        p,
+        strong {
           color: var(--am-c-ps-text);
         }
 
@@ -264,7 +247,8 @@ export default {
       }
 
       .am-input .el-input__wrapper {
-        .am-icon-info-reverse, .am-icon-check {
+        .am-icon-info-reverse,
+        .am-icon-check {
           font-size: 18px;
         }
 

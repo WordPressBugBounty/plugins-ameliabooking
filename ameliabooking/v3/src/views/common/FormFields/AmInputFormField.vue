@@ -29,75 +29,71 @@
 
 <script setup>
 // * _components
-import AmInput from'../../_components/input/AmInput.vue'
+import AmInput from '../../_components/input/AmInput.vue'
 
 // * Import from Vue
-import {
-  computed,
-  ref,
-  toRefs
-} from "vue";
+import { computed, ref, toRefs } from 'vue'
 
 // * Form Item Props
 let props = defineProps({
   modelValue: {
     type: [String, Array, Object, Number],
-    required: true
+    required: true,
   },
   itemName: {
     type: String,
-    required: true
+    required: true,
   },
   itemType: {
     type: String,
-    default: 'text'
+    default: 'text',
   },
   label: {
-    type: String
+    type: String,
   },
   labelPosition: {
     type: String,
-    default: 'top'
+    default: 'top',
   },
   placeholder: {
-    type: String
+    type: String,
   },
   visible: {
     type: Boolean,
-    default: true
+    default: true,
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   showPassword: {
     type: Boolean,
-    default: false
+    default: false,
   },
   clearable: {
     type: Boolean,
-    default: false
+    default: false,
   },
   readonly: {
     type: Boolean,
-    default: false
+    default: false,
   },
   prefixIcon: {
     type: [String, Object],
-    default: ''
+    default: '',
   },
   prepend: {
     type: [String, Object],
-    default: ''
+    default: '',
   },
   suffixIcon: {
     type: [String, Object],
-    default: ''
+    default: '',
   },
   append: {
     type: [String, Object],
-    default: ''
-  }
+    default: '',
+  },
 })
 
 // * Define Emits
@@ -109,19 +105,19 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 // * Form Item Reference
 let formFieldRef = ref(null)
 
 defineExpose({
-  formFieldRef
+  formFieldRef,
 })
 </script>
 
 <script>
 export default {
-  name: "FirstNameFormField"
+  name: 'FirstNameFormField',
 }
 </script>

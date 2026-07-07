@@ -1,40 +1,34 @@
 <template>
-  <div
-    ref="infoFormWrapperRef"
-    class="am-fs__info"
-    :class="props.globalClass"
-  >
+  <div ref="infoFormWrapperRef" class="am-fs__info" :class="props.globalClass">
     <div v-show="!loading">
-      <div v-if="paymentError && (instantBooking || isWaitingListBooking)" class="am-fs__info-error">
-        <AmAlert
-          type="error"
-          :title="paymentError"
-          :show-icon="true"
-          :closable="false"
-        >
-        </AmAlert>
+      <div
+        v-if="paymentError && (instantBooking || isWaitingListBooking)"
+        class="am-fs__info-error"
+      >
+        <AmAlert type="error" :title="paymentError" :show-icon="true" :closable="false"> </AmAlert>
       </div>
 
       <div v-if="authError" class="am-fs__info-error">
-        <AmAlert
-          type="error"
-          :title="authErrorMessage"
-          :show-icon="true"
-          :closable="true"
-        >
+        <AmAlert type="error" :title="authErrorMessage" :show-icon="true" :closable="true">
         </AmAlert>
       </div>
 
       <!-- Social Buttons -->
-      <div v-if="(settings.socialLogin.googleLoginEnabled && settings.general.googleClientId && !loggedInUser) || (settings.socialLogin.facebookLoginEnabled && settings.socialLogin.facebookCredentialsEnabled && !loggedInUser)">
+      <div
+        v-if="
+          (settings.socialLogin.googleLoginEnabled &&
+            settings.general.googleClientId &&
+            !loggedInUser) ||
+          (settings.socialLogin.facebookLoginEnabled &&
+            settings.socialLogin.facebookCredentialsEnabled &&
+            !loggedInUser)
+        "
+      >
         <div class="am-fs__info-social-wrapper">
           <div class="am-fs__info-social-wrapper__label">
-            {{amLabels.auto_fill_your_details}}
+            {{ amLabels.auto_fill_your_details }}
           </div>
-          <am-social-button
-            :provider="socialProvider"
-            @social-action="onSignupSocial"
-          />
+          <am-social-button :provider="socialProvider" @social-action="onSignupSocial" />
         </div>
 
         <!-- Social Divider -->
@@ -51,8 +45,8 @@
         label-position="top"
         class="am-fs__info-form"
         :class="[
-          {'am-fs__info-form-mobile': pageWidth < 330},
-          {'am-fs__info-form-mobile-s': pageWidth < 300}
+          { 'am-fs__info-form-mobile': pageWidth < 330 },
+          { 'am-fs__info-form-mobile-s': pageWidth < 300 },
         ]"
       >
         <template v-for="item in amCustomize.infoStep.order" :key="item.id">
@@ -74,13 +68,9 @@
           "
           class="am-subscribe"
         >
-          <AmCheckBox
-            v-model="subscribeToMailchimp"
-            :label="amLabels.subscribe_to_mailing_list"
-          >
+          <AmCheckBox v-model="subscribeToMailchimp" :label="amLabels.subscribe_to_mailing_list">
           </AmCheckBox>
         </el-form-item>
-
 
         <!-- Custom Fields TODO - validation for custom fields isn't set-->
         <template v-if="availableCustomFields && allCustomFields">
@@ -88,13 +78,13 @@
             v-for="(cf, index) in allCustomFields"
             v-show="cf.id in availableCustomFields && checkCustomerCustomFieldVisibility(cf)"
             :id="'am-cf-' + cf.id"
-            :ref="el => customFieldsRefs[index] = el"
+            :ref="(el) => (customFieldsRefs[index] = el)"
             :key="index"
             class="am-fs__info-form__item"
             :class="[
               { 'is-required': cf.type === 'file' && cf.required },
               `am-cf-width-${cf.width}`,
-              {'am-rtl': isRtl}
+              { 'am-rtl': isRtl },
             ]"
             label-position="top"
             :prop="cf.required && cf.type !== 'content' ? 'cf' + cf.id : 'inputFile'"
@@ -102,9 +92,7 @@
             <!-- ####### LABEL ####### -->
             <template v-if="cf.type !== 'content'" #label>
               <span
-                v-if="
-                  (cf.type === 'checkbox' || cf.type === 'radio') && cf.label
-                "
+                v-if="(cf.type === 'checkbox' || cf.type === 'radio') && cf.label"
                 :class="
                   (cf.type === 'checkbox' || cf.type === 'radio') && cf.required
                     ? 'am-custom-required-as-html'
@@ -114,7 +102,7 @@
               >
               </span>
               <span v-else class="am-fs__info-form__label">
-                {{cf.label}}
+                {{ cf.label }}
               </span>
             </template>
             <!-- ####### /LABEL ####### -->
@@ -124,7 +112,7 @@
             <component
               :is="customFieldsComponents[cf.type]"
               v-model="infoFormData['cf' + cf.id]"
-              :type="cf.type === 'text-area' ? 'textarea' : (cf.type === 'text' ? 'text' : '')"
+              :type="cf.type === 'text-area' ? 'textarea' : cf.type === 'text' ? 'text' : ''"
               :placeholder="refCFPlaceholders[cf.id] && refCFPlaceholders[cf.id].placeholder"
             ></component>
             <!-- /types - [input, text-area] -->
@@ -145,7 +133,11 @@
               :persistent="false"
               :existing-date="infoFormData['cf' + cf.id]"
               :disabled="false"
-              @selected-date="(dateString) => {selectedDatePickerValue('cf' + cf.id, dateString)}"
+              @selected-date="
+                (dateString) => {
+                  selectedDatePickerValue('cf' + cf.id, dateString)
+                }
+              "
             />
             <!-- /type - date-picker-full -->
 
@@ -165,10 +157,7 @@
             <!-- /type - select -->
 
             <!-- type - radio -->
-            <AmRadioGroup
-              v-if="cf.type === 'radio'"
-              v-model="infoFormData['cf' + cf.id]"
-            >
+            <AmRadioGroup v-if="cf.type === 'radio'" v-model="infoFormData['cf' + cf.id]">
               <AmRadio
                 v-for="(option, i) in cf.options"
                 :key="i"
@@ -179,10 +168,7 @@
             <!-- /type - radio -->
 
             <!-- type - checkbox -->
-            <AmCheckBoxGroup
-              v-if="cf.type === 'checkbox'"
-              v-model="infoFormData['cf' + cf.id]"
-            >
+            <AmCheckBoxGroup v-if="cf.type === 'checkbox'" v-model="infoFormData['cf' + cf.id]">
               <AmCheckBox
                 v-for="(option, i) in cf.options"
                 :key="i"
@@ -202,7 +188,7 @@
               @change="onAddFile"
               @remove="onRemoveFile"
             >
-              {{amLabels.upload_file_here}}
+              {{ amLabels.upload_file_here }}
             </AmAttachment>
             <!-- /type - attachment -->
 
@@ -212,29 +198,49 @@
             <!-- ####### INPUT ####### -->
           </el-form-item>
         </template>
-        <div v-if="instantBooking && settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled" class="am-fs__payments-sentence">
+        <div
+          v-if="
+            instantBooking &&
+            settings.payments.wc.enabled &&
+            !settings.payments.wc.onSiteIfFree &&
+            wcEntityEnabled
+          "
+          class="am-fs__payments-sentence"
+        >
           <p>
-            {{amLabels.payment_wc_mollie_sentence}}
+            {{ amLabels.payment_wc_mollie_sentence }}
           </p>
         </div>
       </el-form>
 
       <PaymentOnSite
-        v-if="isWaitingListBooking || (instantBooking && (settings.payments.wc.enabled ? settings.payments.wc.onSiteIfFree || !wcEntityEnabled : true))"
+        v-if="
+          isWaitingListBooking ||
+          (instantBooking &&
+            (settings.payments.wc.enabled
+              ? settings.payments.wc.onSiteIfFree || !wcEntityEnabled
+              : true))
+        "
         ref="refOnSiteBooking"
         :instant-booking="instantBooking"
         @payment-error="callPaymentError"
       />
 
       <PaymentWc
-        v-if="instantBooking && !isWaitingListBooking && settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled"
+        v-if="
+          instantBooking &&
+          !isWaitingListBooking &&
+          settings.payments.wc.enabled &&
+          !settings.payments.wc.onSiteIfFree &&
+          wcEntityEnabled
+        "
         ref="refWcBooking"
         :instant-booking="instantBooking"
         @payment-error="callPaymentError"
       />
     </div>
 
-    <BookingSkeleton/>
+    <BookingSkeleton />
   </div>
 </template>
 
@@ -244,22 +250,22 @@ import LastNameFormField from './parts/LastNameFormField.vue'
 import EmailFormField from './parts/EmailFormField.vue'
 import PhoneFormField from './parts/PhoneFormField.vue'
 
-import AmAlert from "../../../_components/alert/AmAlert"
-import AmInput from "../../../_components/input/AmInput.vue";
-import AmAttachment from "../../../_components/attachment/AmAttachment.vue"
-import AmCheckBoxGroup from "../../../_components/checkbox/AmCheckboxGroup.vue"
-import AmCheckBox from "../../../_components/checkbox/AmCheckbox.vue";
-import AmRadioGroup from "../../../_components/radio/AmRadioGroup.vue";
-import AmRadio from "../../../_components/radio/AmRadio.vue";
-import AmDatePickerFull from "../../../_components/date-picker-full/AmDatePickerFull.vue";
-import AmSelect from "../../../_components/select/AmSelect.vue";
-import AmOption from "../../../_components/select/AmOption.vue";
-import AmAddressInput from "../../../_components/address-input/AmAddressInput.vue";
+import AmAlert from '../../../_components/alert/AmAlert'
+import AmInput from '../../../_components/input/AmInput.vue'
+import AmAttachment from '../../../_components/attachment/AmAttachment.vue'
+import AmCheckBoxGroup from '../../../_components/checkbox/AmCheckboxGroup.vue'
+import AmCheckBox from '../../../_components/checkbox/AmCheckbox.vue'
+import AmRadioGroup from '../../../_components/radio/AmRadioGroup.vue'
+import AmRadio from '../../../_components/radio/AmRadio.vue'
+import AmDatePickerFull from '../../../_components/date-picker-full/AmDatePickerFull.vue'
+import AmSelect from '../../../_components/select/AmSelect.vue'
+import AmOption from '../../../_components/select/AmOption.vue'
+import AmAddressInput from '../../../_components/address-input/AmAddressInput.vue'
 
-import PaymentOnSite from "../../Parts/Payment/PaymentOnSite.vue";
-import PaymentWc from "../../Parts/Payment/PaymentWc.vue";
-import BookingSkeleton from "../../Parts/BookingSkeleton.vue";
-import moment from "moment";
+import PaymentOnSite from '../../Parts/Payment/PaymentOnSite.vue'
+import PaymentWc from '../../Parts/Payment/PaymentWc.vue'
+import BookingSkeleton from '../../Parts/BookingSkeleton.vue'
+import moment from 'moment'
 import {
   ref,
   computed,
@@ -270,32 +276,33 @@ import {
   onMounted,
   watchEffect,
   watch,
-  nextTick
-} from "vue";
-import { useStore } from "vuex";
-import VueAuthenticate from "vue-authenticate";
-import { settings } from "../../../../plugins/settings";
-import { usePrepaidPrice, usePaymentError } from "../../../../assets/js/common/appointments";
-import { useScrollTo } from "../../../../assets/js/common/scrollElements";
-import { useCustomFields } from "../../../../assets/js/public/customFields";
-import useAction from "../../../../assets/js/public/actions";
-import { useElementSize } from "@vueuse/core";
-import { useCartHasItems } from "../../../../assets/js/public/cart";
-import httpClient from "../../../../plugins/axios";
-import AmSocialButton from "../../../common/FormFields/AmSocialButton.vue";
-import {SocialAuthOptions} from "../../../../assets/js/admin/socialAuthOptions";
-import {mapAddressComponentsForXML} from "../../../../assets/js/common/helper";
-import { useIvyMapping } from "../../../../assets/js/public/ivy";
+  nextTick,
+} from 'vue'
+import { useStore } from 'vuex'
+import VueAuthenticate from 'vue-authenticate'
+import { settings } from '../../../../plugins/settings'
+import { usePrepaidPrice, usePaymentError } from '../../../../assets/js/common/appointments'
+import { useScrollTo } from '../../../../assets/js/common/scrollElements'
+import { useCustomFields } from '../../../../assets/js/public/customFields'
+import useAction from '../../../../assets/js/public/actions'
+import { useElementSize } from '@vueuse/core'
+import { useCartHasItems } from '../../../../assets/js/public/cart'
+import httpClient from '../../../../plugins/axios'
+import AmSocialButton from '../../../common/FormFields/AmSocialButton.vue'
+import { SocialAuthOptions } from '../../../../assets/js/admin/socialAuthOptions'
+import { mapAddressComponentsForXML } from '../../../../assets/js/common/helper'
+import { useIvyMapping } from '../../../../assets/js/public/ivy'
+import { getInternationalPhoneValue } from '../../../../assets/js/common/phone'
 
 let props = defineProps({
   globalClass: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 // * Store
-let store = useStore();
+let store = useStore()
 
 // * Labels
 const amLabels = inject('amLabels')
@@ -307,7 +314,7 @@ let amCustomize = inject('amCustomize')
 const shortcodeData = inject('shortcodeData')
 
 let infoFormWrapperRef = ref(null)
-let {width: pageWidth} = useElementSize(infoFormWrapperRef)
+let { width: pageWidth } = useElementSize(infoFormWrapperRef)
 
 let allFieldsRefs = ref([])
 let primeCollectorRef = ref([])
@@ -315,7 +322,7 @@ let customFieldsRefs = ref([])
 
 let customFieldsComponents = reactive({
   text: markRaw(AmInput),
-  'text-area': markRaw(AmInput)
+  'text-area': markRaw(AmInput),
 })
 
 useCustomFields(store)
@@ -325,22 +332,20 @@ let availableCustomFields = computed(() => store.getters['booking/getAvailableCu
 let allCustomFields = computed(() => store.getters['entities/getCustomFields'])
 
 // * Step Functions
-const {
-  nextStep,
-  footerButtonReset,
-  footerButtonClicked,
-  headerButtonPreviousClicked,
-} = inject('changingStepsFunctions', {
-  nextStep: () => {},
-  headerButtonPreviousClick: () => {},
-  footerButtonReset: () => {},
-  footerButtonClicked: {
-    value: false
+const { nextStep, footerButtonReset, footerButtonClicked, headerButtonPreviousClicked } = inject(
+  'changingStepsFunctions',
+  {
+    nextStep: () => {},
+    headerButtonPreviousClick: () => {},
+    footerButtonReset: () => {},
+    footerButtonClicked: {
+      value: false,
+    },
+    headerButtonPreviousClicked: {
+      value: false,
+    },
   },
-  headerButtonPreviousClicked: {
-    value: false
-  },
-})
+)
 
 watch(headerButtonPreviousClicked, () => {
   if (instantBooking.value && !isWaitingListBooking.value) {
@@ -349,14 +354,14 @@ watch(headerButtonPreviousClicked, () => {
 })
 
 let { addPaymentsStep } = inject('addPaymentsStep', {
-  addPaymentsStep: () => {}
+  addPaymentsStep: () => {},
 })
 
 let { removePaymentsStep } = inject('removePaymentsStep', {
-  removePaymentsStep: () => {}
+  removePaymentsStep: () => {},
 })
 
-function callPaymentError (msg) {
+function callPaymentError(msg) {
   usePaymentError(store, msg)
 }
 
@@ -374,34 +379,37 @@ let phoneError = ref(false)
 let isPhoneValid = ref(false)
 let refreshPhoneComponent = ref(0)
 
-let loggedInUser = computed(() => (store.getters['booking/getCustomerId'] && store.getters['booking/getCustomerEmail'])
-  || (!!window.ameliaUser && window.ameliaUser.type == 'admin'))
+let loggedInUser = computed(
+  () =>
+    (store.getters['booking/getCustomerId'] && store.getters['booking/getCustomerEmail']) ||
+    (!!window.ameliaUser && window.ameliaUser.type == 'admin'),
+)
 
 // * Form data
 let infoFormData = ref({
   firstName: computed({
     get: () => store.getters['booking/getCustomerFirstName'],
     set: (val) => {
-      store.commit('booking/setCustomerFirstName', val ? val : "")
-    }
+      store.commit('booking/setCustomerFirstName', val ? val : '')
+    },
   }),
   lastName: computed({
     get: () => store.getters['booking/getCustomerLastName'],
     set: (val) => {
-      store.commit('booking/setCustomerLastName', val ? val : "")
-    }
+      store.commit('booking/setCustomerLastName', val ? val : '')
+    },
   }),
   email: computed({
     get: () => store.getters['booking/getCustomerEmail'],
     set: (val) => {
-      store.commit('booking/setCustomerEmail', val ? val : "")
-    }
+      store.commit('booking/setCustomerEmail', val ? val : '')
+    },
   }),
   phone: computed({
     get: () => store.getters['booking/getCustomerPhone'],
     set: (val) => {
-      store.commit('booking/setCustomerPhone', val ? val : "")
-    }
+      store.commit('booking/setCustomerPhone', val ? val : '')
+    },
   }),
 })
 provide('infoFormData', infoFormData)
@@ -411,20 +419,20 @@ let formFields = ref({
   firstName: {
     template: markRaw(FirstNameFormField),
     props: {
-      class: computed(() => isRtl.value ? 'am-rtl' : ''),
-    }
+      class: computed(() => (isRtl.value ? 'am-rtl' : '')),
+    },
   },
   lastName: {
     template: markRaw(LastNameFormField),
     props: {
-      class: computed(() => isRtl.value ? 'am-rtl' : ''),
-    }
+      class: computed(() => (isRtl.value ? 'am-rtl' : '')),
+    },
   },
   email: {
     template: markRaw(EmailFormField),
     props: {
-      class: computed(() => isRtl.value ? 'am-rtl' : ''),
-    }
+      class: computed(() => (isRtl.value ? 'am-rtl' : '')),
+    },
   },
   phone: {
     countryCode: computed({
@@ -433,37 +441,58 @@ let formFields = ref({
         return iso ? iso.toUpperCase() : ''
       },
       set: (val) => {
-        store.commit('booking/setCustomerCountryPhoneIso', val ? val.toLowerCase() : "")
-      }
+        store.commit('booking/setCustomerCountryPhoneIso', val ? val.toLowerCase() : '')
+      },
     }),
     template: markRaw(PhoneFormField),
     props: {
-      class: computed(() => isRtl.value ? 'am-rtl' : ''),
+      class: computed(() => (isRtl.value ? 'am-rtl' : '')),
       phoneError: computed(() => phoneError.value && !isPhoneValid.value),
-      errorMessage: computed(() => !isPhoneValid.value && infoFormData.value.phone ? amLabels.value.enter_valid_phone_warning : ''),
+      errorMessage: computed(() =>
+        !isPhoneValid.value && infoFormData.value.phone
+          ? amLabels.value.enter_valid_phone_warning
+          : '',
+      ),
       refreshTrigger: computed(() => refreshPhoneComponent.value),
     },
     handlers: {
       handlePhoneData: (phoneData) => {
         // If phone data is received without country code, set the default country code
-        if (phoneData && !phoneData.countryCode && !store.getters['booking/getCustomerCountryPhoneIso'] && settings.general.phoneDefaultCountryCode !== 'auto') {
-          store.commit('booking/setCustomerCountryPhoneIso', settings.general.phoneDefaultCountryCode.toLowerCase())
+        if (
+          phoneData &&
+          !phoneData.countryCode &&
+          !store.getters['booking/getCustomerCountryPhoneIso'] &&
+          settings.general.phoneDefaultCountryCode !== 'auto'
+        ) {
+          store.commit(
+            'booking/setCustomerCountryPhoneIso',
+            settings.general.phoneDefaultCountryCode.toLowerCase(),
+          )
         }
 
-        // Set national format of phone number because chanvge of coutry code doesn't change the national format
-        store.commit('booking/setCustomerPhone', phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, "") : "")
+        // Keep international format so the phone includes the country calling code.
+        const countryCode = (
+          phoneData?.countryCode ||
+          store.getters['booking/getCustomerCountryPhoneIso'] ||
+          ''
+        ).toUpperCase()
+
+        store.commit(
+          'booking/setCustomerPhone',
+          getInternationalPhoneValue(phoneData?.phoneNumber ?? phoneData?.e164, phoneData, countryCode)
+        )
 
         isPhoneValid.value = !!phoneData.isValid
-      }
-    }
-  }
+      },
+    },
+  },
 })
 
 let subscribeToMailchimp = computed({
   get: () => store.getters['booking/getCustomerSubscribe'],
   set: (val) => {
     store.commit('booking/setCustomerSubscribe', val)
-  }
+  },
 })
 
 // * Form validation rules
@@ -473,14 +502,14 @@ let rules = ref({
       required: true,
       message: amLabels.value.enter_first_name_warning,
       trigger: 'submit',
-    }
+    },
   ],
   lastName: [
     {
       required: amCustomize.infoStep.options.lastName.required,
       message: amLabels.value.enter_last_name_warning,
       trigger: 'submit',
-    }
+    },
   ],
   email: [
     {
@@ -491,15 +520,15 @@ let rules = ref({
     {
       type: 'email',
       message: amLabels.value.enter_valid_email_warning,
-      trigger: 'submit'
-    }
+      trigger: 'submit',
+    },
   ],
   phone: [
     {
       required: amCustomize.infoStep.options.phone.required,
       message: amLabels.value.enter_phone_warning,
       trigger: ['blur', 'submit'],
-    }
+    },
   ],
 })
 
@@ -517,43 +546,48 @@ let loading = computed(() => store.getters['booking/getLoading'])
 
 let instantBooking = ref(usePrepaidPrice(store) === 0)
 
-let isWaitingListBooking = computed(() => store.getters['appointmentWaitingListOptions/getIsWaitingListSlot'])
+let isWaitingListBooking = computed(
+  () => store.getters['appointmentWaitingListOptions/getIsWaitingListSlot'],
+)
 
 allCustomFields.value.forEach((customField) => {
   if (customField.id in availableCustomFields.value) {
-    rules.value['cf' + customField.id] = [{
-      message: amLabels.value.required_field,
-      required: customField.required,
-      trigger: 'submit'
-    }]
+    rules.value['cf' + customField.id] = [
+      {
+        message: amLabels.value.required_field,
+        required: customField.required,
+        trigger: 'submit',
+      },
+    ]
   }
 })
 
-function selectedDatePickerValue (id, dateString) {
+function selectedDatePickerValue(id, dateString) {
   infoFormData.value[id] = moment(dateString, 'YYYY-MM-DD').toDate()
 }
 
-function onAddFile (a) {
+function onAddFile(a) {
   store.commit('booking/setAttachment', {
     id: a.id,
-    raw: a.raw
+    raw: a.raw,
   })
 
   infoFormData.value['cf' + a.id] = a.raw
 }
 
-function onRemoveFile (a) {
+function onRemoveFile(a) {
   store.commit('booking/setAttachment', {
     id: a.id,
-    raw: a.raw
+    raw: a.raw,
   })
 
   infoFormData.value['cf' + a.id] = a.raw
 }
 
-function addressSelected (addressComponents, cfId) {
+function addressSelected(addressComponents, cfId) {
   if (addressComponents && store.state.booking.appointment.bookings[0].customFields[cfId]) {
-    store.state.booking.appointment.bookings[0].customFields[cfId].components = mapAddressComponentsForXML(addressComponents)
+    store.state.booking.appointment.bookings[0].customFields[cfId].components =
+      mapAddressComponentsForXML(addressComponents)
   }
 }
 
@@ -571,12 +605,12 @@ function submitForm() {
   infoFormData.value.email = infoFormData.value.email.trim()
 
   useAction(
-      store,
-      {rules: rules.value},
-      'customValidation',
-      store.getters['booking/getBookableType'],
-      null,
-      null
+    store,
+    { rules: rules.value },
+    'customValidation',
+    store.getters['booking/getBookableType'],
+    null,
+    null,
   )
   infoFormRef.value.validate((valid) => {
     if (valid && (amCustomize.infoStep.options.phone.required ? isPhoneValid.value : true)) {
@@ -587,19 +621,29 @@ function submitForm() {
         // For waiting list bookings always use onSite gateway.
         if (isWaitingListBooking.value) {
           store.commit('booking/setPaymentGateway', 'onSite')
-          if (refOnSiteBooking.value && typeof refOnSiteBooking.value.continueWithBooking === 'function') {
+          if (
+            refOnSiteBooking.value &&
+            typeof refOnSiteBooking.value.continueWithBooking === 'function'
+          ) {
             refOnSiteBooking.value.continueWithBooking()
           } else {
             // Fallback: remove payment step already, just proceed to next step if exposed
             nextStep()
           }
         } else {
-          if (settings.payments.wc.enabled && !settings.payments.wc.onSiteIfFree && wcEntityEnabled.value) {
+          if (
+            settings.payments.wc.enabled &&
+            !settings.payments.wc.onSiteIfFree &&
+            wcEntityEnabled.value
+          ) {
             store.commit('booking/setPaymentGateway', 'wc')
             refWcBooking.value.continueWithBooking()
           } else {
             store.commit('booking/setPaymentGateway', 'onSite')
-            if (refOnSiteBooking.value && typeof refOnSiteBooking.value.continueWithBooking === 'function') {
+            if (
+              refOnSiteBooking.value &&
+              typeof refOnSiteBooking.value.continueWithBooking === 'function'
+            ) {
               refOnSiteBooking.value.continueWithBooking()
             } else {
               nextStep()
@@ -611,11 +655,12 @@ function submitForm() {
       // * Scroll to the first error field
       let fieldElement
 
-      let phoneField = infoFormRef.value.fields.find(el => el.prop === 'phone')
-      let shouldFlagPhone = phoneField
-        && amCustomize.infoStep.options.phone.visibility
-        && (amCustomize.infoStep.options.phone.required || !!infoFormData.value.phone)
-        && !isPhoneValid.value
+      let phoneField = infoFormRef.value.fields.find((el) => el.prop === 'phone')
+      let shouldFlagPhone =
+        phoneField &&
+        amCustomize.infoStep.options.phone.visibility &&
+        (amCustomize.infoStep.options.phone.required || !!infoFormData.value.phone) &&
+        !isPhoneValid.value
 
       if (shouldFlagPhone) {
         phoneField.validateState = 'error'
@@ -652,21 +697,23 @@ function onSignupSocial({ provider, credentials }) {
 
   if (provider === 'google') {
     data.code = credentials
-    httpClient.post(`${socialCheckUrl}`, data).then(response => {
+    httpClient.post(`${socialCheckUrl}`, data).then((response) => {
       setDataFromSocialLogin(response.data.data.user)
     })
   }
   if (provider === 'facebook') {
     VueAuthenticateInstance.options.providers[provider].url = `${socialCheckUrl}`
-    VueAuthenticateInstance.authenticate(provider, data).then((response) => {
-     setDataFromSocialLogin(response.data.data.user)
-    }).catch((error) => {
-      if (!VueAuthenticateInstance.isAuthenticated()) {
-        authError.value = true
-        authErrorMessage.value = 'User is not authenticated.'
-        store.commit('setLoading', false)
-      }
-    })
+    VueAuthenticateInstance.authenticate(provider, data)
+      .then((response) => {
+        setDataFromSocialLogin(response.data.data.user)
+      })
+      .catch((error) => {
+        if (!VueAuthenticateInstance.isAuthenticated()) {
+          authError.value = true
+          authErrorMessage.value = 'User is not authenticated.'
+          store.commit('setLoading', false)
+        }
+      })
   }
 }
 
@@ -691,8 +738,12 @@ watchEffect(() => {
 
 let visibilityFlags = ref({})
 
-function checkCustomerCustomFieldVisibility (cf) {
-  if (cf.saveType === 'customer' && loggedInUser.value && store.state.booking.appointment.bookings[0].customer.customFields) {
+function checkCustomerCustomFieldVisibility(cf) {
+  if (
+    cf.saveType === 'customer' &&
+    loggedInUser.value &&
+    store.state.booking.appointment.bookings[0].customer.customFields
+  ) {
     let customerCustomFields = store.state.booking.appointment.bookings[0].customer.customFields
 
     try {
@@ -705,7 +756,7 @@ function checkCustomerCustomFieldVisibility (cf) {
         return true
       }
 
-       if (alreadyFlagged) {
+      if (alreadyFlagged) {
         return visibilityFlags.value[cf.id]
       }
 
@@ -720,7 +771,7 @@ function checkCustomerCustomFieldVisibility (cf) {
       switch (cf.type) {
         case 'checkbox':
         case 'file':
-          visible = Array.isArray(currentValue) ? currentValue.length === 0 : (currentValue == null)
+          visible = Array.isArray(currentValue) ? currentValue.length === 0 : currentValue == null
           break
         default:
           visible = currentValue == null || currentValue === ''
@@ -748,29 +799,33 @@ onMounted(() => {
   let entity = null
 
   switch (store.getters['booking/getBookableType']) {
-    case ('appointment'):
-      entity = useCartHasItems(store) === 1 ? store.getters['entities/getBookableFromBookableEntities'](
-        store.getters['booking/getSelection']
-      ) : null
+    case 'appointment':
+      entity =
+        useCartHasItems(store) === 1
+          ? store.getters['entities/getBookableFromBookableEntities'](
+              store.getters['booking/getSelection'],
+            )
+          : null
 
       break
 
-    case ('package'):
-      entity = store.getters['entities/getPackage'](
-        store.getters['booking/getPackageId']
-      )
+    case 'package':
+      entity = store.getters['entities/getPackage'](store.getters['booking/getPackageId'])
 
       break
   }
 
   let entityPayments = entity && entity.settings ? JSON.parse(entity.settings)['payments'] : null
 
-  wcEntityEnabled.value = entityPayments && 'wc' in entityPayments
-    ? !('enabled' in entityPayments.wc) || entityPayments.wc.enabled
-    : settings.payments.wc.enabled
+  wcEntityEnabled.value =
+    entityPayments && 'wc' in entityPayments
+      ? !('enabled' in entityPayments.wc) || entityPayments.wc.enabled
+      : settings.payments.wc.enabled
 
   if (settings.general.customFieldsAllowedExtensions) {
-    customFieldsAllowedExtensions.value = Object.keys(settings.general.customFieldsAllowedExtensions).join(', ')
+    customFieldsAllowedExtensions.value = Object.keys(
+      settings.general.customFieldsAllowedExtensions,
+    ).join(', ')
   }
 
   Object.keys(availableCustomFields.value).forEach((id) => {
@@ -778,18 +833,26 @@ onMounted(() => {
       get: () => store.state.booking.appointment.bookings[0].customFields[id].value,
       set: (val) => {
         store.state.booking.appointment.bookings[0].customFields[id].value = val
-      }
+      },
     })
 
     // * Placeholder implementation for custom input and textarea
-    if (availableCustomFields.value[id].type === 'text' || availableCustomFields.value[id].type === 'text-area') {
-      refCFPlaceholders.value[id] = {placeholder: ''}
+    if (
+      availableCustomFields.value[id].type === 'text' ||
+      availableCustomFields.value[id].type === 'text-area'
+    ) {
+      refCFPlaceholders.value[id] = { placeholder: '' }
     }
   })
 
-  addressCustomFields.value.forEach(el => {
+  addressCustomFields.value.forEach((el) => {
     let id = el.id.split('amelia-address-autocomplete-')
-    if (id && id.length > 1 && id[1] in store.state.booking.appointment.bookings[0].customFields && store.state.booking.appointment.bookings[0].customFields[id[1]].value) {
+    if (
+      id &&
+      id.length > 1 &&
+      id[1] in store.state.booking.appointment.bookings[0].customFields &&
+      store.state.booking.appointment.bookings[0].customFields[id[1]].value
+    ) {
       el.update(store.state.booking.appointment.bookings[0].customFields[id[1]].value)
     }
   })
@@ -799,7 +862,7 @@ onMounted(() => {
   }
 
   nextTick(() => {
-    primeCollectorRef.value.forEach(el => {
+    primeCollectorRef.value.forEach((el) => {
       if (el.primeFieldRef) {
         allFieldsRefs.value.push(el.primeFieldRef)
       }
@@ -808,12 +871,12 @@ onMounted(() => {
   })
 
   useAction(
-      store,
-      { customFieldsPlaceholders: refCFPlaceholders, couponCode },
-      'InitInfoStep',
-      store.getters['booking/getBookableType'],
-      null,
-      null
+    store,
+    { customFieldsPlaceholders: refCFPlaceholders, couponCode },
+    'InitInfoStep',
+    store.getters['booking/getBookableType'],
+    null,
+    null,
   )
 
   if (couponCode.value) {
@@ -856,8 +919,7 @@ export default {
 
     &__info {
       &-error {
-        animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{100}ms
-          am-animation-slide-up;
+        animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{100}ms am-animation-slide-up;
         animation-fill-mode: both;
         margin-bottom: 10px;
       }
@@ -895,7 +957,7 @@ export default {
         // Before & After
         &:before,
         &:after {
-          background: var(--shade-250, #D1D5D7);
+          background: var(--shade-250, #d1d5d7);
           content: '';
           height: 1px;
           width: 100%;
@@ -907,7 +969,7 @@ export default {
           font-style: normal;
           font-weight: 400;
           line-height: 24px;
-          color: var(--shade-500, #808A90);
+          color: var(--shade-500, #808a90);
           margin-left: 8px;
           margin-right: 8px;
         }
@@ -922,11 +984,7 @@ export default {
           $count: 100;
           @for $i from 0 through $count {
             &:nth-child(#{$i + 1}) {
-              animation: 600ms
-                cubic-bezier(0.45, 1, 0.4, 1.2)
-                #{$i *
-                100}ms
-                am-animation-slide-up;
+              animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
               animation-fill-mode: both;
             }
           }

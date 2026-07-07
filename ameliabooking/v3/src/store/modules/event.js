@@ -19,9 +19,7 @@ function getDefaultEvent() {
     gallery: [],
     translations: null,
 
-    periods: [
-      { startDate: null, endDate: null, startTime: null, endTime: null },
-    ],
+    periods: [{ startDate: null, endDate: null, startTime: null, endTime: null }],
     bookingOpens: {
       disabled: true,
       date: '',
@@ -108,7 +106,7 @@ function getDefaultEvent() {
         },
         barion: {
           enabled: null,
-        }
+        },
       },
       googleMeet: {
         enabled: null,

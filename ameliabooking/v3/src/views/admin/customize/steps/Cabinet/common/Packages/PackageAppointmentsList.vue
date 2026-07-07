@@ -5,9 +5,7 @@
         <AmButton
           custom-class="am-cappa__back-btn"
           :icon="arrowLeft"
-          :type="
-            amCustomize[pageRenderKey][stepName].options.backBtn.buttonType
-          "
+          :type="amCustomize[pageRenderKey][stepName].options.backBtn.buttonType"
           :size="'micro'"
           :category="'secondary'"
           icon-only
@@ -22,11 +20,7 @@
           <div
             class="am-cappa__img"
             :style="{
-              backgroundImage: `url(${usePictureLoad(
-                baseUrls,
-                packObj,
-                false
-              )})`,
+              backgroundImage: `url(${usePictureLoad(baseUrls, packObj, false)})`,
             }"
           >
             <span :style="{ backgroundColor: packObj.color }"></span>
@@ -37,11 +31,7 @@
             </div>
             <div class="am-cappa__date">
               {{ labelsDisplay('package_book_expire') }}
-              {{
-                getFrontedFormattedDate(
-                  moment().add(5, 'days').format('YYYY-MM-DD')
-                )
-              }}
+              {{ getFrontedFormattedDate(moment().add(5, 'days').format('YYYY-MM-DD')) }}
             </div>
             <div class="am-cappa__capacity">6/15 {{ bookedNumberText(6) }}</div>
           </div>
@@ -50,34 +40,22 @@
           <AmButton
             :category="'danger'"
             :size="'small'"
-            :type="
-              amCustomize[pageRenderKey][stepName].options.cancelBtn.buttonType
-            "
+            :type="amCustomize[pageRenderKey][stepName].options.cancelBtn.buttonType"
             :class="['am-cappa__actions', responsiveClass]"
           >
             {{ labelsDisplay('package_cancel') }}
           </AmButton>
           <PaymentButton
             btn-size="small"
-            :type="
-              amCustomize[pageRenderKey][stepName].options.payBtn.buttonType
-            "
+            :type="amCustomize[pageRenderKey][stepName].options.payBtn.buttonType"
             :class="`am-cappa__actions ${responsiveClass}`"
           >
           </PaymentButton>
         </div>
       </div>
 
-      <el-tabs
-        v-model="selectedServiceId"
-        class="am-cappa__service"
-        @tab-click="selectService"
-      >
-        <el-tab-pane
-          v-for="serviceId in Object.keys(packApps)"
-          :key="serviceId"
-          :name="serviceId"
-        >
+      <el-tabs v-model="selectedServiceId" class="am-cappa__service" @tab-click="selectService">
+        <el-tab-pane v-for="serviceId in Object.keys(packApps)" :key="serviceId" :name="serviceId">
           <template #label>
             <div class="am-cappa__service-heading">
               {{ packApps[serviceId].purchaseData.name }}
@@ -92,14 +70,13 @@
                     backgroundImage: `url(${usePictureLoad(
                       baseUrls,
                       packApps[selectedServiceId].purchaseData,
-                      false
+                      false,
                     )})`,
                   }"
                 >
                   <span
                     :style="{
-                      backgroundColor:
-                        packApps[selectedServiceId].purchaseData.color,
+                      backgroundColor: packApps[selectedServiceId].purchaseData.color,
                     }"
                   ></span>
                 </div>
@@ -108,21 +85,13 @@
                     {{ packApps[selectedServiceId].purchaseData.name }}
                   </div>
                   <div
-                    v-if="
-                      getPurchasedCount(packApps, selectedServiceId, 'count')
-                    "
+                    v-if="getPurchasedCount(packApps, selectedServiceId, 'count')"
                     class="am-cappa__service-capacity"
                   >
-                    {{
-                      getPurchasedCount(packApps, selectedServiceId, 'count')
-                    }}/{{
+                    {{ getPurchasedCount(packApps, selectedServiceId, 'count') }}/{{
                       getPurchasedCount(packApps, selectedServiceId, 'total')
                     }}
-                    {{
-                      bookedNumberText(
-                        getPurchasedCount(packApps, selectedServiceId, 'count')
-                      )
-                    }}
+                    {{ bookedNumberText(getPurchasedCount(packApps, selectedServiceId, 'count')) }}
                   </div>
                 </div>
               </div>
@@ -130,13 +99,8 @@
               <AmButton
                 :class="['am-cappa__service-book', responsiveClass]"
                 size="small"
-                :type="
-                  amCustomize[pageRenderKey][stepName].options.bookBtn
-                    .buttonType
-                "
-                :disabled="
-                  getPurchasedCount(packApps, selectedServiceId, 'count') === 0
-                "
+                :type="amCustomize[pageRenderKey][stepName].options.bookBtn.buttonType"
+                :disabled="getPurchasedCount(packApps, selectedServiceId, 'count') === 0"
               >
                 {{ labelsDisplay('book_now') }}
               </AmButton>
@@ -152,8 +116,7 @@
         </el-tab-pane>
       </el-tabs>
 
-      <AppointmentBooking v-if="bookVisibility" :visibility="bookVisibility">
-      </AppointmentBooking>
+      <AppointmentBooking v-if="bookVisibility" :visibility="bookVisibility"> </AppointmentBooking>
 
       <CancelPopup
         v-if="cancelVisibility"
@@ -171,15 +134,7 @@
 import moment from 'moment/moment'
 
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  onMounted,
-  defineComponent,
-  watch,
-  nextTick,
-} from 'vue'
+import { ref, computed, inject, onMounted, defineComponent, watch, nextTick } from 'vue'
 
 // * Composables
 import { useResponsiveClass } from '../../../../../../../assets/js/common/responsive'
@@ -318,28 +273,21 @@ arrService.forEach((serv) => {
   arrApp.forEach((item, index) => {
     if (
       Object.keys(dateGroupedAppointments).indexOf(
-        moment().add(item.when, 'days').format('YYYY-MM-DD')
+        moment().add(item.when, 'days').format('YYYY-MM-DD'),
       ) < 0
     ) {
-      dateGroupedAppointments[
-        moment().add(item.when, 'days').format('YYYY-MM-DD')
-      ] = {}
-      dateGroupedAppointments[
-        moment().add(item.when, 'days').format('YYYY-MM-DD')
-      ].date = moment().add(item.when, 'days').format('YYYY-MM-DD')
-      dateGroupedAppointments[
-        moment().add(item.when, 'days').format('YYYY-MM-DD')
-      ].appointments = []
+      dateGroupedAppointments[moment().add(item.when, 'days').format('YYYY-MM-DD')] = {}
+      dateGroupedAppointments[moment().add(item.when, 'days').format('YYYY-MM-DD')].date = moment()
+        .add(item.when, 'days')
+        .format('YYYY-MM-DD')
+      dateGroupedAppointments[moment().add(item.when, 'days').format('YYYY-MM-DD')].appointments =
+        []
     }
 
     let app = {
       id: index,
-      bookingEnd: `${moment()
-        .add(item.when, 'days')
-        .format('YYYY-MM-DD')} 08:10:00`,
-      bookingStart: `${moment()
-        .add(item.when, 'days')
-        .format('YYYY-MM-DD')} 08:00:00`,
+      bookingEnd: `${moment().add(item.when, 'days').format('YYYY-MM-DD')} 08:10:00`,
+      bookingStart: `${moment().add(item.when, 'days').format('YYYY-MM-DD')} 08:00:00`,
       bookings: [
         {
           actionsCompleted: null,
@@ -489,9 +437,9 @@ arrService.forEach((serv) => {
       },
     }
 
-    dateGroupedAppointments[
-      moment().add(item.when, 'days').format('YYYY-MM-DD')
-    ].appointments.push(app)
+    dateGroupedAppointments[moment().add(item.when, 'days').format('YYYY-MM-DD')].appointments.push(
+      app,
+    )
   })
 
   packApps.value[serv.id].appointments = dateGroupedAppointments
@@ -540,17 +488,10 @@ let amLabels = inject('labels')
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepName.value]
-      .translations &&
-      amCustomize.value[pageRenderKey.value][stepName.value].translations[
-        label
-      ] &&
-      amCustomize.value[pageRenderKey.value][stepName.value].translations[
-        label
-      ][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[
-          label
-        ][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepName.value].translations &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -558,9 +499,7 @@ function labelsDisplay(label) {
 }
 
 function bookedNumberText(numb) {
-  return numb === 1
-    ? labelsDisplay('appointment_booked')
-    : labelsDisplay('appointments_booked')
+  return numb === 1 ? labelsDisplay('appointment_booked') : labelsDisplay('appointments_booked')
 }
 
 // * Book appointment
@@ -579,18 +518,9 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-cappa-text': amColors.value.colorMainText,
-    '--am-c-cappa-text-op80': useColorTransparency(
-      amColors.value.colorMainText,
-      0.8
-    ),
-    '--am-c-cappa-text-op70': useColorTransparency(
-      amColors.value.colorMainText,
-      0.7
-    ),
-    '--am-c-cappa-text-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
+    '--am-c-cappa-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
+    '--am-c-cappa-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
+    '--am-c-cappa-text-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
     '--am-c-cappa-primary': amColors.value.colorPrimary,
   }
 })

@@ -7,24 +7,24 @@ export default {
   }),
 
   getters: {
-    getForm (state) {
+    getForm(state) {
       return state.form
     },
 
-    getShortcodeParams (state) {
+    getShortcodeParams(state) {
       return state.preselected
-    }
+    },
   },
 
   mutations: {
-    setForm (state, payload) {
+    setForm(state, payload) {
       state.form = payload
     },
 
-    setShortcodeParams (state, payload) {
+    setShortcodeParams(state, payload) {
       state.preselected = payload
     },
   },
 
-  actions: {}
+  actions: {},
 }

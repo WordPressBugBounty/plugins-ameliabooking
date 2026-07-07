@@ -9,12 +9,7 @@
       media="all"
     />
   </template>
-  <div
-    id="amelia-container"
-    ref="ameliaContainer"
-    class="am-fc__wrapper"
-    :style="cssVars"
-  >
+  <div id="amelia-container" ref="ameliaContainer" class="am-fc__wrapper" :style="cssVars">
     <template v-if="ready && pagesArray.length">
       <component :is="pagesArray[pageIndex]"></component>
     </template>
@@ -90,9 +85,7 @@ onMounted(() => {
 
   document
     .getElementById('amelia-v2-booking-' + shortcodeData.value.counter)
-    .classList.add(
-      'amelia-v2-booking-' + shortcodeData.value.counter + '-loaded'
-    )
+    .classList.add('amelia-v2-booking-' + shortcodeData.value.counter + '-loaded')
 
   useAction(store, {}, 'ViewContent', 'appointment', null, null)
 
@@ -173,10 +166,8 @@ watch(itemType, () => {
 
   if (itemType.value === '') {
     pagesArray.value.forEach((a, index) => {
-      if (a.name === 'CategoryService')
-        removeItemFromStepArray(pagesArray.value, index)
-      if (a.name === 'CategoryPackage')
-        removeItemFromStepArray(pagesArray.value, index)
+      if (a.name === 'CategoryService') removeItemFromStepArray(pagesArray.value, index)
+      if (a.name === 'CategoryPackage') removeItemFromStepArray(pagesArray.value, index)
     })
   }
 })
@@ -187,14 +178,9 @@ function removeItemFromStepArray(arr, identifier) {
 
 function iOS() {
   return (
-    [
-      'iPad Simulator',
-      'iPhone Simulator',
-      'iPod Simulator',
-      'iPad',
-      'iPhone',
-      'iPod',
-    ].includes(navigator.platform) ||
+    ['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod'].includes(
+      navigator.platform,
+    ) ||
     // iPad on iOS 13 detection
     (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
   )
@@ -225,7 +211,7 @@ function nextPage() {
   }
 
   nextTick(() => {
-      if (iOS()) {
+    if (iOS()) {
       setTimeout(measureAndScroll, 500)
     } else {
       measureAndScroll()
@@ -259,36 +245,25 @@ function setShortcodeParams() {
   if (preselected.category.length !== 1) {
     if (shortcodeData.value.categories_hidden) {
       availableCategories.value = JSON.parse(
-        JSON.stringify(
-          useAvailableCategories(amEntities.value, shortcodeData.value)
-        )
+        JSON.stringify(useAvailableCategories(amEntities.value, shortcodeData.value)),
       )
 
       nextTick(() => {
-        let componentIndex = pagesArray.value.findIndex(
-          (a) => a.name === 'CategoriesList'
-        )
+        let componentIndex = pagesArray.value.findIndex((a) => a.name === 'CategoriesList')
         pagesArray.value.splice(componentIndex, 1)
       })
     }
 
     if (!shortcodeData.value.categories_hidden) {
       availableCategories.value = JSON.parse(
-        JSON.stringify(
-          useAvailableCategories(amEntities.value, shortcodeData.value)
-        )
+        JSON.stringify(useAvailableCategories(amEntities.value, shortcodeData.value)),
       )
 
       nextTick(() => {
         if (availableCategories.value.length === 1) {
-          store.commit(
-            'booking/setCategoryId',
-            parseInt(availableCategories.value[0].id)
-          )
+          store.commit('booking/setCategoryId', parseInt(availableCategories.value[0].id))
           categorySelected.value = parseInt(availableCategories.value[0].id)
-          let componentIndex = pagesArray.value.findIndex(
-            (a) => a.name === 'CategoriesList'
-          )
+          let componentIndex = pagesArray.value.findIndex((a) => a.name === 'CategoriesList')
           pagesArray.value.splice(componentIndex, 1)
         }
       })
@@ -303,29 +278,22 @@ function setShortcodeParams() {
     availableCategories.value = JSON.parse(
       JSON.stringify(
         useAvailableCategories(amEntities.value, shortcodeData.value).filter(
-          (a) => a.id === parseInt(preselected.category[0])
-        )
-      )
+          (a) => a.id === parseInt(preselected.category[0]),
+        ),
+      ),
     )
 
     nextTick(() => {
-      let componentIndex = pagesArray.value.findIndex(
-        (a) => a.name === 'CategoriesList'
-      )
+      let componentIndex = pagesArray.value.findIndex((a) => a.name === 'CategoriesList')
       pagesArray.value.splice(componentIndex, 1)
     })
   }
 
   if (preselected.service.length === 1) {
     store.commit('booking/setServiceId', parseInt(preselected.service[0]))
-    let service = store.getters['entities/getService'](
-      parseInt(preselected.service[0])
-    )
+    let service = store.getters['entities/getService'](parseInt(preselected.service[0]))
     categorySelected.value = service ? parseInt(service.categoryId) : null
-    store.commit(
-      'booking/setCategoryId',
-      service ? parseInt(service.categoryId) : null
-    )
+    store.commit('booking/setCategoryId', service ? parseInt(service.categoryId) : null)
 
     nextTick(() => {
       pagesArray.value = []
@@ -341,10 +309,7 @@ function setShortcodeParams() {
     store.commit('booking/setLocationId', parseInt(preselected.location[0]))
   }
 
-  if (
-    preselected.package.length === 1 &&
-    store.getters['entities/getPackages'].length
-  ) {
+  if (preselected.package.length === 1 && store.getters['entities/getPackages'].length) {
     pagesArray.value = []
     store.commit('booking/setPackageId', parseInt(preselected.package[0]))
 
@@ -394,9 +359,7 @@ provide('customizedDataForm', customizedDataForm)
 
 // * Fonts
 const amFonts = ref(
-  amSettings.customizedData
-    ? amSettings.customizedData.fonts
-    : defaultCustomizeSettings.fonts
+  amSettings.customizedData ? amSettings.customizedData.fonts : defaultCustomizeSettings.fonts,
 )
 provide('amFonts', amFonts)
 
@@ -433,14 +396,8 @@ let cssVars = computed(() => {
     '--am-c-btn-prim-text': amColors.value.colorBtnPrimText,
     '--am-c-btn-sec': amColors.value.colorBtnSec,
     '--am-c-btn-sec-text': amColors.value.colorBtnSecText,
-    '--am-c-skeleton-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
-    '--am-c-skeleton-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
+    '--am-c-skeleton-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
+    '--am-c-skeleton-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
     '--am-font-family': amFonts.value.fontFamily,
   }
 })

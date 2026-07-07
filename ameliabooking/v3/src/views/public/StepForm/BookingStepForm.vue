@@ -36,18 +36,12 @@
                 (booked && booked.data.length === 0))
             "
           >
-            <div
-              v-for="step in sidebarSteps"
-              :key="step.key"
-              class="am-fs-sb__step"
-            >
+            <div v-for="step in sidebarSteps" :key="step.key" class="am-fs-sb__step">
               <div class="am-fs-sb__step-inner">
                 <div class="am-fs-sb__step-icon">
                   <span :class="`am-icon-${step.icon}`"></span>
                   <span
-                    v-if="
-                      step.key === 'cartStep' && useCartHasItems(store) !== 0
-                    "
+                    v-if="step.key === 'cartStep' && useCartHasItems(store) !== 0"
                     class="am-fs-sb__step-icon__number"
                     :class="[{ 'am-rtl': isRtl }, sidebarCollapseItemsClass]"
                   >
@@ -83,14 +77,12 @@
                 class="am-fs-sb__step-selection__wrapper"
                 :class="{
                   'am-fs-sb__step-selection-packages':
-                    step.key === packageAppointmentsStep.key &&
-                    step.stepSelectedData.length > 3,
+                    step.key === packageAppointmentsStep.key && step.stepSelectedData.length > 3,
                 }"
               >
                 <template
                   v-if="
-                    !sidebarCollapsed &&
-                    (useCart(store).length === 1 || step.key === 'cartStep')
+                    !sidebarCollapsed && (useCart(store).length === 1 || step.key === 'cartStep')
                   "
                 >
                   <p
@@ -98,11 +90,7 @@
                     :key="itemSelected.position"
                     class="am-fs-sb__step-selection"
                   >
-                    <span
-                      v-if="
-                        step.key !== packageAppointmentsStep.key || index < 3
-                      "
-                    >
+                    <span v-if="step.key !== packageAppointmentsStep.key || index < 3">
                       {{ itemSelected.value }}
                     </span>
                     <span v-else>
@@ -121,9 +109,7 @@
               <div v-if="sidebarCollapsed" class="am-fs-sb__step">
                 <div class="am-fs-sb__step-inner">
                   <div class="am-fs-sb__step-icon">
-                    <span
-                      :class="`am-icon-${stepsArray[stepIndex].sidebarData.icon}`"
-                    ></span>
+                    <span :class="`am-icon-${stepsArray[stepIndex].sidebarData.icon}`"></span>
                   </div>
                   <div
                     class="am-fs-sb__step-checker"
@@ -222,27 +208,17 @@
                 {{ amLabels.collapse_menu }}
               </span>
             </Transition>
-            <span
-              :class="`am-icon-arrow-circle-${
-                sidebarCollapsed ? 'left' : 'right'
-              }`"
-            ></span>
+            <span :class="`am-icon-arrow-circle-${sidebarCollapsed ? 'left' : 'right'}`"></span>
           </div>
         </div>
       </template>
     </SideBar>
     <MainContent>
       <template v-if="stepsArray[stepIndex] !== congratulationsStep" #header>
-        <MainContentHeader
-          :sidebar-visible="sidebarVisibility"
-          :ready="ready"
-        ></MainContentHeader>
+        <MainContentHeader :sidebar-visible="sidebarVisibility" :ready="ready"></MainContentHeader>
       </template>
       <template #step>
-        <component
-          :is="stepsArray[stepIndex]"
-          global-class="am-fs__main-content"
-        ></component>
+        <component :is="stepsArray[stepIndex]" global-class="am-fs__main-content"></component>
       </template>
       <template #footer>
         <MainContentFooter
@@ -250,9 +226,7 @@
             stepsArray[stepIndex] === congratulationsStep &&
             !!amSettings.roles.customerCabinet.pageUrl
           "
-          :add-to-cart-button-show="
-            useCartStep(store) && stepsArray[stepIndex] === cartStep
-          "
+          :add-to-cart-button-show="useCartStep(store) && stepsArray[stepIndex] === cartStep"
           :back-to-cart-button-show="
             useCartStep(store) &&
             cart.length > 1 &&
@@ -285,9 +259,7 @@
       :style="cssVars"
     >
       <img
-        :src="
-          baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/am-empty-booking.svg'
-        "
+        :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/am-empty-booking.svg'"
         style="margin-top: 10px"
         :alt="amLabels.no_services_employees"
       />
@@ -310,12 +282,10 @@
       v-else
       ref="ameliaContainer"
       class="am-no-services"
-      :style="{height: '100%', ...cssVars}"
+      :style="{ height: '100%', ...cssVars }"
     >
       <img
-        :src="
-          baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/am-empty-booking.svg'
-        "
+        :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/am-empty-booking.svg'"
         style="margin-top: 10px"
         :alt="amLabels.no_package_services"
       />
@@ -424,9 +394,7 @@ onMounted(() => {
 
   document
     .getElementById('amelia-v2-booking-' + shortcodeData.value.counter)
-    .classList.add(
-      'amelia-v2-booking-' + shortcodeData.value.counter + '-loaded'
-    )
+    .classList.add('amelia-v2-booking-' + shortcodeData.value.counter + '-loaded')
 
   useAction(store, {}, 'ViewContent', 'appointment', null, null)
 
@@ -434,14 +402,7 @@ onMounted(() => {
     containerWidth.value = ameliaContainer.value.offsetWidth
   })
 
-  useAction(
-    store,
-    { containerWidth },
-    'ContainerWidth',
-    'appointment',
-    null,
-    null
-  )
+  useAction(store, { containerWidth }, 'ContainerWidth', 'appointment', null, null)
 })
 
 // * Root Settings
@@ -480,9 +441,7 @@ let footerCustomizeOptions = computed(() => {
 
 // * Fonts
 const amFonts = ref(
-  amSettings.customizedData
-    ? amSettings.customizedData.fonts
-    : defaultCustomizeSettings.fonts
+  amSettings.customizedData ? amSettings.customizedData.fonts : defaultCustomizeSettings.fonts,
 )
 provide('amFonts', amFonts)
 
@@ -512,7 +471,7 @@ let sidebarFooterHeight = ref(0)
 
 // * Form Sidebar Visibility
 let sidebarVisibility = ref(
-  amCustomize.sidebar ? amCustomize.sidebar.options.self.visibility : true
+  amCustomize.sidebar ? amCustomize.sidebar.options.self.visibility : true,
 )
 
 // * Root Urls
@@ -542,15 +501,14 @@ watch(ready, (current) => {
     let preselected = store.getters['entities/getPreselected']
 
     let selectionPackages = store.getters['entities/filteredPackages'](
-      store.getters['booking/getSelection']
+      store.getters['booking/getSelection'],
     )
 
     empty.value =
       store.getters['entities/getServices'].length === 0 ||
       store.getters['entities/getEmployees'].length === 0 ||
       (store.getters['entities/getPackages'].length === 0 &&
-        (shortcodeData.value.show === 'packages' ||
-          preselected.package.length > 0)) ||
+        (shortcodeData.value.show === 'packages' || preselected.package.length > 0)) ||
       ((shortcodeData.value.show === 'packages' ||
         preselected.show === 'packages' ||
         preselected.package.length > 1) &&
@@ -740,22 +698,18 @@ function calculateInitStepsArray() {
     let stepsOrder =
       'order' in amCustomize
         ? amCustomize.order
-        : [
-            { id: 'ServiceStep' },
-            { id: 'EmployeeStep' },
-            { id: 'LocationStep' },
-          ]
+        : [{ id: 'ServiceStep' }, { id: 'EmployeeStep' }, { id: 'LocationStep' }]
     stepsOrder.forEach((stepKey, index) => {
       if (stepKey.id === 'ServiceStep') {
         steps.splice(index, 0, serviceStep)
       }
 
       if (stepKey.id === 'EmployeeStep') {
-          steps.splice(index, 0, employeeStep)
+        steps.splice(index, 0, employeeStep)
       }
 
       if (stepKey.id === 'LocationStep') {
-          steps.splice(index, 0, locationStep)
+        steps.splice(index, 0, locationStep)
       }
     })
   }
@@ -772,9 +726,7 @@ const labels = inject('labels')
 const localLanguage = inject('localLanguage')
 
 // * if local lang is in settings lang
-let langDetection = computed(() =>
-  amSettings.general.usedLanguages.includes(localLanguage.value)
-)
+let langDetection = computed(() => amSettings.general.usedLanguages.includes(localLanguage.value))
 
 let cart = useCart(store)
 
@@ -791,19 +743,11 @@ let amLabels = computed(() => {
 
   if (amSettings.customizedData && amSettings.customizedData.sbsNew) {
     Object.keys(amSettings.customizedData.sbsNew).forEach((stepKey) => {
-      if (
-        stepKey !== 'colors' &&
-        amSettings.customizedData.sbsNew[stepKey].translations
-      ) {
-        let customizedLabels =
-          amSettings.customizedData.sbsNew[stepKey].translations
+      if (stepKey !== 'colors' && amSettings.customizedData.sbsNew[stepKey].translations) {
+        let customizedLabels = amSettings.customizedData.sbsNew[stepKey].translations
         Object.keys(customizedLabels).forEach((labelKey) => {
-          if (
-            customizedLabels[labelKey][localLanguage.value] &&
-            langDetection.value
-          ) {
-            computedLabels[labelKey] =
-              customizedLabels[labelKey][localLanguage.value]
+          if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
+            computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
           } else if (customizedLabels[labelKey].default) {
             computedLabels[labelKey] = customizedLabels[labelKey].default
           }
@@ -819,20 +763,13 @@ provide('amLabels', amLabels)
 let footerLabels = computed(() => {
   let customLabels = {}
   if (amSettings.customizedData && amSettings.customizedData.sbsNew) {
-    let customizedLabels = amSettings.customizedData.sbsNew[
-      stepsArray.value[stepIndex.value].key
-    ]
-      ? amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key]
-          .translations
+    let customizedLabels = amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key]
+      ? amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key].translations
       : null
     if (amSettings.customizedData && customizedLabels) {
       Object.keys(customizedLabels).forEach((labelKey) => {
-        if (
-          customizedLabels[labelKey][localLanguage.value] &&
-          langDetection.value
-        ) {
-          customLabels[labelKey] =
-            customizedLabels[labelKey][localLanguage.value]
+        if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
+          customLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
         } else if (customizedLabels[labelKey].default) {
           customLabels[labelKey] = customizedLabels[labelKey].default
         }
@@ -851,8 +788,8 @@ let primFooterBtnType = computed(() => {
     amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key]
   ) {
     btnType =
-      amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key]
-        .options.primaryFooterButton.buttonType
+      amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key].options
+        .primaryFooterButton.buttonType
   }
 
   return btnType
@@ -868,12 +805,12 @@ let secFooterBtnType = computed(() => {
     amSettings.customizedData &&
     amSettings.customizedData.sbsNew &&
     amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key] &&
-    amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key]
-      .options.secondaryFooterButton
+    amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key].options
+      .secondaryFooterButton
   ) {
     btnType =
-      amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key]
-        .options.secondaryFooterButton.buttonType
+      amSettings.customizedData.sbsNew[stepsArray.value[stepIndex.value].key].options
+        .secondaryFooterButton.buttonType
   }
 
   return btnType
@@ -885,8 +822,7 @@ let addToCartBtnType = computed(() => {
     amSettings.customizedData.sbsNew &&
     amSettings.customizedData.sbsNew['cartStep']
   ) {
-    return amSettings.customizedData.sbsNew['cartStep'].options['addToCart']
-      .buttonType
+    return amSettings.customizedData.sbsNew['cartStep'].options['addToCart'].buttonType
   }
 
   return 'text'
@@ -898,8 +834,7 @@ let backToCartBtnType = computed(() => {
     amSettings.customizedData.sbsNew &&
     amSettings.customizedData.sbsNew['cartStep']
   ) {
-    return amSettings.customizedData.sbsNew['cartStep'].options['backToCart']
-      .buttonType
+    return amSettings.customizedData.sbsNew['cartStep'].options['backToCart'].buttonType
   }
 
   return 'text'
@@ -911,11 +846,7 @@ function dedicatedStepLabel(labelKey, stepKey) {
     let customizedLabels = amSettings.customizedData.sbsNew[stepKey]
       ? amSettings.customizedData.sbsNew[stepKey].translations
       : null
-    if (
-      amSettings.customizedData &&
-      customizedLabels &&
-      customizedLabels[labelKey]
-    ) {
+    if (amSettings.customizedData && customizedLabels && customizedLabels[labelKey]) {
       if (
         customLabel === '' &&
         customizedLabels[labelKey][localLanguage.value] &&
@@ -933,9 +864,7 @@ function dedicatedStepLabel(labelKey, stepKey) {
 
 let bringingAnyoneOptions = computed(() => {
   return useCapacity(
-    store.getters['entities/getEmployeeServices'](
-      store.getters['booking/getSelection']
-    )
+    store.getters['entities/getEmployeeServices'](store.getters['booking/getSelection']),
   )
 })
 
@@ -949,18 +878,13 @@ function setShortcodeParams() {
 
   // * When single service selected
   if (preselected.service.length === 1) {
-    let service = store.getters['entities/getService'](
-      parseInt(preselected.service[0])
-    )
+    let service = store.getters['entities/getService'](parseInt(preselected.service[0]))
 
     if (service) {
       store.commit('booking/setServiceId', parseInt(preselected.service[0]))
     }
     // * Set category id from service if it exists
-    store.commit(
-      'booking/setCategoryId',
-      service ? parseInt(service.categoryId) : null
-    )
+    store.commit('booking/setCategoryId', service ? parseInt(service.categoryId) : null)
   }
 
   // * When single employee selected
@@ -989,15 +913,12 @@ function setShortcodeParams() {
 
     sidebarDataUpdate()
     let selectedPackage = store.getters['entities/filteredPackages'](
-      store.getters['booking/getSelection']
+      store.getters['booking/getSelection'],
     )[0]
     if (selectedPackage) {
       goToPackageStep(selectedPackage, false)
     }
-  } else if (
-    preselected.show === 'packages' ||
-    preselected.package.length > 1
-  ) {
+  } else if (preselected.show === 'packages' || preselected.package.length > 1) {
     if (shortcodeData.value.layout === '2') {
       stepsArray.value.splice(0, 3, packagesStep)
       sidebarSteps.value.splice(0, 3)
@@ -1013,24 +934,28 @@ function setShortcodeParams() {
     changeInitStepDataService()
     store.commit('booking/setBookableType', 'appointment')
     let employeeOptions =
-      store.getters['entities/filteredEmployees'](
-        store.getters['booking/getSelection']
-      ).length <= 1
+      store.getters['entities/filteredEmployees'](store.getters['booking/getSelection']).length <= 1
 
-    let employeeStepVisibility = amCustomize?.employeeStep ? !amCustomize.employeeStep.options.employee.visibility : !defaultCustomizeSettings.sbsNew.employeeStep.options.employee.visibility
-    let employeeVisibility = shortcodeData.value.layout === '2' ? employeeStepVisibility : !amCustomize.initStep.options.employee.visibility
+    let employeeStepVisibility = amCustomize?.employeeStep
+      ? !amCustomize.employeeStep.options.employee.visibility
+      : !defaultCustomizeSettings.sbsNew.employeeStep.options.employee.visibility
+    let employeeVisibility =
+      shortcodeData.value.layout === '2'
+        ? employeeStepVisibility
+        : !amCustomize.initStep.options.employee.visibility
     let locationOptions =
-      store.getters['entities/filteredLocations'](
-        store.getters['booking/getSelection']
-      ).length <= 1
-    let locationStepVisibility = amCustomize?.locationStep ? !amCustomize.locationStep.options.location.visibility : !defaultCustomizeSettings.sbsNew.locationStep.options.location.visibility
-    let locationVisibility = shortcodeData.value.layout === '2' ? locationStepVisibility : !amCustomize.initStep.options.location.visibility
+      store.getters['entities/filteredLocations'](store.getters['booking/getSelection']).length <= 1
+    let locationStepVisibility = amCustomize?.locationStep
+      ? !amCustomize.locationStep.options.location.visibility
+      : !defaultCustomizeSettings.sbsNew.locationStep.options.location.visibility
+    let locationVisibility =
+      shortcodeData.value.layout === '2'
+        ? locationStepVisibility
+        : !amCustomize.initStep.options.location.visibility
 
     if (shortcodeData.value.layout === '2') {
       // * SeviceStep index in stepsArray
-      let serviceStepIndex = stepsArray.value.findIndex(
-        (item) => item.name === 'ServiceStep'
-      )
+      let serviceStepIndex = stepsArray.value.findIndex((item) => item.name === 'ServiceStep')
 
       // * If sevice is preslected
       if (preselected.service.length === 1 && serviceStepIndex !== -1) {
@@ -1039,15 +964,11 @@ function setShortcodeParams() {
       }
 
       // * EmployeeStep index in stepsArray
-      let employeeStepIndex = stepsArray.value.findIndex(
-        (item) => item.name === 'EmployeeStep'
-      )
+      let employeeStepIndex = stepsArray.value.findIndex((item) => item.name === 'EmployeeStep')
 
       // * If employee is preslected
       if (
-        (preselected.employee.length === 1 &&
-        employeeStepIndex !== -1 &&
-        employeeOptions) ||
+        (preselected.employee.length === 1 && employeeStepIndex !== -1 && employeeOptions) ||
         employeeVisibility
       ) {
         stepsArray.value.splice(employeeStepIndex, 1)
@@ -1055,15 +976,14 @@ function setShortcodeParams() {
       }
 
       // * LocationStep index in stepsArray
-      let locationStepIndex = stepsArray.value.findIndex(
-        (item) => item.name === 'LocationStep'
-      )
+      let locationStepIndex = stepsArray.value.findIndex((item) => item.name === 'LocationStep')
 
       // * If location is preslected
       if (
-        ((preselected.location.length === 1 || store.getters['entities/getLocations'].length === 0) &&
-        locationStepIndex !== -1 &&
-        locationOptions) ||
+        ((preselected.location.length === 1 ||
+          store.getters['entities/getLocations'].length === 0) &&
+          locationStepIndex !== -1 &&
+          locationOptions) ||
         locationVisibility
       ) {
         stepsArray.value.splice(locationStepIndex, 1)
@@ -1083,12 +1003,8 @@ function setShortcodeParams() {
     } else {
       if (
         preselected.service.length === 1 &&
-        (preselected.employee.length === 1 ||
-          employeeOptions ||
-          employeeVisibility) &&
-        (preselected.location.length === 1 ||
-          locationOptions ||
-          locationVisibility)
+        (preselected.employee.length === 1 || employeeOptions || employeeVisibility) &&
+        (preselected.location.length === 1 || locationOptions || locationVisibility)
       ) {
         if (bringingAnyoneOptions.value.availability) {
           stepsArray.value.splice(0, 1, bringingAnyone)
@@ -1105,9 +1021,7 @@ function setShortcodeParams() {
 
 function stepChanger(steps, stepsNamesToRemove, stepsToAdd, startIndex) {
   let removeIndexes = steps.value
-    .map((item, index) =>
-      stepsNamesToRemove.includes(item.name) ? index : null
-    )
+    .map((item, index) => (stepsNamesToRemove.includes(item.name) ? index : null))
     .filter((item) => item !== null)
     .reverse()
 
@@ -1136,7 +1050,7 @@ function goToPackageStep(pack, goToNextStep = true) {
 
   let bookingCount = pack.bookable.reduce(
     (partialSum, book) => partialSum + book.maximumScheduled,
-    0
+    0,
   )
 
   let removeSteps = []
@@ -1156,14 +1070,10 @@ function goToPackageStep(pack, goToNextStep = true) {
       }
     })
 
-    lowestInitStepsIndex.value = Math.min(
-      ...initStepsArray.value.map((step) => step.index)
-    )
+    lowestInitStepsIndex.value = Math.min(...initStepsArray.value.map((step) => step.index))
 
     // * If ServiceStep is present in initial steps
-    if (
-      initStepsArray.value.find((step) => step.component.name === 'ServiceStep')
-    ) {
+    if (initStepsArray.value.find((step) => step.component.name === 'ServiceStep')) {
       initStepsArray.value.forEach((step) => {
         if (step.component.name !== 'ServiceStep') {
           removeSteps.push(step.component.name)
@@ -1265,24 +1175,16 @@ function removePackageStep() {
 
   stepChanger(
     stepsArray,
-    [
-      'PackageInfoStep',
-      'PackageAppointmentsStep',
-      'PackageAppointmentsListStep',
-    ],
+    ['PackageInfoStep', 'PackageAppointmentsStep', 'PackageAppointmentsListStep'],
     addSteps,
-    addingStartIndex
+    addingStartIndex,
   )
 
   stepChanger(
     sidebarSteps,
-    [
-      'PackageInfoStep',
-      'PackageAppointmentsStep',
-      'PackageAppointmentsListStep',
-    ],
+    ['PackageInfoStep', 'PackageAppointmentsStep', 'PackageAppointmentsListStep'],
     [],
-    stepIndex.value
+    stepIndex.value,
   )
 
   sidebarDataUpdate()
@@ -1376,46 +1278,49 @@ function removeCartStep() {
  * @type {any}
  */
 let selectedServiceExtras = computed(() => {
-  let service = store.getters['entities/getService'](
-    store.getters['booking/getServiceId']
-  )
+  let service = store.getters['entities/getService'](store.getters['booking/getServiceId'])
 
   return service ? service.extras : []
 })
 
 // * Appointment Waiting List: populate module on service selection
-watch(() => store.getters['booking/getServiceId'], (newServiceId) => {
-  // Reset first
-  store.dispatch('appointmentWaitingListOptions/resetWaitingOptions')
+watch(
+  () => store.getters['booking/getServiceId'],
+  (newServiceId) => {
+    // Reset first
+    store.dispatch('appointmentWaitingListOptions/resetWaitingOptions')
 
-  if (!newServiceId) return
+    if (!newServiceId) return
 
-  let globalEnabled = !!(amSettings.featuresIntegrations?.waitingListAppointments?.enabled)
-  if (!globalEnabled) return
+    let globalEnabled = !!amSettings.featuresIntegrations?.waitingListAppointments?.enabled
+    if (!globalEnabled) return
 
-  let service = store.getters['entities/getService'](newServiceId)
-  if (!service || !service.settings) return
+    let service = store.getters['entities/getService'](newServiceId)
+    if (!service || !service.settings) return
 
-  let serviceSettings = null
-  try {
-    serviceSettings = JSON.parse(service.settings)
-  } catch (e) {
-    serviceSettings = null
-  }
-  if (!serviceSettings || !serviceSettings.waitingList || !serviceSettings.waitingList.enabled) return
+    let serviceSettings = null
+    try {
+      serviceSettings = JSON.parse(service.settings)
+    } catch (e) {
+      serviceSettings = null
+    }
+    if (!serviceSettings || !serviceSettings.waitingList || !serviceSettings.waitingList.enabled)
+      return
 
-  const wl = serviceSettings.waitingList
-  // Backend may not yet supply peopleWaiting for appointments; default 0
-  let waitingPayload = {
-    enabled: !!wl.enabled,
-    maxCapacity: wl.maxCapacity || 0,
-    maxExtraPeople: wl.maxExtraPeople || 0,
-    maxExtraPeopleEnabled: !!wl.maxExtraPeopleEnabled,
-    peopleWaiting: wl.peopleWaiting || 0,
-    isWaitingListSlot: false
-  }
-  store.commit('appointmentWaitingListOptions/setAllData', waitingPayload)
-}, { immediate: true })
+    const wl = serviceSettings.waitingList
+    // Backend may not yet supply peopleWaiting for appointments; default 0
+    let waitingPayload = {
+      enabled: !!wl.enabled,
+      maxCapacity: wl.maxCapacity || 0,
+      maxExtraPeople: wl.maxExtraPeople || 0,
+      maxExtraPeopleEnabled: !!wl.maxExtraPeopleEnabled,
+      peopleWaiting: wl.peopleWaiting || 0,
+      isWaitingListSlot: false,
+    }
+    store.commit('appointmentWaitingListOptions/setAllData', waitingPayload)
+  },
+  { immediate: true },
+)
 
 /**
  * Add or Remove steps from Steps Array
@@ -1430,7 +1335,7 @@ function changeInitStepDataService() {
       let initStepsIndex = Math.max(
         stepsArray.value.findIndex((step) => step.name === 'ServiceStep'),
         stepsArray.value.findIndex((step) => step.name === 'EmployeeStep'),
-        stepsArray.value.findIndex((step) => step.name === 'LocationStep')
+        stepsArray.value.findIndex((step) => step.name === 'LocationStep'),
       )
       stepsArray.value.splice(initStepsIndex + 1, 0, extras)
     } else {
@@ -1445,9 +1350,7 @@ function changeInitStepDataService() {
     sidebarSteps.value.find((step) => step.name === 'ExtrasStep') &&
     !Object.keys(selectedServiceExtras.value).length
   ) {
-    let extrasIndex = stepsArray.value.findIndex(
-      (step) => step.name === 'ExtrasStep'
-    )
+    let extrasIndex = stepsArray.value.findIndex((step) => step.name === 'ExtrasStep')
     stepsArray.value.splice(extrasIndex, 1)
     sidebarSteps.value.splice(extrasIndex, 1)
   }
@@ -1510,10 +1413,7 @@ function previousStep() {
       preventRebuildRecurringBookingData.value = true
     }
 
-    if (
-      stepsArray.value[stepIndex.value].name ===
-      packageAppointmentsListStep.name
-    ) {
+    if (stepsArray.value[stepIndex.value].name === packageAppointmentsListStep.name) {
       goBackToPackageBooking.value = true
     }
 
@@ -1611,11 +1511,17 @@ const sidebarSteps = ref([])
 provide('sidebarSteps', sidebarSteps)
 
 let keepPaymentStep = computed(() =>
-  !empty.value ? (useCart(store).length ? usePrepaidPrice(store) !== 0 : useCheckingIfAllNotFree(store)) : true
+  !empty.value
+    ? useCart(store).length
+      ? usePrepaidPrice(store) !== 0
+      : useCheckingIfAllNotFree(store)
+    : true,
 )
 
 // Appointment waiting list flag
-const isWaitingListBooking = computed(() => store.getters['appointmentWaitingListOptions/getIsWaitingListSlot'])
+const isWaitingListBooking = computed(
+  () => store.getters['appointmentWaitingListOptions/getIsWaitingListSlot'],
+)
 
 watchEffect(() => {
   // If waiting list, remove payment step
@@ -1640,26 +1546,20 @@ function sidebarDataCollector(data) {
   // Determines are selected data already exists
   if (
     sidebarSteps.value[stepIndex.value].stepSelectedData.filter(
-      (item) => item.reference === data.reference
+      (item) => item.reference === data.reference,
     ).length
   ) {
-    sidebarSteps.value[stepIndex.value].stepSelectedData.forEach(
-      (item, index, array) => {
-        // Handles changing value of existing data
-        if (
-          item.reference === data.reference &&
-          data.value &&
-          data.value !== item.value
-        ) {
-          item.value = data.value
-        }
-
-        // Removes un-selected form data from sidebar array
-        if (item.reference === data.reference && !data.value) {
-          array.splice(index, 1)
-        }
+    sidebarSteps.value[stepIndex.value].stepSelectedData.forEach((item, index, array) => {
+      // Handles changing value of existing data
+      if (item.reference === data.reference && data.value && data.value !== item.value) {
+        item.value = data.value
       }
-    )
+
+      // Removes un-selected form data from sidebar array
+      if (item.reference === data.reference && !data.value) {
+        array.splice(index, 1)
+      }
+    })
   } else {
     if (data.value) {
       sidebarSteps.value[stepIndex.value].stepSelectedData.push(data)
@@ -1684,11 +1584,7 @@ function sidebarDataUpdate() {
     if (item.name === 'CongratulationsStep') {
       return
     }
-    if (
-      !sidebarSteps.value.find(
-        (block) => block.labelKey === item.sidebarData.label
-      )
-    ) {
+    if (!sidebarSteps.value.find((block) => block.labelKey === item.sidebarData.label)) {
       let labelKey = item.sidebarData.label
       let step = {
         name: item.name,
@@ -1746,14 +1642,12 @@ function backToCart() {
 
     store.commit(
       'booking/setEmployeeId',
-      items[items.length - 1].services[items[items.length - 1].serviceId]
-        .providerId
+      items[items.length - 1].services[items[items.length - 1].serviceId].providerId,
     )
 
     store.commit(
       'booking/setLocationId',
-      items[items.length - 1].services[items[items.length - 1].serviceId]
-        .locationId
+      items[items.length - 1].services[items[items.length - 1].serviceId].locationId,
     )
   }
 
@@ -1768,7 +1662,11 @@ let amColors = computed(() => {
 })
 provide('amColors', amColors)
 
-let borderCalculation = computed(() => containerWidth.value !== 0 && containerWidth.value > 560 ? sidebarVisibility.value || sidebarCollapsed.value : false)
+let borderCalculation = computed(() =>
+  containerWidth.value !== 0 && containerWidth.value > 560
+    ? sidebarVisibility.value || sidebarCollapsed.value
+    : false,
+)
 
 let cssVars = computed(() => {
   return {
@@ -1791,22 +1689,10 @@ let cssVars = computed(() => {
     '--am-c-btn-prim-text': amColors.value.colorBtnPrimText,
     '--am-c-btn-sec': amColors.value.colorBtnSec,
     '--am-c-btn-sec-text': amColors.value.colorBtnSecText,
-    '--am-c-skeleton-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
-    '--am-c-skeleton-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
-    '--am-c-skeleton-sb-op20': useColorTransparency(
-      amColors.value.colorSbText,
-      0.2
-    ),
-    '--am-c-skeleton-sb-op60': useColorTransparency(
-      amColors.value.colorSbText,
-      0.6
-    ),
+    '--am-c-skeleton-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
+    '--am-c-skeleton-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-skeleton-sb-op20': useColorTransparency(amColors.value.colorSbText, 0.2),
+    '--am-c-skeleton-sb-op60': useColorTransparency(amColors.value.colorSbText, 0.6),
     '--am-font-family': amFonts.value.fontFamily,
 
     // css properties

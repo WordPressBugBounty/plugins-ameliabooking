@@ -44,11 +44,16 @@
       :item-name="service.name"
       :price="service.price"
       :price-visibility="amCustomize[pageRenderKey].serviceStep.options.price.visibility"
-      :tax-visibility="(licence.isPro || licence.isDeveloper) && amCustomize[pageRenderKey].serviceStep.options.tax.visibility "
+      :tax-visibility="
+        (licence.isPro || licence.isDeveloper) &&
+        amCustomize[pageRenderKey].serviceStep.options.tax.visibility
+      "
       :tax-excluded="false"
       :info-items="service.infoItems"
       :info-btn-visibility="amCustomize[pageRenderKey].serviceStep.options.moreBtn.visibility"
-      :packages-btn-visibility="features.packages && amCustomize[pageRenderKey].serviceStep.options.packagesBtn.visibility"
+      :packages-btn-visibility="
+        features.packages && amCustomize[pageRenderKey].serviceStep.options.packagesBtn.visibility
+      "
       :parent-width="componentWidth"
       @select-item="selectService(service)"
       @trigger-info-popup="
@@ -71,7 +76,9 @@
     :is-person="false"
     :employees-heading="!licence.isLite ? labelsDisplay('employees') : ''"
     :employees-data="!licence.isLite ? employeesData : []"
-    :locations-heading="licence.isBasic || licence.isPro || licence.isDeveloper ? labelsDisplay('locations') : ''"
+    :locations-heading="
+      licence.isBasic || licence.isPro || licence.isDeveloper ? labelsDisplay('locations') : ''
+    "
     :locations-data="licence.isBasic || licence.isPro || licence.isDeveloper ? locationsData : []"
   />
   <!-- /More Info -->
@@ -105,7 +112,7 @@ const props = defineProps({
 
 // * Step contains slide popups
 let inPopup = ref(true)
-provide('inPopup', {inPopup})
+provide('inPopup', { inPopup })
 
 // * Features integrations
 let features = inject('features')
@@ -125,9 +132,7 @@ let licence = inject('licence')
 
 // * Component reference
 const stepCardLayoutReference = ref(null)
-const stepCardLayoutDom = computed(
-  () => stepCardLayoutReference.value?.stepCardLayoutRef || null
-)
+const stepCardLayoutDom = computed(() => stepCardLayoutReference.value?.stepCardLayoutRef || null)
 
 // * Component width
 const { width: componentWidth } = useElementSize(stepCardLayoutDom)
@@ -135,9 +140,9 @@ const { width: componentWidth } = useElementSize(stepCardLayoutDom)
 function labelsDisplay(label) {
   return computed(() => {
     return (
-      amCustomize.value[pageRenderKey.value]?.[stepName.value]?.translations?.[
-        label
-      ]?.[langKey.value] || amLabels[label]
+      amCustomize.value[pageRenderKey.value]?.[stepName.value]?.translations?.[label]?.[
+        langKey.value
+      ] || amLabels[label]
     )
   }).value
 }
@@ -288,13 +293,10 @@ const locationMap = {
   8: 'Color Studio',
 }
 watchEffect(() => {
-
   if (!serviceCustomizeOptions.value.serviceCategory.visibility) {
     serviceOptions.value.forEach((service) => {
       if (service.infoItems.some((item) => item.icon === 'folder')) {
-        service.infoItems = service.infoItems.filter(
-          (item) => item.icon !== 'folder'
-        )
+        service.infoItems = service.infoItems.filter((item) => item.icon !== 'folder')
       }
     })
   } else {
@@ -302,9 +304,7 @@ watchEffect(() => {
       if (!service.infoItems.some((item) => item.icon === 'folder')) {
         service.infoItems.splice(0, 0, {
           icon: 'folder',
-          name: categoryOptions.value.find(
-            (cat) => cat.id === service.categoryId
-          ).name,
+          name: categoryOptions.value.find((cat) => cat.id === service.categoryId).name,
         })
       }
     })
@@ -313,18 +313,13 @@ watchEffect(() => {
   if (!serviceCustomizeOptions.value.serviceDuration.visibility) {
     serviceOptions.value.forEach((service) => {
       if (service.infoItems.some((item) => item.icon === 'clock')) {
-        service.infoItems = service.infoItems.filter(
-          (item) => item.icon !== 'clock'
-        )
+        service.infoItems = service.infoItems.filter((item) => item.icon !== 'clock')
       }
     })
   } else {
     serviceOptions.value.forEach((service) => {
       if (!service.infoItems.some((item) => item.icon === 'clock')) {
-        let position =
-          service.infoItems.findIndex((item) => item.icon === 'folder') !== -1
-            ? 1
-            : 0
+        let position = service.infoItems.findIndex((item) => item.icon === 'folder') !== -1 ? 1 : 0
         service.infoItems.splice(position, 0, {
           icon: 'clock',
           name: durationMap[service.id],
@@ -333,12 +328,14 @@ watchEffect(() => {
     })
   }
 
-  if (!serviceCustomizeOptions.value.serviceCapacity.visibility || (licence.isStarter || licence.isLite)) {
+  if (
+    !serviceCustomizeOptions.value.serviceCapacity.visibility ||
+    licence.isStarter ||
+    licence.isLite
+  ) {
     serviceOptions.value.forEach((service) => {
       if (service.infoItems.some((item) => item.icon === 'user')) {
-        service.infoItems = service.infoItems.filter(
-          (item) => item.icon !== 'user'
-        )
+        service.infoItems = service.infoItems.filter((item) => item.icon !== 'user')
       }
     })
   } else {
@@ -346,7 +343,7 @@ watchEffect(() => {
       if (!service.infoItems.some((item) => item.icon === 'user')) {
         let indexC = service.infoItems.findIndex((item) => item.icon === 'folder')
         let indexD = service.infoItems.findIndex((item) => item.icon === 'clock')
-        let position = indexD < 0 ? indexC < 0 ? 0 : indexC + 1 : indexD + 1
+        let position = indexD < 0 ? (indexC < 0 ? 0 : indexC + 1) : indexD + 1
         service.infoItems.splice(position, 0, {
           icon: 'user',
           name: '1/15',
@@ -355,12 +352,14 @@ watchEffect(() => {
     })
   }
 
-  if (!serviceCustomizeOptions.value.serviceLocation.visibility || (licence.isStarter || licence.isLite)) {
+  if (
+    !serviceCustomizeOptions.value.serviceLocation.visibility ||
+    licence.isStarter ||
+    licence.isLite
+  ) {
     serviceOptions.value.forEach((service) => {
       if (service.infoItems.some((item) => item.icon === 'locations')) {
-        service.infoItems = service.infoItems.filter(
-          (item) => item.icon !== 'locations'
-        )
+        service.infoItems = service.infoItems.filter((item) => item.icon !== 'locations')
       }
     })
   } else {

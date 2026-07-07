@@ -1,12 +1,6 @@
 <template>
-  <div
-    class="am-cc__cf"
-    :class="responsiveClass"
-  >
-    <template
-      v-for="(item, index) in props.data"
-      :key="index"
-    >
+  <div class="am-cc__cf" :class="responsiveClass">
+    <template v-for="(item, index) in props.data" :key="index">
       <div class="am-cc__cf-item">
         <span class="am-cc__cf-name" v-html="item.label"></span>
         <div v-if="'value' in item" class="am-cc__cf-value">
@@ -16,24 +10,20 @@
         </div>
       </div>
     </template>
-
   </div>
 </template>
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject
-} from "vue";
+import { computed, inject } from 'vue'
 
 // * Composables
-import { useResponsiveClass } from "../../../../../../../../assets/js/common/responsive.js";
+import { useResponsiveClass } from '../../../../../../../../assets/js/common/responsive.js'
 
 let props = defineProps({
   data: {
-    type: [Array, Object, String]
-  }
+    type: [Array, Object, String],
+  },
 })
 
 let cWidth = inject('containerWidth')
@@ -43,26 +33,28 @@ let responsiveClass = computed(() => {
 })
 
 function customFieldValueDisplay(value) {
-  if (!value) return '/';
+  if (!value) return '/'
 
   if (Array.isArray(value)) {
-    if (value.length === 0) return '/';
+    if (value.length === 0) return '/'
 
-    return value.map(item => {
-      if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
-        return item.name || '/';
-      }
-      return item || '/';
-    }).join(', ');
+    return value
+      .map((item) => {
+        if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
+          return item.name || '/'
+        }
+        return item || '/'
+      })
+      .join(', ')
   }
 
-  return value;
+  return value
 }
 </script>
 
 <script>
 export default {
-  name: "TemplateCustomFields"
+  name: 'TemplateCustomFields',
 }
 </script>
 

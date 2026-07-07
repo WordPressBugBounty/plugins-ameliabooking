@@ -7,17 +7,8 @@
     :style="cssVars"
   >
     <div class="am-payments__heading">
-      <div
-        v-if="paymentError"
-        class="am-payments__error"
-      >
-        <AmAlert
-          type="error"
-          :title="paymentError"
-          :show-icon="true"
-          :closable="false"
-        >
-        </AmAlert>
+      <div v-if="paymentError" class="am-payments__error">
+        <AmAlert type="error" :title="paymentError" :show-icon="true" :closable="false"> </AmAlert>
       </div>
       <span class="am-payments__heading-main">
         {{ amLabels.summary }}
@@ -35,13 +26,13 @@
       v-model="paymentDeposit"
       class="am-payments__full"
       :label="amLabels.full_amount_consent"
-      :class="{'am-payments__full-checked': paymentDeposit}"
+      :class="{ 'am-payments__full-checked': paymentDeposit }"
     >
     </AmCheckbox>
 
     <div class="am-payments__method">
       <p
-        v-show="Object.keys(availablePayments).filter(item => availablePayments[item]).length > 1"
+        v-show="Object.keys(availablePayments).filter((item) => availablePayments[item]).length > 1"
         class="am-payments__method-heading"
       >
         {{ amLabels.payment_method }}
@@ -49,12 +40,19 @@
       <div class="am-payments__method-cards">
         <template v-for="(available, gateway) in availablePayments">
           <div
-            v-if="available && Object.keys(availablePayments).filter(item => availablePayments[item]).length > 1"
+            v-if="
+              available &&
+              Object.keys(availablePayments).filter((item) => availablePayments[item]).length > 1
+            "
             :key="gateway"
             tabindex="0"
             role="button"
             class="am-payments__method-button"
-            :class="[{'am-payments__method-button__selected' : paymentGateway === gateway }, responsiveClass, `am-payments__method-button-${paymentList.length}`]"
+            :class="[
+              { 'am-payments__method-button__selected': paymentGateway === gateway },
+              responsiveClass,
+              `am-payments__method-button-${paymentList.length}`,
+            ]"
             :aria-label="`${getPaymentBtnString(gateway)} ${amLabels.payment_button || 'payment button'}`"
             @click="setPaymentGateway(gateway)"
             @keydown.enter.space.prevent="setPaymentGateway(gateway)"
@@ -64,7 +62,7 @@
               :src="`${baseUrls.wpAmeliaPluginURL}/v3/src/assets/img/icons/${gateway === 'wc' ? 'online' : gateway}.svg`"
               :alt="gateway"
               :class="gateway"
-            >
+            />
             <div>
               <p>{{ getPaymentBtnString(gateway) }}</p>
             </div>
@@ -78,10 +76,10 @@
       </p>
     </div>
     <PaymentOnSite
-        ref="refOnSitePayment"
-        :instant-booking="true"
-        :show-recaptcha="false"
-        @payment-error="callPaymentError"
+      ref="refOnSitePayment"
+      :instant-booking="true"
+      :show-recaptcha="false"
+      @payment-error="callPaymentError"
     />
     <div v-if="paymentGateway" class="am-payments__pm">
       <component
@@ -111,54 +109,46 @@ import PaymentPayPal from '../Methods/PaymentPayPal.vue'
 import PaymentOnSite from '../Methods/PaymentOnSite.vue'
 import PaymentWc from '../Methods/PaymentWc.vue'
 import PaymentCommon from '../Methods/PaymentCommon.vue'
-import PaymentSquare from "../Methods/PaymentSquare.vue";
+import PaymentSquare from '../Methods/PaymentSquare.vue'
 
 // * Loader component
 import BookingSkeleton from '../../../Parts/BookingSkeleton.vue'
 
 // * Import from Vue
-import {
-  ref,
-  inject,
-  provide,
-  markRaw,
-  watch,
-  computed,
-  onMounted
-} from "vue";
+import { ref, inject, provide, markRaw, watch, computed, onMounted } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Composables
-import useAction from "../../../../../assets/js/public/actions";
-import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
-import { usePrepaidPrice } from "../../../../../assets/js/common/appointments";
-import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
-import {settings} from "../../../../../plugins/settings";
+import useAction from '../../../../../assets/js/public/actions'
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
+import { usePrepaidPrice } from '../../../../../assets/js/common/appointments'
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
+import { settings } from '../../../../../plugins/settings'
 
 // * Properties
 let props = defineProps({
   globalClass: {
     type: String,
-    default: ''
+    default: '',
   },
   componentClass: {
     type: String,
-    default: ''
+    default: '',
   },
   selectedItem: {
     type: Object,
-    required: true
+    required: true,
   },
   inDialog: {
     type: Boolean,
-    default: false
+    default: false,
   },
   taxVisibility: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 // * Store
@@ -177,7 +167,7 @@ const amLabels = inject('amLabels')
 const componentTypes = {
   // appointment: markRaw(AppointmentInfo),
   // package: markRaw(PackageInfo),
-  event: markRaw(EventPaymentInfo)
+  event: markRaw(EventPaymentInfo),
 }
 
 // * Payment Error
@@ -189,15 +179,14 @@ let paymentError = computed(() => {
 })
 
 // * Step Functions
-const {
-  headerButtonPreviousClicked,
-  footerBtnDisabledUpdater,
-  footerButtonClick
-} = inject('changingStepsFunctions', {
-  headerButtonPreviousClicked: ref(false),
-  footerBtnDisabledUpdater: () => {},
-  footerButtonClick: () => {}
-})
+const { headerButtonPreviousClicked, footerBtnDisabledUpdater, footerButtonClick } = inject(
+  'changingStepsFunctions',
+  {
+    headerButtonPreviousClicked: ref(false),
+    footerBtnDisabledUpdater: () => {},
+    footerButtonClick: () => {},
+  },
+)
 
 watch(headerButtonPreviousClicked, () => {
   store.commit('payment/setPaymentGateway', '')
@@ -240,7 +229,7 @@ let fullAmount = computed(() => {
 // true = pay full amount
 let paymentDeposit = computed({
   get: () => store.getters['payment/getPaymentDeposit'],
-  set: (value) => store.commit('payment/setPaymentDeposit', value)
+  set: (value) => store.commit('payment/setPaymentDeposit', value),
 })
 
 let mandatoryOnSitePayment = ref(false)
@@ -249,7 +238,11 @@ let paymentSentence = computed(() => {
   let sentence = ''
   if (paymentGateway.value === 'onSite' && !mandatoryOnSitePayment.value) {
     sentence = amLabels.payment_onsite_sentence
-  } else if (paymentGateway.value === 'mollie' || paymentGateway.value === 'wc' || paymentGateway.value === 'barion') {
+  } else if (
+    paymentGateway.value === 'mollie' ||
+    paymentGateway.value === 'wc' ||
+    paymentGateway.value === 'barion'
+  ) {
     sentence = amLabels.payment_wc_mollie_sentence
   }
 
@@ -258,7 +251,7 @@ let paymentSentence = computed(() => {
 
 let refOnSitePayment = ref(null)
 
-function callPaymentError (msg) {
+function callPaymentError(msg) {
   if (store.getters['payment/getOnSitePayment']) {
     store.commit('payment/setOnSitePayment', false)
     store.commit('payment/setPaymentGateway', 'onSite')
@@ -268,7 +261,7 @@ function callPaymentError (msg) {
   store.commit('payment/setError', msg)
 }
 
-function callPaymentAbandoned () {
+function callPaymentAbandoned() {
   store.commit('setLoading', false)
 }
 
@@ -291,27 +284,58 @@ let availablePayments = computed(() => {
 
     let entityPayments = entity.settings ? JSON.parse(entity.settings)['payments'] : null
 
-    let payments = !entityPayments ? {
-      onSite: amSettings.value.payments.onSite,
-      stripe: amSettings.value.payments.stripe.enabled,
-      payPal: amSettings.value.payments.payPal.enabled,
-      wc: amSettings.value.payments.wc.enabled,
-      mollie: amSettings.value.payments.mollie.enabled,
-      razorpay: amSettings.value.payments.razorpay.enabled,
-      square: settings.payments.square.enabled,
-      barion: settings.payments.barion.enabled,
-    } : {
-      onSite: 'onSite' in entityPayments ? entityPayments.onSite && amSettings.value.payments.onSite : amSettings.value.payments.onSite,
-      stripe: 'stripe' in entityPayments ? entityPayments.stripe.enabled && amSettings.value.payments.stripe.enabled : amSettings.value.payments.stripe.enabled,
-      payPal: 'payPal' in entityPayments ? entityPayments.payPal.enabled && amSettings.value.payments.payPal.enabled : amSettings.value.payments.payPal.enabled,
-      wc: 'wc' in entityPayments ? (!('enabled' in entityPayments.wc) || entityPayments.wc.enabled) && amSettings.value.payments.wc.enabled : amSettings.value.payments.wc.enabled,
-      mollie: 'mollie' in entityPayments ? entityPayments.mollie.enabled && amSettings.value.payments.mollie.enabled : amSettings.value.payments.mollie.enabled,
-      razorpay: 'razorpay' in entityPayments ? entityPayments.razorpay.enabled && amSettings.value.payments.razorpay.enabled : amSettings.value.payments.razorpay.enabled,
-      square: 'square' in entityPayments ? entityPayments.square.enabled && settings.payments.square.enabled : settings.payments.square.enabled,
-      barion: 'barion' in entityPayments ? entityPayments.barion.enabled && settings.payments.barion.enabled && ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode) : settings.payments.barion.enabled && ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode),
-    }
+    let payments = !entityPayments
+      ? {
+          onSite: amSettings.value.payments.onSite,
+          stripe: amSettings.value.payments.stripe.enabled,
+          payPal: amSettings.value.payments.payPal.enabled,
+          wc: amSettings.value.payments.wc.enabled,
+          mollie: amSettings.value.payments.mollie.enabled,
+          razorpay: amSettings.value.payments.razorpay.enabled,
+          square: settings.payments.square.enabled,
+          barion: settings.payments.barion.enabled,
+        }
+      : {
+          onSite:
+            'onSite' in entityPayments
+              ? entityPayments.onSite && amSettings.value.payments.onSite
+              : amSettings.value.payments.onSite,
+          stripe:
+            'stripe' in entityPayments
+              ? entityPayments.stripe.enabled && amSettings.value.payments.stripe.enabled
+              : amSettings.value.payments.stripe.enabled,
+          payPal:
+            'payPal' in entityPayments
+              ? entityPayments.payPal.enabled && amSettings.value.payments.payPal.enabled
+              : amSettings.value.payments.payPal.enabled,
+          wc:
+            'wc' in entityPayments
+              ? (!('enabled' in entityPayments.wc) || entityPayments.wc.enabled) &&
+                amSettings.value.payments.wc.enabled
+              : amSettings.value.payments.wc.enabled,
+          mollie:
+            'mollie' in entityPayments
+              ? entityPayments.mollie.enabled && amSettings.value.payments.mollie.enabled
+              : amSettings.value.payments.mollie.enabled,
+          razorpay:
+            'razorpay' in entityPayments
+              ? entityPayments.razorpay.enabled && amSettings.value.payments.razorpay.enabled
+              : amSettings.value.payments.razorpay.enabled,
+          square:
+            'square' in entityPayments
+              ? entityPayments.square.enabled && settings.payments.square.enabled
+              : settings.payments.square.enabled,
+          barion:
+            'barion' in entityPayments
+              ? entityPayments.barion.enabled &&
+                settings.payments.barion.enabled &&
+                ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode)
+              : settings.payments.barion.enabled &&
+                ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode),
+        }
 
-    if (!payments.onSite &&
+    if (
+      !payments.onSite &&
       !payments.stripe &&
       !payments.payPal &&
       !payments.wc &&
@@ -332,12 +356,15 @@ let availablePayments = computed(() => {
       }
     }
 
-    if (amSettings.value.payments.defaultPaymentMethod && payments[amSettings.value.payments.defaultPaymentMethod]) {
+    if (
+      amSettings.value.payments.defaultPaymentMethod &&
+      payments[amSettings.value.payments.defaultPaymentMethod]
+    ) {
       store.commit('payment/setPaymentGateway', amSettings.value.payments.defaultPaymentMethod)
 
       footerBtnDisabledUpdater(false)
     } else {
-      if (Object.keys(payments).filter(item => payments[item]).length === 1) {
+      if (Object.keys(payments).filter((item) => payments[item]).length === 1) {
         for (let key in payments) {
           if (payments[key]) {
             store.commit('payment/setPaymentGateway', key)
@@ -356,7 +383,7 @@ let availablePayments = computed(() => {
 
 let paymentList = computed(() => {
   let arr = []
-  Object.keys(availablePayments.value).forEach(a => {
+  Object.keys(availablePayments.value).forEach((a) => {
     if (availablePayments.value[a]) {
       arr.push(a)
     }
@@ -364,13 +391,13 @@ let paymentList = computed(() => {
 
   return arr
 })
-function setPaymentGateway (gateway) {
+function setPaymentGateway(gateway) {
   store.commit('payment/setPaymentGateway', gateway)
 
   footerBtnDisabledUpdater(false)
 }
 
-function setOnSitePayment (isMandatory) {
+function setOnSitePayment(isMandatory) {
   if (amSettings.value.payments.wc.enabled ? amSettings.value.payments.wc.onSiteIfFree : true) {
     if (isMandatory) {
       store.commit('payment/setPaymentGateway', 'onSite')
@@ -383,7 +410,6 @@ function setOnSitePayment (isMandatory) {
 let paymentRef = ref(null)
 provide('paymentRef', paymentRef)
 
-
 onMounted(() => {
   store.commit('payment/setError', '')
   store.commit('setLoading', false)
@@ -391,7 +417,10 @@ onMounted(() => {
   let price = usePrepaidPrice(store)
 
   if (price === 0) {
-    if (amSettings.value.payments.wc.enabled === true && !amSettings.value.payments.wc.onSiteIfFree) {
+    if (
+      amSettings.value.payments.wc.enabled === true &&
+      !amSettings.value.payments.wc.onSiteIfFree
+    ) {
       store.commit('payment/setPaymentGateway', 'wc')
     } else {
       store.commit('payment/setPaymentGateway', 'onSite')
@@ -406,7 +435,7 @@ onMounted(() => {
 let amColors = inject('amColors')
 
 const cssVars = computed(() => {
-  return  {
+  return {
     '--am-c-ps-price-bgr': useColorTransparency(amColors.value.colorBtnPrim, 0.05),
     '--am-c-ps-total-price': amColors.value.colorBtnPrim,
     '--am-c-ps-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
@@ -417,12 +446,12 @@ const cssVars = computed(() => {
     '--am-c-ps-primary': amColors.value.colorPrimary,
     '--am-c-ps-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
     '--am-c-ps-primary-op06': useColorTransparency(amColors.value.colorPrimary, 0.06),
-    '--am-w-ps-card': `${100 / paymentList.value.length}%`
+    '--am-w-ps-card': `${100 / paymentList.value.length}%`,
   }
 })
 
-function getPaymentBtnString (key) {
-  switch(key) {
+function getPaymentBtnString(key) {
+  switch (key) {
     case 'square':
       return amLabels['square']
     case 'onSite':
@@ -454,13 +483,12 @@ let responsiveClass = computed(() => {
 
 <script>
 export default {
-  name: "PaymentPage"
+  name: 'PaymentPage',
 }
 </script>
 
 <style lang="scss">
 .amelia-v2-booking #amelia-container {
-
   .am-payments {
     --am-c-ps-text: var(--am-c-main-text);
     --am-c-ps-border: var(--am-c-inp-border);
@@ -468,7 +496,7 @@ export default {
       $count: 6;
       @for $i from 0 through $count {
         &:nth-child(#{$i + 1}) {
-          animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+          animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
           animation-fill-mode: both;
         }
       }
@@ -481,7 +509,7 @@ export default {
       line-height: 1.6;
       color: var(--am-c-ps-text);
       margin-bottom: 4px;
-      animation: 600ms cubic-bezier(.45,1,.4,1.2) #{100}ms am-animation-slide-up;
+      animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{100}ms am-animation-slide-up;
       animation-fill-mode: both;
     }
 
@@ -542,7 +570,7 @@ export default {
     }
 
     &__error {
-      animation: 600ms cubic-bezier(.45,1,.4,1.2) #{100}ms am-animation-slide-up;
+      animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{100}ms am-animation-slide-up;
       animation-fill-mode: both;
       margin-bottom: 10px;
     }

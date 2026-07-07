@@ -18,12 +18,7 @@
         <!-- Icon -->
         <div class="am-integration-card__icon">
           <img
-            :src="
-              baseUrls.wpAmeliaPluginURL +
-              '/v3/src/assets/img/icons/' +
-              iconName +
-              '.svg'
-            "
+            :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/' + iconName + '.svg'"
             alt=""
             aria-hidden="true"
             height="40"
@@ -38,8 +33,7 @@
             class="am-integration-card__status"
             :class="{
               'am-integration-card__status--connected': isConnected,
-              'am-integration-card__status--disconnected':
-                !isConnected && isAvailable,
+              'am-integration-card__status--disconnected': !isConnected && isAvailable,
             }"
           >
             {{ statusText }}

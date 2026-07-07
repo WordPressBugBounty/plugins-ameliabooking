@@ -1,12 +1,6 @@
 <template>
-  <div
-    ref="amSkeletonContainer"
-    class="am-skeleton-catalog__wrapper"
-  >
-    <el-skeleton
-      animated
-      class="am-skeleton-catalog"
-    >
+  <div ref="amSkeletonContainer" class="am-skeleton-catalog__wrapper">
+    <el-skeleton animated class="am-skeleton-catalog">
       <template #template>
         <div
           v-for="i in new Array(8)"
@@ -14,10 +8,7 @@
           class="am-skeleton-catalog__item"
           :class="itemWidth"
         >
-          <el-skeleton-item
-            class="am-skeleton-catalog__item-inner"
-            variant="text"
-          />
+          <el-skeleton-item class="am-skeleton-catalog__item-inner" variant="text" />
         </div>
       </template>
     </el-skeleton>
@@ -25,11 +16,7 @@
 </template>
 
 <script setup>
-import {
-  ref,
-  computed,
-  onMounted
-} from "vue";
+import { ref, computed, onMounted } from 'vue'
 
 // * Component reference
 let amSkeletonContainer = ref(null)
@@ -38,7 +25,7 @@ let amSkeletonContainer = ref(null)
 let containerWidth = ref(0)
 
 // * window resize listener
-window.addEventListener('resize', resize);
+window.addEventListener('resize', resize)
 
 // * resize function
 function resize() {
@@ -72,7 +59,7 @@ let itemWidth = computed(() => {
 
 <script>
 export default {
-  name: "CatalogSkeleton"
+  name: 'CatalogSkeleton',
 }
 </script>
 
@@ -115,7 +102,12 @@ export default {
       &-inner {
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg,var(--el-skeleton-color) 25%,var(--el-skeleton-to-color) 37%,var(--el-skeleton-color) 63%);
+        background: linear-gradient(
+          90deg,
+          var(--el-skeleton-color) 25%,
+          var(--el-skeleton-to-color) 37%,
+          var(--el-skeleton-color) 63%
+        );
         background-size: 400% 100%;
         -webkit-animation: el-skeleton-loading 1.4s ease infinite;
         animation: el-skeleton-loading 1.4s ease infinite;
@@ -125,12 +117,20 @@ export default {
 }
 
 @-webkit-keyframes el-skeleton-loading {
-  0% {background-position: 100% 50%}
-  100% {background-position: 0 50%}
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
 }
 
 @keyframes el-skeleton-loading {
-  0% {background-position: 100% 50%}
-  100% {background-position: 0 50%}
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
 }
 </style>

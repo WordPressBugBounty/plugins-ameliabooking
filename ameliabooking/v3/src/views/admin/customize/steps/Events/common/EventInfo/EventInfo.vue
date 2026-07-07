@@ -28,10 +28,7 @@
     <div class="am-eli__main">
       <el-tabs v-model="activeName">
         <el-tab-pane :label="labelsDisplay('event_info')" name="first">
-          <div
-            v-if="selectedEvent.periods.length"
-            class="am-eli__timetable am-eli__main-item"
-          >
+          <div v-if="selectedEvent.periods.length" class="am-eli__timetable am-eli__main-item">
             <p class="am-eli__timetable-title am-eli__main-title">
               {{ labelsDisplay('event_timetable') }}
               <span v-if="eventRange.start !== eventRange.end">
@@ -81,11 +78,7 @@
             ></EventEmployee>
           </template>
         </el-tab-pane>
-        <el-tab-pane
-          v-if="features.tickets"
-          :label="labelsDisplay('event_tickets')"
-          name="second"
-        >
+        <el-tab-pane v-if="features.tickets" :label="labelsDisplay('event_tickets')" name="second">
           <EventTicket
             v-for="ticket in tickets"
             :key="ticket.id"
@@ -101,18 +94,13 @@
   </div>
 
   <!-- Bringing Anyone with you -->
-  <AmSlidePopup
-    :visibility="bringingAnyoneVisibility"
-    custom-class="am-eli__bringing-wrapper"
-  >
+  <AmSlidePopup :visibility="bringingAnyoneVisibility" custom-class="am-eli__bringing-wrapper">
     <EventBringingAnyone />
 
     <template #footer>
       <div class="am-eli__bringing-footer" :class="responsiveClass">
         <AmButton
-          :type="
-            amCustomize[pageRenderKey].bringingAnyone.options.secBtn.buttonType
-          "
+          :type="amCustomize[pageRenderKey].bringingAnyone.options.secBtn.buttonType"
           category="secondary"
           :disabled="false"
           @click="noOneBringWith"
@@ -121,9 +109,7 @@
         </AmButton>
         <AmButton
           :category="isWaiting ? 'waiting' : 'primary'"
-          :type="
-            amCustomize[pageRenderKey].bringingAnyone.options.primBtn.buttonType
-          "
+          :type="amCustomize[pageRenderKey].bringingAnyone.options.primBtn.buttonType"
           :disabled="false"
           @click="bringPeopleWithYou"
         >
@@ -260,14 +246,8 @@ let selectedEvent = ref({
     {
       id: 1,
       eventId: 1,
-      periodStart: moment()
-        .add(2, 'days')
-        .add(5, 'hours')
-        .format('YYYY-MM-DD hh:mm:ss'),
-      periodEnd: moment()
-        .add(4, 'days')
-        .add(10, 'hours')
-        .format('YYYY-MM-DD hh:mm:ss'),
+      periodStart: moment().add(2, 'days').add(5, 'hours').format('YYYY-MM-DD hh:mm:ss'),
+      periodEnd: moment().add(4, 'days').add(10, 'hours').format('YYYY-MM-DD hh:mm:ss'),
     },
   ],
   pictureFullPath: null,
@@ -369,14 +349,8 @@ let selectedEventsPeriods = computed(() => {
   selectedEvent.value.periods.forEach(function (period) {
     let periodStartDate = moment(period.periodStart.split(' ')[0], 'YYYY-MM-DD')
     let periodEndDate = moment(period.periodEnd.split(' ')[0], 'YYYY-MM-DD')
-    let periodStartTime = moment(
-      period.periodStart.split(' ')[1],
-      'HH:mm:ss'
-    ).format('HH:mm:ss')
-    let periodEndTime = moment(
-      period.periodEnd.split(' ')[1],
-      'HH:mm:ss'
-    ).format('HH:mm:ss')
+    let periodStartTime = moment(period.periodStart.split(' ')[1], 'HH:mm:ss').format('HH:mm:ss')
+    let periodEndTime = moment(period.periodEnd.split(' ')[1], 'HH:mm:ss').format('HH:mm:ss')
 
     if (periodEndTime === '00:00:00') {
       periodEndTime = '24:00:00'
@@ -410,11 +384,7 @@ let selectedEventsPeriods = computed(() => {
 
   let periods = []
   periodsArr
-    .sort(
-      (a, b) =>
-        moment(a.start, 'YYYY-MM-DD HH:mm:ss') -
-        moment(b.start, 'YYYY-MM-DD HH:mm:ss')
-    )
+    .sort((a, b) => moment(a.start, 'YYYY-MM-DD HH:mm:ss') - moment(b.start, 'YYYY-MM-DD HH:mm:ss'))
     .forEach((item) => {
       periods.push({
         dateOfMonth: getFrontedFormattedDate(item.start.split(' ')[0]),
@@ -433,7 +403,7 @@ let eventRange = computed(() => {
   selectedEvent.value.periods.forEach((item) => {
     rangeArr.push(
       moment(item.periodStart, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD'),
-      moment(item.periodEnd, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD')
+      moment(item.periodEnd, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD'),
     )
   })
 
@@ -478,11 +448,8 @@ let amLabels = inject('labels')
 
 function labelsDisplay(label, stepKey = 'info') {
   let computedLabel = computed(() => {
-    let translations =
-      amCustomize.value[pageRenderKey.value][stepKey].translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    let translations = amCustomize.value[pageRenderKey.value][stepKey].translations
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -526,26 +493,11 @@ let cssVars = computed(() => {
     '--am-c-eli-primary': amColors.value.colorPrimary,
     '--am-c-eli-bgr': amColors.value.colorMainBgr,
     '--am-c-eli-text': amColors.value.colorMainText,
-    '--am-c-eli-text-op90': useColorTransparency(
-      amColors.value.colorMainText,
-      0.9
-    ),
-    '--am-c-eli-text-op80': useColorTransparency(
-      amColors.value.colorMainText,
-      0.8
-    ),
-    '--am-c-eli-text-op70': useColorTransparency(
-      amColors.value.colorMainText,
-      0.7
-    ),
-    '--am-c-eli-text-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.7
-    ),
-    '--am-c-eli-text-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
+    '--am-c-eli-text-op90': useColorTransparency(amColors.value.colorMainText, 0.9),
+    '--am-c-eli-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
+    '--am-c-eli-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
+    '--am-c-eli-text-op60': useColorTransparency(amColors.value.colorMainText, 0.7),
+    '--am-c-eli-text-op20': useColorTransparency(amColors.value.colorMainText, 0.1),
   }
 })
 </script>

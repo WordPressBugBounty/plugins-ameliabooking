@@ -36,9 +36,7 @@
               v-for="item in customers"
               :key="item.id"
               :value="item.id"
-              :label="
-                item.email ? item.email : item.firstName + ' ' + item.lastName
-              "
+              :label="item.email ? item.email : item.firstName + ' ' + item.lastName"
             >
               <div class="am-cap__cust-option">
                 <div class="am-cap__cust-option__heading">
@@ -64,10 +62,7 @@
 
         <!-- Add Customer -->
         <AmButton
-          v-if="
-            !store.getters['attendee/getId'] &&
-            amSettings.roles.allowWriteCustomers
-          "
+          v-if="!store.getters['attendee/getId'] && amSettings.roles.allowWriteCustomers"
           class="am-capai-cuf__heading-add"
           :class="props.responsiveClass"
           :size="'default'"
@@ -86,10 +81,7 @@
         <div class="am-cap-cust" :class="responsiveClass" :style="cssVars">
           <!-- Customer Name -->
           <div class="am-cap-cust__name" :class="noShowData(0).class">
-            <span
-              v-if="noShowData(0).icon"
-              :class="`am-icon-${noShowData(0).icon}`"
-            />
+            <span v-if="noShowData(0).icon" :class="`am-icon-${noShowData(0).icon}`" />
             {{ customer.firstName + ' ' + customer.lastName }}
           </div>
           <!-- /Customer Name -->
@@ -103,10 +95,7 @@
             class="am-cap-cust__data-wrapper"
           >
             <!-- Customer Phone -->
-            <div
-              v-if="customer.phone && customerPhoneVisibility"
-              class="am-cap-cust__data"
-            >
+            <div v-if="customer.phone && customerPhoneVisibility" class="am-cap-cust__data">
               <span class="am-icon-phone"></span>
               <a :href="`tel:${customer.phone}`">
                 {{ customer.phone }}
@@ -115,10 +104,7 @@
             <!-- /Customer Phone -->
 
             <!-- Customer Email -->
-            <div
-              v-if="customer.email && customerEmailVisibility"
-              class="am-cap-cust__data"
-            >
+            <div v-if="customer.email && customerEmailVisibility" class="am-cap-cust__data">
               <span class="am-icon-email"></span>
               <a :href="`mailto:${customer.email}`">
                 {{ customer.email }}
@@ -130,20 +116,12 @@
         </div>
 
         <!-- Select Status -->
-        <el-form-item
-          :prop="'status'"
-          class="am-cap__att-form__item"
-          :class="responsiveClass"
-        >
+        <el-form-item :prop="'status'" class="am-cap__att-form__item" :class="responsiveClass">
           <AmSelect
             v-model="detailsForm.status"
             :placeholder="amLabels.select"
-            :prefix-icon="
-              attendeeStatuses.find((i) => i.value === detailsForm.status).icon
-            "
-            :prefix-icon-color="
-              attendeeStatuses.find((i) => i.value === detailsForm.status).color
-            "
+            :prefix-icon="attendeeStatuses.find((i) => i.value === detailsForm.status).icon"
+            :prefix-icon-color="attendeeStatuses.find((i) => i.value === detailsForm.status).color"
             popper-class="am-capei-att__popper"
           >
             <AmOption
@@ -152,10 +130,7 @@
               :value="status.value"
               :label="status.label"
             >
-              <span
-                :class="`am-icon-${status.icon}`"
-                :style="{ color: status.color }"
-              />
+              <span :class="`am-icon-${status.icon}`" :style="{ color: status.color }" />
               {{ status.label }}
             </AmOption>
           </AmSelect>
@@ -192,10 +167,7 @@
           <el-form-item
             v-for="(item, index) in detailsForm.tickets"
             :key="index"
-            :label="
-              props.event.customTickets.find((i) => i.id === item.eventTicketId)
-                .name
-            "
+            :label="props.event.customTickets.find((i) => i.id === item.eventTicketId).name"
             class="am-cap__att-form__item"
             :class="responsiveClass"
           >
@@ -225,10 +197,7 @@
 
 <script setup>
 // * Import Composable
-import {
-  useFocusCustomers,
-  useSearchCustomers,
-} from '../../../../../../assets/js/admin/customers'
+import { useFocusCustomers, useSearchCustomers } from '../../../../../../assets/js/admin/customers'
 import { useResponsiveClass } from '../../../../../../assets/js/common/responsive'
 import { useAttendeeStatuses } from '../../../../../../assets/js/common/attendees'
 
@@ -293,12 +262,12 @@ let amCustomize = inject('amCustomize')
 let customerPhoneVisibility = computed(() =>
   shortcodeData.value.cabinetType === 'employee'
     ? amCustomize.value.events.options.customerPhone.visibility
-    : true
+    : true,
 )
 let customerEmailVisibility = computed(() =>
   shortcodeData.value.cabinetType === 'employee'
     ? amCustomize.value.events.options.customerEmail.visibility
-    : true
+    : true,
 )
 
 // * Form Reference
@@ -339,20 +308,19 @@ let eventSettings = computed(() => {
   return props.event.settings ? JSON.parse(props.event.settings) : null
 })
 
-let attendeeStatuses = ref(useAttendeeStatuses().filter(
-    i => !amSettings.featuresIntegrations.waitingList.enabled ||
-      (
-        eventSettings.value
-          ? 'waitingList' in eventSettings.value && !eventSettings.value.waitingList.enabled
-          : true
-      ) ? i.value !== 'waiting' : true
-  )
+let attendeeStatuses = ref(
+  useAttendeeStatuses().filter((i) =>
+    !amSettings.featuresIntegrations.waitingList.enabled ||
+    (eventSettings.value
+      ? 'waitingList' in eventSettings.value && !eventSettings.value.waitingList.enabled
+      : true)
+      ? i.value !== 'waiting'
+      : true,
+  ),
 )
 
 // * Customer Searching
-let searchingCustomers = computed(
-  () => store.getters['customerInfo/getLoading']
-)
+let searchingCustomers = computed(() => store.getters['customerInfo/getLoading'])
 
 // * Customers
 let customers = computed(() => store.getters['customerInfo/getCustomers'])
@@ -360,7 +328,7 @@ let customers = computed(() => store.getters['customerInfo/getCustomers'])
 let customer = computed(() =>
   detailsForm.value.customerId
     ? customers.value.find((i) => i.id === detailsForm.value.customerId)
-    : null
+    : null,
 )
 
 function editCustomer(id) {
@@ -377,10 +345,7 @@ function editCustomer(id) {
       },
     })
     .then((response) => {
-      store.commit(
-        'customerInfo/setCustomer',
-        useFrontendCustomer(store, response.data.data.user)
-      )
+      store.commit('customerInfo/setCustomer', useFrontendCustomer(store, response.data.data.user))
     })
     .catch((error) => {
       console.log(error)
@@ -406,10 +371,7 @@ function addedCustomer(customer) {
 
 onMounted(() => {
   if (!store.getters['attendee/getId']) {
-    store.commit(
-      'customerInfo/setCustomers',
-      store.getters['auth/getPreloadedCustomers']
-    )
+    store.commit('customerInfo/setCustomers', store.getters['auth/getPreloadedCustomers'])
   }
 })
 
@@ -453,15 +415,9 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-cust-no1': amColors.value.colorMainText,
-    '--am-c-cust-no1-bgr': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
+    '--am-c-cust-no1-bgr': useColorTransparency(amColors.value.colorMainText, 0.1),
     '--am-c-cust-no2': amColors.value.colorWarning,
-    '--am-c-cust-no2-bgr': useColorTransparency(
-      amColors.value.colorWarning,
-      0.1
-    ),
+    '--am-c-cust-no2-bgr': useColorTransparency(amColors.value.colorWarning, 0.1),
     '--am-c-cust-no3': amColors.value.colorError,
     '--am-c-cust-no3-bgr': useColorTransparency(amColors.value.colorError, 0.1),
     '--am-c-cust-text': amColors.value.colorMainText,

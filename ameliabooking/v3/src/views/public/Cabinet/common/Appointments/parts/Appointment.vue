@@ -97,9 +97,7 @@
         <AppointmentLinked
           :linked-appointments="linkedAppointments"
           :responsive-class="props.responsiveClass"
-          @edit-linked-appointment="
-            (data) => emits('editLinkedAppointment', data)
-          "
+          @edit-linked-appointment="(data) => emits('editLinkedAppointment', data)"
         />
       </el-tab-pane>
       <!-- /Linked -->
@@ -178,10 +176,7 @@ import moment from 'moment'
 
 // * Composables
 import { useTimeInSeconds } from '../../../../../../assets/js/common/date'
-import {
-  useAppointmentSlots,
-  useSlotsPricing,
-} from '../../../../../../assets/js/public/slots'
+import { useAppointmentSlots, useSlotsPricing } from '../../../../../../assets/js/public/slots'
 
 // * Components
 import AmButton from '../../../../../_components/button/AmButton.vue'
@@ -277,9 +272,7 @@ let recurringList = ref(null)
 provide('recurringList', recurringList)
 
 function getSelectedDatesTimes(ignoredRecurringIndex, ignoredMain) {
-  let date = moment(store.getters['appointment/getStartDate']).format(
-    'YYYY-MM-DD'
-  )
+  let date = moment(store.getters['appointment/getStartDate']).format('YYYY-MM-DD')
 
   let selectedDateTimes = {}
 
@@ -295,12 +288,7 @@ function getSelectedDatesTimes(ignoredRecurringIndex, ignoredMain) {
 
   if (recurringList.value) {
     recurringList.value.forEach((item, index) => {
-      if (
-        item.time &&
-        (ignoredRecurringIndex !== null
-          ? index !== ignoredRecurringIndex
-          : true)
-      ) {
+      if (item.time && (ignoredRecurringIndex !== null ? index !== ignoredRecurringIndex : true)) {
         let recurringDate = moment(item.date).format('YYYY-MM-DD')
 
         if (!(recurringDate in selectedDateTimes)) {
@@ -328,7 +316,7 @@ function getFreeTimes(ignoredRecurringIndex, data, isMain) {
 
   if (date in selectedDatesTimes) {
     let remainingTimes = data.times.filter(
-      (t) => !Object.keys(selectedDatesTimes[date]).includes(t)
+      (t) => !Object.keys(selectedDatesTimes[date]).includes(t),
     )
 
     let availableTimes = []
@@ -346,18 +334,14 @@ function getFreeTimes(ignoredRecurringIndex, data, isMain) {
         .forEach((selectedTimeInSeconds) => {
           if (remainingTimeInSeconds < selectedTimeInSeconds) {
             if (
-              remainingTimeInSeconds +
-                service.value.duration +
-                service.value.timeAfter >
+              remainingTimeInSeconds + service.value.duration + service.value.timeAfter >
               selectedTimeInSeconds
             ) {
               available = false
             }
           } else {
             if (
-              selectedTimeInSeconds +
-                service.value.duration +
-                service.value.timeAfter >
+              selectedTimeInSeconds + service.value.duration + service.value.timeAfter >
               remainingTimeInSeconds
             ) {
               available = false
@@ -389,23 +373,17 @@ function filterOut(date, selectedDatesTimes, availableTimes) {
 
   let hasFiltered = false
 
-  let dayBeforeDate = moment(date, 'YYYY-MM-DD')
-    .subtract(1, 'days')
-    .format('YYYY-MM-DD')
+  let dayBeforeDate = moment(date, 'YYYY-MM-DD').subtract(1, 'days').format('YYYY-MM-DD')
 
   if (dayBeforeDate in selectedDatesTimes) {
-    let dayBeforeSelectedTimesInSeconds = Object.keys(
-      selectedDatesTimes[dayBeforeDate]
-    )
+    let dayBeforeSelectedTimesInSeconds = Object.keys(selectedDatesTimes[dayBeforeDate])
       .map((i) => useTimeInSeconds(i))
       .sort((a, b) => {
         return a - b
       })
 
     let dayBeforeLastTimeInSeconds =
-      dayBeforeSelectedTimesInSeconds[
-        dayBeforeSelectedTimesInSeconds.length - 1
-      ] +
+      dayBeforeSelectedTimesInSeconds[dayBeforeSelectedTimesInSeconds.length - 1] +
       service.value.duration +
       service.value.timeAfter
 
@@ -422,36 +400,23 @@ function filterOut(date, selectedDatesTimes, availableTimes) {
     }
   }
 
-  let dayAfterDate = moment(date, 'YYYY-MM-DD')
-    .add(1, 'days')
-    .format('YYYY-MM-DD')
+  let dayAfterDate = moment(date, 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD')
 
   if (dayAfterDate in selectedDatesTimes) {
-    let dayAfterSelectedTimesInSeconds = Object.keys(
-      selectedDatesTimes[dayAfterDate]
-    )
+    let dayAfterSelectedTimesInSeconds = Object.keys(selectedDatesTimes[dayAfterDate])
       .map((i) => useTimeInSeconds(i))
       .sort((a, b) => {
         return a - b
       })
 
-    if (
-      dayAfterSelectedTimesInSeconds[0] -
-        service.value.duration -
-        service.value.timeAfter <
-      0
-    ) {
+    if (dayAfterSelectedTimesInSeconds[0] - service.value.duration - service.value.timeAfter < 0) {
       availableTimes.forEach((time) => {
         let timeInSeconds = useTimeInSeconds(time)
 
         if (
-          timeInSeconds + service.value.duration + service.value.timeAfter <=
-            86400 ||
+          timeInSeconds + service.value.duration + service.value.timeAfter <= 86400 ||
           dayAfterSelectedTimesInSeconds[0] >=
-            timeInSeconds +
-              service.value.duration +
-              service.value.timeAfter -
-              86400
+            timeInSeconds + service.value.duration + service.value.timeAfter - 86400
         ) {
           filtered.push(time)
         }
@@ -482,9 +447,8 @@ function selectDate(date) {
 
 function selectTime(time) {
   let locationId =
-    freeSlots.value[
-      moment(store.getters['appointment/getStartDate']).format('YYYY-MM-DD')
-    ][time][0].l
+    freeSlots.value[moment(store.getters['appointment/getStartDate']).format('YYYY-MM-DD')][time][0]
+      .l
 
   if (locationId) {
     store.commit('appointment/setLocationId', locationId)
@@ -505,7 +469,7 @@ function isDisabledDate(value, inspectTimes, isMain, monthOrYear) {
               date: value,
               times: Object.keys(freeSlots.value[date]),
             },
-            isMain
+            isMain,
           ).length
         : true)
     )
@@ -539,7 +503,7 @@ let slotsProps = computed(() => {
       Math,
       store.getters['appointment/getBookings']
         .filter((b) => b.status !== 'canceled' && b.status !== 'rejected')
-        .map((b) => b.duration)
+        .map((b) => b.duration),
     ),
     providerIds: store.getters['appointment/getProviderId']
       ? [store.getters['appointment/getProviderId']]
@@ -562,12 +526,7 @@ function changedSlotCondition(isMount = false) {
   }
 }
 
-function fetchSlots(
-  selectedDate,
-  recurringIndex = null,
-  isNavigation = false,
-  isMount = false
-) {
+function fetchSlots(selectedDate, recurringIndex = null, isNavigation = false, isMount = false) {
   if (store.getters['appointment/getServiceId']) {
     slotsLoading.value = true
 
@@ -575,40 +534,27 @@ function fetchSlots(
       Object.assign(
         {
           startDateTime: selectedDate
-            ? moment(selectedDate)
-                .startOf('month')
-                .subtract(6, 'days')
-                .format('YYYY-MM-DD')
+            ? moment(selectedDate).startOf('month').subtract(6, 'days').format('YYYY-MM-DD')
             : null,
           endDateTime: selectedDate
-            ? moment(selectedDate)
-                .endOf('month')
-                .add(6, 'days')
-                .format('YYYY-MM-DD')
+            ? moment(selectedDate).endOf('month').add(6, 'days').format('YYYY-MM-DD')
             : null,
         },
-        slotsProps.value
+        slotsProps.value,
       ),
       {},
       (slots, occupied, minimum, maximum) => {
         maximumBookingStartDate.value = maximum
 
-        if (
-          store.getters['appointment/getStartDate'] &&
-          recurringIndex === null &&
-          !isNavigation
-        ) {
-          let startDateString = moment(
-            store.getters['appointment/getStartDate']
-          ).format('YYYY-MM-DD')
+        if (store.getters['appointment/getStartDate'] && recurringIndex === null && !isNavigation) {
+          let startDateString = moment(store.getters['appointment/getStartDate']).format(
+            'YYYY-MM-DD',
+          )
 
           if (startDateString in slots) {
             if (
               store.getters['appointment/getStartTime'] &&
-              !(
-                store.getters['appointment/getStartTime'] in
-                slots[startDateString]
-              ) &&
+              !(store.getters['appointment/getStartTime'] in slots[startDateString]) &&
               !isMount
             ) {
               store.commit('appointment/setStartTime', null)
@@ -632,18 +578,14 @@ function fetchSlots(
 
         let slotsPricingResult =
           !licence.isLite && !licence.isStarter && !licence.isBasic
-            ? useSlotsPricing(
-                store,
-                slots,
-                store.getters['appointment/getServiceId']
-              )
+            ? useSlotsPricing(store, slots, store.getters['appointment/getServiceId'])
             : null
 
         slotsPricing.value = slotsPricingResult ? slotsPricingResult.dates : {}
 
         slotsLoading.value = false
       },
-      () => {}
+      () => {},
     )
   }
 }
@@ -706,7 +648,7 @@ function getAmount(serviceId, bookings) {
 
   let employeeService = store.getters['entities/getEmployeeService'](
     store.getters['appointment/getProviderId'],
-    store.getters['appointment/getServiceId']
+    store.getters['appointment/getServiceId'],
   )
 
   bookings
@@ -716,23 +658,17 @@ function getAmount(serviceId, bookings) {
         store.getters['appointment/getAppointmentData'],
         savedAppointment.value,
         booking,
-        service.value
+        service.value,
       )
 
       let data = {
         id: 'id' in booking ? booking.id : null,
         price: !changedBookingPrice
           ? booking.price
-          : useAppointmentServicePrice(
-              employeeService,
-              booking.persons,
-              booking.duration
-            ),
+          : useAppointmentServicePrice(employeeService, booking.persons, booking.duration),
         persons: booking.persons,
         aggregatedPrice:
-          'aggregatedPrice' in booking
-            ? booking.aggregatedPrice
-            : employeeService.aggregatedPrice,
+          'aggregatedPrice' in booking ? booking.aggregatedPrice : employeeService.aggregatedPrice,
         extras: booking.extras.filter((e) => 'id' in e && e.id),
         serviceId: serviceId,
         coupon: booking.coupon,
@@ -742,16 +678,9 @@ function getAmount(serviceId, bookings) {
         data.tax = booking.tax
       }
 
-      let bookingAmountData = useAppointmentBookingAmountData(
-        store,
-        data,
-        false
-      )
+      let bookingAmountData = useAppointmentBookingAmountData(store, data, false)
 
-      amount +=
-        bookingAmountData.total -
-        bookingAmountData.discount +
-        bookingAmountData.tax
+      amount += bookingAmountData.total - bookingAmountData.discount + bookingAmountData.tax
     })
 
   return amount
@@ -810,40 +739,31 @@ function validateSave() {
   })
 
   // Wait for all validations to complete
-  Promise.all([customFieldsPromise, customersPromise, detailsPromise]).then(
-    (results) => {
-      // If any validation failed, stop here
-      if (results.includes(false)) {
-        return
-      }
-
-      // Continue with capacity check
-      capacityWarning.value =
-        store.getters['appointment/getBookings']
-          .filter(
-            (i) =>
-              i.status !== 'canceled' &&
-              i.status !== 'rejected' &&
-              i.status !== 'waiting'
-          )
-          .map((i) => i.persons)
-          .reduce((accumulator, currentValue) => {
-            return accumulator + currentValue
-          }, 0) > service.value.maxCapacity
-          ? amLabels.value.select_max_customer_count_warning +
-            ' ' +
-            service.value.maxCapacity
-          : ''
-
-      // Check capacity warning
-      if (capacityWarning.value) {
-        activeTab.value = 'customers'
-        return
-      }
-
-      saveAppointment()
+  Promise.all([customFieldsPromise, customersPromise, detailsPromise]).then((results) => {
+    // If any validation failed, stop here
+    if (results.includes(false)) {
+      return
     }
-  )
+
+    // Continue with capacity check
+    capacityWarning.value =
+      store.getters['appointment/getBookings']
+        .filter((i) => i.status !== 'canceled' && i.status !== 'rejected' && i.status !== 'waiting')
+        .map((i) => i.persons)
+        .reduce((accumulator, currentValue) => {
+          return accumulator + currentValue
+        }, 0) > service.value.maxCapacity
+        ? amLabels.value.select_max_customer_count_warning + ' ' + service.value.maxCapacity
+        : ''
+
+    // Check capacity warning
+    if (capacityWarning.value) {
+      activeTab.value = 'customers'
+      return
+    }
+
+    saveAppointment()
+  })
 }
 
 function saveAppointment() {
@@ -870,34 +790,29 @@ function saveAppointment() {
         customerId: booking.customer.id,
         extras: booking.extras.filter((e) => e.quantity),
         customFields:
-          amSettings.featuresIntegrations.customFields.enabled ||
-          store.getters['appointment/getId']
+          amSettings.featuresIntegrations.customFields.enabled || store.getters['appointment/getId']
             ? customFields
             : null,
-      })
+      }),
     )
   })
 
   let removedBookings = []
 
   if (savedAppointment.value) {
-    let oldBookingsIds = savedAppointment.value.bookings.map(
-      (i) => 'id' in i && i.id
-    )
+    let oldBookingsIds = savedAppointment.value.bookings.map((i) => 'id' in i && i.id)
 
     let newBookingsIds = bookings.map((j) => 'id' in j && j.id)
 
     removedBookings = savedAppointment.value.bookings
       .filter((booking) =>
-        oldBookingsIds
-          .filter((x) => !newBookingsIds.includes(x))
-          .includes(booking.id)
+        oldBookingsIds.filter((x) => !newBookingsIds.includes(x)).includes(booking.id),
       )
       .map(
         (booking) =>
           new Object({
             id: booking.id,
-          })
+          }),
       )
   }
 
@@ -915,9 +830,7 @@ function saveAppointment() {
       store.getters['appointment/getStartTime'],
     utc: timeZone === 'UTC',
     timeZone: timeZone === 'UTC' ? null : timeZone,
-    notifyParticipants: store.getters['appointment/getNotifyParticipants']
-      ? 1
-      : 0,
+    notifyParticipants: store.getters['appointment/getNotifyParticipants'] ? 1 : 0,
     internalNotes: store.getters['appointment/getInternalNotes'],
     id: store.getters['appointment/getId'],
     payment: {
@@ -930,16 +843,13 @@ function saveAppointment() {
               bookingStart: moment(i.date).format('YYYY-MM-DD') + ' ' + i.time,
               providerId: i.slot[0][0],
               locationId: i.slot[0][1],
-            })
+            }),
         )
       : [],
     lessonSpace: store.getters['appointment/getLessonSpace']
-      ? 'https://www.thelessonspace.com/space/' +
-        store.getters['appointment/getLessonSpace']
+      ? 'https://www.thelessonspace.com/space/' + store.getters['appointment/getLessonSpace']
       : null,
-    createPaymentLinks: store.getters['appointment/getCreatePaymentLinks']
-      ? 1
-      : 0,
+    createPaymentLinks: store.getters['appointment/getCreatePaymentLinks'] ? 1 : 0,
   }
 
   loading.value = true
@@ -947,13 +857,11 @@ function saveAppointment() {
   httpClient
     .post(
       '/appointments' +
-        (store.getters['appointment/getId']
-          ? '/' + store.getters['appointment/getId']
-          : ''),
+        (store.getters['appointment/getId'] ? '/' + store.getters['appointment/getId'] : ''),
       data,
       {
         params: { source: 'cabinet-provider' },
-      }
+      },
     )
     .then((result) => {
       if (result.data.data.appointment.id) {
@@ -963,11 +871,7 @@ function saveAppointment() {
     .catch((e) => {
       errorMessage.value = amLabels.value.error
 
-      if (
-        'response' in e &&
-        'data' in e.response &&
-        'data' in e.response.data
-      ) {
+      if ('response' in e && 'data' in e.response && 'data' in e.response.data) {
         if (
           'timeSlotUnavailable' in e.response.data.data &&
           e.response.data.data.timeSlotUnavailable === true
@@ -1005,7 +909,7 @@ onMounted(() => {
 
   if (store.getters['appointment/getId']) {
     savedAppointment.value = JSON.parse(
-      JSON.stringify(store.getters['appointment/getAppointmentData'])
+      JSON.stringify(store.getters['appointment/getAppointmentData']),
     )
 
     let locations = store.getters['entities/filteredLocations']({
@@ -1025,14 +929,10 @@ onMounted(() => {
     let detachedEntity =
       (store.getters['appointment/getId'] &&
         store.getters['appointment/getServiceId'] &&
-        services
-          .map((i) => i.id)
-          .indexOf(store.getters['appointment/getServiceId']) === -1) ||
+        services.map((i) => i.id).indexOf(store.getters['appointment/getServiceId']) === -1) ||
       (store.getters['appointment/getId'] &&
         store.getters['appointment/getLocationId'] &&
-        locations
-          .map((i) => i.id)
-          .indexOf(store.getters['appointment/getLocationId']) === -1)
+        locations.map((i) => i.id).indexOf(store.getters['appointment/getLocationId']) === -1)
 
     if (!detachedEntity) {
       changedSlotCondition(true)
@@ -1040,10 +940,7 @@ onMounted(() => {
   }
 
   if (store.getters['appointment/getServiceId']) {
-    store.dispatch(
-      'appointment/updateEmployeeService',
-      store.getters['appointment/getServiceId']
-    )
+    store.dispatch('appointment/updateEmployeeService', store.getters['appointment/getServiceId'])
     store.dispatch('appointment/addAllCustomFieldsFormRules', {
       label: amLabels.value.required_field,
     })
@@ -1056,22 +953,13 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-capai-text': amColors.value.colorMainText,
-    '--am-c-capai-text-op10': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
+    '--am-c-capai-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
     '--am-c-capai-primary': amColors.value.colorPrimary,
 
     '--am-c-cust-no1': amColors.value.colorMainText,
-    '--am-c-cust-no1-bgr': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
+    '--am-c-cust-no1-bgr': useColorTransparency(amColors.value.colorMainText, 0.1),
     '--am-c-cust-no2': amColors.value.colorWarning,
-    '--am-c-cust-no2-bgr': useColorTransparency(
-      amColors.value.colorWarning,
-      0.1
-    ),
+    '--am-c-cust-no2-bgr': useColorTransparency(amColors.value.colorWarning, 0.1),
     '--am-c-cust-no3': amColors.value.colorError,
     '--am-c-cust-no3-bgr': useColorTransparency(amColors.value.colorError, 0.1),
     '--am-c-cust-link': useColorTransparency(amColors.value.colorMainText, 0.5),

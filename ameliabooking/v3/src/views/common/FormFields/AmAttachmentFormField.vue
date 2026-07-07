@@ -18,14 +18,24 @@
       @change="onAddFile"
       @remove="onRemoveFile"
     >
-      {{props.btnLabel}}
+      {{ props.btnLabel }}
     </AmAttachment>
   </el-form-item>
   <div v-else>
     <p v-for="(fileInfo, index) in props.modelValue" :key="index">
       <a
         :key="index"
-        :href="ajaxUrl + '/fields/' + props.id + '/' + props.bookingId + '/' + index + '&source=' + props.source"
+        :href="
+          ajaxUrl +
+          '/fields/' +
+          props.id +
+          '/' +
+          props.bookingId +
+          '/' +
+          index +
+          '&source=' +
+          props.source
+        "
         target="_blank"
       >
         {{ fileInfo.name }}
@@ -39,12 +49,8 @@
 import AmAttachment from '../../_components/attachment/AmAttachment.vue'
 
 // * Import from Vue
-import {
-  computed, onMounted,
-  ref,
-  toRefs
-} from "vue";
-import {settings} from "../../../plugins/settings";
+import { computed, onMounted, ref, toRefs } from 'vue'
+import { settings } from '../../../plugins/settings'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -53,36 +59,36 @@ import { useStore } from 'vuex'
 let props = defineProps({
   modelValue: {
     type: [String, Array, Object, Number],
-    required: true
+    required: true,
   },
   id: {
-    type: [String, Number]
+    type: [String, Number],
   },
   bookingId: {
-    type: [String, Number]
+    type: [String, Number],
   },
   itemName: {
     type: String,
-    required: true
+    required: true,
   },
   isUpload: {
     type: Boolean,
-    default: true
+    default: true,
   },
   label: {
-    type: String
+    type: String,
   },
   labelPosition: {
     type: String,
-    default: 'top'
+    default: 'top',
   },
   btnLabel: {
-    type: String
+    type: String,
   },
   source: {
     type: String,
-    default: 'cabinet-provider'
-  }
+    default: 'cabinet-provider',
+  },
 })
 
 // * Define Emits
@@ -98,35 +104,37 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 // * Form Item Reference
 let formFieldRef = ref(null)
 
 defineExpose({
-  formFieldRef
+  formFieldRef,
 })
 
 let customFieldsAllowedExtensions = ref('')
 
 onMounted(() => {
   if (settings.general.customFieldsAllowedExtensions) {
-    customFieldsAllowedExtensions.value = Object.keys(settings.general.customFieldsAllowedExtensions).join(', ')
+    customFieldsAllowedExtensions.value = Object.keys(
+      settings.general.customFieldsAllowedExtensions,
+    ).join(', ')
   }
 })
 
-function onAddFile (a) {
+function onAddFile(a) {
   emits('update:modelValue', a.raw)
 }
 
-function onRemoveFile (a) {
+function onRemoveFile(a) {
   emits('update:modelValue', a.raw)
 }
 </script>
 
 <script>
 export default {
-  name: "AttachmentFormField"
+  name: 'AttachmentFormField',
 }
 </script>

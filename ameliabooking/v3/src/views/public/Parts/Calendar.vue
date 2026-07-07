@@ -40,7 +40,12 @@
   </div>
 
   <!-- Skeleton -->
-  <el-skeleton v-else animated class="am-skeleton-slots" :class="checkScreen ? 'am-skeleton-slots-mobile':''">
+  <el-skeleton
+    v-else
+    animated
+    class="am-skeleton-slots"
+    :class="checkScreen ? 'am-skeleton-slots-mobile' : ''"
+  >
     <template #template>
       <div class="am-skeleton-slots-filters">
         <el-skeleton-item v-for="item in new Array(4)" :key="item" variant="text" />
@@ -58,34 +63,18 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  provide,
-  inject,
-  computed,
-  nextTick
-} from "vue";
+import { ref, provide, inject, computed, nextTick } from 'vue'
 
 // * Import from vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 //  * Dedicated component
-import AmAdvancedSlotCalendar from "../../_components/advanced-slot-calendar/AmAdvancedSlotCalendar";
+import AmAdvancedSlotCalendar from '../../_components/advanced-slot-calendar/AmAdvancedSlotCalendar'
 
 // * Composables
-import {
-  useCartHasItems,
-  useCartItem,
-  useCartStep,
-} from "../../../assets/js/public/cart.js";
-import {
-  useCalendarEvents,
-  useDuration,
-} from "../../../assets/js/common/appointments.js";
-import {
-  useAppointmentSlots,
-  useSlotsPricing,
-} from "../../../assets/js/public/slots";
+import { useCartHasItems, useCartItem, useCartStep } from '../../../assets/js/public/cart.js'
+import { useCalendarEvents, useDuration } from '../../../assets/js/common/appointments.js'
+import { useAppointmentSlots, useSlotsPricing } from '../../../assets/js/public/slots'
 
 // * Plugin Licence
 let licence = inject('licence')
@@ -94,59 +83,59 @@ let licence = inject('licence')
 const props = defineProps({
   slotsParams: {
     type: Object,
-    default: () => {}
+    default: () => {},
   },
   id: {
     type: Number,
-    default: 0
+    default: 0,
   },
   serviceId: {
     type: Number,
-    default: 0
+    default: 0,
   },
   date: {
     type: String,
-    default: ''
+    default: '',
   },
   loadCounter: {
     type: Number,
-    default: 0
+    default: 0,
   },
   preselectSlot: {
     type: Boolean,
-    default: false
+    default: false,
   },
   notMultiple: {
     type: Boolean,
-    default: true
+    default: true,
   },
   endTime: {
     type: Boolean,
-    default: true
+    default: true,
   },
   timeZone: {
     type: Boolean,
-    default: true
+    default: true,
   },
   labelSlotsSelected: {
     type: String,
-    default: ''
+    default: '',
   },
   labelWaitingList: {
     type: String,
-    default: ''
+    default: '',
   },
   fetchedSlots: {
     type: Object,
-    default: () => {}
+    default: () => {},
   },
   inCollapse: {
     type: Boolean,
-    default: false
+    default: false,
   },
   showBusySlots: {
     type: Boolean,
-    default: false
+    default: false,
   },
   showCalendarDateBusyness: {
     type: Boolean,
@@ -154,11 +143,11 @@ const props = defineProps({
   },
   showEstimatedPricing: {
     type: Boolean,
-    default: false
+    default: false,
   },
   showIndicatorPricing: {
     type: Boolean,
-    default: false
+    default: false,
   },
   showPeopleWaiting: {
     type: Boolean,
@@ -166,37 +155,35 @@ const props = defineProps({
   },
   showSlotPricing: {
     type: Boolean,
-    default: false
+    default: false,
   },
   isPackage: {
     type: Boolean,
-    default: false
+    default: false,
   },
   taxVisibility: {
     type: Boolean,
-    default: false
+    default: false,
   },
   taxLabel: {
     type: String,
-    default: ''
+    default: '',
   },
   taxLabelIncl: {
     type: String,
-    default: ''
+    default: '',
   },
   disableWaitingList: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
-const emits = defineEmits([
-  'loadingSlots'
-])
+const emits = defineEmits(['loadingSlots'])
 
 let nested = computed(() => {
   return {
-    inCollapse: props.inCollapse
+    inCollapse: props.inCollapse,
   }
 })
 
@@ -208,7 +195,7 @@ let searchEnd = ref(null)
 
 let selectedYearMonth = ref('')
 
-function loadSlots (customCallback) {
+function loadSlots(customCallback) {
   let range = useRange(store)
 
   if (range) {
@@ -220,13 +207,16 @@ function loadSlots (customCallback) {
   getSlots(customCallback)
 }
 
-watch(() => props.loadCounter, () => {
-  loadSlots(() => {})
-})
+watch(
+  () => props.loadCounter,
+  () => {
+    loadSlots(() => {})
+  },
+)
 
 let cWidth = inject('containerWidth', 0)
 
-let checkScreen = computed(() => cWidth.value < 560 || (cWidth.value - 240 < 520))
+let checkScreen = computed(() => cWidth.value < 560 || cWidth.value - 240 < 520)
 
 let busyness = computed(() => store.getters['booking/getBusyness'])
 
@@ -297,19 +287,20 @@ provide('calendarStartDate', calendarStartDate)
 provide('calendarChangeSideBar', calendarChangeSideBar)
 
 // Capture DOM clicks inside calendar to compare real day-number clicks vs. gap/padding
-function onCalendarClick (e) {
+function onCalendarClick(e) {
   if (iOS()) return
   let target = e.target
-  let cell = target && typeof target.closest === 'function'
-    ? target.closest('td[data-date],td.fc-day,td.fc-daygrid-day')
-    : null
+  let cell =
+    target && typeof target.closest === 'function'
+      ? target.closest('td[data-date],td.fc-day,td.fc-daygrid-day')
+      : null
   if (!cell) return
 
   let dateAttr = (cell.dataset && cell.dataset.date) || cell.getAttribute('data-date')
   if (!dateAttr) return
 
   const classList = cell.classList ? Array.from(cell.classList) : []
-  const isDisabledCell = classList.some(cls => cls && cls.toLowerCase().includes('disabled'))
+  const isDisabledCell = classList.some((cls) => cls && cls.toLowerCase().includes('disabled'))
   if (isDisabledCell) {
     return
   }
@@ -329,16 +320,17 @@ function onCalendarClick (e) {
 }
 
 // Stop early pointer/mouse events from reaching the inner calendar when they would toggle unselect
-function onCalendarPointerDown (e) {
+function onCalendarPointerDown(e) {
   if (iOS()) return
   let target = e.target
-  let cell = target && typeof target.closest === 'function'
-    ? target.closest('td[data-date],td.fc-day,td.fc-daygrid-day')
-    : null
+  let cell =
+    target && typeof target.closest === 'function'
+      ? target.closest('td[data-date],td.fc-day,td.fc-daygrid-day')
+      : null
   if (!cell) return
 
   const classList = cell.classList ? Array.from(cell.classList) : []
-  const isDisabledCell = classList.some(cls => cls && cls.toLowerCase().includes('disabled'))
+  const isDisabledCell = classList.some((cls) => cls && cls.toLowerCase().includes('disabled'))
   if (isDisabledCell) {
     return
   }
@@ -346,46 +338,40 @@ function onCalendarPointerDown (e) {
 // iOS detection helper
 function iOS() {
   return (
-    [
-      'iPad Simulator',
-      'iPhone Simulator',
-      'iPod Simulator',
-      'iPad',
-      'iPhone',
-      'iPod',
-    ].includes(navigator.platform) ||
+    ['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod'].includes(
+      navigator.platform,
+    ) ||
     // iPad on iOS 13 detection
     (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
   )
 }
 // Helper: prune waiting list times using backend minimumDateTime and current time (today)
-function filterWaitingListTimes (dateStr, timesArray, minimumDateTime) {
+function filterWaitingListTimes(dateStr, timesArray, minimumDateTime) {
   if (!Array.isArray(timesArray) || !timesArray.length) return []
-  const todayStr = new Date().toISOString().slice(0,10)
+  const todayStr = new Date().toISOString().slice(0, 10)
   let minTimeForDate = null
   if (minimumDateTime) {
     const parts = minimumDateTime.split(' ')
     if (parts.length === 2) {
       const [minDate, minTime] = parts
       if (minDate === dateStr) {
-        minTimeForDate = minTime.slice(0,5) // HH:mm
+        minTimeForDate = minTime.slice(0, 5) // HH:mm
       }
     }
   }
   if (dateStr === todayStr) {
     const now = new Date()
-    const nowTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+    const nowTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
     if (!minTimeForDate || nowTime.localeCompare(minTimeForDate) > 0) {
       minTimeForDate = nowTime
     }
   }
   let filtered = timesArray
   if (minTimeForDate) {
-    filtered = filtered.filter(t => t.localeCompare(minTimeForDate) > 0)
+    filtered = filtered.filter((t) => t.localeCompare(minTimeForDate) > 0)
   }
-  return filtered.sort((a,b) => a.localeCompare(b))
+  return filtered.sort((a, b) => a.localeCompare(b))
 }
-
 
 /*********
  * Other *
@@ -393,16 +379,19 @@ function filterWaitingListTimes (dateStr, timesArray, minimumDateTime) {
 
 let periodPricing = ref({})
 
-function setSelectedDuration (value) {
+function setSelectedDuration(value) {
   store.commit('booking/setBookingDuration', value)
 
   let cartItem = useCartItem(store)
 
   let service = store.getters['entities/getService'](cartItem.serviceId)
 
-  let extrasIds = store.getters['booking/getSelectedExtras'].map(i => i.extraId)
+  let extrasIds = store.getters['booking/getSelectedExtras'].map((i) => i.extraId)
 
-  calendarSlotDuration.value = useDuration(value, service.extras.filter(i => extrasIds.includes(i.id)))
+  calendarSlotDuration.value = useDuration(
+    value,
+    service.extras.filter((i) => extrasIds.includes(i.id)),
+  )
 
   calendarServiceDuration.value = value
 
@@ -411,21 +400,21 @@ function setSelectedDuration (value) {
   })
 }
 
-function setSelectedDate (value) {
-  calendarEventSlots.value = useSelectedDate(
-    store,
-    value,
-    {
-      start: searchStart.value,
-      end: searchEnd.value,
-    }
-  )
+function setSelectedDate(value) {
+  calendarEventSlots.value = useSelectedDate(store, value, {
+    start: searchStart.value,
+    end: searchEnd.value,
+  })
 
   calendarEventBusySlots.value = useBusySlots(store)
 
   // Derive waiting list times for the selected date
-  if (!skipWaitingListSlots() && value && (value in calendarWaitingListSlots.value)) {
-    calendarWaitingListTimes.value = filterWaitingListTimes(value, Object.keys(calendarWaitingListSlots.value[value] || {}), calendarMinimumDate.value)
+  if (!skipWaitingListSlots() && value && value in calendarWaitingListSlots.value) {
+    calendarWaitingListTimes.value = filterWaitingListTimes(
+      value,
+      Object.keys(calendarWaitingListSlots.value[value] || {}),
+      calendarMinimumDate.value,
+    )
   } else {
     calendarWaitingListTimes.value = []
   }
@@ -437,36 +426,47 @@ function setSelectedDate (value) {
   calendarEventDate.value = value
 }
 
-function setSelectedTime (value) {
+function setSelectedTime(value) {
   useSelectedTime(store, value)
 
   calendarEventSlot.value = value
 }
 
-function setWaitingListSlot (isWaiting, peopleWaiting, providerId = null) {
+function setWaitingListSlot(isWaiting, peopleWaiting, providerId = null) {
   store.commit('appointmentWaitingListOptions/setIsWaitingListSlot', !!isWaiting)
   store.commit('appointmentWaitingListOptions/setPeopleWaiting', peopleWaiting)
   store.commit('appointmentWaitingListOptions/setSelectedProviderId', providerId)
   // Determine if CartStep currently present
   let hasCartStep = false
   if (stepsArray && Array.isArray(stepsArray.value)) {
-    hasCartStep = stepsArray.value.some(s => s && s.name === 'CartStep')
+    hasCartStep = stepsArray.value.some((s) => s && s.name === 'CartStep')
   }
   if (isWaiting) {
     // Remove cart step only if it exists
-    if (hasCartStep && injectedRemoveCartStep && typeof injectedRemoveCartStep.removeCartStep === 'function') {
+    if (
+      hasCartStep &&
+      injectedRemoveCartStep &&
+      typeof injectedRemoveCartStep.removeCartStep === 'function'
+    ) {
       injectedRemoveCartStep.removeCartStep()
     }
   } else {
     // Re-add cart step only if missing and cart feature enabled
     if (
-      !props.disableWaitingList && !props.isPackage && !hasCartStep && useCartStep(store)
-      && injectedAddCartStep && typeof injectedAddCartStep.addCartStep === 'function'
+      !props.disableWaitingList &&
+      !props.isPackage &&
+      !hasCartStep &&
+      useCartStep(store) &&
+      injectedAddCartStep &&
+      typeof injectedAddCartStep.addCartStep === 'function'
     ) {
       injectedAddCartStep.addCartStep()
       // Retry once on next tick in case steps array mutates asynchronously
       nextTick(() => {
-        let existsAfter = stepsArray && Array.isArray(stepsArray.value) && stepsArray.value.some(s => s && s.name === 'CartStep')
+        let existsAfter =
+          stepsArray &&
+          Array.isArray(stepsArray.value) &&
+          stepsArray.value.some((s) => s && s.name === 'CartStep')
         if (!existsAfter) {
           if (useCartStep(store)) {
             injectedAddCartStep.addCartStep()
@@ -478,11 +478,16 @@ function setWaitingListSlot (isWaiting, peopleWaiting, providerId = null) {
 }
 
 // Skip waiting list slots for: recurring / cart / package / customer panel (capc)
-function skipWaitingListSlots () {
-  return props.disableWaitingList || props.isPackage || useCartHasItems(store) || (originKey && originKey.value === 'capc')
+function skipWaitingListSlots() {
+  return (
+    props.disableWaitingList ||
+    props.isPackage ||
+    useCartHasItems(store) ||
+    (originKey && originKey.value === 'capc')
+  )
 }
 
-function unselectDate () {
+function unselectDate() {
   useDeselectedDate(store)
 
   calendarEventSlots.value = []
@@ -496,19 +501,29 @@ function unselectDate () {
   calendarWaitingListTimes.value = []
 }
 
-function changeMonth (yearMonth) {
+function changeMonth(yearMonth) {
   selectedYearMonth.value = yearMonth
 
   getSlots(() => {})
 }
 
-function renderedMonth (data) {
+function renderedMonth(data) {
   searchStart.value = data.start
 
   searchEnd.value = data.end
 }
 
-function getSlotsCallback (slots, occupied, minimumDateTime, maximumDateTime, busyness, appCount, lastBookedProviderId, customCallback, waitingListSlots = {}) {
+function getSlotsCallback(
+  slots,
+  occupied,
+  minimumDateTime,
+  maximumDateTime,
+  busyness,
+  appCount,
+  lastBookedProviderId,
+  customCallback,
+  waitingListSlots = {},
+) {
   calendarMinimumDate.value = minimumDateTime
   calendarMaximumDate.value = maximumDateTime
 
@@ -526,21 +541,28 @@ function getSlotsCallback (slots, occupied, minimumDateTime, maximumDateTime, bu
     appCount,
     lastBookedProviderId,
     searchStart,
-    searchEnd
+    searchEnd,
   )
 
   if (props.serviceId) {
     let service = store.getters['entities/getService'](props.serviceId)
 
-    let periodPricingResult = !props.isPackage && service.customPricing.enabled === 'period' && !licence.isLite && !licence.isStarter && !licence.isBasic
-      ? useSlotsPricing(store, slots, service.id)
-      : null
+    let periodPricingResult =
+      !props.isPackage &&
+      service.customPricing.enabled === 'period' &&
+      !licence.isLite &&
+      !licence.isStarter &&
+      !licence.isBasic
+        ? useSlotsPricing(store, slots, service.id)
+        : null
 
     periodPricing.value = periodPricingResult ? periodPricingResult : null
   }
 
   if ('calendarStartDate' in result) {
-    calendarStartDate.value = selectedYearMonth.value ? selectedYearMonth.value + '-01' : result.calendarStartDate
+    calendarStartDate.value = selectedYearMonth.value
+      ? selectedYearMonth.value + '-01'
+      : result.calendarStartDate
   }
 
   if ('calendarEventSlot' in result) {
@@ -561,9 +583,11 @@ function getSlotsCallback (slots, occupied, minimumDateTime, maximumDateTime, bu
   if (!skipWaitingListSlots()) {
     const selectedDate = store.getters['booking/getMultipleAppointmentsDate']
     if (selectedDate && calendarWaitingListSlots.value[selectedDate]) {
-      calendarWaitingListTimes.value = filterWaitingListTimes(selectedDate, Object.keys(
-        calendarWaitingListSlots.value[selectedDate] || {}
-      ), minimumDateTime)
+      calendarWaitingListTimes.value = filterWaitingListTimes(
+        selectedDate,
+        Object.keys(calendarWaitingListSlots.value[selectedDate] || {}),
+        minimumDateTime,
+      )
     } else {
       calendarWaitingListTimes.value = []
     }
@@ -580,7 +604,7 @@ function getSlotsCallback (slots, occupied, minimumDateTime, maximumDateTime, bu
   })
 }
 
-function getSlots (customCallback) {
+function getSlots(customCallback) {
   calendarSlotsLoading.value = true
 
   emits('loadingSlots', true)
@@ -591,16 +615,16 @@ function getSlots (customCallback) {
         startDateTime: searchStart.value,
         endDateTime: searchEnd.value,
       },
-      props.slotsParams
+      props.slotsParams,
     ),
     props.fetchedSlots,
     getSlotsCallback,
     customCallback,
-    store.getters['appointmentWaitingListOptions/getOptions']
+    store.getters['appointmentWaitingListOptions/getOptions'],
   )
 }
 
-function unsetData () {
+function unsetData() {
   calendarEventSlots.value = []
 
   calendarEventSlot.value = ''
@@ -609,7 +633,7 @@ function unsetData () {
 defineExpose({
   loadSlots,
   unsetData,
-  calendarSlotsLoading
+  calendarSlotsLoading,
 })
 </script>
 
@@ -648,7 +672,6 @@ export default {
 
   // Skeleton
   .am-skeleton-slots {
-
     &-mobile {
       padding: 0px;
 
@@ -660,7 +683,6 @@ export default {
           max-width: 56px;
         }
       }
-
     }
 
     &-filters {

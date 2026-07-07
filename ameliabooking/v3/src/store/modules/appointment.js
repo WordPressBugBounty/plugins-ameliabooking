@@ -223,9 +223,8 @@ export default {
         let filteredCustomFields = customFieldsEntity.filter(
           (i) =>
             i.allServices ||
-            (i.services.map((s) => s.id).indexOf(state.employeeService.id) !==
-              -1 &&
-              i.type !== 'content')
+            (i.services.map((s) => s.id).indexOf(state.employeeService.id) !== -1 &&
+              i.type !== 'content'),
         )
 
         commit('setCustomFields', filteredCustomFields)
@@ -244,8 +243,7 @@ export default {
           'setEmployeeService',
           typeof employeeService !== 'undefined'
             ? employeeService
-            : rootGetters['entities/getServices']
-              .find((i) => i.id === state.serviceId)
+            : rootGetters['entities/getServices'].find((i) => i.id === state.serviceId),
         )
         // * Set custom fields based on service selection
         dispatch('serviceCustomFieldsFiltration')
@@ -256,7 +254,7 @@ export default {
 
     resetBookingsExtras({ state }, index) {
       state.bookings[index].extras = state.employeeService.extras.map(
-        (e) => new Object({ extraId: e.id, quantity: 0 })
+        (e) => new Object({ extraId: e.id, quantity: 0 }),
       )
     },
 
@@ -267,19 +265,15 @@ export default {
     },
 
     resetBookingCustomFields({ state, getters }, key) {
-      state.bookings[key].customFields = getters['getCustomFields'].reduce(
-        (actual, current) => {
-          actual[current.id] = {
-            label: current.label,
-            type: current.type,
-            value:
-              current.type === 'checkbox' || current.type === 'file' ? [] : '',
-          }
+      state.bookings[key].customFields = getters['getCustomFields'].reduce((actual, current) => {
+        actual[current.id] = {
+          label: current.label,
+          type: current.type,
+          value: current.type === 'checkbox' || current.type === 'file' ? [] : '',
+        }
 
-          return actual
-        },
-        {}
-      )
+        return actual
+      }, {})
     },
 
     updateBookingCustomField({ state }, payload) {
@@ -341,10 +335,14 @@ export default {
       })
     },
 
-    removeBooking({ state, getters ,commit}, payload) {
+    removeBooking({ state, getters, commit }, payload) {
       state.bookings.splice(payload, 1)
 
-      commit('customerInfo/setCustomersIds', getters['getBookings'].map((i) => i.customer.id), { root: true })
+      commit(
+        'customerInfo/setCustomersIds',
+        getters['getBookings'].map((i) => i.customer.id),
+        { root: true },
+      )
     },
   },
 }

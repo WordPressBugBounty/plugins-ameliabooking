@@ -7,10 +7,7 @@
     :aria-labelledby="ticketHeadingId"
   >
     <div class="am-ct__info">
-      <p
-        :id="ticketHeadingId"
-        class="am-ct__info-name"
-      >
+      <p :id="ticketHeadingId" class="am-ct__info-name">
         {{ props.ticket.name }}
       </p>
       <p
@@ -24,17 +21,20 @@
           {{ useFormattedPrice(props.ticket.price) }}
         </span>
         <span v-if="!props.capacity" class="am-ct__info-spots__number">
-          {{ isWaitingList ? ticketCalculation() > 0 ? ticketCalculation() : '' : ticketCalculation() }}
+          {{
+            isWaitingList
+              ? ticketCalculation() > 0
+                ? ticketCalculation()
+                : ''
+              : ticketCalculation()
+          }}
         </span>
         <span v-if="!props.capacity" class="am-ct__info-spots__text">
           {{ ticketText() }}
         </span>
       </p>
     </div>
-    <div
-      class="am-ct__action"
-      :class="[{ 'am-readonly': props.readonly }, responsiveClass]"
-    >
+    <div class="am-ct__action" :class="[{ 'am-readonly': props.readonly }, responsiveClass]">
       <p v-if="componentWidth > 500" class="am-ct__action-price">
         {{ useFormattedPrice(props.ticket.price) }}
       </p>
@@ -109,9 +109,7 @@ let componentWidth = computed(() => {
 let responsiveClass = computed(() => useResponsiveClass(componentWidth.value))
 
 let selectedEvent = computed(() =>
-  store.getters['eventEntities/getEvent'](
-    store.getters['eventBooking/getSelectedEventId']
-  )
+  store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId']),
 )
 
 const ticketName = computed(() => props.ticket?.name || '')
@@ -136,37 +134,42 @@ let spots = computed({
 let spotsLimitation = computed(() => {
   if (props.extraPeople !== null && props.extraPeople !== undefined) {
     if (props.capacity !== null && props.capacity !== undefined) {
-      const selectedWithoutCurrent =
-        store.getters['tickets/getEventGlobalSpots'] - spots.value
+      const selectedWithoutCurrent = store.getters['tickets/getEventGlobalSpots'] - spots.value
       const capacityLimit = props.capacity - selectedWithoutCurrent
       const extraPeopleLimit = props.extraPeople + 1 - selectedWithoutCurrent
       return Math.max(0, Math.min(capacityLimit, extraPeopleLimit))
     }
 
     let limitCorrection =
-      props.extraPeople +
-      1 -
-      (store.getters['tickets/getEventGlobalSpots'] - spots.value)
+      props.extraPeople + 1 - (store.getters['tickets/getEventGlobalSpots'] - spots.value)
     if (isWaitingList.value) {
-      return Math.max(0, limitCorrection >=
-        props.ticket.waitingListSpots - props.ticket.waiting
-        ? props.ticket.waitingListSpots - props.ticket.waiting
-        : limitCorrection)
+      return Math.max(
+        0,
+        limitCorrection >= props.ticket.waitingListSpots - props.ticket.waiting
+          ? props.ticket.waitingListSpots - props.ticket.waiting
+          : limitCorrection,
+      )
     }
-    return Math.max(0, limitCorrection >= props.ticket.spots - props.ticket.sold
-      ? props.ticket.spots - props.ticket.sold
-      : limitCorrection)
+    return Math.max(
+      0,
+      limitCorrection >= props.ticket.spots - props.ticket.sold
+        ? props.ticket.spots - props.ticket.sold
+        : limitCorrection,
+    )
   }
 
   if (props.capacity !== null && props.capacity !== undefined)
-    return Math.max(0, (
-      props.capacity -
-      (store.getters['tickets/getEventGlobalSpots'] - spots.value)
-    ))
+    return Math.max(
+      0,
+      props.capacity - (store.getters['tickets/getEventGlobalSpots'] - spots.value),
+    )
 
-  return Math.max(0, isWaitingList.value
-    ? props.ticket.waitingListSpots - props.ticket.waiting
-    : props.ticket.spots - props.ticket.sold)
+  return Math.max(
+    0,
+    isWaitingList.value
+      ? props.ticket.waitingListSpots - props.ticket.waiting
+      : props.ticket.spots - props.ticket.sold,
+  )
 })
 
 let disableSelection = computed(() => {
@@ -176,9 +179,9 @@ let disableSelection = computed(() => {
 
   if (!selectedEvent.value.maxCustomCapacity) {
     return (
-        store.getters['tickets/getEventGlobalSpots'] !== spots.value ||
-        (!isWaitingList.value && props.ticket.spots === props.ticket.sold) ||
-        (isWaitingList.value && props.ticket.waiting === props.ticket.waitingListSpots)
+      store.getters['tickets/getEventGlobalSpots'] !== spots.value ||
+      (!isWaitingList.value && props.ticket.spots === props.ticket.sold) ||
+      (isWaitingList.value && props.ticket.waiting === props.ticket.waitingListSpots)
     )
   }
 
@@ -187,17 +190,15 @@ let disableSelection = computed(() => {
 
 function updateSpots(newValue, oldValue) {
   if (
-    props.capacity !== null && props.capacity !== undefined ||
-    props.extraPeople !== null && props.extraPeople !== undefined ||
+    (props.capacity !== null && props.capacity !== undefined) ||
+    (props.extraPeople !== null && props.extraPeople !== undefined) ||
     !selectedEvent.value.bringingAnyone
   ) {
     store.commit('tickets/setEventGlobalSpots', newValue - oldValue)
   }
 }
 
-let isWaitingList = computed(
-  () => store.getters['eventWaitingListOptions/getAvailability']
-)
+let isWaitingList = computed(() => store.getters['eventWaitingListOptions/getAvailability'])
 
 function ticketCalculation() {
   if (isWaitingList.value) {
@@ -205,9 +206,7 @@ function ticketCalculation() {
   }
 
   // * No attendees, but there are customers on the waiting list, return 0
-  return selectedEvent.value.full
-    ? 0
-    : props.ticket.spots - props.ticket.sold - spots.value
+  return selectedEvent.value.full ? 0 : props.ticket.spots - props.ticket.sold - spots.value
 }
 
 function ticketText() {
@@ -239,26 +238,11 @@ let cssVars = computed(() => {
     '--am-c-ct-primary': amColors.value.colorPrimary,
     '--am-c-ct-bgr': amColors.value.colorMainBgr,
     '--am-c-ct-text': amColors.value.colorMainText,
-    '--am-c-ct-text-op90': useColorTransparency(
-      amColors.value.colorMainText,
-      0.9
-    ),
-    '--am-c-ct-text-op80': useColorTransparency(
-      amColors.value.colorMainText,
-      0.8
-    ),
-    '--am-c-ct-text-op70': useColorTransparency(
-      amColors.value.colorMainText,
-      0.7
-    ),
-    '--am-c-ct-text-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
-    '--am-c-ct-text-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
+    '--am-c-ct-text-op90': useColorTransparency(amColors.value.colorMainText, 0.9),
+    '--am-c-ct-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
+    '--am-c-ct-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
+    '--am-c-ct-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-ct-text-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
   }
 })
 </script>

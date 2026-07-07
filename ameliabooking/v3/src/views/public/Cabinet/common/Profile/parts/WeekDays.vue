@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="am-caewh"
-    :style="cssVars"
-  >
+  <div class="am-caewh" :style="cssVars">
     <div
       v-for="(weekDay, weekDayIndex) in employee.weekDayList"
       :key="weekDayIndex"
@@ -35,29 +32,25 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  inject,
-  computed,
-} from "vue";
+import { ref, inject, computed } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * _components
-import AmSwitch from "../../../../../_components/switch/AmSwitch.vue";
+import AmSwitch from '../../../../../_components/switch/AmSwitch.vue'
 
 // * Dedicated components
-import Periods from "./Periods.vue";
+import Periods from './Periods.vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 
 let props = defineProps({
   responsiveClass: {
     type: String,
     default: '',
-  }
+  },
 })
 
 // * Store
@@ -73,32 +66,32 @@ let employee = computed(() => {
 let weekDays = ref([
   {
     label: amLabels.weekday_monday,
-    value: 'monday'
+    value: 'monday',
   },
   {
     label: amLabels.weekday_tuesday,
-    value: 'tuesday'
+    value: 'tuesday',
   },
   {
     label: amLabels.weekday_wednesday,
-    value: 'wednesday'
+    value: 'wednesday',
   },
   {
     label: amLabels.weekday_thursday,
-    value: 'thursday'
+    value: 'thursday',
   },
   {
     label: amLabels.weekday_friday,
-    value: 'friday'
+    value: 'friday',
   },
   {
     label: amLabels.weekday_saturday,
-    value: 'saturday'
+    value: 'saturday',
   },
   {
     label: amLabels.weekday_sunday,
-    value: 'sunday'
-  }
+    value: 'sunday',
+  },
 ])
 
 // * Colors
@@ -117,7 +110,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: 'WeekDays'
+  name: 'WeekDays',
 }
 </script>
 

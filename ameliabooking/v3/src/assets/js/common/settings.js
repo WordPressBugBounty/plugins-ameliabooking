@@ -1,7 +1,12 @@
-import httpClient from "../../../plugins/axios";
+import httpClient from '../../../plugins/axios'
 import { settings } from '../../../plugins/settings.js'
 
-function usePopulateSettings (globalSettings, defaultSettings, savedSettings = {}, resultSettings = {}) {
+function usePopulateSettings(
+  globalSettings,
+  defaultSettings,
+  savedSettings = {},
+  resultSettings = {},
+) {
   for (let key in defaultSettings) {
     if (key in globalSettings && defaultSettings[key] && typeof defaultSettings[key] === 'object') {
       if (!(key in resultSettings)) {
@@ -12,7 +17,7 @@ function usePopulateSettings (globalSettings, defaultSettings, savedSettings = {
         globalSettings[key],
         defaultSettings[key],
         key in savedSettings ? savedSettings[key] : globalSettings[key],
-        resultSettings[key]
+        resultSettings[key],
       )
 
       if (Object.keys(resultSettings[key]).length === 0) {
@@ -30,7 +35,7 @@ function usePopulateSettings (globalSettings, defaultSettings, savedSettings = {
   return resultSettings
 }
 
-function useUpdateStashEntities () {
+function useUpdateStashEntities() {
   if (settings.activation.stash) {
     httpClient
       .post(
@@ -40,14 +45,11 @@ function useUpdateStashEntities () {
           params: {
             source: 'cabinet-provider',
           },
-        }
+        },
       )
       .then(() => {})
       .catch(() => {})
   }
 }
 
-export {
-  usePopulateSettings,
-  useUpdateStashEntities,
-}
+export { usePopulateSettings, useUpdateStashEntities }

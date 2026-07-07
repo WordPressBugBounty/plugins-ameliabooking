@@ -1,11 +1,10 @@
 <template>
-  <div
-    class="am-cappf"
-    :style="cssVars"
-  >
+  <div class="am-cappf" :style="cssVars">
     <div
       class="am-cappf__options"
-      :class="{'am-only-one': display === 'second' || !amSettings.roles.allowCustomerDeleteProfile}"
+      :class="{
+        'am-only-one': display === 'second' || !amSettings.roles.allowCustomerDeleteProfile,
+      }"
     >
       <div v-if="display === 'first' && amSettings.roles.allowCustomerDeleteProfile">
         <AmButton
@@ -16,7 +15,7 @@
           :disabled="loading"
           @click="deleteProfileDialog = true"
         >
-          {{displayLabels('delete_profile')}}
+          {{ displayLabels('delete_profile') }}
         </AmButton>
       </div>
       <div v-if="display === 'first' || display === 'third'">
@@ -26,7 +25,7 @@
           :disabled="loading"
           @click="display === 'first' ? saveProfileChanges() : saveCustomerCustomFields()"
         >
-          {{displayLabels('save_changes')}}
+          {{ displayLabels('save_changes') }}
         </AmButton>
       </div>
       <div v-if="display === 'second'">
@@ -36,66 +35,63 @@
           :disabled="loading"
           @click="changeProfilePassword()"
         >
-          {{displayLabels('change_password')}}
+          {{ displayLabels('change_password') }}
         </AmButton>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
 // * _components
-import AmButton from "../../../../_components/button/AmButton.vue";
+import AmButton from '../../../../_components/button/AmButton.vue'
 
 // * Import from Vue
-import {
-  inject,
-  computed,
-  ref
-} from "vue";
+import { inject, computed, ref } from 'vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
 
 // * Components properties
 let props = defineProps({
   parentWidth: {
     type: Number,
-    default: 1200
+    default: 1200,
   },
   display: {
     type: String,
-    default: 'first'
+    default: 'first',
   },
   loading: {
     type: Boolean,
-    default: false
+    default: false,
   },
   customizedLabels: {
     type: Object,
     default: () => {
       return {}
-    }
+    },
   },
   deleteFooterType: {
     type: String,
-    default: 'plain'
+    default: 'plain',
   },
   saveFooterButton: {
     type: String,
-    default: 'filled'
+    default: 'filled',
   },
   passFooterButton: {
     type: String,
-    default: 'filled'
-  }
+    default: 'filled',
+  },
 })
 
 // * Labels
 const amLabels = inject('labels')
-function displayLabels (label) {
-  return Object.keys(props.customizedLabels).length && props.customizedLabels[label] ? props.customizedLabels[label] : amLabels[label]
+function displayLabels(label) {
+  return Object.keys(props.customizedLabels).length && props.customizedLabels[label]
+    ? props.customizedLabels[label]
+    : amLabels[label]
 }
 
 // * Settings
@@ -123,13 +119,11 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: "MainProfileFooter"
+  name: 'MainProfileFooter',
 }
 </script>
 
-
 <style lang="scss">
-
 @mixin profile-footer-block {
   // am - amelia
   // cappf - cabinet panel profile footer

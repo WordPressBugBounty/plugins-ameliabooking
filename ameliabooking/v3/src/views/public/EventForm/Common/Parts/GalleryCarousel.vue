@@ -9,10 +9,7 @@
     @keydown.left.prevent="previousImage"
     @keydown.right.prevent="nextImage"
   >
-    <div
-      v-if="gallery.length > 1"
-      class="am-gc__arrows"
-    >
+    <div v-if="gallery.length > 1" class="am-gc__arrows">
       <button
         type="button"
         class="am-gc__arrow am-icon-arrow-left"
@@ -31,23 +28,22 @@
       v-for="(img, index) in gallery"
       :key="index"
       class="am-gc__display"
-      :style="{display: index === activeImage ? 'flex': 'none', backgroundImage: `url(${img.pictureFullPath})`}"
+      :style="{
+        display: index === activeImage ? 'flex' : 'none',
+        backgroundImage: `url(${img.pictureFullPath})`,
+      }"
       role="group"
       aria-roledescription="slide"
       :aria-hidden="index !== activeImage"
       :aria-label="getSlideLabel(index, img)"
     ></div>
 
-    <div
-      class="am-gc__bullets"
-      role="tablist"
-      :aria-label="carouselNavigationLabel"
-    >
+    <div class="am-gc__bullets" role="tablist" :aria-label="carouselNavigationLabel">
       <button
         v-for="(img, index) in gallery"
         :key="index"
         class="am-gc__bullets-item"
-        :class="{'am-active': index === activeImage}"
+        :class="{ 'am-active': index === activeImage }"
         type="button"
         role="tab"
         :aria-selected="index === activeImage"
@@ -57,21 +53,15 @@
       ></button>
     </div>
 
-    <span
-      class="am-gc__sr-only"
-      aria-live="polite"
-      aria-atomic="true"
-    >{{ activeSlideAnnouncement }}</span>
+    <span class="am-gc__sr-only" aria-live="polite" aria-atomic="true">{{
+      activeSlideAnnouncement
+    }}</span>
   </div>
 </template>
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  inject,
-  computed
-} from "vue";
+import { ref, inject, computed } from 'vue'
 
 // * Comosables
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation.js'
@@ -79,8 +69,8 @@ import { useColorTransparency } from '../../../../../assets/js/common/colorManip
 const props = defineProps({
   gallery: {
     type: Array,
-    required: true
-  }
+    required: true,
+  },
 })
 
 const activeImage = ref(0)
@@ -149,7 +139,7 @@ const cssVars = computed(() => {
 
 <script>
 export default {
-  name: "GalleryCarousel"
+  name: 'GalleryCarousel',
 }
 </script>
 
@@ -185,7 +175,7 @@ export default {
         background: transparent;
         padding: 0;
 
-        &[class*="am-icon"] {
+        &[class*='am-icon'] {
           flex: 0 0 auto;
           font-size: 28px;
         }

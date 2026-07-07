@@ -2,7 +2,7 @@
   <div
     v-if="props.ready && !props.loading && !props.loadingUpcoming"
     class="am-elf__footer"
-    :class="{'am-congrats' : isCongratzStep && props.secondButtonShow}"
+    :class="{ 'am-congrats': isCongratzStep && props.secondButtonShow }"
   >
     <AmButton
       v-if="props.secondButtonShow"
@@ -19,10 +19,7 @@
     ></div>
     <AmButton
       v-if="props.paymentGateway !== 'payPal' || isCongratzStep"
-      :class="[
-        { mainBtnClass },
-        { 'square-continue': props.paymentGateway === 'square' },
-      ]"
+      :class="[{ mainBtnClass }, { 'square-continue': props.paymentGateway === 'square' }]"
       :type="props.primaryFooterButtonType"
       :category="isWaitingList() ? 'waiting' : 'primary'"
       size="medium"
@@ -105,13 +102,10 @@ const { secondButtonClick } = inject('secondButton', {
   secondButtonClick: () => {},
 })
 
-const { footerButtonClick, footerBtnDisabled } = inject(
-  'changingStepsFunctions',
-  {
-    footerButtonClick: () => {},
-    footerBtnDisabled: ref(false),
-  }
-)
+const { footerButtonClick, footerBtnDisabled } = inject('changingStepsFunctions', {
+  footerButtonClick: () => {},
+  footerBtnDisabled: ref(false),
+})
 
 // flag for payPal button on congratz step
 let isCongratzStep = ref(false)
@@ -132,15 +126,13 @@ let primaryBtnLabel = computed(() => {
     return 'event_book_event'
   }
 
-  if (steps.value[currentStep.value].name === 'CongratulationsStep')
-    return 'finish_appointment'
+  if (steps.value[currentStep.value].name === 'CongratulationsStep') return 'finish_appointment'
 
   return 'continue'
 })
 
 let secondaryBtnLabel = computed(() => {
-  if (steps.value[currentStep.value].name === 'CongratulationsStep')
-    return 'congrats_panel'
+  if (steps.value[currentStep.value].name === 'CongratulationsStep') return 'congrats_panel'
 
   return 'event_close'
 })
@@ -162,14 +154,13 @@ const shortcodeData = inject(
   'shortcodeData',
   ref({
     counter: 1000,
-  })
+  }),
 )
 
 // * Labels
 const amLabels = inject('labels')
 function displayLabels(label) {
-  return Object.keys(props.customizedLabels).length &&
-    props.customizedLabels[label]
+  return Object.keys(props.customizedLabels).length && props.customizedLabels[label]
     ? props.customizedLabels[label]
     : amLabels[label]
 }

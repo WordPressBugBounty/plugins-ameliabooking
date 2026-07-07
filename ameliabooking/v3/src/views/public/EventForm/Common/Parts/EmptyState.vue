@@ -1,27 +1,18 @@
 <template>
-<div
-  class="am-ev-empty"
-  :style="cssVars"
-  role="status"
-  aria-live="polite"
-  aria-atomic="true"
->
-  <span class="am-icon-search-close" aria-hidden="true"></span>
-  <p>
-    {{ labels.no_results }}
-  </p>
-</div>
+  <div class="am-ev-empty" :style="cssVars" role="status" aria-live="polite" aria-atomic="true">
+    <span class="am-icon-search-close" aria-hidden="true"></span>
+    <p>
+      {{ labels.no_results }}
+    </p>
+  </div>
 </template>
 
 <script setup>
 // * Import from Vue
-import {
-  inject,
-  computed
-} from "vue";
+import { inject, computed } from 'vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
 
 // * Global labels
 let labels = inject('labels')
@@ -33,14 +24,14 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-ev-empty-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
-    '--am-c-ev-empty-text': amColors.value.colorMainText
+    '--am-c-ev-empty-text': amColors.value.colorMainText,
   }
 })
 </script>
 
 <script>
 export default {
-  name: "EmptyState",
+  name: 'EmptyState',
 }
 </script>
 

@@ -59,10 +59,13 @@ export function useReactiveCustomize() {
       // Two-level spread: top-level keys get new objects, so every consumer that holds a
       // reference to amCustomize.value[someKey] sees a changed value on next access.
       amCustomize.value = Object.fromEntries(
-        Object.entries(raw).map(([k, v]) => [k, Array.isArray(v) ? [...v] : (v && typeof v === 'object' ? { ...v } : v)])
+        Object.entries(raw).map(([k, v]) => [
+          k,
+          Array.isArray(v) ? [...v] : v && typeof v === 'object' ? { ...v } : v,
+        ]),
       )
     },
-    { immediate: true }
+    { immediate: true },
   )
 
   const stepIndex = computed(() => {

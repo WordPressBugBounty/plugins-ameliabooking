@@ -1,17 +1,12 @@
 <template>
-  <div
-    class="am-button-group"
-    :class="{'am-rtl': isRtl}"
-  >
+  <div class="am-button-group" :class="{ 'am-rtl': isRtl }">
     <slot></slot>
   </div>
 </template>
 
 <script setup>
 // * import from Vue
-import {
-  computed,
-} from "vue"
+import { computed } from 'vue'
 
 let isRtl = computed(() => {
   if (document) {
@@ -24,7 +19,7 @@ let isRtl = computed(() => {
 
 <script>
 export default {
-  name: "AmButtonGroup"
+  name: 'AmButtonGroup',
 }
 </script>
 
@@ -49,7 +44,7 @@ export default {
 
       &:last-child {
         border-top-left-radius: 0;
-        border-bottom-left-radius: 0
+        border-bottom-left-radius: 0;
       }
 
       &:not(:last-child) {

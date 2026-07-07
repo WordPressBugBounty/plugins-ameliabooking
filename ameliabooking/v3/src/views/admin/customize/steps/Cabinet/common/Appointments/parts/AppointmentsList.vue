@@ -4,18 +4,13 @@
     :class="[
       {
         'am-no-border':
-          props.groupedAppointments &&
-          Object.keys(props.groupedAppointments).length === 1,
+          props.groupedAppointments && Object.keys(props.groupedAppointments).length === 1,
       },
       props.responsiveClass,
     ]"
     :style="cssVars"
   >
-    <div
-      v-for="(item, dateKey) in props.groupedAppointments"
-      :key="dateKey"
-      class="am-capa"
-    >
+    <div v-for="(item, dateKey) in props.groupedAppointments" :key="dateKey" class="am-capa">
       <div
         class="am-capa__date"
         :class="[
@@ -26,8 +21,7 @@
           },
           {
             'am-no-flag':
-              props.groupedAppointments &&
-              Object.keys(props.groupedAppointments).length === 1,
+              props.groupedAppointments && Object.keys(props.groupedAppointments).length === 1,
           },
           props.responsiveClass,
         ]"
@@ -37,14 +31,10 @@
       <CollapseCard
         v-for="(appointment, index) in item.appointments"
         :key="index"
-        :start="
-          getFrontedFormattedTime(
-            appointment.bookingStart.split(' ')[1].slice(0, 5)
-          )
-        "
+        :start="getFrontedFormattedTime(appointment.bookingStart.split(' ')[1].slice(0, 5))"
         :name="appointment.service.name"
         :employee="appointment.provider"
-        :customers="appointment.bookings.map(b => b.customer)"
+        :customers="appointment.bookings.map((b) => b.customer)"
         :price="125"
         :duration="1800"
         :periods="[]"
@@ -54,9 +44,7 @@
         :location="appointment.location"
         :google-meet-link="appointment.googleMeetUrl"
         :microsoft-teams-link="appointment.microsoftTeamsUrl"
-        :zoom-link="
-          appointment.zoomMeeting ? appointment.zoomMeeting.joinUrl : ''
-        "
+        :zoom-link="appointment.zoomMeeting ? appointment.zoomMeeting.joinUrl : ''"
         :lesson-space-link="appointment.lessonSpace"
         :bookable="appointment.service"
         :reservation="appointment"
@@ -77,10 +65,7 @@
   >
   </CancelPopup>
 
-  <AppointmentBooking
-    v-if="rescheduleVisibility"
-    :visibility="rescheduleVisibility"
-  >
+  <AppointmentBooking v-if="rescheduleVisibility" :visibility="rescheduleVisibility">
   </AppointmentBooking>
 </template>
 
@@ -146,14 +131,8 @@ let cssVars = computed(() => {
   return {
     '--am-c-capa-bgr': amColors.value.colorMainBgr,
     '--am-c-capa-text': amColors.value.colorMainText,
-    '--am-c-capa-text-op70': useColorTransparency(
-      amColors.value.colorMainText,
-      0.7
-    ),
-    '--am-c-capa-text-op25': useColorTransparency(
-      amColors.value.colorMainText,
-      0.25
-    ),
+    '--am-c-capa-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
+    '--am-c-capa-text-op25': useColorTransparency(amColors.value.colorMainText, 0.25),
     '--am-c-capa-primary': amColors.value.colorPrimary,
   }
 })
@@ -183,7 +162,8 @@ export default {
         position: absolute;
         top: 4px;
         left: 8px;
-        background-image: linear-gradient(
+        background-image:
+          linear-gradient(
             180deg,
             transparent,
             transparent 50%,
@@ -197,7 +177,9 @@ export default {
             var(--am-c-capa-text-op25),
             var(--am-c-capa-text-op25)
           );
-        background-size: 3px 12px, 100% 20px;
+        background-size:
+          3px 12px,
+          100% 20px;
       }
 
       &.am-no-border {

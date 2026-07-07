@@ -1,12 +1,6 @@
 <template>
-  <div
-    ref="amSkeletonContainer"
-    class="am-skeleton-evl__wrapper"
-  >
-    <el-skeleton
-      animated
-      class="am-skeleton-evl"
-    >
+  <div ref="amSkeletonContainer" class="am-skeleton-evl__wrapper">
+    <el-skeleton animated class="am-skeleton-evl">
       <template #template>
         <div
           v-for="i in new Array(props.displayNumber)"
@@ -14,10 +8,7 @@
           class="am-skeleton-evl__item"
           :class="itemWidth"
         >
-          <el-skeleton-item
-            class="am-skeleton-evl__item-inner"
-            variant="text"
-          />
+          <el-skeleton-item class="am-skeleton-evl__item-inner" variant="text" />
         </div>
       </template>
     </el-skeleton>
@@ -25,17 +16,13 @@
 </template>
 
 <script setup>
-import {
-  ref,
-  computed,
-  onMounted
-} from "vue";
+import { ref, computed, onMounted } from 'vue'
 
 let props = defineProps({
   displayNumber: {
     type: Number,
-    required: true
-  }
+    required: true,
+  },
 })
 
 // * Component reference
@@ -45,7 +32,7 @@ let amSkeletonContainer = ref(null)
 let containerWidth = ref(0)
 
 // * window resize listener
-window.addEventListener('resize', resize);
+window.addEventListener('resize', resize)
 
 // * resize function
 function resize() {
@@ -79,12 +66,11 @@ let itemWidth = computed(() => {
 
 <script>
 export default {
-  name: "EventListSkeleton"
+  name: 'EventListSkeleton',
 }
 </script>
 
 <style lang="scss">
-
 .amelia-v2-booking #amelia-container {
   // am - amelia
   // evl - event list
@@ -105,5 +91,4 @@ export default {
     }
   }
 }
-
 </style>

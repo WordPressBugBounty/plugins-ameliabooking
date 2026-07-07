@@ -7,16 +7,22 @@
           {{ labelsDisplay('auto_fill_your_details') }}
         </div>
         <div class="am-fs__info-social-wrapper__social-buttons">
-          <img v-if="features.googleSocialLogin" :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/google.svg'" alt="Google">
-          <img v-if="features.facebookSocialLogin" :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/facebook.svg'" alt="Facebook">
+          <img
+            v-if="features.googleSocialLogin"
+            :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/google.svg'"
+            alt="Google"
+          />
+          <img
+            v-if="features.facebookSocialLogin"
+            :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/facebook.svg'"
+            alt="Facebook"
+          />
         </div>
       </div>
 
       <!-- Social Divider -->
       <div class="am-fs__info-social-divider">
-        <span class="par-sm">{{
-          labelsDisplay('or_enter_details_below')
-        }}</span>
+        <span class="par-sm">{{ labelsDisplay('or_enter_details_below') }}</span>
       </div>
       <!-- /Social Divider -->
     </div>
@@ -30,25 +36,21 @@
       class="am-fs__info-form"
       :class="{ 'am-fs__info-form-mobile': checkScreen }"
     >
-      <template
-        v-for="item in amCustomize[pageRenderKey].infoStep.order"
-        :key="item.id"
-      >
+      <template v-for="item in amCustomize[pageRenderKey].infoStep.order" :key="item.id">
         <component :is="formFields[item.id]"></component>
       </template>
 
-
       <el-form-item
-          v-if="
-            amSettings.featuresIntegrations.mailchimp.enabled &&
-            amSettings.mailchimp.subscribeFieldVisible &&
-            amCustomize[pageRenderKey].infoStep.options.email.visibility
-          "
-          class="am-fs__info-form__item am-subscribe"
+        v-if="
+          amSettings.featuresIntegrations.mailchimp.enabled &&
+          amSettings.mailchimp.subscribeFieldVisible &&
+          amCustomize[pageRenderKey].infoStep.options.email.visibility
+        "
+        class="am-fs__info-form__item am-subscribe"
       >
         <AmCheckbox
-            :value="amSettings.mailchimp.checkedByDefault"
-            :label="labelsDisplay('subscribe_to_mailing_list')"
+          :value="amSettings.mailchimp.checkedByDefault"
+          :label="labelsDisplay('subscribe_to_mailing_list')"
         >
         </AmCheckbox>
       </el-form-item>
@@ -85,12 +87,8 @@ function labelsDisplay(label) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value].infoStep.translations &&
       amCustomize.value[pageRenderKey.value].infoStep.translations[label] &&
-      amCustomize.value[pageRenderKey.value].infoStep.translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value].infoStep.translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value].infoStep.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].infoStep.translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -99,7 +97,7 @@ function labelsDisplay(label) {
 
 // Container Width
 let cWidth = inject('containerWidth', 0)
-let checkScreen = computed(() => cWidth.value < 560 || (cWidth.value - 240 < 520))
+let checkScreen = computed(() => cWidth.value < 560 || cWidth.value - 240 < 520)
 
 // * Amelia Settings
 const amSettings = inject('settings')
@@ -130,27 +128,21 @@ let rules = computed(() => {
     ],
     lastName: [
       {
-        required:
-          amCustomize.value[pageRenderKey.value].infoStep.options.lastName
-            .required,
+        required: amCustomize.value[pageRenderKey.value].infoStep.options.lastName.required,
         message: labelsDisplay('enter_last_name_warning'),
         trigger: ['blur', 'submit'],
       },
     ],
     email: [
       {
-        required:
-          amCustomize.value[pageRenderKey.value].infoStep.options.email
-            .required,
+        required: amCustomize.value[pageRenderKey.value].infoStep.options.email.required,
         message: labelsDisplay('enter_valid_email_warning'),
         trigger: ['blur', 'submit'],
       },
     ],
     phone: [
       {
-        required:
-          amCustomize.value[pageRenderKey.value].infoStep.options.phone
-            .required,
+        required: amCustomize.value[pageRenderKey.value].infoStep.options.phone.required,
         message: labelsDisplay('enter_phone_warning'),
         trigger: ['blur', 'submit'],
       },
@@ -260,11 +252,7 @@ export default {
           $count: 4;
           @for $i from 0 through $count {
             &:nth-child(#{$i + 1}) {
-              animation: 600ms
-                cubic-bezier(0.45, 1, 0.4, 1.2)
-                #{$i *
-                100}ms
-                am-animation-slide-up;
+              animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
               animation-fill-mode: both;
             }
           }

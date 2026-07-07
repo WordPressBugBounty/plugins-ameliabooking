@@ -20,30 +20,26 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  ref,
-  inject
-} from "vue";
+import { computed, ref, inject } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Composables
 
 // * _components
-import { formFieldsTemplates } from "../../../../../../assets/js/common/formFieldsTemplates";
+import { formFieldsTemplates } from '../../../../../../assets/js/common/formFieldsTemplates'
 
 // * Props
 const props = defineProps({
   responsiveClass: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 // * Store
-const store = useStore();
+const store = useStore()
 
 // * Labels
 let amLabels = inject('amLabels')
@@ -56,15 +52,15 @@ let passFormData = ref({
   newPass: computed({
     get: () => store.getters['auth/getNewPassword'],
     set: (val) => {
-      store.commit('auth/setNewPassword', val ? val : "")
-    }
+      store.commit('auth/setNewPassword', val ? val : '')
+    },
   }),
   confirmPass: computed({
     get: () => store.getters['auth/getConfirmPassword'],
     set: (val) => {
-      store.commit('auth/setConfirmPassword', val ? val : "")
-    }
-  })
+      store.commit('auth/setConfirmPassword', val ? val : '')
+    },
+  }),
 })
 
 // * Form construction
@@ -79,7 +75,7 @@ let passFormConstruction = ref({
       placeholder: '',
       minLength: 3,
       class: computed(() => `am-capp__item ${props.responsiveClass}`),
-    }
+    },
   },
   confirmPass: {
     template: formFieldsTemplates.text,
@@ -91,8 +87,8 @@ let passFormConstruction = ref({
       placeholder: '',
       minLength: 3,
       class: computed(() => `am-capp__item ${props.responsiveClass}`),
-    }
-  }
+    },
+  },
 })
 
 // * Form validation rules
@@ -106,8 +102,8 @@ let passFormRules = ref({
     {
       min: 4,
       message: amLabels.new_password_length,
-      trigger: 'submit'
-    }
+      trigger: 'submit',
+    },
   ],
   confirmPass: [
     {
@@ -118,13 +114,14 @@ let passFormRules = ref({
     {
       min: 4,
       message: amLabels.new_password_length,
-      trigger: 'submit'
+      trigger: 'submit',
     },
     {
-      validator: () => store.getters['auth/getNewPassword'] === store.getters['auth/getConfirmPassword'],
+      validator: () =>
+        store.getters['auth/getNewPassword'] === store.getters['auth/getConfirmPassword'],
       message: amLabels.passwords_not_match,
-      trigger: 'submit'
-    }
+      trigger: 'submit',
+    },
   ],
 })
 
@@ -134,6 +131,4 @@ defineExpose({
 })
 </script>
 
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>

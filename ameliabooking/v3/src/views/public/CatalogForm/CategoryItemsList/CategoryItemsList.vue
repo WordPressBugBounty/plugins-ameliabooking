@@ -10,7 +10,11 @@
     <template #header>
       <span class="am-fcil__filter-buttons">
         <Header
-          v-if="preselectedCategories !== 1 && !shortcodeData.categories_hidden && availableCategories.length !== 1"
+          v-if="
+            preselectedCategories !== 1 &&
+            !shortcodeData.categories_hidden &&
+            availableCategories.length !== 1
+          "
           :btn-size="filterWidth < 481 ? 'medium' : 'mini'"
           :btn-string="amLabels.back_btn"
           :btn-type="customizedOptions.backBtn.buttonType"
@@ -27,7 +31,7 @@
           custom-class="am-fcil__filter-buttons__menu"
           :icon-only="true"
           :icon="iconSearchMenu"
-          @click="() => filterMobileMenu = !filterMobileMenu"
+          @click="() => (filterMobileMenu = !filterMobileMenu)"
         ></AmButton>
       </span>
       <div class="am-fcil__filter">
@@ -46,7 +50,13 @@
         </div>
         <Transition name="slide-fade">
           <div
-            v-if="shortcodeData.employee.length !== 1 && amEntities.employees.length > 1 && customizedOptions.filterEmployee.visibility && filterMobileMenu && !licence.isLite"
+            v-if="
+              shortcodeData.employee.length !== 1 &&
+              amEntities.employees.length > 1 &&
+              customizedOptions.filterEmployee.visibility &&
+              filterMobileMenu &&
+              !licence.isLite
+            "
             class="am-fcil__filter-item"
             role="search"
             :aria-label="amLabels.filter_employee"
@@ -73,7 +83,14 @@
         </Transition>
         <Transition name="slide-fade">
           <div
-            v-if="shortcodeData.location.length !== 1 && amEntities.locations.length > 1 && customizedOptions.filterLocation.visibility && filterMobileMenu && !licence.isLite && !licence.isStarter"
+            v-if="
+              shortcodeData.location.length !== 1 &&
+              amEntities.locations.length > 1 &&
+              customizedOptions.filterLocation.visibility &&
+              filterMobileMenu &&
+              !licence.isLite &&
+              !licence.isStarter
+            "
             class="am-fcil__filter-item"
             role="search"
             :aria-label="amLabels.filter_location"
@@ -100,7 +117,13 @@
         </Transition>
         <Transition name="slide-fade">
           <div
-            v-if="availableCategories.length !== 1 && preselectedCategories !== 1 && customizedOptions.sidebar.visibility && !sideMenuVisibility && filterMobileMenu"
+            v-if="
+              availableCategories.length !== 1 &&
+              preselectedCategories !== 1 &&
+              customizedOptions.sidebar.visibility &&
+              !sideMenuVisibility &&
+              filterMobileMenu
+            "
             class="am-fcil__filter-item am-w100"
             :class="filterClassWidth.category"
           >
@@ -122,7 +145,13 @@
           </div>
         </Transition>
         <div
-          v-if="!preselected.show && customizedOptions.filterButtons.visibility && categoryPackages.length !== 0 && categoryServices.length !== 0 && !useCartHasItems(store)"
+          v-if="
+            !preselected.show &&
+            customizedOptions.filterButtons.visibility &&
+            categoryPackages.length !== 0 &&
+            categoryServices.length !== 0 &&
+            !useCartHasItems(store)
+          "
           role="search"
           aria-label="Filter Buttons"
           class="am-fcil__filter-item"
@@ -131,7 +160,7 @@
           <div class="am-fcil__filter-item__btn-wrapper">
             <div
               class="am-fcil__filter-item__btn"
-              :class="{'am-active': displayCategoryPackages && displayCategoryServices}"
+              :class="{ 'am-active': displayCategoryPackages && displayCategoryServices }"
               @click="changeCategoryItemsVisibility('all')"
             >
               <span>
@@ -140,7 +169,7 @@
             </div>
             <div
               class="am-fcil__filter-item__btn"
-              :class="{'am-active': displayCategoryPackages && !displayCategoryServices}"
+              :class="{ 'am-active': displayCategoryPackages && !displayCategoryServices }"
               @click="changeCategoryItemsVisibility('packages')"
             >
               <span>
@@ -149,7 +178,7 @@
             </div>
             <div
               class="am-fcil__filter-item__btn"
-              :class="{'am-active': !displayCategoryPackages && displayCategoryServices}"
+              :class="{ 'am-active': !displayCategoryPackages && displayCategoryServices }"
               @click="changeCategoryItemsVisibility('services')"
             >
               <span>
@@ -160,7 +189,15 @@
         </div>
       </div>
     </template>
-    <template v-if="availableCategories.length !== 1 && preselectedCategories !== 1 && customizedOptions.sidebar.visibility && sideMenuVisibility" #side>
+    <template
+      v-if="
+        availableCategories.length !== 1 &&
+        preselectedCategories !== 1 &&
+        customizedOptions.sidebar.visibility &&
+        sideMenuVisibility
+      "
+      #side
+    >
       <SideMenu
         :menu-items="categoriesMenu"
         :init-selection="categorySelected"
@@ -172,11 +209,7 @@
       ></SideMenu>
     </template>
     <template #heading>
-      <div
-        role="heading"
-        aria-level="2"
-        class="am-fcil__heading"
-      >
+      <div role="heading" aria-level="2" class="am-fcil__heading">
         {{ headingStringRender }}
       </div>
     </template>
@@ -188,16 +221,16 @@
           :key="item.id"
           role="group"
           class="am-fcil__item"
-          :class="{'am-mobile': containerWidth < 481}"
+          :class="{ 'am-mobile': containerWidth < 481 }"
         >
-          <div
-            class="am-fcil__item-inner"
-            :class="{'am-mobile': containerWidth < 481}"
-          >
+          <div class="am-fcil__item-inner" :class="{ 'am-mobile': containerWidth < 481 }">
             <div
               class="am-fcil__item-content"
-              :style="customizedOptions.cardColor && customizedOptions.cardColor.visibility ?
-              {backgroundColor: useColorTransparency(item.color, 0.1)} : {}"
+              :style="
+                customizedOptions.cardColor && customizedOptions.cardColor.visibility
+                  ? { backgroundColor: useColorTransparency(item.color, 0.1) }
+                  : {}
+              "
             >
               <!-- Card Badge -->
               <div
@@ -213,10 +246,10 @@
               </div>
 
               <!-- Card Hero Image -->
-              <div 
+              <div
                 v-if="item.pictureFullPath"
                 class="am-fcil__item-hero"
-                :style="{backgroundImage: `url(${item.pictureFullPath})`}"
+                :style="{ backgroundImage: `url(${item.pictureFullPath})` }"
                 tabindex="0"
                 @click="selectPackage(item)"
                 @keydown.enter="selectPackage(item)"
@@ -224,7 +257,7 @@
 
               <!-- Card Heading -->
               <div class="am-fcil__item-heading">
-                <div 
+                <div
                   class="am-fcil__item-name"
                   tabindex="0"
                   @click="selectPackage(item)"
@@ -232,22 +265,26 @@
                 >
                   {{ item.name }}
                 </div>
-                <div
-                  v-if="customizedOptions.packagePrice.visibility"
-                  class="am-fcil__item-cost"
-                >
+                <div v-if="customizedOptions.packagePrice.visibility" class="am-fcil__item-cost">
                   <span v-if="item.discount" class="am-fcil__item-discount">
-                    {{`${amLabels.save} ${item.discount}%`}}
+                    {{ `${amLabels.save} ${item.discount}%` }}
                   </span>
                   <span class="am-fcil__item-price">
                     {{ item.price ? useFormattedPrice(usePackageAmount(item)) : amLabels.free }}
                   </span>
-                  <span v-if="item.price && (customizedOptions.tax?.visibility ?? true) && useTaxVisibility(store,item.id, 'package')" class="am-fcil__item-price">
+                  <span
+                    v-if="
+                      item.price &&
+                      (customizedOptions.tax?.visibility ?? true) &&
+                      useTaxVisibility(store, item.id, 'package')
+                    "
+                    class="am-fcil__item-price"
+                  >
                     <template v-if="amSettings.payments.taxes.excluded">
                       {{ `+${amLabels.total_tax_colon}` }}
                     </template>
                     <template v-else>
-                      {{amLabels.incl_tax}}
+                      {{ amLabels.incl_tax }}
                     </template>
                   </span>
                 </div>
@@ -260,7 +297,7 @@
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-folder"></span>
-                  <span>{{ availableCategories.find(a => a.id === categorySelected).name }}</span>
+                  <span>{{ availableCategories.find((a) => a.id === categorySelected).name }}</span>
                 </div>
                 <div
                   v-if="customizedOptions.packageDuration.visibility"
@@ -271,7 +308,9 @@
                     {{ `${amLabels.expires_at} ${item.endDate.split(' ')[0]}` }}
                   </span>
                   <span v-else-if="item.durationCount">
-                    {{ `${amLabels.expires_after} ${item.durationCount} ${packageDurationLabel(item.durationCount, item.durationType)}` }}
+                    {{
+                      `${amLabels.expires_after} ${item.durationCount} ${packageDurationLabel(item.durationCount, item.durationType)}`
+                    }}
                   </span>
                   <span v-else>
                     {{ amLabels.without_expiration }}
@@ -285,7 +324,10 @@
                   <span>1/1</span>
                 </div>
                 <div
-                  v-if="usePackageLocations(amEntities, item, shortcodeData).length && customizedOptions.packageLocation.visibility"
+                  v-if="
+                    usePackageLocations(amEntities, item, shortcodeData).length &&
+                    customizedOptions.packageLocation.visibility
+                  "
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-locations"></span>
@@ -303,7 +345,7 @@
                   {{ `${amLabels.in_package}:` }}
                 </span>
                 <span v-for="obj in item.bookable" :key="obj.id">
-                  {{obj.service.name}}
+                  {{ obj.service.name }}
                 </span>
               </div>
             </div>
@@ -311,11 +353,11 @@
             <!-- Card Footer -->
             <div
               class="am-fcil__item-footer"
-              :class="[{'am-mobile': containerWidth < 481}, {'am-micro': containerWidth < 320}]"
+              :class="[{ 'am-mobile': containerWidth < 481 }, { 'am-micro': containerWidth < 320 }]"
             >
               <AmButton
                 v-if="customizedOptions.cardEmployeeBtn.visibility"
-                :class="{'am-w100': containerWidth < 320}"
+                :class="{ 'am-w100': containerWidth < 320 }"
                 size="small"
                 :type="customizedOptions.cardEmployeeBtn.buttonType"
                 @click="getDialogPackageEmployees(item)"
@@ -323,7 +365,10 @@
                 {{ amLabels.view_employees }}
               </AmButton>
               <AmButton
-                :class="[{'am-w100': !customizedOptions.cardEmployeeBtn.visibility}, {'am-micro am-w100': containerWidth < 320}]"
+                :class="[
+                  { 'am-w100': !customizedOptions.cardEmployeeBtn.visibility },
+                  { 'am-micro am-w100': containerWidth < 320 },
+                ]"
                 size="small"
                 :type="customizedOptions.cardContinueBtn.buttonType"
                 @click="selectPackage(item)"
@@ -342,16 +387,16 @@
           v-for="item in categoryServices"
           :key="item.id"
           class="am-fcil__item"
-          :class="{'am-mobile': containerWidth < 481}"
+          :class="{ 'am-mobile': containerWidth < 481 }"
         >
-          <div
-            class="am-fcil__item-inner"
-            :class="{'am-mobile': containerWidth < 481}"
-          >
+          <div class="am-fcil__item-inner" :class="{ 'am-mobile': containerWidth < 481 }">
             <div
               class="am-fcil__item-content"
-              :style="customizedOptions.cardColor && customizedOptions.cardColor.visibility ?
-              {backgroundColor: useColorTransparency(item.color, 0.1)} : {}"
+              :style="
+                customizedOptions.cardColor && customizedOptions.cardColor.visibility
+                  ? { backgroundColor: useColorTransparency(item.color, 0.1) }
+                  : {}
+              "
             >
               <!-- Card Badge -->
               <div
@@ -368,10 +413,10 @@
               <!-- /Card Badge -->
 
               <!-- Card Hero Image -->
-              <div 
+              <div
                 v-if="item.pictureFullPath"
                 class="am-fcil__item-hero"
-                :style="{backgroundImage: `url(${item.pictureFullPath})`}"
+                :style="{ backgroundImage: `url(${item.pictureFullPath})` }"
                 tabindex="0"
                 @click="selectService(item.id)"
                 @keydown.enter="selectService(item.id)"
@@ -388,19 +433,28 @@
                 >
                   {{ item.name }}
                 </div>
-                <div
-                  v-if="customizedOptions.servicePrice.visibility"
-                  class="am-fcil__item-cost"
-                >
-                  <span v-if="useServicePrice(amEntities, item.id).min || useServicePrice(amEntities, item.id).max" class="am-fcil__item-price">
+                <div v-if="customizedOptions.servicePrice.visibility" class="am-fcil__item-cost">
+                  <span
+                    v-if="
+                      useServicePrice(amEntities, item.id).min ||
+                      useServicePrice(amEntities, item.id).max
+                    "
+                    class="am-fcil__item-price"
+                  >
                     {{ useServicePrice(amEntities, item.id).price }}
                   </span>
-                  <span v-if="(customizedOptions.tax?.visibility ?? true) && useTaxVisibility(store,item.id, 'service')" class="am-fcil__item-price">
+                  <span
+                    v-if="
+                      (customizedOptions.tax?.visibility ?? true) &&
+                      useTaxVisibility(store, item.id, 'service')
+                    "
+                    class="am-fcil__item-price"
+                  >
                     <template v-if="amSettings.payments.taxes.excluded">
                       {{ `+${amLabels.total_tax_colon}` }}
                     </template>
                     <template v-else>
-                      {{amLabels.incl_tax}}
+                      {{ amLabels.incl_tax }}
                     </template>
                   </span>
                 </div>
@@ -414,7 +468,7 @@
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-folder"></span>
-                  <span>{{ availableCategories.find(a => a.id === categorySelected).name }}</span>
+                  <span>{{ availableCategories.find((a) => a.id === categorySelected).name }}</span>
                 </div>
                 <div
                   v-if="customizedOptions.serviceDuration.visibility"
@@ -428,10 +482,13 @@
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-user"></span>
-                  <span>{{ useEmployeesServiceCapacity(amEntities , item.id) }}</span>
+                  <span>{{ useEmployeesServiceCapacity(amEntities, item.id) }}</span>
                 </div>
                 <div
-                  v-if="useServiceLocation(amEntities, item.id).length && customizedOptions.serviceLocation.visibility"
+                  v-if="
+                    useServiceLocation(amEntities, item.id).length &&
+                    customizedOptions.serviceLocation.visibility
+                  "
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-locations"></span>
@@ -446,11 +503,11 @@
             <!-- Card Footer -->
             <div
               class="am-fcil__item-footer"
-              :class="[{'am-mobile': containerWidth < 481}, {'am-micro': containerWidth < 320}]"
+              :class="[{ 'am-mobile': containerWidth < 481 }, { 'am-micro': containerWidth < 320 }]"
             >
               <AmButton
                 v-if="customizedOptions.cardEmployeeBtn.visibility && !licence.isLite"
-                :class="{'am-w100': containerWidth < 320}"
+                :class="{ 'am-w100': containerWidth < 320 }"
                 size="small"
                 :type="customizedOptions.cardEmployeeBtn.buttonType"
                 @click="getDialogServiceEmployees(item.id)"
@@ -458,7 +515,10 @@
                 {{ amLabels.view_employees }}
               </AmButton>
               <AmButton
-                :class="[{'am-w100': !customizedOptions.cardEmployeeBtn.visibility}, {'am-micro am-w100': containerWidth < 320}]"
+                :class="[
+                  { 'am-w100': !customizedOptions.cardEmployeeBtn.visibility },
+                  { 'am-micro am-w100': containerWidth < 320 },
+                ]"
                 size="small"
                 :type="customizedOptions.cardContinueBtn.buttonType"
                 @click="selectService(item.id)"
@@ -491,11 +551,7 @@
         <template #default>
           <div>
             <AmCollapse>
-              <AmCollapseItem
-                v-for="(employee, index) in dialogEmployeesArray"
-                :key="index"
-                side
-              >
+              <AmCollapseItem v-for="(employee, index) in dialogEmployeesArray" :key="index" side>
                 <template #heading>
                   <div class="am-fcil-employee__heading">
                     <div class="am-fcil-employee__heading-left">
@@ -508,7 +564,7 @@
                         {{ `${employee.firstName} ${employee.lastName}` }}
                         <span
                           v-if="employee.badge"
-                          :style="{background: employee.badge.color}"
+                          :style="{ background: employee.badge.color }"
                           class="am-fcil-employee__badge"
                         >
                           {{ employee.badge.content }}
@@ -565,17 +621,20 @@
       </AmDialog>
     </template>
   </Content>
-  <div
-    v-else
-    ref="ameliaContainer"
-    class="am-empty"
-  >
-    <img :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/am-empty-booking.svg'" alt="Empty">
+  <div v-else ref="ameliaContainer" class="am-empty">
+    <img
+      :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/am-empty-booking.svg'"
+      alt="Empty"
+    />
     <div class="am-empty__heading">
       {{ amLabels.oops }}
     </div>
     <div class="am-empty__subheading">
-      {{ preselected.show !== 'packages' ? amLabels.no_services_employees : amLabels.no_package_services }}
+      {{
+        preselected.show !== 'packages'
+          ? amLabels.no_services_employees
+          : amLabels.no_package_services
+      }}
     </div>
     <div class="am-empty__text">
       <span v-if="preselected.show !== 'packages'">
@@ -584,9 +643,7 @@
       <a href="https://wpamelia.com/services-and-categories/" rel="nofollow">
         {{ amLabels.add_services_url }}&nbsp;
       </a>
-      <span v-if="preselected.show !== 'packages'">
-        {{ amLabels.and }}&nbsp;
-      </span>
+      <span v-if="preselected.show !== 'packages'"> {{ amLabels.and }}&nbsp; </span>
       <a
         v-if="preselected.show !== 'packages'"
         href="https://wpamelia.com/employees/"
@@ -622,10 +679,10 @@ import {
   onBeforeMount,
   onMounted,
   onBeforeUnmount,
-  provide
-} from "vue";
+  provide,
+} from 'vue'
 
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Composables
 import {
@@ -635,32 +692,26 @@ import {
   useServicePrice,
   useServiceLocation,
   usePackageEmployees,
-  usePackageLocations
+  usePackageLocations,
 } from '../../../../assets/js/public/catalog.js'
 import {
   useCartHasItems,
   useRemoveLastCartItem,
-  useCartStep
+  useCartStep,
 } from '../../../../assets/js/public/cart'
 import { useFormattedPrice } from '../../../../assets/js/common/formatting.js'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation.js'
-import {
-  useBuildPackage,
-  usePackageAmount,
-} from "../../../../assets/js/public/package";
-import useAction from "../../../../assets/js/public/actions";
-import { useDescriptionVisibility } from "../../../../assets/js/common/helper";
-import { useTaxVisibility } from "../../../../assets/js/common/pricing";
+import { useBuildPackage, usePackageAmount } from '../../../../assets/js/public/package'
+import useAction from '../../../../assets/js/public/actions'
+import { useDescriptionVisibility } from '../../../../assets/js/common/helper'
+import { useTaxVisibility } from '../../../../assets/js/common/pricing'
 
 // * Plugin Licence
 let licence = inject('licence')
 
-let {
-  nextPage,
-  previousPage
-} = inject('changingPageFunctions', {
+let { nextPage, previousPage } = inject('changingPageFunctions', {
   nextPage: () => {},
-  previousPage: () => {}
+  previousPage: () => {},
 })
 
 // * Root Urls
@@ -706,16 +757,25 @@ let store = useStore()
 const shortcodeData = inject('shortcodeData')
 const preselected = computed(() => store.getters['entities/getPreselected'])
 
-let preselectedCategories = computed (() => {
-  let categoryArray = Array.isArray(shortcodeData.value.category) ? shortcodeData.value.category : shortcodeData.value.category.split(',')
-  categoryArray = categoryArray.filter(c => c)
+let preselectedCategories = computed(() => {
+  let categoryArray = Array.isArray(shortcodeData.value.category)
+    ? shortcodeData.value.category
+    : shortcodeData.value.category.split(',')
+  categoryArray = categoryArray.filter((c) => c)
   return categoryArray.length
 })
 
 // * Sidebar Menu Visibility
 let sideMenuVisibility = computed(() => {
-  let sidebarByContainer = contentRef.value && contentRef.value.catContainerWidth ? contentRef.value.catContainerWidth > 768 : true
-  return preselectedCategories.value !== 1 && customizedOptions.value.sidebar.visibility && sidebarByContainer
+  let sidebarByContainer =
+    contentRef.value && contentRef.value.catContainerWidth
+      ? contentRef.value.catContainerWidth > 768
+      : true
+  return (
+    preselectedCategories.value !== 1 &&
+    customizedOptions.value.sidebar.visibility &&
+    sidebarByContainer
+  )
 })
 
 // * Entities
@@ -723,12 +783,12 @@ let amEntities = inject('amEntities')
 
 // * Filtered employees
 let queryEmployeeLower = ref('')
-function filterEmployee (query) {
+function filterEmployee(query) {
   queryEmployeeLower.value = query.toLowerCase()
 }
 let filteredEmployees = computed(() => {
   if (queryEmployeeLower.value) {
-    return amEntities.value.employees.filter(item => {
+    return amEntities.value.employees.filter((item) => {
       const fullName = `${item.firstName} ${item.lastName}`.toLowerCase()
       return fullName.includes(queryEmployeeLower.value)
     })
@@ -739,12 +799,12 @@ let filteredEmployees = computed(() => {
 
 // * Filtered Locations
 let queryLocationLower = ref('')
-function filterLocation (query) {
+function filterLocation(query) {
   queryLocationLower.value = query.toLowerCase()
 }
 let filteredLocations = computed(() => {
   if (queryLocationLower.value) {
-    return amEntities.value.locations.filter(item => {
+    return amEntities.value.locations.filter((item) => {
       return item.name.toLowerCase().includes(queryLocationLower.value)
     })
   }
@@ -767,11 +827,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   if (amSettings.customizedData?.cbf?.categoryItemsList?.translations) {
     let customizedLabels = amSettings.customizedData.cbf.categoryItemsList.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -786,15 +846,15 @@ let amLabels = computed(() => {
 let searchFilter = ref('')
 
 let iconSearch = {
-  components: {IconComponent},
-  template: `<IconComponent icon="search"/>`
+  components: { IconComponent },
+  template: `<IconComponent icon="search"/>`,
 }
 
 let filterMobileMenu = ref(true)
 
 let iconSearchMenu = {
-  components: {IconComponent},
-  template: `<IconComponent icon="filter"/>`
+  components: { IconComponent },
+  template: `<IconComponent icon="filter"/>`,
 }
 
 let filterWidth = computed(() => {
@@ -817,13 +877,16 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', resize)
 })
 
-function searchingStrings (name) {
+function searchingStrings(name) {
   let arr = []
-  searchFilter.value.toLowerCase().split(' ').forEach(item => {
-    arr.push(name.toLowerCase().includes(item))
-  })
+  searchFilter.value
+    .toLowerCase()
+    .split(' ')
+    .forEach((item) => {
+      arr.push(name.toLowerCase().includes(item))
+    })
 
-  return arr.filter(a => a === false).length <= 0
+  return arr.filter((a) => a === false).length <= 0
 }
 
 // * Categories menu
@@ -832,16 +895,16 @@ let availableCategories = inject('availableCategories')
 let categoriesMenu = computed(() => {
   let arr = [...availableCategories.value]
   let arrMenu = []
-  arr.forEach(item => {
+  arr.forEach((item) => {
     arrMenu.push({
       id: item.id,
-      name: item.name
+      name: item.name,
     })
   })
 
   arrMenu.unshift({
     id: 0,
-    name: amLabels.value.filter_all
+    name: amLabels.value.filter_all,
   })
 
   return arrMenu
@@ -861,7 +924,7 @@ let categoriesFiltered = computed(() => {
     categoriesForFiltering.value,
     shortcodeData.value,
     employeeFilter.value,
-    locationFilter.value
+    locationFilter.value,
   )
 })
 
@@ -874,31 +937,30 @@ let categoriesStructural = computed(() => {
     },
     shortcodeData.value,
     null,
-    null
+    null,
   )
 })
 
 let categoryPackages = computed(() => {
   let arr = []
-  if (categoriesFiltered.value.find(cat => cat.id === categorySelected.value)) {
-    amEntities.value.packages.forEach(pack => {
-      categoriesFiltered.value.find(cat => cat.id === categorySelected.value).packageList.forEach(packId => {
-        if (
-          pack.id === packId
-          && (searchFilter.value ? searchingStrings(pack.name) : true)
-        ) {
-          arr.push(pack)
-        }
-      })
+  if (categoriesFiltered.value.find((cat) => cat.id === categorySelected.value)) {
+    amEntities.value.packages.forEach((pack) => {
+      categoriesFiltered.value
+        .find((cat) => cat.id === categorySelected.value)
+        .packageList.forEach((packId) => {
+          if (pack.id === packId && (searchFilter.value ? searchingStrings(pack.name) : true)) {
+            arr.push(pack)
+          }
+        })
     })
   } else {
-    amEntities.value.packages.forEach(pack => {
-      categoriesFiltered.value.forEach(cat => {
-        cat.packageList.forEach(packId => {
+    amEntities.value.packages.forEach((pack) => {
+      categoriesFiltered.value.forEach((cat) => {
+        cat.packageList.forEach((packId) => {
           if (
-            pack.id === packId
-            && !arr.find(p => p.id === packId)
-            && (searchFilter.value ? searchingStrings(pack.name) : true)
+            pack.id === packId &&
+            !arr.find((p) => p.id === packId) &&
+            (searchFilter.value ? searchingStrings(pack.name) : true)
           ) {
             arr.push(pack)
           }
@@ -912,21 +974,26 @@ let categoryPackages = computed(() => {
 let categoryServices = computed(() => {
   let arr = []
 
-  if (categorySelected.value && categoriesFiltered.value.find(cat => cat.id === categorySelected.value)) {
-    amEntities.value.services.forEach(service => {
-      categoriesFiltered.value.find(cat => cat.id === categorySelected.value).serviceIdList.forEach(serviceId => {
-        if (
-          service.id === serviceId &&
-          (searchFilter.value ? searchingStrings(service.name) : true)
-        ) {
-          arr.push(service)
-        }
-      })
+  if (
+    categorySelected.value &&
+    categoriesFiltered.value.find((cat) => cat.id === categorySelected.value)
+  ) {
+    amEntities.value.services.forEach((service) => {
+      categoriesFiltered.value
+        .find((cat) => cat.id === categorySelected.value)
+        .serviceIdList.forEach((serviceId) => {
+          if (
+            service.id === serviceId &&
+            (searchFilter.value ? searchingStrings(service.name) : true)
+          ) {
+            arr.push(service)
+          }
+        })
     })
   } else {
-    amEntities.value.services.forEach(service => {
-      categoriesFiltered.value.forEach(cat => {
-        cat.serviceIdList.forEach(serviceId => {
+    amEntities.value.services.forEach((service) => {
+      categoriesFiltered.value.forEach((cat) => {
+        cat.serviceIdList.forEach((serviceId) => {
           if (
             service.id === serviceId &&
             (searchFilter.value ? searchingStrings(service.name) : true)
@@ -943,22 +1010,21 @@ let categoryServices = computed(() => {
 
 let categoryPackagesStructural = computed(() => {
   let arr = []
-  if (categoriesStructural.value.find(cat => cat.id === categorySelected.value)) {
-    amEntities.value.packages.forEach(pack => {
-      categoriesStructural.value.find(cat => cat.id === categorySelected.value).packageList.forEach(packId => {
-        if (pack.id === packId) {
-          arr.push(pack)
-        }
-      })
+  if (categoriesStructural.value.find((cat) => cat.id === categorySelected.value)) {
+    amEntities.value.packages.forEach((pack) => {
+      categoriesStructural.value
+        .find((cat) => cat.id === categorySelected.value)
+        .packageList.forEach((packId) => {
+          if (pack.id === packId) {
+            arr.push(pack)
+          }
+        })
     })
   } else {
-    amEntities.value.packages.forEach(pack => {
-      categoriesStructural.value.forEach(cat => {
-        cat.packageList.forEach(packId => {
-          if (
-            pack.id === packId
-            && !arr.find(p => p.id === packId)
-          ) {
+    amEntities.value.packages.forEach((pack) => {
+      categoriesStructural.value.forEach((cat) => {
+        cat.packageList.forEach((packId) => {
+          if (pack.id === packId && !arr.find((p) => p.id === packId)) {
             arr.push(pack)
           }
         })
@@ -972,21 +1038,24 @@ let categoryPackagesStructural = computed(() => {
 let categoryServicesStructural = computed(() => {
   let arr = []
 
-  if (categorySelected.value && categoriesStructural.value.find(cat => cat.id === categorySelected.value)) {
-    amEntities.value.services.forEach(service => {
-      categoriesStructural.value.find(cat => cat.id === categorySelected.value).serviceIdList.forEach(serviceId => {
-        if (service.id === serviceId) {
-          arr.push(service)
-        }
-      })
+  if (
+    categorySelected.value &&
+    categoriesStructural.value.find((cat) => cat.id === categorySelected.value)
+  ) {
+    amEntities.value.services.forEach((service) => {
+      categoriesStructural.value
+        .find((cat) => cat.id === categorySelected.value)
+        .serviceIdList.forEach((serviceId) => {
+          if (service.id === serviceId) {
+            arr.push(service)
+          }
+        })
     })
   } else {
-    amEntities.value.services.forEach(service => {
-      categoriesStructural.value.forEach(cat => {
-        cat.serviceIdList.forEach(serviceId => {
-          if (
-            service.id === serviceId
-          ) {
+    amEntities.value.services.forEach((service) => {
+      categoriesStructural.value.forEach((cat) => {
+        cat.serviceIdList.forEach((serviceId) => {
+          if (service.id === serviceId) {
             arr.push(service)
           }
         })
@@ -1033,8 +1102,7 @@ const structuralEmpty = computed(() => {
     !useCartHasItems(store) &&
     categoryPackagesStructural.value.length > 0
   const hasServicesStructural =
-    displayCategoryServices.value &&
-    categoryServicesStructural.value.length > 0
+    displayCategoryServices.value && categoryServicesStructural.value.length > 0
   return !hasPackagesStructural && !hasServicesStructural
 })
 
@@ -1047,35 +1115,46 @@ let filterClassWidth = computed(() => {
   let aLocation = amEntities.value.locations.length
 
   let searchVisibility = customizedOptions.value.searchInput.visibility
-  let employeeVisibility = customizedOptions.value.filterEmployee.visibility && pEmployee.length !== 1 && aEmployee > 1 && !licence.isLite
-  let locationVisibility = customizedOptions.value.filterLocation.visibility && pLocation.length !== 1 && aLocation > 1 && !licence.isLite && !licence.isStarter
-  let buttonsVisibility = customizedOptions.value.filterButtons.visibility
-    && preselected.value.show !== 'packages'
-    && preselected.value.show !== 'services'
-    && categoryPackages.value.length !== 0
-    && categoryServices.value.length !== 0
-    && !useCartHasItems(store)
+  let employeeVisibility =
+    customizedOptions.value.filterEmployee.visibility &&
+    pEmployee.length !== 1 &&
+    aEmployee > 1 &&
+    !licence.isLite
+  let locationVisibility =
+    customizedOptions.value.filterLocation.visibility &&
+    pLocation.length !== 1 &&
+    aLocation > 1 &&
+    !licence.isLite &&
+    !licence.isStarter
+  let buttonsVisibility =
+    customizedOptions.value.filterButtons.visibility &&
+    preselected.value.show !== 'packages' &&
+    preselected.value.show !== 'services' &&
+    categoryPackages.value.length !== 0 &&
+    categoryServices.value.length !== 0 &&
+    !useCartHasItems(store)
 
   let classFilter = {
     search: 'am-w30',
     employee: 'am-w20',
     location: 'am-w20',
     buttons: 'am-w30',
-    category: 'am-w100'
+    category: 'am-w100',
   }
 
   if (filterWidth.value > 992) {
     if (!searchVisibility || !buttonsVisibility) {
-      classFilter.employee = (!searchVisibility && !buttonsVisibility) ? 'am-w50' : 'am-w35'
-      classFilter.location = (!searchVisibility && !buttonsVisibility) ? 'am-w50' : 'am-w35'
-      classFilter.search = !buttonsVisibility && !locationVisibility && !employeeVisibility ? 'am-w100' : 'am-w30'
+      classFilter.employee = !searchVisibility && !buttonsVisibility ? 'am-w50' : 'am-w35'
+      classFilter.location = !searchVisibility && !buttonsVisibility ? 'am-w50' : 'am-w35'
+      classFilter.search =
+        !buttonsVisibility && !locationVisibility && !employeeVisibility ? 'am-w100' : 'am-w30'
 
       if (!employeeVisibility) {
-        classFilter.location = (!searchVisibility && !buttonsVisibility) ? 'am-w100' : 'am-w70'
+        classFilter.location = !searchVisibility && !buttonsVisibility ? 'am-w100' : 'am-w70'
       }
 
       if (!locationVisibility) {
-        classFilter.employee = (!searchVisibility && !buttonsVisibility) ? 'am-w100' : 'am-w70'
+        classFilter.employee = !searchVisibility && !buttonsVisibility ? 'am-w100' : 'am-w70'
       }
     } else {
       if (!employeeVisibility) {
@@ -1091,16 +1170,32 @@ let filterClassWidth = computed(() => {
       }
     }
   } else if (filterWidth.value > 768) {
-    classFilter.search = buttonsVisibility ? 'am-w50 am-tablet am-order1' : 'am-w100 am-tablet am-order1'
-    classFilter.buttons = searchVisibility ? 'am-w50 am-tablet am-order2' : 'am-w100 tablet am-order2'
-    classFilter.employee = locationVisibility ? 'am-w50 am-tablet am-order3' : 'am-w100 am-tablet am-order3'
-    classFilter.location = employeeVisibility ? 'am-w50 am-tablet am-order4' : 'am-w100 am-tablet am-order4'
+    classFilter.search = buttonsVisibility
+      ? 'am-w50 am-tablet am-order1'
+      : 'am-w100 am-tablet am-order1'
+    classFilter.buttons = searchVisibility
+      ? 'am-w50 am-tablet am-order2'
+      : 'am-w100 tablet am-order2'
+    classFilter.employee = locationVisibility
+      ? 'am-w50 am-tablet am-order3'
+      : 'am-w100 am-tablet am-order3'
+    classFilter.location = employeeVisibility
+      ? 'am-w50 am-tablet am-order4'
+      : 'am-w100 am-tablet am-order4'
     classFilter.category = 'am-w100 am-tablet am-order5'
   } else if (filterWidth.value > 480) {
-    classFilter.search = buttonsVisibility ? 'am-w50 am-tablet am-order1' : 'am-w100 am-tablet am-order1'
-    classFilter.buttons = searchVisibility ? 'am-w50 am-tablet am-order2' : 'am-w100 tablet am-order2'
-    classFilter.employee = locationVisibility ? 'am-w50 am-tablet am-order3' : 'am-w100 am-tablet am-order3'
-    classFilter.location = employeeVisibility ? 'am-w50 am-tablet am-order4' : 'am-w100 am-tablet am-order4'
+    classFilter.search = buttonsVisibility
+      ? 'am-w50 am-tablet am-order1'
+      : 'am-w100 am-tablet am-order1'
+    classFilter.buttons = searchVisibility
+      ? 'am-w50 am-tablet am-order2'
+      : 'am-w100 tablet am-order2'
+    classFilter.employee = locationVisibility
+      ? 'am-w50 am-tablet am-order3'
+      : 'am-w100 am-tablet am-order3'
+    classFilter.location = employeeVisibility
+      ? 'am-w50 am-tablet am-order4'
+      : 'am-w100 am-tablet am-order4'
     classFilter.category = 'am-w100 am-tablet am-order5'
   } else {
     classFilter.employee = 'am-w100 am-mobile'
@@ -1115,25 +1210,38 @@ let filterClassWidth = computed(() => {
 
 // * Container width
 let containerWidth = computed(() => {
-  return contentRef.value && contentRef.value.catContainerWidth ? contentRef.value.catContainerWidth : 0
+  return contentRef.value && contentRef.value.catContainerWidth
+    ? contentRef.value.catContainerWidth
+    : 0
 })
 
 let headingStringRender = computed(() => {
-  let packagesLength = categoryPackages.value.length && !useCartHasItems(store) ? categoryPackages.value.length : 0
+  let packagesLength =
+    categoryPackages.value.length && !useCartHasItems(store) ? categoryPackages.value.length : 0
 
-  let serviceString = categoryServices.value.length > 1 ? amLabels.value.heading_services : amLabels.value.heading_service
-  let packageString = packagesLength ? packagesLength > 1 ? amLabels.value.packages : amLabels.value.package : ''
+  let serviceString =
+    categoryServices.value.length > 1
+      ? amLabels.value.heading_services
+      : amLabels.value.heading_service
+  let packageString = packagesLength
+    ? packagesLength > 1
+      ? amLabels.value.packages
+      : amLabels.value.package
+    : ''
 
   if (!categoryServices.value.length && !packagesLength) {
     return amLabels.value.no_search_data
   }
 
   if (displayCategoryServices.value && (!displayCategoryPackages.value || !packagesLength)) {
-    return `${amLabels.value.available} - ${ categoryServices.value.length } ${serviceString}`
+    return `${amLabels.value.available} - ${categoryServices.value.length} ${serviceString}`
   }
 
-  if ((!displayCategoryServices.value || !categoryServices.value.length) && displayCategoryPackages.value) {
-    return `${amLabels.value.available} - ${packagesLength } ${packageString}`
+  if (
+    (!displayCategoryServices.value || !categoryServices.value.length) &&
+    displayCategoryPackages.value
+  ) {
+    return `${amLabels.value.available} - ${packagesLength} ${packageString}`
   }
 
   let connective = packagesLength ? '/' : ''
@@ -1142,16 +1250,16 @@ let headingStringRender = computed(() => {
 })
 
 // * Choose category from categories menu
-function selectCategory (category) {
+function selectCategory(category) {
   const categoryId = category.id === 0 ? null : category.id
   categorySelected.value = categoryId
-  store.commit('booking/setCategoryId',categoryId)
+  store.commit('booking/setCategoryId', categoryId)
 }
 
 let itemType = inject('itemType')
 
 // * Select Service
-function selectService (id) {
+function selectService(id) {
   store.commit('booking/setServiceId', parseInt(id))
   store.commit('booking/setBookableType', 'appointment')
 
@@ -1165,7 +1273,7 @@ function selectService (id) {
 }
 
 // * Select Package
-function selectPackage (pack) {
+function selectPackage(pack) {
   store.commit('booking/setServiceId', null)
   store.commit('booking/setPackageId', pack.id)
   store.commit('booking/setBookableType', 'package')
@@ -1181,13 +1289,13 @@ function selectPackage (pack) {
   })
 }
 
-function goBack () {
+function goBack() {
   categorySelected.value = null
   store.commit('booking/setCategoryId', null)
   previousPage()
 }
 
-function goToCart () {
+function goToCart() {
   useRemoveLastCartItem(store)
 
   showCart.value = true
@@ -1202,30 +1310,30 @@ let dialogEmployeesArray = ref([])
 let dialogPackage = ref({})
 let dialogServiceId = ref(null)
 
-function closeEmployeeDialog () {
+function closeEmployeeDialog() {
   dialogEmployeesType.value = ''
   dialogEmployeesArray.value = []
   dialogPackage.value = {}
   dialogServiceId.value = null
 }
 
-function getDialogPackageEmployees (pack) {
+function getDialogPackageEmployees(pack) {
   dialogEmployeesArray.value = usePackageEmployees(amEntities.value, pack, shortcodeData.value)
   dialogPackage.value = pack
   dialogEmployees.value = true
 }
 
-function getDialogServiceEmployees (serviceId) {
+function getDialogServiceEmployees(serviceId) {
   let arr = []
   let employeesIds = Object.keys(amEntities.value.entitiesRelations)
 
   employeesIds.forEach((employeeId) => {
     if (
-      employeeId in amEntities.value.entitiesRelations
-      && serviceId in amEntities.value.entitiesRelations[employeeId]
-      && amEntities.value.employees.find(a => a.id === parseInt(employeeId))
+      employeeId in amEntities.value.entitiesRelations &&
+      serviceId in amEntities.value.entitiesRelations[employeeId] &&
+      amEntities.value.employees.find((a) => a.id === parseInt(employeeId))
     ) {
-      arr.push(amEntities.value.employees.find(a => a.id === parseInt(employeeId)))
+      arr.push(amEntities.value.employees.find((a) => a.id === parseInt(employeeId)))
     }
   })
 
@@ -1237,13 +1345,15 @@ function getDialogServiceEmployees (serviceId) {
 }
 
 function employeePrice(employee) {
-  let servicePrice = amEntities.value.services.find(a => a.id === dialogServiceId.value).price
-  let employeeServicePrice = employee.serviceList.find(a => a.id === dialogServiceId.value).price
+  let servicePrice = amEntities.value.services.find((a) => a.id === dialogServiceId.value).price
+  let employeeServicePrice = employee.serviceList.find((a) => a.id === dialogServiceId.value).price
 
-  return employeeServicePrice !== servicePrice ? `${employeeServicePrice - servicePrice > 0 ? (servicePrice > 0 ? '+' : '') : '-'} ${useFormattedPrice(employeeServicePrice - servicePrice)}` : 0
+  return employeeServicePrice !== servicePrice
+    ? `${employeeServicePrice - servicePrice > 0 ? (servicePrice > 0 ? '+' : '') : '-'} ${useFormattedPrice(employeeServicePrice - servicePrice)}`
+    : 0
 }
 
-function dialogBooking () {
+function dialogBooking() {
   if (dialogEmployeesType.value === 'service') {
     selectService(dialogServiceId.value)
   } else {
@@ -1267,30 +1377,39 @@ function packageDurationLabel(duration, type) {
   return string
 }
 
-function displayPackageLocationLabel (entities, item) {
+function displayPackageLocationLabel(entities, item) {
   let locations = usePackageLocations(entities, item)
-  if (locations.length === 1 || (locations.length && locations.every(location => location.id === locations[0].id))) {
+  if (
+    locations.length === 1 ||
+    (locations.length && locations.every((location) => location.id === locations[0].id))
+  ) {
     return locations[0].address ? locations[0].address : locations[0].name
   }
   return amLabels.value.multiple_locations
 }
 
-function displayServiceLocationLabel (entities, id) {
+function displayServiceLocationLabel(entities, id) {
   let locations = useServiceLocation(entities, id)
-  if (locations.length === 1 || (locations.length && locations.every(location => location.id === locations[0].id))) {
+  if (
+    locations.length === 1 ||
+    (locations.length && locations.every((location) => location.id === locations[0].id))
+  ) {
     return locations[0].address ? locations[0].address : locations[0].name
   }
   return amLabels.value.multiple_locations
 }
 
 // * Fonts
-let amFonts = inject('amFonts', ref({
-  fontFamily: 'Amelia Roboto, sans-serif',
-  fontUrl: '',
-  customFontFamily: '',
-  fontFormat: '',
-  customFontSelected: false
-}))
+let amFonts = inject(
+  'amFonts',
+  ref({
+    fontFamily: 'Amelia Roboto, sans-serif',
+    fontUrl: '',
+    customFontFamily: '',
+    fontFormat: '',
+    customFontSelected: false,
+  }),
+)
 
 // * Colors
 let amColors = inject('amColors')
@@ -1300,11 +1419,17 @@ let cssVars = computed(() => {
     '--am-c-fcil-text-op-10': useColorTransparency(amColors.value.colorSbText, 0.1),
     '--am-c-fcil-main-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15),
     '--am-c-fcil-card-text-op15': useColorTransparency(amColors.value.colorCardText, 0.15),
-    '--am-c-fcil-card-text-op80': useColorTransparency(amColors.value.colorCardText, 0.80),
-    '--am-c-fcil-primary-op20': useColorTransparency(amColors.value.colorPrimary, 0.20),
-    '--am-c-fcil-success-op20': useColorTransparency(amColors.value.colorSuccess, 0.20),
+    '--am-c-fcil-card-text-op80': useColorTransparency(amColors.value.colorCardText, 0.8),
+    '--am-c-fcil-primary-op20': useColorTransparency(amColors.value.colorPrimary, 0.2),
+    '--am-c-fcil-success-op20': useColorTransparency(amColors.value.colorSuccess, 0.2),
     '--am-c-fcil-filter-text-op10': useColorTransparency(amColors.value.colorInpText, 0.1),
-    '--am-w-fcil-main': availableCategories.value.length !== 1 && preselectedCategories.value !== 1 && customizedOptions.value.sidebar.visibility && sideMenuVisibility.value ? 'calc(100% - 220px)' : '100%',
+    '--am-w-fcil-main':
+      availableCategories.value.length !== 1 &&
+      preselectedCategories.value !== 1 &&
+      customizedOptions.value.sidebar.visibility &&
+      sideMenuVisibility.value
+        ? 'calc(100% - 220px)'
+        : '100%',
     '--am-w-fcil-card': contentRef.value && contentRef.value.catFormWidth < 580 ? '100%' : '50%',
   }
 })
@@ -1315,7 +1440,7 @@ let popupCssVars = computed(() => {
     '--am-c-fcil-employee-bgr': amColors.value.colorMainBgr,
     '--am-c-fcil-employee-heading': amColors.value.colorMainHeadingText,
     '--am-c-fcil-employee-text': amColors.value.colorMainText,
-    '--am-c-fcil-employee-text-op80': useColorTransparency(amColors.value.colorMainText, 0.80),
+    '--am-c-fcil-employee-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
     '--am-c-fcil-employee-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15),
     '--am-c-fcil-employee-primary': amColors.value.colorPrimary,
     '--am-c-fcil-employee-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
@@ -1327,8 +1452,8 @@ let popupCssVars = computed(() => {
 
 <script>
 export default {
-  name: "CategoryItemsList",
-  key: "categoryItemsList"
+  name: 'CategoryItemsList',
+  key: 'categoryItemsList',
 }
 </script>
 
@@ -1398,7 +1523,7 @@ export default {
             &1 {
               order: 1;
             }
-            &2{
+            &2 {
               order: 2;
             }
             &3 {
@@ -1426,11 +1551,12 @@ export default {
           line-height: 1.6;
           padding: 2px 8px;
           border-radius: 6px;
-          transition: all .2s ease-in-out;
+          transition: all 0.2s ease-in-out;
           cursor: pointer;
           color: var(--am-c-fcil-filter-placeholder);
 
-          &:hover, &.am-active {
+          &:hover,
+          &.am-active {
             color: var(--am-c-fcil-filter-text);
             background-color: var(--am-c-fcil-filter-inp-bgr);
           }
@@ -1524,7 +1650,7 @@ export default {
       padding: 16px 24px 16px;
     }
 
-    &__wrapper{
+    &__wrapper {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
@@ -1575,7 +1701,11 @@ export default {
         border-radius: 12px;
 
         &.am-package {
-          background: linear-gradient(95.75deg, var(--am-c-fcil-card-bgr) -110.8%,  var(--am-c-warning) 114.33%);
+          background: linear-gradient(
+            95.75deg,
+            var(--am-c-fcil-card-bgr) -110.8%,
+            var(--am-c-warning) 114.33%
+          );
           span {
             color: var(--am-c-fcil-card-bgr);
           }
@@ -1584,7 +1714,7 @@ export default {
         &.am-service {
           background-color: var(--am-c-fcil-success-op20);
           span {
-            color:  var(--am-c-fcil-success);
+            color: var(--am-c-fcil-success);
           }
         }
 
@@ -1599,7 +1729,7 @@ export default {
           font-weight: 400;
           line-height: 1;
 
-          &[class*="am-icon"] {
+          &[class*='am-icon'] {
             font-size: 24px;
           }
         }
@@ -1621,7 +1751,6 @@ export default {
           cursor: pointer;
           background-size: 105% !important;
         }
-   
       }
 
       &-heading {
@@ -1702,7 +1831,7 @@ export default {
             white-space: nowrap;
             overflow: hidden;
 
-            &[class*="am-icon"] {
+            &[class*='am-icon'] {
               flex: 0 0 auto;
               font-size: 24px;
               color: var(--am-c-fcil-primary);
@@ -1738,7 +1867,8 @@ export default {
             padding-right: 2px;
           }
 
-          &:first-child, &:last-child {
+          &:first-child,
+          &:last-child {
             &:after {
               display: none;
             }
@@ -1807,18 +1937,17 @@ export default {
     }
 
     .am-collapse-item {
-
       $count: 100;
       @for $i from 0 through $count {
         &:nth-child(#{$i + 1}) {
-          animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+          animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
           animation-fill-mode: both;
         }
       }
 
       &__heading {
         padding: 8px;
-        transition-delay: .5s;
+        transition-delay: 0.5s;
 
         &-side {
           transition-delay: 0s;
@@ -1873,7 +2002,7 @@ export default {
       }
 
       &__badge {
-        color: #FFF;
+        color: #fff;
         border-radius: 4px;
         padding: 0 4px;
         font-size: 13px;

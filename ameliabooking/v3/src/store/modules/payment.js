@@ -9,20 +9,20 @@ export default {
     depositType: '',
     data: {},
     error: '',
-    onSitePayment: false
+    onSitePayment: false,
   }),
 
   getters: {
-    getError (state) {
+    getError(state) {
       return state.error
     },
-    getPaymentGateway (state) {
+    getPaymentGateway(state) {
       return state.gateway
     },
-    getPaymentDeposit (state) {
+    getPaymentDeposit(state) {
       return state.deposit
     },
-    getAllData (state) {
+    getAllData(state) {
       return {
         amount: state.amount,
         gateway: state.gateway,
@@ -32,28 +32,28 @@ export default {
         data: state.data,
       }
     },
-    getOnSitePayment (state) {
+    getOnSitePayment(state) {
       return state.onSitePayment
-    }
+    },
   },
 
   mutations: {
-    setError (state, payload) {
+    setError(state, payload) {
       state.error = payload
     },
-    setPaymentGateway (state, payload) {
+    setPaymentGateway(state, payload) {
       state.gateway = payload
     },
-    setPaymentDeposit (state, payload) {
+    setPaymentDeposit(state, payload) {
       state.deposit = payload
     },
-    setPaymentDepositAmount (state, payload) {
+    setPaymentDepositAmount(state, payload) {
       state.depositAmount = payload
     },
-    setPaymentDepositType (state, payload) {
+    setPaymentDepositType(state, payload) {
       state.depositType = payload
     },
-    setAllData (state, payload) {
+    setAllData(state, payload) {
       state.amount = payload.amount
       state.gateway = payload.gateway
       state.deposit = payload.deposit
@@ -61,13 +61,13 @@ export default {
       state.depositType = payload.depositType
       state.data = payload.data
     },
-    setOnSitePayment (state, payload) {
+    setOnSitePayment(state, payload) {
       state.onSitePayment = payload
-    }
+    },
   },
 
   actions: {
-    resetPaymentData ({commit}) {
+    resetPaymentData({ commit }) {
       commit('setAllData', {
         amount: 0,
         gateway: '',
@@ -76,6 +76,6 @@ export default {
         depositType: '',
         data: {},
       })
-    }
-  }
+    },
+  },
 }

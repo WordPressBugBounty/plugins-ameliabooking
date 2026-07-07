@@ -1,10 +1,7 @@
 <template>
   <div class="am-fs__extras" :style="cssVars">
     <div class="am-fs__extras-heading">
-      <span
-        v-if="extrasOptions.heading.visibility"
-        class="am-fs__extras-heading-main"
-      >
+      <span v-if="extrasOptions.heading.visibility" class="am-fs__extras-heading-main">
         {{ labelsDisplay('extras_available') }}
       </span>
       <span class="am-fs__extras-heading-required am-error-text">
@@ -39,10 +36,7 @@
           </template>
           <template #default>
             <div
-              v-if="
-                extrasOptions.description.visibility ||
-                extrasOptions.duration.visibility
-              "
+              v-if="extrasOptions.description.visibility || extrasOptions.duration.visibility"
               class="am-fs__extras-card__content"
               :style="cssVars"
             >
@@ -52,10 +46,7 @@
               >
                 {{ extra.description }}
               </div>
-              <div
-                v-if="extrasOptions.duration.visibility"
-                class="am-fs__extras-card__content-sub"
-              >
+              <div v-if="extrasOptions.duration.visibility" class="am-fs__extras-card__content-sub">
                 {{ `${labelsDisplay('duration_colon')} 60 min` }}
               </div>
             </div>
@@ -86,11 +77,8 @@ const { amCustomize } = useReactiveCustomize()
 
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    let translations =
-      amCustomize.value[pageRenderKey.value].extrasStep.translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    let translations = amCustomize.value[pageRenderKey.value].extrasStep.translations
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -134,10 +122,7 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-extras-text': amColors.value.colorMainText,
-    '--am-c-extras-text-op80': useColorTransparency(
-      amColors.value.colorMainText,
-      0.8
-    ),
+    '--am-c-extras-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
   }
 })
 </script>
@@ -176,11 +161,7 @@ export default {
           $count: 3;
           @for $i from 0 through $count {
             &:nth-child(#{$i + 1}) {
-              animation: 600ms
-                cubic-bezier(0.45, 1, 0.4, 1.2)
-                #{$i *
-                100}ms
-                am-animation-slide-up;
+              animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
               animation-fill-mode: both;
             }
           }
@@ -223,11 +204,7 @@ export default {
           $count: 3;
           @for $i from 0 through $count {
             &:nth-child(#{$i + 1}) {
-              animation: 600ms
-                cubic-bezier(0.45, 1, 0.4, 1.2)
-                #{$i *
-                100}ms
-                am-animation-slide-up;
+              animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
               animation-fill-mode: both;
             }
           }

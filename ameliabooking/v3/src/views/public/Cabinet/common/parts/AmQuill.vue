@@ -29,11 +29,11 @@ const defaultOptions = {
       [{ font: [] }],
       [{ align: [] }],
       ['clean'],
-      ['link', 'image', 'video']
-    ]
+      ['link', 'image', 'video'],
+    ],
   },
   placeholder: 'Insert content here ...',
-  readOnly: false
+  readOnly: false,
 }
 
 // Props (replace with actual props in parent component)
@@ -42,12 +42,12 @@ const props = defineProps({
   value: String,
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   options: {
     type: Object,
-    default: () => ({})
-  }
+    default: () => ({}),
+  },
 })
 
 // Emits
@@ -62,7 +62,7 @@ const observeDOMChanges = (element) => {
 
   observer.observe(element, {
     childList: true,
-    subtree: true
+    subtree: true,
   })
 
   return observer
@@ -98,7 +98,7 @@ const initialize = () => {
     }
 
     // Handle selection-change (blur, focus)
-    quill.on('selection-change', range => {
+    quill.on('selection-change', (range) => {
       if (!range) {
         emit('blur', quill)
       } else {
@@ -133,7 +133,7 @@ watch(
     } else if (!val) {
       quill.setText('')
     }
-  }
+  },
 )
 
 watch(
@@ -142,7 +142,7 @@ watch(
     if (quill) {
       quill.enable(!val)
     }
-  }
+  },
 )
 
 // Lifecycle hooks
@@ -160,7 +160,11 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   const editorToolbar = editor.value.previousSibling
-  if (editorToolbar && editorToolbar.nodeType === 1 && editorToolbar.className.indexOf('ql-toolbar') > -1) {
+  if (
+    editorToolbar &&
+    editorToolbar.nodeType === 1 &&
+    editorToolbar.className.indexOf('ql-toolbar') > -1
+  ) {
     editorToolbar.parentNode.removeChild(editorToolbar)
   }
 })
@@ -168,5 +172,4 @@ onBeforeUnmount(() => {
 onUnmounted(() => {
   quill = null
 })
-
 </script>

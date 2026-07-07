@@ -11,10 +11,7 @@
       class="am-caepif__block"
       :class="[{ 'am-w-70': employee.pictureFullPath }, props.responsiveClass]"
     >
-      <template
-        v-for="(item, name) in employeeInfoFormConstruction"
-        :key="name"
-      >
+      <template v-for="(item, name) in employeeInfoFormConstruction" :key="name">
         <component
           :is="item.template"
           ref="customerCollectorRef"
@@ -36,10 +33,7 @@
       ></div>
     </div>
     <div class="am-caepif__block" :class="props.responsiveClass">
-      <template
-        v-for="(item, name) in employeeDataFormConstruction"
-        :key="name"
-      >
+      <template v-for="(item, name) in employeeDataFormConstruction" :key="name">
         <component
           :is="item.template"
           ref="customerCollectorRef"
@@ -65,13 +59,14 @@
 
 <script setup>
 // * Import from Vue
-import {computed, ref, inject, onBeforeMount} from 'vue'
+import { computed, ref, inject, onBeforeMount } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
 
 // * Import Form Templates
 import { formFieldsTemplates } from '../../../../../../assets/js/common/formFieldsTemplates'
+import { getInternationalPhoneValue } from '../../../../../../assets/js/common/phone'
 
 // * Components
 import DescriptionEditor from '../../parts/DescriptionEditor.vue'
@@ -157,7 +152,7 @@ let employeeFormData = ref({
   }),
 })
 
-function setEmployeeCountryPhoneIso (val) {
+function setEmployeeCountryPhoneIso(val) {
   let countryPhoneIso = val ? val.toLowerCase() : ''
 
   store.commit('auth/setProfileCountryPhoneIso', countryPhoneIso)
@@ -193,8 +188,7 @@ let employeeFormRules = computed(() => {
     ],
     locationId: [
       {
-        required:
-          locations.value.filter((i) => i.status === 'visible').length > 0,
+        required: locations.value.filter((i) => i.status === 'visible').length > 0,
         message: amLabels.enter_location_warning,
         trigger: ['submit', 'change'],
       },
@@ -210,7 +204,7 @@ let employeeInfoFormConstruction = ref({
       itemName: 'firstName',
       label: amLabels.first_name_colon,
       placeholder: amLabels.enter_first_name,
-      class: computed(() => `am-caepif__item ${props.responsiveClass}`)
+      class: computed(() => `am-caepif__item ${props.responsiveClass}`),
     },
   },
   lastName: {
@@ -247,21 +241,36 @@ let employeeInfoFormConstruction = ref({
       label: amLabels.phone_colon,
       placeholder: amLabels.enter_phone,
       phoneError: computed(() => phoneError.value && !isPhoneValid.value),
-      errorMessage: computed(() => phoneError.value && !isPhoneValid.value && employeeFormData.value.phone ? amLabels.enter_valid_phone_warning : ''),
+      errorMessage: computed(() =>
+        phoneError.value && !isPhoneValid.value && employeeFormData.value.phone
+          ? amLabels.enter_valid_phone_warning
+          : '',
+      ),
       whatsAppLabel: amLabels.whatsapp_opt_in_text,
-      isWhatsApp: computed(() => amSettings.notifications.whatsAppEnabled && !(phoneError.value && !isPhoneValid.value)),
+      isWhatsApp: computed(
+        () =>
+          amSettings.notifications.whatsAppEnabled && !(phoneError.value && !isPhoneValid.value),
+      ),
       class: computed(() => `am-caepif__item ${props.responsiveClass}`),
     },
     handlers: {
       handlePhoneData: (phoneData) => {
-        if (phoneData && !phoneData.countryCode && !store.getters['auth/getProfile'].countryPhoneIso && amSettings.general.phoneDefaultCountryCode !== 'auto') {
+        if (
+          phoneData &&
+          !phoneData.countryCode &&
+          !store.getters['auth/getProfile'].countryPhoneIso &&
+          amSettings.general.phoneDefaultCountryCode !== 'auto'
+        ) {
           setEmployeeCountryPhoneIso(amSettings.general.phoneDefaultCountryCode)
         }
 
-        store.commit('employee/setPhone', phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, "") : "")
+        store.commit(
+          'employee/setPhone',
+          getInternationalPhoneValue(phoneData?.phoneNumber ?? phoneData?.e164, phoneData, phoneData?.countryCode)
+        )
 
         isPhoneValid.value = !!phoneData.isValid
-      }
+      },
     },
   },
 })
@@ -274,10 +283,7 @@ let employeeDataFormConstruction = ref({
       label: `${amLabels.location}:`,
       placeholder: amLabels.select_location,
       class: computed(
-        () =>
-          `am-caepif__item ${props.responsiveClass} ${
-            amSettings.zoom.enabled || 'am-w-100'
-          }`
+        () => `am-caepif__item ${props.responsiveClass} ${amSettings.zoom.enabled || 'am-w-100'}`,
       ),
       options: locationsOptions.value,
     },

@@ -19,10 +19,7 @@
     </template>
     <template #heading>
       <div
-        :class="[
-          { 'am-tablet': pageWidth <= 678 },
-          { 'am-mobile': pageWidth < 450 },
-        ]"
+        :class="[{ 'am-tablet': pageWidth <= 678 }, { 'am-mobile': pageWidth < 450 }]"
         class="am-fcip__header-top"
         role="region"
         aria-label="Package Information"
@@ -33,10 +30,7 @@
               {{ pack.name }}
             </span>
           </span>
-          <div
-            v-if="customizedOptions.packageBadge.visibility"
-            class="am-fcip__badge am-package"
-          >
+          <div v-if="customizedOptions.packageBadge.visibility" class="am-fcip__badge am-package">
             <span class="am-icon-shipment"></span>
             <span>
               {{ amLabels.package }}
@@ -50,15 +44,8 @@
           >
             {{ `${amLabels.save} ${pack.discount}%` }}
           </span>
-          <span
-            v-if="customizedOptions.packagePrice.visibility"
-            class="am-fcip__header-price"
-          >
-            {{
-              pack.price
-                ? useFormattedPrice(usePackageAmount(pack))
-                : amLabels.free
-            }}
+          <span v-if="customizedOptions.packagePrice.visibility" class="am-fcip__header-price">
+            {{ pack.price ? useFormattedPrice(usePackageAmount(pack)) : amLabels.free }}
           </span>
           <span
             v-if="
@@ -76,10 +63,7 @@
             </template>
           </span>
           <span class="am-fcip__header-btn">
-            <AmButton
-              :type="customizedOptions.bookingBtn.buttonType"
-              @click="bookNow"
-            >
+            <AmButton :type="customizedOptions.bookingBtn.buttonType" @click="bookNow">
               {{ amLabels.book_now }}
             </AmButton>
           </span>
@@ -87,8 +71,7 @@
       </div>
       <div
         v-if="
-          (customizedOptions.packageCategory.visibility &&
-            preselected.package.length !== 1) ||
+          (customizedOptions.packageCategory.visibility && preselected.package.length !== 1) ||
           customizedOptions.packageDuration.visibility ||
           customizedOptions.packageCapacity.visibility ||
           (customizedOptions.packageLocation.visibility && packLocations.length)
@@ -110,11 +93,9 @@
             </span>
             <span v-else-if="pack.durationCount">
               {{
-                `${amLabels.expires_after} ${
-                  pack.durationCount
-                } ${packageDurationLabel(
+                `${amLabels.expires_after} ${pack.durationCount} ${packageDurationLabel(
                   pack.durationCount,
-                  pack.durationType
+                  pack.durationType,
                 )}`
               }}
             </span>
@@ -130,10 +111,7 @@
             <span>1/1</span>
           </div>
           <div
-            v-if="
-              packLocations.length &&
-              customizedOptions.packageLocation.visibility
-            "
+            v-if="packLocations.length && customizedOptions.packageLocation.visibility"
             class="am-fcip__mini-info__inner"
           >
             <span class="am-icon-locations"></span>
@@ -149,10 +127,7 @@
       <div v-if="pack.gallery.length" class="am-fcip__gallery">
         <div
           class="am-fcip__gallery-hero"
-          :class="[
-            { w100: pack.gallery.length === 1 },
-            { 'am-mobile w100': pageWidth < 678 },
-          ]"
+          :class="[{ w100: pack.gallery.length === 1 }, { 'am-mobile w100': pageWidth < 678 }]"
           :style="{
             backgroundImage: `url(${pack.gallery[0].pictureFullPath})`,
           }"
@@ -181,9 +156,7 @@
         </div>
         <AmButton
           v-if="pack.gallery.length > 1"
-          :custom-class="`am-fcip__gallery-btn${
-            pageWidth < 678 ? ' am-mobile' : ''
-          }`"
+          :custom-class="`am-fcip__gallery-btn${pageWidth < 678 ? ' am-mobile' : ''}`"
           category="secondary"
           type="filled"
           @click="openGallery(0)"
@@ -207,35 +180,20 @@
       >
         <div class="am-gd" :style="cssGalleryDialogVars">
           <div class="am-gd__display-wrapper">
-            <div
-              class="am-gd__arrows"
-              style="display: flex; justify-content: space-between"
-            >
+            <div class="am-gd__arrows" style="display: flex; justify-content: space-between">
               <span
                 class="am-icon-arrow-left"
                 role="button"
                 tabindex="0"
                 :aria-label="amLabels.previous_image || 'Previous image'"
                 @click="
-                  () =>
-                    (activeImage =
-                      activeImage <= 0
-                        ? pack.gallery.length - 1
-                        : activeImage - 1)
+                  () => (activeImage = activeImage <= 0 ? pack.gallery.length - 1 : activeImage - 1)
                 "
                 @keydown.enter="
-                  () =>
-                    (activeImage =
-                      activeImage <= 0
-                        ? pack.gallery.length - 1
-                        : activeImage - 1)
+                  () => (activeImage = activeImage <= 0 ? pack.gallery.length - 1 : activeImage - 1)
                 "
                 @keydown.space.prevent="
-                  () =>
-                    (activeImage =
-                      activeImage <= 0
-                        ? pack.gallery.length - 1
-                        : activeImage - 1)
+                  () => (activeImage = activeImage <= 0 ? pack.gallery.length - 1 : activeImage - 1)
                 "
               ></span>
               <span
@@ -245,24 +203,15 @@
                 :aria-label="amLabels.next_image || 'Next image'"
                 @click="
                   () =>
-                    (activeImage =
-                      pack.gallery.length - 1 === activeImage
-                        ? 0
-                        : activeImage + 1)
+                    (activeImage = pack.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
                 "
                 @keydown.enter="
                   () =>
-                    (activeImage =
-                      pack.gallery.length - 1 === activeImage
-                        ? 0
-                        : activeImage + 1)
+                    (activeImage = pack.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
                 "
                 @keydown.space.prevent="
                   () =>
-                    (activeImage =
-                      pack.gallery.length - 1 === activeImage
-                        ? 0
-                        : activeImage + 1)
+                    (activeImage = pack.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
                 "
               ></span>
             </div>
@@ -272,11 +221,7 @@
               class="am-gd__display"
               :style="{ display: index === activeImage ? 'flex' : 'none' }"
               @click="
-                () =>
-                  (activeImage =
-                    pack.gallery.length - 1 === activeImage
-                      ? 0
-                      : activeImage + 1)
+                () => (activeImage = pack.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
               "
             >
               <img :src="img.pictureFullPath" :alt="index" />
@@ -339,10 +284,7 @@
             v-show="tabsActive === 'description'"
             class="am-fcip__info-content"
           >
-            <div
-              class="am-fcip__info-service__desc ql-description"
-              v-html="pack.description"
-            ></div>
+            <div class="am-fcip__info-service__desc ql-description" v-html="pack.description"></div>
           </div>
           <!-- /Description -->
 
@@ -353,11 +295,7 @@
             class="am-fcip__info-content"
           >
             <AmCollapse>
-              <AmCollapseItem
-                v-for="employee in packEmployees"
-                :key="employee.id"
-                side
-              >
+              <AmCollapseItem v-for="employee in packEmployees" :key="employee.id" side>
                 <template #heading>
                   <div class="am-fcip__info-employee">
                     <div class="am-fcip__info-employee__hero">
@@ -394,31 +332,21 @@
       </div>
 
       <!-- Available Service in Packages -->
-      <div
-        v-if="customizedOptions.packageServices.visibility"
-        class="am-fcip__include-wrapper"
-      >
+      <div v-if="customizedOptions.packageServices.visibility" class="am-fcip__include-wrapper">
         <div class="am-fcip__include-heading">
           <span class="am-fcip__include-heading__text">
             {{ `${amLabels.package_includes}:` }}
           </span>
         </div>
         <AmCollapse>
-          <AmCollapseItem
-            v-for="book in pack.bookable"
-            :key="book.id"
-            :side="true"
-          >
+          <AmCollapseItem v-for="book in pack.bookable" :key="book.id" :side="true">
             <template #heading>
               <div class="am-fcip__include-service">
                 <AmImagePlaceholder
                   item-class="am-fcip__include-service__img"
                   :item-data="book.service"
                 ></AmImagePlaceholder>
-                {{
-                  book.service.name +
-                  (!pack.sharedCapacity ? ' x' + book.quantity : '')
-                }}
+                {{ book.service.name + (!pack.sharedCapacity ? ' x' + book.quantity : '') }}
               </div>
             </template>
             <template #default>
@@ -434,9 +362,7 @@
                 <span v-if="getServiceEmployees(book).length > 6">
                   + {{ getServiceEmployees(book).length - 6 }}
                 </span>
-                <template
-                  v-if="useDescriptionVisibility(book.service.description)"
-                >
+                <template v-if="useDescriptionVisibility(book.service.description)">
                   <div
                     class="am-fcip__include-service__info-description ql-description"
                     v-html="book.service.description"
@@ -474,9 +400,7 @@
   </Content>
   <div v-if="empty" ref="ameliaContainer" class="am-empty">
     <img
-      :src="
-        baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/am-empty-booking.svg'
-      "
+      :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/am-empty-booking.svg'"
       :alt="amLabels.no_package_services"
     />
     <div class="am-empty__heading">
@@ -524,14 +448,8 @@ import { useStore } from 'vuex'
 // * Composables
 import { useFormattedPrice } from '../../../../assets/js/common/formatting.js'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation.js'
-import {
-  usePackageAmount,
-  useBuildPackage,
-} from '../../../../assets/js/public/package.js'
-import {
-  usePackageEmployees,
-  usePackageLocations,
-} from '../../../../assets/js/public/catalog.js'
+import { usePackageAmount, useBuildPackage } from '../../../../assets/js/public/package.js'
+import { usePackageEmployees, usePackageLocations } from '../../../../assets/js/public/catalog.js'
 import { useDescriptionVisibility } from '../../../../assets/js/common/helper'
 import { useTaxVisibility } from '../../../../assets/js/common/pricing'
 
@@ -582,22 +500,18 @@ let itemType = inject('itemType')
 // * Selected category
 let categorySelected = inject('categorySelected')
 let category = computed(() => {
-  return amEntities.value.categories.find(
-    (item) => item.id === categorySelected.value
-  )
+  return amEntities.value.categories.find((item) => item.id === categorySelected.value)
 })
 
 let catNameVisibility = ref(
   preselected.value.package.length !== 1 &&
     customizedOptions.value.packageCategory.visibility &&
-    category.value
+    category.value,
 )
 
 // * Selected package
 let pack = computed(() => {
-  return amEntities.value.packages.find(
-    (item) => item.id === store.getters['booking/getPackageId']
-  )
+  return amEntities.value.packages.find((item) => item.id === store.getters['booking/getPackageId'])
 })
 
 let activeImage = ref(0)
@@ -615,9 +529,9 @@ let packLocations = computed(() => {
 let unfilteredEmployees = ref(
   preselected.value.employee.length > 0
     ? amEntities.value.unfilteredEmployees.filter((a) =>
-        preselected.value.employee.map((id) => parseInt(id)).includes(a.id)
+        preselected.value.employee.map((id) => parseInt(id)).includes(a.id),
       )
-    : amEntities.value.unfilteredEmployees
+    : amEntities.value.unfilteredEmployees,
 )
 
 function getServiceEmployees(bookable) {
@@ -626,14 +540,12 @@ function getServiceEmployees(bookable) {
   if (bookable.providers.length) {
     bookable.providers.forEach((pro) => {
       if (unfilteredEmployees.value.find((a) => a.id === parseInt(pro.id))) {
-        employees.push(
-          unfilteredEmployees.value.find((a) => a.id === parseInt(pro.id))
-        )
+        employees.push(unfilteredEmployees.value.find((a) => a.id === parseInt(pro.id)))
       }
     })
   } else {
     employees = unfilteredEmployees.value.filter((e) =>
-      e.serviceList.find((s) => s.id === bookable.service.id)
+      e.serviceList.find((s) => s.id === bookable.service.id),
     )
   }
 
@@ -651,14 +563,10 @@ function galleryKeydownHandler(e) {
   if (!galleryDialog.value) return
   if (e.key === 'ArrowLeft') {
     activeImage.value =
-      activeImage.value <= 0
-        ? pack.value.gallery.length - 1
-        : activeImage.value - 1
+      activeImage.value <= 0 ? pack.value.gallery.length - 1 : activeImage.value - 1
   } else if (e.key === 'ArrowRight') {
     activeImage.value =
-      pack.value.gallery.length - 1 === activeImage.value
-        ? 0
-        : activeImage.value + 1
+      pack.value.gallery.length - 1 === activeImage.value ? 0 : activeImage.value + 1
   }
 }
 
@@ -675,10 +583,8 @@ onUnmounted(() => {
 })
 
 onMounted(() => {
-  if (!customizedOptions.value.packageDescription.visibility)
-    tabsActive.value = 'employees'
-  if (!useDescriptionVisibility(pack.value.description))
-    tabsActive.value = 'employees'
+  if (!customizedOptions.value.packageDescription.visibility) tabsActive.value = 'employees'
+  if (!useDescriptionVisibility(pack.value.description)) tabsActive.value = 'employees'
 })
 
 // * Empty state
@@ -687,14 +593,11 @@ let empty = ref(false)
 onBeforeMount(() => {
   // ! have to be recalculated basic on package selection on backend now it's working as old catalog form
   empty.value =
-    store.getters['entities/getEmployees'].length === 0 ||
-    packEmployees.value.length === 0
+    store.getters['entities/getEmployees'].length === 0 || packEmployees.value.length === 0
 })
 
 let packageThumbsGallery = computed(() => {
-  let thumbs = pack.value.gallery.length
-    ? JSON.parse(JSON.stringify(pack.value.gallery))
-    : []
+  let thumbs = pack.value.gallery.length ? JSON.parse(JSON.stringify(pack.value.gallery)) : []
   if (pack.value.gallery.length === 1) return []
   thumbs.shift()
   if (thumbs.length > 2) thumbs.splice(2, thumbs.length - 2)
@@ -717,10 +620,7 @@ provide('bookingDialogWidth', bookingDialogWidth)
 
 function bookNow() {
   store.commit('booking/setPackageId', pack.value.id)
-  store.commit(
-    'booking/setMultipleAppointments',
-    useBuildPackage(0, pack.value)
-  )
+  store.commit('booking/setMultipleAppointments', useBuildPackage(0, pack.value))
   store.commit('booking/setMultipleAppointmentsIndex', 0)
   store.commit('booking/setBookableType', 'package')
 
@@ -740,12 +640,10 @@ provide('stepName', stepName)
 
 function onFinishedBooking() {
   let entity = store.getters['entities/getBookableFromBookableEntities'](
-    store.getters['booking/getSelection']
+    store.getters['booking/getSelection'],
   )
 
-  let entitySettings = entity.settings
-    ? JSON.parse(entity.settings)
-    : amSettings
+  let entitySettings = entity.settings ? JSON.parse(entity.settings) : amSettings
 
   if (
     'general' in entitySettings &&
@@ -764,10 +662,7 @@ function onDialogClosing() {
   if (stepName.value && stepName.value === 'CongratulationsStep') {
     onFinishedBooking()
   } else {
-    store.commit(
-      'entities/setPreselected',
-      store.getters['entities/getOriginalPreselected']
-    )
+    store.commit('entities/setPreselected', store.getters['entities/getOriginalPreselected'])
   }
 
   bookingDialogWidth.value = '760px'
@@ -783,9 +678,7 @@ const labels = inject('labels')
 const localLanguage = inject('localLanguage')
 
 // * if local lang is in settings lang
-let langDetection = computed(() =>
-  amSettings.general.usedLanguages.includes(localLanguage.value)
-)
+let langDetection = computed(() => amSettings.general.usedLanguages.includes(localLanguage.value))
 
 // * Computed labels
 let amLabels = computed(() => {
@@ -796,15 +689,10 @@ let amLabels = computed(() => {
     amSettings.customizedData.cbf &&
     amSettings.customizedData.cbf.categoryPackage.translations
   ) {
-    let customizedLabels =
-      amSettings.customizedData.cbf.categoryPackage.translations
+    let customizedLabels = amSettings.customizedData.cbf.categoryPackage.translations
     Object.keys(customizedLabels).forEach((labelKey) => {
-      if (
-        customizedLabels[labelKey][localLanguage.value] &&
-        langDetection.value
-      ) {
-        computedLabels[labelKey] =
-          customizedLabels[labelKey][localLanguage.value]
+      if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
+        computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
         computedLabels[labelKey] = customizedLabels[labelKey].default
       }
@@ -816,8 +704,7 @@ let amLabels = computed(() => {
 function displayPackageLocationLabel(locations) {
   if (
     locations.length === 1 ||
-    (locations.length &&
-      locations.every((location) => location.id === locations[0].id))
+    (locations.length && locations.every((location) => location.id === locations[0].id))
   ) {
     return locations[0].address ? locations[0].address : locations[0].name
   }
@@ -843,34 +730,13 @@ let amColors = inject('amColors')
 
 let cssVars = computed(() => {
   return {
-    '--am-c-fcip-success-op20': useColorTransparency(
-      amColors.value.colorSuccess,
-      0.2
-    ),
-    '--am-c-fcip-primary-op20': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.2
-    ),
-    '--am-c-fcip-text-op80': useColorTransparency(
-      amColors.value.colorMainText,
-      0.8
-    ),
-    '--am-c-fcip-text-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
-    '--am-c-fcip-text-op03': useColorTransparency(
-      amColors.value.colorMainText,
-      0.03
-    ),
-    '--am-c-fcip-text-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
-    '--am-c-fcip-btn-op50': useColorTransparency(
-      amColors.value.colorBtnSec,
-      0.5
-    ),
+    '--am-c-fcip-success-op20': useColorTransparency(amColors.value.colorSuccess, 0.2),
+    '--am-c-fcip-primary-op20': useColorTransparency(amColors.value.colorPrimary, 0.2),
+    '--am-c-fcip-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
+    '--am-c-fcip-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-fcip-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03),
+    '--am-c-fcip-text-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
+    '--am-c-fcip-btn-op50': useColorTransparency(amColors.value.colorBtnSec, 0.5),
   }
 })
 
@@ -880,14 +746,8 @@ let cssGalleryDialogVars = computed(() => {
     '--am-c-fcip-text': amColors.value.colorMainText,
     '--am-c-fcip-success': amColors.value.colorSuccess,
     '--am-c-fcip-primary': amColors.value.colorPrimary,
-    '--am-c-scroll-op30': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.3
-    ),
-    '--am-c-scroll-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
     '--am-font-family': amFonts.fontFamily,
   }
 })

@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="am-capei-recurr"
-    :style="cssVars"
-  >
+  <div class="am-capei-recurr" :style="cssVars">
     <div class="am-capei-recurr__header">
       <div class="am-capei-recurr__header-text">
         {{ amLabels.event_recurring_check }}
@@ -16,7 +13,9 @@
 
     <!-- Recurring form -->
     <el-form
-      v-if="recurringFormData.enabled && periods.length && periods[0].startDate && periods[0].endDate"
+      v-if="
+        recurringFormData.enabled && periods.length && periods[0].startDate && periods[0].endDate
+      "
       ref="recurringFormRef"
       :rules="rules"
       :model="recurringFormData"
@@ -65,31 +64,19 @@
         class="am-w-100"
         :disabled="props.recurringUntil !== null"
       >
-        <el-form-item
-          class="am-capei-recurr__form-item"
-        >
-          <AmRadio
-            :value="'each'"
-          >
+        <el-form-item class="am-capei-recurr__form-item">
+          <AmRadio :value="'each'">
             {{ amLabels.recurrence_each }}
           </AmRadio>
         </el-form-item>
 
-        <el-form-item
-          :prop="'on'"
-          class="am-capei-recurr__form-item"
-        >
-          <AmRadio
-            :value="'on'"
-          >
+        <el-form-item :prop="'on'" class="am-capei-recurr__form-item">
+          <AmRadio :value="'on'">
             {{ amLabels.recurrence_on }}
           </AmRadio>
         </el-form-item>
 
-        <el-form-item
-          class="am-capei-recurr__form-item am-w-50"
-          :class="responsiveClass"
-        >
+        <el-form-item class="am-capei-recurr__form-item am-w-50" :class="responsiveClass">
           <AmSelect
             v-model="recurringFormData.monthlyOnRepeat"
             :disabled="recurringFormData.monthlyRepeat === 'each' || props.recurringUntil !== null"
@@ -104,10 +91,7 @@
           </AmSelect>
         </el-form-item>
 
-        <el-form-item
-          class="am-capei-recurr__form-item am-w-50"
-          :class="responsiveClass"
-        >
+        <el-form-item class="am-capei-recurr__form-item am-w-50" :class="responsiveClass">
           <AmSelect
             v-model="recurringFormData.monthlyOnDay"
             :disabled="recurringFormData.monthlyRepeat === 'each'"
@@ -145,31 +129,29 @@
 
 <script setup>
 // * Import from Vue
-import { ref, inject, computed } from "vue";
+import { ref, inject, computed } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import from library
-import moment from "moment/moment";
+import moment from 'moment/moment'
 
 // * Import Composables
-import {
-  momentDateFormat,
-} from "../../../../../../assets/js/common/date";
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation";
-import { useResponsiveClass } from "../../../../../../assets/js/common/responsive";
+import { momentDateFormat } from '../../../../../../assets/js/common/date'
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
+import { useResponsiveClass } from '../../../../../../assets/js/common/responsive'
 
 // * Import Components
-import AmSelect from "../../../../../_components/select/AmSelect.vue"
-import AmDatePicker from "../../../../../_components/datePicker/AmDatePicker.vue"
-import AmOption from "../../../../../_components/select/AmOption.vue";
+import AmSelect from '../../../../../_components/select/AmSelect.vue'
+import AmDatePicker from '../../../../../_components/datePicker/AmDatePicker.vue'
+import AmOption from '../../../../../_components/select/AmOption.vue'
 
 // * Import Parts
-import AmInputNumber from "../../../../../_components/input-number/AmInputNumber.vue";
-import AmRadio from "../../../../../_components/radio/AmRadio.vue";
-import AmRadioGroup from "../../../../../_components/radio/AmRadioGroup.vue";
-import AmSwitch from "../../../../../_components/switch/AmSwitch.vue";
+import AmInputNumber from '../../../../../_components/input-number/AmInputNumber.vue'
+import AmRadio from '../../../../../_components/radio/AmRadio.vue'
+import AmRadioGroup from '../../../../../_components/radio/AmRadioGroup.vue'
+import AmSwitch from '../../../../../_components/switch/AmSwitch.vue'
 
 // * Props
 let props = defineProps({
@@ -181,11 +163,11 @@ let props = defineProps({
     type: Object,
     default: null,
   },
-});
+})
 
 let responsiveClass = computed(() => {
   return useResponsiveClass(props.pageWidth)
-});
+})
 
 // * Store
 const store = useStore()
@@ -199,78 +181,78 @@ let localLanguage = inject('localLanguage')
 let recurringPeriods = ref([
   {
     label: amLabels.value.day,
-    value: 'daily'
+    value: 'daily',
   },
   {
     label: amLabels.value.week,
-    value: 'weekly'
+    value: 'weekly',
   },
   {
     label: amLabels.value.month,
-    value: 'monthly'
+    value: 'monthly',
   },
   {
     label: amLabels.value.year,
-    value: 'yearly'
-  }
+    value: 'yearly',
+  },
 ])
 
 let monthlyWeekDayRepeat = ref([
   {
     label: amLabels.value.recurring_date_first,
-    value: 'first'
+    value: 'first',
   },
   {
     label: amLabels.value.recurring_date_second,
-    value: 'second'
+    value: 'second',
   },
   {
     label: amLabels.value.recurring_date_third,
-    value: 'third'
+    value: 'third',
   },
   {
     label: amLabels.value.recurring_date_fourth,
-    value: 'fourth'
+    value: 'fourth',
   },
   {
     label: amLabels.value.recurring_date_fifth,
-    value: 'fifth'
+    value: 'fifth',
   },
   {
     label: amLabels.value.recurring_date_last,
-    value: 'last'
-  }
+    value: 'last',
+  },
 ])
 
 let weekDays = [
   {
     label: amLabels.value.weekday_monday,
-    value: 'monday'
+    value: 'monday',
   },
   {
     label: amLabels.value.weekday_tuesday,
-    value: 'tuesday'
+    value: 'tuesday',
   },
   {
     label: amLabels.value.weekday_wednesday,
-    value: 'wednesday'
+    value: 'wednesday',
   },
   {
     label: amLabels.value.weekday_thursday,
-    value: 'thursday'
+    value: 'thursday',
   },
   {
     label: amLabels.value.weekday_friday,
-    value: 'friday'
+    value: 'friday',
   },
   {
     label: amLabels.value.weekday_saturday,
-    value: 'saturday'
+    value: 'saturday',
   },
   {
     label: amLabels.value.weekday_sunday,
-    value: 'sunday'
-  }
+    value: 'sunday',
+  },
 ]
 
 /********
@@ -283,55 +265,55 @@ let recurringFormData = ref({
     get: () => store.getters['event/getRecurringEnabled'],
     set: (val) => {
       store.commit('event/setRecurringEnabled', val)
-    }
+    },
   }),
   cycle: computed({
     get: () => store.getters['event/getRecurringCycle'],
     set: (val) => {
       store.commit('event/setRecurringCycle', val)
-    }
+    },
   }),
   cycleInterval: computed({
     get: () => store.getters['event/getRecurringCycleInterval'],
     set: (val) => {
       store.commit('event/setRecurringCycleInterval', val)
-    }
+    },
   }),
   monthDate: computed({
     get: () => store.getters['event/getRecurringMonthDate'],
     set: (val) => {
       store.commit('event/setRecurringMonthDate', val)
-    }
+    },
   }),
   monthlyOnDay: computed({
     get: () => store.getters['event/getRecurringMonthlyOnDay'],
     set: (val) => {
       store.commit('event/setRecurringMonthlyOnDay', val)
-    }
+    },
   }),
   monthlyOnRepeat: computed({
     get: () => store.getters['event/getRecurringMonthlyOnRepeat'],
     set: (val) => {
       store.commit('event/setRecurringMonthlyOnRepeat', val)
-    }
+    },
   }),
   monthlyRepeat: computed({
     get: () => store.getters['event/getRecurringMonthlyRepeat'],
     set: (val) => {
       store.commit('event/setRecurringMonthlyRepeat', val)
-    }
+    },
   }),
   order: computed({
     get: () => store.getters['event/getRecurringOrder'],
     set: (val) => {
       store.commit('event/setRecurringOrder', val)
-    }
+    },
   }),
   until: computed({
     get: () => store.getters['event/getRecurringUntil'],
     set: (val) => {
       store.commit('event/setRecurringUntil', val)
-    }
+    },
   }),
 })
 
@@ -342,21 +324,21 @@ let rules = computed(() => {
         required: true,
         message: amLabels.value.select_cycle_warning,
         trigger: ['submit', 'change'],
-      }
+      },
     ],
     until: [
       {
         required: true,
         message: amLabels.value.select_date_warning,
         trigger: ['submit', 'change'],
-      }
+      },
     ],
     monthDate: [
       {
         required: true,
         message: amLabels.value.select_date_warning,
         trigger: ['submit', 'change'],
-      }
+      },
     ],
   }
 })
@@ -366,7 +348,9 @@ let periods = computed(() => store.getters['event/getPeriods'])
 let minDate = computed(() => {
   return props.recurringUntil !== null
     ? props.recurringUntil
-    : (periods.value.length ? moment(periods.value[0].startDate, 'YYYY-MM-DD') : moment())
+    : periods.value.length
+      ? moment(periods.value[0].startDate, 'YYYY-MM-DD')
+      : moment()
 })
 
 function isDisabledRecurringUntil(value) {
@@ -375,7 +359,7 @@ function isDisabledRecurringUntil(value) {
 
 // * Expose
 defineExpose({
-  recurringFormRef
+  recurringFormRef,
 })
 
 // * Colors
@@ -478,7 +462,7 @@ let cssVars = computed(() => {
         &.el-form-item {
           margin-bottom: 0;
 
-          &.is-required:not(.is-no-asterisk)>.el-form-item__label:before {
+          &.is-required:not(.is-no-asterisk) > .el-form-item__label:before {
             color: var(--am-c-error);
           }
         }

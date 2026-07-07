@@ -28,12 +28,8 @@
 </template>
 
 <script setup>
-import {
-  ref,
-  inject,
-  computed
-} from 'vue'
-import {useColorTransparency} from "../../../assets/js/common/colorManipulation";
+import { ref, inject, computed } from 'vue'
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
 import IconArrowLeft from '../icons/IconArrowLeft.vue'
 import IconArrowRight from '../icons/IconArrowRight.vue'
 
@@ -41,18 +37,18 @@ import IconArrowRight from '../icons/IconArrowRight.vue'
 const props = defineProps({
   small: {
     type: Boolean,
-    default: false
+    default: false,
   },
   background: {
     type: Boolean,
-    default: false
+    default: false,
   },
   currentPage: {
     type: Number,
   },
   pageSize: {
     type: Number,
-    default: 10
+    default: 10,
   },
   defaultPageSize: {
     type: Number,
@@ -65,18 +61,18 @@ const props = defineProps({
   },
   pagerCount: {
     type: Number,
-    default: 7
+    default: 7,
   },
   defaultCurrentPage: {
     type: Number,
   },
   layout: {
     type: String,
-    default: 'prev, pager, next, jumper, ->, total, slot'
+    default: 'prev, pager, next, jumper, ->, total, slot',
   },
   pageSizes: {
     type: Array,
-    default: () => [10, 20, 30, 40, 50, 100]
+    default: () => [10, 20, 30, 40, 50, 100],
   },
   popperClass: {
     type: String,
@@ -90,7 +86,7 @@ const props = defineProps({
   },
   nextText: {
     type: String,
-    default: ''
+    default: '',
   },
   nextIcon: {
     type: [String, Object, Function],
@@ -98,11 +94,11 @@ const props = defineProps({
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   hideOnSinglePage: {
-    type: Boolean
-  }
+    type: Boolean,
+  },
 })
 
 // * Component Emits
@@ -120,24 +116,30 @@ let currentPage = computed({
   },
   set: (val) => {
     emits('update:current-page', val)
-  }
+  },
 })
 
 // * Font Vars
-let amFonts = inject('amFonts', ref({
-  fontFamily: 'Amelia Roboto, sans-serif',
-  fontUrl: '',
-  customFontFamily: '',
-  fontFormat: '',
-  customFontSelected: false
-}))
+let amFonts = inject(
+  'amFonts',
+  ref({
+    fontFamily: 'Amelia Roboto, sans-serif',
+    fontUrl: '',
+    customFontFamily: '',
+    fontFormat: '',
+    customFontSelected: false,
+  }),
+)
 
 // * Color Vars
-let amColors = inject('amColors', ref({
-  colorPrimary: '#1246D6',
-  colorMainBgr: '#FFFFFF',
-  colorMainText: '#1A2C37',
-}))
+let amColors = inject(
+  'amColors',
+  ref({
+    colorPrimary: '#1246D6',
+    colorMainBgr: '#FFFFFF',
+    colorMainText: '#1A2C37',
+  }),
+)
 
 // * CSS Variables
 let cssVars = computed(() => {

@@ -21,38 +21,34 @@
 
 <script setup>
 // * Components
-import AmAddressInput  from "../../_components/address-input/AmAddressInput.vue";
+import AmAddressInput from '../../_components/address-input/AmAddressInput.vue'
 
 // * Import from Vue
-import {
-  computed,
-  ref,
-  toRefs,
-} from "vue";
+import { computed, ref, toRefs } from 'vue'
 
 // * Form Item Props
 let props = defineProps({
   modelValue: {
     type: [String, Array, Object, Number],
-    required: true
+    required: true,
   },
   id: {
     type: [String, Number],
   },
   itemName: {
     type: String,
-    required: true
+    required: true,
   },
   label: {
-    type: String
+    type: String,
   },
   labelPosition: {
     type: String,
-    default: 'top'
+    default: 'top',
   },
   options: {
     type: Array,
-  }
+  },
 })
 
 // * Define Emits
@@ -64,20 +60,20 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 // * Form Item Reference
 let formFieldRef = ref(null)
 
 defineExpose({
-  formFieldRef
+  formFieldRef,
 })
 </script>
 
 <script>
 export default {
-  name: "AddressFormField"
+  name: 'AddressFormField',
 }
 </script>
 

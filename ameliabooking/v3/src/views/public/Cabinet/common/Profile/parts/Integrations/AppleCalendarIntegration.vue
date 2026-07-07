@@ -4,9 +4,7 @@
     <div v-if="showBack" class="am-apple-integration__header">
       <div class="am-apple-integration__header-back" @click="handleBack">
         <span class="am-icon-arrow-big-left"></span>
-        <span class="am-apple-integration__header-title">{{
-          amLabels.apple_calendar
-        }}</span>
+        <span class="am-apple-integration__header-title">{{ amLabels.apple_calendar }}</span>
       </div>
     </div>
     <!-- /Navigation Header -->
@@ -149,13 +147,9 @@ const iCloudId = computed({
 })
 
 const appSpecificPassword = computed({
-  get: () =>
-    store.getters['employee/getEmployeeAppleCalendarAppSpecificPassword'],
+  get: () => store.getters['employee/getEmployeeAppleCalendarAppSpecificPassword'],
   set: (val) => {
-    store.commit(
-      'employee/setEmployeeAppleCalendarAppSpecificPassword',
-      val ? val : null
-    )
+    store.commit('employee/setEmployeeAppleCalendarAppSpecificPassword', val ? val : null)
   },
 })
 
@@ -168,16 +162,14 @@ const appleId = computed({
 
 onMounted(() => {
   if (amSettings.appleCalendar.enabled && appleVisibility.value) {
-    appleVisibility.value.contentVisibility =
-      isEmployeeConnectedToPersonalAppleCalendar.value
+    appleVisibility.value.contentVisibility = isEmployeeConnectedToPersonalAppleCalendar.value
   }
 })
 
 function useEmployeeAppleConnect(store) {
   const data = {
     iCloudId: store.getters['employee/getEmployeeAppleCalendarICloudId'],
-    appSpecificPassword:
-      store.getters['employee/getEmployeeAppleCalendarAppSpecificPassword'],
+    appSpecificPassword: store.getters['employee/getEmployeeAppleCalendarAppSpecificPassword'],
   }
 
   httpClient
@@ -186,10 +178,7 @@ function useEmployeeAppleConnect(store) {
     })
     .then(() => {
       store.commit('employee/setEmployeeAppleCalendarICloudId', data.iCloudId)
-      store.commit(
-        'employee/setEmployeeAppleCalendarAppSpecificPassword',
-        data.appSpecificPassword
-      )
+      store.commit('employee/setEmployeeAppleCalendarAppSpecificPassword', data.appSpecificPassword)
       useAppleSync(store)
     })
     .catch((error) => {
@@ -211,8 +200,7 @@ function useEmployeeAppleDisconnect(store) {
     .catch((error) => {
       console.log(error)
       alertVisibility.value = true
-      message.value =
-        error.response?.data?.message ?? 'An error occurred during disconnect'
+      message.value = error.response?.data?.message ?? 'An error occurred during disconnect'
     })
     .finally(() => {
       store.commit('auth/setAppleLoading', false)

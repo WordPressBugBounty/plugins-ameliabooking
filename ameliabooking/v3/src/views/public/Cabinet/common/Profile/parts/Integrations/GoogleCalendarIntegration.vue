@@ -4,9 +4,7 @@
     <div v-if="showBack" class="am-google-integration__header">
       <div class="am-google-integration__header-back" @click="handleBack">
         <span class="am-icon-arrow-big-left"></span>
-        <span class="am-google-integration__header-title">{{
-          amLabels.google_calendar
-        }}</span>
+        <span class="am-google-integration__header-title">{{ amLabels.google_calendar }}</span>
       </div>
     </div>
     <!-- /Navigation Header -->
@@ -29,8 +27,8 @@
             isAdminConnected
               ? amLabels.red_employee_google_calendar_connected_by_admin
               : account.token
-              ? getAccountPrimaryCalendarName(account)
-              : amLabels.red_employee_google_description
+                ? getAccountPrimaryCalendarName(account)
+                : amLabels.red_employee_google_description
           "
           :is-connected="!!account.token"
           :is-connect-button-needed="true"
@@ -59,15 +57,10 @@
       <!-- /Google Calendar Accounts -->
 
       <!-- Configuration Section -->
-      <div
-        v-if="!isAdminConnected && hasAnyGoogleConnection"
-        class="am-google-integration__config"
-      >
+      <div v-if="!isAdminConnected && hasAnyGoogleConnection" class="am-google-integration__config">
         <!-- Sync With -->
         <div class="am-google-integration__field">
-          <label class="am-google-integration__label">{{
-            amLabels.red_sync_with
-          }}</label>
+          <label class="am-google-integration__label">{{ amLabels.red_sync_with }}</label>
           <AmSelect
             v-model="googleId"
             :placeholder="amLabels.select_calendar"
@@ -98,9 +91,7 @@
             :key="index"
             class="am-google-integration__blocked-item"
           >
-            <div
-              class="am-google-integration__field am-google-integration__field--grow"
-            >
+            <div class="am-google-integration__field am-google-integration__field--grow">
               <AmSelect
                 :model-value="blockedCalendarId"
                 :placeholder="amLabels.calendar_name"
@@ -296,16 +287,12 @@ const getAvailableCalendarsForBlockedCalendar = (currentIndex) => {
     selectedSet.add(String(googleId.value))
   }
 
-  return allCalendars.value.filter(
-    (calendar) => !selectedSet.has(String(calendar.id))
-  )
+  return allCalendars.value.filter((calendar) => !selectedSet.has(String(calendar.id)))
 }
 
 const getAccountPrimaryCalendarName = (account) => {
   if (account.calendarList && account.calendarList.length > 0) {
-    const primaryCalendar = account.calendarList.find(
-      (calendar) => calendar.primary
-    )
+    const primaryCalendar = account.calendarList.find((calendar) => calendar.primary)
     return primaryCalendar?.summary
   }
   return undefined
@@ -327,7 +314,7 @@ const filteredSyncCalendars = computed(() => {
   const query = calendarFilterQuery.value['sync'] || ''
   if (!query) return allCalendars.value
   return allCalendars.value.filter((calendar) =>
-    calendar.summary?.toLowerCase().includes(query.toLowerCase())
+    calendar.summary?.toLowerCase().includes(query.toLowerCase()),
   )
 })
 
@@ -336,7 +323,7 @@ const getFilteredAvailableCalendars = (index) => {
   const query = calendarFilterQuery.value[index] || ''
   if (!query) return available
   return available.filter((calendar) =>
-    calendar.summary?.toLowerCase().includes(query.toLowerCase())
+    calendar.summary?.toLowerCase().includes(query.toLowerCase()),
   )
 }
 
@@ -348,7 +335,7 @@ watch(
   () => googleId.value,
   (newCalendarId) => {
     if (newCalendarId) removeSyncCalendarFromBlocked(newCalendarId)
-  }
+  },
 )
 </script>
 

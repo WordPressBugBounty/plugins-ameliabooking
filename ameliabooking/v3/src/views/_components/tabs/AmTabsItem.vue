@@ -11,7 +11,6 @@
 </template>
 
 <script setup>
-
 /**
  * Component Props
  */
@@ -21,29 +20,27 @@ const props = defineProps({
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   name: {
-    type: [String, Number]
+    type: [String, Number],
   },
   closable: {
     type: Boolean,
-    default: false
+    default: false,
   },
   lazy: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 </script>
 
 <script>
 export default {
-  name: "ElTabPane",
-  componentName: '"ElTabPane"'
+  name: 'ElTabPane',
+  componentName: '"ElTabPane"',
 }
 </script>
 
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>

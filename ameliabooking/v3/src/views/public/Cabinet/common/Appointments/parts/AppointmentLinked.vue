@@ -14,17 +14,24 @@
         :name="recurringIndex"
         class="am-capai-collapse__item"
       >
-
         <template #title>
           <!-- Customer Name -->
           <div
             class="am-capai-customer__name"
-            :class="[{'am-pb-16': !((recurringBooking.customer.email && customerEmailVisibility) || (recurringBooking.customer.phone && customerPhoneVisibility))}, noShowData(recurringBooking.customer.noShowCount).class]"
+            :class="[
+              {
+                'am-pb-16': !(
+                  (recurringBooking.customer.email && customerEmailVisibility) ||
+                  (recurringBooking.customer.phone && customerPhoneVisibility)
+                ),
+              },
+              noShowData(recurringBooking.customer.noShowCount).class,
+            ]"
           >
-          <span
-            v-if="noShowData(recurringBooking.customer.noShowCount).icon"
-            :class="`am-icon-${noShowData(recurringBooking.customer.noShowCount).icon}`"
-          />
+            <span
+              v-if="noShowData(recurringBooking.customer.noShowCount).icon"
+              :class="`am-icon-${noShowData(recurringBooking.customer.noShowCount).icon}`"
+            />
             {{ recurringBooking.customer.firstName + ' ' + recurringBooking.customer.lastName }}
           </div>
           <!-- /Customer Name -->
@@ -32,7 +39,10 @@
 
         <!-- Customer Info -->
         <div
-          v-if="(recurringBooking.customer.email && customerEmailVisibility) || (recurringBooking.customer.phone && customerPhoneVisibility)"
+          v-if="
+            (recurringBooking.customer.email && customerEmailVisibility) ||
+            (recurringBooking.customer.phone && customerPhoneVisibility)
+          "
           class="am-capai-customer__data-wrapper"
           :class="props.responsiveClass"
         >
@@ -79,11 +89,7 @@
               {{ getFrontedFormattedDateTime(linked.bookingStart) }}
             </div>
             <div class="am-capai-linked__list-action">
-              <AmButton
-                category="primary"
-                size="small"
-                @click="editLinkedAppointment(linked)"
-              >
+              <AmButton category="primary" size="small" @click="editLinkedAppointment(linked)">
                 {{ amLabels.edit }}
               </AmButton>
             </div>
@@ -96,19 +102,14 @@
 
 <script setup>
 // * Import from Vue
-import {
-  inject,
-  ref,
-  onMounted,
-  computed,
-} from 'vue'
+import { inject, ref, onMounted, computed } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
 
 // * Import Composables
 import { getFrontedFormattedDateTime } from '../../../../../../assets/js/common/date'
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 
 // * Import Components
 import AmButton from '../../../../../_components/button/AmButton.vue'
@@ -124,7 +125,7 @@ let props = defineProps({
   },
   linkedAppointments: {
     type: Array,
-    required: true
+    required: true,
   },
 })
 
@@ -139,13 +140,11 @@ let amCustomize = inject('amCustomize')
 
 let activeBookingIndex = ref(null)
 
-function linkedArray (recurringBooking) {
-  return props.linkedAppointments.filter((a) =>
-    a.bookings.filter(
-      (b) =>
-        parseInt(b.customer.id) ===
-        parseInt(recurringBooking.customer.id)
-    ).length
+function linkedArray(recurringBooking) {
+  return props.linkedAppointments.filter(
+    (a) =>
+      a.bookings.filter((b) => parseInt(b.customer.id) === parseInt(recurringBooking.customer.id))
+        .length,
   )
 }
 
@@ -155,7 +154,7 @@ const { noShowData } = inject('noShowData')
 let amLabels = inject('amLabels')
 
 function editLinkedAppointment(appointment) {
-  store.commit('appointment/resetAppointment', {providerId: store.getters['auth/getProfile'].id})
+  store.commit('appointment/resetAppointment', { providerId: store.getters['auth/getProfile'].id })
   store.commit('customerInfo/setCustomers', [])
   store.commit('customerInfo/setCustomersIds', [])
 
@@ -163,8 +162,16 @@ function editLinkedAppointment(appointment) {
 }
 
 // * Customized options
-let customerPhoneVisibility = computed(() => shortcodeData.value.cabinetType === 'employee' ? amCustomize.value.appointments.options.customerPhone.visibility : true)
-let customerEmailVisibility = computed(() => shortcodeData.value.cabinetType === 'employee' ? amCustomize.value.appointments.options.customerEmail.visibility : true)
+let customerPhoneVisibility = computed(() =>
+  shortcodeData.value.cabinetType === 'employee'
+    ? amCustomize.value.appointments.options.customerPhone.visibility
+    : true,
+)
+let customerEmailVisibility = computed(() =>
+  shortcodeData.value.cabinetType === 'employee'
+    ? amCustomize.value.appointments.options.customerEmail.visibility
+    : true,
+)
 
 // * Colors
 let amColors = inject('amColors')
@@ -176,7 +183,11 @@ let cssVars = computed(() => {
 })
 
 onMounted(() => {
-  if (store.getters['appointment/getBookings'].filter((b) => b.status !== 'canceled' && b.status !== 'rejected').length < 2) {
+  if (
+    store.getters['appointment/getBookings'].filter(
+      (b) => b.status !== 'canceled' && b.status !== 'rejected',
+    ).length < 2
+  ) {
     activeBookingIndex.value = 0
   }
 })
@@ -250,7 +261,7 @@ onMounted(() => {
         font-weight: 500;
         line-height: 24px;
 
-        [class^="am-icon-"] {
+        [class^='am-icon-'] {
           font-size: 24px;
           line-height: 24px;
         }

@@ -1,15 +1,16 @@
 <template>
   <el-form-item
-    v-if="store.state.entities.services.length > 1 && store.state.entities.preselected.service.length !== 1"
+    v-if="
+      store.state.entities.services.length > 1 &&
+      store.state.entities.preselected.service.length !== 1
+    "
     class="am-fs__init-form__item"
     :prop="store.state.entities.categories.length > 1 ? 'service' : 'onlyService'"
     :class="'am-service-select'"
     label-position="top"
   >
     <template #label>
-      <span class="am-fs__init-form__label">
-        {{amLabels.service_colon}}:
-      </span>
+      <span class="am-fs__init-form__label"> {{ amLabels.service_colon }}: </span>
     </template>
     <AmAdvancedSelect
       v-if="store.state.entities.categories.length > 1"
@@ -51,16 +52,10 @@
           <span class="am-select-service-name">
             {{ service.name }}
           </span>
-          <span
-            v-if="service.price > 0"
-            class="am-select-service-price"
-          >
+          <span v-if="service.price > 0" class="am-select-service-price">
             {{ useFormattedPrice(service.price) }}
-            <span
-              v-if="taxVisibility(service.id)"
-              class="am-select-service-tax"
-            >
-              <template v-if="taxServicesOptions.find(a => a.id === service.id).excluded">
+            <span v-if="taxVisibility(service.id)" class="am-select-service-tax">
+              <template v-if="taxServicesOptions.find((a) => a.id === service.id).excluded">
                 {{ `+${amLabels.total_tax_colon}` }}
               </template>
               <template v-else>
@@ -75,51 +70,51 @@
 </template>
 
 <script setup>
-import { useStore } from "vuex";
-import { computed, inject, reactive, ref } from "vue";
+import { useStore } from 'vuex'
+import { computed, inject, reactive, ref } from 'vue'
 import AmSelect from '../../../_components/select/AmSelect'
 import AmOption from '../../../_components/select/AmOption'
 import AmAdvancedSelect from '../../../_components/advanced-select/AmAdvancedSelect'
-import useAction from "../../../../assets/js/public/actions";
-import { useFormattedPrice } from "../../../../assets/js/common/formatting"
-import { useEntityTax } from "../../../../assets/js/common/pricing";
+import useAction from '../../../../assets/js/public/actions'
+import { useFormattedPrice } from '../../../../assets/js/common/formatting'
+import { useEntityTax } from '../../../../assets/js/common/pricing'
 
 let props = defineProps({
   filterable: {
     type: Boolean,
-    default: true
+    default: true,
   },
   taxVisible: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 })
 
 // * Amelia Settings
 const amSettings = inject('settings')
 
 // * Store
-let store = useStore();
+let store = useStore()
 
 // * Labels
 const amLabels = inject('amLabels')
 
 // * Sidebar steps
 let { sidebarDataCollector } = inject('sidebarStepsFunctions', {
-  sidebarDataCollector: () => {}
+  sidebarDataCollector: () => {},
 })
 
 const { changeInitStepDataService } = inject('initDataChanges', {
-  changeInitStepDataService: () => {}
+  changeInitStepDataService: () => {},
 })
 
 const { footerBtnDisabledUpdater } = inject('changingStepsFunctions', {
-  footerBtnDisabledUpdater: () => {}
+  footerBtnDisabledUpdater: () => {},
 })
 
 // Container Width
 let cWidth = inject('containerWidth', 0)
-let checkScreen = computed(() => cWidth.value < 560 || (cWidth.value - 240 < 520))
+let checkScreen = computed(() => cWidth.value < 560 || cWidth.value - 240 < 520)
 
 /**
  * * Category - Service Block
@@ -129,7 +124,7 @@ let initFormData = inject('initFormData')
 
 // * Service select props
 let advSelectProps = reactive({
-  expandTrigger: checkScreen.value ? 'click': 'hover',
+  expandTrigger: checkScreen.value ? 'click' : 'hover',
   multiple: false,
   checkStrictly: false,
   emitPath: true,
@@ -138,28 +133,32 @@ let advSelectProps = reactive({
   label: 'name',
   children: 'serviceList',
   disabled: 'disabled',
-  leaf: 'leaf'
+  leaf: 'leaf',
 })
 
 // * Set Category Options from entities
-let categoryOptions = computed(() => store.getters['entities/filteredCategories'](
-  Object.assign(store.getters['booking/getSelection'], {serviceId: null, categoryId: null})
-))
+let categoryOptions = computed(() =>
+  store.getters['entities/filteredCategories'](
+    Object.assign(store.getters['booking/getSelection'], { serviceId: null, categoryId: null }),
+  ),
+)
 
 // * Set Service Options from entities
-let serviceOptions = computed(() => store.getters['entities/filteredServices'](
-    Object.assign(store.getters['booking/getSelection'], {serviceId: null, categoryId: null})
-))
+let serviceOptions = computed(() =>
+  store.getters['entities/filteredServices'](
+    Object.assign(store.getters['booking/getSelection'], { serviceId: null, categoryId: null }),
+  ),
+)
 let taxServicesOptions = computed(() => {
   let arr = []
 
   if (amSettings.payments.taxes.enabled) {
-    serviceOptions.value.forEach(service => {
+    serviceOptions.value.forEach((service) => {
       let tax = useEntityTax(store, service.id, 'service')
       if (tax) {
         let obj = {
           id: service.id,
-          excluded: amSettings.payments.taxes.excluded
+          excluded: amSettings.payments.taxes.excluded,
         }
         arr.push(obj)
       }
@@ -172,7 +171,7 @@ let taxServicesOptions = computed(() => {
 // * Filter service
 let queryLower = ref('')
 
-function filterService (query) {
+function filterService(query) {
   queryLower.value = query.toLowerCase()
 }
 
@@ -195,11 +194,13 @@ let changeService = (val) => {
     reference: 'service',
     // position will depends on fields order
     position: 0,
-    value: ''
+    value: '',
   }
 
   if (Array.isArray(val)) {
-    serviceData.value = categoryOptions.value.find((item) => item.id === val[0]).serviceList.find(item => item.id === val[1]).name
+    serviceData.value = categoryOptions.value
+      .find((item) => item.id === val[0])
+      .serviceList.find((item) => item.id === val[1]).name
   }
 
   if (!store.getters['booking/getPackageId']) {
@@ -213,12 +214,12 @@ let changeService = (val) => {
   footerBtnDisabledUpdater(false)
 }
 
-function changeOnlyService (val) {
+function changeOnlyService(val) {
   let serviceData = {
     reference: 'service',
     // position will depends on fields order
     position: 0,
-    value: ''
+    value: '',
   }
 
   if (val) {
@@ -233,14 +234,14 @@ function changeOnlyService (val) {
   sidebarDataCollector(serviceData)
 }
 
-function taxVisibility (id) {
-  return props.taxVisible && !!taxServicesOptions.value.filter(a => a.id === id).length
+function taxVisibility(id) {
+  return props.taxVisible && !!taxServicesOptions.value.filter((a) => a.id === id).length
 }
 </script>
 
 <script>
 export default {
-  name: "ServiceFormField"
+  name: 'ServiceFormField',
 }
 </script>
 

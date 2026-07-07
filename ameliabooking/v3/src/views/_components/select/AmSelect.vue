@@ -1,10 +1,6 @@
 <template>
   <!-- Select -->
-  <div
-    ref="amSelectWrapper"
-    class="am-select-wrapper"
-    :class="props.parentClass"
-  >
+  <div ref="amSelectWrapper" class="am-select-wrapper" :class="props.parentClass">
     <el-select
       :id="id"
       ref="amSelect"
@@ -12,12 +8,12 @@
       class="am-select"
       :class="[
         `am-select--${props.size}`,
-        {'am-select--disabled': props.disabled},
-        {'am-select--suffix': props.suffixIcon},
-        {'am-select--prefix': props.prefixIcon},
-        {'am-select--multiple': props.multiple && !props.collapseTags},
+        { 'am-select--disabled': props.disabled },
+        { 'am-select--suffix': props.suffixIcon },
+        { 'am-select--prefix': props.prefixIcon },
+        { 'am-select--multiple': props.multiple && !props.collapseTags },
         { 'am-rtl': isRtl },
-        props.customClass
+        props.customClass,
       ]"
       :popper-class="`am-select-popper${popperClass ? ' ' + popperClass : popperClass}`"
       :popper-options="props.popperOptions"
@@ -93,20 +89,13 @@
 
 <script setup>
 // * Import form Vue
-import {
-  ref,
-  toRefs,
-  computed,
-  inject,
-  onMounted,
-  onBeforeUnmount
-} from 'vue'
+import { ref, toRefs, computed, inject, onMounted, onBeforeUnmount } from 'vue'
 
 // * Components
-import IconComponent from "../icons/IconComponent.vue";
+import IconComponent from '../icons/IconComponent.vue'
 
 // * Composable
-import { useColorTransparency } from '../../../assets/js/common/colorManipulation';
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
 
 // * Labels
 let amLabels = inject('labels')
@@ -156,7 +145,7 @@ const props = defineProps({
   collapseTagsTooltip: {
     // * whether show all selected tags when mouse hover text of collapse-tags. To use this, collapse-tags must be true
     type: Boolean,
-    default: false
+    default: false,
   },
   multipleLimit: {
     // * maximum number of options user can select when multiple is true. No limit when set to 0
@@ -264,10 +253,10 @@ const props = defineProps({
     type: [String, Object],
     default: () => {
       return {
-        components: {IconComponent},
-        template: `<IconComponent icon="close"></IconComponent>`
+        components: { IconComponent },
+        template: `<IconComponent icon="close"></IconComponent>`,
       }
-    }
+    },
   },
   fitInputWidth: {
     // * whether the width of the dropdown is the same as the input
@@ -278,10 +267,10 @@ const props = defineProps({
     type: [String, Object],
     default: () => {
       return {
-        components: {IconComponent},
-        template: `<IconComponent icon="arrow-down"></IconComponent>`
+        components: { IconComponent },
+        template: `<IconComponent icon="arrow-down"></IconComponent>`,
       }
-    }
+    },
   },
   tagType: {
     // * tag type when multiple is true, default is 'info'
@@ -330,7 +319,7 @@ const props = defineProps({
         'left-end',
         'right',
         'right-start',
-        'right-end'
+        'right-end',
       ].includes(value)
     },
   },
@@ -338,12 +327,7 @@ const props = defineProps({
     // * list of possible positions for dropdown popper.js
     type: Array,
     default: () => {
-      return [
-        'bottom-start',
-        'top-start',
-        'right',
-        'left'
-      ]
+      return ['bottom-start', 'top-start', 'right', 'left']
     },
   },
   maxCollapseTags: {
@@ -423,7 +407,7 @@ const emits = defineEmits([
   'blur',
   'focus',
   'update:modelValue',
-  'click'
+  'click',
 ])
 
 /**
@@ -462,7 +446,7 @@ let amFonts = inject(
     customFontFamily: '',
     fontFormat: '',
     customFontSelected: false,
-  })
+  }),
 )
 
 // * Color Vars
@@ -489,7 +473,7 @@ let amColors = inject(
     colorBtnPrimText: '#FFFFFF',
     colorBtnSec: '#1A2C37',
     colorBtnSecText: '#FFFFFF',
-  })
+  }),
 )
 
 // * Css Variables
@@ -499,35 +483,17 @@ let cssVars = computed(() => {
     '--am-c-select-border': amColors.value.colorInpBorder,
     '--am-c-select-text': amColors.value.colorInpText,
     '--am-c-select-placeholder': amColors.value.colorInpPlaceHolder,
-    '--am-c-select-shadow': useColorTransparency(
-      amColors.value.colorInpText,
-      0.05
-    ),
-    '--am-c-select-text-op60': useColorTransparency(
-      amColors.value.colorInpText,
-      0.6
-    ),
-    '--am-c-select-text-op50': useColorTransparency(
-      amColors.value.colorInpText,
-      0.5
-    ),
-    '--am-c-select-text-op40': useColorTransparency(
-      amColors.value.colorInpText,
-      0.4
-    ),
-    '--am-c-select-text-op03': useColorTransparency(
-      amColors.value.colorInpText,
-      0.03
-    ),
-    '--am-c-select-text-op06': useColorTransparency(
-      amColors.value.colorInpText,
-      0.06
-    ),
+    '--am-c-select-shadow': useColorTransparency(amColors.value.colorInpText, 0.05),
+    '--am-c-select-text-op60': useColorTransparency(amColors.value.colorInpText, 0.6),
+    '--am-c-select-text-op50': useColorTransparency(amColors.value.colorInpText, 0.5),
+    '--am-c-select-text-op40': useColorTransparency(amColors.value.colorInpText, 0.4),
+    '--am-c-select-text-op03': useColorTransparency(amColors.value.colorInpText, 0.03),
+    '--am-c-select-text-op06': useColorTransparency(amColors.value.colorInpText, 0.06),
     '--am-font-family': amFonts.value.fontFamily,
   }
 })
 
-function getClearValue () {
+function getClearValue() {
   if (typeof props.valueOnClear === 'function') {
     return props.valueOnClear()
   }
@@ -539,7 +505,7 @@ function getClearValue () {
   return props.multiple ? [] : null
 }
 
-function hasSelectedValue () {
+function hasSelectedValue() {
   if (props.multiple) {
     return Array.isArray(model.value) && model.value.length > 0
   }
@@ -548,11 +514,11 @@ function hasSelectedValue () {
   return !emptyValues.includes(model.value)
 }
 
-function handleClear () {
+function handleClear() {
   emits('clear')
 }
 
-function canClearFromKeyboard (event) {
+function canClearFromKeyboard(event) {
   if (!props.clearable || props.disabled || !hasSelectedValue()) {
     return false
   }
@@ -562,10 +528,15 @@ function canClearFromKeyboard (event) {
   }
 
   // Keep Backspace usable for search input editing in filterable mode.
-  return !(props.filterable && event.target && typeof event.target.value === 'string' && event.target.value.length);
+  return !(
+    props.filterable &&
+    event.target &&
+    typeof event.target.value === 'string' &&
+    event.target.value.length
+  )
 }
 
-function clearFromKeyboard (event) {
+function clearFromKeyboard(event) {
   if (event && event[clearHandledKey]) {
     return
   }
@@ -584,33 +555,75 @@ function clearFromKeyboard (event) {
   emits('clear')
 }
 
-function handleKeydown (event) {
+function handleKeydown(event) {
   clearFromKeyboard(event)
 }
 
-function handleWrapperKeydownCapture (event) {
+function handleWrapperKeydownCapture(event) {
   clearFromKeyboard(event)
 }
 
-function handleBlur (event) {
+function handleBlur(event) {
   emits('blur', event)
 }
 
-function visibleChange (eventValue) {
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-success', amColors.value.colorSuccess)
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-error', amColors.value.colorError)
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-warning', amColors.value.colorWarning)
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-option-bgr', amColors.value.colorDropBgr)
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-option-border', amColors.value.colorDropBorder)
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-option-text', amColors.value.colorDropText)
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-option-text-op65', useColorTransparency(amColors.value.colorDropText, 0.65))
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-option-text-op15', useColorTransparency(amColors.value.colorDropText, 0.15))
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-option-hover', useColorTransparency(amColors.value.colorDropText, 0.1))
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-option-selected', amColors.value.colorPrimary)
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-option-selected-op10', useColorTransparency(amColors.value.colorPrimary, 0.1))
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-option-img-bgr', amColors.value.colorSuccess)
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-c-option-img-text', amColors.value.colorMainBgr)
-  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty('--am-font-family', amFonts.value.fontFamily)
+function visibleChange(eventValue) {
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-success',
+    amColors.value.colorSuccess,
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-error',
+    amColors.value.colorError,
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-warning',
+    amColors.value.colorWarning,
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-option-bgr',
+    amColors.value.colorDropBgr,
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-option-border',
+    amColors.value.colorDropBorder,
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-option-text',
+    amColors.value.colorDropText,
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-option-text-op65',
+    useColorTransparency(amColors.value.colorDropText, 0.65),
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-option-text-op15',
+    useColorTransparency(amColors.value.colorDropText, 0.15),
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-option-hover',
+    useColorTransparency(amColors.value.colorDropText, 0.1),
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-option-selected',
+    amColors.value.colorPrimary,
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-option-selected-op10',
+    useColorTransparency(amColors.value.colorPrimary, 0.1),
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-option-img-bgr',
+    amColors.value.colorSuccess,
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-option-img-text',
+    amColors.value.colorMainBgr,
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-font-family',
+    amFonts.value.fontFamily,
+  )
   emits('visible-change', eventValue)
 }
 
@@ -734,11 +747,13 @@ export default {
         box-shadow: 0 0 0 1px var(--am-c-select-border);
         box-sizing: border-box;
 
-        &:hover:not(.is-focused), &.is-hovering:not(.is-focused) {
+        &:hover:not(.is-focused),
+        &.is-hovering:not(.is-focused) {
           --am-c-select-border: var(--am-c-select-text-op40);
         }
 
-        &:focus, &.is-focused {
+        &:focus,
+        &.is-focused {
           --am-c-select-border: var(--am-c-primary);
         }
 
@@ -807,7 +822,7 @@ export default {
         }
         [class^='am-icon'] {
           font-size: 18px;
-          color: var(--am-c-select-text)
+          color: var(--am-c-select-text);
         }
       }
 
@@ -816,7 +831,7 @@ export default {
         [class^='am-icon'] {
           font-size: 24px;
           line-height: 1;
-          color: var(--am-c-select-text)
+          color: var(--am-c-select-text);
         }
       }
     }

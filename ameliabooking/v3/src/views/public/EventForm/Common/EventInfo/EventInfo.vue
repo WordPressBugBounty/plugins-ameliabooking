@@ -21,60 +21,43 @@
     <!--/ Gallery -->
 
     <!-- Event header summary -->
-    <div
-      class="am-eli__header"
-      role="group"
-      :aria-label="amLabels.event_info"
-    >
-     <EventCard
-       :event="selectedEvent"
-       :labels="amLabels"
-       :locations="locations"
-       :tickets="tickets"
-       :customized-options="customizedOptions"
-       :date-string-visibility="true"
-       :border-visibility="false"
-       :btn-visibility="false"
-       :auto-info-height="true"
-       :image-visibility="false"
-       vertical-orientation="start"
-       :in-header="true"
-       :in-dialog="true"
-       :tax-visible="useTaxVisibility(store, selectedEvent.id, 'event') && (customizedOptions.tax?.visibility ?? true)"
-     ></EventCard>
+    <div class="am-eli__header" role="group" :aria-label="amLabels.event_info">
+      <EventCard
+        :event="selectedEvent"
+        :labels="amLabels"
+        :locations="locations"
+        :tickets="tickets"
+        :customized-options="customizedOptions"
+        :date-string-visibility="true"
+        :border-visibility="false"
+        :btn-visibility="false"
+        :auto-info-height="true"
+        :image-visibility="false"
+        vertical-orientation="start"
+        :in-header="true"
+        :in-dialog="true"
+        :tax-visible="
+          useTaxVisibility(store, selectedEvent.id, 'event') &&
+          (customizedOptions.tax?.visibility ?? true)
+        "
+      ></EventCard>
     </div>
     <!--/ Event header summary -->
 
     <!-- Main tabbed content -->
     <div class="am-eli__main">
-      <el-tabs
-        v-model="activeName"
-        :aria-label="amLabels.event_info"
-      >
+      <el-tabs v-model="activeName" :aria-label="amLabels.event_info">
         <!-- Info tab -->
-        <el-tab-pane
-          :label="amLabels.event_info"
-          name="first"
-        >
+        <el-tab-pane :label="amLabels.event_info" name="first">
           <!-- Timetable -->
-          <div
-            v-if="selectedEvent.periods.length"
-            class="am-eli__timetable am-eli__main-item"
-          >
-            <p
-              id="am-eli-timetable-title"
-              class="am-eli__timetable-title am-eli__main-title"
-            >
+          <div v-if="selectedEvent.periods.length" class="am-eli__timetable am-eli__main-item">
+            <p id="am-eli-timetable-title" class="am-eli__timetable-title am-eli__main-title">
               {{ amLabels.event_timetable }}
               <span v-if="eventRange.start !== eventRange.end">
                 {{ `: ${eventRange.start} - ${eventRange.end}` }}
               </span>
             </p>
-            <ul
-              class="am-eli__timetable-list"
-              aria-labelledby="am-eli-timetable-title"
-              role="list"
-            >
+            <ul class="am-eli__timetable-list" aria-labelledby="am-eli-timetable-title" role="list">
               <li
                 v-for="(period, index) in selectedEventsPeriods"
                 :key="`${period.dateOfMonth}-${index}`"
@@ -134,19 +117,24 @@
         <!--/ Info tab -->
 
         <!-- Tickets tab -->
-        <el-tab-pane
-          v-if="tickets.length"
-          :label="amLabels.event_tickets"
-          name="second"
-        >
-          <template
-            v-for="ticket in tickets"
-            :key="ticket.id"
-          >
+        <el-tab-pane v-if="tickets.length" :label="amLabels.event_tickets" name="second">
+          <template v-for="ticket in tickets" :key="ticket.id">
             <EventTicket
               :ticket="ticket"
-              :capacity="!isWaitingList ? selectedEvent.maxCustomCapacity : selectedEvent.maxCustomCapacity ? waitingListOptions.maxCapacity : null"
-              :extra-people="!isWaitingList ? selectedEvent.maxExtraPeople : waitingListOptions.maxExtraPeopleEnabled ? waitingListOptions.maxExtraPeople : null"
+              :capacity="
+                !isWaitingList
+                  ? selectedEvent.maxCustomCapacity
+                  : selectedEvent.maxCustomCapacity
+                    ? waitingListOptions.maxCapacity
+                    : null
+              "
+              :extra-people="
+                !isWaitingList
+                  ? selectedEvent.maxExtraPeople
+                  : waitingListOptions.maxExtraPeopleEnabled
+                    ? waitingListOptions.maxExtraPeople
+                    : null
+              "
               :customized-labels="amLabels"
               :readonly="true"
             />
@@ -162,7 +150,9 @@
   <EventInfoSkeleton
     v-else
     aria-busy="true"
-    :aria-label="amLabels.loading_event_information || amLabels.loading || 'Loading event information'"
+    :aria-label="
+      amLabels.loading_event_information || amLabels.loading || 'Loading event information'
+    "
     role="status"
   ></EventInfoSkeleton>
   <!--/ Loading skeleton -->
@@ -180,10 +170,7 @@
     <BringingAnyone></BringingAnyone>
 
     <template #footer>
-      <div
-        class="am-eli__bringing-footer"
-        :class="responsiveClass"
-      >
+      <div class="am-eli__bringing-footer" :class="responsiveClass">
         <AmButton
           :type="amDialogCustomizedOptions.secBtn.buttonType"
           category="secondary"
@@ -210,58 +197,49 @@
 
 <script setup>
 // * _components
-import AmButton from "../../../../_components/button/AmButton.vue";
-import AmSlidePopup from "../../../../_components/slide-popup/AmSlidePopup.vue";
+import AmButton from '../../../../_components/button/AmButton.vue'
+import AmSlidePopup from '../../../../_components/slide-popup/AmSlidePopup.vue'
 
 // * Dedicated Components
-import EventCard from "../../Common/Parts/EventCard.vue";
-import DescriptionItem from "../../Common/Parts/DescriptionItem.vue";
-import EventEmployee from "../../Common/Parts/EventEmployee.vue";
-import EventInfoSkeleton from "./EventInfoSkeleton.vue";
+import EventCard from '../../Common/Parts/EventCard.vue'
+import DescriptionItem from '../../Common/Parts/DescriptionItem.vue'
+import EventEmployee from '../../Common/Parts/EventEmployee.vue'
+import EventInfoSkeleton from './EventInfoSkeleton.vue'
 
 // * Parts
-import EventTicket from "../../Common/Parts/EventTicket.vue";
-import GalleryCarousel from "../../Common/Parts/GalleryCarousel.vue";
+import EventTicket from '../../Common/Parts/EventTicket.vue'
+import GalleryCarousel from '../../Common/Parts/GalleryCarousel.vue'
 
 // * Dialogs
-import BringingAnyone from "../../Common/Parts/BringingAnyone.vue";
+import BringingAnyone from '../../Common/Parts/BringingAnyone.vue'
 
 // * Import from Vue
-import {
-  inject,
-  ref,
-  reactive,
-  computed,
-  onMounted,
-  nextTick,
-  watch,
-  watchEffect
-} from "vue";
+import { inject, ref, reactive, computed, onMounted, nextTick, watch, watchEffect } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Composables
 import {
   getFrontedFormattedDate,
-  getEventFrontedFormattedTime
-} from "../../../../../assets/js/common/date";
-import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
-import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
-import { useTaxVisibility } from "../../../../../assets/js/common/pricing";
+  getEventFrontedFormattedTime,
+} from '../../../../../assets/js/common/date'
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
+import { useTaxVisibility } from '../../../../../assets/js/common/pricing'
 import useAction from '../../../../../assets/js/public/actions'
-import moment from "moment/moment";
+import moment from 'moment/moment'
 
 // * Components Properties
 let props = defineProps({
   globalClass: {
     type: String,
-    default: ''
+    default: '',
   },
   inDialog: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 // * Step functionality
@@ -270,13 +248,13 @@ let {
   headerButtonPreviousReset,
   footerButtonReset,
   footerButtonClicked,
-  footerBtnDisabled
+  footerBtnDisabled,
 } = inject('changingStepsFunctions', {
   nextStep: () => {},
   headerButtonPreviousReset: () => {},
   footerButtonReset: () => {},
   footerButtonClicked: ref(false),
-  footerBtnDisabled: ref(false)
+  footerBtnDisabled: ref(false),
 })
 
 // * Define store
@@ -307,11 +285,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   if (customizedDataForm.value.info.translations) {
     let customizedLabels = customizedDataForm.value.info.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -323,11 +301,11 @@ let amLabels = computed(() => {
 })
 
 let amDialogLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   if (customizedDataForm.value.bringingAnyone.translations) {
     let customizedLabels = customizedDataForm.value.bringingAnyone.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -343,7 +321,9 @@ let amDialogCustomizedOptions = computed(() => {
 })
 
 // * Event obj
-let selectedEvent = computed(() => store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId']))
+let selectedEvent = computed(() =>
+  store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId']),
+)
 
 let isWaitingList = computed(() => store.getters['eventWaitingListOptions/getAvailability'])
 
@@ -375,29 +355,30 @@ let selectedEventsPeriods = computed(() => {
         periodStartDate.add(1, 'days')
       }
 
-      periodDates.forEach(dayPeriod => {
+      periodDates.forEach((dayPeriod) => {
         periodsArr.push({
           id: period.id,
           start: dayPeriod + ' ' + periodStartTime,
-          end: dayPeriod + ' ' + periodEndTime
+          end: dayPeriod + ' ' + periodEndTime,
         })
       })
     } else {
       periodsArr.push({
         id: period.id,
         start: periodStartDate.format('YYYY-MM-DD') + ' ' + periodStartTime,
-        end: periodEndDate.format('YYYY-MM-DD') + ' ' + periodEndTime
+        end: periodEndDate.format('YYYY-MM-DD') + ' ' + periodEndTime,
       })
     }
   })
 
   let periods = []
-  periodsArr.sort((a, b) => moment(a.start, 'YYYY-MM-DD HH:mm:ss') - moment(b.start, 'YYYY-MM-DD HH:mm:ss'))
-    .forEach(item => {
+  periodsArr
+    .sort((a, b) => moment(a.start, 'YYYY-MM-DD HH:mm:ss') - moment(b.start, 'YYYY-MM-DD HH:mm:ss'))
+    .forEach((item) => {
       periods.push({
         dateOfMonth: getFrontedFormattedDate(item.start.split(' ')[0]),
         timeStart: getEventFrontedFormattedTime(item.start.split(' ')[1]),
-        timeEnd: getEventFrontedFormattedTime(item.end.split(' ')[1])
+        timeEnd: getEventFrontedFormattedTime(item.end.split(' ')[1]),
       })
     })
 
@@ -408,10 +389,10 @@ let eventRange = computed(() => {
   let rangeArr = []
   let rangeObj = {}
 
-  selectedEvent.value.periods.forEach(item => {
+  selectedEvent.value.periods.forEach((item) => {
     rangeArr.push(
       moment(item.periodStart, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD'),
-      moment(item.periodEnd, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD')
+      moment(item.periodEnd, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD'),
     )
   })
 
@@ -426,7 +407,7 @@ const activeName = ref('first')
 
 const eventInfoRef = ref(null)
 
-function onKeydownCapture (e) {
+function onKeydownCapture(e) {
   if (e?.key !== 'ArrowUp' && e?.key !== 'ArrowDown') {
     return
   }
@@ -458,9 +439,13 @@ function onKeydownCapture (e) {
 }
 
 // * Footer btn
-watchEffect(() => {
-  footerBtnDisabled.value = !isWaitingList.value && (!selectedEvent.value.bookable || selectedEvent.value.full)
-}, {flush: 'post'})
+watchEffect(
+  () => {
+    footerBtnDisabled.value =
+      !isWaitingList.value && (!selectedEvent.value.bookable || selectedEvent.value.full)
+  },
+  { flush: 'post' },
+)
 
 // * Event fluid step keys
 let eventFluidStepKey = inject('eventFluidStepKey')
@@ -480,8 +465,8 @@ if (selectedEvent.value.customPricing) {
 // * Event Organizer and Staff
 let eventOrganizer = computed(() => {
   let employeeId = selectedEvent.value.organizerId
-  if (employeeId && employees.value.find(e => e.id === employeeId)) {
-    return employees.value.find(e => e.id === employeeId)
+  if (employeeId && employees.value.find((e) => e.id === employeeId)) {
+    return employees.value.find((e) => e.id === employeeId)
   }
 
   return {}
@@ -489,22 +474,26 @@ let eventOrganizer = computed(() => {
 
 let eventStaff = computed(() => {
   let filtered = []
-  selectedEvent.value.providers.forEach(emp => {
-    if (employees.value.some(e => e.id === emp.id)) {
-      emp.badge = employees.value.find(empl => empl.id === emp.id).badge
+  selectedEvent.value.providers.forEach((emp) => {
+    if (employees.value.some((e) => e.id === emp.id)) {
+      emp.badge = employees.value.find((empl) => empl.id === emp.id).badge
       filtered.push(emp)
     }
   })
 
   if (selectedEvent.value.organizerId) {
-    return filtered.filter(e => e.id !== selectedEvent.value.organizerId)
+    return filtered.filter((e) => e.id !== selectedEvent.value.organizerId)
   }
 
   return filtered
 })
 
 // * Set max people based on settings from backend
-let evCapacity = computed(() => selectedEvent.value.maxCapacity - (selectedEvent.value.maxCapacity - selectedEvent.value.places))
+let evCapacity = computed(
+  () =>
+    selectedEvent.value.maxCapacity -
+    (selectedEvent.value.maxCapacity - selectedEvent.value.places),
+)
 
 // * Set max waiting people based on settings from backend
 let evWaitingCapacity = computed(() => {
@@ -514,29 +503,38 @@ let evWaitingCapacity = computed(() => {
   return waitingListOptions.value.maxCapacity - waitingListOptions.value.peopleWaiting
 })
 
-watchEffect(() => {
-  if (isWaitingList.value) {
-    if (waitingListOptions.value.maxExtraPeopleEnabled
-      && waitingListOptions.value.maxExtraPeople
-      && evWaitingCapacity.value > waitingListOptions.value.maxExtraPeople) {
-      store.commit('persons/setMaxPersons', (waitingListOptions.value.maxExtraPeople + 1))
+watchEffect(
+  () => {
+    if (isWaitingList.value) {
+      if (
+        waitingListOptions.value.maxExtraPeopleEnabled &&
+        waitingListOptions.value.maxExtraPeople &&
+        evWaitingCapacity.value > waitingListOptions.value.maxExtraPeople
+      ) {
+        store.commit('persons/setMaxPersons', waitingListOptions.value.maxExtraPeople + 1)
+      } else {
+        store.commit('persons/setMaxPersons', evWaitingCapacity.value)
+      }
     } else {
-      store.commit('persons/setMaxPersons', evWaitingCapacity.value)
+      if (
+        selectedEvent.value.maxExtraPeople &&
+        evCapacity.value > selectedEvent.value.maxExtraPeople
+      ) {
+        store.commit('persons/setMaxPersons', selectedEvent.value.maxExtraPeople + 1)
+      } else {
+        store.commit('persons/setMaxPersons', evCapacity.value)
+      }
     }
-  } else {
-    if (selectedEvent.value.maxExtraPeople && evCapacity.value > selectedEvent.value.maxExtraPeople) {
-      store.commit('persons/setMaxPersons', (selectedEvent.value.maxExtraPeople + 1))
-    } else {
-      store.commit('persons/setMaxPersons', evCapacity.value)
-    }
-  }
-}, {flush: 'post'})
+  },
+  { flush: 'post' },
+)
 
 // * Bringing anyone with you slide popup
 let bringingAnyoneAvailability = computed(() => {
-  const commonCondition = !selectedEvent.value.customPricing
-    && selectedEvent.value.bringingAnyone
-    && (store.getters['persons/getMinPersons'] !== store.getters['persons/getMaxPersons'])
+  const commonCondition =
+    !selectedEvent.value.customPricing &&
+    selectedEvent.value.bringingAnyone &&
+    store.getters['persons/getMinPersons'] !== store.getters['persons/getMaxPersons']
 
   if (isWaitingList.value) {
     return commonCondition && evWaitingCapacity.value > 1
@@ -560,7 +558,7 @@ watch(bringingAnyoneVisibility, async (isVisible) => {
     const dialog = document.querySelector('.am-eli__bringing-wrapper')
     if (dialog) {
       const focusable = dialog.querySelector(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
       )
       focusable?.focus()
     }
@@ -580,27 +578,30 @@ function bringPeopleWithYou() {
 }
 
 // * Event Tickets
-watchEffect(() => {
-  if (selectedEvent.value.customPricing && !store.getters['tickets/getTicketsData'].length) {
-    store.commit('tickets/setTickets', selectedEvent.value.customTickets)
+watchEffect(
+  () => {
+    if (selectedEvent.value.customPricing && !store.getters['tickets/getTicketsData'].length) {
+      store.commit('tickets/setTickets', selectedEvent.value.customTickets)
 
-    if (selectedEvent.value.maxCustomCapacity) {
-      if (isWaitingList.value) {
-        store.commit('tickets/setMaxCustomCapacity', waitingListOptions.value.maxCapacity)
-      } else {
-        store.commit('tickets/setMaxCustomCapacity', selectedEvent.value.maxCustomCapacity)
+      if (selectedEvent.value.maxCustomCapacity) {
+        if (isWaitingList.value) {
+          store.commit('tickets/setMaxCustomCapacity', waitingListOptions.value.maxCapacity)
+        } else {
+          store.commit('tickets/setMaxCustomCapacity', selectedEvent.value.maxCustomCapacity)
+        }
       }
     }
-  }
 
-  if (selectedEvent.value.maxExtraPeople && !isWaitingList.value) {
-    store.commit('tickets/setMaxExtraPeople', selectedEvent.value.maxExtraPeople)
-  }
+    if (selectedEvent.value.maxExtraPeople && !isWaitingList.value) {
+      store.commit('tickets/setMaxExtraPeople', selectedEvent.value.maxExtraPeople)
+    }
 
-  if (isWaitingList.value && waitingListOptions.value.maxExtraPeopleEnabled) {
-    store.commit('tickets/setMaxExtraPeople', waitingListOptions.value.maxExtraPeople)
-  }
-}, {flush: 'post'})
+    if (isWaitingList.value && waitingListOptions.value.maxExtraPeopleEnabled) {
+      store.commit('tickets/setMaxExtraPeople', waitingListOptions.value.maxExtraPeople)
+    }
+  },
+  { flush: 'post' },
+)
 
 // * Event Tickets
 let tickets = computed(() => {
@@ -609,11 +610,16 @@ let tickets = computed(() => {
     let override
     useAction(
       store,
-      { tickets: sorted, setTickets: arr => { if (Array.isArray(arr)) override = arr } },
+      {
+        tickets: sorted,
+        setTickets: (arr) => {
+          if (Array.isArray(arr)) override = arr
+        },
+      },
       'EventTickets',
       'event',
       null,
-      null
+      null,
     )
     return Array.isArray(override) ? override : sorted
   }
@@ -671,9 +677,9 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: "EventInfo",
-  key: "info",
-  label: "event_info"
+  name: 'EventInfo',
+  key: 'info',
+  label: 'event_info',
 }
 </script>
 
@@ -712,7 +718,6 @@ export default {
         }
 
         .el-tabs {
-
           &__nav {
             &-wrap {
               overflow: visible;
@@ -737,9 +742,9 @@ export default {
             line-height: 1.42857;
             color: var(--am-c-eli-text-op90);
 
-             &:focus {
-               box-shadow: none;
-             }
+            &:focus {
+              box-shadow: none;
+            }
 
             &.is-active {
               color: var(--am-c-eli-primary);

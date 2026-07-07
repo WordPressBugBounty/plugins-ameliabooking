@@ -2,7 +2,10 @@
   <span class="am-oit__wrapper">
     <span class="am-oit">
       <span class="am-oit__img">
-        <span class="am-oit__img-placeholder" :style="{backgroundImage: `url(${prop.imageThumb})`}">
+        <span
+          class="am-oit__img-placeholder"
+          :style="{ backgroundImage: `url(${prop.imageThumb})` }"
+        >
           <span v-if="!prop.imageThumb">
             {{ imagePlaceholder() }}
           </span>
@@ -10,21 +13,33 @@
       </span>
       <span class="am-oit__content">
         <span class="am-oit__data">
-          <span :class="`am-oit__data-label ${badge ? 'am-oit__data-label-wrap':''}`">
+          <span :class="`am-oit__data-label ${badge ? 'am-oit__data-label-wrap' : ''}`">
             <span class="am-oit__data-label-name">
               {{ label }}
             </span>
-            <span v-if="badge" class="am-oit__data-label-badge" :style="{background: badge.color}">
+            <span
+              v-if="badge"
+              class="am-oit__data-label-badge"
+              :style="{ background: badge.color }"
+            >
               {{ badge.content }}
             </span>
           </span>
-          <span v-if="!badge && useDescriptionVisibility(description)" class="am-oit__data-description" v-html="replaceNewLines(description)"></span>
+          <span
+            v-if="!badge && useDescriptionVisibility(description)"
+            class="am-oit__data-description"
+            v-html="replaceNewLines(description)"
+          ></span>
         </span>
         <span class="am-oit__meta">
           <span v-if="prop.price" class="am-oit__price" :style="cssVarsPrice">
             {{ prop.price }}
           </span>
-          <span v-if="useDescriptionVisibility(description)" class="am-oit__info-trigger" @click="dialogInfoVisible">
+          <span
+            v-if="useDescriptionVisibility(description)"
+            class="am-oit__info-trigger"
+            @click="dialogInfoVisible"
+          >
             <span class="am-icon-circle-info"></span>
           </span>
         </span>
@@ -48,7 +63,10 @@
       <div class="am-dialog__body">
         <div class="am-dialog__body-heading">
           <span class="am-oit__img">
-            <span class="am-oit__img-placeholder" :style="{backgroundImage: `url(${prop.imageThumb})`}">
+            <span
+              class="am-oit__img-placeholder"
+              :style="{ backgroundImage: `url(${prop.imageThumb})` }"
+            >
               <span v-if="!prop.imageThumb">
                 {{ imagePlaceholder() }}
               </span>
@@ -58,16 +76,19 @@
             <span class="am-dialog__body-heading__text-name">
               {{ label }}
             </span>
-            <span v-if="badge" class="am-dialog__body-heading__text-badge" :style="{background: badge.color}">
+            <span
+              v-if="badge"
+              class="am-dialog__body-heading__text-badge"
+              :style="{ background: badge.color }"
+            >
               {{ badge.content }}
             </span>
           </div>
         </div>
-        <div class="am-dialog__body-content" v-html="description">
-        </div>
+        <div class="am-dialog__body-content" v-html="description"></div>
       </div>
       <template #footer>
-        <AmButton :type="primFooterBtnType" category="primary"  @click="handleClick">
+        <AmButton :type="primFooterBtnType" category="primary" @click="handleClick">
           {{ dialogButtonText }}
         </AmButton>
       </template>
@@ -81,15 +102,11 @@ import AmDialog from '../../dialog/AmDialog.vue'
 import AmButton from '../../button/AmButton.vue'
 
 // * Import from Vue
-import {
-  computed,
-  inject,
-  ref
-} from 'vue'
+import { computed, inject, ref } from 'vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../assets/js/common/colorManipulation";
-import { useDescriptionVisibility } from "../../../../assets/js/common/helper";
+import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
+import { useDescriptionVisibility } from '../../../../assets/js/common/helper'
 
 /**
  * Component Props
@@ -97,35 +114,35 @@ import { useDescriptionVisibility } from "../../../../assets/js/common/helper";
 const prop = defineProps({
   identifier: {
     type: [String, Number],
-    required: true
+    required: true,
   },
   imageThumb: {
     type: String,
-    default: ''
+    default: '',
   },
   label: {
     type: [String, Number],
-    default: ''
+    default: '',
   },
   description: {
     type: String,
-    default: ''
+    default: '',
   },
   price: {
     type: [String, Number],
-    default: ''
+    default: '',
   },
   dialogTitle: {
     type: String,
-    default: ''
+    default: '',
   },
   dialogButtonText: {
     type: String,
-    default: ''
+    default: '',
   },
   badge: {
-    type: [String, Number, Object]
-  }
+    type: [String, Number, Object],
+  },
 })
 
 /**
@@ -152,20 +169,23 @@ const handleClick = () => {
   emits('click', prop.identifier)
 }
 
-function replaceNewLines (description) {
+function replaceNewLines(description) {
   if (!description) return ''
   let text = description.replace(/<br\s*\/?>/gi, ' ')
-  text = text.replace(/<\/p>/gi, ' ').replace(/<\/div>/gi, ' ').replace(/<\/li>/gi, ' ')
+  text = text
+    .replace(/<\/p>/gi, ' ')
+    .replace(/<\/div>/gi, ' ')
+    .replace(/<\/li>/gi, ' ')
   text = text.replace(/<[^>]*>/g, '')
   text = text.replace(/&nbsp;/g, ' ')
   text = text.replace(/\s+/g, ' ').trim()
   return text
 }
 
-function imagePlaceholder () {
+function imagePlaceholder() {
   if (prop.label) {
     let shortLabel = ''
-    prop.label.split(' ').forEach(item => {
+    prop.label.split(' ').forEach((item) => {
       shortLabel += item.charAt(0).toUpperCase()
     })
 
@@ -175,26 +195,27 @@ function imagePlaceholder () {
 
 let primFooterBtnType = inject('primDescBtnType', 'filled')
 
-
 // * Global colors
-let amColors = inject('amColors');
+let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-oit-c-main-bgr': amColors.value.colorMainBgr,
     '--am-oit-c-main-btn-color': amColors.value.colorBtnPrim,
     '--am-oit-c-main-btn-color-text': amColors.value.colorBtnPrimText,
     '--am-oit-c-main-heading-text': amColors.value.colorMainHeadingText,
-    '--am-oit-c-main-heading-text-op90': useColorTransparency(amColors.value.colorMainHeadingText, 0.9),
+    '--am-oit-c-main-heading-text-op90': useColorTransparency(
+      amColors.value.colorMainHeadingText,
+      0.9,
+    ),
     '--am-oit-c-main-text': amColors.value.colorMainText,
     '--am-c-option-img-text': amColors.value.colorMainBgr,
   }
 })
 let cssVarsPrice = computed(() => {
   return {
-    '--am-c-option-selected': amColors.value.colorPrimary
+    '--am-c-option-selected': amColors.value.colorPrimary,
   }
 })
-
 </script>
 
 <script>
@@ -250,7 +271,6 @@ export default {
           line-height: 1;
           color: var(--am-c-option-img-text);
         }
-
       }
     }
 
@@ -289,7 +309,7 @@ export default {
         }
 
         &-badge {
-          color: #FFF;
+          color: #fff;
           border-radius: 4px;
           padding: 0 4px;
           font-size: 13px;
@@ -320,7 +340,8 @@ export default {
           all: unset;
         }
 
-        & br, img {
+        & br,
+        img {
           display: none !important;
         }
       }
@@ -391,7 +412,7 @@ export default {
       font-size: 16px;
       font-weight: 500;
       line-height: 1.5;
-      color: #808A90;
+      color: #808a90;
       padding: 16px;
     }
 
@@ -444,7 +465,7 @@ export default {
           }
 
           &-badge {
-            color: #FFF;
+            color: #fff;
             border-radius: 4px;
             padding: 0 4px;
           }
@@ -470,7 +491,7 @@ export default {
   .el-dialog__footer {
     .el-button {
       background-color: var(--am-oit-c-main-btn-color);
-      color: var(--am-oit-c-main-btn-color-text)
+      color: var(--am-oit-c-main-btn-color-text);
     }
   }
 }

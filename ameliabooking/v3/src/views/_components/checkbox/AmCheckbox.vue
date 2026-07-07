@@ -25,69 +25,68 @@
       <slot></slot>
     </el-checkbox>
   </div>
-
 </template>
 
 <script setup>
-import { computed, inject, ref, toRefs } from 'vue';
-import { useColorTransparency } from "../../../assets/js/common/colorManipulation";
+import { computed, inject, ref, toRefs } from 'vue'
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
 
 /**
  * Component Props
  */
 const props = defineProps({
   modelValue: {
-    type: [String, Number, Boolean]
+    type: [String, Number, Boolean],
   },
   value: {
     // ** value of the Checkbox when used inside a checkbox-group
-    type: [String, Number, Boolean, Object]
+    type: [String, Number, Boolean, Object],
   },
   label: {
     // ** label of the Checkbox when used inside a checkbox-group. If there's no value, label will act as value
-    type: [String, Number, Boolean, Object]
+    type: [String, Number, Boolean, Object],
   },
   trueValue: {
     // ** value of the Checkbox if it's checked
-    type: [String, Number]
+    type: [String, Number],
   },
   falseValue: {
     // ** value of the Checkbox if it's unchecked
-    type: [String, Number]
+    type: [String, Number],
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   border: {
     // ** whether to add a border around Checkbox
     type: Boolean,
-    default: false
+    default: false,
   },
   size: {
     type: String,
     default: 'default',
     validator(value) {
       return ['default', 'medium', 'small'].includes(value)
-    }
+    },
   },
   name: {
     type: String,
-    default: ''
+    default: '',
   },
   checked: {
     type: Boolean,
-    default: false
+    default: false,
   },
   indeterminate: {
     // ** Set indeterminate state, only responsible for style control
     type: Boolean,
-    default: false
+    default: false,
   },
   validateEvent: {
     // ** whether to trigger form validation
     type: Boolean,
-    default: true
+    default: true,
   },
   tabindex: {
     // ** input tabindex
@@ -116,7 +115,7 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 /**
@@ -125,7 +124,7 @@ let model = computed({
 const amCheckbox = ref()
 
 // * Color Vars
-let amColors = inject('amColors',{})
+let amColors = inject('amColors', {})
 
 // * Css Variables
 let cssVars = computed(() => {
@@ -136,7 +135,6 @@ let cssVars = computed(() => {
     '--am-c-checkbox-btn-dsb-op60': useColorTransparency(amColors.value.colorInpBgr, 0.6),
   }
 })
-
 </script>
 
 <style lang="scss">
@@ -180,7 +178,6 @@ let cssVars = computed(() => {
       width: 100%;
 
       .el-checkbox {
-
         &__input {
           width: var(--am-w-checkbox-inp);
           height: var(--am-h-checkbox-inp);

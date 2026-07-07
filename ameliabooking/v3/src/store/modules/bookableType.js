@@ -2,20 +2,20 @@ export default {
   namespaced: true,
 
   state: () => ({
-    type: ''
+    type: '',
   }),
 
   getters: {
-    getType (state) {
+    getType(state) {
       return state.type
     },
   },
 
   mutations: {
-    setType (state, payload) {
+    setType(state, payload) {
       state.type = payload
     },
   },
 
-  actions: {}
+  actions: {},
 }

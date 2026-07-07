@@ -2,10 +2,7 @@
   <div
     ref="stepCardLayoutRef"
     class="am-fs-scl"
-    :class="[
-      props.customClass,
-      { 'am-oxvisible': bringingAnyoneVisibility || packagesVisibility },
-    ]"
+    :class="[props.customClass, { 'am-oxvisible': bringingAnyoneVisibility || packagesVisibility }]"
     :style="cssVars"
   >
     <AmAlert
@@ -16,10 +13,7 @@
       :show-border="true"
       :title="alertMessage"
     />
-    <div
-      class="am-fs-scl__filters"
-      :class="responsiveClass"
-    >
+    <div class="am-fs-scl__filters" :class="responsiveClass">
       <slot name="filters" />
     </div>
     <div class="am-fs-scl__content">
@@ -27,12 +21,9 @@
     </div>
 
     <!-- Bringing Anyone with you -->
-    <AmSlidePopup
-      :visibility="bringingAnyoneVisibility"
-      class="am-fs__init__bringing"
-    >
+    <AmSlidePopup :visibility="bringingAnyoneVisibility" class="am-fs__init__bringing">
       <p class="am-fs__popup-x">
-        <AmeliaIconClose/>
+        <AmeliaIconClose />
       </p>
       <BringingAnyone />
       <template #footer>
@@ -72,7 +63,7 @@
       <template #footer>
         <AmButton
           class="am-fs__ps-popup__btn"
-          :class="`am-fs__ps-popup__btn${checkScreen ? '-mobile':''}`"
+          :class="`am-fs__ps-popup__btn${checkScreen ? '-mobile' : ''}`"
           category="primary"
           size="medium"
           :type="amCustomize[pageRenderKey].packageStep.options.primaryButton.buttonType"
@@ -140,11 +131,11 @@ let langKey = inject('langKey')
 let amLabels = inject('labels')
 
 // * Label computed function
-function labelsDisplay (label, stepKey) {
+function labelsDisplay(label, stepKey) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepKey].translations
-    && amCustomize.value[pageRenderKey.value][stepKey].translations[label]
-    && amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepKey].translations &&
+      amCustomize.value[pageRenderKey.value][stepKey].translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
       ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
       : amLabels[label]
   })
@@ -162,7 +153,7 @@ let packagesVisibility = computed(() => {
 })
 
 let pill = {
-  template: `<div class="am-fs__ps-pill">$60 USD</div>`
+  template: `<div class="am-fs__ps-pill">$60 USD</div>`,
 }
 
 let alertMessage = ref('')
@@ -178,7 +169,7 @@ defineExpose({
 })
 
 // * Global colors
-let amColors = inject('amColors');
+let amColors = inject('amColors')
 let cssPackage = computed(() => {
   return {
     '--am-c-ps-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
@@ -189,32 +180,20 @@ let cssPackage = computed(() => {
 let cssVars = computed(() => {
   return {
     '--am-c-primary': amColors.value.colorPrimary,
-    '--am-c-primary-op05': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.05
-    ),
+    '--am-c-primary-op05': useColorTransparency(amColors.value.colorPrimary, 0.05),
     '--am-c-main-bgr': amColors.value.colorMainBgr,
     '--am-c-main-heading-text': amColors.value.colorMainHeadingText,
     '--am-c-main-text': amColors.value.colorMainText,
-    '--am-c-main-text-op70': useColorTransparency(
-      amColors.value.colorMainText,
-      0.7
-    ),
+    '--am-c-main-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
     '--am-c-inp-border': amColors.value.colorInpBorder,
-    '--am-c-scroll-op30': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.3
-    ),
-    '--am-c-scroll-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
   }
 })
 
 // Container Width
 let cWidth = inject('containerWidth', 0)
-let checkScreen = computed(() => cWidth.value < 560 || (cWidth.value - 240 < 520))
+let checkScreen = computed(() => cWidth.value < 560 || cWidth.value - 240 < 520)
 </script>
 
 <style lang="scss">

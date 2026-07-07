@@ -4,9 +4,7 @@
     class="am-congrats__info-item"
     :class="responsiveClass"
   >
-    <span class="am-congrats__info-item__label">
-      Coupon code:
-    </span>
+    <span class="am-congrats__info-item__label"> Coupon code: </span>
     <span class="am-congrats__info-item__value">
       {{ props.coupon.code }}
     </span>
@@ -27,33 +25,29 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject
-} from "vue";
+import { ref, computed, inject } from 'vue'
 
 // * Composable
-import { useFormattedPrice } from "../../../../../assets/js/common/formatting";
-import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
+import { useFormattedPrice } from '../../../../../assets/js/common/formatting'
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
 
 let props = defineProps({
   booked: {
     type: Object,
-    required: true
+    required: true,
   },
   labels: {
     type: Object,
-    required: true
+    required: true,
   },
   coupon: {
     type: Object,
-    required: true
+    required: true,
   },
   inDialog: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 // * Responsive - Container Width
@@ -66,7 +60,7 @@ let componentWidth = computed(() => {
 
 let responsiveClass = computed(() => useResponsiveClass(componentWidth.value))
 
-function getPaymentGatewayNiceName (payment) {
+function getPaymentGatewayNiceName(payment) {
   if (payment.gateway === 'onSite') {
     return props.labels['on_site']
   }
@@ -81,7 +75,7 @@ function getPaymentGatewayNiceName (payment) {
 }
 
 let paymentLabel = computed(() => {
-  if(props.booked && props.booked.paymentAmount && props.booked.payments[0].gateway === 'onSite') {
+  if (props.booked && props.booked.paymentAmount && props.booked.payments[0].gateway === 'onSite') {
     return `${props.labels.congrats_total_amount}:`
   }
 
@@ -104,9 +98,10 @@ let priceDisplay = computed(() => {
   if (props.booked) {
     let pricePart = ''
 
-    pricePart = props.booked.payments[0].gateway !== 'onSite'
-      ? useFormattedPrice(props.booked.paymentAmount)
-      : useFormattedPrice(props.booked.price)
+    pricePart =
+      props.booked.payments[0].gateway !== 'onSite'
+        ? useFormattedPrice(props.booked.paymentAmount)
+        : useFormattedPrice(props.booked.price)
 
     let label = ''
     if (props.booked.payments[0].status !== 'paid') {
@@ -122,7 +117,7 @@ let priceDisplay = computed(() => {
 
 <script>
 export default {
-  name: "PaymentCongratsInfo"
+  name: 'PaymentCongratsInfo',
 }
 </script>
 

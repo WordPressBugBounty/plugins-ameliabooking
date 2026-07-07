@@ -1,29 +1,31 @@
-import httpClient from "../../../plugins/axios";
+import httpClient from '../../../plugins/axios'
 
-function useStripeSync (store) {
+function useStripeSync(store) {
   store.commit('auth/setStripeLoading', true)
 
-  httpClient.get(
-    '/stripe/accounts/' + store.getters['employee/getId']
-  ).then((response) => {
-    if (response.data.data.account) {
-      store.commit('auth/setStripeProvider', response.data.data.account)
+  httpClient
+    .get('/stripe/accounts/' + store.getters['employee/getId'])
+    .then((response) => {
+      if (response.data.data.account) {
+        store.commit('auth/setStripeProvider', response.data.data.account)
 
-      if (!store.getters['employee/getStripeConnect']) {
-        store.commit('employee/setStripeConnect', {
-          id: response.data.data.account.id,
-          amount: null,
-        })
+        if (!store.getters['employee/getStripeConnect']) {
+          store.commit('employee/setStripeConnect', {
+            id: response.data.data.account.id,
+            amount: null,
+          })
+        }
       }
-    }
-  }).catch((error) => {
-    console.log(error)
-  }).finally(() => {
-    store.commit('auth/setStripeLoading', false)
-  })
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+    .finally(() => {
+      store.commit('auth/setStripeLoading', false)
+    })
 }
 
-function useStripeConnect (store, accountType) {
+function useStripeConnect(store, accountType) {
   store.commit('auth/setStripeLoading', true)
 
   httpClient
@@ -37,40 +39,37 @@ function useStripeConnect (store, accountType) {
     .catch((error) => {
       store.commit('auth/setStripeLoading', false)
       console.log(
-        'response' in error &&
-          'data' in error.response &&
-          'message' in error.response.data
+        'response' in error && 'data' in error.response && 'message' in error.response.data
           ? error.response.data.message
-          : error.message
+          : error.message,
       )
     })
 }
 
-function useStripeDisconnect (store) {
+function useStripeDisconnect(store) {
   store.commit('auth/setStripeLoading', true)
 
-  httpClient.post(
-    '/stripe/disconnect/' + store.getters['auth/getProfile'].id
-  ).then(() => {
-    store.commit(
-      'auth/setStripeProvider',
-      {
+  httpClient
+    .post('/stripe/disconnect/' + store.getters['auth/getProfile'].id)
+    .then(() => {
+      store.commit('auth/setStripeProvider', {
         id: '',
         email: '',
         type: '',
         completed: false,
-      }
-    )
+      })
 
-    store.commit('employee/setStripeConnect', null)
-  }).catch((error) => {
-    console.log(error)
-  }).finally(() => {
-    store.commit('auth/setStripeLoading', false)
-  })
+      store.commit('employee/setStripeConnect', null)
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+    .finally(() => {
+      store.commit('auth/setStripeLoading', false)
+    })
 }
 
-function useStripePreview (store) {
+function useStripePreview(store) {
   let stripeProvider = store.getters['auth/getStripeProvider']
 
   store.commit('auth/setStripeLoading', true)
@@ -80,23 +79,20 @@ function useStripePreview (store) {
 
     store.commit('auth/setStripeLoading', false)
   } else if (stripeProvider.type === 'express') {
-    httpClient.post(
-      '/stripe/dashboard/' + store.getters['auth/getProfile'].id
-    ).then((response) => {
-      if (response.data.data.url) {
-        window.open(response.data.data.url, '_blank')
-      }
-    }).catch((error) => {
-      console.log(error)
-    }).finally(() => {
-      store.commit('auth/setStripeLoading', false)
-    })
+    httpClient
+      .post('/stripe/dashboard/' + store.getters['auth/getProfile'].id)
+      .then((response) => {
+        if (response.data.data.url) {
+          window.open(response.data.data.url, '_blank')
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+      .finally(() => {
+        store.commit('auth/setStripeLoading', false)
+      })
   }
 }
 
-export {
-  useStripeSync,
-  useStripeConnect,
-  useStripeDisconnect,
-  useStripePreview,
-}
+export { useStripeSync, useStripeConnect, useStripeDisconnect, useStripePreview }

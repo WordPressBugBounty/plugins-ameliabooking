@@ -8,9 +8,7 @@
     <template #label>
       <span class="am-ff__item-label" v-html="props.label" />
     </template>
-    <AmCheckboxGroup
-      v-model="model"
-    >
+    <AmCheckboxGroup v-model="model">
       <AmCheckbox
         v-for="(option, i) in props.options"
         :key="i"
@@ -27,32 +25,28 @@ import AmCheckboxGroup from '../../_components/checkbox/AmCheckboxGroup.vue'
 import AmCheckbox from '../../_components/checkbox/AmCheckbox.vue'
 
 // * Import from Vue
-import {
-  computed,
-  ref,
-  toRefs
-} from "vue";
+import { computed, ref, toRefs } from 'vue'
 
 // * Form Item Props
 let props = defineProps({
   modelValue: {
     type: [String, Array, Object, Number],
-    required: true
+    required: true,
   },
   itemName: {
     type: String,
-    required: true
+    required: true,
   },
   label: {
-    type: String
+    type: String,
   },
   labelPosition: {
     type: String,
-    default: 'top'
+    default: 'top',
   },
   options: {
     type: Array,
-  }
+  },
 })
 
 // * Define Emits
@@ -64,19 +58,19 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 // * Form Item Reference
 let formFieldRef = ref(null)
 
 defineExpose({
-  formFieldRef
+  formFieldRef,
 })
 </script>
 
 <script>
 export default {
-  name: "CheckboxFormField"
+  name: 'CheckboxFormField',
 }
 </script>

@@ -17,10 +17,7 @@
         :value="item.value"
         :label="item.label"
       >
-        <span
-          :class="`am-icon-${item.icon}`"
-          :style="`color: ${item.color}`"
-        ></span>
+        <span :class="`am-icon-${item.icon}`" :style="`color: ${item.color}`"></span>
         {{ item.label }}
       </AmOption>
     </AmSelect>
@@ -80,7 +77,7 @@ function appointmentStatusChange() {
       },
       {
         params: { source: 'cabinet-provider' },
-      }
+      },
     )
     .then((result) => {
       let message =
@@ -106,11 +103,7 @@ function appointmentStatusChange() {
       let message = amLabels.value.error
       let type = 'error'
 
-      if (
-        'response' in e &&
-        'data' in e.response &&
-        'data' in e.response.data
-      ) {
+      if ('response' in e && 'data' in e.response && 'data' in e.response.data) {
         if (
           'timeSlotUnavailable' in e.response.data.data &&
           e.response.data.data.timeSlotUnavailable === true

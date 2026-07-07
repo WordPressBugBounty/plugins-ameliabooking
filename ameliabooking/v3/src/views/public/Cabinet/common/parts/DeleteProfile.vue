@@ -12,7 +12,11 @@
         </div>
         <div
           class="am-csd__header-btn"
-          @click="() => { emits('close') }"
+          @click="
+            () => {
+              emits('close')
+            }
+          "
         >
           <IconComponent icon="close"></IconComponent>
         </div>
@@ -29,7 +33,11 @@
           category="secondary"
           :size="cWidth <= 360 ? 'small' : 'default'"
           :type="props.customizedOptions.closeBtn.buttonType"
-          @click="() => { emits('close') }"
+          @click="
+            () => {
+              emits('close')
+            }
+          "
         >
           {{ displayLabels('close') }}
         </AmButton>
@@ -38,7 +46,11 @@
           :size="cWidth <= 360 ? 'small' : 'default'"
           :loading-icon="'loading'"
           :type="props.customizedOptions.confirmBtn.buttonType"
-          @click="() => { emits('deleteProfile') }"
+          @click="
+            () => {
+              emits('deleteProfile')
+            }
+          "
         >
           {{ displayLabels('delete') }}
         </AmButton>
@@ -49,37 +61,34 @@
 
 <script setup>
 // * import from Vue
-import {
-  computed,
-  inject,
-} from "vue";
+import { computed, inject } from 'vue'
 
 // * _components
-import AmSlidePopup from "../../../../_components/slide-popup/AmSlidePopup.vue";
-import IconComponent from "../../../../_components/icons/IconComponent.vue";
-import AmButton from "../../../../_components/button/AmButton.vue";
+import AmSlidePopup from '../../../../_components/slide-popup/AmSlidePopup.vue'
+import IconComponent from '../../../../_components/icons/IconComponent.vue'
+import AmButton from '../../../../_components/button/AmButton.vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
 
 // * Component Props
 let props = defineProps({
   visibility: {
     type: Boolean,
-    required: true
+    required: true,
   },
   customizedLabels: {
     type: Object,
     default: () => {
       return {}
-    }
+    },
   },
   customizedOptions: {
     type: Object,
     default: () => {
       return {}
-    }
-  }
+    },
+  },
 })
 
 let cWidth = inject('containerWidth')
@@ -92,8 +101,10 @@ const emits = defineEmits(['close', 'deleteProfile'])
  *************/
 // * Labels
 const amLabels = inject('labels')
-function displayLabels (label) {
-  return Object.keys(props.customizedLabels).length && props.customizedLabels[label] ? props.customizedLabels[label] : amLabels[label]
+function displayLabels(label) {
+  return Object.keys(props.customizedLabels).length && props.customizedLabels[label]
+    ? props.customizedLabels[label]
+    : amLabels[label]
 }
 
 // * Fonts
@@ -114,7 +125,7 @@ let cssDialogVars = computed(() => {
 
 <script>
 export default {
-  name: 'DeleteProfile'
+  name: 'DeleteProfile',
 }
 </script>
 
@@ -155,7 +166,8 @@ export default {
       }
     }
 
-    &__inner {}
+    &__inner {
+    }
 
     &__header {
       display: flex;
@@ -176,7 +188,7 @@ export default {
     }
 
     &__content {
-      padding: 0  24px;
+      padding: 0 24px;
     }
 
     &__footer {

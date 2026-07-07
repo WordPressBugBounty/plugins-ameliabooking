@@ -2,34 +2,40 @@
   <div
     class="am-collapse-item"
     :class="[
-      {'am-collapse-item-no-button': !partsVisibility || props.side},
-      {'am-collapse-item-no-border': props.borderless},
-      {'am-collapse-item__arrow' : props.side && partsVisibility},
-      {'am-collapse-item__open': contentVisibility}
+      { 'am-collapse-item-no-button': !partsVisibility || props.side },
+      { 'am-collapse-item-no-border': props.borderless },
+      { 'am-collapse-item__arrow': props.side && partsVisibility },
+      { 'am-collapse-item__open': contentVisibility },
     ]"
     :style="cssVars"
   >
     <div
       class="am-collapse-item__heading"
       :class="[
-        {'am-collapse-item__heading-active' : contentVisibility},
-        {'am-collapse-item__heading-side' : contentVisibility && props.side},
-        props.headingClass
+        { 'am-collapse-item__heading-active': contentVisibility },
+        { 'am-collapse-item__heading-side': contentVisibility && props.side },
+        props.headingClass,
       ]"
       :tabindex="props.side ? 0 : undefined"
       @click="onHeadingClick"
       @keydown.enter.prevent="onHeadingKeydown"
       @keydown.space.prevent="onHeadingKeydown"
     >
-      <div v-if="props.side && partsVisibility && props.arrowPosition === 'left'" class="am-collapse-item__trigger am-collapse-item__trigger-side am-collapse-item__trigger-side--left">
+      <div
+        v-if="props.side && partsVisibility && props.arrowPosition === 'left'"
+        class="am-collapse-item__trigger am-collapse-item__trigger-side am-collapse-item__trigger-side--left"
+      >
         <slot name="icon-start" class="am-collapse-item__trigger-start"></slot>
-        <span class="am-icon-arrow-down" :class="{'am-rotate-180': contentVisibility}"></span>
+        <span class="am-icon-arrow-down" :class="{ 'am-rotate-180': contentVisibility }"></span>
         <slot name="icon-end"></slot>
       </div>
       <slot name="heading"></slot>
-      <div v-if="props.side && partsVisibility && props.arrowPosition !== 'left'" class="am-collapse-item__trigger am-collapse-item__trigger-side">
+      <div
+        v-if="props.side && partsVisibility && props.arrowPosition !== 'left'"
+        class="am-collapse-item__trigger am-collapse-item__trigger-side"
+      >
         <slot name="icon-start" class="am-collapse-item__trigger-start"></slot>
-        <span class="am-icon-arrow-down" :class="{'am-rotate-180': contentVisibility}"></span>
+        <span class="am-icon-arrow-down" :class="{ 'am-rotate-180': contentVisibility }"></span>
         <slot name="icon-end"></slot>
       </div>
       <slot name="icon-below"></slot>
@@ -40,9 +46,9 @@
         ref="collapseContent"
         class="am-collapse-item__content"
         :class="[
-          {'am-collapse-item__content-no-border' : !props.side},
+          { 'am-collapse-item__content-no-border': !props.side },
           contentVisibility ? 'am-collapse-item__content-open' : 'am-collapse-item__content-close',
-          contentClosing ? 'am-collapse-item__content-closing' : ''
+          contentClosing ? 'am-collapse-item__content-closing' : '',
         ]"
         tabindex="-1"
       >
@@ -67,24 +73,17 @@
           {{ props.buttonOpened }}
         </template>
       </span>
-      <span class="am-icon-arrow-down" :class="{'am-rotate-180': contentVisibility}"></span>
+      <span class="am-icon-arrow-down" :class="{ 'am-rotate-180': contentVisibility }"></span>
     </div>
   </div>
 </template>
 
 <script setup>
 // * Import from Vue
-import {
-  inject,
-  ref,
-  reactive,
-  computed,
-  nextTick,
-  useSlots
-} from 'vue';
+import { inject, ref, reactive, computed, nextTick, useSlots } from 'vue'
 
 // * Composables
-import { useColorTransparency } from "../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
 
 /**
  * Component Props
@@ -92,40 +91,40 @@ import { useColorTransparency } from "../../../assets/js/common/colorManipulatio
 let props = defineProps({
   buttonOpened: {
     type: String,
-    default: ''
+    default: '',
   },
   buttonClosed: {
     type: String,
-    default: ''
+    default: '',
   },
   side: {
     type: Boolean,
-    default: false
+    default: false,
   },
   borderless: {
     type: Boolean,
-    default: false
+    default: false,
   },
   type: {
     type: String,
-    default: ''
+    default: '',
   },
   delay: {
     type: Number,
-    default: 500
+    default: 500,
   },
   collapsable: {
     type: Boolean,
-    default: true
+    default: true,
   },
   headingClass: {
     type: String,
-    default: ''
+    default: '',
   },
   arrowPosition: {
     type: String,
-    default: 'right'
-  }
+    default: 'right',
+  },
 })
 
 /**
@@ -159,10 +158,10 @@ let contentClosing = ref(false)
 let contentClosed = ref(true)
 let collapseContent = ref(null)
 let collapseHeight = reactive({
-  h: '0px'
+  h: '0px',
 })
 
-function closingCollapse () {
+function closingCollapse() {
   contentClosing.value = true
   setTimeout(() => {
     contentClosing.value = false
@@ -170,14 +169,14 @@ function closingCollapse () {
   }, 480)
 }
 
-function toggleContentHeading () {
+function toggleContentHeading() {
   if (props.side && props.collapsable) {
     toggleContent()
   }
 }
 
 // * Card Expand Function
-function toggleContentButton () {
+function toggleContentButton() {
   if (!props.side && props.collapsable) {
     toggleContent()
   }
@@ -210,7 +209,7 @@ function onTriggerKeydown(event) {
 }
 
 // * Card Expand Function
-function toggleContent () {
+function toggleContent() {
   emits('collapseClicked')
   if (partsVisibility.value) {
     setTimeout(() => {
@@ -228,17 +227,17 @@ function toggleContent () {
   }
 }
 
-function closingFromParent () {
+function closingFromParent() {
   if (contentVisibility.value) closingCollapse()
   contentVisibility.value = false
 }
 
-function openingFromParent () {
+function openingFromParent() {
   contentVisibility.value = true
   contentClosed.value = false
 }
 
-function focusContent () {
+function focusContent() {
   nextTick(() => {
     if (collapseContent.value) {
       collapseContent.value.focus()
@@ -250,32 +249,35 @@ defineExpose({
   closingFromParent,
   openingFromParent,
   focusContent,
-  contentVisibility
+  contentVisibility,
 })
 
 // * Colors
-let amColors = inject('amColors', ref({
-  colorPrimary: '#1246D6',
-  colorSuccess: '#019719',
-  colorError: '#B4190F',
-  colorWarning: '#CCA20C',
-  colorMainBgr: '#FFFFFF',
-  colorMainHeadingText: '#33434C',
-  colorMainText: '#1A2C37',
-  colorSbBgr: '#17295A',
-  colorSbText: '#FFFFFF',
-  colorInpBgr: '#FFFFFF',
-  colorInpBorder: '#D1D5D7',
-  colorInpText: '#1A2C37',
-  colorInpPlaceHolder: '#1A2C37',
-  colorDropBgr: '#FFFFFF',
-  colorDropBorder: '#D1D5D7',
-  colorDropText: '#0E1920',
-  colorBtnPrim: '#265CF2',
-  colorBtnPrimText: '#FFFFFF',
-  colorBtnSec: '#1A2C37',
-  colorBtnSecText: '#FFFFFF',
-}))
+let amColors = inject(
+  'amColors',
+  ref({
+    colorPrimary: '#1246D6',
+    colorSuccess: '#019719',
+    colorError: '#B4190F',
+    colorWarning: '#CCA20C',
+    colorMainBgr: '#FFFFFF',
+    colorMainHeadingText: '#33434C',
+    colorMainText: '#1A2C37',
+    colorSbBgr: '#17295A',
+    colorSbText: '#FFFFFF',
+    colorInpBgr: '#FFFFFF',
+    colorInpBorder: '#D1D5D7',
+    colorInpText: '#1A2C37',
+    colorInpPlaceHolder: '#1A2C37',
+    colorDropBgr: '#FFFFFF',
+    colorDropBorder: '#D1D5D7',
+    colorDropText: '#0E1920',
+    colorBtnPrim: '#265CF2',
+    colorBtnPrimText: '#FFFFFF',
+    colorBtnSec: '#1A2C37',
+    colorBtnSecText: '#FFFFFF',
+  }),
+)
 let cssVars = computed(() => {
   return {
     '--am-c-collapse-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
@@ -289,13 +291,21 @@ let cssVars = computed(() => {
 $collapseContentHeight: v-bind('collapseHeight.h');
 
 @keyframes am-animation-collapse-open {
-  0%{height: 0;}
-  100%{height: $collapseContentHeight;}
+  0% {
+    height: 0;
+  }
+  100% {
+    height: $collapseContentHeight;
+  }
 }
 
 @keyframes am-animation-collapse-close {
-  0%{height: $collapseContentHeight;}
-  100%{height: 0;}
+  0% {
+    height: $collapseContentHeight;
+  }
+  100% {
+    height: 0;
+  }
 }
 
 @mixin am-collapse-item-block {

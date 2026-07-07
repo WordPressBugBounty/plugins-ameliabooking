@@ -18,33 +18,23 @@
           class="am-ec__period-date__day"
           :class="[
             {
-              'am-ghost':
-                eventStatus === 'canceled' || eventStatus === 'closed',
+              'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed',
             },
             responsiveClass,
           ]"
         >
-          {{
-            getEventFrontedFormattedDateDay(
-              props.event.periods[0].periodStart.split(' ')[0]
-            )
-          }}
+          {{ getEventFrontedFormattedDateDay(props.event.periods[0].periodStart.split(' ')[0]) }}
         </span>
         <span
           class="am-ec__period-date__month"
           :class="[
             {
-              'am-ghost':
-                eventStatus === 'canceled' || eventStatus === 'closed',
+              'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed',
             },
             responsiveClass,
           ]"
         >
-          {{
-            getEventFrontedFormattedDateMonth(
-              props.event.periods[0].periodStart.split(' ')[0]
-            )
-          }}
+          {{ getEventFrontedFormattedDateMonth(props.event.periods[0].periodStart.split(' ')[0]) }}
         </span>
       </p>
       <p
@@ -56,20 +46,14 @@
           responsiveClass,
         ]"
       >
-        {{
-          getEventFrontedFormattedTime(
-            props.event.periods[0].periodStart.split(' ')[1]
-          )
-        }}
+        {{ getEventFrontedFormattedTime(props.event.periods[0].periodStart.split(' ')[1]) }}
       </p>
     </div>
 
     <!-- Image -->
     <div
       v-if="
-        props.event.gallery.length &&
-        props.imageVisibility &&
-        customizeOptions.imgTab.visibility
+        props.event.gallery.length && props.imageVisibility && customizeOptions.imgTab.visibility
       "
       class="am-ec__image"
       :class="responsiveClass"
@@ -89,16 +73,12 @@
         {{ props.event.name }}
       </p>
       <p
-        v-if="
-          inHeader && componentWidth <= 500 && customizeOptions.price.visibility
-        "
+        v-if="inHeader && componentWidth <= 500 && customizeOptions.price.visibility"
         class="am-ec__info-price"
       >
         {{
           props.event.customPricing
-            ? `${labelsDisplay('from')} ${useFormattedPrice(
-                useMinTicketPrice(props.event)
-              )}`
+            ? `${labelsDisplay('from')} ${useFormattedPrice(useMinTicketPrice(props.event))}`
             : useFormattedPrice(props.event.price)
         }}
         <template v-if="taxVisibility">
@@ -119,10 +99,7 @@
         {{ useEventLocation(props.event, locations) }}
       </p>
       <div
-        v-if="
-          customizeOptions.status.visibility ||
-          customizeOptions.slots.visibility
-        "
+        v-if="customizeOptions.status.visibility || customizeOptions.slots.visibility"
         class="am-ec__info-other"
       >
         <p
@@ -132,24 +109,16 @@
           {{ labelsDisplay(eventStatus) }}
         </p>
         <p
-          v-if="
-            eventStatus === 'full' &&
-            customizeOptions.slots.visibility &&
-            features.waitingList
-          "
+          v-if="eventStatus === 'full' && customizeOptions.slots.visibility && features.waitingList"
           class="am-ec__info-waiting-list"
         >
           {{ eventPlaces }}
           {{
-            eventPlaces === 1
-              ? labelsDisplay('person_waiting')
-              : labelsDisplay('people_waiting')
+            eventPlaces === 1 ? labelsDisplay('person_waiting') : labelsDisplay('people_waiting')
           }}
         </p>
         <p
-          v-if="
-            showEventCapacity(eventStatus) && customizeOptions.slots.visibility
-          "
+          v-if="showEventCapacity(eventStatus) && customizeOptions.slots.visibility"
           class="am-ec__info-capacity"
         >
           <span class="am-ec__info-capacity__number">
@@ -170,10 +139,7 @@
     <div
       v-if="!inHeader || componentWidth > 500"
       class="am-ec__actions"
-      :class="[
-        { 'am-vertical-center': !customizeOptions.price.visibility },
-        responsiveClass,
-      ]"
+      :class="[{ 'am-vertical-center': !customizeOptions.price.visibility }, responsiveClass]"
     >
       <div
         v-if="customizeOptions.price.visibility"
@@ -183,9 +149,7 @@
         <p>
           {{
             props.event.customPricing
-              ? `${labelsDisplay('from')} ${useFormattedPrice(
-                  useMinTicketPrice(props.event)
-                )}`
+              ? `${labelsDisplay('from')} ${useFormattedPrice(useMinTicketPrice(props.event))}`
               : useFormattedPrice(props.event.price)
           }}
           <template v-if="taxVisibility">
@@ -208,8 +172,8 @@
             isWaiting
               ? labelsDisplay('join_waiting_list')
               : eventStatus !== 'open'
-              ? labelsDisplay('event_learn_more')
-              : labelsDisplay('event_read_more')
+                ? labelsDisplay('event_learn_more')
+                : labelsDisplay('event_read_more')
           }}
         </AmButton>
       </p>
@@ -313,18 +277,13 @@ let eventStatus = computed(() => {
 
 // * Waiting enabled
 let isWaiting = computed(() => {
-  return (
-    eventStatus.value === 'full' &&
-    features.value.waitingList
-  )
+  return eventStatus.value === 'full' && features.value.waitingList
 })
 
 let eventPlaces = computed(() => {
   if (props.event.customPricing) {
     let places = 0
-    let eventTickets = props.tickets.length
-      ? props.tickets
-      : props.event.customTickets
+    let eventTickets = props.tickets.length ? props.tickets : props.event.customTickets
 
     if (props.event.maxCustomCapacity) {
       let sold = 0
@@ -338,9 +297,7 @@ let eventPlaces = computed(() => {
     } else {
       eventTickets.forEach((t) => {
         if ('enabled' in t ? t.enabled : true) {
-          places += isWaiting.value
-            ? t.sold
-            : t.spots - t.sold - ('persons' in t ? t.persons : 0)
+          places += isWaiting.value ? t.sold : t.spots - t.sold - ('persons' in t ? t.persons : 0)
         }
       })
     }
@@ -370,11 +327,8 @@ let amLabels = inject('labels')
 
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    let translations =
-      amCustomize.value[pageRenderKey.value][props.parentKey].translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    let translations = amCustomize.value[pageRenderKey.value][props.parentKey].translations
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -396,19 +350,15 @@ let amColors = inject('amColors')
 
 let cardBorderOrientation = computed(() => {
   if (componentWidth.value <= 500) {
-    return `0px 2px 2px -1px ${
-      amColors.value.colorCardBorder
-    }, 0px 0px 11px ${useColorTransparency(
+    return `0px 2px 2px -1px ${amColors.value.colorCardBorder}, 0px 0px 11px ${useColorTransparency(
       amColors.value.colorCardBorder,
-      0.3
+      0.3,
     )}, inset 0px -8px 0px ${props.event.color}`
   }
 
-  return `0px 2px 2px -1px ${
-    amColors.value.colorCardBorder
-  }, 0px 0px 11px ${useColorTransparency(
+  return `0px 2px 2px -1px ${amColors.value.colorCardBorder}, 0px 0px 11px ${useColorTransparency(
     amColors.value.colorCardBorder,
-    0.3
+    0.3,
   )}, inset 8px 0px 0px ${props.event.color}`
 })
 
@@ -430,34 +380,21 @@ let cssVars = computed(() => {
     '--am-c-ec-success': amColors.value.colorSuccess,
     '--am-c-ec-primary': amColors.value.colorPrimary,
     '--am-c-ec-warning': amColors.value.colorWarning,
-    '--am-c-ec-bgr': props.inHeader
-      ? amColors.value.colorMainBgr
-      : amColors.value.colorCardBgr,
-    '--am-c-ec-text': props.inHeader
-      ? amColors.value.colorMainText
-      : amColors.value.colorCardText,
+    '--am-c-ec-bgr': props.inHeader ? amColors.value.colorMainBgr : amColors.value.colorCardBgr,
+    '--am-c-ec-text': props.inHeader ? amColors.value.colorMainText : amColors.value.colorCardText,
     '--am-c-ec-text-op90': useColorTransparency(
-      props.inHeader
-        ? amColors.value.colorMainText
-        : amColors.value.colorCardText,
-      0.9
+      props.inHeader ? amColors.value.colorMainText : amColors.value.colorCardText,
+      0.9,
     ),
     '--am-c-ec-text-op80': useColorTransparency(
-      props.inHeader
-        ? amColors.value.colorMainText
-        : amColors.value.colorCardText,
-      0.8
+      props.inHeader ? amColors.value.colorMainText : amColors.value.colorCardText,
+      0.8,
     ),
     '--am-c-ec-text-op50': useColorTransparency(
-      props.inHeader
-        ? amColors.value.colorMainText
-        : amColors.value.colorCardText,
-      0.5
+      props.inHeader ? amColors.value.colorMainText : amColors.value.colorCardText,
+      0.5,
     ),
-    '--am-c-ec-error-op70': useColorTransparency(
-      amColors.value.colorError,
-      0.7
-    ),
+    '--am-c-ec-error-op70': useColorTransparency(amColors.value.colorError, 0.7),
     '--am-h-ec-info': props.autoInfoHeight ? 'unset' : '84px',
     '--am-vo-ec': props.verticalOrientation,
     '--am-fs-ec-title': props.inHeader ? '18px' : '16px',

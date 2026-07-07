@@ -1,15 +1,7 @@
 <template>
-  <div
-    class="am-els"
-    :style="cssVars"
-    :aria-busy="!ready || loading"
-  >
+  <div class="am-els" :style="cssVars" :aria-busy="!ready || loading">
     <!-- Screen-reader-only live region for loading announcements -->
-    <div
-      class="am-sr-only"
-      aria-live="polite"
-      aria-atomic="true"
-    >
+    <div class="am-sr-only" aria-live="polite" aria-atomic="true">
       <span v-if="!ready || loading">{{ amLabels.loading || 'Loading events, please wait.' }}</span>
     </div>
 
@@ -20,22 +12,15 @@
       aria-live="polite"
       aria-atomic="true"
     >
-      {{`${total} ${total === 1 ? amLabels.event_available : amLabels.events_available }`}}
+      {{ `${total} ${total === 1 ? amLabels.event_available : amLabels.events_available}` }}
     </div>
 
     <EventListHeaderSkeleton v-if="!ready || loading"></EventListHeaderSkeleton>
 
     <!-- Events Filters -->
-    <div
-      v-if="customizedOptions.filters.visibility && !onlyOneEvent"
-      class="am-els__filters"
-    >
+    <div v-if="customizedOptions.filters.visibility && !onlyOneEvent" class="am-els__filters">
       <div v-if="ready" class="am-els__filters-top">
-        <div
-          class="am-els__filters-search"
-          role="search"
-          :aria-label="amLabels.event_search"
-        >
+        <div class="am-els__filters-search" role="search" :aria-label="amLabels.event_search">
           <AmInput
             v-model="eventSearch"
             :aria-label="amLabels.event_search"
@@ -56,7 +41,7 @@
             @click="toggleFiltersMenu"
           >
             <span class="am-icon-filter" aria-hidden="true"></span>
-            <span v-if="cWidth > 500">{{amLabels.event_filters}}</span>
+            <span v-if="cWidth > 500">{{ amLabels.event_filters }}</span>
           </AmButton>
         </div>
       </div>
@@ -73,11 +58,18 @@
           :aria-label="amLabels.event_filters"
         >
           <div
-            v-if="amSettings.featuresIntegrations.eventTags.enabled && (!store.getters['params/getShortcodeParams'].tags || store.getters['params/getShortcodeParams'].tags.length !== 1) && tags.length > 0"
+            v-if="
+              amSettings.featuresIntegrations.eventTags.enabled &&
+              (!store.getters['params/getShortcodeParams'].tags ||
+                store.getters['params/getShortcodeParams'].tags.length !== 1) &&
+              tags.length > 0
+            "
             class="am-els__filters-menu__items"
             :class="[responsiveClass, filterClassWidth.tag]"
           >
-            <label :for="`am-els-tag-select-${shortcode.counter}`" class="am-sr-only">{{ amLabels.event_type }}</label>
+            <label :for="`am-els-tag-select-${shortcode.counter}`" class="am-sr-only">{{
+              amLabels.event_type
+            }}</label>
             <AmSelect
               :id="`am-els-tag-select-${shortcode.counter}`"
               v-model="tagFilter"
@@ -98,11 +90,17 @@
             </AmSelect>
           </div>
           <div
-            v-if="(!store.getters['params/getShortcodeParams'].locations || store.getters['params/getShortcodeParams'].locations.length !== 1) && locations.length > 0"
+            v-if="
+              (!store.getters['params/getShortcodeParams'].locations ||
+                store.getters['params/getShortcodeParams'].locations.length !== 1) &&
+              locations.length > 0
+            "
             class="am-els__filters-menu__items"
             :class="[responsiveClass, filterClassWidth.location]"
           >
-            <label :for="`am-els-location-select-${shortcode.counter}`" class="am-sr-only">{{ amLabels.event_location }}</label>
+            <label :for="`am-els-location-select-${shortcode.counter}`" class="am-sr-only">{{
+              amLabels.event_location
+            }}</label>
             <AmSelect
               :id="`am-els-location-select-${shortcode.counter}`"
               v-model="locationFilter"
@@ -134,8 +132,16 @@
               :clearable="!!shortcode.range"
               :readonly="!shortcode.range"
               :aria-label="amLabels.date_picker_placeholder"
-              @selected-date="(dateString) => {store.commit('params/setDates', [dateString])}"
-              @clear-date="() => {store.commit('params/setDates', [])}"
+              @selected-date="
+                (dateString) => {
+                  store.commit('params/setDates', [dateString])
+                }
+              "
+              @clear-date="
+                () => {
+                  store.commit('params/setDates', [])
+                }
+              "
             />
           </div>
         </div>
@@ -151,16 +157,16 @@
         role="list"
         :aria-label="amLabels.events || 'Events'"
       >
-        <template
-          v-for="event in events"
-          :key="event.id"
-        >
+        <template v-for="event in events" :key="event.id">
           <EventCard
             :event="event"
             :labels="amLabels"
             :locations="locations"
             :customized-options="customizedOptions"
-            :tax-visible="useTaxVisibility(store, event.id, 'event') && (customizedOptions.tax?.visibility ?? true)"
+            :tax-visible="
+              useTaxVisibility(store, event.id, 'event') &&
+              (customizedOptions.tax?.visibility ?? true)
+            "
             @click="selectEvent"
           ></EventCard>
         </template>
@@ -176,7 +182,11 @@
       <nav
         v-if="total && Math.ceil(total / showItems) > 1"
         class="am-els__pagination"
-        :aria-label="amLabels.event_page ? `${amLabels.event_page} ${currentPage} / ${Math.ceil(total / showItems)}` : (amLabels.events_pagination || 'Events pagination')"
+        :aria-label="
+          amLabels.event_page
+            ? `${amLabels.event_page} ${currentPage} / ${Math.ceil(total / showItems)}`
+            : amLabels.events_pagination || 'Events pagination'
+        "
       >
         <div class="am-els__pagination-info" aria-hidden="true">
           {{ `${amLabels.event_page || 'Page'} ${currentPage} / ${Math.ceil(total / showItems)}` }}
@@ -199,7 +209,6 @@
     </template>
 
     <EmptyState v-if="ready && !loading && empty" />
-
   </div>
 </template>
 
@@ -218,29 +227,20 @@ import EventCard from '../../Common/Parts/EventCard.vue'
 import EventListSkeleton from '../Parts/EventListSkeleton.vue'
 import EventListFiltersSkeleton from '../Parts/EventListFiltersSkeleton.vue'
 import EventListHeaderSkeleton from '../Parts/EventListHeaderSkeleton.vue'
-import EmptyState from "../../Common/Parts/EmptyState.vue";
+import EmptyState from '../../Common/Parts/EmptyState.vue'
 
 // * Import from Vue
-import {
-  ref,
-  watch,
-  inject,
-  computed,
-  reactive,
-  nextTick,
-} from 'vue'
+import { ref, watch, inject, computed, reactive, nextTick } from 'vue'
 
 // * Import from vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import Composable
-import {
-  useColorTransparency
-} from "../../../../../assets/js/common/colorManipulation";
-import useAction from "../../../../../assets/js/public/actions";
-import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
-import { useUrlQueryParams } from "../../../../../assets/js/common/helper";
-import { useTaxVisibility } from "../../../../../assets/js/common/pricing";
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
+import useAction from '../../../../../assets/js/public/actions'
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
+import { useUrlQueryParams } from '../../../../../assets/js/common/helper'
+import { useTaxVisibility } from '../../../../../assets/js/common/pricing'
 
 // * Define store
 const store = useStore()
@@ -250,8 +250,8 @@ const amSettings = inject('settings')
 
 let shortcode = computed(() => store.getters['shortcodeParams/getShortcodeParams'])
 
-let onlyOneEvent = computed (() => {
-  let shortcodeEvents = shortcode.value.eventId.split(',').filter(e => e)//.length === 1
+let onlyOneEvent = computed(() => {
+  let shortcodeEvents = shortcode.value.eventId.split(',').filter((e) => e) //.length === 1
   let urlParams = useUrlQueryParams(window.location.href)
   let urlEvents = urlParams && urlParams.ameliaEventId ? urlParams.ameliaEventId.split(',') : []
   return shortcodeEvents.length === 1 || urlEvents.length === 1
@@ -265,10 +265,13 @@ let loading = computed(() => store.getters['getLoading'])
 
 let urlParams = useUrlQueryParams(window.location.href)
 watch(ready, (readyState) => {
-  if (readyState &&
+  if (
+    readyState &&
     urlParams &&
     urlParams.ameliaEventPopup &&
-    store.getters['eventEntities/getEvents'].filter(i => i.id === parseInt(urlParams.ameliaEventPopup)).length
+    store.getters['eventEntities/getEvents'].filter(
+      (i) => i.id === parseInt(urlParams.ameliaEventPopup),
+    ).length
   ) {
     selectEvent(parseInt(urlParams.ameliaEventPopup))
   }
@@ -298,11 +301,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   if (customizedDataForm.value.list.translations) {
     let customizedLabels = customizedDataForm.value.list.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -317,14 +320,16 @@ let amLabels = computed(() => {
 let events = computed(() => store.getters['eventEntities/getEvents'])
 
 // * Empty state
-let empty = computed(() => store.getters['getReady'] && !store.getters['getLoading'] ? events.value.length === 0 : false)
+let empty = computed(() =>
+  store.getters['getReady'] && !store.getters['getLoading'] ? events.value.length === 0 : false,
+)
 
 // * Events Pagination
 let currentPage = computed({
   get: () => store.getters['pagination/getPage'],
   set: (val) => {
     store.commit('pagination/setPage', val)
-  }
+  },
 })
 
 // * Total pages
@@ -333,29 +338,37 @@ let total = computed(() => store.getters['pagination/getCount'])
 // * Show items on pages
 let showItems = computed(() => store.getters['pagination/getShow'])
 
-function changePage () {
+function changePage() {
   store.commit('setLoading', true)
   store.dispatch('eventEntities/requestEvents')
 }
 
 let filterIcon = {
-  components: {IconComponent},
-  template: `<IconComponent icon="filter"/>`
+  components: { IconComponent },
+  template: `<IconComponent icon="filter"/>`,
 }
 
 // * Locations array
-let locations = computed(() => store.getters['eventEntities/getFilteredLocations'](store.getters['params/getShortcodeParams']))
+let locations = computed(() =>
+  store.getters['eventEntities/getFilteredLocations'](store.getters['params/getShortcodeParams']),
+)
 
 // * Tags array
-let tags = computed(() => store.getters['eventEntities/getFilteredTags'](store.getters['params/getShortcodeParams']))
+let tags = computed(() =>
+  store.getters['eventEntities/getFilteredTags'](store.getters['params/getShortcodeParams']),
+)
 
 // * Filter class generated according to filter elements visibility
 let filterClassWidth = computed(() => {
   // p - preselected
   // a - array
-  let pTag = store.getters['params/getShortcodeParams'].tags && store.getters['params/getShortcodeParams'].tags.length === 1
+  let pTag =
+    store.getters['params/getShortcodeParams'].tags &&
+    store.getters['params/getShortcodeParams'].tags.length === 1
   let aTag = tags.value.length
-  let pLocation = store.getters['params/getShortcodeParams'].locations && store.getters['params/getShortcodeParams'].locations.length === 1
+  let pLocation =
+    store.getters['params/getShortcodeParams'].locations &&
+    store.getters['params/getShortcodeParams'].locations.length === 1
   let aLocation = locations.value.length
 
   let tagVisibility = !pTag && aTag > 0 && amSettings.featuresIntegrations.eventTags.enabled
@@ -364,7 +377,7 @@ let filterClassWidth = computed(() => {
   let classFilter = {
     tag: 'am-mw33',
     location: 'am-mw33',
-    date: 'am-mw33'
+    date: 'am-mw33',
   }
 
   if (!tagVisibility) {
@@ -391,7 +404,7 @@ let filterClassWidth = computed(() => {
 })
 
 let popupVisible = inject('popupVisible')
-function selectEvent (id) {
+function selectEvent(id) {
   popupVisible.value = true
   store.commit('setLoading', true)
   store.commit('eventBooking/setEventId', id)
@@ -405,12 +418,12 @@ let eventSearch = computed({
   },
   set: (val) => {
     store.commit('params/setSearch', val)
-  }
+  },
 })
 
 let iconSearch = {
-  components: {IconComponent},
-  template: `<IconComponent icon="search"/>`
+  components: { IconComponent },
+  template: `<IconComponent icon="search"/>`,
 }
 
 let tagFilter = computed({
@@ -419,11 +432,11 @@ let tagFilter = computed({
   },
   set: (val) => {
     store.commit('params/setTag', val)
-  }
+  },
 })
 
 let queryTags = ref('')
-function filterQueryTag (query) {
+function filterQueryTag(query) {
   queryTags.value = query.toLowerCase()
 }
 
@@ -443,11 +456,11 @@ let locationFilter = computed({
   },
   set: (val) => {
     store.commit('params/setLocationIdParam', val)
-  }
+  },
 })
 
 let queryLocation = ref('')
-function filterQueryLocation (query) {
+function filterQueryLocation(query) {
   queryLocation.value = query.toLowerCase()
 }
 
@@ -490,13 +503,15 @@ let filtersPanelId = computed(() => `am-els-filters-panel-${shortcode.value?.cou
 // * Ref for the filters panel (focus management on open)
 let filtersPanelRef = ref(null)
 
-function toggleFiltersMenu () {
+function toggleFiltersMenu() {
   filtersMenuVisibility.value = !filtersMenuVisibility.value
   if (filtersMenuVisibility.value) {
     nextTick(() => {
       const panel = filtersPanelRef.value
       if (panel) {
-        const firstFocusable = panel.querySelector('input, button, select, [tabindex]:not([tabindex="-1"])')
+        const firstFocusable = panel.querySelector(
+          'input, button, select, [tabindex]:not([tabindex="-1"])',
+        )
         if (firstFocusable) {
           firstFocusable.focus()
         }
@@ -520,8 +535,8 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: "EventsList",
-  key: "eventsList"
+  name: 'EventsList',
+  key: 'eventsList',
 }
 </script>
 
@@ -529,7 +544,6 @@ export default {
 @import '../../../../../assets/scss/common/transitions/_transitions-mixin.scss';
 
 .amelia-v2-booking #amelia-container {
-
   // am - amelia
   // els - events list step
   .am-els {

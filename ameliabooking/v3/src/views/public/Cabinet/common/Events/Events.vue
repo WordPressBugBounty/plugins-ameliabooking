@@ -3,8 +3,7 @@
     ref="pageContainer"
     class="am-cap am-cape-main"
     :class="{
-      'am-capei-main':
-        eventVisibility || eventAttendeeVisibility || attendeeOpenFromAttendees,
+      'am-capei-main': eventVisibility || eventAttendeeVisibility || attendeeOpenFromAttendees,
     }"
     :style="cssVars"
   >
@@ -25,12 +24,7 @@
       </AmAlert>
 
       <CabinetFilters
-        v-if="
-          !eventAttendeeVisibility &&
-          !eventVisibility &&
-          !eventAttendeesVisibility &&
-          ready
-        "
+        v-if="!eventAttendeeVisibility && !eventVisibility && !eventAttendeesVisibility && ready"
         :step-key="'events'"
         :empty="empty"
         :responsive-class="responsiveClass"
@@ -92,18 +86,12 @@
           class="am-cape__wrapper"
           :class="[
             {
-              'am-no-border':
-                dateGroupedEvents &&
-                Object.keys(dateGroupedEvents).length === 1,
+              'am-no-border': dateGroupedEvents && Object.keys(dateGroupedEvents).length === 1,
             },
             responsiveClass,
           ]"
         >
-          <div
-            v-for="(item, dateKey) in dateGroupedEvents"
-            :key="dateKey"
-            class="am-cape"
-          >
+          <div v-for="(item, dateKey) in dateGroupedEvents" :key="dateKey" class="am-cape">
             <div
               class="am-cape__date"
               :class="[
@@ -113,9 +101,7 @@
                     getFrontedFormattedDate(moment().format('YYYY-MM-DD')),
                 },
                 {
-                  'am-no-flag':
-                    dateGroupedEvents &&
-                    Object.keys(dateGroupedEvents).length === 1,
+                  'am-no-flag': dateGroupedEvents && Object.keys(dateGroupedEvents).length === 1,
                 },
                 responsiveClass,
               ]"
@@ -126,29 +112,21 @@
               v-for="(event, index) in item.events"
               :key="index"
               :start="
-                getFrontedFormattedTime(
-                  event.periods[0].periodStart.split(' ')[1].slice(0, 5)
-                )
+                getFrontedFormattedTime(event.periods[0].periodStart.split(' ')[1].slice(0, 5))
               "
               :name="event.name"
               :employee="eventEmployees(event)"
               :customers="
                 event.bookings
-                  .filter(
-                    (i) => i.status !== 'rejected' && i.status !== 'canceled'
-                  )
+                  .filter((i) => i.status !== 'rejected' && i.status !== 'canceled')
                   .map((i) => i.customer)
               "
               :price="useEventBookingsPrice(event)"
               :duration="null"
-              :periods="
-                (periods = usePeriodsData(event.periods)) ? periods : []
-              "
+              :periods="(periods = usePeriodsData(event.periods)) ? periods : []"
               :extras="[]"
               :tickets="useTicketsData(event)"
-              :custom-fields="
-                useCustomFieldsData(event.bookings, shortcodeData.cabinetType)
-              "
+              :custom-fields="useCustomFieldsData(event.bookings, shortcodeData.cabinetType)"
               :location="useEventLocation(store, event)"
               :qr-codes="qrCodeTicketsVisibility ? useEventQrCodes(event) : []"
               :google-meet-link="
@@ -194,8 +172,7 @@
             !eventAttendeeVisibility &&
             !eventVisibility &&
             !eventAttendeesVisibility &&
-            (dateGroupedEvents === null ||
-              Object.keys(dateGroupedEvents).length === 0)
+            (dateGroupedEvents === null || Object.keys(dateGroupedEvents).length === 0)
           "
           :heading="amLabels.no_evt_found"
           :text="amLabels.have_no_evt"
@@ -240,9 +217,7 @@
           v-if="eventAttendeeVisibility"
           :visibility="eventAttendeeVisibility"
           :title="
-            editAttendeeRecognition
-              ? amLabels.event_edit_attendee
-              : amLabels.event_add_attendee
+            editAttendeeRecognition ? amLabels.event_edit_attendee : amLabels.event_add_attendee
           "
           :event="targetEvent"
           :page-width="pageWidth"
@@ -379,9 +354,7 @@ const labels = inject('labels')
 const localLanguage = inject('localLanguage')
 
 // * if local lang is in settings lang
-let langDetection = computed(() =>
-  amSettings.general.usedLanguages.includes(localLanguage.value)
-)
+let langDetection = computed(() => amSettings.general.usedLanguages.includes(localLanguage.value))
 
 // * Computed labels
 let amLabels = computed(() => {
@@ -390,12 +363,8 @@ let amLabels = computed(() => {
   let customizedLabels = amCustomize.value.events.translations
   if (customizedLabels) {
     Object.keys(customizedLabels).forEach((labelKey) => {
-      if (
-        customizedLabels[labelKey][localLanguage.value] &&
-        langDetection.value
-      ) {
-        computedLabels[labelKey] =
-          customizedLabels[labelKey][localLanguage.value]
+      if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
+        computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
         computedLabels[labelKey] = customizedLabels[labelKey].default
       }
@@ -424,12 +393,8 @@ function customizedLabels(step) {
   let customizedLabels = amCustomize.value[step].translations
   if (customizedLabels) {
     Object.keys(customizedLabels).forEach((labelKey) => {
-      if (
-        customizedLabels[labelKey][localLanguage.value] &&
-        langDetection.value
-      ) {
-        computedLabels[labelKey] =
-          customizedLabels[labelKey][localLanguage.value]
+      if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
+        computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
         computedLabels[labelKey] = customizedLabels[labelKey].default
       }
@@ -483,9 +448,7 @@ function getEvents(page = 1) {
   store.commit('cabinet/setEventsLoading', true)
 
   let timeZone = store.getters['cabinet/getTimeZone']
-  let params = JSON.parse(
-    JSON.stringify(store.getters['cabinetFilters/getEventsFilters'])
-  )
+  let params = JSON.parse(JSON.stringify(store.getters['cabinetFilters/getEventsFilters']))
   params.dates = params.dates.map((d) => moment(d).format('YYYY-MM-DD'))
   params.timeZone = timeZone
   params.source = 'cabinet-' + cabinetType.value
@@ -498,10 +461,7 @@ function getEvents(page = 1) {
     params.customerId = params.customers
   }
 
-  store.commit(
-    'auth/setLoadingEventsCounter',
-    store.getters['auth/getLoadingEventsCounter'] + 1
-  )
+  store.commit('auth/setLoadingEventsCounter', store.getters['auth/getLoadingEventsCounter'] + 1)
 
   let loadingCounter = store.getters['auth/getLoadingEventsCounter']
 
@@ -512,10 +472,7 @@ function getEvents(page = 1) {
         return
       }
 
-      store.dispatch(
-        'cabinetFilters/injectEventsOptions',
-        response.data.data.events
-      )
+      store.dispatch('cabinetFilters/injectEventsOptions', response.data.data.events)
 
       store.commit('auth/setPreloadedEvents', response.data.data.events)
 
@@ -525,7 +482,7 @@ function getEvents(page = 1) {
       dateGroupedEvents.value = useParsedEvents(
         response.data.data.events,
         store.getters['cabinet/getTimeZone'],
-        store
+        store,
       )
     })
     .catch((error) => {
@@ -561,10 +518,7 @@ function editEvent(event) {
       },
     })
     .then((response) => {
-      store.commit(
-        'event/setEvent',
-        useFrontEvent(store, response.data.data.event)
-      )
+      store.commit('event/setEvent', useFrontEvent(store, response.data.data.event))
 
       eventVisibility.value = true
     })
@@ -626,9 +580,7 @@ function addEvent() {
 function addEventAttendee(event) {
   targetEvent.value = event
 
-  resetEventAttendee(
-    useInitAttendee(store, store.getters['attendee/getDefaultAttendee'], event)
-  )
+  resetEventAttendee(useInitAttendee(store, store.getters['attendee/getDefaultAttendee'], event))
 
   eventAttendeeVisibility.value = true
 }
@@ -655,9 +607,7 @@ function closeEventAttendees() {
 
   getEvents(eventsPage.value)
 
-  resetEventAttendee(
-    useInitAttendee(store, store.getters['attendee/getDefaultAttendee'])
-  )
+  resetEventAttendee(useInitAttendee(store, store.getters['attendee/getDefaultAttendee']))
 
   eventAttendeesVisibility.value = false
   attendeeOpenFromAttendees.value = false
@@ -680,12 +630,7 @@ function closeEvent() {
 function resetEvent() {
   store.commit('event/setEvent', {
     bookings: [],
-    settings: usePopulateSettings(
-      amSettings,
-      store.getters['event/getSettings'],
-      {},
-      {}
-    ),
+    settings: usePopulateSettings(amSettings, store.getters['event/getSettings'], {}, {}),
   })
 }
 
@@ -701,7 +646,7 @@ function cancelBooking() {
       },
       {
         params: { source: 'cabinet-' + cabinetType.value },
-      }
+      },
     )
     .then(() => {
       targetBooking.value = null
@@ -717,10 +662,7 @@ function cancelBooking() {
       }
     })
     .catch((error) => {
-      if (
-        !('data' in error.response.data) &&
-        'message' in error.response.data
-      ) {
+      if (!('data' in error.response.data) && 'message' in error.response.data) {
         alertVisibility.value = true
         alertMessage.value = error.response.data.message
 
@@ -740,7 +682,7 @@ watch(
   () => props.loadBookingsCounter,
   () => {
     getEvents()
-  }
+  },
 )
 
 onMounted(() => {
@@ -765,10 +707,7 @@ function eventEmployees(evt) {
 
   if (evt.providers.length) {
     evt.providers.forEach((pro) => {
-      if (
-        pro.id !== evt.organizerId &&
-        employees.find((item) => item.id === pro.id)
-      ) {
+      if (pro.id !== evt.organizerId && employees.find((item) => item.id === pro.id)) {
         arr.push(employees.find((item) => item.id === pro.id))
       }
     })
@@ -818,26 +757,14 @@ let cssVars = computed(() => {
   return {
     '--am-c-cape-bgr': amColors.value.colorMainBgr,
     '--am-c-cape-text': amColors.value.colorMainText,
-    '--am-c-cape-text-op70': useColorTransparency(
-      amColors.value.colorMainText,
-      0.7
-    ),
-    '--am-c-cape-text-op25': useColorTransparency(
-      amColors.value.colorMainText,
-      0.25
-    ),
+    '--am-c-cape-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
+    '--am-c-cape-text-op25': useColorTransparency(amColors.value.colorMainText, 0.25),
     '--am-c-cape-primary': amColors.value.colorPrimary,
 
     '--am-c-cust-no1': amColors.value.colorMainText,
-    '--am-c-cust-no1-bgr': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
+    '--am-c-cust-no1-bgr': useColorTransparency(amColors.value.colorMainText, 0.1),
     '--am-c-cust-no2': amColors.value.colorWarning,
-    '--am-c-cust-no2-bgr': useColorTransparency(
-      amColors.value.colorWarning,
-      0.1
-    ),
+    '--am-c-cust-no2-bgr': useColorTransparency(amColors.value.colorWarning, 0.1),
     '--am-c-cust-no3': amColors.value.colorError,
     '--am-c-cust-no3-bgr': useColorTransparency(amColors.value.colorError, 0.1),
     '--am-c-cust-text': amColors.value.colorMainText,
@@ -871,7 +798,8 @@ export default {
         position: absolute;
         top: 4px;
         left: 8px;
-        background-image: linear-gradient(
+        background-image:
+          linear-gradient(
             180deg,
             transparent,
             transparent 50%,
@@ -885,7 +813,9 @@ export default {
             var(--am-c-cape-text-op25),
             var(--am-c-cape-text-op25)
           );
-        background-size: 3px 12px, 100% 20px;
+        background-size:
+          3px 12px,
+          100% 20px;
       }
 
       &.am-no-border {

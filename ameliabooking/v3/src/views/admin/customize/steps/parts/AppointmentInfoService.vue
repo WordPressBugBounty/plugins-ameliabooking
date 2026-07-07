@@ -38,17 +38,10 @@ const { amCustomize } = useReactiveCustomize()
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value].congratulations
-      .translations &&
-      amCustomize.value[pageRenderKey.value].congratulations.translations[
-        label
-      ] &&
-      amCustomize.value[pageRenderKey.value].congratulations.translations[
-        label
-      ][langKey.value]
-      ? amCustomize.value[pageRenderKey.value].congratulations.translations[
-          label
-        ][langKey.value]
+    return amCustomize.value[pageRenderKey.value].congratulations.translations &&
+      amCustomize.value[pageRenderKey.value].congratulations.translations[label] &&
+      amCustomize.value[pageRenderKey.value].congratulations.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].congratulations.translations[label][langKey.value]
       : amLabels[label]
   })
 

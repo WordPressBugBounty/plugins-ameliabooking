@@ -1,12 +1,6 @@
 <template>
-  <div
-    ref="cartRef"
-    class="am-fs__main-content am-fs__cart"
-  >
-    <div
-      class="am-fs__cart-title"
-      v-html="labelsDisplay('cart_title', 'cartStep')"
-    ></div>
+  <div ref="cartRef" class="am-fs__main-content am-fs__cart">
+    <div class="am-fs__cart-title" v-html="labelsDisplay('cart_title', 'cartStep')"></div>
 
     <div class="am-fs__cart-includes">
       <AmCollapse>
@@ -20,8 +14,7 @@
             <CartItemHead :data="item"></CartItemHead>
           </template>
           <template #default>
-            <CartItemBody :data="item" :index="index" :size="cart.length">
-            </CartItemBody>
+            <CartItemBody :data="item" :index="index" :size="cart.length"> </CartItemBody>
           </template>
         </AmCollapseItem>
       </AmCollapse>
@@ -64,12 +57,8 @@ function labelsDisplay(label, stepKey) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value][stepKey].translations &&
       amCustomize.value[pageRenderKey.value][stepKey].translations[label] &&
-      amCustomize.value[pageRenderKey.value][stepKey].translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -340,11 +329,7 @@ export default {
         $count: 2;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms
-              cubic-bezier(0.45, 1, 0.4, 1.2)
-              #{$i *
-              100}ms
-              am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }
@@ -365,11 +350,7 @@ export default {
           $count: 100;
           @for $i from 0 through $count {
             &:nth-child(#{$i + 1}) {
-              animation: 600ms
-                cubic-bezier(0.45, 1, 0.4, 1.2)
-                #{$i *
-                100}ms
-                am-animation-slide-up;
+              animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
               animation-fill-mode: both;
             }
           }

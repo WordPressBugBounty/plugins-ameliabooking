@@ -5,21 +5,19 @@
       ref="amInput"
       v-model="model"
       :class="[
-        props.type === 'text' ||
-        props.type === 'email' ||
-        props.type === 'password' ? 'am-input' : 'am-textarea',
-        props.size && (props.type !== 'text-area' && props.type !== 'textarea') ? `am-input--${props.size}` : ''
+        props.type === 'text' || props.type === 'email' || props.type === 'password'
+          ? 'am-input'
+          : 'am-textarea',
+        props.size && props.type !== 'text-area' && props.type !== 'textarea'
+          ? `am-input--${props.size}`
+          : '',
       ]"
       :type="props.type === 'text-area' ? 'textarea' : props.type"
       :aria-label="props.ariaLabel"
       @blur="(e) => $emit('blur', e)"
       @focus="(e) => $emit('focus', e)"
-      @change="
-        (currentValue, oldValue) => $emit('change', currentValue, oldValue)
-      "
-      @input="
-        (currentValue, oldValue) => $emit('input', currentValue, oldValue)
-      "
+      @change="(currentValue, oldValue) => $emit('change', currentValue, oldValue)"
+      @input="(currentValue, oldValue) => $emit('input', currentValue, oldValue)"
       @keyup.enter="(e) => $emit('enter', e)"
       @clear="() => $emit('clear')"
     >
@@ -28,36 +26,21 @@
         <template v-if="typeof props.prepend === 'string'">
           {{ props.prepend }}
         </template>
-        <component
-          :is="props.prepend"
-          v-if="typeof props.prepend === 'object'"
-        />
+        <component :is="props.prepend" v-if="typeof props.prepend === 'object'" />
       </template>
       <!-- */ Prepend Slot * -->
 
       <!-- * Icon Start/Prefix * -->
       <template v-if="props.prefixIcon" #prefix>
-        <span
-          v-if="typeof props.prefixIcon === 'string'"
-          :class="`am-icon-${props.prefixIcon}`"
-        />
-        <component
-          :is="props.prefixIcon"
-          v-if="typeof props.prefixIcon === 'object'"
-        />
+        <span v-if="typeof props.prefixIcon === 'string'" :class="`am-icon-${props.prefixIcon}`" />
+        <component :is="props.prefixIcon" v-if="typeof props.prefixIcon === 'object'" />
       </template>
       <!-- */ Icon Start/Prefix * -->
 
       <!-- * Icon End/Suffix * -->
       <template v-if="props.suffixIcon" #suffix>
-        <span
-          v-if="typeof props.suffixIcon === 'string'"
-          :class="`am-icon-${props.suffixIcon}`"
-        />
-        <component
-          :is="props.suffixIcon"
-          v-if="typeof props.suffixIcon === 'object'"
-        />
+        <span v-if="typeof props.suffixIcon === 'string'" :class="`am-icon-${props.suffixIcon}`" />
+        <component :is="props.suffixIcon" v-if="typeof props.suffixIcon === 'object'" />
       </template>
       <!-- */ Icon End/Suffix * -->
 
@@ -280,9 +263,7 @@ let { modelValue } = toRefs(props)
 
 let model = computed({
   get: () => {
-    return props.isMoney
-      ? format(modelValue.value, useCurrencyOptions())
-      : modelValue.value
+    return props.isMoney ? format(modelValue.value, useCurrencyOptions()) : modelValue.value
   },
   set: (val) => {
     emits(
@@ -292,7 +273,7 @@ let model = computed({
             ...useCurrencyOptions(),
             modelModifiers: { number: true },
           })
-        : val
+        : val,
     )
   },
 })
@@ -321,7 +302,7 @@ let amColors = inject(
     colorBtnPrimText: '#FFFFFF',
     colorBtnSec: '#1A2C37',
     colorBtnSecText: '#FFFFFF',
-  })
+  }),
 )
 
 // * Css Variables
@@ -330,22 +311,10 @@ let cssVars = computed(() => {
     '--am-c-inp-bgr': amColors.value.colorInpBgr,
     '--am-c-inp-border': amColors.value.colorInpBorder,
     '--am-c-inp-text': amColors.value.colorInpText,
-    '--am-c-inp-text-op03': useColorTransparency(
-      amColors.value.colorInpText,
-      0.03
-    ),
-    '--am-c-inp-text-op05': useColorTransparency(
-      amColors.value.colorInpText,
-      0.05
-    ),
-    '--am-c-inp-text-op40': useColorTransparency(
-      amColors.value.colorInpText,
-      0.4
-    ),
-    '--am-c-inp-text-op60': useColorTransparency(
-      amColors.value.colorInpText,
-      0.6
-    ),
+    '--am-c-inp-text-op03': useColorTransparency(amColors.value.colorInpText, 0.03),
+    '--am-c-inp-text-op05': useColorTransparency(amColors.value.colorInpText, 0.05),
+    '--am-c-inp-text-op40': useColorTransparency(amColors.value.colorInpText, 0.4),
+    '--am-c-inp-text-op60': useColorTransparency(amColors.value.colorInpText, 0.6),
     '--am-c-inp-placeholder': amColors.value.colorInpPlaceHolder,
   }
 })
@@ -423,7 +392,8 @@ const amInput = ref(null)
               border: none;
               padding: 0 12px;
               background-color: var(--am-c-inp-text-op03);
-              box-shadow: inset 1px 0 0 0 var(--am-c-input-border),
+              box-shadow:
+                inset 1px 0 0 0 var(--am-c-input-border),
                 0 1px 0 0 var(--am-c-input-border),
                 0 -1px 0 0 var(--am-c-input-border);
             }
@@ -437,7 +407,8 @@ const amInput = ref(null)
               border: none;
               padding: 0 12px;
               background-color: var(--am-c-inp-text-op03);
-              box-shadow: 0 0 0 0 var(--am-c-input-border),
+              box-shadow:
+                0 0 0 0 var(--am-c-input-border),
                 0 1px 0 0 var(--am-c-input-border),
                 0 -1px 0 0 var(--am-c-input-border),
                 inset -1px 0 0 0 var(--am-c-input-border);

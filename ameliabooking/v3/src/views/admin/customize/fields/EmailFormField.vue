@@ -37,12 +37,8 @@ function labelsDisplay(label) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value].infoStep.translations &&
       amCustomize.value[pageRenderKey.value].infoStep.translations[label] &&
-      amCustomize.value[pageRenderKey.value].infoStep.translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value].infoStep.translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value].infoStep.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].infoStep.translations[label][langKey.value]
       : amLabels[label]
   })
 

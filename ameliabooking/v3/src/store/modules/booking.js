@@ -1,4 +1,4 @@
-import {settings} from "../../plugins/settings";
+import { settings } from '../../plugins/settings'
 
 export default {
   namespaced: true,
@@ -7,34 +7,36 @@ export default {
     appointment: {
       bookingStartDate: '',
       bookingStartTime: '',
-      bookings: [{
-        customer: {
-          email: '',
-          externalId: null,
-          firstName: '',
-          id: null,
-          lastName: '',
-          phone: '',
-          countryPhoneIso : '',
-          translations: null,
-          customFields: null,
-          subscribeToMailchimp: settings.mailchimp.checkedByDefault,
+      bookings: [
+        {
+          customer: {
+            email: '',
+            externalId: null,
+            firstName: '',
+            id: null,
+            lastName: '',
+            phone: '',
+            countryPhoneIso: '',
+            translations: null,
+            customFields: null,
+            subscribeToMailchimp: settings.mailchimp.checkedByDefault,
+          },
+          customFields: {},
+          customerId: 0,
+          extras: [],
+          persons: 1,
+          haveMandatoryExtras: false,
+          minSelectedExtras: 0,
         },
-        customFields: {},
-        customerId: 0,
-        extras: [],
-        persons: 1,
-        haveMandatoryExtras: false,
-        minSelectedExtras: 0
-      }],
+      ],
       duration: 0,
       group: false,
-      notifyParticipants:'',
+      notifyParticipants: '',
       payment: {
         amount: 0,
         gateway: '',
         deposit: false,
-        data: {}
+        data: {},
       },
       categoryId: null,
       serviceId: null,
@@ -48,7 +50,7 @@ export default {
       deduction: '',
       limit: '',
       required: false,
-      bookingsCount: 0
+      bookingsCount: 0,
     },
     appointmentsIndex: 0,
     currentCartItem: null,
@@ -59,7 +61,7 @@ export default {
         serviceId: null,
         index: 0,
         services: {},
-      }
+      },
     ],
     attachments: {},
     recurringRules: {
@@ -73,15 +75,15 @@ export default {
         count: 1,
       },
       days: [
-        {value: 'monday', selected: false},
-        {value: 'tuesday', selected: false},
-        {value: 'wednesday', selected: false},
-        {value: 'thursday', selected: false},
-        {value: 'friday', selected: false},
-        {value: 'saturday', selected: false},
-        {value: 'sunday', selected: false}
+        { value: 'monday', selected: false },
+        { value: 'tuesday', selected: false },
+        { value: 'wednesday', selected: false },
+        { value: 'thursday', selected: false },
+        { value: 'friday', selected: false },
+        { value: 'saturday', selected: false },
+        { value: 'sunday', selected: false },
       ],
-      monthly: 0
+      monthly: 0,
     },
     loading: false,
     booked: null,
@@ -89,11 +91,11 @@ export default {
     packageId: null,
     error: '',
     busyness: [],
-    lastBookedProviderId: null
+    lastBookedProviderId: null,
   }),
 
   getters: {
-    getSelection (state) {
+    getSelection(state) {
       return {
         packageId: state.packageId,
         categoryId: state.appointment.categoryId,
@@ -104,7 +106,7 @@ export default {
       }
     },
 
-    getServiceProviderSelection (state) {
+    getServiceProviderSelection(state) {
       return {
         serviceId: state.appointment.serviceId,
         providerId: state.appointment.providerId,
@@ -112,58 +114,59 @@ export default {
       }
     },
 
-    getPackageId (state) {
+    getPackageId(state) {
       return state.packageId
     },
 
-    getCategoryId (state) {
+    getCategoryId(state) {
       return state.appointment.categoryId
     },
 
-    getServiceId (state) {
+    getServiceId(state) {
       return state.appointment.serviceId
     },
 
-    getEmployeeId (state) {
+    getEmployeeId(state) {
       return state.appointment.providerId
     },
 
-    getLocationId (state) {
+    getLocationId(state) {
       return state.appointment.locationId
     },
 
-    getBooking (state) {
+    getBooking(state) {
       return state.appointment.bookings[0]
     },
 
-    getBookingPersons (state) {
+    getBookingPersons(state) {
       let i = state.appointmentsIndex
 
-      return state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .list[state.appointments[i].index]
-        .persons
+      return state.appointments[i].services[state.appointments[i].serviceId].list[
+        state.appointments[i].index
+      ].persons
     },
 
-    getBookingDuration (state) {
+    getBookingDuration(state) {
       let i = state.appointmentsIndex
 
-      return state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .list[state.appointments[i].index]
-        .duration
+      return state.appointments[i].services[state.appointments[i].serviceId].list[
+        state.appointments[i].index
+      ].duration
     },
 
-    getBookableType (state) {
+    getBookableType(state) {
       return state.appointment.type
     },
 
-    getAllMultipleAppointments (state) {
+    getAllMultipleAppointments(state) {
       return state.appointments
     },
 
-    getMultipleAppointmentsServiceSlots (state) {
-      let selection = state.appointments[state.appointmentsIndex].services[state.appointments[state.appointmentsIndex].serviceId]
+    getMultipleAppointmentsServiceSlots(state) {
+      let selection =
+        state.appointments[state.appointmentsIndex].services[
+          state.appointments[state.appointmentsIndex].serviceId
+        ]
 
       if (selection.providerId || selection.locationId) {
         let slots = {}
@@ -171,7 +174,9 @@ export default {
         for (let date in selection.slots) {
           for (let time in selection.slots[date]) {
             for (let i = 0; i < selection.slots[date][time].length; i++) {
-              if ((selection.providerId && selection.slots[date][time][i].e === selection.providerId) ||
+              if (
+                (selection.providerId &&
+                  selection.slots[date][time][i].e === selection.providerId) ||
                 (selection.locationId && selection.slots[date][time][i].l === selection.locationId)
               ) {
                 if (!(date in slots)) {
@@ -187,264 +192,258 @@ export default {
         return slots
       }
 
-      return state.appointments[state.appointmentsIndex].services[state.appointments[state.appointmentsIndex].serviceId].slots
+      return state.appointments[state.appointmentsIndex].services[
+        state.appointments[state.appointmentsIndex].serviceId
+      ].slots
     },
 
-    getMultipleAppointmentsRange (state) {
+    getMultipleAppointmentsRange(state) {
       let i = state.appointmentsIndex
 
-      return state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .list[state.appointments[i].index]
-        .range
+      return state.appointments[i].services[state.appointments[i].serviceId].list[
+        state.appointments[i].index
+      ].range
     },
 
     getMultipleAppointmentsAppCount: (state) => (serviceId) => {
       let i = state.appointmentsIndex
 
-      return state.appointments[i]
-          .services[serviceId]
-          .appCount
+      return state.appointments[i].services[serviceId].appCount
     },
 
-    getMultipleAppointmentsDate (state) {
+    getMultipleAppointmentsDate(state) {
       let i = state.appointmentsIndex
 
-      return state.appointments[i]
-          .services[state.appointments[i].serviceId]
-          .list[state.appointments[i].index]
-          .date
+      return state.appointments[i].services[state.appointments[i].serviceId].list[
+        state.appointments[i].index
+      ].date
     },
 
-    getMultipleAppointmentsOccupied (state) {
-      return state.appointments[state.appointmentsIndex].services[state.appointments[state.appointmentsIndex].serviceId].occupied
+    getMultipleAppointmentsOccupied(state) {
+      return state.appointments[state.appointmentsIndex].services[
+        state.appointments[state.appointmentsIndex].serviceId
+      ].occupied
     },
 
-    getMultipleAppointmentsTime (state) {
+    getMultipleAppointmentsTime(state) {
       let i = state.appointmentsIndex
 
-      return state.appointments[i]
-          .services[state.appointments[i].serviceId]
-          .list[state.appointments[i].index]
-          .time
+      return state.appointments[i].services[state.appointments[i].serviceId].list[
+        state.appointments[i].index
+      ].time
     },
 
-    getMultipleAppointmentsSlots (state) {
+    getMultipleAppointmentsSlots(state) {
       let i = state.appointmentsIndex
 
-      return state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .slots
+      return state.appointments[i].services[state.appointments[i].serviceId].slots
     },
 
-    getMultipleAppointmentsLastDate (state) {
+    getMultipleAppointmentsLastDate(state) {
       let i = state.appointmentsIndex
 
-      return state.appointments[i]
-          .services[state.appointments[i].serviceId]
-          .lastDate
+      return state.appointments[i].services[state.appointments[i].serviceId].lastDate
     },
 
-    getSelectedExtras (state) {
+    getSelectedExtras(state) {
       let i = state.appointmentsIndex
 
-      return state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .list[state.appointments[i].index]
-        .extras
+      return state.appointments[i].services[state.appointments[i].serviceId].list[
+        state.appointments[i].index
+      ].extras
     },
 
-    getCustomerId (state) {
+    getCustomerId(state) {
       return state.appointment.bookings[0].customer.id
     },
 
-    getCustomerFirstName (state) {
+    getCustomerFirstName(state) {
       return state.appointment.bookings[0].customer.firstName
     },
 
-    getCustomerLastName (state) {
+    getCustomerLastName(state) {
       return state.appointment.bookings[0].customer.lastName
     },
 
-    getCustomerEmail (state) {
+    getCustomerEmail(state) {
       return state.appointment.bookings[0].customer.email
     },
 
-    getCustomerPhone (state) {
+    getCustomerPhone(state) {
       return state.appointment.bookings[0].customer.phone
     },
 
-    getCustomerCountryPhoneIso (state) {
+    getCustomerCountryPhoneIso(state) {
       return state.appointment.bookings[0].customer.countryPhoneIso
     },
 
-    getCustomerSubscribe (state) {
+    getCustomerSubscribe(state) {
       return state.appointment.bookings[0].customer.subscribeToMailchimp
     },
 
-    getCustomerExternalId (state) {
+    getCustomerExternalId(state) {
       return state.appointment.bookings[0].customer.externalId
     },
 
-    getCustomerTranslations (state) {
+    getCustomerTranslations(state) {
       return state.appointment.bookings[0].customer.translations
     },
 
-    getCustomerCustomFields (state) {
+    getCustomerCustomFields(state) {
       return state.appointment.bookings[0].customer.customFields
     },
 
-    getAvailableCustomFields (state) {
+    getAvailableCustomFields(state) {
       return state.appointment.bookings[0].customFields
     },
 
-    getRecurringRepeatType (state) {
+    getRecurringRepeatType(state) {
       return state.recurringRules.repeat.type
     },
 
-    getRecurringRepeatInterval (state) {
+    getRecurringRepeatInterval(state) {
       return state.recurringRules.repeat.interval
     },
 
-    getRecurringOccurrenceType (state) {
+    getRecurringOccurrenceType(state) {
       return state.recurringRules.occurrence.type
     },
 
-    getRecurringOccurrenceDate (state) {
+    getRecurringOccurrenceDate(state) {
       return state.recurringRules.occurrence.date
     },
 
-    getRecurringOccurrenceCount (state) {
+    getRecurringOccurrenceCount(state) {
       return state.recurringRules.occurrence.count
     },
 
-    getRecurringDays (state) {
+    getRecurringDays(state) {
       return state.recurringRules.days
     },
 
-    getRecurringMonthly (state) {
+    getRecurringMonthly(state) {
       return state.recurringRules.monthly
     },
 
-    getAttachments (state) {
+    getAttachments(state) {
       return state.attachments
     },
 
-    getCoupon (state) {
+    getCoupon(state) {
       return state.coupon
     },
 
-    getCouponCode (state) {
+    getCouponCode(state) {
       return state.coupon.code
     },
 
-    getCouponValidated (state) {
-      return !state.coupon.required || (state.coupon.code !== '')
+    getCouponValidated(state) {
+      return !state.coupon.required || state.coupon.code !== ''
     },
 
-    getPaymentGateway (state) {
+    getPaymentGateway(state) {
       return state.appointment.payment.gateway
     },
 
-    getPaymentDeposit (state) {
+    getPaymentDeposit(state) {
       return state.appointment.payment.deposit
     },
 
-    getLoading (state) {
+    getLoading(state) {
       return state.loading
     },
 
-    getBooked (state) {
+    getBooked(state) {
       return state.booked
     },
 
-    getError (state) {
+    getError(state) {
       return state.error
     },
 
-    getBusyness (state) {
+    getBusyness(state) {
       return state.busyness
     },
 
-    getLastBookedProviderId (state) {
+    getLastBookedProviderId(state) {
       return state.lastBookedProviderId
     },
 
-    getCurrentCartItem (state) {
+    getCurrentCartItem(state) {
       return state.currentCartItem
     },
 
-    getShownCart (state) {
+    getShownCart(state) {
       return state.shownCart
     },
 
-    getCartItemIndex (state) {
+    getCartItemIndex(state) {
       return state.appointmentsIndex
     },
   },
 
   mutations: {
-    setPackageId (state, payload) {
+    setPackageId(state, payload) {
       state.packageId = payload
     },
 
-    setCategoryId (state, payload) {
+    setCategoryId(state, payload) {
       state.appointment.categoryId = payload
     },
 
-    setServiceId (state, payload) {
+    setServiceId(state, payload) {
       state.appointment.serviceId = payload
     },
 
-    setEmployeeId (state, payload) {
+    setEmployeeId(state, payload) {
       state.appointment.providerId = payload
     },
 
-    setLocationId (state, payload) {
+    setLocationId(state, payload) {
       state.appointment.locationId = payload
     },
 
-    setCartItem (state, payload) {
+    setCartItem(state, payload) {
       state.appointments[state.appointmentsIndex] = payload
     },
 
-    setCurrentCartItem (state, payload) {
+    setCurrentCartItem(state, payload) {
       state.currentCartItem = payload
     },
 
-    setShownCart (state, payload) {
+    setShownCart(state, payload) {
       state.shownCart = payload
     },
 
-    setCartItemIndex (state, payload) {
+    setCartItemIndex(state, payload) {
       state.appointmentsIndex = payload
     },
 
-    setMultipleAppointments (state, payload) {
+    setMultipleAppointments(state, payload) {
       state.appointments = payload
     },
 
-    setMultipleAppointmentsServiceId (state, payload) {
+    setMultipleAppointmentsServiceId(state, payload) {
       state.appointments[state.appointmentsIndex].serviceId = payload
     },
 
-    setMultipleAppointmentsIndex (state, payload) {
+    setMultipleAppointmentsIndex(state, payload) {
       state.appointments[state.appointmentsIndex].index = payload
     },
 
-    unsetMultipleAppointmentsData (state, payload) {
+    unsetMultipleAppointmentsData(state, payload) {
       let i = state.appointmentsIndex
 
       if (payload !== '') {
-        state.appointments[i]
-            .services[state.appointments[i].serviceId]
-            .list[payload] = {
+        state.appointments[i].services[state.appointments[i].serviceId].list[payload] = {
           date: null,
           time: null,
           providerId: null,
           locationId: null,
-          persons: state.appointments[i].services[state.appointments[i].serviceId].list[payload].persons,
-          extras: state.appointments[i].services[state.appointments[i].serviceId].list[payload].extras,
+          persons:
+            state.appointments[i].services[state.appointments[i].serviceId].list[payload].persons,
+          extras:
+            state.appointments[i].services[state.appointments[i].serviceId].list[payload].extras,
           duration: null,
           slots: [],
           price: null,
@@ -452,112 +451,98 @@ export default {
       }
     },
 
-    unsetRecurringItems (state) {
+    unsetRecurringItems(state) {
       let i = state.appointmentsIndex
 
       state.appointments[i].services[state.appointments[i].serviceId].list.length = 1
     },
 
-    setMultipleAppointmentsRange (state, payload) {
+    setMultipleAppointmentsRange(state, payload) {
       let i = state.appointmentsIndex
 
-      state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .list[state.appointments[i].index]
-        .range = payload
+      state.appointments[i].services[state.appointments[i].serviceId].list[
+        state.appointments[i].index
+      ].range = payload
     },
 
-    setMultipleAppointmentsExistingApp (state, payload) {
+    setMultipleAppointmentsExistingApp(state, payload) {
       let i = state.appointmentsIndex
 
-      state.appointments[i]
-          .services[state.appointments[i].serviceId]
-          .list[state.appointments[i].index]
-          .existingApp = payload
+      state.appointments[i].services[state.appointments[i].serviceId].list[
+        state.appointments[i].index
+      ].existingApp = payload
     },
 
-    setMultipleAppointmentsAppCount (state, payload) {
+    setMultipleAppointmentsAppCount(state, payload) {
       let i = state.appointmentsIndex
 
-      state.appointments[i]
-          .services[state.appointments[i].serviceId]
-          .appCount = payload
+      state.appointments[i].services[state.appointments[i].serviceId].appCount = payload
     },
 
-    setMultipleAppointmentsDate (state, payload) {
+    setMultipleAppointmentsDate(state, payload) {
       let i = state.appointmentsIndex
 
-      state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .list[state.appointments[i].index]
-        .date = payload
+      state.appointments[i].services[state.appointments[i].serviceId].list[
+        state.appointments[i].index
+      ].date = payload
     },
 
-    setMultipleAppointmentsTime (state, payload) {
+    setMultipleAppointmentsTime(state, payload) {
       let i = state.appointmentsIndex
 
-      state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .list[state.appointments[i].index]
-        .time = payload
+      state.appointments[i].services[state.appointments[i].serviceId].list[
+        state.appointments[i].index
+      ].time = payload
     },
 
-    setMultipleAppointmentsSlots (state, payload) {
+    setMultipleAppointmentsSlots(state, payload) {
       let i = state.appointmentsIndex
 
-      state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .slots = payload
+      state.appointments[i].services[state.appointments[i].serviceId].slots = payload
     },
 
-    setMultipleAppointmentsOccupied (state, payload) {
+    setMultipleAppointmentsOccupied(state, payload) {
       let i = state.appointmentsIndex
 
-      state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .occupied = payload
+      state.appointments[i].services[state.appointments[i].serviceId].occupied = payload
     },
 
-    setMultipleAppointmentsLastDate (state, payload) {
+    setMultipleAppointmentsLastDate(state, payload) {
       let i = state.appointmentsIndex
 
-      state.appointments[i]
-          .services[state.appointments[i].serviceId]
-          .lastDate = payload
+      state.appointments[i].services[state.appointments[i].serviceId].lastDate = payload
     },
 
-    setMultipleAppointmentsServiceProvider (state, payload) {
+    setMultipleAppointmentsServiceProvider(state, payload) {
       let i = state.appointmentsIndex
 
-      state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .providerId = payload ? parseInt(payload) : null
+      state.appointments[i].services[state.appointments[i].serviceId].providerId = payload
+        ? parseInt(payload)
+        : null
     },
 
-    setMultipleAppointmentsServiceLocation (state, payload) {
+    setMultipleAppointmentsServiceLocation(state, payload) {
       let i = state.appointmentsIndex
 
-      state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .locationId = payload ? parseInt(payload) : null
+      state.appointments[i].services[state.appointments[i].serviceId].locationId = payload
+        ? parseInt(payload)
+        : null
     },
 
-    setBookingPersons (state, payload) {
+    setBookingPersons(state, payload) {
       let i = state.appointmentsIndex
 
-      state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .list[state.appointments[i].index]
-        .persons = payload + (settings.appointments.bringingAnyoneLogic === 'additional' ? 1 : 0)
+      state.appointments[i].services[state.appointments[i].serviceId].list[
+        state.appointments[i].index
+      ].persons = payload + (settings.appointments.bringingAnyoneLogic === 'additional' ? 1 : 0)
     },
 
-    setBookingDuration (state, payload) {
+    setBookingDuration(state, payload) {
       let i = state.appointmentsIndex
 
-      state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .list[state.appointments[i].index]
-        .duration = payload
+      state.appointments[i].services[state.appointments[i].serviceId].list[
+        state.appointments[i].index
+      ].duration = payload
     },
 
     setAvailableCustomFields(state, payload) {
@@ -577,133 +562,136 @@ export default {
       state.appointment.bookings[0].customFields = populateAvailableCustomFields
     },
 
-    setBookableType (state, payload) {
+    setBookableType(state, payload) {
       state.appointment.type = payload
     },
 
-    setSelectedExtras (state, payload) {
+    setSelectedExtras(state, payload) {
       let i = state.appointmentsIndex
 
-      state.appointments[i]
-        .services[state.appointments[i].serviceId]
-        .list[state.appointments[i].index]
-        .extras = payload ? payload : []
+      state.appointments[i].services[state.appointments[i].serviceId].list[
+        state.appointments[i].index
+      ].extras = payload ? payload : []
     },
 
-    setCustomerId (state, payload) {
+    setCustomerId(state, payload) {
       state.appointment.bookings[0].customer.id = payload
     },
 
-    setCustomerFirstName (state, payload) {
+    setCustomerFirstName(state, payload) {
       state.appointment.bookings[0].customer.firstName = payload
     },
 
-    setCustomerLastName (state, payload) {
+    setCustomerLastName(state, payload) {
       state.appointment.bookings[0].customer.lastName = payload
     },
 
-    setCustomerEmail (state, payload) {
+    setCustomerEmail(state, payload) {
       state.appointment.bookings[0].customer.email = payload
     },
 
-    setCustomerPhone (state, payload) {
+    setCustomerPhone(state, payload) {
       state.appointment.bookings[0].customer.phone = payload
     },
 
-    setCustomerCountryPhoneIso (state, payload) {
+    setCustomerCountryPhoneIso(state, payload) {
       state.appointment.bookings[0].customer.countryPhoneIso = payload
     },
 
-    setCustomerSubscribe (state, payload) {
+    setCustomerSubscribe(state, payload) {
       state.appointment.bookings[0].customer.subscribeToMailchimp = payload
     },
 
-    setCustomerExternalId (state, payload) {
+    setCustomerExternalId(state, payload) {
       state.appointment.bookings[0].customer.externalId = payload
     },
 
-    setRecurringRepeatType (state, payload) {
+    setRecurringRepeatType(state, payload) {
       state.recurringRules.repeat.type = payload
     },
 
-    setRecurringRepeatInterval (state, payload) {
+    setRecurringRepeatInterval(state, payload) {
       state.recurringRules.repeat.interval = payload
     },
 
-    setRecurringOccurrenceType (state, payload) {
+    setRecurringOccurrenceType(state, payload) {
       state.recurringRules.occurrence.type = payload
     },
 
-    setRecurringOccurrenceDate (state, payload) {
+    setRecurringOccurrenceDate(state, payload) {
       state.recurringRules.occurrence.date = payload
     },
 
-    setRecurringOccurrenceCount (state, payload) {
+    setRecurringOccurrenceCount(state, payload) {
       state.recurringRules.occurrence.count = payload
     },
 
-    setRecurringDays (state, payload) {
-      state.recurringRules.days.find(day => day.value === payload.value).selected = payload.selected
+    setRecurringDays(state, payload) {
+      state.recurringRules.days.find((day) => day.value === payload.value).selected =
+        payload.selected
     },
 
-    setRecurringMonthly (state, payload) {
+    setRecurringMonthly(state, payload) {
       state.recurringRules.monthly = payload
     },
 
-    setCustomerTranslations (state, payload) {
+    setCustomerTranslations(state, payload) {
       state.appointment.bookings[0].customer.translations = payload
     },
 
-    setCustomerCustomFields (state, payload) {
+    setCustomerCustomFields(state, payload) {
       state.appointment.bookings[0].customer.customFields = payload
     },
 
-    setAttachment (state, payload) {
+    setAttachment(state, payload) {
       state.attachments[payload.id] = payload.raw
     },
 
-    setCoupon (state, payload) {
+    setCoupon(state, payload) {
       state.coupon = payload
     },
 
-    setCouponCode (state, payload) {
+    setCouponCode(state, payload) {
       state.coupon.code = payload
     },
 
-    setCouponRequired (state, payload) {
+    setCouponRequired(state, payload) {
       state.coupon.required = payload
     },
 
-    setBookingsCount (state, payload) {
+    setBookingsCount(state, payload) {
       state.coupon.bookingsCount = payload
     },
 
-    setPaymentGateway (state, payload) {
+    setPaymentGateway(state, payload) {
       state.appointment.payment.gateway = payload
     },
 
-    setPaymentDeposit (state, payload) {
+    setPaymentDeposit(state, payload) {
       state.appointment.payment.deposit = payload
     },
 
-    setLoading (state, payload) {
+    setLoading(state, payload) {
       state.loading = payload
     },
 
-    setBooked (state, payload) {
+    setBooked(state, payload) {
       state.booked = payload
     },
 
-    setError (state, payload) {
+    setError(state, payload) {
       state.error = payload
     },
 
-    setBusyness (state, payload) {
+    setBusyness(state, payload) {
       state.busyness = payload
     },
 
-    setLastBookedProviderId (state, payload) {
-      state.lastBookedProviderId = !payload.fromBackend || (state.lastBookedProviderId === null && payload.providerId !==null) ? payload.providerId : state.lastBookedProviderId
+    setLastBookedProviderId(state, payload) {
+      state.lastBookedProviderId =
+        !payload.fromBackend || (state.lastBookedProviderId === null && payload.providerId !== null)
+          ? payload.providerId
+          : state.lastBookedProviderId
     },
   },
 }

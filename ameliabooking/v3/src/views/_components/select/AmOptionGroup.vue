@@ -1,15 +1,9 @@
 <template>
-
   <!-- Option Group -->
-  <el-option-group
-    class="adm-select-option-group"
-    :label="label"
-    :disabled="disabled"
-  >
+  <el-option-group class="adm-select-option-group" :label="label" :disabled="disabled">
     <slot />
   </el-option-group>
   <!-- /Option Group -->
-
 </template>
 
 <script>
@@ -19,13 +13,13 @@ export default {
   props: {
     label: {
       type: String,
-      default: ''
+      default: '',
     },
     disabled: {
       type: Boolean,
-      default: false
-    }
-  }
+      default: false,
+    },
+  },
 }
 </script>
 

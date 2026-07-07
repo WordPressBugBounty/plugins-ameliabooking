@@ -1,16 +1,9 @@
 <template>
-  <div
-    class="am-fs__cserv"
-    :class="useResponsiveClass(wrapperWidth)"
-    :style="cssVars
-">
-    <div
-      class="am-fs__cserv-heading"
-      :class="useResponsiveClass(wrapperWidth)"
-    >
+  <div class="am-fs__cserv" :class="useResponsiveClass(wrapperWidth)" :style="cssVars">
+    <div class="am-fs__cserv-heading" :class="useResponsiveClass(wrapperWidth)">
       <span
         class="am-fs__cserv-heading-img"
-        :style="{backgroundColor: `${props.data.service.color}`}"
+        :style="{ backgroundColor: `${props.data.service.color}` }"
       >
         {{ imagePlaceholder(props.data.service.name) }}
       </span>
@@ -18,10 +11,7 @@
         {{ props.data.service.name }}
       </p>
     </div>
-    <div
-      class="am-fs__cserv-price"
-      :class="useResponsiveClass(wrapperWidth)"
-    >
+    <div class="am-fs__cserv-price" :class="useResponsiveClass(wrapperWidth)">
       <span class="am-price">
         {{ useFormattedPrice(servicePrice + extrasPrice) }}
       </span>
@@ -31,34 +21,31 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject,
-} from 'vue'
+import { computed, inject } from 'vue'
 
 // * Composable
 import { useFormattedPrice } from '../../../../../assets/js/common/formatting'
-import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
-import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
 
 let props = defineProps({
   data: {
     type: Object,
-    default: null
+    default: null,
   },
   globalClass: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 // * Features
 let features = inject('features')
 
-function imagePlaceholder (label) {
+function imagePlaceholder(label) {
   let shortLabel = ''
 
-  label.split(' ').forEach(item => {
+  label.split(' ').forEach((item) => {
     shortLabel += item.charAt(0).toUpperCase()
   })
 

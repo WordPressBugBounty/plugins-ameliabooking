@@ -1,25 +1,18 @@
 <template>
-  <div
-    :class="`am-atc-${generatedClass}`"
-    :style="cssVars"
-  >
+  <div :class="`am-atc-${generatedClass}`" :style="cssVars">
     <p>
       {{ calendarString }}
     </p>
     <div :class="`am-atc-${generatedClass}-cals`">
-      <div
-        v-for="cal in calendars"
-        :key="cal.type"
-        :class="`am-atc-${generatedClass}-cals-cards`"
-      >
+      <div v-for="cal in calendars" :key="cal.type" :class="`am-atc-${generatedClass}-cals-cards`">
         <a
-          :style="{borderColor : 'var(--am-c-atc-text-op10)'}"
+          :style="{ borderColor: 'var(--am-c-atc-text-op10)' }"
           :class="`am-atc-${generatedClass}-cals-card`"
         >
           <div>
             <span :class="`am-icon-${cal.type}`"></span>
           </div>
-          <p :style="{color : 'var(--am-c-atc-text)'}">
+          <p :style="{ color: 'var(--am-c-atc-text)' }">
             {{ cal.label }}
           </p>
         </a>
@@ -30,11 +23,7 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  ref,
-  inject
-} from 'vue'
+import { computed, ref, inject } from 'vue'
 
 // * Composables
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation.js'
@@ -43,27 +32,27 @@ import { useColorTransparency } from '../../../../../assets/js/common/colorManip
 defineProps({
   calendarString: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 })
 
 let calendars = ref([
   {
     type: 'google',
-    label: 'Google'
+    label: 'Google',
   },
   {
     type: 'outlook',
-    label: 'Outlook'
+    label: 'Outlook',
   },
   {
     type: 'yahoo',
-    label: 'Yahoo'
+    label: 'Yahoo',
   },
   {
     type: 'apple',
-    label: 'Apple'
-  }
+    label: 'Apple',
+  },
 ])
 
 // * Bookable type
@@ -86,21 +75,21 @@ const cssVars = computed(() => {
     return {
       '--am-c-atc-text': amColors.value.colorMainText,
       '--am-c-atc-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
-      '--am-c-atc-text-op5': useColorTransparency(amColors.value.colorMainText, 0.05)
+      '--am-c-atc-text-op5': useColorTransparency(amColors.value.colorMainText, 0.05),
     }
   }
 
   return {
     '--am-c-atc-text': amColors.value.colorSbText,
     '--am-c-atc-text-op10': useColorTransparency(amColors.value.colorSbText, 0.1),
-    '--am-c-atc-text-op5': useColorTransparency(amColors.value.colorSbText, 0.05)
+    '--am-c-atc-text-op5': useColorTransparency(amColors.value.colorSbText, 0.05),
   }
 })
 </script>
 
 <script>
 export default {
-  name: 'AddToCalendar'
+  name: 'AddToCalendar',
 }
 </script>
 
@@ -171,7 +160,7 @@ export default {
             }
 
             .am-icon-yahoo {
-              font-size: 17px
+              font-size: 17px;
             }
           }
 
@@ -245,7 +234,7 @@ export default {
             }
 
             .am-icon-yahoo {
-              font-size: 17px
+              font-size: 17px;
             }
           }
 

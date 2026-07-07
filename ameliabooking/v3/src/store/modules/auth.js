@@ -1,5 +1,5 @@
-import moment from "moment";
-import httpClient from "../../plugins/axios";
+import moment from 'moment'
+import httpClient from '../../plugins/axios'
 
 export default {
   namespaced: true,
@@ -39,125 +39,125 @@ export default {
   }),
 
   getters: {
-    getEmail (state) {
+    getEmail(state) {
       return state.email
     },
 
-    getPassword (state) {
+    getPassword(state) {
       return state.password
     },
 
-    getNewPassword (state) {
+    getNewPassword(state) {
       return state.newPassword
     },
 
-    getConfirmPassword (state) {
+    getConfirmPassword(state) {
       return state.confirmPassword
     },
 
-    getAuthenticated (state) {
+    getAuthenticated(state) {
       return state.authenticated
     },
 
-    getProfile (state) {
+    getProfile(state) {
       return state.profile
     },
 
-    getProfileDeleted (state) {
+    getProfileDeleted(state) {
       return state.profileDeleted
     },
 
-    getLoggedOut (state) {
+    getLoggedOut(state) {
       return state.loggedOut
     },
 
-    getGoogleLoading (state) {
+    getGoogleLoading(state) {
       return state.googleLoading
     },
 
-    getOutlookLoading (state) {
+    getOutlookLoading(state) {
       return state.outlookLoading
     },
 
-    getAppleLoading (state) {
+    getAppleLoading(state) {
       return state.appleLoading
     },
 
-    getStripeLoading (state) {
+    getStripeLoading(state) {
       return state.stripeLoading
     },
 
-    getZoomLoading (state) {
+    getZoomLoading(state) {
       return state.zoomLoading
     },
 
-    getSpacesLoading (state) {
+    getSpacesLoading(state) {
       return state.spacesLoading
     },
 
-    getZoomUsers (state) {
+    getZoomUsers(state) {
       return state.zoomUsers
     },
 
-    getSpaces (state) {
+    getSpaces(state) {
       return state.spaces
     },
 
-    getGoogleCalendars (state) {
+    getGoogleCalendars(state) {
       return state.googleCalendars
     },
 
-    getOutlookCalendars (state) {
+    getOutlookCalendars(state) {
       return state.outlookCalendars
     },
 
-    getAppleCalendars (state) {
+    getAppleCalendars(state) {
       return state.appleCalendars
     },
 
-    getStripeProvider (state) {
+    getStripeProvider(state) {
       return state.stripeProvider
     },
 
-    getLoadingAppointmentsCounter (state) {
+    getLoadingAppointmentsCounter(state) {
       return state.loadingAppointmentsCounter
     },
 
-    getLoadingEventsCounter (state) {
+    getLoadingEventsCounter(state) {
       return state.loadingEventsCounter
     },
 
-    getPreloadedEvents (state) {
+    getPreloadedEvents(state) {
       return state.preloaded.events
     },
 
-    getPreloadedCustomers (state) {
+    getPreloadedCustomers(state) {
       return state.preloaded.customers
     },
   },
 
   mutations: {
-    setEmail (state, payload) {
+    setEmail(state, payload) {
       state.email = payload
     },
 
-    setPassword (state, payload) {
+    setPassword(state, payload) {
       state.password = payload
     },
 
-    setNewPassword (state, payload) {
+    setNewPassword(state, payload) {
       state.newPassword = payload
     },
 
-    setConfirmPassword (state, payload) {
+    setConfirmPassword(state, payload) {
       state.confirmPassword = payload
     },
 
-    setAuthenticated (state, payload) {
+    setAuthenticated(state, payload) {
       state.authenticated = payload
     },
 
-    setProfile (state, payload) {
+    setProfile(state, payload) {
       state.profile = payload
 
       if (state.profile.phone === null) {
@@ -169,116 +169,112 @@ export default {
       }
     },
 
-    setProfileFirstName (state, payload) {
+    setProfileFirstName(state, payload) {
       state.profile.firstName = payload
     },
 
-    setProfileLastName (state, payload) {
+    setProfileLastName(state, payload) {
       state.profile.lastName = payload
     },
 
-    setProfileEmail (state, payload) {
+    setProfileEmail(state, payload) {
       state.profile.email = payload
     },
 
-    setProfilePhone (state, payload) {
+    setProfilePhone(state, payload) {
       state.profile.phone = payload
     },
 
-    setProfileCountryPhoneIso (state, payload) {
+    setProfileCountryPhoneIso(state, payload) {
       state.profile.countryPhoneIso = payload
     },
 
-    setProfileBirthday (state, payload) {
+    setProfileBirthday(state, payload) {
       state.profile.birthday = payload
     },
 
-    setProfileDeleted (state, payload) {
+    setProfileDeleted(state, payload) {
       state.profileDeleted = payload
     },
 
-    setLoggedOut (state, payload) {
+    setLoggedOut(state, payload) {
       state.loggedOut = payload
     },
 
-    setGoogleLoading (state, payload) {
+    setGoogleLoading(state, payload) {
       state.googleLoading = payload
     },
 
-    setOutlookLoading (state, payload) {
+    setOutlookLoading(state, payload) {
       state.outlookLoading = payload
     },
 
-    setAppleLoading (state, payload) {
+    setAppleLoading(state, payload) {
       state.appleLoading = payload
     },
 
-    setStripeLoading (state, payload) {
+    setStripeLoading(state, payload) {
       state.stripeLoading = payload
     },
 
-    setZoomLoading (state, payload) {
+    setZoomLoading(state, payload) {
       state.zoomLoading = payload
     },
 
-    setSpacesLoading (state, payload) {
+    setSpacesLoading(state, payload) {
       state.spacesLoading = payload
     },
 
-    setZoomUsers (state, payload) {
+    setZoomUsers(state, payload) {
       state.zoomUsers = payload
     },
 
-    setSpaces (state, payload) {
+    setSpaces(state, payload) {
       state.spaces = payload
     },
 
-    setGoogleCalendars (state, payload) {
+    setGoogleCalendars(state, payload) {
       state.googleCalendars = payload
     },
 
-    setOutlookCalendars (state, payload) {
+    setOutlookCalendars(state, payload) {
       state.outlookCalendars = payload
     },
 
-    setAppleCalendars (state, payload) {
+    setAppleCalendars(state, payload) {
       state.appleCalendars = payload
     },
 
-    setStripeProvider (state, payload) {
+    setStripeProvider(state, payload) {
       state.stripeProvider = payload
     },
 
-    setLoadingAppointmentsCounter (state, payload) {
+    setLoadingAppointmentsCounter(state, payload) {
       state.loadingAppointmentsCounter = payload
     },
 
-    setLoadingEventsCounter (state, payload) {
+    setLoadingEventsCounter(state, payload) {
       state.loadingEventsCounter = payload
     },
 
-    setPreloadedEvents (state, payload) {
+    setPreloadedEvents(state, payload) {
       state.preloaded.events = payload
     },
 
-    setPreloadedCustomers (state, payload) {
+    setPreloadedCustomers(state, payload) {
       state.preloaded.customers = payload
     },
   },
 
   actions: {
-    logout ({commit}) {
+    logout({ commit }) {
       commit('setPassword', '')
       commit('setAuthenticated', false)
       commit('setLoggedOut', true)
       localStorage.removeItem('vue-authenticate.vueauth_token')
 
       try {
-        httpClient.post(
-            '/users/logout',
-            {},
-            {}
-        )
+        httpClient.post('/users/logout', {}, {})
 
         if (window?.ameliaBooking?.cabinet?.userLoggedOut) {
           window.ameliaBooking.cabinet.userLoggedOut()
@@ -286,6 +282,6 @@ export default {
       } catch (error) {
         console.log(error)
       }
-    }
-  }
+    },
+  },
 }

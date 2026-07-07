@@ -13,10 +13,7 @@
     >
       {{ amLabels.change_password }}
     </AmButton>
-    <AmButton
-      size="medium"
-      @click="saveData"
-    >
+    <AmButton size="medium" @click="saveData">
       {{ props.tabActive !== 'password' ? amLabels.save : amLabels.change_password }}
     </AmButton>
   </div>
@@ -40,8 +37,8 @@ const props = defineProps({
   },
   passwordActive: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 // * Emits

@@ -110,8 +110,7 @@ const { previousStep } = inject('changingStepsFunctions', {
 let amLabels = inject('labels')
 
 function displayLabels(label) {
-  return Object.keys(props.customizedLabels).length &&
-    props.customizedLabels[label]
+  return Object.keys(props.customizedLabels).length && props.customizedLabels[label]
     ? props.customizedLabels[label]
     : amLabels[label]
 }
@@ -140,16 +139,13 @@ let amColors = inject(
     colorBtnPrimText: '#FFFFFF',
     colorBtnSec: '#1A2C37',
     colorBtnSecText: '#FFFFFF',
-  })
+  }),
 )
 
 // * Css Vars
 let cssVars = computed(() => {
   return {
-    '--am-c-el-text-op15': useColorTransparency(
-      amColors.value.colorMainText,
-      0.15
-    ),
+    '--am-c-el-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15),
   }
 })
 
@@ -173,7 +169,7 @@ watch(
   {
     flush: 'post',
     immediate: true,
-  }
+  },
 )
 
 onBeforeUnmount(() => {

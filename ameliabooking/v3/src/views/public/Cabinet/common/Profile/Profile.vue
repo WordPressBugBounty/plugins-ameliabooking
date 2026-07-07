@@ -30,11 +30,7 @@
         :aria-label="tabsAriaLabel"
         @tab-click="tabClick"
       >
-        <el-tab-pane
-          class="am-capi__tabs-item"
-          :label="amLabels.personal_info"
-          name="first"
-        >
+        <el-tab-pane class="am-capi__tabs-item" :label="amLabels.personal_info" name="first">
           <template v-if="!loading">
             <div class="am-capi__sr-only">{{ amLabels.personal_info }}</div>
             <el-form
@@ -54,16 +50,16 @@
                   v-model="infoFormData[item.id]"
                   v-model:country-code="infoFormConstruction[item.id].countryCode"
                   v-bind="infoFormConstruction[item.id].props"
-                  v-on="'handlers' in infoFormConstruction[item.id] ? infoFormConstruction[item.id].handlers : {}"
+                  v-on="
+                    'handlers' in infoFormConstruction[item.id]
+                      ? infoFormConstruction[item.id].handlers
+                      : {}
+                  "
                 ></component>
               </template>
             </el-form>
           </template>
-          <ProfileSkeleton
-            v-else
-            :count="5"
-            :page-width="pageWidth"
-          ></ProfileSkeleton>
+          <ProfileSkeleton v-else :count="5" :page-width="pageWidth"></ProfileSkeleton>
         </el-tab-pane>
 
         <!-- Customer Custom Fields -->
@@ -101,11 +97,7 @@
         </el-tab-pane>
         <!-- /Customer Custom Fields -->
 
-        <el-tab-pane
-          class="am-capi__tabs-item"
-          :label="amLabels.password_tab"
-          name="second"
-        >
+        <el-tab-pane class="am-capi__tabs-item" :label="amLabels.password_tab" name="second">
           <template v-if="!loading">
             <div class="am-capi__sr-only">{{ amLabels.password_tab }}</div>
             <el-form
@@ -159,17 +151,17 @@
 
 <script setup>
 // * _components
-import AmAlert from "../../../../_components/alert/AmAlert.vue";
+import AmAlert from '../../../../_components/alert/AmAlert.vue'
 
 // * Dedicated Components
-import DeleteProfile from "../parts/DeleteProfile.vue"
-import MainProfileFooter from "../../../../common/SbsFormConstruction/MainContent/parts/MainProfileFooter.vue"
-import ProfileSkeleton from "./parts/ProfileSkeleton.vue";
+import DeleteProfile from '../parts/DeleteProfile.vue'
+import MainProfileFooter from '../../../../common/SbsFormConstruction/MainContent/parts/MainProfileFooter.vue'
+import ProfileSkeleton from './parts/ProfileSkeleton.vue'
 
 // * Import Libraries
-import moment from "moment";
-import { useCookies } from "vue3-cookies";
-import httpClient from "../../../../../plugins/axios";
+import moment from 'moment'
+import { useCookies } from 'vue3-cookies'
+import httpClient from '../../../../../plugins/axios'
 
 // * Import from Vue
 import {
@@ -181,23 +173,21 @@ import {
   onMounted,
   onBeforeUnmount,
   nextTick,
-  watch
-} from "vue";
+  watch,
+} from 'vue'
 
 // * Composables
-import {
-  useResponsiveClass
-} from "../../../../../assets/js/common/responsive";
-import {
-  useColorTransparency
-} from "../../../../../assets/js/common/colorManipulation";
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
 
 // * Form Fields Templates
-import { formFieldsTemplates } from "../../../../../assets/js/common/formFieldsTemplates";
+import { formFieldsTemplates } from '../../../../../assets/js/common/formFieldsTemplates'
 
 // * Import from Vuex
-import { useStore } from "vuex";
-import {mapAddressComponentsForXML} from "../../../../../assets/js/common/helper";
+import { useStore } from 'vuex'
+import { mapAddressComponentsForXML } from '../../../../../assets/js/common/helper'
+import { getInternationalPhoneValue } from '../../../../../assets/js/common/phone'
+
 let store = useStore()
 
 // * Loading state
@@ -228,7 +218,7 @@ watch(sidebarCollapsed, (current) => {
   }
 })
 
-function collapseTriggered () {
+function collapseTriggered() {
   pageWidth.value = pageContainer.value.offsetWidth
 }
 
@@ -266,9 +256,9 @@ const localLanguage = inject('localLanguage')
 // * if local lang is in settings lang
 let langDetection = computed(() => amSettings.general.usedLanguages.includes(localLanguage.value))
 
-function customizedLabelsObject (obj, custObj) {
+function customizedLabelsObject(obj, custObj) {
   if (custObj) {
-    Object.keys(custObj).forEach(labelKey => {
+    Object.keys(custObj).forEach((labelKey) => {
       if (custObj[labelKey][localLanguage.value] && langDetection.value) {
         obj[labelKey] = custObj[labelKey][localLanguage.value]
       } else if (custObj[labelKey].default) {
@@ -281,14 +271,14 @@ function customizedLabelsObject (obj, custObj) {
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
   let customizedLabels = amCustomize.value.profile.translations
 
   return customizedLabelsObject(computedLabels, customizedLabels)
 })
 
 // * Dedicated step labels
-function customizedStepLabels (step) {
+function customizedStepLabels(step) {
   let stepLabels = {}
   let customizedLabels = amCustomize.value[step].translations
 
@@ -326,7 +316,7 @@ let tabsAriaLabel = computed(() => {
 // * Success message
 let successMessage = ref('')
 
-function closeAlert () {
+function closeAlert() {
   alertVisibility.value = false
   successMessage.value = ''
 }
@@ -346,32 +336,33 @@ let infoFormData = ref({
   firstName: computed({
     get: () => store.getters['auth/getProfile'].firstName,
     set: (val) => {
-      store.commit('auth/setProfileFirstName', val ? val : "")
-    }
+      store.commit('auth/setProfileFirstName', val ? val : '')
+    },
   }),
   lastName: computed({
     get: () => store.getters['auth/getProfile'].lastName,
     set: (val) => {
-      store.commit('auth/setProfileLastName', val ? val : "")
-    }
+      store.commit('auth/setProfileLastName', val ? val : '')
+    },
   }),
   email: computed({
     get: () => store.getters['auth/getProfile'].email,
     set: (val) => {
-      store.commit('auth/setProfileEmail', val ? val : "")
-    }
+      store.commit('auth/setProfileEmail', val ? val : '')
+    },
   }),
   phone: computed({
     get: () => store.getters['auth/getProfile'].phone,
     set: (val) => {
-      store.commit('auth/setProfilePhone', val ? val : "")
-    }
+      store.commit('auth/setProfilePhone', val ? val : '')
+    },
   }),
   birthday: computed({
-    get: () => store.getters['auth/getProfile'].birthday ? store.getters['auth/getProfile'].birthday : '',
+    get: () =>
+      store.getters['auth/getProfile'].birthday ? store.getters['auth/getProfile'].birthday : '',
     set: (val) => {
-      store.commit('auth/setProfileBirthday', val ? moment(val).format('YYYY-MM-DD') : "")
-    }
+      store.commit('auth/setProfileBirthday', val ? moment(val).format('YYYY-MM-DD') : '')
+    },
   }),
 })
 
@@ -384,7 +375,7 @@ let infoFormConstruction = ref({
       label: amLabels.value.first_name_colon,
       placeholder: amLabels.value.enter_first_name,
       class: computed(() => `am-capi__item ${responsiveClass.value}`),
-    }
+    },
   },
   lastName: {
     template: formFieldsTemplates.text,
@@ -393,7 +384,7 @@ let infoFormConstruction = ref({
       label: amLabels.value.last_name_colon,
       placeholder: amLabels.value.enter_last_name,
       class: computed(() => `am-capi__item ${responsiveClass.value}`),
-    }
+    },
   },
   email: {
     template: formFieldsTemplates.text,
@@ -402,7 +393,7 @@ let infoFormConstruction = ref({
       label: amLabels.value.email_colon,
       placeholder: amLabels.value.enter_email,
       class: computed(() => `am-capi__item ${responsiveClass.value}`),
-    }
+    },
   },
   phone: {
     countryCode: computed({
@@ -411,10 +402,7 @@ let infoFormConstruction = ref({
           ? store.getters['auth/getProfile'].countryPhoneIso.toUpperCase()
           : '',
       set: (val) => {
-        store.commit(
-          'auth/setProfileCountryPhoneIso',
-          val ? val.toLowerCase() : ''
-        )
+        store.commit('auth/setProfileCountryPhoneIso', val ? val.toLowerCase() : '')
       },
     }),
     template: formFieldsTemplates.phone,
@@ -423,22 +411,40 @@ let infoFormConstruction = ref({
       label: amLabels.value.phone_colon,
       placeholder: amLabels.value.enter_phone,
       phoneError: computed(() => phoneError.value && !isPhoneValid.value),
-      errorMessage: computed(() => phoneError.value && !isPhoneValid.value && infoFormData.value.phone ? amLabels.value.enter_valid_phone_warning : ''),
+      errorMessage: computed(() =>
+        phoneError.value && !isPhoneValid.value && infoFormData.value.phone
+          ? amLabels.value.enter_valid_phone_warning
+          : '',
+      ),
       whatsAppLabel: amLabels.value.whatsapp_opt_in_text,
-      isWhatsApp: computed(() => amSettings.notifications.whatsAppEnabled && !(phoneError.value && !isPhoneValid.value)),
+      isWhatsApp: computed(
+        () =>
+          amSettings.notifications.whatsAppEnabled && !(phoneError.value && !isPhoneValid.value),
+      ),
       class: computed(() => `am-capi__item ${responsiveClass.value}`),
     },
     handlers: {
       handlePhoneData: (phoneData) => {
-        if (phoneData && !phoneData.countryCode && !store.getters['auth/getProfile'].countryPhoneIso && amSettings.general.phoneDefaultCountryCode !== 'auto') {
-          store.commit('auth/setProfileCountryPhoneIso', amSettings.general.phoneDefaultCountryCode.toLowerCase())
+        if (
+          phoneData &&
+          !phoneData.countryCode &&
+          !store.getters['auth/getProfile'].countryPhoneIso &&
+          amSettings.general.phoneDefaultCountryCode !== 'auto'
+        ) {
+          store.commit(
+            'auth/setProfileCountryPhoneIso',
+            amSettings.general.phoneDefaultCountryCode.toLowerCase(),
+          )
         }
 
-        store.commit('auth/setProfilePhone', phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, "") : "")
+        store.commit(
+          'auth/setProfilePhone',
+          getInternationalPhoneValue(phoneData?.phoneNumber ?? phoneData?.e164, phoneData, phoneData?.countryCode)
+        )
 
         isPhoneValid.value = !!phoneData.isValid
-      }
-    }
+      },
+    },
   },
   birthday: {
     template: formFieldsTemplates.datepicker,
@@ -449,8 +455,8 @@ let infoFormConstruction = ref({
       clearable: true,
       readonly: false,
       class: computed(() => `am-capi__item am-capi__item-birthday ${responsiveClass.value}`),
-    }
-  }
+    },
+  },
 })
 
 // * Form validation rules
@@ -460,14 +466,14 @@ let infoFormRules = ref({
       required: true,
       message: amLabels.value.enter_first_name_warning,
       trigger: 'submit',
-    }
+    },
   ],
   lastName: [
     {
       required: customizedOptions.value.lastName.required,
       message: amLabels.value.enter_last_name_warning,
       trigger: 'submit',
-    }
+    },
   ],
   email: [
     {
@@ -475,32 +481,41 @@ let infoFormRules = ref({
       type: 'email',
       message: amLabels.value.enter_valid_email_warning,
       trigger: 'submit',
-    }
+    },
   ],
   phone: [
     {
       required: customizedOptions.value.phone.required,
       message: amLabels.value.enter_phone_warning,
       trigger: ['blur', 'submit'],
-    }
+    },
   ],
   birthday: [
     {
       required: customizedOptions.value.birthday.required,
       message: amLabels.value.enter_date_of_birth_warning,
       trigger: 'submit',
-    }
+    },
   ],
 })
 
 let deleteProfileDialog = ref(false)
 provide('deleteProfileDialog', deleteProfileDialog)
 
-function saveProfileChanges () {
+function saveProfileChanges() {
   // Trim inputs
-  store.commit('auth/setProfileFirstName', infoFormData.value.firstName ? infoFormData.value.firstName.trim() : "")
-  store.commit('auth/setProfileLastName', infoFormData.value.lastName ? infoFormData.value.lastName.trim() : "")
-  store.commit('auth/setProfileEmail', infoFormData.value.email ? infoFormData.value.email.trim() : "")
+  store.commit(
+    'auth/setProfileFirstName',
+    infoFormData.value.firstName ? infoFormData.value.firstName.trim() : '',
+  )
+  store.commit(
+    'auth/setProfileLastName',
+    infoFormData.value.lastName ? infoFormData.value.lastName.trim() : '',
+  )
+  store.commit(
+    'auth/setProfileEmail',
+    infoFormData.value.email ? infoFormData.value.email.trim() : '',
+  )
 
   infoFormRef.value.validate((valid) => {
     if (valid && (customizedOptions.value.phone.required ? isPhoneValid.value : true)) {
@@ -510,15 +525,12 @@ function saveProfileChanges () {
 
       store.commit('setLoading', true)
 
-      httpClient.post(
-        '/users/' + cabinetType.value + 's/' + user.id,
-        user
-      ).finally(() => {
+      httpClient.post('/users/' + cabinetType.value + 's/' + user.id, user).finally(() => {
         store.commit('setLoading', false)
         alertVisibility.value = true
       })
     } else {
-      let phoneField = infoFormRef.value.fields.find(el => el.prop === 'phone')
+      let phoneField = infoFormRef.value.fields.find((el) => el.prop === 'phone')
       if (phoneField && !isPhoneValid.value) {
         phoneField.validateState = 'error'
       }
@@ -541,15 +553,15 @@ let passFormData = ref({
   newPass: computed({
     get: () => store.getters['auth/getNewPassword'],
     set: (val) => {
-      store.commit('auth/setNewPassword', val ? val : "")
-    }
+      store.commit('auth/setNewPassword', val ? val : '')
+    },
   }),
   confirmPass: computed({
     get: () => store.getters['auth/getConfirmPassword'],
     set: (val) => {
-      store.commit('auth/setConfirmPassword', val ? val : "")
-    }
-  })
+      store.commit('auth/setConfirmPassword', val ? val : '')
+    },
+  }),
 })
 
 // * Form construction
@@ -564,7 +576,7 @@ let passFormConstruction = ref({
       placeholder: '',
       minLength: 3,
       class: computed(() => `am-capp__item ${responsiveClass.value}`),
-    }
+    },
   },
   confirmPass: {
     template: formFieldsTemplates.text,
@@ -576,8 +588,8 @@ let passFormConstruction = ref({
       placeholder: '',
       minLength: 3,
       class: computed(() => `am-capp__item ${responsiveClass.value}`),
-    }
-  }
+    },
+  },
 })
 
 // * Form validation rules
@@ -591,8 +603,8 @@ let passFormRules = ref({
     {
       min: 4,
       message: amLabels.value.new_password_length,
-      trigger: 'submit'
-    }
+      trigger: 'submit',
+    },
   ],
   confirmPass: [
     {
@@ -603,20 +615,21 @@ let passFormRules = ref({
     {
       min: 4,
       message: amLabels.value.new_password_length,
-      trigger: 'submit'
+      trigger: 'submit',
     },
     {
-      validator: () => store.getters['auth/getNewPassword'] === store.getters['auth/getConfirmPassword'],
+      validator: () =>
+        store.getters['auth/getNewPassword'] === store.getters['auth/getConfirmPassword'],
       message: amLabels.value.passwords_not_match,
-      trigger: 'submit'
-    }
+      trigger: 'submit',
+    },
   ],
 })
 
 // * Change Password Alert visibility
 let alertVisibility = ref(false)
 
-function tabClick () {
+function tabClick() {
   alertVisibility.value = false
 }
 
@@ -628,19 +641,19 @@ function changeProfilePassword() {
 
       store.commit('setLoading', true)
 
-      httpClient.post(
-        '/users/customers/' + user.id,
-        {password: store.getters['auth/getNewPassword']}
-      ).then(() => {
-        successMessage.value = amLabels.value.password_success
+      httpClient
+        .post('/users/customers/' + user.id, { password: store.getters['auth/getNewPassword'] })
+        .then(() => {
+          successMessage.value = amLabels.value.password_success
 
-        store.commit('auth/setNewPassword', '')
-        store.commit('auth/setConfirmPassword', '')
-      }).catch(() => {
-      }).finally(() => {
-        store.commit('setLoading', false)
-        alertVisibility.value = true
-      })
+          store.commit('auth/setNewPassword', '')
+          store.commit('auth/setConfirmPassword', '')
+        })
+        .catch(() => {})
+        .finally(() => {
+          store.commit('setLoading', false)
+          alertVisibility.value = true
+        })
     } else {
       return false
     }
@@ -649,32 +662,32 @@ function changeProfilePassword() {
 provide('changeProfilePassword', changeProfilePassword)
 
 // * Logout
-function logout () {
+function logout() {
   deleteProfileDialog.value = false
   store.commit('auth/setProfileDeleted', true)
   store.dispatch('auth/logout')
 }
 
-function addressSelected (addressComponents, cfId) {
+function addressSelected(addressComponents, cfId) {
   if (addressComponents) {
     for (const key in customFields) {
       if (customFields[key].id === cfId) {
         customFields[key].components = mapAddressComponentsForXML(addressComponents)
-        break;
+        break
       }
     }
   }
 }
 
-function deleteProfile () {
+function deleteProfile() {
   store.commit('setLoading', true)
 
-  let profileId =  store.getters['auth/getProfile'] ? store.getters['auth/getProfile'].id : null
+  let profileId = store.getters['auth/getProfile'] ? store.getters['auth/getProfile'].id : null
   if (!profileId) {
     return
   }
 
-  let data =   {
+  let data = {
     email: '',
     firstName: amLabels.value.customer,
     lastName: profileId,
@@ -682,25 +695,25 @@ function deleteProfile () {
     birthday: '',
     gender: '',
     externalId: '',
-    password: ''
-  };
+    password: '',
+  }
 
   const vueCookies = useCookies()['cookies']
 
-  httpClient.post(
-    '/users/customers/' + profileId,
-    data
-  ).then(() => {
-    store.commit('auth/setProfile', {})
-    vueCookies.remove('ameliaUserEmail')
+  httpClient
+    .post('/users/customers/' + profileId, data)
+    .then(() => {
+      store.commit('auth/setProfile', {})
+      vueCookies.remove('ameliaUserEmail')
 
-    store.commit('setLoading', false)
+      store.commit('setLoading', false)
 
-    logout()
-  }).catch((error) => {
-    store.commit('setLoading', false)
-    console.log(error)
-  })
+      logout()
+    })
+    .catch((error) => {
+      store.commit('setLoading', false)
+      console.log(error)
+    })
 }
 
 /**
@@ -739,14 +752,14 @@ function setCustomerCustomFieldsFormConstruction(field, id) {
   }
 
   if (field.type === 'file') {
-    let profileId =  store.getters['auth/getProfile'] ? store.getters['auth/getProfile'].id : null
+    let profileId = store.getters['auth/getProfile'] ? store.getters['auth/getProfile'].id : null
     cfFormConstruction[id].props = {
       ...cfFormConstruction[id].props,
       ...{
         btnLabel: amLabels.value.upload_file_here,
         isUpload: true,
         bookingId: profileId,
-        source: 'cabinet-customer'
+        source: 'cabinet-customer',
       },
     }
   }
@@ -767,7 +780,7 @@ function setInitCustomerCustomFields() {
   const savedCustomFields = JSON.parse(store.getters['auth/getProfile'].customFields || '{}')
 
   allFields
-    .filter(field => field.saveType === 'customer' && field.type !== 'content')
+    .filter((field) => field.saveType === 'customer' && field.type !== 'content')
     .sort((a, b) => a.position - b.position)
     .forEach((field, index) => {
       const { id } = field
@@ -815,10 +828,7 @@ function saveCustomerCustomFields() {
 
       store.commit('setLoading', true)
 
-      httpClient.post(
-          `/users/${cabinetType.value}s/${user.id}`,
-          updatedUser
-      ).finally(() => {
+      httpClient.post(`/users/${cabinetType.value}s/${user.id}`, updatedUser).finally(() => {
         store.commit('setLoading', false)
         successMessage.value = amLabels.value.profile_data_success
         alertVisibility.value = true
@@ -837,15 +847,15 @@ let cssVars = computed(() => {
   return {
     '--am-c-capi-primary': amColors.value.colorPrimary,
     '--am-c-capi-text': amColors.value.colorMainText,
-    '--am-c-capi-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1)
+    '--am-c-capi-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
   }
 })
 </script>
 
 <script>
 export default {
-  name: "CabinetProfile",
-  key: 'profile'
+  name: 'CabinetProfile',
+  key: 'profile',
 }
 </script>
 
@@ -855,7 +865,6 @@ export default {
   // capi - cabinet personal information
   // capp - cabinet personal password
   .am-capi {
-
     &__sr-only {
       position: absolute;
       width: 1px;
@@ -868,10 +877,10 @@ export default {
       border: 0;
     }
 
-     &__inner {
-       display: block;
-       padding: 16px 32px;
-     }
+    &__inner {
+      display: block;
+      padding: 16px 32px;
+    }
 
     &__tabs {
       .el-tabs__item:focus-visible {
@@ -880,20 +889,20 @@ export default {
       }
     }
 
-     &__form {
-       display: flex;
-       flex-wrap: wrap;
-       justify-content: space-between;
+    &__form {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
 
-       & > * {
-         $count: 100;
-         @for $i from 0 through $count {
-           &:nth-child(#{$i + 1}) {
-             animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
-             animation-fill-mode: both;
-           }
-         }
-       }
+      & > * {
+        $count: 100;
+        @for $i from 0 through $count {
+          &:nth-child(#{$i + 1}) {
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
+            animation-fill-mode: both;
+          }
+        }
+      }
 
       @media (prefers-reduced-motion: reduce) {
         & > * {
@@ -901,104 +910,104 @@ export default {
         }
       }
 
-       // * traba da postanu globalni stilovi za formu
-       .el-form {
-         &-item {
-           display: block;
-           font-family: var(--am-font-family);
-           font-size: var(--am-fs-label);
-           margin-bottom: 24px;
+      // * traba da postanu globalni stilovi za formu
+      .el-form {
+        &-item {
+          display: block;
+          font-family: var(--am-font-family);
+          font-size: var(--am-fs-label);
+          margin-bottom: 24px;
 
-           &.am-capi__item {
-             width: calc(50% - 12px);
+          &.am-capi__item {
+            width: calc(50% - 12px);
 
-             &-birthday {
-               .el-input__inner {
-                 color: transparent !important;
-                 text-shadow: 0 0 0 var(--am-c-inp-text);
-                 cursor: pointer;
-               }
-             }
+            &-birthday {
+              .el-input__inner {
+                color: transparent !important;
+                text-shadow: 0 0 0 var(--am-c-inp-text);
+                cursor: pointer;
+              }
+            }
 
-             &.am-rw-480 {
-               width: 100%;
-             }
-           }
+            &.am-rw-480 {
+              width: 100%;
+            }
+          }
 
-           &.am-capp__item {
-             width: 100%;
+          &.am-capp__item {
+            width: 100%;
 
-             .el-form-item__content {
-               max-width: 360px;
-             }
-           }
+            .el-form-item__content {
+              max-width: 360px;
+            }
+          }
 
-           &__label {
-             flex: 0 0 auto;
-             text-align: left;
-             font-size: var(--am-fs-label);
-             line-height: 1.3;
-             color: var(--am-c-main-text);
-             box-sizing: border-box;
-             margin: 0;
+          &__label {
+            flex: 0 0 auto;
+            text-align: left;
+            font-size: var(--am-fs-label);
+            line-height: 1.3;
+            color: var(--am-c-main-text);
+            box-sizing: border-box;
+            margin: 0;
 
-             &:before {
-               color: var(--am-c-error);
-             }
-           }
+            &:before {
+              color: var(--am-c-error);
+            }
+          }
 
-           &__content {
-             display: flex;
-             flex-wrap: wrap;
-             align-items: center;
-             flex: 1;
-             position: relative;
-             font-size: var(--am-fs-input);
-             min-width: 0;
-             color: var(--am-c-main-text);
-           }
+          &__content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            flex: 1;
+            position: relative;
+            font-size: var(--am-fs-input);
+            min-width: 0;
+            color: var(--am-c-main-text);
+          }
 
-           &__error {
-             font-size: 12px;
-             color: var(--am-c-error);
-             padding-top: 4px;
-           }
-         }
-       }
+          &__error {
+            font-size: 12px;
+            color: var(--am-c-error);
+            padding-top: 4px;
+          }
+        }
+      }
 
-       .am-whatsapp-opt-in-text {
-         font-size: 14px;
-         line-height: 1.5;
-       }
-     }
+      .am-whatsapp-opt-in-text {
+        font-size: 14px;
+        line-height: 1.5;
+      }
+    }
 
-     &__alert {
-       .el-alert {
-         padding: 4px 12px 4px 0;
-         box-sizing: border-box;
+    &__alert {
+      .el-alert {
+        padding: 4px 12px 4px 0;
+        box-sizing: border-box;
 
-         &__content {
-           .el-alert__closebtn {
-             top: 50%;
-             transform: translateY(-50%);
-           }
-         }
+        &__content {
+          .el-alert__closebtn {
+            top: 50%;
+            transform: translateY(-50%);
+          }
+        }
 
-         &__title {
-           display: flex;
-           align-items: center;
-           font-size: 16px;
-           line-height: 1.5;
+        &__title {
+          display: flex;
+          align-items: center;
+          font-size: 16px;
+          line-height: 1.5;
 
-           .am-icon-checkmark-circle-full {
-             font-size: 28px;
-             line-height: 1;
-             color: var(--am-c-alerts-bgr);
-           }
-         }
-       }
-     }
-   }
+          .am-icon-checkmark-circle-full {
+            font-size: 28px;
+            line-height: 1;
+            color: var(--am-c-alerts-bgr);
+          }
+        }
+      }
+    }
+  }
 }
 
 .amelia-v2-booking #amelia-container {

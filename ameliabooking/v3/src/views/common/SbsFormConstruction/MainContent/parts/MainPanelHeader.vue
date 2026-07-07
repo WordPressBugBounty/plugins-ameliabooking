@@ -1,50 +1,46 @@
 <template>
-  <div
-    class="am-caph__main"
-    :style="cssVars"
-  >
+  <div class="am-caph__main" :style="cssVars">
     <slot></slot>
   </div>
 </template>
 
 <script setup>
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
-import {
-  ref,
-  computed,
-  inject
-} from 'vue'
+import { ref, computed, inject } from 'vue'
 
 defineProps({
   ready: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 })
 
 // * Colors
-let amColors = inject('amColors', ref({
-  colorPrimary: '#1246D6',
-  colorSuccess: '#019719',
-  colorError: '#B4190F',
-  colorWarning: '#CCA20C',
-  colorMainBgr: '#FFFFFF',
-  colorMainHeadingText: '#33434C',
-  colorMainText: '#1A2C37',
-  colorSbBgr: '#17295A',
-  colorSbText: '#FFFFFF',
-  colorInpBgr: '#FFFFFF',
-  colorInpBorder: '#D1D5D7',
-  colorInpText: '#1A2C37',
-  colorInpPlaceHolder: '#1A2C37',
-  colorDropBgr: '#FFFFFF',
-  colorDropBorder: '#D1D5D7',
-  colorDropText: '#0E1920',
-  colorBtnPrim: '#265CF2',
-  colorBtnPrimText: '#FFFFFF',
-  colorBtnSec: '#1A2C37',
-  colorBtnSecText: '#FFFFFF',
-}))
+let amColors = inject(
+  'amColors',
+  ref({
+    colorPrimary: '#1246D6',
+    colorSuccess: '#019719',
+    colorError: '#B4190F',
+    colorWarning: '#CCA20C',
+    colorMainBgr: '#FFFFFF',
+    colorMainHeadingText: '#33434C',
+    colorMainText: '#1A2C37',
+    colorSbBgr: '#17295A',
+    colorSbText: '#FFFFFF',
+    colorInpBgr: '#FFFFFF',
+    colorInpBorder: '#D1D5D7',
+    colorInpText: '#1A2C37',
+    colorInpPlaceHolder: '#1A2C37',
+    colorDropBgr: '#FFFFFF',
+    colorDropBorder: '#D1D5D7',
+    colorDropText: '#0E1920',
+    colorBtnPrim: '#265CF2',
+    colorBtnPrimText: '#FFFFFF',
+    colorBtnSec: '#1A2C37',
+    colorBtnSecText: '#FFFFFF',
+  }),
+)
 
 // * Calculate Step Width
 let cssVars = computed(() => {
@@ -53,7 +49,7 @@ let cssVars = computed(() => {
     // caph - cabinet
     '--am-c-caph-text': amColors.value.colorMainText,
     '--am-c-caph-heading-text': amColors.value.colorMainHeadingText,
-    '--am-c-caph-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15)
+    '--am-c-caph-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15),
   }
 })
 </script>
@@ -88,7 +84,8 @@ let cssVars = computed(() => {
       text-overflow: ellipsis;
       overflow: hidden;
 
-      &:before { // theme Twenty Nineteen
+      &:before {
+        // theme Twenty Nineteen
         display: none;
       }
     }

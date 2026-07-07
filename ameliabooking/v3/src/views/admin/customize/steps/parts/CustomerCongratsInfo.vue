@@ -1,24 +1,18 @@
 <template>
   <div class="am-congrats__info-item" :class="responsiveClass">
-    <span class="am-congrats__info-item__label">
-      {{ labelsDisplay('your_name_colon') }}:
-    </span>
+    <span class="am-congrats__info-item__label"> {{ labelsDisplay('your_name_colon') }}: </span>
     <span class="am-congrats__info-item__value">
       {{ `${customer.firstName} ${customer.lastName}` }}
     </span>
   </div>
   <div class="am-congrats__info-item" :class="responsiveClass">
-    <span class="am-congrats__info-item__label">
-      {{ labelsDisplay('email_address_colon') }}:
-    </span>
+    <span class="am-congrats__info-item__label"> {{ labelsDisplay('email_address_colon') }}: </span>
     <span class="am-congrats__info-item__value">
       {{ customer.email }}
     </span>
   </div>
   <div class="am-congrats__info-item" :class="responsiveClass">
-    <span class="am-congrats__info-item__label">
-      {{ labelsDisplay('phone_number_colon') }}:
-    </span>
+    <span class="am-congrats__info-item__label"> {{ labelsDisplay('phone_number_colon') }}: </span>
     <span class="am-congrats__info-item__value">
       {{ customer.phone }}
     </span>
@@ -50,11 +44,8 @@ let amLabels = inject('labels')
 
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    let translations =
-      amCustomize.value[pageRenderKey.value][stepName.value].translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    let translations = amCustomize.value[pageRenderKey.value][stepName.value].translations
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })

@@ -31,35 +31,30 @@
 
 <script setup>
 // * Components
-import Congratulations from "../../../Parts/Congratulations/Page/Congratulations.vue";
+import Congratulations from '../../../Parts/Congratulations/Page/Congratulations.vue'
 
 // * Parts
-import AddToCalendar from "../../../Parts/Congratulations/Parts/AddToCalendar.vue";
-import Skeleton from "../../../Parts/Congratulations/Skeleton/Skeleton.vue";
+import AddToCalendar from '../../../Parts/Congratulations/Parts/AddToCalendar.vue'
+import Skeleton from '../../../Parts/Congratulations/Skeleton/Skeleton.vue'
 
 // * Import from Vue
-import {
-  computed,
-  inject,
-  watchEffect,
-  onMounted, reactive, provide
-} from 'vue'
+import { computed, inject, watchEffect, onMounted, reactive, provide } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
 
 // * Composables
-import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation.js';
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation.js'
 
 let props = defineProps({
   globalClass: {
     type: String,
-    default: ''
+    default: '',
   },
   inDialog: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const store = useStore()
@@ -80,8 +75,8 @@ let ready = computed(() => store.getters['getReady'])
 // * Loading state
 let loading = computed(() => store.getters['getLoading'])
 
-let loadingUpcoming = computed(
-  () => store.getters['getFormKey'] === 'ecf' ? store.getters['eventEntities/getUpcomingLoading'] : false
+let loadingUpcoming = computed(() =>
+  store.getters['getFormKey'] === 'ecf' ? store.getters['eventEntities/getUpcomingLoading'] : false,
 )
 
 let booked = computed(() => store.getters['eventBooking/getBooked'])
@@ -104,11 +99,11 @@ let customer = computed(() => {
 
 const { footerButtonClicked } = inject('changingStepsFunctions', {
   footerButtonClicked: {
-    value: false
-  }
+    value: false,
+  },
 })
 
-function finish () {
+function finish() {
   if (booked.value.redirectAfterBookingUrl) {
     window.location.href = booked.value.redirectAfterBookingUrl
   } else {
@@ -143,16 +138,16 @@ const localLanguage = inject('localLanguage')
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
   let componentKey = stepsArray.value[stepIndex.value].key
 
   if (
-    amSettings.value.customizedData
-    && formKey.value in amSettings.value.customizedData
-    && amSettings.value.customizedData[formKey.value][componentKey].translations
+    amSettings.value.customizedData &&
+    formKey.value in amSettings.value.customizedData &&
+    amSettings.value.customizedData[formKey.value][componentKey].translations
   ) {
     let customizedLabels = amSettings.value.customizedData[formKey.value][componentKey].translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value]) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -169,22 +164,29 @@ provide('amLabels', amLabels.value)
 let amColors = inject('amColors')
 
 const cssVars = computed(() => {
-  if ( booked.value.type !== 'event') {
-    return  {
+  if (booked.value.type !== 'event') {
+    return {
       '--am-c-atc-text-op40': useColorTransparency(amColors.value.colorMainText, 0.4),
       '--am-c-atc-heading-text-op40': useColorTransparency(amColors.value.colorSbText, 0.4),
       '--am-c-atc-text-op30': useColorTransparency(amColors.value.colorMainText, 0.3),
       '--am-c-atc-text': amColors.value.colorMainText,
       '--am-c-atc-heading-text': amColors.value.colorSbText,
-      '--am-c-atc-bgr-coverage': booked.value.type === 'package' && !(amSettings.value.general.addToCalendar && booked.value && booked.value.data.length) ? '50%' : '80%'
+      '--am-c-atc-bgr-coverage':
+        booked.value.type === 'package' &&
+        !(amSettings.value.general.addToCalendar && booked.value && booked.value.data.length)
+          ? '50%'
+          : '80%',
     }
   } else {
-    return  {
+    return {
       '--am-c-atc-text-op40': useColorTransparency(amColors.value.colorMainText, 0.4),
-      '--am-c-atc-heading-text-op40': useColorTransparency(amColors.value.colorMainHeadingText, 0.4),
+      '--am-c-atc-heading-text-op40': useColorTransparency(
+        amColors.value.colorMainHeadingText,
+        0.4,
+      ),
       '--am-c-atc-text-op30': useColorTransparency(amColors.value.colorMainText, 0.3),
       '--am-c-atc-text': amColors.value.colorMainText,
-      '--am-c-atc-heading-text': amColors.value.colorMainHeadingText
+      '--am-c-atc-heading-text': amColors.value.colorMainHeadingText,
     }
   }
 })
@@ -194,10 +196,8 @@ const cssVars = computed(() => {
 export default {
   name: 'CongratulationsStep',
   label: 'event_congrats',
-  key: 'congrats'
+  key: 'congrats',
 }
 </script>
 
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>

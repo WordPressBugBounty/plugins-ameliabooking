@@ -10,15 +10,12 @@
         @click="goBack"
         @keydown.enter="goBack"
       >
-        {{props.btnString}}
+        {{ props.btnString }}
       </AmButton>
     </div>
-    <div
-      v-if="props.cartBtnVisibility"
-      class="am-cat__cart-btn"
-    >
+    <div v-if="props.cartBtnVisibility" class="am-cat__cart-btn">
       <span class="am-cat__cart-number">
-        {{props.cartItemsNumber}}
+        {{ props.cartItemsNumber }}
       </span>
       <AmButton
         aria-label="Go to cart button"
@@ -39,50 +36,46 @@
 import AmButton from '../../../_components/button/AmButton.vue'
 import IconComponent from '../../../_components/icons/IconComponent.vue'
 
-import {
-  defineComponent
-} from "vue"
-import {useStore} from "vuex";
+import { defineComponent } from 'vue'
+import { useStore } from 'vuex'
 // * import composable
-import {
-  useRemoveLastCartItem,
-} from '../../../../assets/js/public/cart'
+import { useRemoveLastCartItem } from '../../../../assets/js/public/cart'
 
 let props = defineProps({
   btnString: {
     type: String,
-    default: ''
+    default: '',
   },
   btnType: {
     type: String,
-    default: 'plain'
+    default: 'plain',
   },
   btnSize: {
     type: String,
-    default: 'mini'
+    default: 'mini',
   },
   backBtnVisibility: {
     type: Boolean,
-    default: true
+    default: true,
   },
   cartBtnVisibility: {
     type: Boolean,
-    default: false
+    default: false,
   },
   cartItemsNumber: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 })
 
 let arrowLeft = defineComponent({
-  components: {IconComponent},
-  template: `<IconComponent icon="arrow-left"></IconComponent>`
+  components: { IconComponent },
+  template: `<IconComponent icon="arrow-left"></IconComponent>`,
 })
 
 let iconCart = defineComponent({
-  components: {IconComponent},
-  template: `<IconComponent icon="cart"/>`
+  components: { IconComponent },
+  template: `<IconComponent icon="cart"/>`,
 })
 
 let emits = defineEmits(['goBack', 'goToCart'])
@@ -102,7 +95,7 @@ function goToCart() {
 
 <script>
 export default {
-  name: "MainHeader"
+  name: 'MainHeader',
 }
 </script>
 

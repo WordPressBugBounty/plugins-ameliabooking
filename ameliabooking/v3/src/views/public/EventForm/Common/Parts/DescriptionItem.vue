@@ -4,11 +4,7 @@
     class="am-eli__description"
     :aria-labelledby="props.title ? titleId : undefined"
   >
-    <p
-      v-if="props.title"
-      :id="titleId"
-      class="am-eli__description-title"
-    >
+    <p v-if="props.title" :id="titleId" class="am-eli__description-title">
       {{ props.title }}
     </p>
     <p
@@ -16,15 +12,13 @@
       :id="descriptionId"
       class="am-eli__description-text ql-description"
       v-html="props.description.slice(0, props.limit) + '...'"
-    >
-    </p>
+    ></p>
     <p
       v-else
       :id="descriptionId"
       class="am-eli__description-text ql-description"
       v-html="props.description"
-    >
-    </p>
+    ></p>
     <button
       v-if="props.description.replace(/<[^>]*>?/gm, '').length > props.limit"
       type="button"
@@ -40,15 +34,10 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  inject,
-  computed,
-  onMounted
-} from "vue";
+import { ref, inject, computed, onMounted } from 'vue'
 
 // * Composables
-import { useDescriptionVisibility } from "../../../../../assets/js/common/helper";
+import { useDescriptionVisibility } from '../../../../../assets/js/common/helper'
 
 // * Component props
 let props = defineProps({
@@ -56,24 +45,24 @@ let props = defineProps({
     type: Object,
     default: () => {
       return {}
-    }
+    },
   },
   title: {
     type: String,
-    default: ''
+    default: '',
   },
   description: {
     type: String,
-    default: ''
+    default: '',
   },
   limit: {
     type: Number,
-    default: 100
+    default: 100,
   },
   initState: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 })
 
 let showMore = ref(false)
@@ -85,8 +74,10 @@ const uid = Math.random().toString(36).slice(2, 8)
 const titleId = computed(() => `am-eli-title-${uid}`)
 const descriptionId = computed(() => `am-eli-desc-${uid}`)
 
-function displayLabels (label) {
-  return Object.keys(props.customizedLabels).length && props.customizedLabels[label] ? props.customizedLabels[label] : amLabels[label]
+function displayLabels(label) {
+  return Object.keys(props.customizedLabels).length && props.customizedLabels[label]
+    ? props.customizedLabels[label]
+    : amLabels[label]
 }
 
 onMounted(() => {
@@ -96,7 +87,7 @@ onMounted(() => {
 
 <script>
 export default {
-  name: "TextItem"
+  name: 'TextItem',
 }
 </script>
 
@@ -106,7 +97,6 @@ export default {
 @mixin event-description {
   .am-eli {
     &__description {
-
       &-title {
         font-size: 14px;
         font-weight: 500;

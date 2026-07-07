@@ -1,39 +1,16 @@
 <template>
-  <div
-    class="am-cat__wrapper"
-    :class="wrapperClass"
-    role="main"
-  >
-    <div
-      ref="catHeader"
-      class="am-cat__header"
-    >
+  <div class="am-cat__wrapper" :class="wrapperClass" role="main">
+    <div ref="catHeader" class="am-cat__header">
       <slot name="header"></slot>
     </div>
-    <div
-      ref="catContainer"
-      class="am-cat__main"
-    >
+    <div ref="catContainer" class="am-cat__main">
       <slot name="side"></slot>
-      <div
-        ref="catForm"
-        class="am-cat__form"
-        :class="formClass"
-        :style="cssVars"
-      >
-        <div
-          ref="catHeading"
-          class="am-cat__heading"
-          :class="headingClass"
-        >
+      <div ref="catForm" class="am-cat__form" :class="formClass" :style="cssVars">
+        <div ref="catHeading" class="am-cat__heading" :class="headingClass">
           <slot name="heading"></slot>
         </div>
 
-        <div
-          ref="catContent"
-          class="am-cat__content"
-          :class="contentClass"
-        >
+        <div ref="catContent" class="am-cat__content" :class="contentClass">
           <slot name="content"></slot>
         </div>
       </div>
@@ -42,37 +19,30 @@
 </template>
 
 <script setup>
-import {
-  inject,
-  ref,
-  onMounted,
-  onBeforeUnmount,
-  computed,
-  nextTick
-} from 'vue'
+import { inject, ref, onMounted, onBeforeUnmount, computed, nextTick } from 'vue'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
 
 defineProps({
   wrapperClass: {
     type: String,
-    default: ''
+    default: '',
   },
   formClass: {
     type: String,
-    default: ''
+    default: '',
   },
   headingClass: {
     type: String,
-    default: ''
+    default: '',
   },
   contentClass: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 let catHeader = ref(null)
-let catHeaderWidth = ref(0);
+let catHeaderWidth = ref(0)
 
 let catContainer = ref(null)
 let catContainerWidth = ref(0)
@@ -106,7 +76,7 @@ function resize() {
 
 onMounted(() => {
   // * window resize listener
-  window.addEventListener('resize', resize);
+  window.addEventListener('resize', resize)
 
   nextTick(() => {
     if (catForm.value && catHeading.value) {
@@ -125,14 +95,13 @@ onBeforeUnmount(() => {
 defineExpose({
   catHeaderWidth,
   catFormWidth,
-  catContainerWidth
+  catContainerWidth,
 })
 
 // * Colors
 let amColors = inject('amColors')
 
 let cssVars = computed(() => {
-
   return {
     '--am-h-cat-content': `${scrollBlockHeight.value}px`,
     '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
@@ -143,7 +112,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: "MainContent"
+  name: 'MainContent',
 }
 </script>
 
@@ -186,7 +155,6 @@ export default {
         background: var(--am-c-scroll-op10);
       }
     }
-
   }
 }
 

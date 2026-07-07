@@ -8,52 +8,52 @@ export default {
   }),
 
   getters: {
-    getMaxPersons (state) {
+    getMaxPersons(state) {
       return state.max
     },
 
-    getMinPersons (state) {
+    getMinPersons(state) {
       return state.min
     },
 
-    getPersons (state) {
+    getPersons(state) {
       return state.persons
     },
 
-    getAllData (state) {
+    getAllData(state) {
       return {
         persons: state.persons,
         max: state.max,
-        min: state.min
+        min: state.min,
       }
-    }
+    },
   },
 
   mutations: {
-    setMaxPersons (state, payload) {
+    setMaxPersons(state, payload) {
       state.max = payload
     },
 
-    setMinPersons (state, payload) {
+    setMinPersons(state, payload) {
       state.min = payload
     },
 
-    setPersons (state, payload) {
+    setPersons(state, payload) {
       state.persons = payload
     },
 
-    setAllData (state, payload) {
+    setAllData(state, payload) {
       state.persons = payload.persons
       state.max = payload.max
       state.min = payload.min
-    }
+    },
   },
 
   actions: {
-    resetPersons ({ commit }) {
+    resetPersons({ commit }) {
       commit('setPersons', 1)
       commit('setMaxPersons', 1)
       commit('setMinPersons', 1)
-    }
-  }
+    },
+  },
 }

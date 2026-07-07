@@ -3,23 +3,29 @@
     v-if="ready && booked && !loading"
     :style="cssVars"
     class="am-fs__main-content am-fs__congrats"
-    :class="[{'am-fs-sb-atc' : checkScreen}, props.globalClass]"
+    :class="[{ 'am-fs-sb-atc': checkScreen }, props.globalClass]"
   >
     <div class="am-fs__congrats-main">
       <img
-        :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/congratulations/congratulations.svg'"
+        :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/congratulations/congratulations.svg'"
         :alt="amLabels.congratulations"
+      />
+      <div
+        v-if="waitingListOptions.enabled && waitingListOptions.isWaitingListSlot"
+        class="am-fs__congrats-main-waiting-list-block"
       >
-      <div v-if="waitingListOptions.enabled && waitingListOptions.isWaitingListSlot" class="am-fs__congrats-main-waiting-list-block">
         <p class="am-fs__congrats-main-heading">
-          {{amLabels.your_position_on_waiting_list}} {{ '#' + (waitingListOptions.peopleWaiting + 1)}}
+          {{ amLabels.your_position_on_waiting_list }}
+          {{ '#' + (waitingListOptions.peopleWaiting + 1) }}
         </p>
-        <span>{{amLabels.appointment_waiting_list_notify_message}}</span>
+        <span>{{ amLabels.appointment_waiting_list_notify_message }}</span>
       </div>
       <p v-else class="am-fs__congrats-main-heading">
         {{ amLabels.congratulations }}
       </p>
-      <span v-if="booked && booked.data.length && bookedType === 'appointment'">{{amLabels.appointment_id}} #{{ booked.data[0].appointmentId  }}</span>
+      <span v-if="booked && booked.data.length && bookedType === 'appointment'"
+        >{{ amLabels.appointment_id }} #{{ booked.data[0].appointmentId }}</span
+      >
 
       <AddToCalendar v-if="checkScreen" class="am-fs__congrats-main-atc"></AddToCalendar>
     </div>
@@ -27,22 +33,36 @@
     <div
       class="am-fs__congrats-info"
       :class="[
-        {'am-fs__congrats-info-mobile' : checkScreen},
-        {'am-fs__congrats-info-mobile-s' : mobileS},
+        { 'am-fs__congrats-info-mobile': checkScreen },
+        { 'am-fs__congrats-info-mobile-s': mobileS },
       ]"
     >
       <div class="am-fs__congrats-info-customer">
         <component :is="componentTypes[bookedType]"></component>
-        <div v-if="booked.price > 0 || (booked.price <= 0 && coupon.code)" class="am-fs__congrats-info-payment">
-          <span v-if="booked && booked.paymentAmount && getPayment(booked.payments).gateway === 'onSite'">
+        <div
+          v-if="booked.price > 0 || (booked.price <= 0 && coupon.code)"
+          class="am-fs__congrats-info-payment"
+        >
+          <span
+            v-if="
+              booked && booked.paymentAmount && getPayment(booked.payments).gateway === 'onSite'
+            "
+          >
             {{ amLabels.congrats_total_amount }}:
           </span>
           <span v-else>{{ amLabels.congrats_payment }}:</span>
-          <span v-if="booked && booked.paymentAmount &&  getPayment(booked.payments).gateway">
-            {{ `${useFormattedPrice(booked.paymentAmount)} - ${ getPayment(booked.payments).gatewayTitle ?  getPayment(booked.payments).gatewayTitle : getPaymentGatewayNiceName( getPayment(booked.payments))}` }}
+          <span v-if="booked && booked.paymentAmount && getPayment(booked.payments).gateway">
+            {{
+              `${useFormattedPrice(booked.paymentAmount)} - ${getPayment(booked.payments).gatewayTitle ? getPayment(booked.payments).gatewayTitle : getPaymentGatewayNiceName(getPayment(booked.payments))}`
+            }}
           </span>
           <span v-else-if="booked">
-            {{ (  getPayment(booked.payments).gateway !== 'onSite' ? useFormattedPrice(booked.paymentAmount) : useFormattedPrice(booked.price < 0 ? 0 : booked.price) ) + ( getPayment(booked.payments).status !== 'paid' ?  (' - ' + amLabels.on_site) : '') }}
+            {{
+              (getPayment(booked.payments).gateway !== 'onSite'
+                ? useFormattedPrice(booked.paymentAmount)
+                : useFormattedPrice(booked.price < 0 ? 0 : booked.price)) +
+              (getPayment(booked.payments).status !== 'paid' ? ' - ' + amLabels.on_site : '')
+            }}
           </span>
           <span v-else></span>
         </div>
@@ -71,9 +91,19 @@
         <el-skeleton-item variant="text" />
       </div>
       <div class="am-skeleton-congratz-booking-info">
-        <div v-for="(item, i) in new Array(10)" :key="item" :class="{'am-customer-info': (i === 6)}">
-          <el-skeleton-item variant="text" :style="{width: `${useRandomIntFromInterval(14, 36)}%`}"/>
-          <el-skeleton-item variant="text" :style="{width: `${useRandomIntFromInterval(14, 36)}%`}"/>
+        <div
+          v-for="(item, i) in new Array(10)"
+          :key="item"
+          :class="{ 'am-customer-info': i === 6 }"
+        >
+          <el-skeleton-item
+            variant="text"
+            :style="{ width: `${useRandomIntFromInterval(14, 36)}%` }"
+          />
+          <el-skeleton-item
+            variant="text"
+            :style="{ width: `${useRandomIntFromInterval(14, 36)}%` }"
+          />
         </div>
       </div>
     </template>
@@ -88,16 +118,19 @@ import AppointmentInfoService from './parts/AppointmentInfoService'
 import PackageInfoService from './parts/PackageInfoService'
 import { computed, inject, provide, markRaw, watchEffect, onMounted } from 'vue'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
-import { useRandomIntFromInterval, useFormattedPrice } from '../../../../assets/js/common/formatting'
+import {
+  useRandomIntFromInterval,
+  useFormattedPrice,
+} from '../../../../assets/js/common/formatting'
 import { useStore } from 'vuex'
 import { useCart } from '../../../../assets/js/public/cart'
-import { useRenderAction } from "../../../../assets/js/public/renderActions";
+import { useRenderAction } from '../../../../assets/js/public/renderActions'
 
 let props = defineProps({
   globalClass: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 // * Root Settings
@@ -119,7 +152,9 @@ let booked = computed(() => store.getters['booking/getBooked'])
 provide('booked', booked)
 
 let bookedType = computed(() => {
-  return useCart(store).filter(i => i.serviceId && i.serviceId in i.services).length > 1 ? 'cart' : booked.value.type
+  return useCart(store).filter((i) => i.serviceId && i.serviceId in i.services).length > 1
+    ? 'cart'
+    : booked.value.type
 })
 
 // * Coupon
@@ -144,17 +179,17 @@ let waitingListOptions = computed(() => store.getters['appointmentWaitingListOpt
 
 const { footerButtonClicked } = inject('changingStepsFunctions', {
   footerButtonClicked: {
-    value: false
-  }
+    value: false,
+  },
 })
 
-function getPayment (payments) {
-  let onlinePayments = payments.filter(i => i.gateway !== 'onSite')
+function getPayment(payments) {
+  let onlinePayments = payments.filter((i) => i.gateway !== 'onSite')
 
   return onlinePayments.length ? onlinePayments[0] : payments[0]
 }
 
-function getPaymentGatewayNiceName (payment) {
+function getPaymentGatewayNiceName(payment) {
   if (payment.gateway === 'onSite') {
     return amLabels.value['on_site']
   }
@@ -188,14 +223,18 @@ let cWidth = inject('containerWidth', 0)
 let checkScreen = computed(() => cWidth.value < 540)
 let mobileS = computed(() => cWidth.value < 340)
 
-function finish () {
+function finish() {
   let entity = store.getters['entities/getBookableFromBookableEntities'](
-    store.getters['booking/getSelection']
+    store.getters['booking/getSelection'],
   )
 
   let entitySettings = entity.settings ? JSON.parse(entity.settings) : globalSettings
 
-  if ('general' in entitySettings && 'redirectUrlAfterAppointment' in entitySettings.general && entitySettings.general.redirectUrlAfterAppointment) {
+  if (
+    'general' in entitySettings &&
+    'redirectUrlAfterAppointment' in entitySettings.general &&
+    entitySettings.general.redirectUrlAfterAppointment
+  ) {
     window.location.href = entitySettings.general.redirectUrlAfterAppointment
   } else if (globalSettings.general.redirectUrlAfterAppointment) {
     window.location.href = globalSettings.general.redirectUrlAfterAppointment
@@ -204,26 +243,32 @@ function finish () {
   }
 }
 
-
 let amColors = inject('amColors')
 
 const cssVars = computed(() => {
   if (checkScreen.value) {
-    return  {
+    return {
       '--am-c-atc-text-op40': useColorTransparency(amColors.value.colorMainText, 0.4),
       '--am-c-atc-heading-text-op40': useColorTransparency(amColors.value.colorSbText, 0.4),
       '--am-c-atc-text-op30': useColorTransparency(amColors.value.colorMainText, 0.3),
       '--am-c-atc-text': amColors.value.colorMainText,
       '--am-c-atc-heading-text': amColors.value.colorSbText,
-      '--am-c-atc-bgr-coverage': booked.value.type === 'package' && !(amSettings.general.addToCalendar && booked.value && booked.value.data.length) ? '50%' : '80%'
+      '--am-c-atc-bgr-coverage':
+        booked.value.type === 'package' &&
+        !(amSettings.general.addToCalendar && booked.value && booked.value.data.length)
+          ? '50%'
+          : '80%',
     }
   } else {
-    return  {
+    return {
       '--am-c-atc-text-op40': useColorTransparency(amColors.value.colorMainText, 0.4),
-      '--am-c-atc-heading-text-op40': useColorTransparency(amColors.value.colorMainHeadingText, 0.4),
+      '--am-c-atc-heading-text-op40': useColorTransparency(
+        amColors.value.colorMainHeadingText,
+        0.4,
+      ),
       '--am-c-atc-text-op30': useColorTransparency(amColors.value.colorMainText, 0.3),
       '--am-c-atc-text': amColors.value.colorMainText,
-      '--am-c-atc-heading-text': amColors.value.colorMainHeadingText
+      '--am-c-atc-heading-text': amColors.value.colorMainHeadingText,
     }
   }
 })
@@ -241,10 +286,9 @@ export default {
     label: 'congratulations',
     icon: 'pennant',
     selected: true,
-    finished: true
-  }
+    finished: true,
+  },
 }
-
 </script>
 
 <style lang="scss">
@@ -252,12 +296,15 @@ export default {
   .am-fs__main-content.am-fs__congrats {
     padding: 16px 16px 16px;
     height: calc(100% - 56px);
-    margin-top:0
+    margin-top: 0;
   }
 
   .am-fs-sb-atc {
     --am-c-sb-bgr-atc: var(--am-c-sb-bgr);
-    background-image: linear-gradient(var(--am-c-sb-bgr-atc) var(--am-c-atc-bgr-coverage), transparent 20%);
+    background-image: linear-gradient(
+      var(--am-c-sb-bgr-atc) var(--am-c-atc-bgr-coverage),
+      transparent 20%
+    );
   }
 
   .am-fs__congrats {
@@ -273,14 +320,14 @@ export default {
         $count: 5;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }
       }
 
       & img {
-        width:54px;
+        width: 54px;
         margin-bottom: 8px;
       }
       &-heading {
@@ -291,7 +338,7 @@ export default {
         color: var(--am-c-atc-heading-text);
       }
       &-atc {
-        margin-top: 16px
+        margin-top: 16px;
       }
       & span {
         color: var(--am-c-atc-heading-text-op40);
@@ -325,7 +372,7 @@ export default {
           $count: 20;
           @for $i from 0 through $count {
             &:nth-child(#{$i + 1}) {
-              animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+              animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
               animation-fill-mode: both;
             }
           }
@@ -356,7 +403,6 @@ export default {
   }
 
   .am-skeleton-congratz {
-
     &-heading {
       display: flex;
       flex-direction: column;
@@ -390,7 +436,6 @@ export default {
         .el-skeleton__item {
           height: 20px;
         }
-
       }
 
       .am-customer-info {

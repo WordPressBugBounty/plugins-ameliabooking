@@ -19,10 +19,8 @@
         <el-form
           v-if="
             subStepName === 'bookAppointment' &&
-            (amCustomize[pageRenderKey][stepRecognition].options.employee
-              .visibility ||
-              amCustomize[pageRenderKey][stepRecognition].options.location
-                .visibility)
+            (amCustomize[pageRenderKey][stepRecognition].options.employee.visibility ||
+              amCustomize[pageRenderKey][stepRecognition].options.location.visibility)
           "
           ref="packageFormRef"
           class="am-csd__filter-wrapper"
@@ -32,15 +30,11 @@
         >
           <div class="am-csd__filter" :class="responsiveClass">
             <el-form-item
-              v-if="
-                amCustomize[pageRenderKey][stepRecognition].options.employee
-                  .visibility
-              "
+              v-if="amCustomize[pageRenderKey][stepRecognition].options.employee.visibility"
               :class="[
                 {
                   'am-csd__filter-item-full':
-                    !amCustomize[pageRenderKey][stepRecognition].options
-                      .location.visibility,
+                    !amCustomize[pageRenderKey][stepRecognition].options.location.visibility,
                 },
                 responsiveClass,
               ]"
@@ -51,8 +45,7 @@
                 v-model="packageFormData.employee"
                 clearable
                 :filterable="
-                  amCustomize[pageRenderKey][stepRecognition].options.employee
-                    .filterable
+                  amCustomize[pageRenderKey][stepRecognition].options.employee.filterable
                 "
                 :placeholder="`${labelsDisplay('package_select_employee')}...`"
                 :fit-input-width="true"
@@ -70,12 +63,8 @@
                     :price="0"
                     :image-thumb="provider.pictureThumbPath"
                     :description="provider.description"
-                    :dialog-title="
-                      labelsDisplay('employee_information_package')
-                    "
-                    :dialog-button-text="
-                      labelsDisplay('select_this_employee_package')
-                    "
+                    :dialog-title="labelsDisplay('employee_information_package')"
+                    :dialog-button-text="labelsDisplay('select_this_employee_package')"
                     :badge="provider.badge"
                   ></AmOptionTemplate2>
                 </AmOption>
@@ -83,15 +72,11 @@
             </el-form-item>
 
             <el-form-item
-              v-if="
-                amCustomize[pageRenderKey][stepRecognition].options.location
-                  .visibility
-              "
+              v-if="amCustomize[pageRenderKey][stepRecognition].options.location.visibility"
               :class="[
                 {
                   'am-csd__filter-item-full':
-                    !amCustomize[pageRenderKey][stepRecognition].options
-                      .employee.visibility,
+                    !amCustomize[pageRenderKey][stepRecognition].options.employee.visibility,
                 },
                 responsiveClass,
               ]"
@@ -102,8 +87,7 @@
                 v-model="packageFormData.location"
                 clearable
                 :filterable="
-                  amCustomize[pageRenderKey][stepRecognition].options.location
-                    .filterable
+                  amCustomize[pageRenderKey][stepRecognition].options.location.filterable
                 "
                 :placeholder="`${labelsDisplay('package_select_location')}...`"
                 :fit-input-width="true"
@@ -118,9 +102,7 @@
             </el-form-item>
           </div>
         </el-form>
-        <Calendar
-          :label-slots-selected="labelsDisplay('date_time_slots_selected')"
-        ></Calendar>
+        <Calendar :label-slots-selected="labelsDisplay('date_time_slots_selected')"></Calendar>
       </div>
     </div>
     <template #footer>
@@ -128,19 +110,13 @@
         <AmButton
           category="secondary"
           :size="popupInnerWidth <= 360 ? 'small' : 'default'"
-          :type="
-            amCustomize[pageRenderKey][stepRecognition].options.cancelBtn
-              .buttonType
-          "
+          :type="amCustomize[pageRenderKey][stepRecognition].options.cancelBtn.buttonType"
         >
           {{ labelsDisplay('cancel') }}
         </AmButton>
         <AmButton
           :size="popupInnerWidth <= 360 ? 'small' : 'default'"
-          :type="
-            amCustomize[pageRenderKey][stepRecognition].options.continueBtn
-              .buttonType
-          "
+          :type="amCustomize[pageRenderKey][stepRecognition].options.continueBtn.buttonType"
         >
           {{ labelsDisplay('continue') }}
         </AmButton>
@@ -248,14 +224,14 @@ let stepRecognition = computed(() => {
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepRecognition.value]
-      .translations &&
-      amCustomize.value[pageRenderKey.value][stepRecognition.value]
-        .translations[label] &&
-      amCustomize.value[pageRenderKey.value][stepRecognition.value]
-        .translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepRecognition.value]
-          .translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepRecognition.value].translations &&
+      amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label][
+        langKey.value
+      ]
+      ? amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label][
+          langKey.value
+        ]
       : amLabels[label]
   })
 
@@ -278,8 +254,7 @@ let rules = ref({
     {
       required: computed(
         () =>
-          amCustomize.value[pageRenderKey.value][stepRecognition.value].options
-            .employee.required
+          amCustomize.value[pageRenderKey.value][stepRecognition.value].options.employee.required,
       ),
       message: labelsDisplay('please_select_employee'),
       trigger: 'submit',
@@ -289,8 +264,7 @@ let rules = ref({
     {
       required: computed(
         () =>
-          amCustomize.value[pageRenderKey.value][stepRecognition.value].options
-            .location.required
+          amCustomize.value[pageRenderKey.value][stepRecognition.value].options.location.required,
       ),
       message: labelsDisplay('please_select_location'),
       trigger: 'submit',
@@ -326,18 +300,9 @@ let cssDialogVars = computed(() => {
   return {
     '--am-c-csd-text': amColors.value.colorMainText,
     '--am-c-csd-bgr': amColors.value.colorMainBgr,
-    '--am-c-csd-text-op10': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
-    '--am-c-scroll-op30': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.3
-    ),
-    '--am-c-scroll-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
+    '--am-c-csd-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
     '--am-font-family': amFonts.value.fontFamily,
   }
 })

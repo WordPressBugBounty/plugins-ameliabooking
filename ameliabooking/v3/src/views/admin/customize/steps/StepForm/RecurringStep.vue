@@ -4,13 +4,9 @@
     :class="[{ 'am-fs__rs-mobile': checkScreen }, props.globalClass]"
     :style="cssVars"
   >
-    <template
-      v-if="amCustomize[pageRenderKey].recurringStep.options.heading.visibility"
-    >
+    <template v-if="amCustomize[pageRenderKey].recurringStep.options.heading.visibility">
       <p>{{ labelsDisplay('recurrence') }}</p>
-      <span class="am-fa__rs-light">{{
-        labelsDisplay('recurrence_choosing_time')
-      }}</span>
+      <span class="am-fa__rs-light">{{ labelsDisplay('recurrence_choosing_time') }}</span>
     </template>
     <p>{{ `${labelsDisplay('repeat_every')}:` }}</p>
     <div class="am-fs__rs-every">
@@ -31,9 +27,7 @@
           v-for="(day, i) in weekDays"
           :key="i"
           :class="{
-            'am-fs__rs-on-week-selected': weekDays.find(
-              (i) => i.value === day.value
-            ).selected,
+            'am-fs__rs-on-week-selected': weekDays.find((i) => i.value === day.value).selected,
           }"
           @click="selectWeekDay(day.value)"
         >
@@ -55,16 +49,12 @@
       </div>
     </div>
     <p>{{ `${labelsDisplay('recurrence_ends')}:` }}</p>
-    <span class="am-fa__rs-light">{{
-      labelsDisplay('recurrence_choose_ends')
-    }}</span>
+    <span class="am-fa__rs-light">{{ labelsDisplay('recurrence_choose_ends') }}</span>
     <div class="am-fs__rs-ends">
       <div class="am-fs__rs-ends-choose">
         <AmRadioGroup v-model="occurrenceType">
           <AmRadio value="on">{{ labelsDisplay('recurrence_on') }}</AmRadio>
-          <AmRadio value="after">{{
-            labelsDisplay('recurrence_after')
-          }}</AmRadio>
+          <AmRadio value="after">{{ labelsDisplay('recurrence_after') }}</AmRadio>
         </AmRadioGroup>
       </div>
       <div class="am-fs__rs-ends-options">
@@ -98,9 +88,7 @@
           >{{ labelsDisplay('repeats_on') }}
           {{ weekDays.filter((i) => i.enabled).join(', ') }},</span
         >
-        <span
-          v-if="repeatType === 'monthly'" class="am-fa__rs-light"
-        >
+        <span v-if="repeatType === 'monthly'" class="am-fa__rs-light">
           {{ `${labelsDisplay('repeats_on')} ${monthlyTypes[repeatMonthly].label}, ` }}
         </span>
         <span class="am-fa__rs-light">
@@ -111,8 +99,7 @@
       </p>
       <p>
         <span v-if="occurrenceType === 'after'" class="am-fa__rs-light"
-          >{{ labelsDisplay('number_of_recurrences') }}
-          {{ occurrenceCount }}</span
+          >{{ labelsDisplay('number_of_recurrences') }} {{ occurrenceCount }}</span
         >
         <span v-else class="am-fa__rs-light"
           >{{ labelsDisplay('ends_on') }} {{ occurrenceDate }}</span
@@ -155,15 +142,9 @@ const { amCustomize } = useReactiveCustomize()
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value].recurringStep.translations &&
-      amCustomize.value[pageRenderKey.value].recurringStep.translations[
-        label
-      ] &&
-      amCustomize.value[pageRenderKey.value].recurringStep.translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value].recurringStep.translations[
-          label
-        ][langKey.value]
+      amCustomize.value[pageRenderKey.value].recurringStep.translations[label] &&
+      amCustomize.value[pageRenderKey.value].recurringStep.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].recurringStep.translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -265,10 +246,7 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-rs-text': amColors.value.colorMainText,
-    '--am-c-rs-text-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
+    '--am-c-rs-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
     '--am-c-rs-bgr': amColors.value.colorMainBgr,
     '--am-c-rs-primary': amColors.value.colorPrimary,
     '--am-c-rs-inp-border': amColors.value.colorInpBorder,
@@ -299,11 +277,7 @@ export default {
         $count: 10;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms
-              cubic-bezier(0.45, 1, 0.4, 1.2)
-              #{$i *
-              100}ms
-              am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }

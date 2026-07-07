@@ -1,10 +1,5 @@
 <template>
-  <AmButton
-    :size="props.btnSize"
-    :suffix="arrowDown"
-    class="am-button-single"
-    :class="props.class"
-  >
+  <AmButton :size="props.btnSize" :suffix="arrowDown" class="am-button-single" :class="props.class">
     {{ labelsDisplay('pay_now_btn') }}
   </AmButton>
 </template>
@@ -60,17 +55,10 @@ let stepName = inject('stepName')
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepName.value]
-      .translations &&
-      amCustomize.value[pageRenderKey.value][stepName.value].translations[
-        label
-      ] &&
-      amCustomize.value[pageRenderKey.value][stepName.value].translations[
-        label
-      ][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[
-          label
-        ][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepName.value].translations &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
       : amLabels[label]
   })
 

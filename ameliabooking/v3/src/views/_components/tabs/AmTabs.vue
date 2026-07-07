@@ -5,30 +5,34 @@
 </template>
 
 <script setup>
-import {
-  computed,
-  toRefs
-} from "vue";
+import { computed, toRefs } from 'vue'
 
 /**
  * Component Props
  */
 const props = defineProps({
   id: {
-    type: String
+    type: String,
   },
   modelValue: {
     type: [String, Number],
   },
   tabsArray: {
     type: Array,
-  }
+  },
 })
 
 /**
  * Component Emits
  * */
-const emits = defineEmits(['tab-click', 'tab-change', 'tab-remove', 'tab-add', 'edit', 'update:activeName'])
+const emits = defineEmits([
+  'tab-click',
+  'tab-change',
+  'tab-remove',
+  'tab-add',
+  'edit',
+  'update:activeName',
+])
 
 /**
  * Component model
@@ -38,16 +42,14 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:activeName', val)
-  }
+  },
 })
 </script>
 
 <script>
 export default {
-  name: "AmTabs"
+  name: 'AmTabs',
 }
 </script>
 
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>

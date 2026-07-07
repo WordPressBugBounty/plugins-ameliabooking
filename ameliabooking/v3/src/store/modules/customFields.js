@@ -7,10 +7,10 @@ export default {
   }),
 
   getters: {
-    getFilteredCustomFieldsArray (state) {
+    getFilteredCustomFieldsArray(state) {
       return state.customFieldsArray
     },
-    getCustomFields (state) {
+    getCustomFields(state) {
       return state.customFields
     },
 
@@ -18,39 +18,38 @@ export default {
       return state.customFields[field].value
     },
 
-    getAllData (state) {
+    getAllData(state) {
       return {
         // customFieldsArray: state.customFieldsArray,
         customFields: state.customFields,
       }
-    }
+    },
   },
 
   mutations: {
-    setFilteredCustomFieldsArray (state, payload) {
+    setFilteredCustomFieldsArray(state, payload) {
       state.customFieldsArray = payload
     },
 
-    setCustomFields (state, payload) {
+    setCustomFields(state, payload) {
       state.customFields = payload
     },
 
-    setCustomField (state, payload) {
+    setCustomField(state, payload) {
       state.customFields[payload.key] = payload
     },
 
-    setCustomFieldValue (state, payload) {
+    setCustomFieldValue(state, payload) {
       state.customFields[payload.key].value = payload.value
     },
 
-    setAllData (state, payoad) {
+    setAllData(state, payoad) {
       // state.customFieldsArray = payoad.customFieldsArray
       state.customFields = payoad.customFields
     },
 
-    populateCustomerCustomFields (state, payload) {
-      let customerCustomFields = payload.customFields
-        ? JSON.parse(payload.customFields) : {}
+    populateCustomerCustomFields(state, payload) {
+      let customerCustomFields = payload.customFields ? JSON.parse(payload.customFields) : {}
       let populateAvailableCustomFields = state.customFields
 
       for (let id in customerCustomFields) {
@@ -60,16 +59,20 @@ export default {
       }
 
       state.customFields = populateAvailableCustomFields
-    }
+    },
   },
 
   actions: {
-    filterEventCustomFields ({ commit, getters, rootGetters }) {
+    filterEventCustomFields({ commit, getters, rootGetters }) {
       let eventId = rootGetters['eventBooking/getSelectedEventId']
       let filteredCustomFieldsArr = []
       let customFields = {}
-      rootGetters['eventEntities/getCustomFields'].forEach(c => {
-        if (c.events.find(event => event.id === parseInt(eventId)) || c.allEvents || c.saveType === 'customer') {
+      rootGetters['eventEntities/getCustomFields'].forEach((c) => {
+        if (
+          c.events.find((event) => event.id === parseInt(eventId)) ||
+          c.allEvents ||
+          c.saveType === 'customer'
+        ) {
           filteredCustomFieldsArr.push(c)
 
           customFields[`cf${c.id}`] = {
@@ -81,12 +84,12 @@ export default {
             required: c.required,
             width: c.width,
             saveFirstChoice: c.saveFirstChoice,
-            saveType: c.saveType
+            saveType: c.saveType,
           }
 
           switch (c.type) {
-            case ('checkbox'):
-            case ('file'):
+            case 'checkbox':
+            case 'file':
               customFields[`cf${c.id}`].value = []
 
               break
@@ -103,6 +106,6 @@ export default {
 
       commit('setFilteredCustomFieldsArray', filteredCustomFieldsArr)
       commit('setCustomFields', customFields)
-    }
-  }
+    },
+  },
 }

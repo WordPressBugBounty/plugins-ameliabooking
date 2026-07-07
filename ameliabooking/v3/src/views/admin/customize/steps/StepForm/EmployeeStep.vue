@@ -12,10 +12,12 @@
         'am--selected': anyEmployee,
       }"
       tabindex="0"
-      @click="() => {
-        selectedEmployee = null
-        anyEmployee = true
-      }"
+      @click="
+        () => {
+          selectedEmployee = null
+          anyEmployee = true
+        }
+      "
     >
       <div class="am-fs__init-item__img am-item-any">
         <span class="am-icon-user" />
@@ -42,15 +44,21 @@
       :price-visibility="amCustomize[pageRenderKey].employeeStep.options.price.visibility"
       :labels="amLabels"
       :parent-width="componentWidth"
-      :info-btn-visibility="!!employee.description && amCustomize[pageRenderKey].employeeStep.options.moreBtn.visibility"
-      @select-item="() => {
-        selectedEmployee = employee
-        anyEmployee = false
-      }"
-      @trigger-info-popup="() => {
-        moreInfoVisibility = true
-        selectedEmployee = employee
-      }"
+      :info-btn-visibility="
+        !!employee.description && amCustomize[pageRenderKey].employeeStep.options.moreBtn.visibility
+      "
+      @select-item="
+        () => {
+          selectedEmployee = employee
+          anyEmployee = false
+        }
+      "
+      @trigger-info-popup="
+        () => {
+          moreInfoVisibility = true
+          selectedEmployee = employee
+        }
+      "
     />
   </StepCardLayout>
 
@@ -99,9 +107,7 @@ let amCustomize = inject('customize')
 
 // * Component reference
 const stepCardLayoutReference = ref(null)
-const stepCardLayoutDom = computed(
-  () => stepCardLayoutReference.value?.stepCardLayoutRef || null
-)
+const stepCardLayoutDom = computed(() => stepCardLayoutReference.value?.stepCardLayoutRef || null)
 
 // * Component width
 const { width: componentWidth } = useElementSize(stepCardLayoutDom)
@@ -113,9 +119,9 @@ let responsiveClass = computed(() => {
 function labelsDisplay(label) {
   return computed(() => {
     return (
-      amCustomize.value[pageRenderKey.value]?.[stepName.value]?.translations?.[
-        label
-        ]?.[langKey.value] || amLabels[label]
+      amCustomize.value[pageRenderKey.value]?.[stepName.value]?.translations?.[label]?.[
+        langKey.value
+      ] || amLabels[label]
     )
   }).value
 }
@@ -129,58 +135,66 @@ let employeeOptions = ref([
     id: 1,
     firstName: 'Sarah',
     lastName: 'Johnson',
-    description: 'Senior nail technician with 8 years of experience specializing in gel manicures and nail art. Sarah is known for her attention to detail and creative designs.',
+    description:
+      'Senior nail technician with 8 years of experience specializing in gel manicures and nail art. Sarah is known for her attention to detail and creative designs.',
     price: '$45',
   },
   {
     id: 2,
     firstName: 'Michael',
     lastName: 'Davis',
-    description: 'Licensed massage therapist specializing in deep tissue and Swedish massage. Michael has extensive training in sports massage and injury recovery.',
+    description:
+      'Licensed massage therapist specializing in deep tissue and Swedish massage. Michael has extensive training in sports massage and injury recovery.',
     price: '',
   },
   {
     id: 3,
     firstName: 'Emma',
     lastName: 'Wilson',
-    description: 'Professional hairstylist and colorist with expertise in balayage, highlights, and modern cuts. Emma stays current with the latest trends and techniques.',
+    description:
+      'Professional hairstylist and colorist with expertise in balayage, highlights, and modern cuts. Emma stays current with the latest trends and techniques.',
     price: '',
   },
   {
     id: 4,
     firstName: 'James',
     lastName: 'Rodriguez',
-    description: 'Certified personal trainer with specialization in strength training and weight loss. James creates personalized workout plans for all fitness levels.',
+    description:
+      'Certified personal trainer with specialization in strength training and weight loss. James creates personalized workout plans for all fitness levels.',
     price: '$55',
   },
   {
     id: 5,
     firstName: 'Lisa',
     lastName: 'Chen',
-    description: 'Licensed esthetician specializing in facials, chemical peels, and anti-aging treatments. Lisa provides personalized skincare consultations.',
+    description:
+      'Licensed esthetician specializing in facials, chemical peels, and anti-aging treatments. Lisa provides personalized skincare consultations.',
     price: '$75',
   },
   {
     id: 6,
     firstName: 'David',
     lastName: 'Thompson',
-    description: 'Master barber with traditional and modern cutting techniques. David offers classic shaves, beard trimming, and contemporary men\'s styling.',
+    description:
+      "Master barber with traditional and modern cutting techniques. David offers classic shaves, beard trimming, and contemporary men's styling.",
     price: '$40',
   },
   {
     id: 7,
     firstName: 'Amanda',
     lastName: 'Brown',
-    description: 'Yoga instructor certified in Hatha, Vinyasa, and Restorative yoga. Amanda focuses on mindfulness and proper alignment for all skill levels.',
+    description:
+      'Yoga instructor certified in Hatha, Vinyasa, and Restorative yoga. Amanda focuses on mindfulness and proper alignment for all skill levels.',
     price: '',
   },
   {
     id: 8,
     firstName: 'Robert',
     lastName: 'Martinez',
-    description: 'Licensed physiotherapist specializing in injury rehabilitation and pain management. Robert uses evidence-based treatments for optimal recovery.',
+    description:
+      'Licensed physiotherapist specializing in injury rehabilitation and pain management. Robert uses evidence-based treatments for optimal recovery.',
     price: '',
-  }
+  },
 ])
 
 // * Service - More Info

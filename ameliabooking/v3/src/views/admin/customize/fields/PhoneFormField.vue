@@ -32,6 +32,7 @@
 <script setup>
 import AmInputPhone from '../../../_components/input-phone/AmInputPhone.vue'
 import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
+import { getInternationalPhoneValue } from '../../../../assets/js/common/phone'
 
 import { computed, inject, ref } from 'vue'
 
@@ -48,12 +49,8 @@ function labelsDisplay(label) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value].infoStep.translations &&
       amCustomize.value[pageRenderKey.value].infoStep.translations[label] &&
-      amCustomize.value[pageRenderKey.value].infoStep.translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value].infoStep.translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value].infoStep.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].infoStep.translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -63,10 +60,18 @@ function labelsDisplay(label) {
 // * Form field data
 let infoFormData = inject('infoFormData')
 
-let countryCode = ref(amSettings.general.phoneDefaultCountryCode === 'auto' ? '' : amSettings.general.phoneDefaultCountryCode.toLowerCase())
+let countryCode = ref(
+  amSettings.general.phoneDefaultCountryCode === 'auto'
+    ? ''
+    : amSettings.general.phoneDefaultCountryCode.toLowerCase(),
+)
 
 function handleData(phoneData) {
-  infoFormData.value.phone = phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, '') : ''
+  infoFormData.value.phone = getInternationalPhoneValue(
+    phoneData?.phoneNumber ?? phoneData?.e164,
+    phoneData,
+    phoneData?.countryCode
+  )
 }
 </script>
 

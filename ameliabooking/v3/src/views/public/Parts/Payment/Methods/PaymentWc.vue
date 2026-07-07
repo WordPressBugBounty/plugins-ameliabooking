@@ -1,6 +1,5 @@
 <template>
-  <div class="am-fs__payment_default">
-  </div>
+  <div class="am-fs__payment_default"></div>
 </template>
 
 <script setup>
@@ -8,29 +7,27 @@
 import {
   // ref,
   inject,
-  watchEffect
-} from "vue";
+  watchEffect,
+} from 'vue'
 
 // * Import form Vuex
-import {
-  useStore
-} from "vuex";
+import { useStore } from 'vuex'
 
 // * Composables
 import {
   getErrorMessage,
   useBookingData,
-  useCreateBookingError
-} from "../../../../../assets/js/public/booking.js";
+  useCreateBookingError,
+} from '../../../../../assets/js/public/booking.js'
 
-import httpClient from "../../../../../plugins/axios";
+import httpClient from '../../../../../plugins/axios'
 
 // * Component props
 let props = defineProps({
   instantBooking: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const store = useStore()
@@ -46,18 +43,15 @@ let stepsArray = inject('stepsArray')
  * Navigation *
  *************/
 
-const {
-  footerButtonReset,
-  footerButtonClicked
-} = inject('changingStepsFunctions', {
+const { footerButtonReset, footerButtonClicked } = inject('changingStepsFunctions', {
   footerButtonReset: () => {},
   footerButtonClicked: {
-    value: false
-  }
+    value: false,
+  },
 })
 
 defineExpose({
-  continueWithBooking
+  continueWithBooking,
 })
 
 // * Labels
@@ -74,61 +68,50 @@ watchEffect(() => {
   }
 })
 
-
 /***********
  * Payment *
  **********/
 
-function continueWithBooking () {
+function continueWithBooking() {
   footerButtonReset()
 
   let bookingData = useBookingData(
     store,
     {
       shortcode: shortcodeData.value,
-      steps: stepsArray.value.map(i => i.name),
+      steps: stepsArray.value.map((i) => i.name),
       // ! it must be refactored
       // sidebar: sidebarSteps.value.map(i => Object.assign({key: i.key, data: i.stepSelectedData})),
     },
     false,
     {},
-    null
+    null,
   )
 
   store.commit('setLoading', true)
 
-  payment(
-    '/payment/wc',
-    bookingData,
-    function (response) {
-      window.location = response.data.data.cartUrl
-    }
-  )
+  payment('/payment/wc', bookingData, function (response) {
+    window.location = response.data.data.cartUrl
+  })
 }
 
 const emits = defineEmits(['payment-error'])
 
-
-function payment (endpoint, bookingData, success) {
-  httpClient.post(
-    endpoint,
-    bookingData.data,
-    bookingData.options
-  ).then(success).catch(error => {
-    useCreateBookingError(
-      store,
-      error.response.data,
-      () => {
+function payment(endpoint, bookingData, success) {
+  httpClient
+    .post(endpoint, bookingData.data, bookingData.options)
+    .then(success)
+    .catch((error) => {
+      useCreateBookingError(store, error.response.data, () => {
         emits('payment-error', getErrorMessage())
-      }
-    )}
-  )
+      })
+    })
 }
 </script>
 
 <script>
 export default {
-  name: 'PaymentWc'
+  name: 'PaymentWc',
 }
 </script>
 

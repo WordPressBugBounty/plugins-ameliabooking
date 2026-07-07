@@ -4,21 +4,15 @@
     :position="position"
     custom-class="am-msd"
     :close-outside="true"
-    :custom-css="{...customCss, ...cssVars}"
+    :custom-css="{ ...customCss, ...cssVars }"
     @update:visibility="emits('update:visibility', false)"
   >
     <div class="am-msd__item-wrapper">
-      <div
-        class="am-msd__item"
-        @click="closeMenu"
-      >
+      <div class="am-msd__item" @click="closeMenu">
         <div class="am-msd__item-inner">
           <transition name="fade">
-            <p
-              class="am-msd__item-heading"
-              :class="{'am-rtl': isRtl}"
-            >
-              {{displayLabels('menu_title')}}
+            <p class="am-msd__item-heading" :class="{ 'am-rtl': isRtl }">
+              {{ displayLabels('menu_title') }}
             </p>
           </transition>
           <transition name="fade">
@@ -28,14 +22,11 @@
           </transition>
         </div>
       </div>
-      <template
-        v-for="(step, index) in menuItems"
-        :key="step.key"
-      >
+      <template v-for="(step, index) in menuItems" :key="step.key">
         <div
           v-if="step.key !== 'packages' || store.getters['entities/getPackages'].length"
           class="am-msd__item"
-          :class="{'selected': monitor === step.key}"
+          :class="{ selected: monitor === step.key }"
           @click="menuSelection(step, index)"
         >
           <div class="am-msd__item-inner">
@@ -43,41 +34,29 @@
               <span :class="`am-icon-${step.icon}`"></span>
             </div>
             <transition name="fade">
-              <p
-                class="am-msd__item-heading"
-                :class="{'am-rtl': isRtl}"
-              >
+              <p class="am-msd__item-heading" :class="{ 'am-rtl': isRtl }">
                 {{ step.label }}
               </p>
             </transition>
             <transition name="fade">
-              <div
-                class="am-msd__item-indicator"
-                :class="{'am-rtl': isRtl}"
-              >
+              <div class="am-msd__item-indicator" :class="{ 'am-rtl': isRtl }">
                 <span :class="isRtl ? 'am-icon-arrow-big-left' : 'am-icon-arrow-big-right'"></span>
               </div>
             </transition>
           </div>
         </div>
-        <div
-          v-if="index === 0"
-          class="am-msd__item-divider"
-        ></div>
+        <div v-if="index === 0" class="am-msd__item-divider"></div>
       </template>
     </div>
 
     <template #footer>
-      <div
-        class="am-msd__item"
-        @click="() => emits('logout')"
-      >
+      <div class="am-msd__item" @click="() => emits('logout')">
         <div class="am-msd__item-inner">
           <div class="am-msd__item-icon">
             <span class="am-icon-logout"></span>
           </div>
           <p class="am-msd__item-heading">
-            {{displayLabels('log_out')}}
+            {{ displayLabels('log_out') }}
           </p>
         </div>
       </div>
@@ -87,51 +66,48 @@
 
 <script setup>
 // * _components
-import AmSlidePopup from "../../../_components/slide-popup/AmSlidePopup.vue";
+import AmSlidePopup from '../../../_components/slide-popup/AmSlidePopup.vue'
 
 // * Import from Vue
-import {
-  computed,
-  inject
-} from "vue";
+import { computed, inject } from 'vue'
 
-import {useStore} from "vuex";
+import { useStore } from 'vuex'
 
 // * Components Props
 let props = defineProps({
   visibility: {
     type: Boolean,
-    required: true
+    required: true,
   },
   customizedLabels: {
     type: Object,
     default: () => {
       return {}
-    }
+    },
   },
   monitor: {
     type: String,
-    required: true
+    required: true,
   },
   menuItems: {
     type: Array,
-    required: true
+    required: true,
   },
   customCss: {
     type: Object,
-    default: () => {}
+    default: () => {},
   },
   width: {
     type: Number,
-    default: 300
+    default: 300,
   },
   position: {
     type: String,
     default: 'right',
     validator(value) {
       return ['right', 'left', 'top', 'bottom'].includes(value)
-    }
-  }
+    },
+  },
 })
 
 // * Components Emits
@@ -150,23 +126,25 @@ let isRtl = computed(() => {
   return false
 })
 
-function menuSelection (step, index) {
-  let obj = {step, index}
+function menuSelection(step, index) {
+  let obj = { step, index }
   emits('click', obj)
   emits('update:visibility', false)
 }
 
-function closeMenu () {
+function closeMenu() {
   emits('update:visibility', false)
 }
 
-function displayLabels (label) {
-  return Object.keys(props.customizedLabels).length && props.customizedLabels[label] ? props.customizedLabels[label] : amLabels[label]
+function displayLabels(label) {
+  return Object.keys(props.customizedLabels).length && props.customizedLabels[label]
+    ? props.customizedLabels[label]
+    : amLabels[label]
 }
 
 let cssVars = computed(() => {
   return {
-    '--am-mw-msd': `${props.width}px`
+    '--am-mw-msd': `${props.width}px`,
   }
 })
 </script>
@@ -180,7 +158,7 @@ let cssVars = computed(() => {
     justify-content: space-between;
     font-size: 16px;
     color: var(--am-c-msd-text);
-    transition: width .3s ease-in-out;
+    transition: width 0.3s ease-in-out;
 
     &.am-slide-popup__block-inner {
       display: flex;
@@ -188,7 +166,8 @@ let cssVars = computed(() => {
       background-color: var(--am-c-msd-bgr);
       padding: 16px 8px 16px 16px;
 
-      &.am-position-right, &.am-position-left {
+      &.am-position-right,
+      &.am-position-left {
         max-width: var(--am-mw-msd);
         width: 100%;
       }
@@ -228,7 +207,7 @@ let cssVars = computed(() => {
       $count: 100;
       @for $i from 0 through $count {
         &:nth-child(#{$i + 1}) {
-          animation: 400ms cubic-bezier(.45,1,.4,1.2) #{$i*70}ms am-animation-slide-right;
+          animation: 400ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 70}ms am-animation-slide-right;
           animation-fill-mode: both;
         }
       }

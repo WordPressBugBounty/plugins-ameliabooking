@@ -1,11 +1,6 @@
 <template>
-  <div
-    class="am-congrats__info-item am-fs__congrats-info-customer-name"
-    :class="responsiveClass"
-  >
-    <span class="am-congrats__info-item__label">
-      {{ props.labels.your_name_colon }}:
-    </span>
+  <div class="am-congrats__info-item am-fs__congrats-info-customer-name" :class="responsiveClass">
+    <span class="am-congrats__info-item__label"> {{ props.labels.your_name_colon }}: </span>
     <span class="am-congrats__info-item__value">
       {{ `${props.customer.firstName} ${props.customer.lastName}` }}
     </span>
@@ -15,9 +10,7 @@
     class="am-congrats__info-item am-fs__congrats-info-customer-email"
     :class="responsiveClass"
   >
-    <span class="am-congrats__info-item__label">
-      {{ props.labels.email_address_colon }}:
-    </span>
+    <span class="am-congrats__info-item__label"> {{ props.labels.email_address_colon }}: </span>
     <span class="am-congrats__info-item__value">
       {{ props.customer.email }}
     </span>
@@ -27,9 +20,7 @@
     class="am-congrats__info-item am-fs__congrats-info-customer-phone"
     :class="responsiveClass"
   >
-    <span class="am-congrats__info-item__label">
-      {{ props.labels.phone_number_colon }}:
-    </span>
+    <span class="am-congrats__info-item__label"> {{ props.labels.phone_number_colon }}: </span>
     <span class="am-congrats__info-item__value">
       {{ props.customer.phone }}
     </span>
@@ -38,28 +29,25 @@
 
 <script setup>
 // * Import from Vue
-import {
-  inject,
-  computed
-} from "vue";
+import { inject, computed } from 'vue'
 
 // * Composables
-import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
 
 // * Component props
 let props = defineProps({
   customer: {
     type: Object,
-    required: true
+    required: true,
   },
   labels: {
     type: Object,
-    required: true
+    required: true,
   },
   inDialog: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 // * Responsive - Container Width
@@ -75,7 +63,7 @@ let responsiveClass = computed(() => useResponsiveClass(componentWidth.value))
 
 <script>
 export default {
-  name: "CustomerCongratsInfo"
+  name: 'CustomerCongratsInfo',
 }
 </script>
 

@@ -1,9 +1,6 @@
 <template>
   <div ref="pageContainer" class="am-cap">
-    <CabinetFilters
-      :param-list="paramList"
-      :responsive-class="responsiveClass"
-    />
+    <CabinetFilters :param-list="paramList" :responsive-class="responsiveClass" />
 
     <div v-if="pageRenderKey === 'cape'" class="am-cap__actions">
       <AmButton
@@ -171,15 +168,12 @@ let dateGroupedAppointments = ref({})
 arrApp.forEach((item, index) => {
   if (
     Object.keys(dateGroupedAppointments.value).indexOf(
-      moment().add(item.when, 'days').format('YYYY-MM-DD')
+      moment().add(item.when, 'days').format('YYYY-MM-DD'),
     ) < 0
   ) {
-    dateGroupedAppointments.value[
+    dateGroupedAppointments.value[moment().add(item.when, 'days').format('YYYY-MM-DD')] = {}
+    dateGroupedAppointments.value[moment().add(item.when, 'days').format('YYYY-MM-DD')].date =
       moment().add(item.when, 'days').format('YYYY-MM-DD')
-    ] = {}
-    dateGroupedAppointments.value[
-      moment().add(item.when, 'days').format('YYYY-MM-DD')
-    ].date = moment().add(item.when, 'days').format('YYYY-MM-DD')
     dateGroupedAppointments.value[
       moment().add(item.when, 'days').format('YYYY-MM-DD')
     ].appointments = []
@@ -187,12 +181,8 @@ arrApp.forEach((item, index) => {
 
   let app = {
     id: index,
-    bookingEnd: `${moment()
-      .add(item.when, 'days')
-      .format('YYYY-MM-DD')} 08:10:00`,
-    bookingStart: `${moment()
-      .add(item.when, 'days')
-      .format('YYYY-MM-DD')} 08:00:00`,
+    bookingEnd: `${moment().add(item.when, 'days').format('YYYY-MM-DD')} 08:10:00`,
+    bookingStart: `${moment().add(item.when, 'days').format('YYYY-MM-DD')} 08:00:00`,
     bookings: [
       {
         actionsCompleted: null,

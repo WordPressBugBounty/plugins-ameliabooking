@@ -89,7 +89,7 @@ let loading = computed(
     store.getters['auth/getOutlookLoading'] ||
     store.getters['auth/getAppleLoading'] ||
     store.getters['auth/getStripeLoading'] ||
-    store.getters['auth/getZoomLoading']
+    store.getters['auth/getZoomLoading'],
 )
 
 const currentView = ref('list')
@@ -163,9 +163,7 @@ const integrations = computed(() => [
     title: amLabels.stripe_connect,
     description: amLabels.red_employee_stripe_description,
     isConnected: isStripeConnected.value,
-    isAvailable:
-      !!amSettings.payments.stripe.enabled &&
-      amSettings.payments.stripe.connect.enabled,
+    isAvailable: !!amSettings.payments.stripe.enabled && amSettings.payments.stripe.connect.enabled,
   },
 ])
 

@@ -10,7 +10,7 @@
       :disabled="props.disabled"
       :border="props.border"
       :name="props.name"
-      :style="{...cssVars}"
+      :style="{ ...cssVars }"
       @change="(e) => $emit('change', e)"
     >
       <slot name="default"></slot>
@@ -20,54 +20,50 @@
 
 <script setup>
 // * Composables
-import { useColorTransparency } from '../../../assets/js/common/colorManipulation';
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
 
 // * Import from Vue
-import {
-  computed,
-  ref,
-  inject, toRefs
-} from "vue";
+import { computed, ref, inject, toRefs } from 'vue'
 
 /**
  * Component Props
  * */
 const props = defineProps({
   modelValue: {
-    type: [String, Number, Boolean]
+    type: [String, Number, Boolean],
   },
   value: {
-    type: [String, Number, Boolean]
+    type: [String, Number, Boolean],
   },
   label: {
     // * the label of Radio. If there's no value, label will act as value
-    type: [String, Number, Boolean]
+    type: [String, Number, Boolean],
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   border: {
     type: Boolean,
-    default: false
+    default: false,
   },
   size: {
     type: String,
     default: 'default',
     validator(value) {
       return ['default', 'medium', 'small'].includes(value)
-    }
+    },
   },
   name: {
     type: String,
-    default: ''
+    default: '',
   },
   style: {
     type: Object,
     default: () => {
       return {}
-    }
-  }
+    },
+  },
 })
 
 /**
@@ -83,34 +79,37 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 const amRadio = ref(null)
 
 // * Color Vars
-let amColors = inject('amColors', ref({
-  colorPrimary: '#1246D6',
-  colorSuccess: '#019719',
-  colorError: '#B4190F',
-  colorWarning: '#CCA20C',
-  colorMainBgr: '#FFFFFF',
-  colorMainHeadingText: '#33434C',
-  colorMainText: '#1A2C37',
-  colorSbBgr: '#17295A',
-  colorSbText: '#FFFFFF',
-  colorInpBgr: '#FFFFFF',
-  colorInpBorder: '#D1D5D7',
-  colorInpText: '#1A2C37',
-  colorInpPlaceHolder: '#1A2C37',
-  colorDropBgr: '#FFFFFF',
-  colorDropBorder: '#D1D5D7',
-  colorDropText: '#0E1920',
-  colorBtnPrim: '#265CF2',
-  colorBtnPrimText: '#FFFFFF',
-  colorBtnSec: '#1A2C37',
-  colorBtnSecText: '#FFFFFF',
-}))
+let amColors = inject(
+  'amColors',
+  ref({
+    colorPrimary: '#1246D6',
+    colorSuccess: '#019719',
+    colorError: '#B4190F',
+    colorWarning: '#CCA20C',
+    colorMainBgr: '#FFFFFF',
+    colorMainHeadingText: '#33434C',
+    colorMainText: '#1A2C37',
+    colorSbBgr: '#17295A',
+    colorSbText: '#FFFFFF',
+    colorInpBgr: '#FFFFFF',
+    colorInpBorder: '#D1D5D7',
+    colorInpText: '#1A2C37',
+    colorInpPlaceHolder: '#1A2C37',
+    colorDropBgr: '#FFFFFF',
+    colorDropBorder: '#D1D5D7',
+    colorDropText: '#0E1920',
+    colorBtnPrim: '#265CF2',
+    colorBtnPrimText: '#FFFFFF',
+    colorBtnSec: '#1A2C37',
+    colorBtnSecText: '#FFFFFF',
+  }),
+)
 
 const cssVars = computed(() => {
   return {
@@ -123,7 +122,6 @@ const cssVars = computed(() => {
     '--am-c-radio-border-op60': useColorTransparency(amColors.value.colorPrimary, 0.6),
   }
 })
-
 </script>
 
 <style lang="scss">
@@ -210,7 +208,6 @@ const cssVars = computed(() => {
 
       // Hover
       &:hover:not(.is-disabled):not(.is-checked) {
-
         // Inner
         .el-radio__inner {
           border: 1px solid var(--am-c-radio-border);
@@ -221,7 +218,6 @@ const cssVars = computed(() => {
 
       // Focus
       &:focus:is(.is-focus) {
-
         // Inner
         .el-radio__inner {
           border: 2px solid var(--am-c-radio-border-lighten80);
@@ -230,7 +226,6 @@ const cssVars = computed(() => {
 
       // Disabled
       &.is-disabled {
-
         // Inner
         .el-radio__inner {
           box-shadow: 0 1px 1px rgba(115, 134, 169, 0.06);
@@ -251,7 +246,6 @@ const cssVars = computed(() => {
 
       // Label Right
       &.is-label-right {
-
         // Input
         .el-radio__input {
           margin-left: auto;

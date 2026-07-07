@@ -25,10 +25,7 @@
 
       <template #heading>
         <div
-          :class="[
-            { 'am-tablet': pageWidth <= 678 },
-            { 'am-mobile': pageWidth < 450 },
-          ]"
+          :class="[{ 'am-tablet': pageWidth <= 678 }, { 'am-mobile': pageWidth < 450 }]"
           class="am-fcis__header-top"
           role="region"
           aria-label="Service Information"
@@ -37,10 +34,7 @@
             <span class="am-fcis__header-name" role="heading" aria-level="1">
               {{ service.name }}
             </span>
-            <div
-              v-if="customizedOptions.serviceBadge.visibility"
-              class="am-fcis__badge am-service"
-            >
+            <div v-if="customizedOptions.serviceBadge.visibility" class="am-fcis__badge am-service">
               <span class="am-icon-service"></span>
               <span>
                 {{ amLabels.heading_service }}
@@ -48,10 +42,7 @@
             </div>
           </div>
           <div class="am-fcis__header-action">
-            <span
-              v-if="customizedOptions.servicePrice.visibility"
-              class="am-fcis__header-price"
-            >
+            <span v-if="customizedOptions.servicePrice.visibility" class="am-fcis__header-price">
               {{
                 useServicePrice(amEntities, service.id).min ||
                 useServicePrice(amEntities, service.id).max
@@ -74,10 +65,7 @@
               </template>
             </span>
             <span class="am-fcis__header-btn">
-              <AmButton
-                :type="customizedOptions.bookingBtn.buttonType"
-                @click="bookNow"
-              >
+              <AmButton :type="customizedOptions.bookingBtn.buttonType" @click="bookNow">
                 {{ amLabels.book_now }}
               </AmButton>
             </span>
@@ -108,15 +96,11 @@
               <span>{{ useServiceDuration(service.duration) }}</span>
             </div>
             <div
-              v-if="
-                customizedOptions.serviceCapacity.visibility && !licence.isLite
-              "
+              v-if="customizedOptions.serviceCapacity.visibility && !licence.isLite"
               class="am-fcis__mini-info__inner"
             >
               <span class="am-icon-user"></span>
-              <span>{{
-                useEmployeesServiceCapacity(amEntities, service.id)
-              }}</span>
+              <span>{{ useEmployeesServiceCapacity(amEntities, service.id) }}</span>
             </div>
             <div
               v-if="
@@ -141,10 +125,7 @@
         <div v-if="service.gallery.length" class="am-fcis__gallery">
           <div
             class="am-fcis__gallery-hero"
-            :class="[
-              { w100: service.gallery.length === 1 },
-              { 'am-mobile w100': pageWidth < 678 },
-            ]"
+            :class="[{ w100: service.gallery.length === 1 }, { 'am-mobile w100': pageWidth < 678 }]"
             :style="{
               backgroundImage: `url(${service.gallery[0].pictureFullPath})`,
             }"
@@ -173,9 +154,7 @@
           </div>
           <AmButton
             v-if="service.gallery.length > 1"
-            :custom-class="`am-fcis__gallery-btn${
-              pageWidth < 678 ? ' am-mobile' : ''
-            }`"
+            :custom-class="`am-fcis__gallery-btn${pageWidth < 678 ? ' am-mobile' : ''}`"
             category="secondary"
             type="filled"
             @click="openGallery(0)"
@@ -196,10 +175,7 @@
         >
           <div class="am-gd" :style="cssGalleryDialogVars">
             <div class="am-gd__display-wrapper">
-              <div
-                class="am-gd__arrows"
-                style="display: flex; justify-content: space-between"
-              >
+              <div class="am-gd__arrows" style="display: flex; justify-content: space-between">
                 <span
                   class="am-icon-arrow-left"
                   role="button"
@@ -208,23 +184,17 @@
                   @click="
                     () =>
                       (activeImage =
-                        activeImage <= 0
-                          ? service.gallery.length - 1
-                          : activeImage - 1)
+                        activeImage <= 0 ? service.gallery.length - 1 : activeImage - 1)
                   "
                   @keydown.enter="
                     () =>
                       (activeImage =
-                        activeImage <= 0
-                          ? service.gallery.length - 1
-                          : activeImage - 1)
+                        activeImage <= 0 ? service.gallery.length - 1 : activeImage - 1)
                   "
                   @keydown.space.prevent="
                     () =>
                       (activeImage =
-                        activeImage <= 0
-                          ? service.gallery.length - 1
-                          : activeImage - 1)
+                        activeImage <= 0 ? service.gallery.length - 1 : activeImage - 1)
                   "
                 ></span>
                 <span
@@ -235,23 +205,17 @@
                   @click="
                     () =>
                       (activeImage =
-                        service.gallery.length - 1 === activeImage
-                          ? 0
-                          : activeImage + 1)
+                        service.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
                   "
                   @keydown.enter="
                     () =>
                       (activeImage =
-                        service.gallery.length - 1 === activeImage
-                          ? 0
-                          : activeImage + 1)
+                        service.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
                   "
                   @keydown.space.prevent="
                     () =>
                       (activeImage =
-                        service.gallery.length - 1 === activeImage
-                          ? 0
-                          : activeImage + 1)
+                        service.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
                   "
                 ></span>
               </div>
@@ -262,10 +226,7 @@
                 :style="{ display: index === activeImage ? 'flex' : 'none' }"
                 @click="
                   () =>
-                    (activeImage =
-                      service.gallery.length - 1 === activeImage
-                        ? 0
-                        : activeImage + 1)
+                    (activeImage = service.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
                 "
               >
                 <img :src="img.pictureFullPath" :alt="`Image ${index + 1}`" />
@@ -310,9 +271,7 @@
               {{ amLabels.about_service }}
             </div>
             <div
-              v-if="
-                customizedOptions.serviceEmployees.visibility && !licence.isLite
-              "
+              v-if="customizedOptions.serviceEmployees.visibility && !licence.isLite"
               :class="{ 'am-active': tabsActive === 'employees' }"
               class="am-fcis__info-tab"
               @click="() => (tabsActive = 'employees')"
@@ -344,16 +303,9 @@
               class="am-fcis__info-content"
             >
               <AmCollapse>
-                <AmCollapseItem
-                  v-for="employee in serviceEmployees"
-                  :key="employee.id"
-                  side
-                >
+                <AmCollapseItem v-for="employee in serviceEmployees" :key="employee.id" side>
                   <template #heading>
-                    <div
-                      :class="{ 'am-mobile': pageWidth < 451 }"
-                      class="am-fcis__info-employee"
-                    >
+                    <div :class="{ 'am-mobile': pageWidth < 451 }" class="am-fcis__info-employee">
                       <div class="am-fcis__info-employee__hero">
                         <AmImagePlaceholder
                           item-class="am-fcis__info-employee__img"
@@ -438,36 +390,20 @@
                 :item-data="pack"
                 :trim-string="3"
               ></AmImagePlaceholder>
-              <div
-                :class="{ 'am-mobile': pageWidth < 451 }"
-                class="am-fcis__include-text"
-              >
-                <div
-                  class="am-fcis__include-header"
-                  :class="{ 'am-mobile': pageWidth < 600 }"
-                >
-                  <div
-                    class="am-fcis__include-name"
-                    :class="{ 'am-mobile': pageWidth < 600 }"
-                  >
+              <div :class="{ 'am-mobile': pageWidth < 451 }" class="am-fcis__include-text">
+                <div class="am-fcis__include-header" :class="{ 'am-mobile': pageWidth < 600 }">
+                  <div class="am-fcis__include-name" :class="{ 'am-mobile': pageWidth < 600 }">
                     {{ pack.name }}
                   </div>
                   <div
                     v-if="customizedOptions.packagePrice.visibility"
                     class="am-fcis__include-cost"
                   >
-                    <span
-                      v-if="pack.discount"
-                      class="am-fcis__include-discount"
-                    >
+                    <span v-if="pack.discount" class="am-fcis__include-discount">
                       {{ `${amLabels.save} ${pack.discount}%` }}
                     </span>
                     <span class="am-fcis__include-price">
-                      {{
-                        pack.price
-                          ? useFormattedPrice(usePackageAmount(pack))
-                          : amLabels.free
-                      }}
+                      {{ pack.price ? useFormattedPrice(usePackageAmount(pack)) : amLabels.free }}
                     </span>
                     <span
                       v-if="
@@ -487,9 +423,7 @@
                 </div>
                 <div class="am-fcis__include-info">
                   <div
-                    v-if="
-                      customizedOptions.packageCategory.visibility && category
-                    "
+                    v-if="customizedOptions.packageCategory.visibility && category"
                     class="am-fcis__include-info__inner"
                   >
                     <span class="am-icon-folder"></span>
@@ -501,17 +435,13 @@
                   >
                     <span class="am-icon-clock"></span>
                     <span v-if="pack.endDate">
-                      {{
-                        `${amLabels.expires_at} ${pack.endDate.split(' ')[0]}`
-                      }}
+                      {{ `${amLabels.expires_at} ${pack.endDate.split(' ')[0]}` }}
                     </span>
                     <span v-else-if="pack.durationCount">
                       {{
-                        `${amLabels.expires_after} ${
-                          pack.durationCount
-                        } ${durationTypeLabel(
+                        `${amLabels.expires_after} ${pack.durationCount} ${durationTypeLabel(
                           pack.durationCount,
-                          pack.durationType
+                          pack.durationType,
                         )}`
                       }}
                     </span>
@@ -527,10 +457,7 @@
                     <span>1/1</span>
                   </div>
                   <div
-                    v-if="
-                      customizedOptions.packageLocation.visibility &&
-                      packageLocations.length
-                    "
+                    v-if="customizedOptions.packageLocation.visibility && packageLocations.length"
                     class="am-fcis__include-info__inner"
                   >
                     <span class="am-icon-locations"></span>
@@ -585,9 +512,7 @@
     </Content>
     <div v-if="empty" ref="ameliaContainer" class="am-empty">
       <img
-        :src="
-          baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/am-empty-booking.svg'
-        "
+        :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/am-empty-booking.svg'"
         :alt="
           preselected.show !== 'packages'
             ? amLabels.no_services_employees
@@ -611,9 +536,7 @@
         <a href="https://wpamelia.com/services-and-categories/" rel="nofollow">
           {{ amLabels.add_services_url }}&nbsp;
         </a>
-        <span v-if="preselected.show !== 'packages'">
-          {{ amLabels.and }}&nbsp;
-        </span>
+        <span v-if="preselected.show !== 'packages'"> {{ amLabels.and }}&nbsp; </span>
         <a
           v-if="preselected.show !== 'packages'"
           href="https://wpamelia.com/employees/"
@@ -662,10 +585,7 @@ import {
 } from '../../../../assets/js/public/catalog.js'
 import { useFormattedPrice } from '../../../../assets/js/common/formatting.js'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation.js'
-import {
-  usePackageAmount,
-  useBuildPackage,
-} from '../../../../assets/js/public/package.js'
+import { usePackageAmount, useBuildPackage } from '../../../../assets/js/public/package.js'
 import { useDescriptionVisibility } from '../../../../assets/js/common/helper'
 import { useFillAppointments } from '../../../../assets/js/common/appointments'
 import {
@@ -710,9 +630,7 @@ const labels = inject('labels')
 const localLanguage = inject('localLanguage')
 
 // * if local lang is in settings lang
-let langDetection = computed(() =>
-  amSettings.general.usedLanguages.includes(localLanguage.value)
-)
+let langDetection = computed(() => amSettings.general.usedLanguages.includes(localLanguage.value))
 
 // * Computed labels
 let amLabels = computed(() => {
@@ -723,15 +641,10 @@ let amLabels = computed(() => {
     amSettings.customizedData.cbf &&
     amSettings.customizedData.cbf.categoryService.translations
   ) {
-    let customizedLabels =
-      amSettings.customizedData.cbf.categoryService.translations
+    let customizedLabels = amSettings.customizedData.cbf.categoryService.translations
     Object.keys(customizedLabels).forEach((labelKey) => {
-      if (
-        customizedLabels[labelKey][localLanguage.value] &&
-        langDetection.value
-      ) {
-        computedLabels[labelKey] =
-          customizedLabels[labelKey][localLanguage.value]
+      if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
+        computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
         computedLabels[labelKey] = customizedLabels[labelKey].default
       }
@@ -749,9 +662,7 @@ let store = useStore()
 let amEntities = inject('amEntities')
 
 // * Cart button
-let cartBtnVisibility = computed(
-  () => useCartStep(store) && useCartHasItems(store) > 0
-)
+let cartBtnVisibility = computed(() => useCartStep(store) && useCartHasItems(store) > 0)
 let cartItemsNumber = computed(() => useCartHasItems(store))
 
 // * Customized data
@@ -774,15 +685,13 @@ let itemType = inject('itemType')
 // * Selected category
 let categorySelected = inject('categorySelected')
 let category = computed(() => {
-  return amEntities.value.categories.find(
-    (item) => item.id === categorySelected.value
-  )
+  return amEntities.value.categories.find((item) => item.id === categorySelected.value)
 })
 
 // * Selected service
 let service = computed(() => {
   let serviceObj = amEntities.value.services.find(
-    (item) => item.id === store.getters['booking/getServiceId']
+    (item) => item.id === store.getters['booking/getServiceId'],
   )
   return serviceObj ? serviceObj : {}
 })
@@ -791,8 +700,7 @@ function displayServiceLocationLabel(entities, id) {
   let locations = useServiceLocation(entities, id)
   if (
     locations.length === 1 ||
-    (locations.length &&
-      locations.every((location) => location.id === locations[0].id))
+    (locations.length && locations.every((location) => location.id === locations[0].id))
   ) {
     return locations[0].address ? locations[0].address : locations[0].name
   }
@@ -810,9 +718,7 @@ let serviceEmployees = computed(() => {
       amEntities.value.entitiesRelations[employeeId][service.value.id] &&
       amEntities.value.employees.find((a) => a.id === parseInt(employeeId))
     ) {
-      arr.push(
-        amEntities.value.employees.find((a) => a.id === parseInt(employeeId))
-      )
+      arr.push(amEntities.value.employees.find((a) => a.id === parseInt(employeeId)))
     }
   })
 
@@ -820,16 +726,10 @@ let serviceEmployees = computed(() => {
 })
 
 function serviceEmployeePrice(employee) {
-  let servicePrice = employee.serviceList.find(
-    (a) => a.id === service.value.id
-  ).price
+  let servicePrice = employee.serviceList.find((a) => a.id === service.value.id).price
   if (servicePrice - service.value.price !== 0)
     return `${
-      servicePrice - service.value.price > 0
-        ? service.value.price > 0
-          ? '+'
-          : ''
-        : '-'
+      servicePrice - service.value.price > 0 ? (service.value.price > 0 ? '+' : '') : '-'
     } ${useFormattedPrice(servicePrice - service.value.price)}`
   return ''
 }
@@ -845,14 +745,10 @@ function galleryKeydownHandler(e) {
   if (!galleryDialog.value) return
   if (e.key === 'ArrowLeft') {
     activeImage.value =
-      activeImage.value <= 0
-        ? service.value.gallery.length - 1
-        : activeImage.value - 1
+      activeImage.value <= 0 ? service.value.gallery.length - 1 : activeImage.value - 1
   } else if (e.key === 'ArrowRight') {
     activeImage.value =
-      service.value.gallery.length - 1 === activeImage.value
-        ? 0
-        : activeImage.value + 1
+      service.value.gallery.length - 1 === activeImage.value ? 0 : activeImage.value + 1
   }
 }
 
@@ -869,16 +765,12 @@ onUnmounted(() => {
 })
 
 onMounted(() => {
-  if (!customizedOptions.value.serviceDescription.visibility)
-    tabsActive.value = 'employees'
-  if (!useDescriptionVisibility(service.value.description))
-    tabsActive.value = 'employees'
+  if (!customizedOptions.value.serviceDescription.visibility) tabsActive.value = 'employees'
+  if (!useDescriptionVisibility(service.value.description)) tabsActive.value = 'employees'
 })
 
 let serviceThumbsGallery = computed(() => {
-  let thumbs = service.value.gallery.length
-    ? JSON.parse(JSON.stringify(service.value.gallery))
-    : []
+  let thumbs = service.value.gallery.length ? JSON.parse(JSON.stringify(service.value.gallery)) : []
   if (service.value.gallery.length === 1) return []
   thumbs.shift()
   if (thumbs.length > 2) thumbs.splice(2, thumbs.length - 2)
@@ -909,9 +801,7 @@ let displayServicePackages = computed(() => {
 })
 
 let packageLocations = computed(() =>
-  store.getters['entities/filteredLocations'](
-    store.getters['booking/getSelection']
-  )
+  store.getters['entities/filteredLocations'](store.getters['booking/getSelection']),
 )
 
 function goBack() {
@@ -951,10 +841,7 @@ provide('bookingDialogWidth', bookingDialogWidth)
 function bookNow() {
   let preselect = store.getters['entities/getPreselected']
   if (serviceEmployees.value.length === 1) {
-    store.commit(
-      'booking/setEmployeeId',
-      parseInt(serviceEmployees.value[0].id)
-    )
+    store.commit('booking/setEmployeeId', parseInt(serviceEmployees.value[0].id))
     preselect.employee = [parseInt(serviceEmployees.value[0].id)]
     store.commit('entities/setPreselected', preselect)
   }
@@ -993,16 +880,13 @@ function selectServicePackage(pack) {
   store.commit('booking/setMultipleAppointmentsIndex', 0)
 
   if (serviceEmployees.value.length === 1) {
-    store.commit(
-      'booking/setEmployeeId',
-      parseInt(serviceEmployees.value[0].id)
-    )
+    store.commit('booking/setEmployeeId', parseInt(serviceEmployees.value[0].id))
   }
 
   if (useServiceLocation(amEntities.value, service.value.id).length === 1) {
     store.commit(
       'booking/setLocationId',
-      parseInt(useServiceLocation(amEntities.value, service.value.id)[0].id)
+      parseInt(useServiceLocation(amEntities.value, service.value.id)[0].id),
     )
   }
 
@@ -1015,8 +899,7 @@ function selectServicePackage(pack) {
 const preselected = computed(() => store.getters['entities/getPreselected'])
 
 let backBtnVisibility = ref(
-  amEntities.value.services.length !== 1 &&
-    preselected.value.service.length !== 1
+  amEntities.value.services.length !== 1 && preselected.value.service.length !== 1,
 )
 
 let stepName = ref('')
@@ -1024,12 +907,10 @@ provide('stepName', stepName)
 
 function onFinishedBooking() {
   let entity = store.getters['entities/getBookableFromBookableEntities'](
-    store.getters['booking/getSelection']
+    store.getters['booking/getSelection'],
   )
 
-  let entitySettings = entity.settings
-    ? JSON.parse(entity.settings)
-    : amSettings
+  let entitySettings = entity.settings ? JSON.parse(entity.settings) : amSettings
 
   if (
     'general' in entitySettings &&
@@ -1061,10 +942,7 @@ function onDialogClosing() {
     // * Reset Location selection
     store.commit('booking/setLocationId', null)
 
-    store.commit(
-      'entities/setPreselected',
-      store.getters['entities/getOriginalPreselected']
-    )
+    store.commit('entities/setPreselected', store.getters['entities/getOriginalPreselected'])
   }
 
   bookingDialogWidth.value = '760px'
@@ -1086,10 +964,7 @@ function durationTypeLabel(duration, type) {
 
 // * Empty state
 let empty = computed(() => {
-  return (
-    Object.keys(service.value).length === 0 ||
-    serviceEmployees.value.length === 0
-  )
+  return Object.keys(service.value).length === 0 || serviceEmployees.value.length === 0
 })
 
 // * Appointment Waiting List: populate module on service selection
@@ -1101,8 +976,7 @@ watch(
 
     if (!newServiceId) return
 
-    let globalEnabled =
-      !!amSettings.featuresIntegrations?.waitingListAppointments?.enabled
+    let globalEnabled = !!amSettings.featuresIntegrations?.waitingListAppointments?.enabled
     if (!globalEnabled) return
 
     let service = store.getters['entities/getService'](newServiceId)
@@ -1114,11 +988,7 @@ watch(
     } catch (e) {
       serviceSettings = null
     }
-    if (
-      !serviceSettings ||
-      !serviceSettings.waitingList ||
-      !serviceSettings.waitingList.enabled
-    )
+    if (!serviceSettings || !serviceSettings.waitingList || !serviceSettings.waitingList.enabled)
       return
 
     const wl = serviceSettings.waitingList
@@ -1133,7 +1003,7 @@ watch(
     }
     store.commit('appointmentWaitingListOptions/setAllData', waitingPayload)
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // * Colors
@@ -1141,30 +1011,12 @@ let amColors = inject('amColors')
 
 let cssVars = computed(() => {
   return {
-    '--am-c-fcis-success-op20': useColorTransparency(
-      amColors.value.colorSuccess,
-      0.2
-    ),
-    '--am-c-fcis-primary-op20': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.2
-    ),
-    '--am-c-fcis-text-op80': useColorTransparency(
-      amColors.value.colorMainText,
-      0.8
-    ),
-    '--am-c-fcis-text-op03': useColorTransparency(
-      amColors.value.colorMainText,
-      0.03
-    ),
-     '--am-c-fcis-text-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
-    '--am-c-fcis-btn-op50': useColorTransparency(
-      amColors.value.colorBtnSec,
-      0.5
-    ),
+    '--am-c-fcis-success-op20': useColorTransparency(amColors.value.colorSuccess, 0.2),
+    '--am-c-fcis-primary-op20': useColorTransparency(amColors.value.colorPrimary, 0.2),
+    '--am-c-fcis-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
+    '--am-c-fcis-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03),
+    '--am-c-fcis-text-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
+    '--am-c-fcis-btn-op50': useColorTransparency(amColors.value.colorBtnSec, 0.5),
   }
 })
 
@@ -1174,14 +1026,8 @@ let cssGalleryDialogVars = computed(() => {
     '--am-c-fcis-text': amColors.value.colorMainText,
     '--am-c-fcis-success': amColors.value.colorSuccess,
     '--am-c-fcis-primary': amColors.value.colorPrimary,
-    '--am-c-scroll-op30': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.3
-    ),
-    '--am-c-scroll-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
     '--am-font-family': amFonts.fontFamily,
   }
 })

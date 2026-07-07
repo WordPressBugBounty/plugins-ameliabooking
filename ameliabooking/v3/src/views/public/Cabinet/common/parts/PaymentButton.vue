@@ -15,7 +15,13 @@
         :size="props.btnSize"
         :type="props.type"
         :suffix="paymentMethods.length > 1 && usePayable(store, props.reservation) ? arrowDown : ''"
-        :class="[{'am-button-single': paymentMethods.length === 1 || !usePayable(store, props.reservation)}, props.class]"
+        :class="[
+          {
+            'am-button-single':
+              paymentMethods.length === 1 || !usePayable(store, props.reservation),
+          },
+          props.class,
+        ]"
         :loading="!!paymentButtonLoader"
         :loading-icon="'loading'"
         :disabled="!usePayable(store, props.reservation)"
@@ -28,12 +34,7 @@
         {{ usePayable(store, props.reservation) ? amLabels.pay_now_btn : amLabels.paid }}
       </AmButton>
     </template>
-    <div
-      v-click-outside="closePayPopup"
-      class="am-cc__edit"
-      role="menu"
-      @keydown="onMenuKeydown"
-    >
+    <div v-click-outside="closePayPopup" class="am-cc__edit" role="menu" @keydown="onMenuKeydown">
       <AmButton
         v-for="paymentMethod in usePaymentMethods(props.bookable.settings)"
         :key="paymentMethod.value"
@@ -55,31 +56,26 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  nextTick,
-} from "vue";
+import { ref, computed, inject, nextTick } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import from Libraries
-import { ClickOutside as vClickOutside } from "element-plus";
+import { ClickOutside as vClickOutside } from 'element-plus'
 
 // * Components
-import AmButton from "../../../../_components/button/AmButton.vue";
-import IconComponent from "../../../../_components/icons/IconComponent.vue";
+import AmButton from '../../../../_components/button/AmButton.vue'
+import IconComponent from '../../../../_components/icons/IconComponent.vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
 import {
   usePaymentMethods,
   usePaymentFromCustomerPanel,
   usePaymentLink,
   usePayable,
-} from "../../../../../assets/js/public/cabinet";
+} from '../../../../../assets/js/public/cabinet'
 
 // * Vars
 let store = useStore()
@@ -89,23 +85,23 @@ const amLabels = inject('amLabels')
 let props = defineProps({
   reservation: {
     type: Object,
-    default: () => {}
+    default: () => {},
   },
   bookable: {
     type: Object,
-    default: () => {}
+    default: () => {},
   },
   type: {
     type: String,
   },
   btnSize: {
     type: String,
-    default: 'mini'
+    default: 'mini',
   },
   class: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 let paymentMethods = computed(() => {
@@ -117,14 +113,14 @@ let paymentButtonLoader = computed(() => {
 })
 
 let arrowDown = {
-  components: {IconComponent},
-  template: `<IconComponent icon="arrow-down"></IconComponent>`
+  components: { IconComponent },
+  template: `<IconComponent icon="arrow-down"></IconComponent>`,
 }
 
 let payPopVisible = ref(false)
 let menuTriggerRef = ref(null)
 
-function paymentLinkActivated (e) {
+function paymentLinkActivated(e) {
   e.stopPropagation()
 
   if (paymentMethods.value.length === 1) {
@@ -134,7 +130,7 @@ function paymentLinkActivated (e) {
   }
 }
 
-function onMenuTriggerKeydown (e) {
+function onMenuTriggerKeydown(e) {
   const openKeys = ['Enter', ' ', 'Spacebar', 'ArrowDown']
 
   if (paymentMethods.value.length === 1 && openKeys.includes(e.key)) {
@@ -158,18 +154,20 @@ function onMenuTriggerKeydown (e) {
   }
 }
 
-function getVisibleMenuItems (container = null) {
-  const popperRoot = container?.closest('.am-cc__popper') || document.querySelector('.am-cc__popper')
+function getVisibleMenuItems(container = null) {
+  const popperRoot =
+    container?.closest('.am-cc__popper') || document.querySelector('.am-cc__popper')
 
   if (!popperRoot) {
     return []
   }
 
-  return Array.from(popperRoot.querySelectorAll('.am-cc__edit-item'))
-    .filter(item => !item.disabled && item.offsetParent !== null)
+  return Array.from(popperRoot.querySelectorAll('.am-cc__edit-item')).filter(
+    (item) => !item.disabled && item.offsetParent !== null,
+  )
 }
 
-function focusFirstMenuItem () {
+function focusFirstMenuItem() {
   nextTick(() => {
     const firstItem = getVisibleMenuItems()[0]
 
@@ -179,7 +177,7 @@ function focusFirstMenuItem () {
   })
 }
 
-function focusMenuTrigger () {
+function focusMenuTrigger() {
   nextTick(() => {
     const trigger = menuTriggerRef.value?.$el || menuTriggerRef.value
 
@@ -189,7 +187,7 @@ function focusMenuTrigger () {
   })
 }
 
-function onMenuKeydown (e) {
+function onMenuKeydown(e) {
   const menuItems = getVisibleMenuItems(e.currentTarget)
 
   if (!menuItems.length) {
@@ -227,15 +225,16 @@ function onMenuKeydown (e) {
 
     const step = e.key === 'ArrowDown' ? 1 : -1
     const fallbackIndex = e.key === 'ArrowDown' ? 0 : menuItems.length - 1
-    const nextIndex = currentIndex === -1
-      ? fallbackIndex
-      : (currentIndex + step + menuItems.length) % menuItems.length
+    const nextIndex =
+      currentIndex === -1
+        ? fallbackIndex
+        : (currentIndex + step + menuItems.length) % menuItems.length
 
     menuItems[nextIndex].focus()
   }
 }
 
-function closePayPopup (focusTrigger = false) {
+function closePayPopup(focusTrigger = false) {
   payPopVisible.value = false
 
   if (focusTrigger) {
@@ -279,7 +278,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: 'PaymentButton'
+  name: 'PaymentButton',
 }
 </script>
 
@@ -295,7 +294,7 @@ export default {
         border-radius: 4px;
         padding: 4px;
         cursor: pointer;
-        transition: background-color .3s ease-in-out;
+        transition: background-color 0.3s ease-in-out;
 
         &:hover {
           background-color: var(--am-c-cc-text-op15);
@@ -309,7 +308,7 @@ export default {
           }
         }
 
-        span[class^="am-icon"] {
+        span[class^='am-icon'] {
           font-size: 24px;
           color: inherit;
           margin: 0 4px 0 0;

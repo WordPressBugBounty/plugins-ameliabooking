@@ -50,14 +50,7 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  reactive,
-  computed,
-  inject,
-  watch,
-  nextTick,
-} from 'vue'
+import { ref, reactive, computed, inject, watch, nextTick } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -94,11 +87,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   let customizedLabels = amCustomize.value.setPass.translations
   if (customizedLabels) {
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -121,13 +114,13 @@ let infoFormData = ref({
     get: () => store.getters['auth/getNewPassword'],
     set: (val) => {
       store.commit('auth/setNewPassword', val ? val : '')
-    }
+    },
   }),
   confirmPassword: computed({
     get: () => store.getters['auth/getConfirmPassword'],
     set: (val) => {
       store.commit('auth/setConfirmPassword', val ? val : '')
-    }
+    },
   }),
 })
 
@@ -142,8 +135,8 @@ let infoFormRules = ref({
     {
       min: 4,
       message: amLabels.value.new_password_length,
-      trigger: 'submit'
-    }
+      trigger: 'submit',
+    },
   ],
   confirmPassword: [
     {
@@ -154,12 +147,13 @@ let infoFormRules = ref({
     {
       min: 4,
       message: amLabels.value.new_password_length,
-      trigger: 'submit'
+      trigger: 'submit',
     },
     {
-      validator: () => store.getters['auth/getNewPassword'] === store.getters['auth/getConfirmPassword'],
+      validator: () =>
+        store.getters['auth/getNewPassword'] === store.getters['auth/getConfirmPassword'],
       message: amLabels.value.passwords_not_match,
-      trigger: 'submit'
+      trigger: 'submit',
     },
   ],
 })
@@ -175,8 +169,8 @@ let signInFormConstruction = ref({
       label: amLabels.value.new_password_colon,
       placeholder: '',
       minLength: 3,
-      class: 'am-asi__item'
-    }
+      class: 'am-asi__item',
+    },
   },
   confirmPassword: {
     template: formFieldsTemplates.text,
@@ -187,8 +181,8 @@ let signInFormConstruction = ref({
       label: amLabels.value.new_password_colon_retype,
       placeholder: '',
       minLength: 3,
-      class: 'am-asi__item'
-    }
+      class: 'am-asi__item',
+    },
   },
 })
 
@@ -204,44 +198,56 @@ let loading = computed(() => {
 let setPassContainerRef = ref(null)
 let hasInitialFocus = ref(false)
 
-function focusFirstInput () {
+function focusFirstInput() {
   if (!setPassContainerRef.value) {
     return
   }
-  const firstInput = setPassContainerRef.value.querySelector('.am-asi__form input, .am-asi__form textarea, .am-asi__form select')
+  const firstInput = setPassContainerRef.value.querySelector(
+    '.am-asi__form input, .am-asi__form textarea, .am-asi__form select',
+  )
   if (firstInput) {
     firstInput.focus()
   }
 }
 
 // * Move focus to first field once loading completes
-watch(loading, (isLoading) => {
-  if (!isLoading && !hasInitialFocus.value) {
-    hasInitialFocus.value = true
-    nextTick(() => {
-      focusFirstInput()
-    })
-  }
-}, {immediate: true})
+watch(
+  loading,
+  (isLoading) => {
+    if (!isLoading && !hasInitialFocus.value) {
+      hasInitialFocus.value = true
+      nextTick(() => {
+        focusFirstInput()
+      })
+    }
+  },
+  { immediate: true },
+)
 
 // * Submit Form
 function submitForm() {
   authFormRef.value.validate((valid) => {
-    if (valid && store.getters['auth/getNewPassword'] === store.getters['auth/getConfirmPassword']) {
+    if (
+      valid &&
+      store.getters['auth/getNewPassword'] === store.getters['auth/getConfirmPassword']
+    ) {
       let user = store.getters['auth/getProfile']
 
       store.commit('setLoading', true)
 
-      httpClient.post(
-        '/users/' + cabinetType.value + 's/' + user.id,
-        {password: store.getters['auth/getNewPassword']},
-        {params: {source: 'cabinet-' + cabinetType.value}}
-      ).then(() => {
-        store.commit('auth/setAuthenticated', true)
-      }).catch(() => {
-      }).finally(() => {
-        store.commit('setLoading', false)
-      })
+      httpClient
+        .post(
+          '/users/' + cabinetType.value + 's/' + user.id,
+          { password: store.getters['auth/getNewPassword'] },
+          { params: { source: 'cabinet-' + cabinetType.value } },
+        )
+        .then(() => {
+          store.commit('auth/setAuthenticated', true)
+        })
+        .catch(() => {})
+        .finally(() => {
+          store.commit('setLoading', false)
+        })
     } else {
       return false
     }
@@ -294,7 +300,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: 'AuthNewPass'
+  name: 'AuthNewPass',
 }
 </script>
 
@@ -306,7 +312,9 @@ export default {
     max-width: 400px;
     width: 100%;
     background-color: var(--am-c-main-bgr);
-    box-shadow: 0 0 9px -4px var(--am-c-main-text-op40), 0px 17px 35px -12px var(--am-c-main-text-op25);
+    box-shadow:
+      0 0 9px -4px var(--am-c-main-text-op40),
+      0px 17px 35px -12px var(--am-c-main-text-op25);
     border-radius: 12px;
     padding: 32px 24px 24px;
     margin: 0 auto;

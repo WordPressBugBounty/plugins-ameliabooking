@@ -23,7 +23,7 @@
           custom-class="am-fcil__filter-buttons__menu"
           :icon-only="true"
           :icon="iconSearchMenu"
-          @click="() => filterMobileMenu = !filterMobileMenu"
+          @click="() => (filterMobileMenu = !filterMobileMenu)"
         />
       </span>
       <div class="am-fcil__filter">
@@ -64,10 +64,7 @@
         <Transition name="slide-fade">
           <div
             v-if="
-              customizeOptions.filterLocation
-                .visibility &&
-              !licence.isLite &&
-              !licence.isStarter
+              customizeOptions.filterLocation.visibility && !licence.isLite && !licence.isStarter
             "
             class="am-fcil__filter-item"
             :class="filterClassWidth.location"
@@ -113,10 +110,7 @@
           </div>
         </Transition>
         <div
-          v-if="
-            features.packages &&
-            customizeOptions.filterButtons.visibility
-          "
+          v-if="features.packages && customizeOptions.filterButtons.visibility"
           class="am-fcil__filter-item"
           :class="filterClassWidth.buttons"
         >
@@ -133,8 +127,7 @@
             <div
               class="am-fcil__filter-item__btn"
               :class="{
-                'am-active':
-                  displayCategoryPackages && !displayCategoryServices,
+                'am-active': displayCategoryPackages && !displayCategoryServices,
               }"
               @click="changeCategoryItemsVisibility('packages')"
             >
@@ -143,8 +136,7 @@
             <div
               class="am-fcil__filter-item__btn"
               :class="{
-                'am-active':
-                  !displayCategoryPackages && displayCategoryServices,
+                'am-active': !displayCategoryPackages && displayCategoryServices,
               }"
               @click="changeCategoryItemsVisibility('services')"
             >
@@ -177,12 +169,9 @@
           v-for="item in categoryPackages"
           :key="item.id"
           class="am-fcil__item"
-          :class="{'am-mobile': containerWidth < 481}"
+          :class="{ 'am-mobile': containerWidth < 481 }"
         >
-          <div
-            class="am-fcil__item-inner"
-            :class="{'am-mobile': containerWidth < 481}"
-          >
+          <div class="am-fcil__item-inner" :class="{ 'am-mobile': containerWidth < 481 }">
             <div
               class="am-fcil__item-content"
               :style="
@@ -216,10 +205,7 @@
                 <div class="am-fcil__item-name">
                   {{ item.name }}
                 </div>
-                <div
-                  v-if="customizeOptions.packagePrice.visibility"
-                  class="am-fcil__item-cost"
-                >
+                <div v-if="customizeOptions.packagePrice.visibility" class="am-fcil__item-cost">
                   <span v-if="item.discount" class="am-fcil__item-discount">
                     {{ `${labelsDisplay('save')} ${item.discount}%` }}
                   </span>
@@ -229,7 +215,7 @@
                         ? useFormattedPrice(
                             item.discount
                               ? item.price - (item.price / 100) * item.discount
-                              : item.price
+                              : item.price,
                           )
                         : labelsDisplay('free')
                     }}
@@ -240,17 +226,11 @@
               <!-- Card Info -->
               <div class="am-fcil__item-info">
                 <div
-                  v-if="
-                    customizeOptions.packageCategory.visibility &&
-                    categorySelected
-                  "
+                  v-if="customizeOptions.packageCategory.visibility && categorySelected"
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-folder"></span>
-                  <span>{{
-                    availableCategories.find((a) => a.id === categorySelected)
-                      .name
-                  }}</span>
+                  <span>{{ availableCategories.find((a) => a.id === categorySelected).name }}</span>
                 </div>
                 <div
                   v-if="customizeOptions.packageDuration.visibility"
@@ -264,10 +244,7 @@
                     {{
                       `${labelsDisplay('expires_after')} ${
                         item.durationCount
-                      } ${packageDurationLabel(
-                        item.durationCount,
-                        item.durationType
-                      )}`
+                      } ${packageDurationLabel(item.durationCount, item.durationType)}`
                     }}
                   </span>
                   <span v-else>
@@ -312,11 +289,11 @@
             <!-- Card Footer -->
             <div
               class="am-fcil__item-footer"
-              :class="[{'am-mobile': containerWidth < 481}, {'am-micro': containerWidth < 320}]"
+              :class="[{ 'am-mobile': containerWidth < 481 }, { 'am-micro': containerWidth < 320 }]"
             >
               <AmButton
                 v-if="customizeOptions.cardEmployeeBtn.visibility"
-                :class="{'am-w100': containerWidth < 320}"
+                :class="{ 'am-w100': containerWidth < 320 }"
                 size="small"
                 :type="btnType('cardEmployeeBtn')"
                 @click="getDialogEmployees()"
@@ -324,7 +301,10 @@
                 {{ labelsDisplay('view_employees') }}
               </AmButton>
               <AmButton
-                :class="[{'am-w100': !customizeOptions.cardEmployeeBtn.visibility}, {'am-micro am-w100': containerWidth < 320}]"
+                :class="[
+                  { 'am-w100': !customizeOptions.cardEmployeeBtn.visibility },
+                  { 'am-micro am-w100': containerWidth < 320 },
+                ]"
                 size="small"
                 :type="btnType('cardContinueBtn')"
               >
@@ -342,12 +322,9 @@
           v-for="item in categoryServices"
           :key="item.id"
           class="am-fcil__item"
-          :class="{'am-mobile': containerWidth < 481}"
+          :class="{ 'am-mobile': containerWidth < 481 }"
         >
-          <div
-            class="am-fcil__item-inner"
-            :class="{'am-mobile': containerWidth < 481}"
-          >
+          <div class="am-fcil__item-inner" :class="{ 'am-mobile': containerWidth < 481 }">
             <div
               class="am-fcil__item-content"
               :style="
@@ -383,16 +360,9 @@
                 <div class="am-fcil__item-name">
                   {{ item.name }}
                 </div>
-                <div
-                  v-if="customizeOptions.servicePrice.visibility"
-                  class="am-fcil__item-cost"
-                >
+                <div v-if="customizeOptions.servicePrice.visibility" class="am-fcil__item-cost">
                   <span class="am-fcil__item-price">
-                    {{
-                      item.price
-                        ? useFormattedPrice(item.price)
-                        : labelsDisplay('free')
-                    }}
+                    {{ item.price ? useFormattedPrice(item.price) : labelsDisplay('free') }}
                   </span>
                 </div>
               </div>
@@ -401,17 +371,11 @@
               <!-- Card Info -->
               <div class="am-fcil__item-info">
                 <div
-                  v-if="
-                    customizeOptions.serviceCategory.visibility &&
-                    categorySelected
-                  "
+                  v-if="customizeOptions.serviceCategory.visibility && categorySelected"
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-folder"></span>
-                  <span>{{
-                    availableCategories.find((a) => a.id === categorySelected)
-                      .name
-                  }}</span>
+                  <span>{{ availableCategories.find((a) => a.id === categorySelected).name }}</span>
                 </div>
                 <div
                   v-if="customizeOptions.serviceDuration.visibility"
@@ -421,10 +385,7 @@
                   <span>{{ serviceDuration(item.duration) }}</span>
                 </div>
                 <div
-                  v-if="
-                    customizeOptions.serviceCapacity.visibility &&
-                    !licence.isLite
-                  "
+                  v-if="customizeOptions.serviceCapacity.visibility && !licence.isLite"
                   class="am-fcil__item-info__inner"
                 >
                   <span class="am-icon-user"></span>
@@ -454,13 +415,11 @@
             <!-- Card Footer -->
             <div
               class="am-fcil__item-footer"
-              :class="[{'am-mobile': containerWidth < 481}, {'am-micro': containerWidth < 320}]"
+              :class="[{ 'am-mobile': containerWidth < 481 }, { 'am-micro': containerWidth < 320 }]"
             >
               <AmButton
-                v-if="
-                  customizeOptions.cardEmployeeBtn.visibility && !licence.isLite
-                "
-                :class="{'am-w100': containerWidth < 320}"
+                v-if="customizeOptions.cardEmployeeBtn.visibility && !licence.isLite"
+                :class="{ 'am-w100': containerWidth < 320 }"
                 size="small"
                 :type="btnType('cardEmployeeBtn')"
                 @click="getDialogEmployees('service')"
@@ -468,7 +427,10 @@
                 {{ labelsDisplay('view_employees') }}
               </AmButton>
               <AmButton
-                :class="[{'am-w100': !customizeOptions.cardEmployeeBtn.visibility}, {'am-micro am-w100': containerWidth < 320}]"
+                :class="[
+                  { 'am-w100': !customizeOptions.cardEmployeeBtn.visibility },
+                  { 'am-micro am-w100': containerWidth < 320 },
+                ]"
                 size="small"
                 :type="btnType('cardContinueBtn')"
               >
@@ -500,11 +462,7 @@
         <template #default>
           <div>
             <AmCollapse>
-              <AmCollapseItem
-                v-for="(employee, index) in dialogEmployeesArray"
-                :key="index"
-                side
-              >
+              <AmCollapseItem v-for="(employee, index) in dialogEmployeesArray" :key="index" side>
                 <template #heading>
                   <div class="am-fcil-employee__heading">
                     <div class="am-fcil-employee__heading-left">
@@ -568,7 +526,7 @@ import AmImagePlaceholder from '../../../_components/image-placeholder/AmImagePl
 import moment from 'moment'
 
 // * Import from Vue
-import {inject, ref, defineComponent, computed, nextTick, onMounted} from 'vue'
+import { inject, ref, defineComponent, computed, nextTick, onMounted } from 'vue'
 
 // * Composables
 import { useFormattedPrice } from '../../../../assets/js/common/formatting.js'
@@ -599,7 +557,10 @@ const baseUrls = inject('baseUrls')
 
 // * Sidebar Menu Visibility
 let sideMenuVisibility = computed(() => {
-  let sidebarByContainer = contentRef.value && contentRef.value.catContainerWidth ? contentRef.value.catContainerWidth > 768 : true
+  let sidebarByContainer =
+    contentRef.value && contentRef.value.catContainerWidth
+      ? contentRef.value.catContainerWidth > 768
+      : true
   return customizeOptions.value.sidebar.visibility && sidebarByContainer
 })
 
@@ -609,8 +570,8 @@ let searchFilter = ref('')
 let filterMobileMenu = ref(true)
 
 let iconSearchMenu = {
-  components: {IconComponent},
-  template: `<IconComponent icon="filter"/>`
+  components: { IconComponent },
+  template: `<IconComponent icon="filter"/>`,
 }
 
 let filterWidth = computed(() => {
@@ -618,7 +579,7 @@ let filterWidth = computed(() => {
 })
 
 // * window resize listener
-window.addEventListener('resize', resize);
+window.addEventListener('resize', resize)
 
 // * resize function
 function resize() {
@@ -652,9 +613,7 @@ let locationsList = ref([
 let locationFilter = ref(null)
 
 // * Category items (packages, services) visibility
-let displayCategoryPackages = ref(
-  !licence.isBasic && !licence.isStarter && !licence.isLite
-)
+let displayCategoryPackages = ref(!licence.isBasic && !licence.isStarter && !licence.isLite)
 let displayCategoryServices = ref(true)
 
 function changeCategoryItemsVisibility(key) {
@@ -767,9 +726,7 @@ let packArray = [
     color: '#230c86',
     price: 500,
     discount: 10,
-    endDate: getFrontedFormattedDate(
-      moment().add(5, 'days').format('YYYY-MM-DD')
-    ),
+    endDate: getFrontedFormattedDate(moment().add(5, 'days').format('YYYY-MM-DD')),
     providers: [1, 2],
     services: [1, 2, 3],
     locations: [2, 3],
@@ -807,9 +764,7 @@ let packArray = [
     color: '#bd971d',
     price: 500,
     discount: 10,
-    endDate: getFrontedFormattedDate(
-      moment().add(5, 'days').format('YYYY-MM-DD')
-    ),
+    endDate: getFrontedFormattedDate(moment().add(5, 'days').format('YYYY-MM-DD')),
     providers: [1, 2],
     services: [1, 2, 3],
     locations: [5],
@@ -976,33 +931,25 @@ let headingStringRender = computed(() => {
     displayCategoryServices.value &&
     (!displayCategoryPackages.value || !categoryPackages.value.length)
   ) {
-    return `${labelsDisplay('available')} - ${
-      categoryServices.value.length
-    } ${serviceString}`
+    return `${labelsDisplay('available')} - ${categoryServices.value.length} ${serviceString}`
   }
 
   if (
     (!displayCategoryServices.value || !categoryServices.value.length) &&
     displayCategoryPackages.value
   ) {
-    return `${labelsDisplay('available')} - ${
-      categoryPackages.value.length
-    } ${packageString}`
+    return `${labelsDisplay('available')} - ${categoryPackages.value.length} ${packageString}`
   }
 
   let connective = categoryPackages.value.length ? '/' : ''
 
   if (features.value.packages === false) {
-    return `${labelsDisplay('available')} - ${
-      categoryServices.value.length
-    } ${serviceString}`
+    return `${labelsDisplay('available')} - ${categoryServices.value.length} ${serviceString}`
   }
 
   return `${labelsDisplay('available')} - ${
     categoryServices.value.length
-  } ${serviceString} ${connective} ${
-    categoryPackages.value.length
-  } ${packageString}`
+  } ${serviceString} ${connective} ${categoryPackages.value.length} ${packageString}`
 })
 
 let dialogEmployees = ref(false)
@@ -1070,30 +1017,29 @@ let filterClassWidth = computed(() => {
   let employeeVisibility = options.filterEmployee.visibility && !licence.isLite
   let locationVisibility =
     options.filterLocation.visibility && !licence.isLite && !licence.isStarter
-  let buttonsVisibility =
-    options.filterButtons.visibility &&
-    features.value.packages
+  let buttonsVisibility = options.filterButtons.visibility && features.value.packages
 
   let classFilter = {
     search: 'am-w30',
     employee: 'am-w20',
     location: 'am-w20',
     buttons: 'am-w30',
-    category: 'am-w100'
+    category: 'am-w100',
   }
 
   if (filterWidth.value > 992) {
     if (!searchVisibility || !buttonsVisibility) {
-      classFilter.employee = (!searchVisibility && !buttonsVisibility) ? 'am-w50' : 'am-w35'
-      classFilter.location = (!searchVisibility && !buttonsVisibility) ? 'am-w50' : 'am-w35'
-      classFilter.search = !buttonsVisibility && !locationVisibility && !employeeVisibility ? 'am-w100' : 'am-w30'
+      classFilter.employee = !searchVisibility && !buttonsVisibility ? 'am-w50' : 'am-w35'
+      classFilter.location = !searchVisibility && !buttonsVisibility ? 'am-w50' : 'am-w35'
+      classFilter.search =
+        !buttonsVisibility && !locationVisibility && !employeeVisibility ? 'am-w100' : 'am-w30'
 
       if (!employeeVisibility) {
-        classFilter.location = (!searchVisibility && !buttonsVisibility) ? 'am-w100' : 'am-w70'
+        classFilter.location = !searchVisibility && !buttonsVisibility ? 'am-w100' : 'am-w70'
       }
 
       if (!locationVisibility) {
-        classFilter.employee = (!searchVisibility && !buttonsVisibility) ? 'am-w100' : 'am-w70'
+        classFilter.employee = !searchVisibility && !buttonsVisibility ? 'am-w100' : 'am-w70'
       }
     } else {
       if (!employeeVisibility) {
@@ -1109,16 +1055,32 @@ let filterClassWidth = computed(() => {
       }
     }
   } else if (filterWidth.value > 768) {
-    classFilter.search = buttonsVisibility ? 'am-w50 am-tablet am-order1' : 'am-w100 am-tablet am-order1'
-    classFilter.buttons = searchVisibility ? 'am-w50 am-tablet am-order2' : 'am-w100 tablet am-order2'
-    classFilter.employee = locationVisibility ? 'am-w50 am-tablet am-order3' : 'am-w100 am-tablet am-order3'
-    classFilter.location = employeeVisibility ? 'am-w50 am-tablet am-order4' : 'am-w100 am-tablet am-order4'
+    classFilter.search = buttonsVisibility
+      ? 'am-w50 am-tablet am-order1'
+      : 'am-w100 am-tablet am-order1'
+    classFilter.buttons = searchVisibility
+      ? 'am-w50 am-tablet am-order2'
+      : 'am-w100 tablet am-order2'
+    classFilter.employee = locationVisibility
+      ? 'am-w50 am-tablet am-order3'
+      : 'am-w100 am-tablet am-order3'
+    classFilter.location = employeeVisibility
+      ? 'am-w50 am-tablet am-order4'
+      : 'am-w100 am-tablet am-order4'
     classFilter.category = 'am-w100 am-tablet am-order5'
   } else if (filterWidth.value > 480) {
-    classFilter.search = buttonsVisibility ? 'am-w50 am-tablet am-order1' : 'am-w100 am-tablet am-order1'
-    classFilter.buttons = searchVisibility ? 'am-w50 am-tablet am-order2' : 'am-w100 tablet am-order2'
-    classFilter.employee = locationVisibility ? 'am-w50 am-tablet am-order3' : 'am-w100 am-tablet am-order3'
-    classFilter.location = employeeVisibility ? 'am-w50 am-tablet am-order4' : 'am-w100 am-tablet am-order4'
+    classFilter.search = buttonsVisibility
+      ? 'am-w50 am-tablet am-order1'
+      : 'am-w100 am-tablet am-order1'
+    classFilter.buttons = searchVisibility
+      ? 'am-w50 am-tablet am-order2'
+      : 'am-w100 tablet am-order2'
+    classFilter.employee = locationVisibility
+      ? 'am-w50 am-tablet am-order3'
+      : 'am-w100 am-tablet am-order3'
+    classFilter.location = employeeVisibility
+      ? 'am-w50 am-tablet am-order4'
+      : 'am-w100 am-tablet am-order4'
     classFilter.category = 'am-w100 am-tablet am-order5'
   } else {
     classFilter.employee = 'am-w100 am-mobile'
@@ -1133,7 +1095,9 @@ let filterClassWidth = computed(() => {
 
 // * Container width
 let containerWidth = computed(() => {
-  return contentRef.value && contentRef.value.catContainerWidth ? contentRef.value.catContainerWidth : 0
+  return contentRef.value && contentRef.value.catContainerWidth
+    ? contentRef.value.catContainerWidth
+    : 0
 })
 
 // * Items location
@@ -1157,9 +1121,7 @@ let amLabels = inject('labels')
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
     let translations = amCustomize.value.cbf.categoryItemsList.translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -1195,11 +1157,7 @@ function serviceDuration(seconds) {
   let hours = Math.floor(seconds / 3600)
   let minutes = (seconds / 60) % 60
 
-  return (
-    (hours ? hours + amLabels.h + ' ' : '') +
-    ' ' +
-    (minutes ? minutes + amLabels.min : '')
-  )
+  return (hours ? hours + amLabels.h + ' ' : '') + ' ' + (minutes ? minutes + amLabels.min : '')
 }
 
 // * Colors
@@ -1207,35 +1165,17 @@ let amColors = inject('amColors')
 
 let cssVars = computed(() => {
   return {
-    '--am-c-fcil-text-op-10': useColorTransparency(
-      amColors.value.colorSbText,
-      0.1
-    ),
-    '--am-c-fcil-main-text-op15': useColorTransparency(
-      amColors.value.colorMainText,
-      0.15
-    ),
-    '--am-c-fcil-card-text-op15': useColorTransparency(
-      amColors.value.colorCardText,
-      0.15
-    ),
-    '--am-c-fcil-card-text-op80': useColorTransparency(
-      amColors.value.colorCardText,
-      0.8
-    ),
-    '--am-c-fcil-primary-op20': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.2
-    ),
-    '--am-c-fcil-success-op20': useColorTransparency(
-      amColors.value.colorSuccess,
-      0.2
-    ),
-    '--am-c-fcil-filter-text-op10': useColorTransparency(
-      amColors.value.colorInpText,
-      0.1
-    ),
-    '--am-w-fcil-main': customizeOptions.value.sidebar.visibility && sideMenuVisibility.value ? 'calc(100% - 220px)' : '100%',
+    '--am-c-fcil-text-op-10': useColorTransparency(amColors.value.colorSbText, 0.1),
+    '--am-c-fcil-main-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15),
+    '--am-c-fcil-card-text-op15': useColorTransparency(amColors.value.colorCardText, 0.15),
+    '--am-c-fcil-card-text-op80': useColorTransparency(amColors.value.colorCardText, 0.8),
+    '--am-c-fcil-primary-op20': useColorTransparency(amColors.value.colorPrimary, 0.2),
+    '--am-c-fcil-success-op20': useColorTransparency(amColors.value.colorSuccess, 0.2),
+    '--am-c-fcil-filter-text-op10': useColorTransparency(amColors.value.colorInpText, 0.1),
+    '--am-w-fcil-main':
+      customizeOptions.value.sidebar.visibility && sideMenuVisibility.value
+        ? 'calc(100% - 220px)'
+        : '100%',
     '--am-w-fcil-card': contentRef.value && contentRef.value.catFormWidth < 580 ? '100%' : '50%',
   }
 })
@@ -1246,19 +1186,10 @@ let popupCssVars = computed(() => {
     '--am-c-fcil-employee-bgr': amColors.value.colorMainBgr,
     '--am-c-fcil-employee-heading': amColors.value.colorMainHeadingText,
     '--am-c-fcil-employee-text': amColors.value.colorMainText,
-    '--am-c-fcil-employee-text-op80': useColorTransparency(
-      amColors.value.colorMainText,
-      0.8
-    ),
-    '--am-c-fcil-employee-text-op15': useColorTransparency(
-      amColors.value.colorMainText,
-      0.15
-    ),
+    '--am-c-fcil-employee-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
+    '--am-c-fcil-employee-text-op15': useColorTransparency(amColors.value.colorMainText, 0.15),
     '--am-c-fcil-employee-primary': amColors.value.colorPrimary,
-    '--am-c-fcil-employee-primary-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
+    '--am-c-fcil-employee-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
     '--am-c-inp-border': amColors.value.colorInpBorder,
     '--am-c-main-text': amColors.value.colorMainText,
   }
@@ -1336,7 +1267,7 @@ export default {
             &1 {
               order: 1;
             }
-            &2{
+            &2 {
               order: 2;
             }
             &3 {
@@ -1364,11 +1295,12 @@ export default {
           line-height: 1.6;
           padding: 2px 8px;
           border-radius: 6px;
-          transition: all .2s ease-in-out;
+          transition: all 0.2s ease-in-out;
           cursor: pointer;
           color: var(--am-c-fcil-filter-placeholder);
 
-          &:hover, &.am-active {
+          &:hover,
+          &.am-active {
             color: var(--am-c-fcil-filter-text);
             background-color: var(--am-c-fcil-filter-inp-bgr);
           }
@@ -1462,7 +1394,7 @@ export default {
       padding: 16px 24px 16px;
     }
 
-    &__wrapper{
+    &__wrapper {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
@@ -1513,7 +1445,11 @@ export default {
         border-radius: 12px;
 
         &.am-package {
-          background: linear-gradient(95.75deg, var(--am-c-fcil-card-bgr) -110.8%,  var(--am-c-warning) 114.33%);
+          background: linear-gradient(
+            95.75deg,
+            var(--am-c-fcil-card-bgr) -110.8%,
+            var(--am-c-warning) 114.33%
+          );
           span {
             color: var(--am-c-fcil-card-bgr);
           }
@@ -1522,7 +1458,7 @@ export default {
         &.am-service {
           background-color: var(--am-c-fcil-success-op20);
           span {
-            color:  var(--am-c-fcil-success);
+            color: var(--am-c-fcil-success);
           }
         }
 
@@ -1537,7 +1473,7 @@ export default {
           font-weight: 400;
           line-height: 1;
 
-          &[class*="am-icon"] {
+          &[class*='am-icon'] {
             font-size: 24px;
           }
         }
@@ -1629,7 +1565,7 @@ export default {
             white-space: nowrap;
             overflow: hidden;
 
-            &[class*="am-icon"] {
+            &[class*='am-icon'] {
               flex: 0 0 auto;
               font-size: 24px;
               color: var(--am-c-fcil-primary);
@@ -1665,7 +1601,8 @@ export default {
             padding-right: 2px;
           }
 
-          &:first-child, &:last-child {
+          &:first-child,
+          &:last-child {
             &:after {
               display: none;
             }
@@ -1735,11 +1672,7 @@ export default {
       $count: 100;
       @for $i from 0 through $count {
         &:nth-child(#{$i + 1}) {
-          animation: 600ms
-            cubic-bezier(0.45, 1, 0.4, 1.2)
-            #{$i *
-            100}ms
-            am-animation-slide-up;
+          animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
           animation-fill-mode: both;
         }
       }

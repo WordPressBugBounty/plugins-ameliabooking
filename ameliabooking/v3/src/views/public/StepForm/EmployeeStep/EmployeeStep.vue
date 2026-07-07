@@ -2,11 +2,9 @@
   <StepCardLayout
     ref="stepCardLayoutReference"
     :custom-class="[props.globalClass, 'am-fs-employee-step']"
-    :card-selected="
-      store.getters['booking/getEmployeeId'] !== null || anyEmployee
-    "
+    :card-selected="store.getters['booking/getEmployeeId'] !== null || anyEmployee"
     :allow-popup="
-     serviceStepsIndex < 0 && stepIndex === 0 && store.getters['booking/getServiceId'] !== null
+      serviceStepsIndex < 0 && stepIndex === 0 && store.getters['booking/getServiceId'] !== null
     "
   >
     <!-- Any Employee -->
@@ -47,10 +45,12 @@
       :keyboard-selection-disabled="keyboardSelectionDisabled"
       :info-btn-visibility="!!employee.description && customizeOptions.moreBtn.visibility"
       @select-item="selectEmployee(employee)"
-      @trigger-info-popup="() => {
-        moreInfoVisibility = true
-        selectedEmployee = employee
-      }"
+      @trigger-info-popup="
+        () => {
+          moreInfoVisibility = true
+          selectedEmployee = employee
+        }
+      "
     />
   </StepCardLayout>
 
@@ -113,9 +113,7 @@ const amCustomize = inject('amCustomize')
 
 // * Component reference
 const stepCardLayoutReference = ref(null)
-const stepCardLayoutDom = computed(
-  () => stepCardLayoutReference.value?.stepCardLayoutRef || null
-)
+const stepCardLayoutDom = computed(() => stepCardLayoutReference.value?.stepCardLayoutRef || null)
 
 // * Component width
 const { width: componentWidth } = useElementSize(stepCardLayoutDom)
@@ -127,7 +125,7 @@ let responsiveClass = computed(() => {
 // * Steps Array
 const stepsArray = inject('stepsArray', ref([]))
 const serviceStepsIndex = computed(() => {
-  return stepsArray.value.findIndex(step => step.name === 'ServiceStep')
+  return stepsArray.value.findIndex((step) => step.name === 'ServiceStep')
 })
 
 // * Step Index
@@ -144,7 +142,7 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Labels
 const amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   const customizedLabels = amCustomize.employeeStep?.translations
 
@@ -173,35 +171,34 @@ const { footerBtnDisabledUpdater } = inject('changingStepsFunctions', {
   footerBtnDisabledUpdater: () => {},
 })
 
-let customizeOptions =  computed(() => amCustomize.employeeStep?.options || defaultCustomizeSettings.sbsNew.employeeStep.options)
+let customizeOptions = computed(
+  () => amCustomize.employeeStep?.options || defaultCustomizeSettings.sbsNew.employeeStep.options,
+)
 
 // * Any Employee
 let anyEmployee = computed(() => !store.getters['booking/getEmployeeId'])
 
 // * Set Employee Options from entities
-let initStepOrder = [
-  { id: 'ServiceStep'},
-  { id: 'EmployeeStep' },
-  { id: 'LocationStep' },
-]
+let initStepOrder = [{ id: 'ServiceStep' }, { id: 'EmployeeStep' }, { id: 'LocationStep' }]
 
 let stepOrder = computed(() => {
   return 'order' in amCustomize ? amCustomize.order : initStepOrder
 })
 
 const filterRules = computed(() => {
-  const idx = stepOrder.value.findIndex(step => step.id === 'EmployeeStep')
+  const idx = stepOrder.value.findIndex((step) => step.id === 'EmployeeStep')
   let arrRules = stepOrder.value.slice(0, idx)
   const obj = { serviceId: null, providerId: null, locationId: null }
-  if (arrRules.some(step => step.id === 'ServiceStep')) delete obj.serviceId
-  if (arrRules.some(step => step.id === 'LocationStep') || locationsRules.value) delete obj.locationId
+  if (arrRules.some((step) => step.id === 'ServiceStep')) delete obj.serviceId
+  if (arrRules.some((step) => step.id === 'LocationStep') || locationsRules.value)
+    delete obj.locationId
   return obj
 })
 
 let employeeOptions = computed(() =>
   store.getters['entities/filteredEmployees'](
-    Object.assign(store.getters['booking/getSelection'], filterRules.value)
-  )
+    Object.assign(store.getters['booking/getSelection'], filterRules.value),
+  ),
 )
 
 function getEmployeePrice(employee) {
@@ -211,7 +208,7 @@ function getEmployeePrice(employee) {
       providerId: employee.id,
     })
     let service = store.getters['entities/getBookableFromBookableEntities'](
-      store.getters['booking/getSelection']
+      store.getters['booking/getSelection'],
     )
 
     if (employeeServices.length === 0 || !service) {
@@ -263,9 +260,7 @@ function disabledEmployee(employee) {
       )
     }
 
-    return Object.values(relations[employee.id]).every(
-      sIds => !sIds.includes(locationId)
-    )
+    return Object.values(relations[employee.id]).every((sIds) => !sIds.includes(locationId))
   }
 
   return false
@@ -319,7 +314,10 @@ watch(moreInfoVisibility, (isVisible, wasVisible) => {
 
 // * Mounted hook
 onMounted(() => {
-  if (!!customizeOptions.value.employee.required && store.getters['booking/getEmployeeId'] === null) {
+  if (
+    !!customizeOptions.value.employee.required &&
+    store.getters['booking/getEmployeeId'] === null
+  ) {
     footerBtnDisabledUpdater(true)
   }
 })

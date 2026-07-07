@@ -1,9 +1,7 @@
-import { useConvertedUtcToLocalDateTime } from "../common/date";
+import { useConvertedUtcToLocalDateTime } from '../common/date'
 
 function useAppointmentDuration(store, appointment) {
-  let service = store.getters['entities/getService'](
-    appointment.serviceId
-  )
+  let service = store.getters['entities/getService'](appointment.serviceId)
 
   let largestBookingDuration = 0
 
@@ -20,7 +18,7 @@ function useAppointmentDuration(store, appointment) {
       let bookingExtrasDuration = 0
 
       booking.extras.forEach((bookingExtra) => {
-        let extra = service.extras.find(i => i.id === bookingExtra.extraId)
+        let extra = service.extras.find((i) => i.id === bookingExtra.extraId)
 
         bookingExtrasDuration += extra.duration * bookingExtra.quantity
       })
@@ -34,9 +32,9 @@ function useAppointmentDuration(store, appointment) {
   return largestBookingDuration + largestBookingExtrasDuration
 }
 
-function useParsedAppointments (appointments, timeZone, allBookings) {
+function useParsedAppointments(appointments, timeZone, allBookings) {
   for (let dateString in appointments) {
-    appointments[dateString].appointments.forEach(appointment => {
+    appointments[dateString].appointments.forEach((appointment) => {
       let appointmentCustomerBookings = {}
 
       appointment.bookings.forEach((booking) => {
@@ -51,19 +49,19 @@ function useParsedAppointments (appointments, timeZone, allBookings) {
 
       for (let customerId in appointmentCustomerBookings) {
         for (let bookingId in appointmentCustomerBookings[customerId]) {
-          if (!(customerId in customerBookings) ||
-            (
-              appointmentCustomerBookings[customerId][bookingId] === 'approved' ||
-              appointmentCustomerBookings[customerId][bookingId] === 'pending'
-            )
+          if (
+            !(customerId in customerBookings) ||
+            appointmentCustomerBookings[customerId][bookingId] === 'approved' ||
+            appointmentCustomerBookings[customerId][bookingId] === 'pending'
           ) {
             customerBookings[customerId] = bookingId
           }
         }
       }
 
-      appointment.bookings.forEach(booking => {
-        if (booking.customerId in customerBookings &&
+      appointment.bookings.forEach((booking) => {
+        if (
+          booking.customerId in customerBookings &&
           parseInt(booking.id) !== parseInt(customerBookings[booking.customerId])
         ) {
           return
@@ -85,13 +83,13 @@ function useParsedAppointments (appointments, timeZone, allBookings) {
     let parsedGroupedAppointments = {}
 
     for (let dateString in appointments) {
-      appointments[dateString].appointments.forEach(appointment => {
+      appointments[dateString].appointments.forEach((appointment) => {
         let appointmentDateString = appointment.bookingStart.split(' ')[0]
 
         if (!(appointmentDateString in parsedGroupedAppointments)) {
           parsedGroupedAppointments[appointmentDateString] = {
             appointments: [appointment],
-            date: appointmentDateString
+            date: appointmentDateString,
           }
         } else {
           parsedGroupedAppointments[appointmentDateString].appointments.push(appointment)
@@ -105,7 +103,4 @@ function useParsedAppointments (appointments, timeZone, allBookings) {
   return appointments
 }
 
-export {
-  useAppointmentDuration,
-  useParsedAppointments,
-}
+export { useAppointmentDuration, useParsedAppointments }

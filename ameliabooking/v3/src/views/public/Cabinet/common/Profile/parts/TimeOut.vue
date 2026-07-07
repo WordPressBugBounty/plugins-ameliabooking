@@ -11,11 +11,7 @@
         {{ props.title }}
       </div>
     </template>
-    <div
-      v-if="timeOut"
-      ref="popupTimeOutRef"
-      class="am-csd__timeOut-content"
-    >
+    <div v-if="timeOut" ref="popupTimeOutRef" class="am-csd__timeOut-content">
       <div class="am-csd__timeOut-content__inner">
         <AmAlert
           v-if="alertVisibility"
@@ -27,9 +23,7 @@
           @close="closeAlert"
           @trigger-close="closeAlert"
         >
-          <template #title>
-            <span class="am-icon-clearable"/> {{ alertMessage }}
-          </template>
+          <template #title> <span class="am-icon-clearable" /> {{ alertMessage }} </template>
         </AmAlert>
 
         <el-form
@@ -79,10 +73,7 @@
       </div>
     </div>
     <template #footer>
-      <div
-        class="am-csd__timeOut-footer"
-        :class="responsiveClass"
-      >
+      <div class="am-csd__timeOut-footer" :class="responsiveClass">
         <AmButton
           category="secondary"
           type="plain"
@@ -91,10 +82,7 @@
         >
           {{ amLabels.cancel }}
         </AmButton>
-        <AmButton
-          :size="pageWidth > 430 ? 'default' : 'small'"
-          @click="saveTimeOut"
-        >
+        <AmButton :size="pageWidth > 430 ? 'default' : 'small'" @click="saveTimeOut">
           {{ amLabels.save }}
         </AmButton>
       </div>
@@ -104,27 +92,21 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  watch,
-  provide,
-} from "vue";
+import { ref, computed, inject, watch, provide } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * _components
-import AmSlidePopup from "../../../../../_components/slide-popup/AmSlidePopup.vue";
-import AmButton from "../../../../../_components/button/AmButton.vue";
-import AmAlert from "../../../../../_components/alert/AmAlert.vue";
-import AmTimeSelect from "../../../../../_components/time-select/AmTimeSelect.vue";
+import AmSlidePopup from '../../../../../_components/slide-popup/AmSlidePopup.vue'
+import AmButton from '../../../../../_components/button/AmButton.vue'
+import AmAlert from '../../../../../_components/alert/AmAlert.vue'
+import AmTimeSelect from '../../../../../_components/time-select/AmTimeSelect.vue'
 
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation.js";
-import { useSecondsInTime, useTimeInSeconds } from "../../../../../../assets/js/common/date";
-import { useResponsiveClass } from "../../../../../../assets/js/common/responsive";
-import { useElementSize } from "@vueuse/core";
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation.js'
+import { useSecondsInTime, useTimeInSeconds } from '../../../../../../assets/js/common/date'
+import { useResponsiveClass } from '../../../../../../assets/js/common/responsive'
+import { useElementSize } from '@vueuse/core'
 
 // * Vars
 let store = useStore()
@@ -147,27 +129,27 @@ let pageWidth = inject('pageWidth')
 let props = defineProps({
   title: {
     type: String,
-    default: ''
+    default: '',
   },
   visibility: {
     type: Boolean,
-    default: false
+    default: false,
   },
   origin: {
     type: String,
-    default: ''
+    default: '',
   },
   timeOutIndex: {
     type: Number,
-    default: 0
+    default: 0,
   },
   originIndex: {
     type: Number,
-    default: 0
+    default: 0,
   },
   isNew: {
     type: Boolean,
-    default: false
+    default: false,
   },
 })
 
@@ -194,7 +176,7 @@ let alertVisibility = ref(false)
 let alertContainer = ref(null)
 let alertMessage = ref('')
 
-function closeAlert () {
+function closeAlert() {
   alertVisibility.value = false
   alertMessage.value = ''
 }
@@ -210,13 +192,13 @@ let breakFormData = ref({
     get: () => timeOut.value.startTime,
     set: (val) => {
       timeOut.value.startTime = val
-    }
+    },
   }),
   endTime: computed({
     get: () => timeOut.value.endTime,
     set: (val) => {
       timeOut.value.endTime = val
-    }
+    },
   }),
 })
 
@@ -230,15 +212,15 @@ let rules = computed(() => {
         required: true,
         message: amLabels.select_time_warning,
         trigger: ['submit', 'change'],
-      }
+      },
     ],
     endTime: [
       {
         required: true,
         message: amLabels.select_time_warning,
         trigger: ['submit', 'change'],
-      }
-    ]
+      },
+    ],
   }
 })
 
@@ -261,22 +243,26 @@ let timeOut = computed(() => {
 })
 
 // ! minTime was not used enywhere in the code
-let minTime = computed(() => periods.value.length ? getNextSlot(periods.value[0].startTime) : '00:00')
+let minTime = computed(() =>
+  periods.value.length ? getNextSlot(periods.value[0].startTime) : '00:00',
+)
 
 // ! maxTime was not used enywhere in the code
-let maxTime = computed(() => periods.value.length ? getPreviousSlot(periods.value[periods.value.length - 1].endTime) : '00:00')
+let maxTime = computed(() =>
+  periods.value.length ? getPreviousSlot(periods.value[periods.value.length - 1].endTime) : '00:00',
+)
 
-function getPreviousSlot (time) {
+function getPreviousSlot(time) {
   return useSecondsInTime(useTimeInSeconds(time) - amSettings.general.timeSlotLength)
 }
 
-function getNextSlot (time) {
+function getNextSlot(time) {
   let nextSlot = useSecondsInTime(useTimeInSeconds(time) + amSettings.general.timeSlotLength)
 
   return nextSlot === '00:00' ? null : nextSlot
 }
 
-function saveTimeOut () {
+function saveTimeOut() {
   timeOutFormRef.value.validate((valid) => {
     if (valid) {
       emits('close')
@@ -284,9 +270,8 @@ function saveTimeOut () {
   })
 }
 
-
 // ! cancelEditTimeOut needs to be refactored
-function cancelEditTimeOut () {
+function cancelEditTimeOut() {
   if (props.isNew) {
     timeOuts.value.pop()
   } else {
@@ -319,7 +304,7 @@ let cssDialogVars = computed(() => {
 
 <script>
 export default {
-  name: 'WorkTimeOut'
+  name: 'WorkTimeOut',
 }
 </script>
 
@@ -349,7 +334,7 @@ export default {
 
       // * Header
       .am-slide-popup__block {
-        &-header{
+        &-header {
           padding: 16px 16px 16px 24px;
           background-color: var(--am-c-csd-bgr);
         }

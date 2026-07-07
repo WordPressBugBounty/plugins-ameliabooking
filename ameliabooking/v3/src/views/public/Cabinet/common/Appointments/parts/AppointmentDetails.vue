@@ -23,7 +23,10 @@
           :key="entity.id"
           :value="entity.id"
           :label="entity.name"
-          :disabled="appointmentFormData.serviceId && typeof filteredCategories.find(i => i.id === entity.id) === 'undefined'"
+          :disabled="
+            appointmentFormData.serviceId &&
+            typeof filteredCategories.find((i) => i.id === entity.id) === 'undefined'
+          "
         />
       </AmSelect>
     </el-form-item>
@@ -48,7 +51,7 @@
           :key="entity.id"
           :value="entity.id"
           :label="entity.name"
-          :disabled="typeof filteredServices.find(i => i.id === entity.id) === 'undefined'"
+          :disabled="typeof filteredServices.find((i) => i.id === entity.id) === 'undefined'"
         />
         <AmOption
           v-if="detachedService"
@@ -80,7 +83,10 @@
           :key="entity.id"
           :value="entity.id"
           :label="entity.name"
-          :disabled="detachedLocation === null && typeof filteredLocations.find(i => i.id === entity.id) === 'undefined'"
+          :disabled="
+            detachedLocation === null &&
+            typeof filteredLocations.find((i) => i.id === entity.id) === 'undefined'
+          "
         />
         <AmOption
           v-if="detachedLocation"
@@ -106,11 +112,7 @@
         :remote-method="searchSpaces"
         :placeholder="`${amLabels.select}`"
       >
-        <AmOption
-          :key="0"
-          :value="0"
-          :label="amLabels.lesson_space_new_space"
-        />
+        <AmOption :key="0" :value="0" :label="amLabels.lesson_space_new_space" />
         <AmOption
           v-for="entity in spaces"
           :key="entity.id"
@@ -136,12 +138,24 @@
         :clearable="true"
         :lang="localLanguage"
         :disabled="!appointmentFormData.serviceId"
-        :disabled-date="(date, monthOrYear) => {return props.isDisabledDate(date, null, true, monthOrYear)}"
+        :disabled-date="
+          (date, monthOrYear) => {
+            return props.isDisabledDate(date, null, true, monthOrYear)
+          }
+        "
         :popper-class="slotsLoading ? 'am-slots-loader' : ''"
         :cell-class-name="getDateClass"
-        @panel-change="(date) => {fetchSlots(date, null, true)}"
+        @panel-change="
+          (date) => {
+            fetchSlots(date, null, true)
+          }
+        "
         @change="selectDate"
-        @focus="appointmentFormData.serviceId && !appointmentFormData.startDate ? fetchSlots(null, null, true) : false"
+        @focus="
+          appointmentFormData.serviceId && !appointmentFormData.startDate
+            ? fetchSlots(null, null, true)
+            : false
+        "
       />
     </el-form-item>
     <!-- /Select Start Date -->
@@ -161,12 +175,21 @@
         @change="selectTime"
       >
         <AmOption
-          v-for="slot in props.getFreeTimes(null, {date: appointmentFormData.startDate, times: props.times, time: appointmentFormData.startTime}, true)"
+          v-for="slot in props.getFreeTimes(
+            null,
+            {
+              date: appointmentFormData.startDate,
+              times: props.times,
+              time: appointmentFormData.startTime,
+            },
+            true,
+          )"
           :key="slot"
           :value="slot"
           :label="slot"
         >
-          {{ getFrontedFormattedTime(slot, 'UTC') }} <span style="float: right;">{{ getTimePrice(slot) }}</span>
+          {{ getFrontedFormattedTime(slot, 'UTC') }}
+          <span style="float: right">{{ getTimePrice(slot) }}</span>
         </AmOption>
       </AmSelect>
     </el-form-item>
@@ -179,10 +202,7 @@
           v-model="appointmentFormData.notifyParticipants"
           :label="amLabels.notify_customers"
         />
-        <el-tooltip
-          effect="dark"
-          placement="top"
-        >
+        <el-tooltip effect="dark" placement="top">
           <template #content>
             <div v-html="amLabels.notify_customers_tooltip"></div>
           </template>
@@ -193,16 +213,20 @@
     <!-- /Notify Customers -->
 
     <!-- Create payment links -->
-    <el-form-item v-if="appointmentFormData.notifyParticipants && appointmentFormData.serviceId && isPaymentLinkEnabled(appointmentFormData.serviceId)" class="am-capai-def__item">
+    <el-form-item
+      v-if="
+        appointmentFormData.notifyParticipants &&
+        appointmentFormData.serviceId &&
+        isPaymentLinkEnabled(appointmentFormData.serviceId)
+      "
+      class="am-capai-def__item"
+    >
       <div class="am-capai-def__notify">
         <AmCheckbox
-            v-model="appointmentFormData.createPaymentLinks"
-            :label="amLabels.generate_payment_links"
+          v-model="appointmentFormData.createPaymentLinks"
+          :label="amLabels.generate_payment_links"
         />
-        <el-tooltip
-            effect="dark"
-            placement="top"
-        >
+        <el-tooltip effect="dark" placement="top">
           <template #content>
             <div v-html="amLabels.generate_payment_links_tooltip"></div>
           </template>
@@ -213,14 +237,8 @@
     <!-- /Notify Customers -->
 
     <!-- Internal Notes -->
-    <el-form-item
-      :label="`${amLabels.note_internal}`"
-      class="am-capai-def__item"
-    >
-      <AmInput
-        v-model="appointmentFormData.internalNotes"
-        :type="'textarea'"
-      />
+    <el-form-item :label="`${amLabels.note_internal}`" class="am-capai-def__item">
+      <AmInput v-model="appointmentFormData.internalNotes" :type="'textarea'" />
     </el-form-item>
     <!-- /Internal Notes -->
   </el-form>
@@ -228,37 +246,28 @@
 
 <script setup>
 // * Import form Vue
-import {
-  computed,
-  ref,
-  inject,
-  watch,
-  onMounted,
-} from "vue";
+import { computed, ref, inject, watch, onMounted } from 'vue'
 
 // * Import store
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
-import { useElementSize } from "@vueuse/core";
+import { useElementSize } from '@vueuse/core'
 
 // * Import libraries
 import moment from 'moment'
 
 // * Import Composables
-import {
-  momentDateFormat,
-  getFrontedFormattedTime,
-} from "../../../../../../assets/js/common/date";
+import { momentDateFormat, getFrontedFormattedTime } from '../../../../../../assets/js/common/date'
 
 // * Import Components
-import AmCheckbox from "../../../../../_components/checkbox/AmCheckbox.vue";
-import AmDatePicker from "../../../../../_components/datePicker/AmDatePicker.vue";
-import AmOption from "../../../../../_components/select/AmOption.vue";
-import AmInput from "../../../../../_components/input/AmInput.vue";
-import AmSelect from "../../../../../_components/select/AmSelect.vue";
-import IconComponent from "../../../../../_components/icons/IconComponent.vue";
-import {useResponsiveClass} from "../../../../../../assets/js/common/responsive";
-import httpClient from "../../../../../../plugins/axios";
+import AmCheckbox from '../../../../../_components/checkbox/AmCheckbox.vue'
+import AmDatePicker from '../../../../../_components/datePicker/AmDatePicker.vue'
+import AmOption from '../../../../../_components/select/AmOption.vue'
+import AmInput from '../../../../../_components/input/AmInput.vue'
+import AmSelect from '../../../../../_components/select/AmSelect.vue'
+import IconComponent from '../../../../../_components/icons/IconComponent.vue'
+import { useResponsiveClass } from '../../../../../../assets/js/common/responsive'
+import httpClient from '../../../../../../plugins/axios'
 
 // * Component props
 let props = defineProps({
@@ -289,10 +298,19 @@ let props = defineProps({
 })
 
 // * Emits
-let emits = defineEmits(['removeSlots', 'fetchSlots', 'changedSlotCondition', 'getSelectedDatesTimes', 'filterOut', 'getFreeTimes', 'selectDate', 'selectTime'])
+let emits = defineEmits([
+  'removeSlots',
+  'fetchSlots',
+  'changedSlotCondition',
+  'getSelectedDatesTimes',
+  'filterOut',
+  'getFreeTimes',
+  'selectDate',
+  'selectTime',
+])
 
 // * Store
-let store = useStore();
+let store = useStore()
 
 // * Labels
 let amLabels = inject('amLabels')
@@ -312,7 +330,7 @@ let slotsPricing = inject('slotsPricing')
 //   return appointmentFormData.value.startDate ? moment(appointmentFormData.value.startDate).format('YYYY-MM-DD') : ''
 // })
 
-function getTimePrice (slot) {
+function getTimePrice(slot) {
   // if (startDateString.value in slotsPricing.value && slot in slotsPricing.value[startDateString.value].slots) {
   //   return useFormattedPrice(slotsPricing.value[startDateString.value].slots[slot].price)
   // }
@@ -346,61 +364,61 @@ let appointmentFormData = ref({
     get: () => store.getters['appointment/getCategoryId'],
     set: (val) => {
       store.commit('appointment/setCategoryId', val ? val : null)
-    }
+    },
   }),
   serviceId: computed({
     get: () => store.getters['appointment/getServiceId'],
     set: (val) => {
       store.commit('appointment/setServiceId', val ? val : null)
-    }
+    },
   }),
   providerId: computed({
     get: () => store.getters['appointment/getProviderId'],
     set: (val) => {
       store.commit('appointment/setProviderId', val ? val : null)
-    }
+    },
   }),
   locationId: computed({
     get: () => store.getters['appointment/getLocationId'],
     set: (val) => {
       store.commit('appointment/setLocationId', val ? val : null)
-    }
+    },
   }),
   lessonSpace: computed({
     get: () => store.getters['appointment/getLessonSpace'],
     set: (val) => {
       store.commit('appointment/setLessonSpace', val ? val : '')
-    }
+    },
   }),
   startDate: computed({
     get: () => store.getters['appointment/getStartDate'],
     set: (val) => {
       store.commit('appointment/setStartDate', val ? val : '')
-    }
+    },
   }),
   startTime: computed({
     get: () => store.getters['appointment/getStartTime'],
     set: (val) => {
       store.commit('appointment/setStartTime', val ? val : '')
-    }
+    },
   }),
   notifyParticipants: computed({
     get: () => store.getters['appointment/getNotifyParticipants'],
     set: (val) => {
       store.commit('appointment/setNotifyParticipants', val)
-    }
+    },
   }),
   createPaymentLinks: computed({
     get: () => store.getters['appointment/getCreatePaymentLinks'],
     set: (val) => {
       store.commit('appointment/setCreatePaymentLinks', val)
-    }
+    },
   }),
   internalNotes: computed({
     get: () => store.getters['appointment/getInternalNotes'],
     set: (val) => {
       store.commit('appointment/setInternalNotes', val ? val : '')
-    }
+    },
   }),
 })
 
@@ -412,45 +430,41 @@ let appointmentFormRules = computed(() => {
         required: true,
         message: amLabels.value.please_select_service,
         trigger: ['submit', 'change'],
-      }
+      },
     ],
     startDate: [
       {
         required: true,
         message: amLabels.value.select_date_warning,
         trigger: ['submit', 'change'],
-      }
+      },
     ],
     startTime: [
       {
         required: true,
         message: amLabels.value.select_time_warning,
         trigger: ['submit', 'change'],
-      }
-    ]
+      },
+    ],
   }
 })
 
 // * Categories
-let filteredCategories = computed(
-  () => store.getters['entities/filteredCategories'](
-    store.getters['appointment/getSelection']
-  )
+let filteredCategories = computed(() =>
+  store.getters['entities/filteredCategories'](store.getters['appointment/getSelection']),
 )
 
 let categories = ref(
-  store.getters['entities/filteredCategories'](
-    {
-      categoryId: null,
-      serviceId: null,
-      providerId: store.getters['appointment/getProviderId'],
-      locationId: null,
-    }
-  )
+  store.getters['entities/filteredCategories']({
+    categoryId: null,
+    serviceId: null,
+    providerId: store.getters['appointment/getProviderId'],
+    locationId: null,
+  }),
 )
 
 let queryCategory = ref('')
-function filterCategory (query) {
+function filterCategory(query) {
   queryCategory.value = query.toLowerCase()
 }
 
@@ -465,33 +479,30 @@ let queryFilteredCategories = computed(() => {
 })
 
 // * Services
-let filteredServices = computed(
-  () => store.getters['entities/filteredServices'](
-    store.getters['appointment/getSelection']
-  )
+let filteredServices = computed(() =>
+  store.getters['entities/filteredServices'](store.getters['appointment/getSelection']),
 )
 
 let services = ref(
-  store.getters['entities/filteredServices'](
-    {
-      categoryId: null,
-      serviceId: null,
-      providerId: store.getters['appointment/getProviderId'],
-      locationId: null,
-    }
-  )
+  store.getters['entities/filteredServices']({
+    categoryId: null,
+    serviceId: null,
+    providerId: store.getters['appointment/getProviderId'],
+    locationId: null,
+  }),
 )
 
-function isPaymentLinkEnabled (serviceId) {
+function isPaymentLinkEnabled(serviceId) {
   let service = store.getters['entities/getService'](serviceId)
   let entitySettings = service && service.settings ? JSON.parse(service.settings) : null
 
-  let paymentLinksEnabled = entitySettings
-  && 'payments' in entitySettings
-  && entitySettings.payments
-  && 'paymentLinks' in entitySettings.payments
-  && entitySettings.payments.paymentLinks
-  && 'enabled' in entitySettings.payments.paymentLinks
+  let paymentLinksEnabled =
+    entitySettings &&
+    'payments' in entitySettings &&
+    entitySettings.payments &&
+    'paymentLinks' in entitySettings.payments &&
+    entitySettings.payments.paymentLinks &&
+    'enabled' in entitySettings.payments.paymentLinks
       ? entitySettings.payments.paymentLinks
       : amSettings.payments.paymentLinks
 
@@ -499,7 +510,7 @@ function isPaymentLinkEnabled (serviceId) {
 }
 
 let queryService = ref('')
-function filterService (query) {
+function filterService(query) {
   queryService.value = query.toLowerCase()
 }
 let queryFilteredServices = computed(() => {
@@ -515,31 +526,27 @@ let queryFilteredServices = computed(() => {
 let detachedService = computed(() => {
   return store.getters['appointment/getId'] &&
     store.getters['appointment/getServiceId'] &&
-    services.value.map(i => i.id).indexOf(store.getters['appointment/getServiceId']) === -1
+    services.value.map((i) => i.id).indexOf(store.getters['appointment/getServiceId']) === -1
     ? store.getters['entities/getService'](store.getters['appointment/getServiceId'])
     : null
 })
 
 // * Locations
-let filteredLocations = computed(
-  () => store.getters['entities/filteredLocations'](
-    store.getters['appointment/getSelection']
-  )
+let filteredLocations = computed(() =>
+  store.getters['entities/filteredLocations'](store.getters['appointment/getSelection']),
 )
 
 let locations = ref(
-  store.getters['entities/filteredLocations'](
-    {
-      categoryId: null,
-      serviceId: null,
-      providerId: store.getters['appointment/getProviderId'],
-      locationId: null,
-    }
-  )
+  store.getters['entities/filteredLocations']({
+    categoryId: null,
+    serviceId: null,
+    providerId: store.getters['appointment/getProviderId'],
+    locationId: null,
+  }),
 )
 
 let queryLocation = ref('')
-function filterLocation (query) {
+function filterLocation(query) {
   queryLocation.value = query.toLowerCase()
 }
 let queryFilteredLocations = computed(() => {
@@ -555,26 +562,24 @@ let queryFilteredLocations = computed(() => {
 let detachedLocation = computed(() => {
   return store.getters['appointment/getId'] &&
     store.getters['appointment/getLocationId'] &&
-    locations.value .map(i => i.id).indexOf(store.getters['appointment/getLocationId']) === -1
+    locations.value.map((i) => i.id).indexOf(store.getters['appointment/getLocationId']) === -1
     ? store.getters['entities/getLocation'](store.getters['appointment/getLocationId'])
     : null
 })
 
-let spaces = ref(
-  store.getters['entities/getSpaces']
-)
+let spaces = ref(store.getters['entities/getSpaces'])
 
 /*****
  * Actions *
  *****/
-function removeSlots () {
+function removeSlots() {
   store.commit('appointment/setTargetedDate', null)
   store.commit('appointment/setStartDate', null)
   store.commit('appointment/setStartTime', null)
   emits('removeSlots')
 }
 
-function fetchSlots (selectedDate, recurringIndex = null, isNavigation = false) {
+function fetchSlots(selectedDate, recurringIndex = null, isNavigation = false) {
   let targetedDate = store.getters['appointment/getTargetedDate']
 
   if (!selectedDate && !targetedDate) {
@@ -583,14 +588,17 @@ function fetchSlots (selectedDate, recurringIndex = null, isNavigation = false) 
     selectedDate = targetedDate
   }
 
-  store.commit('appointment/setTargetedDate', selectedDate && isNavigation ? selectedDate : targetedDate)
+  store.commit(
+    'appointment/setTargetedDate',
+    selectedDate && isNavigation ? selectedDate : targetedDate,
+  )
 
   if (appointmentFormData.value.serviceId) {
     emits('fetchSlots', selectedDate, recurringIndex, isNavigation)
   }
 }
 
-function changedSlotCondition () {
+function changedSlotCondition() {
   if (appointmentFormData.value.startDate) {
     fetchSlots(appointmentFormData.value.startDate)
   }
@@ -600,7 +608,7 @@ function selectTime(value) {
   emits('selectTime', value)
 }
 
-function selectDate (value) {
+function selectDate(value) {
   if (!value) {
     removeSlots()
   } else {
@@ -608,39 +616,45 @@ function selectDate (value) {
   }
 }
 
-function searchSpaces (query) {
+function searchSpaces(query) {
   if (query) {
     clearTimeout(this.searchSpacesTimer)
 
     store.commit('auth/setSpacesLoading', true)
 
-    httpClient.get(
-      '/entities',
-      {
-        params: {types: ['spaces'], lessonSpaceSearch: query}
-      }
-    ).then((response) => {
-      spaces.value = response.data.data.spaces
-    }).catch((e) => {
-      console.log(e)
-    }).finally(() => {
-      store.commit('auth/setSpacesLoading', false)
-    })
+    httpClient
+      .get('/entities', {
+        params: { types: ['spaces'], lessonSpaceSearch: query },
+      })
+      .then((response) => {
+        spaces.value = response.data.data.spaces
+      })
+      .catch((e) => {
+        console.log(e)
+      })
+      .finally(() => {
+        store.commit('auth/setSpacesLoading', false)
+      })
   } else {
     spaces.value = store.getters['entities/getSpaces']
   }
 }
 
-watch (() => appointmentFormData.value.serviceId, (value) => {
-  // * Update employee service and set filtered custom fields
-  store.dispatch('appointment/updateEmployeeService', value ? value : null)
+watch(
+  () => appointmentFormData.value.serviceId,
+  (value) => {
+    // * Update employee service and set filtered custom fields
+    store.dispatch('appointment/updateEmployeeService', value ? value : null)
 
-  if (value) {
-    store.dispatch('appointment/recreateAllBookingCustomFields', {label: amLabels.value.required_field})
+    if (value) {
+      store.dispatch('appointment/recreateAllBookingCustomFields', {
+        label: amLabels.value.required_field,
+      })
 
-    changedSlotCondition()
-  }
-})
+      changedSlotCondition()
+    }
+  },
+)
 
 onMounted(() => {
   if (services.value.length === 1 && !store.getters['appointment/getId']) {
@@ -654,7 +668,7 @@ onMounted(() => {
 
 // * Expose
 defineExpose({
-  detailsFormRef
+  detailsFormRef,
 })
 </script>
 
@@ -669,7 +683,7 @@ defineExpose({
     flex-wrap: wrap;
     justify-content: space-between;
 
-    .am-capai-def{
+    .am-capai-def {
       &__item {
         width: 100%;
         margin-bottom: 24px;
@@ -682,7 +696,8 @@ defineExpose({
           }
         }
 
-        .el-checkbox__input, .el-checkbox__label {
+        .el-checkbox__input,
+        .el-checkbox__label {
           align-self: unset;
           line-height: 1;
           padding: 0;

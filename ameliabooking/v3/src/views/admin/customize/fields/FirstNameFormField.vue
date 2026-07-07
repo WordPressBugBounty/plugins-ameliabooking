@@ -1,10 +1,6 @@
 <template>
   <!-- First Name -->
-  <el-form-item
-    class="am-fs__info-form__item"
-    prop="firstName"
-    label-position="top"
-  >
+  <el-form-item class="am-fs__info-form__item" prop="firstName" label-position="top">
     <template #label>
       <span class="am-fs__info-form__label">
         {{ labelsDisplay('first_name_colon') }}
@@ -36,12 +32,8 @@ function labelsDisplay(label) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value].infoStep.translations &&
       amCustomize.value[pageRenderKey.value].infoStep.translations[label] &&
-      amCustomize.value[pageRenderKey.value].infoStep.translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value].infoStep.translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value].infoStep.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].infoStep.translations[label][langKey.value]
       : amLabels[label]
   })
 

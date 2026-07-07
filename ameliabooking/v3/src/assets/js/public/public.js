@@ -1,55 +1,44 @@
-import {
-  createApp,
-  defineAsyncComponent
-} from 'vue/dist/vue.esm-bundler'
-import { createStore } from "vuex";
-import entities from "./../../../store/modules/entities";
-import booking from "./../../../store/modules/booking";
-import event from "./../../../store/modules/event";
-import attendee from "./../../../store/modules/attendee";
-import appointment from "./../../../store/modules/appointment";
-import employee from "./../../../store/modules/employee";
-import eventEntities from "../../../store/modules/eventEntities";
-import eventBooking from "../../../store/modules/eventBooking";
-import shortcodeParams from "../../../store/modules/shortcodeParams";
-import params from "../../../store/modules/params";
-import pagination from "../../../store/modules/pagination";
-import customerInfo from "../../../store/modules/customerInfo";
-import customFields from "../../../store/modules/customFields";
-import recurring from "../../../store/modules/recurring";
-import persons from "../../../store/modules/persons.js";
-import tickets from "../../../store/modules/tickets.js";
-import payment from "../../../store/modules/payment.js";
-import bookableType from "../../../store/modules/bookableType.js";
-import coupon from "../../../store/modules/coupon.js";
-import auth from "../../../store/modules/auth.js";
-import cabinet from "../../../store/modules/cabinet.js";
-import cabinetFilters from "../../../store/modules/cabinetFilters.js"
-import eventWaitingListOptions from "../../../store/modules/eventWaitingListOptions"
-import stepByStepFilters from "../../../store/modules/stepByStepFilters.js"
-import appointmentWaitingListOptions from "../../../store/modules/appointmentWaitingListOptions"
+import { createApp, defineAsyncComponent } from 'vue/dist/vue.esm-bundler'
+import { createStore } from 'vuex'
+import entities from './../../../store/modules/entities'
+import booking from './../../../store/modules/booking'
+import event from './../../../store/modules/event'
+import attendee from './../../../store/modules/attendee'
+import appointment from './../../../store/modules/appointment'
+import employee from './../../../store/modules/employee'
+import eventEntities from '../../../store/modules/eventEntities'
+import eventBooking from '../../../store/modules/eventBooking'
+import shortcodeParams from '../../../store/modules/shortcodeParams'
+import params from '../../../store/modules/params'
+import pagination from '../../../store/modules/pagination'
+import customerInfo from '../../../store/modules/customerInfo'
+import customFields from '../../../store/modules/customFields'
+import recurring from '../../../store/modules/recurring'
+import persons from '../../../store/modules/persons.js'
+import tickets from '../../../store/modules/tickets.js'
+import payment from '../../../store/modules/payment.js'
+import bookableType from '../../../store/modules/bookableType.js'
+import coupon from '../../../store/modules/coupon.js'
+import auth from '../../../store/modules/auth.js'
+import cabinet from '../../../store/modules/cabinet.js'
+import cabinetFilters from '../../../store/modules/cabinetFilters.js'
+import eventWaitingListOptions from '../../../store/modules/eventWaitingListOptions'
+import stepByStepFilters from '../../../store/modules/stepByStepFilters.js'
+import appointmentWaitingListOptions from '../../../store/modules/appointmentWaitingListOptions'
 
-import {
-  provide,
-  ref,
-  reactive,
-  readonly
-} from "vue";
-import VueGtag from "vue-gtag";
+import { provide, ref, reactive, readonly } from 'vue'
+import VueGtag from 'vue-gtag'
 import { MazUi } from 'maz-ui/plugins'
 import { mazUi as mazUiThemePreset } from '@maz-ui/themes/presets/mazUi'
 import 'maz-ui/styles'
-import {
-  install,
-  init
-} from "./facebookPixel.js";
+import { install, init } from './facebookPixel.js'
 
-import {useLicence} from "../common/licence";
+import { useLicence } from '../common/licence'
 
-import dayjs from "dayjs";
-import updateLocale from "dayjs/plugin/updateLocale";
+import dayjs from 'dayjs'
+import updateLocale from 'dayjs/plugin/updateLocale'
 
-dayjs.extend(updateLocale);
+dayjs.extend(updateLocale)
 
 dayjs.updateLocale(dayjs.locale(), {
   weekStart: window.wpAmeliaSettings.wordpress.startOfWeek,
@@ -83,17 +72,17 @@ const CustomerPanelWrapper = defineAsyncComponent({
 })
 
 if (typeof window.ameliaShortcodeData === 'undefined') {
-  window.ameliaShortcodeData = [{counter: null}]
+  window.ameliaShortcodeData = [{ counter: null }]
 }
 
-const dynamicCdn = window.wpAmeliaUrls.wpAmeliaPluginURL + 'v3/public/';
+const dynamicCdn = window.wpAmeliaUrls.wpAmeliaPluginURL + 'v3/public/'
 
-window.__dynamic_handler__ = function(importer) {
-  return dynamicCdn + 'assets/' + importer;
+window.__dynamic_handler__ = function (importer) {
+  return dynamicCdn + 'assets/' + importer
 }
 // @ts-ignore
-window.__dynamic_preload__ = function(preloads) {
-  return preloads.map(preload => dynamicCdn + preload);
+window.__dynamic_preload__ = function (preloads) {
+  return preloads.map((preload) => dynamicCdn + preload)
 }
 
 function ameliaBeforeFormSubmit(submit, onError, data) {
@@ -159,21 +148,27 @@ function getMazLocale() {
 
 if (window.ameliaShortcodeDataTriggered !== undefined) {
   window.ameliaShortcodeDataTriggered.forEach((shortCodeData) => {
-
     // * Shortcodes that are rendered in Amelia Popup
     if (shortCodeData.in_dialog) {
       // * Collection of all external buttons that are connected to "Amelia popup"
       let externalButtonsLoading = setInterval(() => {
-        let externalButtons = shortCodeData.trigger_type && shortCodeData.trigger_type === 'class' ? [...document.getElementsByClassName(shortCodeData.trigger)]
-          : [document.getElementById(shortCodeData.trigger)]
+        let externalButtons =
+          shortCodeData.trigger_type && shortCodeData.trigger_type === 'class'
+            ? [...document.getElementsByClassName(shortCodeData.trigger)]
+            : [document.getElementById(shortCodeData.trigger)]
 
-        if (externalButtons.length > 0 && externalButtons[0] !== null && typeof externalButtons[0] !== 'undefined') {
+        if (
+          externalButtons.length > 0 &&
+          externalButtons[0] !== null &&
+          typeof externalButtons[0] !== 'undefined'
+        ) {
           clearInterval(externalButtonsLoading)
 
           // * Detect if form loaded from redirection
           if ('ameliaCache' in window && window.ameliaCache.length && window.ameliaCache[0]) {
             let cacheData = JSON.parse(window.ameliaCache[0])
-            if (cacheData &&
+            if (
+              cacheData &&
               'request' in cacheData &&
               'form' in cacheData.request &&
               'shortcode' in cacheData.request.form &&
@@ -189,7 +184,7 @@ if (window.ameliaShortcodeDataTriggered !== undefined) {
           createAmelia(shortCodeData)
 
           // * Made the buttons invisible because amelia components are not fully loaded
-          externalButtons.forEach(btn => {
+          externalButtons.forEach((btn) => {
             btn.style.pointerEvents = 'none'
           })
 
@@ -201,7 +196,7 @@ if (window.ameliaShortcodeDataTriggered !== undefined) {
               clearInterval(componentsLoaded)
               clearTimeout(componentLoadTimeout)
               // * Made the buttons visible because amelia components are fully loaded
-              externalButtons.forEach(btn => {
+              externalButtons.forEach((btn) => {
                 btn.style.removeProperty('pointer-events')
               })
             }
@@ -211,7 +206,7 @@ if (window.ameliaShortcodeDataTriggered !== undefined) {
           componentLoadTimeout = setTimeout(() => {
             clearInterval(componentsLoaded)
             console.warn('Amelia components loading timeout')
-            externalButtons.forEach(btn => {
+            externalButtons.forEach((btn) => {
               btn.style.removeProperty('pointer-events')
             })
           }, 12000)
@@ -220,68 +215,79 @@ if (window.ameliaShortcodeDataTriggered !== undefined) {
     } else if (!shortCodeData.ivy) {
       let ameliaPopUpLoaded = false
 
-      let ameliaBookingButtonLoadInterval = setInterval(
-        function () {
-          let ameliaPopUpButtons = shortCodeData.trigger_type && shortCodeData.trigger_type === 'class' ? [...document.getElementsByClassName(shortCodeData.trigger)]
+      let ameliaBookingButtonLoadInterval = setInterval(function () {
+        let ameliaPopUpButtons =
+          shortCodeData.trigger_type && shortCodeData.trigger_type === 'class'
+            ? [...document.getElementsByClassName(shortCodeData.trigger)]
             : [document.getElementById(shortCodeData.trigger)]
 
-          if (!ameliaPopUpLoaded && ameliaPopUpButtons.length > 0 && ameliaPopUpButtons[0] !== null && typeof ameliaPopUpButtons[0] !== 'undefined') {
-            ameliaPopUpLoaded = true
+        if (
+          !ameliaPopUpLoaded &&
+          ameliaPopUpButtons.length > 0 &&
+          ameliaPopUpButtons[0] !== null &&
+          typeof ameliaPopUpButtons[0] !== 'undefined'
+        ) {
+          ameliaPopUpLoaded = true
 
-            clearInterval(ameliaBookingButtonLoadInterval)
-            ameliaPopUpButtons.forEach(ameliaPopUpButton => {
-              ameliaPopUpButton.onclick = function () {
-                let ameliaBookingFormLoadInterval = setInterval(
-                  function () {
-                    let ameliaPopUpForms = document.getElementsByClassName('amelia-skip-load-' + shortCodeData.counter)
-
-                    if (ameliaPopUpForms.length) {
-                      clearInterval(ameliaBookingFormLoadInterval)
-                      for (let i = 0; i < ameliaPopUpForms.length; i++) {
-                        if (!ameliaPopUpForms[i].classList.contains('amelia-v2-booking-' + shortCodeData.counter + '-loaded')) {
-                          createAmelia(shortCodeData)
-                        }
-                      }
-                    }
-                  }, 1000
+          clearInterval(ameliaBookingButtonLoadInterval)
+          ameliaPopUpButtons.forEach((ameliaPopUpButton) => {
+            ameliaPopUpButton.onclick = function () {
+              let ameliaBookingFormLoadInterval = setInterval(function () {
+                let ameliaPopUpForms = document.getElementsByClassName(
+                  'amelia-skip-load-' + shortCodeData.counter,
                 )
-              }
 
-              if ('ameliaCache' in window && window.ameliaCache.length && window.ameliaCache[0]) {
-                let cacheData = JSON.parse(window.ameliaCache[0])
-
-                if (cacheData &&
-                  'request' in cacheData &&
-                  'form' in cacheData.request &&
-                  'shortcode' in cacheData.request.form &&
-                  'trigger' in cacheData.request.form.shortcode &&
-                  cacheData.request.form.shortcode.trigger
-                ) {
-                  if (!('trigger_type' in cacheData.request.form.shortcode) ||
-                    !cacheData.request.form.shortcode.trigger_type ||
-                    cacheData.request.form.shortcode.trigger_type === 'id'
-                  ) {
-                    let el = document.getElementById(cacheData.request.form.shortcode.trigger)
-
-                    if (typeof el !== 'undefined') {
-                      el.click()
-                    }
-                  } else if ('trigger_type' in cacheData.request.form.shortcode &&
-                    cacheData.request.form.shortcode.trigger_type === 'class'
-                  ) {
-                    let el = document.getElementsByClassName(cacheData.request.form.shortcode.trigger)
-
-                    if (typeof el !== 'undefined' && el.length) {
-                      el[0].click()
+                if (ameliaPopUpForms.length) {
+                  clearInterval(ameliaBookingFormLoadInterval)
+                  for (let i = 0; i < ameliaPopUpForms.length; i++) {
+                    if (
+                      !ameliaPopUpForms[i].classList.contains(
+                        'amelia-v2-booking-' + shortCodeData.counter + '-loaded',
+                      )
+                    ) {
+                      createAmelia(shortCodeData)
                     }
                   }
                 }
-              }
-            })
+              }, 1000)
+            }
 
-          }
-        }, 1000
-      )
+            if ('ameliaCache' in window && window.ameliaCache.length && window.ameliaCache[0]) {
+              let cacheData = JSON.parse(window.ameliaCache[0])
+
+              if (
+                cacheData &&
+                'request' in cacheData &&
+                'form' in cacheData.request &&
+                'shortcode' in cacheData.request.form &&
+                'trigger' in cacheData.request.form.shortcode &&
+                cacheData.request.form.shortcode.trigger
+              ) {
+                if (
+                  !('trigger_type' in cacheData.request.form.shortcode) ||
+                  !cacheData.request.form.shortcode.trigger_type ||
+                  cacheData.request.form.shortcode.trigger_type === 'id'
+                ) {
+                  let el = document.getElementById(cacheData.request.form.shortcode.trigger)
+
+                  if (typeof el !== 'undefined') {
+                    el.click()
+                  }
+                } else if (
+                  'trigger_type' in cacheData.request.form.shortcode &&
+                  cacheData.request.form.shortcode.trigger_type === 'class'
+                ) {
+                  let el = document.getElementsByClassName(cacheData.request.form.shortcode.trigger)
+
+                  if (typeof el !== 'undefined' && el.length) {
+                    el[0].click()
+                  }
+                }
+              }
+            }
+          })
+        }
+      }, 1000)
     }
   })
 }
@@ -318,18 +324,18 @@ function createAmelia(shortcodeData) {
       provide('shortcodeData', readonly(ref(shortcodeData)))
       provide('licence', licence)
       provide('isMounted', isMounted)
-    }
+    },
   })
 
   if (settings.featuresIntegrations.googleAnalytics.enabled && settings.googleTag.id) {
     app.use(VueGtag, {
-      config: {id: wpAmeliaSettings.googleTag.id}
+      config: { id: wpAmeliaSettings.googleTag.id },
     })
   }
 
   if (settings.featuresIntegrations.googleAnalytics.enabled && settings.googleAnalytics.id) {
     app.use(VueGtag, {
-      config: {id: wpAmeliaSettings.googleAnalytics.id}
+      config: { id: wpAmeliaSettings.googleAnalytics.id },
     })
   }
 
@@ -339,9 +345,10 @@ function createAmelia(shortcodeData) {
     init(wpAmeliaSettings.facebookPixel.id)
   }
 
-  let data = 'ameliaCache' in window && window.ameliaCache.length && window.ameliaCache[0]
-    ? JSON.parse(window.ameliaCache[0])
-    : null
+  let data =
+    'ameliaCache' in window && window.ameliaCache.length && window.ameliaCache[0]
+      ? JSON.parse(window.ameliaCache[0])
+      : null
 
   app.use(MazUi, {
     theme: {
@@ -377,7 +384,8 @@ function createAmelia(shortcodeData) {
           ready: false,
           loading: true,
           formKey: '',
-          restoring: data &&
+          restoring:
+            data &&
             data?.request?.form?.shortcode?.counter &&
             parseInt(data.request.form.shortcode.counter) === parseInt(shortcodeData.counter),
           restored: false,
@@ -385,75 +393,75 @@ function createAmelia(shortcodeData) {
         }),
 
         getters: {
-          getSettings (state) {
+          getSettings(state) {
             return state.settings
           },
 
-          getLabels (state) {
+          getLabels(state) {
             return state.labels
           },
 
-          getLocalLanguage (state) {
+          getLocalLanguage(state) {
             return state.localLanguage
           },
 
-          getBaseUrls (state) {
+          getBaseUrls(state) {
             return state.baseUrls
           },
 
-          getRestoring (state) {
+          getRestoring(state) {
             return state.restoring
           },
 
-          getRestored (state) {
+          getRestored(state) {
             return state.restored
           },
 
-          getReady (state) {
+          getReady(state) {
             return state.ready
           },
 
-          getLoading (state) {
+          getLoading(state) {
             return state.loading
           },
 
-          getFormKey (state) {
+          getFormKey(state) {
             return state.formKey
           },
 
-          getIsRtl (state) {
+          getIsRtl(state) {
             return state.isRtl
           },
 
-          getIvy (state) {
+          getIvy(state) {
             return state.ivy
-          }
+          },
         },
 
         mutations: {
-          setRestoring (state, payload) {
+          setRestoring(state, payload) {
             state.restoring = payload
           },
 
-          setRestored (state, payload) {
+          setRestored(state, payload) {
             state.restored = payload
           },
 
-          setReady (state, payload) {
+          setReady(state, payload) {
             state.ready = payload
           },
 
-          setLoading (state, payload) {
+          setLoading(state, payload) {
             state.loading = payload
           },
 
-          setFormKey (state, payload) {
+          setFormKey(state, payload) {
             state.formKey = payload
           },
 
-          setIvy (state, payload) {
+          setIvy(state, payload) {
             state.ivy = payload
-          }
+          },
         },
 
         modules: {
@@ -481,11 +489,11 @@ function createAmelia(shortcodeData) {
           cabinetFilters,
           eventWaitingListOptions,
           stepByStepFilters,
-          appointmentWaitingListOptions
+          appointmentWaitingListOptions,
         },
-      })
+      }),
     )
     .mount(`#amelia-v2-booking${shortcodeData.counter !== null ? '-' + shortcodeData.counter : ''}`)
 }
 
-window.amelia = {load: createAmelia}
+window.amelia = { load: createAmelia }

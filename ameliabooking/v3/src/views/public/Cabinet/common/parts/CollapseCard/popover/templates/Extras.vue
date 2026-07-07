@@ -1,28 +1,18 @@
 <template>
-  <div
-    class="am-cc__extras"
-    :class="responsiveClass"
-  >
-    <div
-      v-for="(item, index) in props.data"
-      :key="index"
-      class="am-cc__extras-item"
-    >
+  <div class="am-cc__extras" :class="responsiveClass">
+    <div v-for="(item, index) in props.data" :key="index" class="am-cc__extras-item">
       <span class="am-cc__extras-name">
-          {{ item.name }}
-        </span>
+        {{ item.name }}
+      </span>
       <div
         v-if="item.duration || item.price || item.quantity"
         class="am-cc__extras-item__inner"
         :class="[
-          {'am-flex-space': (!item.price && item.duration)},
-          {'am-flex-end': (!item.duration)},
+          { 'am-flex-space': !item.price && item.duration },
+          { 'am-flex-end': !item.duration },
         ]"
       >
-        <span
-          v-if="item.duration"
-          class="am-cc__extras-duration"
-        >
+        <span v-if="item.duration" class="am-cc__extras-duration">
           {{ useSecondsToDuration(item.duration, amLabels.h, amLabels.min) }}
         </span>
         <span
@@ -31,12 +21,7 @@
         >
           {{ useFormattedPrice(item.price) }}
         </span>
-        <span
-          v-if="item.quantity"
-          class="am-cc__extras-quantity"
-        >
-        x{{ item.quantity }}
-      </span>
+        <span v-if="item.quantity" class="am-cc__extras-quantity"> x{{ item.quantity }} </span>
       </div>
     </div>
   </div>
@@ -44,15 +29,12 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject
-} from "vue";
+import { computed, inject } from 'vue'
 
 // * Composables
-import { useResponsiveClass } from "../../../../../../../../assets/js/common/responsive.js";
-import { useFormattedPrice } from "../../../../../../../../assets/js/common/formatting";
-import { useSecondsToDuration } from "../../../../../../../../assets/js/common/date";
+import { useResponsiveClass } from '../../../../../../../../assets/js/common/responsive.js'
+import { useFormattedPrice } from '../../../../../../../../assets/js/common/formatting'
+import { useSecondsToDuration } from '../../../../../../../../assets/js/common/date'
 
 // * Vars
 const amLabels = inject('amLabels')
@@ -62,8 +44,8 @@ const shortcodeData = inject('shortcodeData')
 
 let props = defineProps({
   data: {
-    type: [Array, Object, String]
-  }
+    type: [Array, Object, String],
+  },
 })
 
 /*************
@@ -79,7 +61,7 @@ let responsiveClass = computed(() => {
 
 <script>
 export default {
-  name: "TemplateExtras"
+  name: 'TemplateExtras',
 }
 </script>
 
@@ -136,7 +118,8 @@ export default {
       margin: 0 8px 0 0;
     }
 
-    &-duration, &-price {
+    &-duration,
+    &-price {
       font-weight: 400;
       color: var(--am-c-cc-text-op70);
       padding: 0 4px 0 0;

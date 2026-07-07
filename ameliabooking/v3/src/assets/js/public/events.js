@@ -1,40 +1,40 @@
-import httpClient from "../../../plugins/axios";
-import {useUrlParams} from "../common/helper";
+import httpClient from '../../../plugins/axios'
+import { useUrlParams } from '../common/helper'
 
-function useEvents (params, callback) {
-  httpClient.get(
-    '/events',
-    {params: useUrlParams(Object.assign({bookings: false}, params))}
-  ).then(response => {
-    callback(response.data.data.events)
-  }).catch(() => {
-    callback([])
-  })
+function useEvents(params, callback) {
+  httpClient
+    .get('/events', { params: useUrlParams(Object.assign({ bookings: false }, params)) })
+    .then((response) => {
+      callback(response.data.data.events)
+    })
+    .catch(() => {
+      callback([])
+    })
 }
 
-function useEventLocation (event, locations) {
-    let locationAddress = ''
+function useEventLocation(event, locations) {
+  let locationAddress = ''
 
-    if (event.locationId && locations.find(l => l.id === event.locationId)) {
-        let location = locations.filter(location => location.id === event.locationId)[0]
-        locationAddress = location.address
+  if (event.locationId && locations.find((l) => l.id === event.locationId)) {
+    let location = locations.filter((location) => location.id === event.locationId)[0]
+    locationAddress = location.address
 
-        if (!locationAddress) {
-            locationAddress = location.name
-        }
+    if (!locationAddress) {
+      locationAddress = location.name
     }
+  }
 
-    if (event.customLocation) {
-        locationAddress = event.customLocation
-    }
+  if (event.customLocation) {
+    locationAddress = event.customLocation
+  }
 
-    return locationAddress
+  return locationAddress
 }
 
-function useMinTicketPrice (event) {
+function useMinTicketPrice(event) {
   let priceArray = []
 
-  event.customTickets.forEach(ticket => {
+  event.customTickets.forEach((ticket) => {
     if (ticket.enabled) {
       let tPrice = ticket.price
       if (ticket.dateRangePrice != null) {
@@ -47,11 +47,11 @@ function useMinTicketPrice (event) {
   return Math.min(...priceArray)
 }
 
-function useCheckIfEventNotFree (event) {
+function useCheckIfEventNotFree(event) {
   let priceArray = []
 
   if (event.customPricing) {
-    event.customTickets.forEach(ticket => {
+    event.customTickets.forEach((ticket) => {
       if (ticket.enabled) {
         let tPrice = ticket.price
         if (ticket.dateRangePrice != null) {
@@ -99,21 +99,21 @@ function useCheckIfEventNotFree (event) {
 //   }
 // }
 
-function showEventCapacity (status) {
-    switch (status) {
-        case 'open':
-        case 'upcoming':
-            return true
-        case 'canceled':
-        case 'closed':
-        case 'full':
-            return false
-        default:
-            return true
-    }
+function showEventCapacity(status) {
+  switch (status) {
+    case 'open':
+    case 'upcoming':
+      return true
+    case 'canceled':
+    case 'closed':
+    case 'full':
+      return false
+    default:
+      return true
+  }
 }
 
-function useEventStatus (evt) {
+function useEventStatus(evt) {
   if (evt.status === 'approved' || evt.status === 'pending') {
     if (evt.full) return 'full'
     if (evt.upcoming) return 'upcoming'
@@ -125,10 +125,10 @@ function useEventStatus (evt) {
 
 function useWaitingListAvailability(evt) {
   if (evt?.closed || !evt?.waitingList?.enabled) {
-    return false;
+    return false
   }
 
-  let capacityRule;
+  let capacityRule
   let waitingAlreadyStarted = 0
 
   if (evt.customPricing) {
@@ -137,31 +137,31 @@ function useWaitingListAvailability(evt) {
       if (!evt.maxCustomCapacity) {
         capacityRulePerTicket.push(ticket.waitingListSpots > ticket.waiting)
       } else {
-        total += ticket.waiting;
+        total += ticket.waiting
       }
-      return total + ticket.waiting;
-    }, 0);
+      return total + ticket.waiting
+    }, 0)
 
     if (!evt.maxCustomCapacity) {
-      capacityRule = capacityRulePerTicket.some(rule => rule === true)
+      capacityRule = capacityRulePerTicket.some((rule) => rule === true)
     } else {
-      capacityRule = evt.waitingList.maxCapacity > evt.waitingList.peopleWaiting;
+      capacityRule = evt.waitingList.maxCapacity > evt.waitingList.peopleWaiting
     }
 
     waitingAlreadyStarted = peoplePerTicket
   } else {
-    capacityRule = evt.waitingList.maxCapacity > evt.waitingList.peopleWaiting;
-    waitingAlreadyStarted = evt.waitingList.peopleWaiting;
+    capacityRule = evt.waitingList.maxCapacity > evt.waitingList.peopleWaiting
+    waitingAlreadyStarted = evt.waitingList.peopleWaiting
   }
 
   return capacityRule && (evt.full || waitingAlreadyStarted !== 0)
 }
 
-function useWaitingListOccupancy (evt) {
+function useWaitingListOccupancy(evt) {
   let spots = 0
 
   if (evt.customPricing) {
-    evt.customTickets.forEach(ticket => {
+    evt.customTickets.forEach((ticket) => {
       spots += ticket.waiting
     })
   } else {
@@ -180,5 +180,5 @@ export {
   useEventStatus,
   useCheckIfEventNotFree,
   useWaitingListAvailability,
-  useWaitingListOccupancy
+  useWaitingListOccupancy,
 }

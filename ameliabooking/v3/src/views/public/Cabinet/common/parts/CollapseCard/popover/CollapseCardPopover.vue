@@ -13,10 +13,7 @@
     </template>
 
     <div class="am-cc__popover-inner">
-      <div
-        v-if="props.headerText"
-        class="am-cc__popover-heading"
-      >
+      <div v-if="props.headerText" class="am-cc__popover-heading">
         {{ props.headerText }}
       </div>
       <component
@@ -32,38 +29,33 @@
 
 <script setup>
 // * templates
-import Periods from "./templates/Periods.vue";
-import Extras from "./templates/Extras.vue";
-import Tickets from "./templates/Tickets.vue";
-import CustomFields from "./templates/CustomFields.vue";
-import Employee from "./templates/Employee.vue";
-import Customers from "./templates/Customers.vue";
-import QrCode from "./templates/QrCode.vue"
+import Periods from './templates/Periods.vue'
+import Extras from './templates/Extras.vue'
+import Tickets from './templates/Tickets.vue'
+import CustomFields from './templates/CustomFields.vue'
+import Employee from './templates/Employee.vue'
+import Customers from './templates/Customers.vue'
+import QrCode from './templates/QrCode.vue'
 
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  markRaw
-} from "vue"
+import { ref, computed, inject, markRaw } from 'vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../../../assets/js/common/colorManipulation.js"
+import { useColorTransparency } from '../../../../../../../assets/js/common/colorManipulation.js'
 
 let props = defineProps({
   headerText: {
     type: String,
-    default: ''
+    default: '',
   },
   type: {
     type: String,
-    required: true
+    required: true,
   },
   contentData: {
     type: [Array, Object, String],
-    default: ''
-  }
+    default: '',
+  },
 })
 
 let amCustomize = inject('amCustomize')
@@ -75,7 +67,7 @@ let templates = ref({
   customField: markRaw(CustomFields),
   employee: markRaw(Employee),
   customers: markRaw(Customers),
-  qrCode: markRaw(QrCode)
+  qrCode: markRaw(QrCode),
 })
 
 // * Fonts
@@ -99,8 +91,8 @@ let cssVars = computed(() => {
     '--am-c-cc-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
     '--am-c-cc-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
     '--am-c-cc-text-op90': useColorTransparency(amColors.value.colorMainText, 0.9),
-    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.30),
-    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.10),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
     '--am-font-family': amFonts.value.fontFamily,
 
     // css properties
@@ -112,7 +104,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: "CollapseCardPopoverTemplate"
+  name: 'CollapseCardPopoverTemplate',
 }
 </script>
 

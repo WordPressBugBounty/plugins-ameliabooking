@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="am-capei-waiting"
-    :style="cssVars"
-  >
+  <div class="am-capei-waiting" :style="cssVars">
     <div class="am-capei-waiting__header">
       <div class="am-capei-waiting__header-text">
         {{ amLabels.events_show_waiting_list_booking_full }}
@@ -26,18 +23,11 @@
         class="am-capei-waiting__item"
         :class="responsiveClass"
       >
-        <AmInputNumber
-          v-model="waitingListFormData.maxCapacity"
-          :min="1"
-        />
+        <AmInputNumber v-model="waitingListFormData.maxCapacity" :min="1" />
       </el-form-item>
       <template v-if="customPricing">
         <template v-for="(item, index) in tickets" :key="index">
-          <el-form-item
-            :label="item.name"
-            class="am-capei-waiting__item"
-            :class="responsiveClass"
-          >
+          <el-form-item :label="item.name" class="am-capei-waiting__item" :class="responsiveClass">
             <AmInputNumber
               v-model="item.waitingListSpots"
               :min="1"
@@ -57,10 +47,7 @@
         />
       </div>
 
-      <el-form-item
-        v-if="waitingListFormData.maxExtraPeopleEnabled"
-        :class="responsiveClass"
-      >
+      <el-form-item v-if="waitingListFormData.maxExtraPeopleEnabled" :class="responsiveClass">
         <AmInputNumber
           v-model="waitingListFormData.maxExtraPeople"
           :min="0"
@@ -74,18 +61,18 @@
 
 <script setup>
 // * Import from Vue
-import { ref, inject, computed } from "vue";
+import { ref, inject, computed } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import Composables
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation";
-import { useResponsiveClass } from "../../../../../../assets/js/common/responsive";
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
+import { useResponsiveClass } from '../../../../../../assets/js/common/responsive'
 
 // * Import Parts
-import AmInputNumber from "../../../../../_components/input-number/AmInputNumber.vue";
-import AmSwitch from "../../../../../_components/switch/AmSwitch.vue";
+import AmInputNumber from '../../../../../_components/input-number/AmInputNumber.vue'
+import AmSwitch from '../../../../../_components/switch/AmSwitch.vue'
 
 // * Props
 let props = defineProps({
@@ -97,11 +84,11 @@ let props = defineProps({
     type: Object,
     default: null,
   },
-});
+})
 
 let responsiveClass = computed(() => {
   return useResponsiveClass(props.pageWidth)
-});
+})
 
 // * Store
 const store = useStore()
@@ -119,25 +106,25 @@ let waitingListFormData = ref({
     get: () => store.getters['event/getWaitingListEnabled'],
     set: (val) => {
       store.commit('event/setWaitingListEnabled', val)
-    }
+    },
   }),
   maxCapacity: computed({
     get: () => store.getters['event/getWaitingListMaxCapacity'],
     set: (val) => {
       store.commit('event/setWaitingListMaxCapacity', val)
-    }
+    },
   }),
   maxExtraPeopleEnabled: computed({
     get: () => store.getters['event/getWaitingListMaxExtraPeopleEnabled'],
     set: (val) => {
       store.commit('event/setWaitingListMaxExtraPeopleEnabled', val)
-    }
+    },
   }),
   maxExtraPeople: computed({
     get: () => store.getters['event/getWaitingListMaxExtraPeople'],
     set: (val) => {
       store.commit('event/setWaitingListMaxExtraPeople', val)
-    }
+    },
   }),
 })
 
@@ -149,7 +136,7 @@ let maxCustomCapacityEnabled = computed(() => store.getters['event/getMaxCustomC
 
 // * Expose
 defineExpose({
-  waitingListFormRef
+  waitingListFormRef,
 })
 
 // * Colors
@@ -198,7 +185,7 @@ let cssVars = computed(() => {
         justify-content: space-between;
         gap: 8px;
 
-        .el-form-item{
+        .el-form-item {
           &__content {
             width: auto;
             justify-content: flex-end;
@@ -207,7 +194,7 @@ let cssVars = computed(() => {
 
         &.am-rw- {
           &520 {
-            .el-form-item{
+            .el-form-item {
               &__label {
                 width: 100%;
                 justify-content: flex-start;

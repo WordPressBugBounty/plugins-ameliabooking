@@ -3,65 +3,47 @@
     {{ `${labelsDisplay('event_about_list')}:` }}
   </div>
   <div class="am-congrats__info-item" :class="responsiveClass">
-    <span class="am-congrats__info-item__label">
-      {{ labelsDisplay('event_start') }}:
-    </span>
+    <span class="am-congrats__info-item__label"> {{ labelsDisplay('event_start') }}: </span>
     <span class="am-congrats__info-item__value">
       {{
         `${getFrontedFormattedDate(dateTimeObj.dateStart)} ${labelsDisplay(
-          'event_at'
+          'event_at',
         )} ${getEventFrontedFormattedTime(dateTimeObj.timeStart)}`
       }}
     </span>
   </div>
   <div class="am-congrats__info-item" :class="responsiveClass">
-    <span class="am-congrats__info-item__label">
-      {{ labelsDisplay('event_end') }}:
-    </span>
+    <span class="am-congrats__info-item__label"> {{ labelsDisplay('event_end') }}: </span>
     <span class="am-congrats__info-item__value">
       {{
         `${getFrontedFormattedDate(dateTimeObj.dateEnd)} ${labelsDisplay(
-          'event_at'
+          'event_at',
         )} ${getEventFrontedFormattedTime(dateTimeObj.timeEnd)}`
       }}
     </span>
   </div>
-  <div v-if="licence.isBasic || licence.isPro || licence.isDeveloper" class="am-congrats__info-item" :class="responsiveClass">
-    <span class="am-congrats__info-item__label">
-      {{ labelsDisplay('event_location') }}:
-    </span>
+  <div
+    v-if="licence.isBasic || licence.isPro || licence.isDeveloper"
+    class="am-congrats__info-item"
+    :class="responsiveClass"
+  >
+    <span class="am-congrats__info-item__label"> {{ labelsDisplay('event_location') }}: </span>
     <span class="am-congrats__info-item__value">
       {{ address }}
     </span>
   </div>
-  <div
-    v-if="features.tickets"
-    class="am-congrats__info-item"
-    :class="responsiveClass"
-  >
-    <span class="am-congrats__info-item__label">
-      {{ labelsDisplay('event_tickets') }}:
-    </span>
-    <span
-      class="am-congrats__info-item__value"
-      @click="() => (showTickets = !showTickets)"
-    >
+  <div v-if="features.tickets" class="am-congrats__info-item" :class="responsiveClass">
+    <span class="am-congrats__info-item__label"> {{ labelsDisplay('event_tickets') }}: </span>
+    <span class="am-congrats__info-item__value" @click="() => (showTickets = !showTickets)">
       <span>{{ `x${ticketNumber} ` }}</span>
       <span class="am-clickable">{{ showLabel }}</span>
     </span>
   </div>
 
-  <div
-    v-if="showTickets && features.tickets"
-    class="am-congrats__info-item"
-  >
+  <div v-if="showTickets && features.tickets" class="am-congrats__info-item">
     <span class="am-congrats__info-item__value collapsable">
       <span v-for="(ticket, index) in tickets" :key="index">
-        {{
-          `${ticket.persons} x ${ticket.name}(${useFormattedPrice(
-            ticket.price
-          )})`
-        }}
+        {{ `${ticket.persons} x ${ticket.name}(${useFormattedPrice(ticket.price)})` }}
       </span>
     </span>
   </div>
@@ -116,11 +98,8 @@ let amLabels = inject('labels')
 
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    let translations =
-      amCustomize.value[pageRenderKey.value][stepName.value].translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    let translations = amCustomize.value[pageRenderKey.value][stepName.value].translations
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -140,9 +119,7 @@ let address = '9306 Taylorsville Road, Louisville KY 40299'
 let showTickets = ref(false)
 
 let showLabel = computed(() => {
-  return showTickets.value
-    ? labelsDisplay('event_show_less')
-    : labelsDisplay('event_show_more')
+  return showTickets.value ? labelsDisplay('event_show_less') : labelsDisplay('event_show_more')
 })
 
 // * Event Tickets

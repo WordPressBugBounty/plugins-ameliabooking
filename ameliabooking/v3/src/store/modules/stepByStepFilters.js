@@ -8,23 +8,23 @@ export default {
 
   getters: {
     getSearchFilterText(state) {
-      return state.searchFilterText;
+      return state.searchFilterText
     },
 
     getCategoryFilter(state) {
-      return state.categoryFilter;
+      return state.categoryFilter
     },
   },
 
   mutations: {
     setSearchFilterText(state, payload) {
-      state.searchFilterText = payload;
+      state.searchFilterText = payload
     },
 
     setCategoryFilter(state, payload) {
-      state.categoryFilter = payload;
+      state.categoryFilter = payload
     },
   },
 
-  actions: {}
+  actions: {},
 }

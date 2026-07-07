@@ -1,24 +1,17 @@
 <template>
   <template v-if="props.packages.length">
-    <div
-      class="am-sc__list"
-      role="list"
-      :aria-label="amLabels.packages || 'Packages list'"
-    >
+    <div class="am-sc__list" role="list" :aria-label="amLabels.packages || 'Packages list'">
       <div
         v-for="(pack, index) in props.packages"
         :key="pack[0]"
         :style="cssVars"
         class="am-sc"
-        :class="{'am-sc__canceled': pack[1].packageData.status === 'canceled'}"
+        :class="{ 'am-sc__canceled': pack[1].packageData.status === 'canceled' }"
         role="listitem"
         :aria-labelledby="getPackageTitleId(pack[0])"
         :aria-describedby="getPackageDescriptionIds(pack[0], pack[1])"
       >
-        <div
-          class="am-sc__top"
-          :class="responsiveClass"
-        >
+        <div class="am-sc__top" :class="responsiveClass">
           <div class="am-sc__top-menu">
             <div class="am-sc__top-left">
               <div :id="getPackageTitleId(pack[0])" class="am-sc__name">
@@ -29,7 +22,8 @@
                 :id="getPackageDateId(pack[0])"
                 class="am-sc__date"
               >
-                {{ amLabels.package_book_expire }} {{ getFrontedFormattedDate(pack[1].packageData.end.split(' ')[0]) }}
+                {{ amLabels.package_book_expire }}
+                {{ getFrontedFormattedDate(pack[1].packageData.end.split(' ')[0]) }}
               </div>
               <div v-else :id="getPackageDateId(pack[0])" class="am-sc__date">
                 {{ `${amLabels.package_book_expiration} ${amLabels.package_book_unlimited}` }}
@@ -123,56 +117,46 @@
           </AmButton>
         </div>
         <template v-if="pack[1].packageData.end && pack[1].packageData.status !== 'canceled'">
-          <div v-if="expirationDate(pack[1].packageData.end.split(' ')[0]) > 0" class="am-sc__bottom">
+          <div
+            v-if="expirationDate(pack[1].packageData.end.split(' ')[0]) > 0"
+            class="am-sc__bottom"
+          >
             <span
               :id="getPackageExpirationId(pack[0])"
               class="am-sc__expiration"
-              :class="{'am-mobile': cWidth < 481}"
+              :class="{ 'am-mobile': cWidth < 481 }"
             >
-              <span class="am-icon-triangle-info" aria-hidden="true"></span> {{ `${amLabels.package_deal_expire_in} ${expirationDate(pack[1].packageData.end.split(' ')[0])} ${amLabels.expires_days}, ${amLabels.appointments_deal_expire}` }}
+              <span class="am-icon-triangle-info" aria-hidden="true"></span>
+              {{
+                `${amLabels.package_deal_expire_in} ${expirationDate(pack[1].packageData.end.split(' ')[0])} ${amLabels.expires_days}, ${amLabels.appointments_deal_expire}`
+              }}
             </span>
           </div>
         </template>
       </div>
     </div>
   </template>
-  <EmptyState
-    v-else
-    :heading="amLabels.no_pack_found"
-    :text="amLabels.have_no_pack"
-  ></EmptyState>
+  <EmptyState v-else :heading="amLabels.no_pack_found" :text="amLabels.have_no_pack"></EmptyState>
 </template>
 
 <script setup>
 // * Import from libraries
 import moment from 'moment'
-import { ClickOutside as vClickOutside } from "element-plus";
+import { ClickOutside as vClickOutside } from 'element-plus'
 
 // * Import from Vue
-import {
-  reactive,
-  computed,
-  inject,
-  ref,
-  onMounted,
-  nextTick,
-  watch
-} from 'vue'
+import { reactive, computed, inject, ref, onMounted, nextTick, watch } from 'vue'
 
 // * Dedicated components
-import EmptyState from "../../parts/EmptyState.vue"
+import EmptyState from '../../parts/EmptyState.vue'
 
 // * Composables
-import {
-  getFrontedFormattedDate
-} from '../../../../../../assets/js/common/date'
-import {
-  useColorTransparency
-} from '../../../../../../assets/js/common/colorManipulation'
+import { getFrontedFormattedDate } from '../../../../../../assets/js/common/date'
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 import httpClient from '../../../../../../plugins/axios'
 import { createFileUrlFromResponse } from '../../../../../../assets/js/common/helper'
 import { useStore } from 'vuex'
-import AmButton from "@/views/_components/button/AmButton.vue";
+import AmButton from '@/views/_components/button/AmButton.vue'
 
 // * Vars
 let store = useStore()
@@ -181,12 +165,12 @@ let store = useStore()
 let props = defineProps({
   packages: {
     type: [Object, Array],
-    default: () => {}
+    default: () => {},
   },
   responsiveClass: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 // * Components emits
@@ -196,11 +180,11 @@ function expirationDate(end) {
   return moment(end, 'YYYY-MM-DD').diff(moment(), 'days')
 }
 
-function selectId (id) {
+function selectId(id) {
   emits('click', id)
 }
 
-function purchasedCount (data, id, type) {
+function purchasedCount(data, id, type) {
   let count = 0
 
   Object.keys(data).forEach((serviceId) => {
@@ -212,13 +196,17 @@ function purchasedCount (data, id, type) {
   return count
 }
 
-function bookedNumberText (numb) {
+function bookedNumberText(numb) {
   return numb === 1 ? amLabels.value.appointment_booked : amLabels.value.appointments_booked
 }
 
 function packagesSlotsCalculation(data) {
-  let notBooked = data.packageData.sharedCapacity ? data.packageData.sharedCount : purchasedCount(data.services, null, 'count')
-  let slotsCapacity = data.packageData.sharedCapacity ? data.packageData.sharedTotal : purchasedCount(data.services, null, 'total')
+  let notBooked = data.packageData.sharedCapacity
+    ? data.packageData.sharedCount
+    : purchasedCount(data.services, null, 'count')
+  let slotsCapacity = data.packageData.sharedCapacity
+    ? data.packageData.sharedTotal
+    : purchasedCount(data.services, null, 'total')
 
   return `${slotsCapacity - notBooked}/${slotsCapacity} ${bookedNumberText(slotsCapacity - notBooked)}`
 }
@@ -246,11 +234,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   let customizedLabels = amCustomize.value.packagesList.translations
   if (customizedLabels) {
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -276,75 +264,85 @@ onMounted(() => {
   syncEditPopVisible()
 })
 
-watch(() => props.packages, () => {
-  syncEditPopVisible()
-}, { deep: true })
+watch(
+  () => props.packages,
+  () => {
+    syncEditPopVisible()
+  },
+  { deep: true },
+)
 
-function syncEditPopVisible () {
-  let packages = Array.isArray(props.packages) ? props.packages : Object.entries(props.packages || {})
+function syncEditPopVisible() {
+  let packages = Array.isArray(props.packages)
+    ? props.packages
+    : Object.entries(props.packages || {})
   editPopVisible.value = packages.map((_, index) => editPopVisible.value[index] || false)
 }
 
-function getPackageBaseId (id) {
+function getPackageBaseId(id) {
   return `am-package-${id}`
 }
 
-function getPackageTitleId (id) {
+function getPackageTitleId(id) {
   return `${getPackageBaseId(id)}-title`
 }
 
-function getPackageDateId (id) {
+function getPackageDateId(id) {
   return `${getPackageBaseId(id)}-date`
 }
 
-function getPackageCapacityId (id) {
+function getPackageCapacityId(id) {
   return `${getPackageBaseId(id)}-capacity`
 }
 
-function getPackageExpirationId (id) {
+function getPackageExpirationId(id) {
   return `${getPackageBaseId(id)}-expiration`
 }
 
-function getInvoiceMenuId (id) {
+function getInvoiceMenuId(id) {
   return `${getPackageBaseId(id)}-actions`
 }
 
-function getPackageDescriptionIds (id, data) {
+function getPackageDescriptionIds(id, data) {
   let descriptionIds = [getPackageDateId(id)]
 
-  if (data.packageData.end && data.packageData.status !== 'canceled' && expirationDate(data.packageData.end.split(' ')[0]) > 0) {
+  if (
+    data.packageData.end &&
+    data.packageData.status !== 'canceled' &&
+    expirationDate(data.packageData.end.split(' ')[0]) > 0
+  ) {
     descriptionIds.push(getPackageExpirationId(id))
   }
 
   return descriptionIds.join(' ')
 }
 
-function getActionsButtonLabel (data) {
+function getActionsButtonLabel(data) {
   return `${amLabels.value.more_actions || 'More actions'}: ${data.packageData.name}`
 }
 
-function getActionsMenuLabel (data) {
+function getActionsMenuLabel(data) {
   return `${amLabels.value.more_actions || 'More actions'}: ${data.packageData.name}`
 }
 
-function setEditTriggerRef (el, index) {
+function setEditTriggerRef(el, index) {
   if (el) {
     editTriggerRefs.value[index] = el
   }
 }
 
-function setFirstMenuItemRef (el, index) {
+function setFirstMenuItemRef(el, index) {
   if (el) {
     firstMenuItemRefs.value[index] = el
   }
 }
 
-function setFirstAndMenuItemRef (el, rowIndex, itemIndex) {
+function setFirstAndMenuItemRef(el, rowIndex, itemIndex) {
   setFirstMenuItemRef(el, rowIndex)
   setMenuItemRef(el, rowIndex, itemIndex)
 }
 
-function setMenuItemRef (el, rowIndex, itemIndex) {
+function setMenuItemRef(el, rowIndex, itemIndex) {
   if (!el) {
     return
   }
@@ -356,7 +354,7 @@ function setMenuItemRef (el, rowIndex, itemIndex) {
   menuItemRefs.value[rowIndex][itemIndex] = el
 }
 
-function resolveFocusableElement (refItem) {
+function resolveFocusableElement(refItem) {
   if (!refItem) {
     return null
   }
@@ -379,7 +377,7 @@ function resolveFocusableElement (refItem) {
   return null
 }
 
-function focusRefWithRetry (refItem, attempts = 4) {
+function focusRefWithRetry(refItem, attempts = 4) {
   const focusableElement = resolveFocusableElement(refItem)
   if (focusableElement) {
     focusableElement.focus()
@@ -393,20 +391,18 @@ function focusRefWithRetry (refItem, attempts = 4) {
   }
 }
 
-function focusEditTrigger (index) {
+function focusEditTrigger(index) {
   nextTick(() => {
     focusRefWithRetry(editTriggerRefs.value[index])
   })
 }
 
-function getFocusableMenuItems (rowIndex) {
+function getFocusableMenuItems(rowIndex) {
   let itemRefs = menuItemRefs.value[rowIndex] || []
-  return itemRefs
-    .map(refItem => resolveFocusableElement(refItem))
-    .filter(Boolean)
+  return itemRefs.map((refItem) => resolveFocusableElement(refItem)).filter(Boolean)
 }
 
-function handleMenuArrowNavigation (event, rowIndex) {
+function handleMenuArrowNavigation(event, rowIndex) {
   let keys = ['ArrowDown', 'ArrowUp', 'Home', 'End']
   if (!keys.includes(event.key)) {
     return
@@ -419,7 +415,7 @@ function handleMenuArrowNavigation (event, rowIndex) {
 
   event.preventDefault()
 
-  let currentIndex = focusableItems.findIndex(item => item === document.activeElement)
+  let currentIndex = focusableItems.findIndex((item) => item === document.activeElement)
   if (event.key === 'Home') {
     focusableItems[0].focus()
     return
@@ -443,9 +439,7 @@ function handleMenuArrowNavigation (event, rowIndex) {
 async function editItem(e, index) {
   e.stopPropagation()
   let showMenu = !editPopVisible.value[index]
-  editPopVisible.value = editPopVisible.value.map((val, i) =>
-    i === index ? showMenu : false
-  )
+  editPopVisible.value = editPopVisible.value.map((val, i) => (i === index ? showMenu : false))
 
   if (showMenu) {
     await nextTick()
@@ -461,45 +455,51 @@ function closeEditItemPopup(index, restoreFocus = false) {
   }
 }
 
-function previewInvoice (index) {
+function previewInvoice(index) {
   store.commit('cabinet/setPackageLoading', true)
-  httpClient.post(
-    '/invoices/' + props.packages[index][1].packageData.payments[0].id,
-    { format: 'pdf' },
-    {params: {source: 'cabinet-customer'}}
-  ).then(response => {
-    window.open(createFileUrlFromResponse(response))
-    closeEditItemPopup(index, true)
-  })
-  .catch(e => {
-    console.log(e.message)
-  }).finally(() => {
-    store.commit('cabinet/setPackageLoading', false)
-  })
+  httpClient
+    .post(
+      '/invoices/' + props.packages[index][1].packageData.payments[0].id,
+      { format: 'pdf' },
+      { params: { source: 'cabinet-customer' } },
+    )
+    .then((response) => {
+      window.open(createFileUrlFromResponse(response))
+      closeEditItemPopup(index, true)
+    })
+    .catch((e) => {
+      console.log(e.message)
+    })
+    .finally(() => {
+      store.commit('cabinet/setPackageLoading', false)
+    })
 }
 
-function downloadInvoice (index) {
+function downloadInvoice(index) {
   store.commit('cabinet/setPackageLoading', true)
   const format = amSettings.notifications.invoiceFormat || 'pdf'
-  httpClient.post(
-    '/invoices/' + props.packages[index][1].packageData.payments[0].id,
-    { format },
-    {params: {source: 'cabinet-customer'}}
-  ).then(response => {
-    let url = createFileUrlFromResponse(response, format)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `Invoice.${format}`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    closeEditItemPopup(index, true)
-  })
-  .catch(e => {
-    console.log(e.message)
-  }).finally(() => {
-    store.commit('cabinet/setPackageLoading', false)
-  })
+  httpClient
+    .post(
+      '/invoices/' + props.packages[index][1].packageData.payments[0].id,
+      { format },
+      { params: { source: 'cabinet-customer' } },
+    )
+    .then((response) => {
+      let url = createFileUrlFromResponse(response, format)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Invoice.${format}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      closeEditItemPopup(index, true)
+    })
+    .catch((e) => {
+      console.log(e.message)
+    })
+    .finally(() => {
+      store.commit('cabinet/setPackageLoading', false)
+    })
 }
 
 let cssVars = computed(() => {
@@ -518,7 +518,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: 'CabinetPackagesList'
+  name: 'CabinetPackagesList',
 }
 </script>
 
@@ -671,7 +671,7 @@ export default {
       border-radius: 4px;
       padding: 4px;
       cursor: pointer;
-      transition: background-color .3s ease-in-out;
+      transition: background-color 0.3s ease-in-out;
 
       &:hover,
       &:focus-visible {
@@ -683,7 +683,7 @@ export default {
         outline-offset: 2px;
       }
 
-      span[class^="am-icon"] {
+      span[class^='am-icon'] {
         font-size: 24px;
         color: inherit;
         margin: 0 4px 0 0;
@@ -711,7 +711,7 @@ export default {
   border-radius: 6px;
   cursor: pointer;
 
-  span[class^="am-icon"] {
+  span[class^='am-icon'] {
     color: inherit;
   }
 

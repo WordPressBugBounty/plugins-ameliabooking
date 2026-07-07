@@ -37,21 +37,14 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  computed,
-  reactive,
-  inject,
-  onMounted,
-  nextTick,
-} from 'vue'
+import { ref, computed, reactive, inject, onMounted, nextTick } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
 
 // * Composables
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation.js'
-import AmButton from "@/views/_components/button/AmButton.vue";
+import AmButton from '@/views/_components/button/AmButton.vue'
 
 // * Vars
 let store = useStore()
@@ -73,11 +66,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   let customizedLabels = amCustomize.value.accessLinkSuccess.translations
   if (customizedLabels) {
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -98,7 +91,7 @@ let email = computed(() => store.getters['auth/getEmail'])
 let pageKey = inject('pageKey')
 let retryButtonRef = ref(null)
 
-function goToSendAccessLink () {
+function goToSendAccessLink() {
   pageKey.value = 'sendAccessLink'
 }
 
@@ -163,7 +156,9 @@ export default {
     max-width: 400px;
     width: 100%;
     background-color: var(--am-c-main-bgr);
-    box-shadow: 0 0 9px -4px var(--am-c-main-text-op40), 0px 17px 35px -12px var(--am-c-main-text-op25);
+    box-shadow:
+      0 0 9px -4px var(--am-c-main-text-op40),
+      0px 17px 35px -12px var(--am-c-main-text-op25);
     border-radius: 12px;
     padding: 32px 24px 24px;
     margin: 0 auto;

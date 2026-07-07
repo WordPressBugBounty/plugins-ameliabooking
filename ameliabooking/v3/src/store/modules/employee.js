@@ -30,7 +30,7 @@ export default {
     outlookCalendarId: '',
     employeeAppleCalendar: {
       iCloudId: null,
-      appSpecificPassword: null
+      appSpecificPassword: null,
     },
     stripeConnect: null,
     zoomUserId: '',
@@ -45,189 +45,189 @@ export default {
   },
 
   getters: {
-    getEmployee (state) {
+    getEmployee(state) {
       return state
     },
 
-    getId (state) {
+    getId(state) {
       return state.id
     },
 
-    getFirstName (state) {
+    getFirstName(state) {
       return state.firstName
     },
 
-    getLastName (state) {
+    getLastName(state) {
       return state.lastName
     },
 
-    getEmail (state) {
+    getEmail(state) {
       return state.email
     },
 
-    getPhone (state) {
+    getPhone(state) {
       return state.phone
     },
 
-    getLocationId (state) {
+    getLocationId(state) {
       return state.locationId
     },
 
-    getServiceList (state) {
+    getServiceList(state) {
       return state.serviceList
     },
 
-    getZoomUserId (state) {
+    getZoomUserId(state) {
       return state.zoomUserId
     },
 
-    getOutlookCalendarId (state) {
+    getOutlookCalendarId(state) {
       return state.outlookCalendar.calendarId
     },
 
-    getOutlookToken (state) {
+    getOutlookToken(state) {
       return state.outlookCalendar.token
     },
 
-    getOutlookCalendarAccounts (state) {
+    getOutlookCalendarAccounts(state) {
       return state.outlookCalendar.accounts
     },
 
-    getOutlookCalendarBlockedCalendars (state) {
+    getOutlookCalendarBlockedCalendars(state) {
       return state.outlookCalendar.blockedCalendars
     },
 
-    getGoogleCalendarId (state) {
+    getGoogleCalendarId(state) {
       return state.googleCalendar.calendarId
     },
 
-    getGoogleToken (state) {
+    getGoogleToken(state) {
       return state.googleCalendar.token
     },
 
-    getGoogleCalendarAccounts (state) {
+    getGoogleCalendarAccounts(state) {
       return state.googleCalendar.accounts
     },
 
-    getGoogleCalendarBlockedCalendars (state) {
+    getGoogleCalendarBlockedCalendars(state) {
       return state.googleCalendar.blockedCalendars
     },
 
-    getAppleCalendarId (state) {
+    getAppleCalendarId(state) {
       return state.appleCalendarId
     },
 
-    getUserTableGoogleCalendarId (state) {
+    getUserTableGoogleCalendarId(state) {
       return state.googleCalendarId
     },
 
-    getUserTableOutlookCalendarId (state) {
+    getUserTableOutlookCalendarId(state) {
       return state.outlookCalendarId
     },
 
-    getEmployeeAppleCalendarICloudId (state) {
+    getEmployeeAppleCalendarICloudId(state) {
       return state.employeeAppleCalendar.iCloudId
     },
 
-    getEmployeeAppleCalendarAppSpecificPassword (state) {
+    getEmployeeAppleCalendarAppSpecificPassword(state) {
       return state.employeeAppleCalendar.appSpecificPassword
     },
 
-    getStripeConnect (state) {
+    getStripeConnect(state) {
       return state.stripeConnect
     },
 
-    getDescription (state) {
+    getDescription(state) {
       return state.description
     },
 
-    getDescriptionMode (state) {
+    getDescriptionMode(state) {
       return state.descriptionMode
     },
 
-    getSavedSpecialDayList (state) {
+    getSavedSpecialDayList(state) {
       return state.savedSpecialDayList
     },
 
-    getSavedDayOffList (state) {
+    getSavedDayOffList(state) {
       return state.savedDayOffList
     },
   },
 
   mutations: {
-    setEmployee (state, payload) {
+    setEmployee(state, payload) {
       Object.assign(state, payload)
     },
 
-    setId (state, payload) {
+    setId(state, payload) {
       state.id = payload
     },
 
-    setFirstName (state, payload) {
+    setFirstName(state, payload) {
       state.firstName = payload
     },
 
-    setLastName (state, payload) {
+    setLastName(state, payload) {
       state.lastName = payload
     },
 
-    setEmail (state, payload) {
+    setEmail(state, payload) {
       state.email = payload
     },
 
-    setPhone (state, payload) {
+    setPhone(state, payload) {
       state.phone = payload
     },
 
-    setLocationId (state, payload) {
+    setLocationId(state, payload) {
       state.locationId = payload
     },
 
-    setServiceList (state, payload) {
+    setServiceList(state, payload) {
       state.serviceList = payload
     },
 
-    setZoomUserId (state, payload) {
+    setZoomUserId(state, payload) {
       state.zoomUserId = payload
     },
 
-    setOutlookId (state, payload) {
+    setOutlookId(state, payload) {
       state.outlookCalendar.id = payload
     },
 
-    setOutlookCalendarId (state, payload) {
+    setOutlookCalendarId(state, payload) {
       state.outlookCalendar.calendarId = payload
     },
 
-    setOutlookToken (state, payload) {
+    setOutlookToken(state, payload) {
       state.outlookCalendar.token = payload
     },
 
-    setOutlookCalendarAccounts (state, payload) {
+    setOutlookCalendarAccounts(state, payload) {
       state.outlookCalendar.accounts = payload
     },
 
-    setOutlookCalendarBlockedCalendars (state, payload) {
+    setOutlookCalendarBlockedCalendars(state, payload) {
       state.outlookCalendar.blockedCalendars = payload
     },
 
-    setGoogleId (state, payload) {
+    setGoogleId(state, payload) {
       state.googleCalendar.id = payload
     },
 
-    setGoogleCalendarId (state, payload) {
+    setGoogleCalendarId(state, payload) {
       state.googleCalendar.calendarId = payload
     },
 
-    setGoogleToken (state, payload) {
+    setGoogleToken(state, payload) {
       state.googleCalendar.token = payload
     },
 
-    setGoogleCalendarAccounts (state, payload) {
+    setGoogleCalendarAccounts(state, payload) {
       state.googleCalendar.accounts = payload
     },
 
-    setGoogleCalendarBlockedCalendars (state, payload) {
+    setGoogleCalendarBlockedCalendars(state, payload) {
       state.googleCalendar.blockedCalendars = payload
     },
 
@@ -235,48 +235,47 @@ export default {
       state.outlookCalendarId = payload
     },
 
-    setAppleCalendarId (state, payload) {
+    setAppleCalendarId(state, payload) {
       state.appleCalendarId = payload
     },
 
-    setEmployeeGoogleCalendarId (state, payload) {
+    setEmployeeGoogleCalendarId(state, payload) {
       state.googleCalendarId = payload
     },
 
-    setEmployeeAppleCalendarICloudId (state, payload) {
+    setEmployeeAppleCalendarICloudId(state, payload) {
       state.employeeAppleCalendar.iCloudId = payload
     },
 
-    setEmployeeAppleCalendarAppSpecificPassword (state, payload) {
+    setEmployeeAppleCalendarAppSpecificPassword(state, payload) {
       state.employeeAppleCalendar.appSpecificPassword = payload
     },
 
-    setStripeConnect (state, payload) {
+    setStripeConnect(state, payload) {
       state.stripeConnect = payload
     },
 
-    setDescription (state, payload) {
+    setDescription(state, payload) {
       state.description = payload
     },
 
-    setDescriptionMode (state, payload) {
+    setDescriptionMode(state, payload) {
       state.descriptionMode = payload
     },
 
-    setServiceEnabled (state, payload) {
+    setServiceEnabled(state, payload) {
       let { serviceId, categoryId, value } = payload
       state.serviceList[categoryId][serviceId].enabled = value
     },
 
-    setSavedSpecialDayList (state, payload) {
+    setSavedSpecialDayList(state, payload) {
       state.savedSpecialDayList = payload
     },
 
-    setSavedDayOffList (state, payload) {
+    setSavedDayOffList(state, payload) {
       state.savedDayOffList = payload
     },
   },
 
-  actions: {
-  }
+  actions: {},
 }

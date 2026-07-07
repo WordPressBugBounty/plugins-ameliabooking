@@ -111,14 +111,8 @@ let selectedEvent = ref({
     {
       id: 1,
       eventId: 1,
-      periodStart: moment()
-        .add(2, 'days')
-        .add(5, 'hours')
-        .format('YYYY-MM-DD hh:mm:ss'),
-      periodEnd: moment()
-        .add(4, 'days')
-        .add(10, 'hours')
-        .format('YYYY-MM-DD hh:mm:ss'),
+      periodStart: moment().add(2, 'days').add(5, 'hours').format('YYYY-MM-DD hh:mm:ss'),
+      periodEnd: moment().add(4, 'days').add(10, 'hours').format('YYYY-MM-DD hh:mm:ss'),
     },
   ],
   pictureFullPath: null,
@@ -168,8 +162,7 @@ let customLabels = computed(() => {
   let computedLabels = reactive({ ...amLabels })
 
   if (amCustomize.value[pageRenderKey.value].payment.translations) {
-    let customizedLabels =
-      amCustomize.value[pageRenderKey.value].payment.translations
+    let customizedLabels = amCustomize.value[pageRenderKey.value].payment.translations
     Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][langKey.value]) {
         computedLabels[labelKey] = customizedLabels[labelKey][langKey.value]

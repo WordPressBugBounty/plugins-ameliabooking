@@ -1,9 +1,9 @@
 <template>
-  <div
-    class="am-capf"
-    :style="cssVars"
-  >
-    <div v-if="cWidth <= 480 && customizeOptions.timeZone.visibility && stepName !== 'packagesList'" class="am-capf__zone">
+  <div class="am-capf" :style="cssVars">
+    <div
+      v-if="cWidth <= 480 && customizeOptions.timeZone.visibility && stepName !== 'packagesList'"
+      class="am-capf__zone"
+    >
       <TimeZoneSelect size="small"></TimeZoneSelect>
     </div>
     <div class="am-capf__menu">
@@ -44,17 +44,13 @@
     <Transition name="am-slide-fade">
       <div v-if="filtersMenuVisibility" class="am-capf__list">
         <template
-          v-for="(param, index) in Object.values(props.paramList).filter(
-            (p) => p.name !== 'dates'
-          )"
+          v-for="(param, index) in Object.values(props.paramList).filter((p) => p.name !== 'dates')"
           :key="index"
         >
           <span
             v-if="
               entities[param.name].length > 0 &&
-              amCustomize[pageRenderKey][stepName].options[
-                `${param.name}Filter`
-              ].visibility
+              amCustomize[pageRenderKey][stepName].options[`${param.name}Filter`].visibility
             "
             class="am-capf__list-item"
             :class="[
@@ -79,11 +75,7 @@
                 v-for="entity in entities[param.name]"
                 :key="entity.id"
                 :value="entity.id"
-                :label="
-                  entity.firstName
-                    ? entity.firstName + ' ' + entity.lastName
-                    : entity.name
-                "
+                :label="entity.firstName ? entity.firstName + ' ' + entity.lastName : entity.name"
               />
             </AmSelect>
           </span>
@@ -144,17 +136,10 @@ let stepName = inject('stepName')
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepName.value]
-      .translations &&
-      amCustomize.value[pageRenderKey.value][stepName.value].translations[
-        label
-      ] &&
-      amCustomize.value[pageRenderKey.value][stepName.value].translations[
-        label
-      ][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[
-          label
-        ][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepName.value].translations &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -276,7 +261,13 @@ let filterIcon = {
 
 // * Filter button visibility
 let filterBtnVisibility = computed(() => {
-  return Object.values(props.paramList).filter((p) => p.name !== 'dates').some((p) => amCustomize.value[pageRenderKey.value][stepName.value].options[`${p.name}Filter`].visibility && entities.value[p.name].length > 0)
+  return Object.values(props.paramList)
+    .filter((p) => p.name !== 'dates')
+    .some(
+      (p) =>
+        amCustomize.value[pageRenderKey.value][stepName.value].options[`${p.name}Filter`]
+          .visibility && entities.value[p.name].length > 0,
+    )
 })
 
 let cWidth = inject('containerWidth')
@@ -305,9 +296,7 @@ let itemsNumber = computed(() => {
     if (
       p.name !== 'dates' &&
       entities.value[p.name].length > 0 &&
-      amCustomize.value[pageRenderKey.value][stepName.value].options[
-        `${p.name}Filter`
-      ].visibility
+      amCustomize.value[pageRenderKey.value][stepName.value].options[`${p.name}Filter`].visibility
     ) {
       numb++
     }
@@ -323,18 +312,9 @@ let cssVars = computed(() => {
     '--am-c-capf-heading-text': amColors.value.colorMainText,
     '--am-c-capf-text': amColors.value.colorInpText,
     '--am-c-capf-primary': amColors.value.colorPrimary,
-    '--am-c-capf-text-op10': useColorTransparency(
-      amColors.value.colorInpText,
-      0.1
-    ),
-    '--am-c-capf-primary-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
-    '--am-c-capf-primary-op70': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.7
-    ),
+    '--am-c-capf-text-op10': useColorTransparency(amColors.value.colorInpText, 0.1),
+    '--am-c-capf-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
+    '--am-c-capf-primary-op70': useColorTransparency(amColors.value.colorPrimary, 0.7),
   }
 })
 </script>

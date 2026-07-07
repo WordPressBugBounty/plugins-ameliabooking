@@ -1,39 +1,46 @@
 import { settings } from '../../../plugins/settings'
 
-function useCart (store) {
+function useCart(store) {
   return store.getters['booking/getAllMultipleAppointments']
 }
 
-function useCartItem (store) {
-  return store.getters['booking/getAllMultipleAppointments'][store.getters['booking/getCartItemIndex']]
+function useCartItem(store) {
+  return store.getters['booking/getAllMultipleAppointments'][
+    store.getters['booking/getCartItemIndex']
+  ]
 }
 
-function useCartHasItems (store) {
+function useCartHasItems(store) {
   let cart = useCart(store)
 
   let hasItems = 0
 
   cart.forEach((item) => {
     if (!item.packageId) {
-      Object.keys(item.services).forEach(((serviceId) => {
-        if (item.services[serviceId].list.filter(i => i.date && i.time && i.providerId).length) {
+      Object.keys(item.services).forEach((serviceId) => {
+        if (item.services[serviceId].list.filter((i) => i.date && i.time && i.providerId).length) {
           hasItems++
         }
-      }))
+      })
     }
   })
 
   return hasItems
 }
 
-function useCartStep (store) {
+function useCartStep(store) {
   let preselected = store.getters['entities/getPreselected']
 
-  return settings.payments.cart &&
-    !(preselected.show === 'packages' || (Array.isArray(preselected.package) ? preselected.package.length : preselected.package))
+  return (
+    settings.payments.cart &&
+    !(
+      preselected.show === 'packages' ||
+      (Array.isArray(preselected.package) ? preselected.package.length : preselected.package)
+    )
+  )
 }
 
-function useAddToCart (store) {
+function useAddToCart(store) {
   let index = store.getters['booking/getCartItemIndex']
 
   let items = store.getters['booking/getAllMultipleAppointments']
@@ -50,11 +57,11 @@ function useAddToCart (store) {
   store.commit('booking/setCartItemIndex', index)
 }
 
-function useGoToCartStep (stepsArray, stepIndex) {
-  stepIndex.value = stepsArray.value.findIndex(i => i.name === 'CartStep' )
+function useGoToCartStep(stepsArray, stepIndex) {
+  stepIndex.value = stepsArray.value.findIndex((i) => i.name === 'CartStep')
 }
 
-function useInitSelection (store, deselectService) {
+function useInitSelection(store, deselectService) {
   let preselected = store.getters['entities/getPreselected']
 
   if (deselectService && !preselected.service.length) {
@@ -77,25 +84,22 @@ function useInitSelection (store, deselectService) {
   }
 }
 
-function useResetCart (store) {
+function useResetCart(store) {
   let items = store.getters['booking/getAllMultipleAppointments']
 
   if (items[0].packageId) {
-    store.commit(
-      'booking/setMultipleAppointments',
-      [
-        {
-          packageId: null,
-          serviceId: null,
-          index: 0,
-          services: {},
-        }
-      ]
-    )
+    store.commit('booking/setMultipleAppointments', [
+      {
+        packageId: null,
+        serviceId: null,
+        index: 0,
+        services: {},
+      },
+    ])
   }
 }
 
-function useInitCartItem (store) {
+function useInitCartItem(store) {
   let index = store.getters['booking/getCartItemIndex']
 
   let items = store.getters['booking/getAllMultipleAppointments']
@@ -104,7 +108,12 @@ function useInitCartItem (store) {
 
   let appointmentInstantiated = index in items && serviceId in items[index].services
 
-  if (serviceId && items[index] && ('services' in items[index]) && !(serviceId in items[index].services)) {
+  if (
+    serviceId &&
+    items[index] &&
+    'services' in items[index] &&
+    !(serviceId in items[index].services)
+  ) {
     items[index].index = 0
 
     items[index].packageId = null
@@ -122,14 +131,20 @@ function useInitCartItem (store) {
         {
           providerId: store.getters['booking/getEmployeeId'],
           locationId: store.getters['booking/getLocationId'],
-          date: appointmentInstantiated ? store.getters['booking/getMultipleAppointmentsDate'] : null,
-          time: appointmentInstantiated ? store.getters['booking/getMultipleAppointmentsTime'] : null,
-          range: appointmentInstantiated ? store.getters['booking/getMultipleAppointmentsRange'] : {start: null, end: null},
+          date: appointmentInstantiated
+            ? store.getters['booking/getMultipleAppointmentsDate']
+            : null,
+          time: appointmentInstantiated
+            ? store.getters['booking/getMultipleAppointmentsTime']
+            : null,
+          range: appointmentInstantiated
+            ? store.getters['booking/getMultipleAppointmentsRange']
+            : { start: null, end: null },
           persons: 1,
           extras: [],
           duration: null,
           price: null,
-        }
+        },
       ],
     }
   } else if (!serviceId) {
@@ -143,10 +158,11 @@ function useInitCartItem (store) {
   }
 }
 
-function useRemoveLastCartItem (store) {
+function useRemoveLastCartItem(store) {
   let items = store.getters['booking/getAllMultipleAppointments']
 
-  if (!items[items.length - 1].services[items[items.length - 1].serviceId].list[0].date &&
+  if (
+    !items[items.length - 1].services[items[items.length - 1].serviceId].list[0].date &&
     !items[items.length - 1].services[items[items.length - 1].serviceId].list[0].time
   ) {
     items.pop()

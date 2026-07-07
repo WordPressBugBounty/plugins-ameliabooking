@@ -1,10 +1,5 @@
 <template>
-  <el-form
-    ref="pricingFormRef"
-    :model="pricingFormData"
-    :style="cssVars"
-    class="am-capei-price"
-  >
+  <el-form ref="pricingFormRef" :model="pricingFormData" :style="cssVars" class="am-capei-price">
     <div class="am-capei-price__heading">
       <el-form-item
         :label="`${amLabels.price}:`"
@@ -30,10 +25,7 @@
         />
       </el-form-item>
 
-      <div
-        v-if="allowedMultiplePersons"
-        class="am-capei-price__segment"
-      >
+      <div v-if="allowedMultiplePersons" class="am-capei-price__segment">
         <AmCheckbox
           v-model="pricingFormData.bringingAnyone"
           :label="amLabels.event_bringing_anyone"
@@ -55,7 +47,10 @@
       </div>
     </div>
 
-    <div v-if="amSettings.featuresIntegrations.depositPayment.enabled && !licence.isStarter" class="am-capei-price__block">
+    <div
+      v-if="amSettings.featuresIntegrations.depositPayment.enabled && !licence.isStarter"
+      class="am-capei-price__block"
+    >
       <div class="am-capei-price__block-header">
         <div class="am-capei-price__block-header__text">
           {{ amLabels.deposit_enabled }}
@@ -84,10 +79,7 @@
           class="am-capei-price__item am-w-50"
           :class="responsiveClass"
         >
-          <AmInput
-            v-model="pricingFormData.deposit"
-            :is-money="true"
-          />
+          <AmInput v-model="pricingFormData.deposit" :is-money="true" />
         </el-form-item>
 
         <el-form-item
@@ -96,18 +88,11 @@
           class="am-capei-price__item am-w-50"
           :class="responsiveClass"
         >
-          <AmInputNumber
-            v-model="pricingFormData.deposit"
-            :min="1"
-            :max="100"
-          />
+          <AmInputNumber v-model="pricingFormData.deposit" :min="1" :max="100" />
         </el-form-item>
       </template>
 
-      <div
-        v-if="pricingFormData.depositEnabled"
-        class="am-capei-price__segment"
-      >
+      <div v-if="pricingFormData.depositEnabled" class="am-capei-price__segment">
         <AmCheckbox
           v-model="pricingFormData.depositPerPerson"
           :label="amLabels.deposit_per_person"
@@ -137,25 +122,16 @@
       </div>
 
       <template v-if="pricingFormData.customPricing">
-        <div
-          v-if="props.pageWidth > 545"
-          class="am-capei-price__block-heading am-pl-32 am-pr-44"
-        >
-          <div
-            class="am-capei-price__block-heading__item am-custom-pricing am-w-40"
-          >
+        <div v-if="props.pageWidth > 545" class="am-capei-price__block-heading am-pl-32 am-pr-44">
+          <div class="am-capei-price__block-heading__item am-custom-pricing am-w-40">
             {{ amLabels.name }}:
           </div>
 
-          <div
-            class="am-capei-price__block-heading__item am-custom-pricing am-w-30"
-          >
+          <div class="am-capei-price__block-heading__item am-custom-pricing am-w-30">
             {{ amLabels.price }}:
           </div>
 
-          <div
-            class="am-capei-price__block-heading__item am-custom-pricing am-w-30"
-          >
+          <div class="am-capei-price__block-heading__item am-custom-pricing am-w-30">
             {{ amLabels.spots }}:
           </div>
         </div>
@@ -176,14 +152,9 @@
 
           <div
             class="am-capei-price__block-inner"
-            :class="[
-              { 'am-we-40': props.pageWidth > 545 },
-              { 'am-we-100': props.pageWidth < 546 },
-            ]"
+            :class="[{ 'am-we-40': props.pageWidth > 545 }, { 'am-we-100': props.pageWidth < 546 }]"
           >
-            <el-form-item
-              :label="props.pageWidth < 546 ? `${amLabels.name}:` : ''"
-            >
+            <el-form-item :label="props.pageWidth < 546 ? `${amLabels.name}:` : ''">
               <AmInput
                 v-model="ticket.name"
                 :disabled="!ticket.enabled"
@@ -218,9 +189,7 @@
               { 'am-w-100': props.pageWidth < 401 },
             ]"
           >
-            <el-form-item
-              :label="props.pageWidth < 546 ? `${amLabels.spots}:` : ''"
-            >
+            <el-form-item :label="props.pageWidth < 546 ? `${amLabels.spots}:` : ''">
               <AmInputNumber
                 v-model="ticket.spots"
                 :min="1"
@@ -267,10 +236,7 @@
         <div class="am-capei-price__part">
           <div
             class="am-capei-price__part-item"
-            :class="[
-              { 'am-w-100': props.pageWidth < 546 },
-              { 'am-w-50': props.pageWidth > 545 },
-            ]"
+            :class="[{ 'am-w-100': props.pageWidth < 546 }, { 'am-w-50': props.pageWidth > 545 }]"
           >
             <AmCheckbox
               v-model="pricingFormData.maxCustomCapacityEnabled"
@@ -280,10 +246,7 @@
 
           <div
             class="am-capei-price__part-item"
-            :class="[
-              { 'am-w-100': props.pageWidth < 546 },
-              { 'am-w-50': props.pageWidth > 545 },
-            ]"
+            :class="[{ 'am-w-100': props.pageWidth < 546 }, { 'am-w-50': props.pageWidth > 545 }]"
           >
             <AmInputNumber
               v-model="pricingFormData.maxCustomCapacity"
@@ -341,27 +304,17 @@
               />
             </el-form-item>
 
-            <div
-              v-if="props.pageWidth > 545"
-              class="am-capei-price__block-heading"
-            >
-              <div
-                class="am-capei-price__block-heading__item am-custom-date am-w-50"
-              >
+            <div v-if="props.pageWidth > 545" class="am-capei-price__block-heading">
+              <div class="am-capei-price__block-heading__item am-custom-date am-w-50">
                 {{ amLabels.name }}:
               </div>
 
-              <div
-                class="am-capei-price__block-heading__item am-custom-date am-w-50"
-              >
+              <div class="am-capei-price__block-heading__item am-custom-date am-w-50">
                 {{ amLabels.price }}:
               </div>
             </div>
 
-            <template
-              v-for="(ticket, index) in pricingFormData.customTickets"
-              :key="index"
-            >
+            <template v-for="(ticket, index) in pricingFormData.customTickets" :key="index">
               <div
                 class="am-capei-price__block-inner"
                 :class="[
@@ -369,14 +322,8 @@
                   { 'am-w-100': props.pageWidth < 546 },
                 ]"
               >
-                <el-form-item
-                  :label="props.pageWidth < 546 ? `${amLabels.name}:` : ''"
-                >
-                  <AmInput
-                    v-model="ticket.name"
-                    :disabled="true"
-                    :aria-label="amLabels.name"
-                  />
+                <el-form-item :label="props.pageWidth < 546 ? `${amLabels.name}:` : ''">
+                  <AmInput v-model="ticket.name" :disabled="true" :aria-label="amLabels.name" />
                 </el-form-item>
               </div>
 
@@ -444,10 +391,7 @@
         <AmRadioGroup
           v-model="pricingFormData.closeAfterMinBookings"
           class="am-capei-price__part-item"
-          :class="[
-            { 'am-w-100': props.pageWidth < 546 },
-            { 'am-w-50': props.pageWidth > 545 },
-          ]"
+          :class="[{ 'am-w-100': props.pageWidth < 546 }, { 'am-w-50': props.pageWidth > 545 }]"
         >
           <AmRadio :value="false">{{ amLabels.event_close_min_total }}</AmRadio>
           <AmRadio :value="true">{{ amLabels.event_close_min_bookings }}</AmRadio>
@@ -455,16 +399,9 @@
 
         <el-form-item
           class="am-capei-price__part-item"
-          :class="[
-            { 'am-w-100': props.pageWidth < 546 },
-            { 'am-w-50': props.pageWidth > 545 },
-          ]"
+          :class="[{ 'am-w-100': props.pageWidth < 546 }, { 'am-w-50': props.pageWidth > 545 }]"
         >
-          <AmInputNumber
-            v-model="pricingFormData.closeAfterMin"
-            :min="1"
-            :max="maxCapacity"
-          />
+          <AmInputNumber v-model="pricingFormData.closeAfterMin" :min="1" :max="maxCapacity" />
         </el-form-item>
       </div>
     </div>
@@ -500,11 +437,7 @@
           :label="`${amLabels.limit_extra_people_set}:`"
           class="am-capei-price__part-item am-w-100"
         >
-          <AmInputNumber
-            v-model="pricingFormData.maxExtraPeople"
-            :min="0"
-            :max="maxCapacity - 1"
-          />
+          <AmInputNumber v-model="pricingFormData.maxExtraPeople" :min="0" :max="maxCapacity - 1" />
         </el-form-item>
       </div>
     </div>
@@ -536,7 +469,7 @@ import { momentDateFormat } from '../../../../../../assets/js/common/date'
 import { getCurrencySymbol } from '../../../../../../assets/js/common/formatting'
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 import { useResponsiveClass } from '../../../../../../assets/js/common/responsive'
-import moment from "moment";
+import moment from 'moment'
 
 // * Props
 const props = defineProps({
@@ -591,7 +524,9 @@ function isInBookingRange(value) {
 
   let maxDate = !store.getters['event/getBookingClosesDisabled']
     ? moment(store.getters['event/getBookingClosesDate'])
-    : (store.getters['event/getPeriods'][0].startDate ? moment(store.getters['event/getPeriods'][0].startDate, 'YYYY-MM-DD') : moment())
+    : store.getters['event/getPeriods'][0].startDate
+      ? moment(store.getters['event/getPeriods'][0].startDate, 'YYYY-MM-DD')
+      : moment()
 
   return currentDate < minDate || currentDate > maxDate
 }
@@ -600,27 +535,18 @@ let event = computed(() => store.getters['event/getEvent'])
 
 let allowedMultiplePersons = computed(() => {
   return pricingFormData.value.customPricing
-    ? pricingFormData.value.customTickets.reduce(
-      (sum, ticket) => sum + ticket.spots,
-      0
-    ) > 1
+    ? pricingFormData.value.customTickets.reduce((sum, ticket) => sum + ticket.spots, 0) > 1
     : pricingFormData.value.maxCapacity > 1
 })
 
 let ticketsSpotsNumber = computed(() => {
   return pricingFormData.value.customPricing
-    ? pricingFormData.value.customTickets.reduce(
-        (sum, ticket) => sum + ticket.spots,
-        0
-      )
+    ? pricingFormData.value.customTickets.reduce((sum, ticket) => sum + ticket.spots, 0)
     : 0
 })
 
 let maxCapacity = computed(() => {
-  if (
-    pricingFormData.value.customPricing &&
-    pricingFormData.value.maxCustomCapacityEnabled
-  ) {
+  if (pricingFormData.value.customPricing && pricingFormData.value.maxCustomCapacityEnabled) {
     return pricingFormData.value.maxCustomCapacity
   } else if (pricingFormData.value.customPricing) {
     return ticketsSpotsNumber.value
@@ -630,10 +556,7 @@ let maxCapacity = computed(() => {
 })
 
 function changeCustomPricing() {
-  if (
-    pricingFormData.value.customPricing &&
-    pricingFormData.value.customTickets.length === 0
-  ) {
+  if (pricingFormData.value.customPricing && pricingFormData.value.customTickets.length === 0) {
     addTicket()
   }
 }
@@ -663,9 +586,7 @@ function removeTicketsRange(index) {
 function addTicketsRange() {
   pricingFormData.value.customTicketsRanges.push({
     range: ['', ''],
-    tickets: pricingFormData.value.customTickets.map(
-      (i) => new Object({ price: i.price })
-    ),
+    tickets: pricingFormData.value.customTickets.map((i) => new Object({ price: i.price })),
   })
 }
 
@@ -814,14 +735,8 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-capei-price-text': amColors.value.colorMainText,
-    '--am-c-capei-price-text-op03': useColorTransparency(
-      amColors.value.colorMainText,
-      0.03
-    ),
-    '--am-c-capei-price-inp-bgr-op03': useColorTransparency(
-      amColors.value.colorInpBgr,
-      0.03
-    ),
+    '--am-c-capei-price-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03),
+    '--am-c-capei-price-inp-bgr-op03': useColorTransparency(amColors.value.colorInpBgr, 0.03),
   }
 })
 </script>

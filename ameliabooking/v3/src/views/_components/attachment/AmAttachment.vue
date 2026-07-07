@@ -46,7 +46,7 @@
 import AmButton from '../button/AmButton.vue'
 
 // * Import from Vue
-import { computed, ref } from "vue";
+import { computed, ref } from 'vue'
 
 // * Composables
 import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
@@ -57,55 +57,55 @@ import { useColorTransparency } from '../../../assets/js/common/colorManipulatio
 const props = defineProps({
   id: {
     type: [String, Number],
-    default: 0
+    default: 0,
   },
   modelValue: {
-    type: Array
+    type: Array,
   },
   action: {
     type: String,
-    default: ''
+    default: '',
   },
   multiple: {
     type: Boolean,
-    default: false
+    default: false,
   },
   data: {
     type: [String, Object, Array, Function, Number],
   },
   name: {
     type: String,
-    name: 'file'
+    name: 'file',
   },
   withCredentials: {
     type: Boolean,
-    default: false
+    default: false,
   },
   showFileList: {
     type: Boolean,
-    default: true
+    default: true,
   },
   drag: {
     type: Boolean,
-    default: false
+    default: false,
   },
   accept: String,
   autoUpload: {
     type: Boolean,
-    default: true
+    default: true,
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   limit: Number,
   customClass: {
     type: String,
-    default: ''
+    default: '',
   },
   iconOnly: {
     type: Boolean,
-    default: false
+    default: false,
   },
   btnSize: {
     // default / medium / small / mini / micro
@@ -113,7 +113,7 @@ const props = defineProps({
     default: 'default',
     validator(value) {
       return ['default', 'medium', 'small', 'mini', 'micro'].includes(value)
-    }
+    },
   },
   btnCategory: {
     // primary / secondary / success / warning / danger / error
@@ -121,7 +121,7 @@ const props = defineProps({
     default: 'primary',
     validator(value) {
       return ['primary', 'secondary', 'success', 'warning', 'danger', 'error'].includes(value)
-    }
+    },
   },
   btnType: {
     // filled / plain / text
@@ -129,7 +129,7 @@ const props = defineProps({
     default: 'filled',
     validator(value) {
       return ['filled', 'plain', 'text'].includes(value)
-    }
+    },
   },
   btnNativeType: {
     // button / submit / reset
@@ -137,40 +137,40 @@ const props = defineProps({
     default: 'button',
     validator(value) {
       return ['button', 'submit', 'reset'].includes(value)
-    }
+    },
   },
   btnRound: {
     type: Boolean,
-    default: false
+    default: false,
   },
   btnCircle: {
     type: Boolean,
-    default: false
+    default: false,
   },
   btnLoading: {
     type: Boolean,
-    default: false
+    default: false,
   },
   btnAutofocus: {
     type: Boolean,
-    default: false
+    default: false,
   },
   btnPrefix: {
     type: [String, Object, Function],
-    default: ''
+    default: '',
   },
   btnSuffix: {
     type: [String, Object, Function],
-    default: ''
+    default: '',
   },
   btnIcon: {
     type: [String, Object, Function],
-    default: ''
+    default: '',
   },
   btnLoadingIcon: {
     type: [String, Object, Function],
-    default: ''
-  }
+    default: '',
+  },
 })
 
 /**
@@ -183,7 +183,7 @@ let model = computed({
   get: () => props.modelValue,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 const attachments = ref(null)
@@ -191,51 +191,54 @@ const attachments = ref(null)
 /**
  * Component Event Handlers
  */
-function onChange (uploadFile, uploadFiles) {
+function onChange(uploadFile, uploadFiles) {
   let file = {
     id: props.id,
-    raw: uploadFiles
+    raw: uploadFiles,
   }
 
   emits('change', file)
 }
 
-function onRemove (removedFile, arrayOfFiles) {
+function onRemove(removedFile, arrayOfFiles) {
   let file = {
     id: props.id,
-    raw: arrayOfFiles
+    raw: arrayOfFiles,
   }
 
   emits('remove', file)
 }
 
 // * Colors
-let amColors = inject('amColors', ref({
-  colorPrimary: '#1246D6',
-  colorSuccess: '#019719',
-  colorError: '#B4190F',
-  colorWarning: '#CCA20C',
-  colorMainBgr: '#FFFFFF',
-  colorMainHeadingText: '#33434C',
-  colorMainText: '#1A2C37',
-  colorSbBgr: '#17295A',
-  colorSbText: '#FFFFFF',
-  colorInpBgr: '#FFFFFF',
-  colorInpBorder: '#D1D5D7',
-  colorInpText: '#1A2C37',
-  colorInpPlaceHolder: '#1A2C37',
-  colorDropBgr: '#FFFFFF',
-  colorDropBorder: '#D1D5D7',
-  colorDropText: '#0E1920',
-  colorBtnPrim: '#265CF2',
-  colorBtnPrimText: '#FFFFFF',
-  colorBtnSec: '#1A2C37',
-  colorBtnSecText: '#FFFFFF',
-}))
+let amColors = inject(
+  'amColors',
+  ref({
+    colorPrimary: '#1246D6',
+    colorSuccess: '#019719',
+    colorError: '#B4190F',
+    colorWarning: '#CCA20C',
+    colorMainBgr: '#FFFFFF',
+    colorMainHeadingText: '#33434C',
+    colorMainText: '#1A2C37',
+    colorSbBgr: '#17295A',
+    colorSbText: '#FFFFFF',
+    colorInpBgr: '#FFFFFF',
+    colorInpBorder: '#D1D5D7',
+    colorInpText: '#1A2C37',
+    colorInpPlaceHolder: '#1A2C37',
+    colorDropBgr: '#FFFFFF',
+    colorDropBorder: '#D1D5D7',
+    colorDropText: '#0E1920',
+    colorBtnPrim: '#265CF2',
+    colorBtnPrimText: '#FFFFFF',
+    colorBtnSec: '#1A2C37',
+    colorBtnSecText: '#FFFFFF',
+  }),
+)
 
 let cssVars = computed(() => {
   return {
-    '--am-c-btn-op30': useColorTransparency(amColors.value.colorBtnPrim, 0.3)
+    '--am-c-btn-op30': useColorTransparency(amColors.value.colorBtnPrim, 0.3),
   }
 })
 </script>

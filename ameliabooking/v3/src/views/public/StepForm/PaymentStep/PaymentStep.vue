@@ -1,17 +1,7 @@
 <template>
-  <div
-    ref="paymentStepRef"
-    :class="props.globalClass"
-    :style="cssVars"
-  >
+  <div ref="paymentStepRef" :class="props.globalClass" :style="cssVars">
     <div v-if="paymentError" class="am-fs__payments-error">
-      <AmAlert
-        type="error"
-        :title="paymentError"
-        :show-icon="true"
-        :closable="false"
-      >
-      </AmAlert>
+      <AmAlert type="error" :title="paymentError" :show-icon="true" :closable="false"> </AmAlert>
     </div>
     <div v-show="ready && !loading" class="am-fs__payments">
       <div class="am-fs__payments-heading">
@@ -21,7 +11,10 @@
       </div>
 
       <div class="am-fs__payments-price">
-        <component :is="componentTypes[formType]" @set-on-site-payment="setOnSitePayment"></component>
+        <component
+          :is="componentTypes[formType]"
+          @set-on-site-payment="setOnSitePayment"
+        ></component>
       </div>
 
       <AmCheckbox
@@ -29,13 +22,13 @@
         v-model="paymentDeposit"
         class="am-fs__payments-full"
         :label="amLabels.full_amount_consent"
-        :class="{'am-fs__payments-full-checked': paymentDeposit}"
+        :class="{ 'am-fs__payments-full-checked': paymentDeposit }"
         @keydown.enter="paymentDeposit = !paymentDeposit"
       >
       </AmCheckbox>
 
       <p
-        v-show="Object.keys(availablePayments).filter(item => availablePayments[item]).length > 1"
+        v-show="Object.keys(availablePayments).filter((item) => availablePayments[item]).length > 1"
         class="am-fs__payments-method"
       >
         {{ amLabels.payment_method }}
@@ -44,34 +37,45 @@
         <div class="am-fs__payments-main-cards">
           <template v-for="(available, gateway) in availablePayments">
             <div
-              v-if="available && Object.keys(availablePayments).filter(item => availablePayments[item]).length > 1"
+              v-if="
+                available &&
+                Object.keys(availablePayments).filter((item) => availablePayments[item]).length > 1
+              "
               :key="gateway"
-              :class="'am-fs__payments-main-button' + (paymentGateway === gateway ? ' am-fs__payments-main-button_selected' : '') + ' am-fs__payments-main-button-' + gateway"
+              :class="
+                'am-fs__payments-main-button' +
+                (paymentGateway === gateway ? ' am-fs__payments-main-button_selected' : '') +
+                ' am-fs__payments-main-button-' +
+                gateway
+              "
               tabindex="0"
               @click="setPaymentGateway(gateway)"
               @keydown.enter="setPaymentGateway(gateway)"
             >
               <img
                 v-if="available"
-                :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/' + paymentsBtn.find(item => item.key === gateway).value.name"
+                :src="
+                  baseUrls.wpAmeliaPluginURL +
+                  '/v3/src/assets/img/icons/' +
+                  paymentsBtn.find((item) => item.key === gateway).value.name
+                "
                 :alt="gateway"
-              >
+              />
               <div>
-                <p>{{ paymentsBtn.find(item => item.key === gateway).value.text }}</p>
+                <p>{{ paymentsBtn.find((item) => item.key === gateway).value.text }}</p>
               </div>
             </div>
           </template>
         </div>
       </div>
       <div class="am-fs__payments-sentence">
-        <p>{{getPaymentSentence()}}
-        </p>
+        <p>{{ getPaymentSentence() }}</p>
       </div>
       <PaymentOnSite
-          ref="refOnSitePayment"
-          :instant-booking="true"
-          :show-recaptcha="false"
-          @payment-error="callPaymentError"
+        ref="refOnSitePayment"
+        :instant-booking="true"
+        :show-recaptcha="false"
+        @payment-error="callPaymentError"
       />
       <div v-if="paymentGateway" class="am-fs__payments-pm">
         <component
@@ -82,23 +86,13 @@
       </div>
     </div>
 
-    <BookingSkeleton/>
-
+    <BookingSkeleton />
   </div>
 </template>
 
 <script setup>
-import { useStore } from "vuex";
-import {
-  ref,
-  inject,
-  provide,
-  markRaw,
-  watch,
-  computed,
-  onMounted,
-  reactive
-} from "vue";
+import { useStore } from 'vuex'
+import { ref, inject, provide, markRaw, watch, computed, onMounted, reactive } from 'vue'
 import AmCheckbox from '../../../_components/checkbox/AmCheckbox.vue'
 import AmAlert from '../../../_components/alert/AmAlert.vue'
 import AppointmentInfo from './parts/AppointmentInfo'
@@ -109,23 +103,19 @@ import PaymentOnSite from '../../Parts/Payment/PaymentOnSite.vue'
 import PaymentWc from '../../Parts/Payment/PaymentWc.vue'
 import PaymentCommon from '../../Parts/Payment/PaymentCommon.vue'
 import PaymentSquare from '../../Parts/Payment/PaymentSquare.vue'
-import BookingSkeleton from "../../Parts/BookingSkeleton.vue";
+import BookingSkeleton from '../../Parts/BookingSkeleton.vue'
 import PackageInfo from './parts/PackageInfo'
-import { settings } from "../../../../plugins/settings";
-import { useColorTransparency } from "../../../../assets/js/common/colorManipulation";
-import { usePrepaidPrice, usePaymentError } from "../../../../assets/js/common/appointments";
-import useAction from "../../../../assets/js/public/actions";
-import {
-  useCart,
-  useCartItem,
-  useCartHasItems,
-} from '../../../../assets/js/public/cart'
+import { settings } from '../../../../plugins/settings'
+import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
+import { usePrepaidPrice, usePaymentError } from '../../../../assets/js/common/appointments'
+import useAction from '../../../../assets/js/public/actions'
+import { useCart, useCartItem, useCartHasItems } from '../../../../assets/js/public/cart'
 
 let props = defineProps({
   globalClass: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 // * Store
@@ -143,11 +133,11 @@ let langDetection = computed(() => settings.general.usedLanguages.includes(local
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...globalLabels})
+  let computedLabels = reactive({ ...globalLabels })
 
   if (settings.customizedData?.sbsNew?.paymentStep?.translations) {
     let customizedLabels = settings.customizedData.sbsNew.paymentStep.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -164,23 +154,22 @@ provide('amLabels', amLabels)
 const componentTypes = {
   appointment: markRaw(AppointmentInfo),
   package: markRaw(PackageInfo),
-  cart: markRaw(CartInfo)
+  cart: markRaw(CartInfo),
 }
 
 let paymentError = computed(() => store.getters['booking/getError'])
 
 // * Step Functions
-const {
-  footerBtnDisabledUpdater,
-  headerButtonPreviousClicked,
-  footerButtonClick
-} = inject('changingStepsFunctions', {
-  footerBtnDisabledUpdater: () => {},
-  headerButtonPreviousClicked: {
-    value: false
+const { footerBtnDisabledUpdater, headerButtonPreviousClicked, footerButtonClick } = inject(
+  'changingStepsFunctions',
+  {
+    footerBtnDisabledUpdater: () => {},
+    headerButtonPreviousClicked: {
+      value: false,
+    },
+    footerButtonClick: () => {},
   },
-  footerButtonClick: () => {}
-})
+)
 
 watch(headerButtonPreviousClicked, () => {
   store.commit('booking/setPaymentGateway', '')
@@ -196,14 +185,16 @@ const paymentTypes = {
   mollie: markRaw(PaymentCommon),
   wc: markRaw(PaymentWc),
   square: markRaw(PaymentSquare),
-  barion: markRaw(PaymentCommon)
+  barion: markRaw(PaymentCommon),
 }
 
 let ready = computed(() => store.getters['entities/getReady'])
 
 let loading = computed(() => store.getters['booking/getLoading'])
 
-let formType = computed(() => cart.value.length > 1 ? 'cart' : store.getters['booking/getBookableType'])
+let formType = computed(() =>
+  cart.value.length > 1 ? 'cart' : store.getters['booking/getBookableType'],
+)
 
 let paymentGateway = computed(() => {
   if (!store.getters['booking/getPaymentGateway']) {
@@ -214,25 +205,25 @@ let paymentGateway = computed(() => {
 
 let hasDeposit = computed(() => {
   switch (store.getters['booking/getBookableType']) {
-    case ('appointment'): {
+    case 'appointment': {
       let depositPayment = false
 
-      useCart(store).filter(i => 'services' in i && Object.keys(i.services).length).forEach((item) => {
-        let service = store.getters['entities/getCategories'].find(
-          i => i.serviceList.filter(j => j.id === item.serviceId).length
-        ).serviceList.find(
-          i => i.id === item.serviceId
-        )
+      useCart(store)
+        .filter((i) => 'services' in i && Object.keys(i.services).length)
+        .forEach((item) => {
+          let service = store.getters['entities/getCategories']
+            .find((i) => i.serviceList.filter((j) => j.id === item.serviceId).length)
+            .serviceList.find((i) => i.id === item.serviceId)
 
-        if (service.depositPayment!== 'disabled') {
-          depositPayment = true
-        }
-      })
+          if (service.depositPayment !== 'disabled') {
+            depositPayment = true
+          }
+        })
 
       return ready.value ? depositPayment : false
     }
 
-    case ('package'): {
+    case 'package': {
       let item = useCartItem(store)
 
       let pack = store.getters['entities/getPackage'](item.packageId)
@@ -248,25 +239,25 @@ provide('hasDeposit', hasDeposit)
 
 let fullAmount = computed(() => {
   switch (store.getters['booking/getBookableType']) {
-    case ('appointment'): {
+    case 'appointment': {
       let fullAmountPayment = false
 
-      useCart(store).filter(i => 'services' in i && Object.keys(i.services).length).forEach((item) => {
-        let service = store.getters['entities/getCategories'].find(
-          i => i.serviceList.filter(j => j.id === item.serviceId).length
-        ).serviceList.find(
-          i => i.id === item.serviceId
-        )
+      useCart(store)
+        .filter((i) => 'services' in i && Object.keys(i.services).length)
+        .forEach((item) => {
+          let service = store.getters['entities/getCategories']
+            .find((i) => i.serviceList.filter((j) => j.id === item.serviceId).length)
+            .serviceList.find((i) => i.id === item.serviceId)
 
-        if (service.fullPayment) {
-          fullAmountPayment = true
-        }
-      })
+          if (service.fullPayment) {
+            fullAmountPayment = true
+          }
+        })
 
       return ready.value ? fullAmountPayment : false
     }
 
-    case ('package'): {
+    case 'package': {
       let item = useCartItem(store)
 
       let pack = store.getters['entities/getPackage'](item.packageId)
@@ -281,7 +272,7 @@ let fullAmount = computed(() => {
 // true = pay full amount
 let paymentDeposit = computed({
   get: () => store.getters['booking/getPaymentDeposit'],
-  set: (value) => store.commit('booking/setPaymentDeposit', value)
+  set: (value) => store.commit('booking/setPaymentDeposit', value),
 })
 
 let paymentStepRef = ref(null)
@@ -291,7 +282,7 @@ let mandatoryOnSitePayment = ref(false)
 
 let refOnSitePayment = ref(null)
 
-function callPaymentError (msg) {
+function callPaymentError(msg) {
   if (store.getters['payment/getOnSitePayment']) {
     store.commit('payment/setOnSitePayment', false)
     store.commit('booking/setPaymentGateway', 'onSite')
@@ -305,7 +296,7 @@ function callPaymentError (msg) {
   }
 }
 
-function callPaymentAbandoned () {
+function callPaymentAbandoned() {
   store.commit('booking/setLoading', false)
 }
 
@@ -327,52 +318,83 @@ let availablePayments = computed(() => {
     let entity = null
 
     switch (store.getters['booking/getBookableType']) {
-      case ('appointment'):
-        entity = useCartHasItems(store) === 1 ? store.getters['entities/getBookableFromBookableEntities'](
-          store.getters['booking/getSelection']
-        ) : null
+      case 'appointment':
+        entity =
+          useCartHasItems(store) === 1
+            ? store.getters['entities/getBookableFromBookableEntities'](
+                store.getters['booking/getSelection'],
+              )
+            : null
 
         break
 
-      case ('package'):
-        entity = store.getters['entities/getPackage'](
-          store.getters['booking/getPackageId']
-        )
+      case 'package':
+        entity = store.getters['entities/getPackage'](store.getters['booking/getPackageId'])
 
         break
     }
 
     let entityPayments = entity && entity.settings ? JSON.parse(entity.settings)['payments'] : null
 
+    let payments = !entityPayments
+      ? {
+          onSite: settings.payments.onSite,
+          stripe: settings.payments.stripe.enabled,
+          payPal: settings.payments.payPal.enabled,
+          wc: settings.payments.wc.enabled,
+          mollie: settings.payments.mollie.enabled,
+          square: settings.payments.square.enabled,
+          razorpay: settings.payments.razorpay.enabled,
+          barion: settings.payments.barion.enabled,
+        }
+      : {
+          onSite:
+            'onSite' in entityPayments
+              ? entityPayments.onSite && settings.payments.onSite
+              : settings.payments.onSite,
+          stripe:
+            'stripe' in entityPayments
+              ? entityPayments.stripe.enabled && settings.payments.stripe.enabled
+              : settings.payments.stripe.enabled,
+          payPal:
+            'payPal' in entityPayments
+              ? entityPayments.payPal.enabled && settings.payments.payPal.enabled
+              : settings.payments.payPal.enabled,
+          wc:
+            'wc' in entityPayments
+              ? (!('enabled' in entityPayments.wc) || entityPayments.wc.enabled) &&
+                settings.payments.wc.enabled
+              : settings.payments.wc.enabled,
+          mollie:
+            'mollie' in entityPayments
+              ? entityPayments.mollie.enabled && settings.payments.mollie.enabled
+              : settings.payments.mollie.enabled,
+          razorpay:
+            'razorpay' in entityPayments
+              ? entityPayments.razorpay.enabled && settings.payments.razorpay.enabled
+              : settings.payments.razorpay.enabled,
+          square:
+            'square' in entityPayments
+              ? entityPayments.square.enabled && settings.payments.square.enabled
+              : settings.payments.square.enabled,
+          barion:
+            'barion' in entityPayments
+              ? entityPayments.barion.enabled &&
+                settings.payments.barion.enabled &&
+                ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode)
+              : settings.payments.barion.enabled &&
+                ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode),
+        }
 
-    let payments = !entityPayments ? {
-      onSite: settings.payments.onSite,
-      stripe: settings.payments.stripe.enabled,
-      payPal: settings.payments.payPal.enabled,
-      wc: settings.payments.wc.enabled,
-      mollie: settings.payments.mollie.enabled,
-      square: settings.payments.square.enabled,
-      razorpay: settings.payments.razorpay.enabled,
-      barion: settings.payments.barion.enabled,
-    } : {
-      onSite: 'onSite' in entityPayments ? entityPayments.onSite && settings.payments.onSite : settings.payments.onSite,
-      stripe: 'stripe' in entityPayments ? entityPayments.stripe.enabled && settings.payments.stripe.enabled : settings.payments.stripe.enabled,
-      payPal: 'payPal' in entityPayments ? entityPayments.payPal.enabled && settings.payments.payPal.enabled : settings.payments.payPal.enabled,
-      wc: 'wc' in entityPayments ? (!('enabled' in entityPayments.wc) || entityPayments.wc.enabled) && settings.payments.wc.enabled : settings.payments.wc.enabled,
-      mollie: 'mollie' in entityPayments ? entityPayments.mollie.enabled && settings.payments.mollie.enabled : settings.payments.mollie.enabled,
-      razorpay: 'razorpay' in entityPayments ? entityPayments.razorpay.enabled && settings.payments.razorpay.enabled : settings.payments.razorpay.enabled,
-      square: 'square' in entityPayments ? entityPayments.square.enabled && settings.payments.square.enabled : settings.payments.square.enabled,
-      barion: 'barion' in entityPayments ? entityPayments.barion.enabled && settings.payments.barion.enabled && ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode) : settings.payments.barion.enabled && ['USD', 'EUR', 'HUF', 'CZK'].includes(settings.payments.currencyCode),
-    }
-
-    if (!payments.onSite &&
-        !payments.stripe &&
-        !payments.payPal &&
-        !payments.wc &&
-        !payments.mollie &&
-        !payments.square &&
-        !payments.razorpay &&
-        !payments.barion
+    if (
+      !payments.onSite &&
+      !payments.stripe &&
+      !payments.payPal &&
+      !payments.wc &&
+      !payments.mollie &&
+      !payments.square &&
+      !payments.razorpay &&
+      !payments.barion
     ) {
       payments = {
         onSite: settings.payments.onSite,
@@ -386,12 +408,15 @@ let availablePayments = computed(() => {
       }
     }
 
-    if (settings.payments.defaultPaymentMethod && payments[settings.payments.defaultPaymentMethod]) {
+    if (
+      settings.payments.defaultPaymentMethod &&
+      payments[settings.payments.defaultPaymentMethod]
+    ) {
       store.commit('booking/setPaymentGateway', settings.payments.defaultPaymentMethod)
 
       footerBtnDisabledUpdater(false)
     } else {
-      if (Object.keys(payments).filter(item => payments[item]).length === 1) {
+      if (Object.keys(payments).filter((item) => payments[item]).length === 1) {
         for (let key in payments) {
           if (payments[key]) {
             store.commit('booking/setPaymentGateway', key)
@@ -408,13 +433,13 @@ let availablePayments = computed(() => {
   return {}
 })
 
-function setPaymentGateway (gateway) {
+function setPaymentGateway(gateway) {
   store.commit('booking/setPaymentGateway', gateway)
 
   footerBtnDisabledUpdater(false)
 }
 
-function setOnSitePayment (isMandatory) {
+function setOnSitePayment(isMandatory) {
   if (settings.payments.wc.enabled ? settings.payments.wc.onSiteIfFree : true) {
     if (isMandatory) {
       store.commit('booking/setPaymentGateway', 'onSite')
@@ -429,17 +454,19 @@ onMounted(() => {
     paymentStepRef.value.focus()
   }
 
-  const isPaymentStatusError = paymentError.value && (
-    paymentError.value === globalLabels.payment_canceled ||
-    paymentError.value === globalLabels.payment_error ||
-    paymentError.value === globalLabels.payment_error_default
-  )
+  const isPaymentStatusError =
+    paymentError.value &&
+    (paymentError.value === globalLabels.payment_canceled ||
+      paymentError.value === globalLabels.payment_error ||
+      paymentError.value === globalLabels.payment_error_default)
 
   // If it's a payment status error (canceled/failed) delay clear for 3s
   if (!isPaymentStatusError) {
     usePaymentError(store, '')
   } else {
-    setTimeout(() => {usePaymentError(store, '')}, 3000)
+    setTimeout(() => {
+      usePaymentError(store, '')
+    }, 3000)
   }
 
   if (usePrepaidPrice(store) === 0) {
@@ -458,7 +485,7 @@ onMounted(() => {
 let amColors = inject('amColors')
 
 const cssVars = computed(() => {
-  return  {
+  return {
     '--am-c-ps-price-bgr': useColorTransparency(amColors.value.colorBtnPrim, 0.05),
     '--am-c-ps-total-price': amColors.value.colorBtnPrim,
     '--am-c-ps-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
@@ -468,44 +495,48 @@ const cssVars = computed(() => {
     '--am-c-ps-text-op06': useColorTransparency(amColors.value.colorMainText, 0.06),
     '--am-c-ps-primary': amColors.value.colorPrimary,
     '--am-c-ps-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
-    '--am-c-ps-primary-op06': useColorTransparency(amColors.value.colorPrimary, 0.06)
+    '--am-c-ps-primary-op06': useColorTransparency(amColors.value.colorPrimary, 0.06),
   }
 })
 
 let paymentsBtn = []
 
-Object.keys(availablePayments.value).forEach(key => {
-  paymentsBtn.push({key, value: getPaymentBtn(key) })
+Object.keys(availablePayments.value).forEach((key) => {
+  paymentsBtn.push({ key, value: getPaymentBtn(key) })
 })
 
-function getPaymentBtn (key) {
-  switch(key) {
+function getPaymentBtn(key) {
+  switch (key) {
     case 'onSite':
-      return {text: amLabels.value['on_site'], name: 'onSite.svg'}
+      return { text: amLabels.value['on_site'], name: 'onSite.svg' }
     case 'payPal':
-      return {text: amLabels.value['pay_pal'], name: 'payPal.svg'}
+      return { text: amLabels.value['pay_pal'], name: 'payPal.svg' }
     case 'stripe':
-      return {text: amLabels.value['stripe'], name: 'stripe.svg'}
+      return { text: amLabels.value['stripe'], name: 'stripe.svg' }
     case 'razorpay':
-      return {text: amLabels.value['razorpay'], name: 'razorpay.svg'}
+      return { text: amLabels.value['razorpay'], name: 'razorpay.svg' }
     case 'mollie':
-      return {text: amLabels.value['mollie'], name: 'mollie.svg'}
+      return { text: amLabels.value['mollie'], name: 'mollie.svg' }
     case 'wc':
-      return {text: amLabels.value['on_line'], name: 'online.svg'}
+      return { text: amLabels.value['on_line'], name: 'online.svg' }
     case 'square':
-      return {text: amLabels.value['square'], name: 'square.svg'}
+      return { text: amLabels.value['square'], name: 'square.svg' }
     case 'barion':
-      return {text: amLabels.value['barion'], name: 'barion.svg'}
+      return { text: amLabels.value['barion'], name: 'barion.svg' }
     default:
       return ''
   }
 }
 
-function getPaymentSentence () {
-  return paymentGateway.value === 'onSite' && !mandatoryOnSitePayment.value ? amLabels.value.payment_onsite_sentence :
-    (paymentGateway.value === 'mollie' || paymentGateway.value === 'wc' || paymentGateway.value === 'barion') ? amLabels.value.payment_wc_mollie_sentence : ''
+function getPaymentSentence() {
+  return paymentGateway.value === 'onSite' && !mandatoryOnSitePayment.value
+    ? amLabels.value.payment_onsite_sentence
+    : paymentGateway.value === 'mollie' ||
+        paymentGateway.value === 'wc' ||
+        paymentGateway.value === 'barion'
+      ? amLabels.value.payment_wc_mollie_sentence
+      : ''
 }
-
 </script>
 
 <script>
@@ -518,14 +549,14 @@ export default {
     stepSelectedData: [],
     finished: false,
     selected: false,
-  }
+  },
 }
 </script>
 
 <style lang="scss">
 .amelia-v2-booking #amelia-container {
   .am-fs__main-content.am-fs__payments {
-    padding-top:0;
+    padding-top: 0;
   }
 
   .am-fs__payments {
@@ -535,7 +566,7 @@ export default {
       $count: 6;
       @for $i from 0 through $count {
         &:nth-child(#{$i + 1}) {
-          animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+          animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
           animation-fill-mode: both;
         }
       }
@@ -548,7 +579,7 @@ export default {
       line-height: 1.6;
       color: var(--am-c-ps-text);
       margin-bottom: 4px;
-      animation: 600ms cubic-bezier(.45,1,.4,1.2) #{100}ms am-animation-slide-up;
+      animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{100}ms am-animation-slide-up;
       animation-fill-mode: both;
     }
 
@@ -591,7 +622,6 @@ export default {
       }
 
       .el-checkbox {
-
         &__input {
           height: 32px;
           line-height: 32px;
@@ -614,7 +644,7 @@ export default {
     }
 
     &-error {
-      animation: 600ms cubic-bezier(.45,1,.4,1.2) #{100}ms am-animation-slide-up;
+      animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{100}ms am-animation-slide-up;
       animation-fill-mode: both;
       margin-bottom: 10px;
     }

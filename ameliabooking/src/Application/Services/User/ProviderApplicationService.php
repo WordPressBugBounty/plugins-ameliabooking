@@ -302,15 +302,17 @@ class ProviderApplicationService
 
         $result = new CommandResult();
 
-        /** @var Provider $user */
-        $user = UserFactory::create($fields);
+        $fields['type'] = Entities::PROVIDER;
 
-        if (!($user instanceof AbstractUser)) {
+        if ((int)$fields['externalId'] && !$userAS->isRoleForExternalIdAllowed((int)$fields['externalId'], Entities::PROVIDER)) {
             $result->setResult(CommandResult::RESULT_ERROR);
-            $result->setMessage('Could not create a new user entity.');
+            $result->setMessage('Could not create user.');
 
             return $result;
         }
+
+        /** @var Provider $user */
+        $user = UserFactory::create($fields);
 
         if ($oldUser = $providerRepository->getByEmail($user->getEmail()->getValue())) {
             $result->setResult(CommandResult::RESULT_CONFLICT);

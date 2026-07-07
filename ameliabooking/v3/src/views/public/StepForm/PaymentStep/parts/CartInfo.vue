@@ -1,14 +1,15 @@
 <template>
   <div class="am-fs__payments-wrapper" :style="cssVars">
-
     <AmCollapse class="am-fs__payments-cart">
-      <template
-        v-for="(item, index) in useAppointmentsAmountInfo(store)"
-        :key="index"
-      >
+      <template v-for="(item, index) in useAppointmentsAmountInfo(store)" :key="index">
         <AmCollapseItem
-          v-if="(paymentGateway !== 'onSite' && item.prepaid.depositAmount && store.getters['entities/getService'](item.serviceId).depositPayment !== 'disabled') || item.prepaid.discountAmount"
-          :ref="el => servicesRef[index] = el"
+          v-if="
+            (paymentGateway !== 'onSite' &&
+              item.prepaid.depositAmount &&
+              store.getters['entities/getService'](item.serviceId).depositPayment !== 'disabled') ||
+            item.prepaid.discountAmount
+          "
+          :ref="(el) => (servicesRef[index] = el)"
           :side="true"
           :delay="500"
           @collapse-open="collapseState[index] = false"
@@ -23,14 +24,11 @@
           </template>
           <template #icon-below>
             <Transition
-              :duration="{enter: 500, leave: 500}"
+              :duration="{ enter: 500, leave: 500 }"
               @enter="onCollapseClose"
               @leave="onCollapseOpen"
             >
-              <div
-                v-show="collapseState[index]"
-                class="am-fs__payments-cart-sub"
-              >
+              <div v-show="collapseState[index]" class="am-fs__payments-cart-sub">
                 <p>
                   {{ amLabels.total_price }}
                 </p>
@@ -43,13 +41,8 @@
           <template #default>
             <div class="am-fs__payments-cart-open">
               <!-- Discount -->
-              <div
-                v-if="item.prepaid.discountAmount"
-                class="am-fs__payments-cart-open-text"
-              >
-                <span>
-                  {{amLabels.summary_services_subtotal}}:
-                </span>
+              <div v-if="item.prepaid.discountAmount" class="am-fs__payments-cart-open-text">
+                <span> {{ amLabels.summary_services_subtotal }}: </span>
                 <span class="am-amount">
                   {{ useFormattedPrice(item.prepaid.totalAmount) }}
                 </span>
@@ -59,9 +52,7 @@
                 v-if="item.prepaid.discountAmount"
                 class="am-fs__payments-cart-open-text am-fs__payments-cart-open-text-discount"
               >
-                <span>
-                  {{amLabels.discount_amount_colon}}:
-                </span>
+                <span> {{ amLabels.discount_amount_colon }}: </span>
                 <span class="am-amount">
                   {{ useFormattedPrice(item.prepaid.discountAmount) }}
                 </span>
@@ -70,38 +61,51 @@
 
               <div
                 class="am-fs__payments-cart-sub"
-                :class="{'am-fs__payments-cart-sub-border': paymentGateway !== 'onSite' || item.prepaid.discountAmount}"
+                :class="{
+                  'am-fs__payments-cart-sub-border':
+                    paymentGateway !== 'onSite' || item.prepaid.discountAmount,
+                }"
               >
-                <p>
-                  {{ amLabels.total_price }}:
-                </p>
+                <p>{{ amLabels.total_price }}:</p>
                 <p class="am-amount">
                   {{ useFormattedPrice(item.prepaid.totalAmount - item.prepaid.discountAmount) }}
                 </p>
               </div>
 
               <div
-                v-if="store.getters['entities/getService'](item.serviceId).depositPayment !== 'disabled' && item.prepaid.depositAmount && paymentGateway !== 'onSite'"
+                v-if="
+                  store.getters['entities/getService'](item.serviceId).depositPayment !==
+                    'disabled' &&
+                  item.prepaid.depositAmount &&
+                  paymentGateway !== 'onSite'
+                "
                 class="am-fs__payments-cart-open-text"
-                :class="{'am-fs__payments-cart-open-text-border': item.prepaid.discountAmount}"
+                :class="{ 'am-fs__payments-cart-open-text-border': item.prepaid.discountAmount }"
               >
-                <span>
-                  {{amLabels.paying_now}}:
-                </span>
+                <span> {{ amLabels.paying_now }}: </span>
                 <span>
                   {{ useFormattedPrice(item.prepaid.depositAmount) }}
                 </span>
               </div>
 
               <div
-                v-if="store.getters['entities/getService'](item.serviceId).depositPayment !== 'disabled' && item.prepaid.depositAmount && paymentGateway !== 'onSite'"
+                v-if="
+                  store.getters['entities/getService'](item.serviceId).depositPayment !==
+                    'disabled' &&
+                  item.prepaid.depositAmount &&
+                  paymentGateway !== 'onSite'
+                "
                 class="am-fs__payments-cart-open-text"
               >
+                <span> {{ amLabels.paying_later }}: </span>
                 <span>
-                  {{amLabels.paying_later}}:
-                </span>
-                <span>
-                  {{ useFormattedPrice(item.prepaid.totalAmount - item.prepaid.discountAmount - item.prepaid.depositAmount) }}
+                  {{
+                    useFormattedPrice(
+                      item.prepaid.totalAmount -
+                        item.prepaid.discountAmount -
+                        item.prepaid.depositAmount,
+                    )
+                  }}
                 </span>
               </div>
             </div>
@@ -132,15 +136,16 @@
         v-if="settings.payments.coupons"
         type="cart"
         :count="cart.length"
-        :ids="useCart(store).filter(i => i.serviceId && (i.serviceId in i.services)).map(i => i.serviceId)"
+        :ids="
+          useCart(store)
+            .filter((i) => i.serviceId && i.serviceId in i.services)
+            .map((i) => i.serviceId)
+        "
         @coupon-applied="couponApplied"
       />
 
-      <div
-        v-if="!onlyTotal"
-        class="am-fs__payments-app-info-subtotal"
-      >
-        <span>{{amLabels.subtotal}}:</span>
+      <div v-if="!onlyTotal" class="am-fs__payments-app-info-subtotal">
+        <span>{{ amLabels.subtotal }}:</span>
         <span class="am-amount">{{ useFormattedPrice(cartAmount.totalAmount) }}</span>
       </div>
 
@@ -149,11 +154,17 @@
           v-if="settings.payments.coupons"
           v-show="cartAmount.discountAmount > 0"
           class="am-fs__payments-app-info-discount"
-          :class="{'am-fs__payments-app-info-discount-green': cartAmount.discountAmount > 0 }"
+          :class="{ 'am-fs__payments-app-info-discount-green': cartAmount.discountAmount > 0 }"
         >
-          <span>{{amLabels.discount_amount_colon}}:</span>
+          <span>{{ amLabels.discount_amount_colon }}:</span>
           <span class="am-amount">
-            {{ useFormattedPrice(cartAmount.discountAmount > cartAmount.totalAmount ? cartAmount.totalAmount : cartAmount.discountAmount) }}
+            {{
+              useFormattedPrice(
+                cartAmount.discountAmount > cartAmount.totalAmount
+                  ? cartAmount.totalAmount
+                  : cartAmount.discountAmount,
+              )
+            }}
           </span>
         </div>
       </Transition>
@@ -169,7 +180,7 @@
               {{ `+${amLabels.total_tax_colon}` }}
             </template>
             <template v-else>
-              {{amLabels.incl_tax}}
+              {{ amLabels.incl_tax }}
             </template>
           </span>
           <span class="am-amount">
@@ -180,11 +191,15 @@
 
       <div
         class="am-fs__payments-app-info-total"
-        :class="{'am-fs__payments-bordered': !onlyTotal}"
+        :class="{ 'am-fs__payments-bordered': !onlyTotal }"
       >
-        <span>{{amLabels.total_amount_colon}}</span>
+        <span>{{ amLabels.total_amount_colon }}</span>
         <span class="am-amount">
-          {{ useFormattedPrice(cartAmount.totalAmount - cartAmount.discountAmount + cartAmount.taxAmount) }}
+          {{
+            useFormattedPrice(
+              cartAmount.totalAmount - cartAmount.discountAmount + cartAmount.taxAmount,
+            )
+          }}
         </span>
       </div>
 
@@ -192,14 +207,32 @@
         <div class="am-fs__payments-app-info-deposit">
           <span>{{ amLabels.paying_now }}:</span>
           <span class="am-amount">
-            {{ useFormattedPrice(cartAmount.depositAmount ? cartAmount.depositAmount : cartAmount.totalAmount - cartAmount.discountAmount + cartAmount.taxAmount - cartAmount.depositAmount) }}
+            {{
+              useFormattedPrice(
+                cartAmount.depositAmount
+                  ? cartAmount.depositAmount
+                  : cartAmount.totalAmount -
+                      cartAmount.discountAmount +
+                      cartAmount.taxAmount -
+                      cartAmount.depositAmount,
+              )
+            }}
           </span>
         </div>
 
         <div class="am-fs__payments-app-info-remaining">
           <span>{{ amLabels.paying_later }}:</span>
           <span class="am-amount">
-            {{ useFormattedPrice(cartAmount.depositAmount ? cartAmount.totalAmount - cartAmount.discountAmount + cartAmount.taxAmount - cartAmount.depositAmount : 0) }}
+            {{
+              useFormattedPrice(
+                cartAmount.depositAmount
+                  ? cartAmount.totalAmount -
+                      cartAmount.discountAmount +
+                      cartAmount.taxAmount -
+                      cartAmount.depositAmount
+                  : 0,
+              )
+            }}
           </span>
         </div>
       </div>
@@ -209,33 +242,20 @@
 
 <script setup>
 // * Import from Vue
-import {
-  inject,
-  ref,
-  computed,
-  watch
-} from 'vue'
+import { inject, ref, computed, watch } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
 
 // * Composables
-import {
-  useFormattedPrice
-} from '../../../../../assets/js/common/formatting.js'
-import {
-  useAppointmentsAmountInfo
-} from '../../../../../assets/js/common/appointments.js'
-import {
-  useCart
-} from '../../../../../assets/js/public/cart'
-import {
-  useColorTransparency
-} from '../../../../../assets/js/common/colorManipulation.js'
+import { useFormattedPrice } from '../../../../../assets/js/common/formatting.js'
+import { useAppointmentsAmountInfo } from '../../../../../assets/js/common/appointments.js'
+import { useCart } from '../../../../../assets/js/public/cart'
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation.js'
 
 // * _components
-import AmCollapseItem from "../../../../_components/collapse/AmCollapseItem.vue";
-import AmCollapse from "../../../../_components/collapse/AmCollapse.vue";
+import AmCollapseItem from '../../../../_components/collapse/AmCollapseItem.vue'
+import AmCollapse from '../../../../_components/collapse/AmCollapse.vue'
 
 // * Parts
 import Coupon from '../../../Parts/Payment/Coupon.vue'
@@ -252,8 +272,10 @@ const settings = inject('settings')
 let cart = computed(() => useCart(store))
 
 let onlyTotal = computed(() => {
-  return (!settings.payments.coupons || cartAmount.value.discountAmount === 0) &&
-    (!settings.payments.taxes.enabled || (cartAmount.value.taxAmount === 0))
+  return (
+    (!settings.payments.coupons || cartAmount.value.discountAmount === 0) &&
+    (!settings.payments.taxes.enabled || cartAmount.value.taxAmount === 0)
+  )
 })
 
 let cartAmount = computed(() => {
@@ -288,7 +310,7 @@ useAppointmentsAmountInfo(store).forEach((item, index) => {
   collapseState.value[index] = true
 })
 
-function collapseAllCards () {
+function collapseAllCards() {
   Object.keys(collapseState.value).forEach((key) => {
     collapseState.value[key] = true
   })
@@ -304,7 +326,7 @@ watch(paymentGateway, () => {
   collapseAllCards()
 })
 
-function onCollapseClose (el) {
+function onCollapseClose(el) {
   el.style.opacity = 0
   setTimeout(() => {
     el.style.opacity = 1
@@ -312,7 +334,7 @@ function onCollapseClose (el) {
   }, 200)
 }
 
-function onCollapseOpen (el) {
+function onCollapseOpen(el) {
   el.style.opacity = 0
   el.style.setProperty('--am-h-services-sub', `${el.offsetHeight}px`)
   setTimeout(() => {
@@ -322,8 +344,8 @@ function onCollapseOpen (el) {
 
 const emits = defineEmits(['setOnSitePayment'])
 
-function couponApplied () {
-  emits('setOnSitePayment', (cartAmount.value.totalAmount - cartAmount.value.discountAmount) <= 0)
+function couponApplied() {
+  emits('setOnSitePayment', cartAmount.value.totalAmount - cartAmount.value.discountAmount <= 0)
   collapseAllCards()
 }
 
@@ -341,10 +363,9 @@ let cssVars = computed(() => {
 })
 </script>
 
-
 <script>
 export default {
-  name: 'CartInfo'
+  name: 'CartInfo',
 }
 </script>
 
@@ -372,7 +393,8 @@ export default {
           }
         }
 
-        &-discount, &-tax {
+        &-discount,
+        &-tax {
           display: flex;
           justify-content: space-between;
           font-size: 13px;
@@ -387,7 +409,8 @@ export default {
           }
         }
 
-        &-total, &-deposit {
+        &-total,
+        &-deposit {
           display: flex;
           justify-content: space-between;
           font-size: 15px;
@@ -411,14 +434,14 @@ export default {
           flex-wrap: wrap;
           width: 100%;
           padding: 12px;
-          transition-delay: .5s;
+          transition-delay: 0.5s;
 
           &-side {
             transition-delay: 0s;
           }
 
           .am-collapse-item__trigger {
-            padding: 0
+            padding: 0;
           }
         }
         .am-collapse-item__content {
@@ -440,7 +463,7 @@ export default {
           width: 100%;
           display: flex;
           justify-content: space-between;
-          transition: all ease-in-out .3s;
+          transition: all ease-in-out 0.3s;
 
           &-border {
             border-top: 1px dashed var(--am-c-pay-text-op30);
@@ -458,7 +481,7 @@ export default {
           }
 
           .am-amount {
-            color: var(--am-c-pay-primary)
+            color: var(--am-c-pay-primary);
           }
         }
 

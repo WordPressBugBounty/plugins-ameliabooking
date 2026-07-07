@@ -5,25 +5,16 @@
     :style="cssDialogVars"
     position="center"
   >
-    <div
-      ref="popupInnerRef"
-      class="am-csd__inner"
-    >
+    <div ref="popupInnerRef" class="am-csd__inner">
       <div class="am-csd__header">
         <div class="am-csd__header-text">
           {{ labels.no_selected_slot_requirements }}
         </div>
-        <div
-          class="am-csd__header-btn"
-          @click="closeDialog"
-        >
+        <div class="am-csd__header-btn" @click="closeDialog">
           <IconComponent icon="close"></IconComponent>
         </div>
       </div>
-      <div
-        ref="rescheduleRef"
-        class="am-csd__content"
-      >
+      <div ref="rescheduleRef" class="am-csd__content">
         <AmAlert
           v-if="alertVisibility"
           ref="alertContainer"
@@ -34,9 +25,7 @@
           @close="closeAlert"
           @trigger-close="closeAlert"
         >
-          <template #title>
-            <span class="am-icon-clearable"></span> {{ alertMessage }}
-          </template>
+          <template #title> <span class="am-icon-clearable"></span> {{ alertMessage }} </template>
         </AmAlert>
 
         <!-- Packages filters -->
@@ -48,13 +37,23 @@
             :model="packageFormData"
             label-position="top"
           >
-            <div
-              class="am-csd__filter am-csd__filter-employee"
-              :class="responsiveClass"
-            >
+            <div class="am-csd__filter am-csd__filter-employee" :class="responsiveClass">
               <el-form-item
-                v-if="props.employees.length && employeeVisibility && props.customizedOptions.employee.visibility"
-                :class="[{'am-csd__filter-full': !(props.locations.length && locationVisibility && props.customizedOptions.location.visibility)}, responsiveClass]"
+                v-if="
+                  props.employees.length &&
+                  employeeVisibility &&
+                  props.customizedOptions.employee.visibility
+                "
+                :class="[
+                  {
+                    'am-csd__filter-full': !(
+                      props.locations.length &&
+                      locationVisibility &&
+                      props.customizedOptions.location.visibility
+                    ),
+                  },
+                  responsiveClass,
+                ]"
                 :label="`${labels.package_appointment_employee}:`"
                 :prop="'employee'"
               >
@@ -91,8 +90,21 @@
               </el-form-item>
 
               <el-form-item
-                v-if="props.locations.length && locationVisibility && props.customizedOptions.location.visibility"
-                :class="[{'am-csd__filter-full': !(props.employees.length && employeeVisibility && props.customizedOptions.employee.visibility)}, responsiveClass]"
+                v-if="
+                  props.locations.length &&
+                  locationVisibility &&
+                  props.customizedOptions.location.visibility
+                "
+                :class="[
+                  {
+                    'am-csd__filter-full': !(
+                      props.employees.length &&
+                      employeeVisibility &&
+                      props.customizedOptions.employee.visibility
+                    ),
+                  },
+                  responsiveClass,
+                ]"
                 :label="`${labels.package_appointment_location}:`"
                 :prop="'location'"
               >
@@ -126,15 +138,31 @@
           :load-counter="loadCounter"
           :end-time="props.customizedOptions.endTimeVisibility.visibility"
           :time-zone="props.customizedOptions.timeZoneVisibility.visibility"
-          :show-estimated-pricing="props.appointment.id && 'estimatedPricingVisibility' in props.customizedOptions ? props.customizedOptions.estimatedPricingVisibility.visibility : false"
-          :show-indicator-pricing="props.appointment.id && 'indicatorPricingVisibility' in props.customizedOptions ? props.customizedOptions.indicatorPricingVisibility.visibility : false"
-          :show-slot-pricing="props.appointment.id && 'slotPricingVisibility' in props.customizedOptions ? props.customizedOptions.slotPricingVisibility.visibility : false"
+          :show-estimated-pricing="
+            props.appointment.id && 'estimatedPricingVisibility' in props.customizedOptions
+              ? props.customizedOptions.estimatedPricingVisibility.visibility
+              : false
+          "
+          :show-indicator-pricing="
+            props.appointment.id && 'indicatorPricingVisibility' in props.customizedOptions
+              ? props.customizedOptions.indicatorPricingVisibility.visibility
+              : false
+          "
+          :show-slot-pricing="
+            props.appointment.id && 'slotPricingVisibility' in props.customizedOptions
+              ? props.customizedOptions.slotPricingVisibility.visibility
+              : false
+          "
           :show-calendar-date-busyness="false"
           :label-slots-selected="labels.date_time_slots_selected"
           :fetched-slots="null"
           :service-id="parseInt(props.appointment.serviceId)"
           :is-package="props.appointment.bookings[0].packageCustomerService !== null"
-          :date="props.appointment && props.appointment.bookingStart ? props.appointment.bookingStart.split(' ')[0] : ''"
+          :date="
+            props.appointment && props.appointment.bookingStart
+              ? props.appointment.bookingStart.split(' ')[0]
+              : ''
+          "
           :slots-params="slotsProps"
         ></Calendar>
       </div>
@@ -153,7 +181,9 @@
         <AmButton
           :size="popupInnerWidth <= 360 ? 'small' : 'default'"
           :type="props.customizedOptions.continueBtn.buttonType"
-          :disabled="!!(slotsAreLoading || calendarLoadingState || !appointmentDate || !appointmentTime)"
+          :disabled="
+            !!(slotsAreLoading || calendarLoadingState || !appointmentDate || !appointmentTime)
+          "
           @click="processBooking"
         >
           {{ labels.continue }}
@@ -165,45 +195,34 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  watch,
-  provide,
-  onMounted,
-  nextTick
-} from "vue";
+import { ref, computed, inject, watch, provide, onMounted, nextTick } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import from Libraries
-import httpClient from "../../../../../plugins/axios";
-import moment from "moment";
+import httpClient from '../../../../../plugins/axios'
+import moment from 'moment'
 
 // * _components
-import AmSlidePopup from "../../../../_components/slide-popup/AmSlidePopup.vue";
-import IconComponent from "../../../../_components/icons/IconComponent.vue";
-import AmButton from "../../../../_components/button/AmButton.vue";
-import AmOption from "../../../../_components/select/AmOption.vue";
-import AmSelect from "../../../../_components/select/AmSelect.vue";
-import AmOptionTemplate2 from "../../../../_components/select/parts/AmOptionTemplate2.vue";
-import AmAlert from "../../../../_components/alert/AmAlert.vue";
+import AmSlidePopup from '../../../../_components/slide-popup/AmSlidePopup.vue'
+import IconComponent from '../../../../_components/icons/IconComponent.vue'
+import AmButton from '../../../../_components/button/AmButton.vue'
+import AmOption from '../../../../_components/select/AmOption.vue'
+import AmSelect from '../../../../_components/select/AmSelect.vue'
+import AmOptionTemplate2 from '../../../../_components/select/parts/AmOptionTemplate2.vue'
+import AmAlert from '../../../../_components/alert/AmAlert.vue'
 
 // * Templates
-import Calendar from "../../../Parts/Calendar.vue";
+import Calendar from '../../../Parts/Calendar.vue'
 
 // * Composables
-import {
-  useUtcValue,
-  useUtcValueOffset,
-} from "../../../../../assets/js/common/date";
-import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation.js";
-import {useCurrentTimeZone, useSortedDateStrings} from "../../../../../assets/js/common/helper.js";
-import { useScrollTo } from "../../../../../assets/js/common/scrollElements";
-import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
-import {useCreateBookingSuccess} from "../../../../../assets/js/public/booking";
+import { useUtcValue, useUtcValueOffset } from '../../../../../assets/js/common/date'
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation.js'
+import { useCurrentTimeZone, useSortedDateStrings } from '../../../../../assets/js/common/helper.js'
+import { useScrollTo } from '../../../../../assets/js/common/scrollElements'
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
+import { useCreateBookingSuccess } from '../../../../../assets/js/public/booking'
 
 // * Vars
 let store = useStore()
@@ -220,64 +239,64 @@ const amSettings = inject('settings')
 let props = defineProps({
   visibility: {
     type: Boolean,
-    default: false
+    default: false,
   },
   appointment: {
     type: Object,
-    default: null
+    default: null,
   },
   employees: {
     type: Array,
     default: () => {
       return []
-    }
+    },
   },
   locations: {
     type: Array,
     default: () => {
       return []
-    }
+    },
   },
   slotsParams: {
     type: Object,
-    default: () => {}
+    default: () => {},
   },
   isPackage: {
     type: Boolean,
-    default: false
+    default: false,
   },
   labels: {
     type: Object,
-    required: true
+    required: true,
   },
   customizedOptions: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 // * Filter Employees and Locations
 let queryEmployeeLower = ref('')
-function filterEmployee (query) {
+function filterEmployee(query) {
   queryEmployeeLower.value = query.toLowerCase()
 }
 let filteredEmployees = computed(() => {
   if (queryEmployeeLower.value) {
-    return props.employees.filter(item => {
+    return props.employees.filter((item) => {
       const fullName = `${item.firstName} ${item.lastName}`.toLowerCase()
       return fullName.includes(queryEmployeeLower.value) && item.show
     })
   }
-  return props.employees.filter(e => e.show)
+  return props.employees.filter((e) => e.show)
 })
 
 let queryLocationLower = ref('')
-function filterLocation (query) {
+function filterLocation(query) {
   queryLocationLower.value = query.toLowerCase()
 }
 let filteredLocations = computed(() => {
   if (queryLocationLower.value) {
-    return props.locations.filter(item => {
+    return props.locations.filter((item) => {
       return item.name.toLowerCase().includes(queryLocationLower.value)
     })
   }
@@ -289,17 +308,20 @@ let amLabels = inject('amLabels')
 let appointmentDate = ref(null)
 let appointmentTime = ref(null)
 
-watch(() => props.appointment, (current) => {
-  setTimeout(() => {
-    loadCounter.value++
-  }, 200)
+watch(
+  () => props.appointment,
+  (current) => {
+    setTimeout(() => {
+      loadCounter.value++
+    }, 200)
 
-  let init = JSON.parse(JSON.stringify(current))
-  if (init && init.bookingStart) {
-    appointmentDate.value = init.bookingStart.split(' ')[0]
-    appointmentTime.value = init.bookingStart.split(' ')[1].substring(0, 5)
-  }
-})
+    let init = JSON.parse(JSON.stringify(current))
+    if (init && init.bookingStart) {
+      appointmentDate.value = init.bookingStart.split(' ')[0]
+      appointmentTime.value = init.bookingStart.split(' ')[1].substring(0, 5)
+    }
+  },
+)
 
 // * Popup contnte width
 let popupInnerRef = ref(null)
@@ -309,7 +331,7 @@ let popupInnerWidth = ref(0)
 let sidebarCollapsed = inject('sidebarCollapsed')
 
 // * window resize listener
-window.addEventListener('resize', resize);
+window.addEventListener('resize', resize)
 
 // * resize function
 function resize() {
@@ -330,7 +352,7 @@ watch(sidebarCollapsed, (current) => {
   }
 })
 
-function collapseTriggered () {
+function collapseTriggered() {
   popupInnerWidth.value = popupInnerRef.value.offsetWidth
 }
 
@@ -358,7 +380,7 @@ let alertVisibility = ref(false)
 let alertContainer = ref(null)
 let alertMessage = ref('')
 
-function closeAlert () {
+function closeAlert() {
   alertVisibility.value = false
   alertMessage.value = ''
 }
@@ -382,17 +404,20 @@ let slotsAreLoading = ref(false)
  *********/
 let packageFormData = ref({
   employee: null,
-  location: null
+  location: null,
 })
 
 let employeeVisibility = ref(true)
 let locationVisibility = ref(true)
 
 let filterFormVisibility = computed(() => {
-  return (props.appointment && !props.appointment.id)
-    && (props.employees.length || props.locations.length)
-    && (props.customizedOptions.employee.visibility || props.customizedOptions.location.visibility)
-    && (employeeVisibility.value || locationVisibility.value)
+  return (
+    props.appointment &&
+    !props.appointment.id &&
+    (props.employees.length || props.locations.length) &&
+    (props.customizedOptions.employee.visibility || props.customizedOptions.location.visibility) &&
+    (employeeVisibility.value || locationVisibility.value)
+  )
 })
 
 let packageFormRef = ref(null)
@@ -403,18 +428,24 @@ let rules = computed(() => {
     return {
       employee: [
         {
-          required: 'employee' in props.customizedOptions ? props.customizedOptions.employee.required : false,
+          required:
+            'employee' in props.customizedOptions
+              ? props.customizedOptions.employee.required
+              : false,
           message: props.labels.please_select_employee,
           trigger: 'submit',
-        }
+        },
       ],
       location: [
         {
-          required: 'location' in props.customizedOptions ? props.customizedOptions.location.required : false,
+          required:
+            'location' in props.customizedOptions
+              ? props.customizedOptions.location.required
+              : false,
           message: props.labels.please_select_location,
           trigger: 'submit',
-        }
-      ]
+        },
+      ],
     }
   }
 
@@ -453,12 +484,12 @@ function changeFilter() {
   emits('location-selection', packageFormData.value.location)
 }
 
-function selectEmployee (val) {
+function selectEmployee(val) {
   packageFormData.value.employee = val
   changeFilter()
 }
 
-function closeDialog () {
+function closeDialog() {
   if (filterFormVisibility.value) {
     packageFormData.value.employee = null
     packageFormData.value.location = null
@@ -502,7 +533,7 @@ let calendarServiceDuration = ref(0)
 
 provide('calendarServiceDuration', calendarServiceDuration)
 
-function processBooking () {
+function processBooking() {
   if ('id' in props.appointment) {
     rescheduleBooking()
   } else {
@@ -510,7 +541,7 @@ function processBooking () {
   }
 }
 
-function getDateTimeData (useUtc) {
+function getDateTimeData(useUtc) {
   let timeZone = useUtc ? 'UTC' : store.getters['cabinet/getTimeZone']
 
   let localBookingStart = appointmentDate.value + ' ' + appointmentTime.value
@@ -536,75 +567,104 @@ function getDateTimeData (useUtc) {
   }
 }
 
-function rescheduleBooking () {
+function rescheduleBooking() {
   calendarRef.value.calendarSlotsLoading = true
 
   let bookingData = getDateTimeData(false)
 
-  if (useCurrentTimeZone() === store.getters['cabinet/getTimeZone'] && amSettings.general.showClientTimeZone) {
-    bookingData.utcOffset = useUtcValueOffset(useUtcValue(appointmentDate.value + ' ' + appointmentTime.value))
+  if (
+    useCurrentTimeZone() === store.getters['cabinet/getTimeZone'] &&
+    amSettings.general.showClientTimeZone
+  ) {
+    bookingData.utcOffset = useUtcValueOffset(
+      useUtcValue(appointmentDate.value + ' ' + appointmentTime.value),
+    )
   }
 
-  httpClient.post(
-    '/bookings/reassign/' + props.appointment.bookings.filter(i => i.status === 'approved' || i.status === 'pending' || i.status === 'waiting')[0].id,
+  httpClient
+    .post(
+      '/bookings/reassign/' +
+        props.appointment.bookings.filter(
+          (i) => i.status === 'approved' || i.status === 'pending' || i.status === 'waiting',
+        )[0].id,
       bookingData,
-    {params: {source: 'cabinet-' + cabinetType.value}}
-  ).then(() => {
-    calendarRef.value.calendarSlotsLoading = false
-    emits('success', {message: amLabels.value.appointment_rescheduled})
-  }).catch((error) => {
-    calendarRef.value.calendarSlotsLoading = false
-    if (error.response) {
-      if (!('data' in error.response.data) && 'message' in error.response.data) {
-        alertVisibility.value = true
-        alertMessage.value = error.response.data.message
-        setTimeout(function () {
-          useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
-        }, 500)
-      }
+      { params: { source: 'cabinet-' + cabinetType.value } },
+    )
+    .then(() => {
+      calendarRef.value.calendarSlotsLoading = false
+      emits('success', { message: amLabels.value.appointment_rescheduled })
+    })
+    .catch((error) => {
+      calendarRef.value.calendarSlotsLoading = false
+      if (error.response) {
+        if (!('data' in error.response.data) && 'message' in error.response.data) {
+          alertVisibility.value = true
+          alertMessage.value = error.response.data.message
+          setTimeout(function () {
+            useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
+          }, 500)
+        }
 
-      if ('data' in error.response && 'data' in error.response.data && 'customerAlreadyBooked' in error.response.data.data) {
-        alertVisibility.value = true
-        alertMessage.value = props.labels.customer_already_booked_app
-        setTimeout(function () {
-          useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
-        }, 500)
-      }
+        if (
+          'data' in error.response &&
+          'data' in error.response.data &&
+          'customerAlreadyBooked' in error.response.data.data
+        ) {
+          alertVisibility.value = true
+          alertMessage.value = props.labels.customer_already_booked_app
+          setTimeout(function () {
+            useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
+          }, 500)
+        }
 
-      if ('data' in error.response && 'data' in error.response.data && 'cancelBookingUnavailable' in error.response.data.data) {
-        alertVisibility.value = true
-        alertMessage.value = props.labels.booking_cancel_exception
-        setTimeout(function () {
-          useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
-        }, 500)
-      }
+        if (
+          'data' in error.response &&
+          'data' in error.response.data &&
+          'cancelBookingUnavailable' in error.response.data.data
+        ) {
+          alertVisibility.value = true
+          alertMessage.value = props.labels.booking_cancel_exception
+          setTimeout(function () {
+            useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
+          }, 500)
+        }
 
-      if ('data' in error.response && 'data' in error.response.data && 'timeSlotUnavailable' in error.response.data.data && error.response.data.data.timeSlotUnavailable === true) {
-        alertVisibility.value = true
-        alertMessage.value = props.labels.time_slot_unavailable
-        setTimeout(function () {
-          useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
-        }, 500)
-      }
+        if (
+          'data' in error.response &&
+          'data' in error.response.data &&
+          'timeSlotUnavailable' in error.response.data.data &&
+          error.response.data.data.timeSlotUnavailable === true
+        ) {
+          alertVisibility.value = true
+          alertMessage.value = props.labels.time_slot_unavailable
+          setTimeout(function () {
+            useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
+          }, 500)
+        }
 
-      if ('data' in error.response && 'data' in error.response.data && 'rescheduleBookingUnavailable' in error.response.data.data && error.response.data.data.rescheduleBookingUnavailable === true) {
-        alertVisibility.value = true
-        alertMessage.value = props.labels.booking_reschedule_exception
-        setTimeout(function () {
-          useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
-        }, 500)
+        if (
+          'data' in error.response &&
+          'data' in error.response.data &&
+          'rescheduleBookingUnavailable' in error.response.data.data &&
+          error.response.data.data.rescheduleBookingUnavailable === true
+        ) {
+          alertVisibility.value = true
+          alertMessage.value = props.labels.booking_reschedule_exception
+          setTimeout(function () {
+            useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
+          }, 500)
+        }
       }
-    }
-    emits('error')
-  })
+      emits('error')
+    })
 }
 
-function packageBookingApp () {
+function packageBookingApp() {
   calendarRef.value.calendarSlotsLoading = true
 
   let bookingDateTimeData = getDateTimeData(
     amSettings.general.showClientTimeZone &&
-    store.getters['cabinet/getTimeZone'] === useCurrentTimeZone()
+      store.getters['cabinet/getTimeZone'] === useCurrentTimeZone(),
   )
 
   let data = JSON.parse(JSON.stringify(props.appointment))
@@ -619,54 +679,66 @@ function packageBookingApp () {
 
   data.locationId = parseInt(appointmentLocationId.value)
 
-  httpClient.post(
-    '/bookings',
-    data
-  ).then((response) => {
-    calendarRef.value.calendarSlotsLoading = false
-    useCreateBookingSuccess(store, response)
-    emits('success', {message: amLabels.value.booking_added_success})
-  }).catch((error) => {
-    calendarRef.value.calendarSlotsLoading = false
-    if (error.response) {
-      if ('customerAlreadyBooked' in error.response.data.data && error.response.data.data.customerAlreadyBooked === true) {
-        alertVisibility.value = true
-        alertMessage.value = props.labels.customer_already_booked_app
-        setTimeout(function () {
-          useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
-        }, 500)
+  httpClient
+    .post('/bookings', data)
+    .then((response) => {
+      calendarRef.value.calendarSlotsLoading = false
+      useCreateBookingSuccess(store, response)
+      emits('success', { message: amLabels.value.booking_added_success })
+    })
+    .catch((error) => {
+      calendarRef.value.calendarSlotsLoading = false
+      if (error.response) {
+        if (
+          'customerAlreadyBooked' in error.response.data.data &&
+          error.response.data.data.customerAlreadyBooked === true
+        ) {
+          alertVisibility.value = true
+          alertMessage.value = props.labels.customer_already_booked_app
+          setTimeout(function () {
+            useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
+          }, 500)
+        }
+
+        if (
+          'timeSlotUnavailable' in error.response.data.data &&
+          error.response.data.data.timeSlotUnavailable === true
+        ) {
+          alertVisibility.value = true
+          alertMessage.value = props.labels.time_slot_unavailable
+          setTimeout(function () {
+            useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
+          }, 500)
+        }
+
+        if (
+          'packageBookingUnavailable' in error.response.data.data &&
+          error.response.data.data.packageBookingUnavailable === true
+        ) {
+          alertVisibility.value = true
+          alertMessage.value = props.labels.package_booking_unavailable
+          setTimeout(function () {
+            useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
+          }, 500)
+        }
+
+        if (
+          'customerBlocked' in error.response.data.data &&
+          error.response.data.data.customerBlocked === true
+        ) {
+          alertVisibility.value = true
+          alertMessage.value = props.labels.customer_blocked
+          setTimeout(function () {
+            useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
+          }, 500)
+        }
       }
 
-      if ('timeSlotUnavailable' in error.response.data.data && error.response.data.data.timeSlotUnavailable === true) {
-        alertVisibility.value = true
-        alertMessage.value = props.labels.time_slot_unavailable
-        setTimeout(function () {
-          useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
-        }, 500)
-      }
-
-      if ('packageBookingUnavailable' in error.response.data.data && error.response.data.data.packageBookingUnavailable === true) {
-        alertVisibility.value = true
-        alertMessage.value = props.labels.package_booking_unavailable
-        setTimeout(function () {
-          useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
-        }, 500)
-      }
-
-      if ('customerBlocked' in error.response.data.data && error.response.data.data.customerBlocked === true) {
-        alertVisibility.value = true
-        alertMessage.value = props.labels.customer_blocked
-        setTimeout(function () {
-          useScrollTo(rescheduleRef.value, alertContainer.value.$el, 0, 300)
-        }, 500)
-      }
-    }
-
-    emits('error', error)
-  })
+      emits('error', error)
+    })
 }
 
-function addPackageBooking () {
+function addPackageBooking() {
   if (!filterFormVisibility.value) {
     packageBookingApp()
   } else {
@@ -686,10 +758,7 @@ let appointmentProviderId = ref(null)
 let appointmentLocationId = ref(null)
 let dateSlots = ref(null)
 
-function useSlotsCallback(
-  store,
-  slots
-) {
+function useSlotsCallback(store, slots) {
   dateSlots.value = slots
 
   slotsAreLoading.value = false
@@ -709,7 +778,8 @@ function useSlotsCallback(
 
   return {
     calendarStartDate: bookingStartParts[0],
-    calendarEventSlots: bookingStartParts[0] in slots ? Object.keys(slots[bookingStartParts[0]]) : [],
+    calendarEventSlots:
+      bookingStartParts[0] in slots ? Object.keys(slots[bookingStartParts[0]]) : [],
     calendarEventDate: bookingStartParts[0],
     calendarEventSlot: bookingStartParts[1].slice(0, 5),
   }
@@ -721,33 +791,36 @@ provide('useRange', () => {
   if (!props.appointment.bookingStart) {
     return {
       start: null,
-      end: null
+      end: null,
     }
   }
 
   let bookingStart = props.appointment.bookingStart.split(' ')[0]
 
   return {
-    start: moment(bookingStart, 'YYYY-MM-DD').startOf('month').subtract(6, 'days').format('YYYY-MM-DD'),
-    end: moment(bookingStart, 'YYYY-MM-DD').endOf('month').add(12, 'days').format('YYYY-MM-DD')
+    start: moment(bookingStart, 'YYYY-MM-DD')
+      .startOf('month')
+      .subtract(6, 'days')
+      .format('YYYY-MM-DD'),
+    end: moment(bookingStart, 'YYYY-MM-DD').endOf('month').add(12, 'days').format('YYYY-MM-DD'),
   }
 })
 
 provide('useSelectedDuration', () => {})
 
-function setBookingData () {
+function setBookingData() {
   let slots = Object.keys(dateSlots.value[appointmentDate.value])
 
   if (slots.length) {
     appointmentProviderId.value =
-        appointmentTime.value && dateSlots.value[appointmentDate.value][appointmentTime.value] ?
-            dateSlots.value[appointmentDate.value][appointmentTime.value][0].e
-            : dateSlots.value[appointmentDate.value][slots[0]][0].e
+      appointmentTime.value && dateSlots.value[appointmentDate.value][appointmentTime.value]
+        ? dateSlots.value[appointmentDate.value][appointmentTime.value][0].e
+        : dateSlots.value[appointmentDate.value][slots[0]][0].e
 
     appointmentLocationId.value =
-        appointmentTime.value && dateSlots.value[appointmentDate.value][appointmentTime.value] ?
-            dateSlots.value[appointmentDate.value][appointmentTime.value][0].l
-            : dateSlots.value[appointmentDate.value][slots[0]][0].l
+      appointmentTime.value && dateSlots.value[appointmentDate.value][appointmentTime.value]
+        ? dateSlots.value[appointmentDate.value][appointmentTime.value][0].l
+        : dateSlots.value[appointmentDate.value][slots[0]][0].l
   }
 }
 
@@ -809,7 +882,7 @@ let cssDialogVars = computed(() => {
 
 <script>
 export default {
-  name: 'AppointmentBooking'
+  name: 'AppointmentBooking',
 }
 </script>
 
@@ -926,7 +999,7 @@ export default {
     }
 
     &__content {
-      padding: 0  24px;
+      padding: 0 24px;
     }
 
     &__alert {
@@ -1010,7 +1083,7 @@ export default {
       }
 
       .el-form {
-        &-item{
+        &-item {
           width: calc(50% - 12px);
 
           &.am-csd__filter-full {

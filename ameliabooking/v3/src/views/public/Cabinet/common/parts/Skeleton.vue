@@ -1,5 +1,5 @@
 <template>
-  <el-skeleton animated class="am-asi-el-skeleton" :class="[{'am-asi': props.mainClass}]">
+  <el-skeleton animated class="am-asi-el-skeleton" :class="[{ 'am-asi': props.mainClass }]">
     <template #template>
       <div v-if="props.centerFirst" class="el-skeleton-item-wrapper-title">
         <el-skeleton-item variant="rect" />
@@ -16,22 +16,22 @@
 let props = defineProps({
   centerFirst: {
     type: Boolean,
-    default: false
+    default: false,
   },
   count: {
     type: Number,
-    default: 3
+    default: 3,
   },
   mainClass: {
     type: String,
-    default: ''
+    default: '',
   },
 })
 </script>
 
 <script>
 export default {
-  name: "AuthSkeleton"
+  name: 'AuthSkeleton',
 }
 </script>
 
@@ -51,7 +51,8 @@ export default {
           margin: 0 auto;
         }
 
-        .el-skeleton-item-wrapper, .el-skeleton-item-wrapper-title {
+        .el-skeleton-item-wrapper,
+        .el-skeleton-item-wrapper-title {
           padding: 6px 0;
 
           .el-skeleton__item {

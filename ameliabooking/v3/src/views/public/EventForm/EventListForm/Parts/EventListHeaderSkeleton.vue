@@ -1,20 +1,9 @@
 <template>
-  <div
-    ref="amSkeletonContainer"
-    class="am-skeleton-els-header"
-  >
-    <el-skeleton
-      animated
-      class="am-skeleton-els-header-text"
-    >
+  <div ref="amSkeletonContainer" class="am-skeleton-els-header">
+    <el-skeleton animated class="am-skeleton-els-header-text">
       <template #template>
-        <div
-          class="am-skeleton-els__item"
-        >
-          <el-skeleton-item
-            class="am-skeleton-els__item-inner"
-            variant="text"
-          />
+        <div class="am-skeleton-els__item">
+          <el-skeleton-item class="am-skeleton-els__item-inner" variant="text" />
         </div>
       </template>
     </el-skeleton>
@@ -22,10 +11,7 @@
 </template>
 
 <script setup>
-import {
-  ref,
-  onMounted
-} from "vue";
+import { ref, onMounted } from 'vue'
 
 // * Component reference
 let amSkeletonContainer = ref(null)
@@ -34,7 +20,7 @@ let amSkeletonContainer = ref(null)
 let containerWidth = ref(0)
 
 // * window resize listener
-window.addEventListener('resize', resize);
+window.addEventListener('resize', resize)
 
 // * resize function
 function resize() {
@@ -52,12 +38,11 @@ onMounted(() => {
 
 <script>
 export default {
-  name: "EventListheaderSkeleton"
+  name: 'EventListheaderSkeleton',
 }
 </script>
 
 <style lang="scss">
-
 .amelia-v2-booking #amelia-container {
   // am - amelia
   // els - event list
@@ -83,5 +68,4 @@ export default {
     }
   }
 }
-
 </style>

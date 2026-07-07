@@ -1,12 +1,14 @@
-function useAmount (entity, coupon, entityTax, subTotal, includedTaxInTotal) {
+function useAmount(entity, coupon, entityTax, subTotal, includedTaxInTotal) {
   let excludedTax = entityTax ? entityTax.excluded : false
 
   let discount = 0
 
   if (coupon && coupon.limit) {
-    discount = entityTax && !excludedTax
-      ? usePercentageAmount(useTaxedAmount(subTotal, entityTax), coupon.discount) + coupon.deduction
-      : usePercentageAmount(subTotal, coupon.discount) + coupon.deduction
+    discount =
+      entityTax && !excludedTax
+        ? usePercentageAmount(useTaxedAmount(subTotal, entityTax), coupon.discount) +
+          coupon.deduction
+        : usePercentageAmount(subTotal, coupon.discount) + coupon.deduction
 
     if (discount >= subTotal) {
       discount = subTotal
@@ -39,23 +41,23 @@ function useAmount (entity, coupon, entityTax, subTotal, includedTaxInTotal) {
   }
 }
 
-function getAllColumn (type) {
+function getAllColumn(type) {
   switch (type) {
-    case ('service'):
+    case 'service':
       return 'allServices'
 
-    case ('extra'):
+    case 'extra':
       return 'allExtras'
 
-    case ('event'):
+    case 'event':
       return 'allEvents'
 
-    case ('package'):
+    case 'package':
       return 'allPackages'
   }
 }
 
-function useTaxVisibility (store, id, type) {
+function useTaxVisibility(store, id, type) {
   let allColumn = getAllColumn(type)
 
   let amSettings = store.getters['getSettings']
@@ -69,41 +71,46 @@ function useTaxVisibility (store, id, type) {
   return (tax && tax[allColumn]) || !!tax?.[`${type}List`].length
 }
 
-function useEntityTax (store, entityId, entityType) {
+function useEntityTax(store, entityId, entityType) {
   let allColumn = getAllColumn(entityType)
 
-  let tax = store.getters[entityType !== 'event' ? 'entities/getTaxes' : 'eventEntities/getTaxes'].find(
-    t => t[allColumn] || t[entityType + 'List'].find(s => s.id === entityId)
-  )
+  let tax = store.getters[
+    entityType !== 'event' ? 'entities/getTaxes' : 'eventEntities/getTaxes'
+  ].find((t) => t[allColumn] || t[entityType + 'List'].find((s) => s.id === entityId))
 
-  return tax && typeof tax !== 'undefined' && ('status' in tax ? tax.status === 'visible' : true) ? tax : null
+  return tax && typeof tax !== 'undefined' && ('status' in tax ? tax.status === 'visible' : true)
+    ? tax
+    : null
 }
 
-function useTaxAmount (tax, amount) {
+function useTaxAmount(tax, amount) {
   switch (tax.type) {
-    case ('percentage'):
+    case 'percentage':
       return usePercentageAmount(amount, tax.amount)
-    case ('fixed'):
+    case 'fixed':
       return amount > 0 ? tax.amount : 0
   }
 }
 
-function useTaxedAmount (value, tax) {
+function useTaxedAmount(value, tax) {
   switch (tax.type) {
-    case ('percentage'):
+    case 'percentage':
       return value / (1 + tax.amount / 100)
-    case ('fixed'):
+    case 'fixed':
       return value - tax.amount
   }
 }
 
-function useDepositAmount (totalAmount, entity) {
+function useDepositAmount(totalAmount, entity) {
   let depositAmount = 0
 
   if (entity.depositPayment !== 'disabled') {
     switch (entity.depositPayment) {
-      case ('fixed'):
-        depositAmount = (entity.depositPerPerson && entity.aggregatedPrice && entity.persons ? entity.persons : 1) * entity.deposit
+      case 'fixed':
+        depositAmount =
+          (entity.depositPerPerson && entity.aggregatedPrice && entity.persons
+            ? entity.persons
+            : 1) * entity.deposit
 
         break
 
@@ -117,11 +124,11 @@ function useDepositAmount (totalAmount, entity) {
   return useRoundAmount(totalAmount > depositAmount ? depositAmount : 0)
 }
 
-function usePercentageAmount (amount, percentage) {
-  return amount * percentage / 100
+function usePercentageAmount(amount, percentage) {
+  return (amount * percentage) / 100
 }
 
-function useRoundAmount (amount) {
+function useRoundAmount(amount) {
   return Math.round(amount * 100) / 100
 }
 

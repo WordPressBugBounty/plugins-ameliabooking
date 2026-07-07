@@ -20,12 +20,7 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  inject,
-  computed,
-  onMounted,
-} from 'vue'
+import { ref, inject, computed, onMounted } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -67,8 +62,7 @@ function setFormData(field, id) {
 
         return value ? value : ''
       },
-      set: (value) =>
-        store.commit('attendee/setCustomFields', {id: id, value: value}),
+      set: (value) => store.commit('attendee/setCustomFields', { id: id, value: value }),
     })
   }
 }
@@ -90,12 +84,14 @@ function setFormConstruction(field, id) {
   }
 
   if (field.type === 'checkbox' || field.type === 'radio') {
-    cfFormConstruction.value[id].props.options = cfFormConstruction.value[id].props.options.map((option) => {
-      return {
-        ...option,
-        value: option.label,
-      }
-    })
+    cfFormConstruction.value[id].props.options = cfFormConstruction.value[id].props.options.map(
+      (option) => {
+        return {
+          ...option,
+          value: option.label,
+        }
+      },
+    )
   }
 
   if (field.type === 'text-area') {
@@ -112,7 +108,7 @@ function setFormConstruction(field, id) {
         btnLabel: amLabels.value.upload_file_here,
         isUpload: false,
         bookingId: bookingId,
-        source: 'cabinet-provider'
+        source: 'cabinet-provider',
       },
     }
   }
@@ -180,7 +176,7 @@ defineExpose({
         $count: 100;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }

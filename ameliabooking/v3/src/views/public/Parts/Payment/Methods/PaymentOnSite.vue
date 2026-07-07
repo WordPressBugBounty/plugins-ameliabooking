@@ -20,17 +20,12 @@
 
 <script setup>
 // * Import from Vue
-import {
-  inject,
-  watchEffect,
-  ref,
-  computed, onMounted
-} from "vue";
+import { inject, watchEffect, ref, computed, onMounted } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
-import { VueRecaptcha } from "vue-recaptcha";
+import { VueRecaptcha } from 'vue-recaptcha'
 
 import {
   useBookingData,
@@ -38,17 +33,17 @@ import {
   useCreateBookingSuccess,
   useCreateBookingError,
   getErrorMessage,
-} from "../../../../../assets/js/public/booking.js";
+} from '../../../../../assets/js/public/booking.js'
 
 let props = defineProps({
   instantBooking: {
     type: Boolean,
-    default: false
+    default: false,
   },
   showRecaptcha: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 })
 
 const store = useStore()
@@ -65,34 +60,31 @@ const shortcodeData = inject('shortcodeData')
  * Navigation *
  *************/
 
-const {
-  nextStep,
-  footerButtonReset,
-  footerButtonClicked
-} = inject('changingStepsFunctions', {
+const { nextStep, footerButtonReset, footerButtonClicked } = inject('changingStepsFunctions', {
   nextStep: () => {},
   footerButtonReset: () => {},
   footerButtonClicked: {
-    value: false
-  }
+    value: false,
+  },
 })
 
 defineExpose({
-  continueWithBooking
+  continueWithBooking,
 })
 
-
-watchEffect(() => {
-  if (footerButtonClicked.value && !props.instantBooking) {
-    if (!store.getters['coupon/getCouponValidated']) {
-      footerButtonReset()
-      emits('payment-error', amLabels.coupon_mandatory)
-    } else {
-      continueWithBooking()
+watchEffect(
+  () => {
+    if (footerButtonClicked.value && !props.instantBooking) {
+      if (!store.getters['coupon/getCouponValidated']) {
+        footerButtonReset()
+        emits('payment-error', amLabels.coupon_mandatory)
+      } else {
+        continueWithBooking()
+      }
     }
-  }
-},{flush: 'post'})
-
+  },
+  { flush: 'post' },
+)
 
 /*************
  * Recaptcha *
@@ -104,27 +96,19 @@ let recaptchaValid = ref(false)
 
 let recaptchaResponse = ref(null)
 
-function onRecaptchaExpired () {
+function onRecaptchaExpired() {
   recaptchaValid.value = false
 
   emits('payment-error', amLabels.recaptcha_error)
 }
 
-function onRecaptchaVerify (response) {
+function onRecaptchaVerify(response) {
   recaptchaValid.value = true
 
   recaptchaResponse.value = response
 
   if (settings.value.general.googleRecaptcha.invisible) {
-    onSiteBooking(
-      useBookingData(
-        store,
-        null,
-        false,
-        {},
-        recaptchaResponse.value
-      )
-    )
+    onSiteBooking(useBookingData(store, null, false, {}, recaptchaResponse.value))
 
     return false
   }
@@ -134,8 +118,13 @@ function onRecaptchaVerify (response) {
  * Payment *
  **********/
 
-function onSiteBooking (bookingData) {
-  if (settings.value.general.googleRecaptcha.enabled && props.showRecaptcha && !settings.value.general.googleRecaptcha.invisible && !recaptchaValid.value) {
+function onSiteBooking(bookingData) {
+  if (
+    settings.value.general.googleRecaptcha.enabled &&
+    props.showRecaptcha &&
+    !settings.value.general.googleRecaptcha.invisible &&
+    !recaptchaValid.value
+  ) {
     emits('payment-error', amLabels.recaptcha_error)
 
     return false
@@ -144,39 +133,33 @@ function onSiteBooking (bookingData) {
   useCreateBooking(
     store,
     bookingData,
-    response => {
+    (response) => {
       useCreateBookingSuccess(store, response, () => {
         nextStep()
       })
     },
-    error => {
+    (error) => {
       console.log(error)
 
-      useCreateBookingError(
-        store,
-        error.response.data,
-        () => {
-          if (settings.value.general.googleRecaptcha.enabled && props.showRecaptcha && settings.value.general.googleRecaptcha.invisible) {
-            recaptchaRef.value.reset()
-          }
-
-          emits('payment-error', getErrorMessage())
+      useCreateBookingError(store, error.response.data, () => {
+        if (
+          settings.value.general.googleRecaptcha.enabled &&
+          props.showRecaptcha &&
+          settings.value.general.googleRecaptcha.invisible
+        ) {
+          recaptchaRef.value.reset()
         }
-      )
-    }
+
+        emits('payment-error', getErrorMessage())
+      })
+    },
   )
 }
 
-function continueWithBooking () {
+function continueWithBooking() {
   footerButtonReset()
 
-  let bookingData = useBookingData(
-    store,
-    null,
-    false,
-    {},
-    recaptchaResponse.value
-  )
+  let bookingData = useBookingData(store, null, false, {}, recaptchaResponse.value)
 
   store.commit('setLoading', true)
 
@@ -197,7 +180,7 @@ function continueWithBooking () {
 
 <script>
 export default {
-  name: 'PaymentOnSite'
+  name: 'PaymentOnSite',
 }
 </script>
 

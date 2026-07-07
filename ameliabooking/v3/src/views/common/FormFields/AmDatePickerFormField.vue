@@ -17,7 +17,11 @@
       :week-starts-from-day="props.weekStartsFromDay"
       :input-placeholder="props.placeholder"
       :refresh-value="props.refreshValue"
-      @selected-date="(dateString) => { selectedDatePickerValue(dateString) }"
+      @selected-date="
+        (dateString) => {
+          selectedDatePickerValue(dateString)
+        }
+      "
       @clear-date="clearDate"
     />
   </el-form-item>
@@ -28,52 +32,48 @@
 import AmDatePickerFull from '../../_components/date-picker-full/AmDatePickerFull.vue'
 
 // * Import from Vue
-import {
-  computed,
-  ref,
-  toRefs
-} from "vue";
+import { computed, ref, toRefs } from 'vue'
 
 // * Moment
-import moment from "moment";
+import moment from 'moment'
 
 // * Form Item Props
 let props = defineProps({
   modelValue: {
     type: [String, Array, Object, Number],
-    required: true
+    required: true,
   },
   itemName: {
     type: String,
-    required: true
+    required: true,
   },
   label: {
-    type: String
+    type: String,
   },
   labelPosition: {
     type: String,
-    default: 'top'
+    default: 'top',
   },
   weekStartsFromDay: {
     type: [String, Number],
-    default: 1
+    default: 1,
   },
   placeholder: {
     type: String,
-    default: ''
+    default: '',
   },
   clearable: {
     type: Boolean,
-    default: false
+    default: false,
   },
   readonly: {
     type: Boolean,
-    default: true
+    default: true,
   },
   refreshValue: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 // * Define Emits
@@ -85,27 +85,27 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 // * Form Item Reference
 let formFieldRef = ref(null)
 
 defineExpose({
-  formFieldRef
+  formFieldRef,
 })
 
-function selectedDatePickerValue (dateString) {
+function selectedDatePickerValue(dateString) {
   emits('update:modelValue', moment(dateString, 'YYYY-MM-DD').toDate())
 }
 
-function clearDate () {
+function clearDate() {
   emits('update:modelValue', '')
 }
 </script>
 
 <script>
 export default {
-  name: "DatePickerFormField"
+  name: 'DatePickerFormField',
 }
 </script>

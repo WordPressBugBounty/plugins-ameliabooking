@@ -19,11 +19,7 @@
       <template #step-list>
         <div class="am-fs-sb__step-wrapper" tabindex="0">
           <template v-if="stepsArray[stepIndex] !== congratulationsStep">
-            <div
-              v-for="step in sidebarSteps"
-              :key="step.label"
-              class="am-fs-sb__step"
-            >
+            <div v-for="step in sidebarSteps" :key="step.label" class="am-fs-sb__step">
               <div class="am-fs-sb__step-inner">
                 <div class="am-fs-sb__step-icon">
                   <span :class="`am-icon-${step.icon}`"></span>
@@ -63,8 +59,7 @@
                 class="am-fs-sb__step-selection__wrapper"
                 :class="{
                   'am-fs-sb__step-selection-packages':
-                    step.key === packageAppointmentsStep.key &&
-                    step.stepSelectedData.length > 3,
+                    step.key === packageAppointmentsStep.key && step.stepSelectedData.length > 3,
                 }"
               >
                 <p
@@ -72,9 +67,7 @@
                   :key="itemSelected.position"
                   class="am-fs-sb__step-selection"
                 >
-                  <span
-                    v-if="step.key !== packageAppointmentsStep.key || index < 3"
-                  >
+                  <span v-if="step.key !== packageAppointmentsStep.key || index < 3">
                     {{ itemSelected.value }}
                   </span>
                   <span v-else>
@@ -90,9 +83,7 @@
                 <AddToCalendar
                   v-if="!sidebarCollapsed"
                   :use-in-sb="true"
-                  :calendar-string="
-                    labelsDisplay('add_to_calendar', 'congratulations')
-                  "
+                  :calendar-string="labelsDisplay('add_to_calendar', 'congratulations')"
                 ></AddToCalendar>
               </transition>
               <div v-if="sidebarCollapsed" class="am-fs-sb__step">
@@ -118,10 +109,8 @@
         <div ref="sidebarFooterRef" class="am-fs-sb__footer">
           <div
             v-if="
-              amCustomize[pageRenderKey].sidebar.options.supportHeading
-                .visibility ||
-              amCustomize[pageRenderKey].sidebar.options.companyPhone
-                .visibility ||
+              amCustomize[pageRenderKey].sidebar.options.supportHeading.visibility ||
+              amCustomize[pageRenderKey].sidebar.options.companyPhone.visibility ||
               amCustomize[pageRenderKey].sidebar.options.companyEmail.visibility
             "
             class="am-fs-sb__support"
@@ -130,8 +119,7 @@
               <div
                 v-if="
                   !sidebarCollapsed &&
-                  amCustomize[pageRenderKey].sidebar.options.supportHeading
-                    .visibility
+                  amCustomize[pageRenderKey].sidebar.options.supportHeading.visibility
                 "
                 class="am-fs-sb__support-heading"
                 :class="sidebarCollapseItemsClass"
@@ -140,10 +128,7 @@
               </div>
             </transition>
             <div
-              v-if="
-                amCustomize[pageRenderKey].sidebar.options.companyPhone
-                  .visibility
-              "
+              v-if="amCustomize[pageRenderKey].sidebar.options.companyPhone.visibility"
               class="am-fs-sb__support-email"
             >
               <template v-if="!sidebarCollapsed"> +111222333 </template>
@@ -152,15 +137,10 @@
               </template>
             </div>
             <div
-              v-if="
-                amCustomize[pageRenderKey].sidebar.options.companyEmail
-                  .visibility
-              "
+              v-if="amCustomize[pageRenderKey].sidebar.options.companyEmail.visibility"
               class="am-fs-sb__support-email"
             >
-              <template v-if="!sidebarCollapsed">
-                support@wpamelia.com
-              </template>
+              <template v-if="!sidebarCollapsed"> support@wpamelia.com </template>
               <template v-else>
                 <span class="am-icon-email"></span>
               </template>
@@ -176,11 +156,7 @@
                 {{ labelsDisplay('collapse_menu', 'sidebar') }}
               </span>
             </Transition>
-            <span
-              :class="`am-icon-arrow-circle-${
-                sidebarCollapsed ? 'left' : 'right'
-              }`"
-            ></span>
+            <span :class="`am-icon-arrow-circle-${sidebarCollapsed ? 'left' : 'right'}`"></span>
           </div>
         </div>
       </template>
@@ -192,23 +168,17 @@
         ></MainContentHeader>
       </template>
       <template #step>
-        <component
-          :is="stepsArray[stepIndex]"
-          class="am-fs__main-content"
-        ></component>
+        <component :is="stepsArray[stepIndex]" class="am-fs__main-content"></component>
       </template>
       <template #footer>
         <MainContentFooter
           :customized-labels="globalStepLabels()"
           :primary-footer-button-type="
-            amCustomize[pageRenderKey][stepName].options.primaryFooterButton
-              .buttonType
+            amCustomize[pageRenderKey][stepName].options.primaryFooterButton.buttonType
           "
           :secondary-footer-button-type="footerButtonType"
           :second-button-show="
-            !licence.isLite
-              ? stepsArray[stepIndex] === congratulationsStep
-              : false
+            !licence.isLite ? stepsArray[stepIndex] === congratulationsStep : false
           "
           :add-to-cart-button-show="stepsArray[stepIndex] === cartStep"
           :add-to-cart-button-type="
@@ -391,10 +361,9 @@ const packageAppointmentsStep = markRaw(PackageAppointmentsStep)
 const packageAppointmentsListStep = markRaw(PackageAppointmentsListStep)
 
 let footerButtonType = computed(() => {
-  return amCustomize.value[pageRenderKey.value][stepName.value].options
-    .secondaryFooterButton
-    ? amCustomize.value[pageRenderKey.value][stepName.value].options
-        .secondaryFooterButton.buttonType
+  return amCustomize.value[pageRenderKey.value][stepName.value].options.secondaryFooterButton
+    ? amCustomize.value[pageRenderKey.value][stepName.value].options.secondaryFooterButton
+        .buttonType
     : 'text'
 })
 
@@ -412,16 +381,10 @@ let serviceFlow = computed(() => {
       if (item.id === 'ServiceStep') values.push(serviceStep)
       if (
         item.id === 'EmployeeStep' &&
-        (licence.isStarter ||
-          licence.isBasic ||
-          licence.isPro ||
-          licence.isDeveloper)
+        (licence.isStarter || licence.isBasic || licence.isPro || licence.isDeveloper)
       )
         values.push(employeeStep)
-      if (
-        item.id === 'LocationStep' &&
-        (licence.isBasic || licence.isPro || licence.isDeveloper)
-      )
+      if (item.id === 'LocationStep' && (licence.isBasic || licence.isPro || licence.isDeveloper))
         values.push(locationStep)
     })
   }
@@ -495,22 +458,20 @@ function sidebarDataCollector(data) {
   // Determines are selected data already exists
   if (
     sidebarSteps.value[stepIndex.value].stepSelectedData.filter(
-      (item) => item.reference === data.reference
+      (item) => item.reference === data.reference,
     ).length
   ) {
-    sidebarSteps.value[stepIndex.value].stepSelectedData.forEach(
-      (item, index, array) => {
-        // Handles changing value of existing data
-        if (item.reference === data.reference && data.value) {
-          item.value = data.value
-        }
-
-        // Removes un-selected form data from sidebar array
-        if (item.reference === data.reference && !data.value) {
-          array.splice(index, 1)
-        }
+    sidebarSteps.value[stepIndex.value].stepSelectedData.forEach((item, index, array) => {
+      // Handles changing value of existing data
+      if (item.reference === data.reference && data.value) {
+        item.value = data.value
       }
-    )
+
+      // Removes un-selected form data from sidebar array
+      if (item.reference === data.reference && !data.value) {
+        array.splice(index, 1)
+      }
+    })
   } else {
     // Handles the selection of new data
     sidebarSteps.value[stepIndex.value].stepSelectedData.push(data)
@@ -528,8 +489,7 @@ function sidebarDataCollector(data) {
 function sidebarDataCreator() {
   stepsArray.value.forEach((item, index) => {
     if ('key' in item && item.key !== 'congratulations') {
-      let stepLabels =
-        amCustomize.value[pageRenderKey.value][item.key].translations
+      let stepLabels = amCustomize.value[pageRenderKey.value][item.key].translations
       let labelKey = item.sidebarData.label
       let heading =
         stepLabels && stepLabels[labelKey]
@@ -563,17 +523,13 @@ watchEffect(() => {
     sidebarSteps.value.forEach((item) => {
       if (
         amCustomize.value[pageRenderKey.value][item.key].translations &&
-        amCustomize.value[pageRenderKey.value][item.key].translations[
-          item.labelKey
-        ] &&
-        amCustomize.value[pageRenderKey.value][item.key].translations[
-          item.labelKey
-        ][langKey.value]
+        amCustomize.value[pageRenderKey.value][item.key].translations[item.labelKey] &&
+        amCustomize.value[pageRenderKey.value][item.key].translations[item.labelKey][langKey.value]
       ) {
         item.label =
-          amCustomize.value[pageRenderKey.value][item.key].translations[
-            item.labelKey
-          ][langKey.value]
+          amCustomize.value[pageRenderKey.value][item.key].translations[item.labelKey][
+            langKey.value
+          ]
       } else {
         item.label = amLabels[item.labelKey]
       }
@@ -650,17 +606,14 @@ onBeforeMount(() => {
 
 function globalStepLabels() {
   let stepLabels = {}
-  let customizedLabels =
-    amCustomize.value[pageRenderKey.value][stepName.value].translations
+  let customizedLabels = amCustomize.value[pageRenderKey.value][stepName.value].translations
   if (customizedLabels && Object.keys(customizedLabels)) {
-    Object.keys(
-      amCustomize.value[pageRenderKey.value][stepName.value].translations
-    ).forEach((label) => {
-      stepLabels[label] =
-        amCustomize.value[pageRenderKey.value][stepName.value].translations[
-          label
-        ][langKey.value]
-    })
+    Object.keys(amCustomize.value[pageRenderKey.value][stepName.value].translations).forEach(
+      (label) => {
+        stepLabels[label] =
+          amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
+      },
+    )
   } else {
     stepLabels = {}
   }
@@ -672,12 +625,8 @@ function dedicatedStepLabel(label, stepKey) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value][stepKey].translations &&
       amCustomize.value[pageRenderKey.value][stepKey].translations[label] &&
-      amCustomize.value[pageRenderKey.value][stepKey].translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -689,12 +638,8 @@ function labelsDisplay(label, stepKey) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value][stepKey].translations &&
       amCustomize.value[pageRenderKey.value][stepKey].translations[label] &&
-      amCustomize.value[pageRenderKey.value][stepKey].translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -708,10 +653,14 @@ let amColors = computed(() => {
     ? amCustomize.value[pageRenderKey.value].colors
     : defaultCustomizeSettings[pageRenderKey.value].colors
 
-    return { ...colors }
+  return { ...colors }
 })
 
-let borderCalculation = computed(() => containerWidth.value !== 0 && containerWidth.value > 560 ? amCustomize.value.sbsNew.sidebar.options.self.visibility || sidebarCollapsed.value : false)
+let borderCalculation = computed(() =>
+  containerWidth.value !== 0 && containerWidth.value > 560
+    ? amCustomize.value.sbsNew.sidebar.options.self.visibility || sidebarCollapsed.value
+    : false,
+)
 
 provide('amColors', amColors)
 let cssVars = computed(() => {
@@ -749,9 +698,7 @@ let cssVars = computed(() => {
         ? '592px'
         : '760px'
       : '520px',
-    '--am-brad-main': borderCalculation.value
-      ? '0 0.5rem 0.5rem 0'
-      : '0.5rem',
+    '--am-brad-main': borderCalculation.value ? '0 0.5rem 0.5rem 0' : '0.5rem',
   }
 })
 </script>

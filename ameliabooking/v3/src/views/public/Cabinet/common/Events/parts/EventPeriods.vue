@@ -65,11 +65,7 @@
           <AmTimeSelect
             v-model="item.startTime"
             :start="'00:00'"
-            :end="
-              useSecondsInTime(
-                useTimeInSeconds('24:00') - amSettings.general.timeSlotLength
-              )
-            "
+            :end="useSecondsInTime(useTimeInSeconds('24:00') - amSettings.general.timeSlotLength)"
             :min-time="null"
             :max-time="item.endTime"
             :step="useSecondsInTime(amSettings.general.timeSlotLength)"
@@ -105,15 +101,8 @@
         </el-form-item>
         <!-- /Event End Time -->
 
-        <div
-          v-if="periodsFormData.periods.length > 1"
-          class="am-capei-per__delete"
-        >
-          <AmButton
-            :size="'default'"
-            category="danger"
-            @click="removePeriod(index)"
-          >
+        <div v-if="periodsFormData.periods.length > 1" class="am-capei-per__delete">
+          <AmButton :size="'default'" category="danger" @click="removePeriod(index)">
             {{ amLabels.delete_period }}
           </AmButton>
         </div>
@@ -176,10 +165,7 @@
         <!-- /Opens Time -->
       </template>
 
-      <AmCheckbox
-        v-if="recurringEnabled"
-        v-model="periodsFormData.bookingOpensRec"
-      >
+      <AmCheckbox v-if="recurringEnabled" v-model="periodsFormData.bookingOpensRec">
         {{ amLabels.apply_to_all }}
         <el-tooltip effect="dark" placement="top">
           <template #content>
@@ -242,10 +228,7 @@
         <!-- /Closes Time -->
       </template>
 
-      <AmCheckbox
-        v-if="recurringEnabled"
-        v-model="periodsFormData.bookingClosesRec"
-      >
+      <AmCheckbox v-if="recurringEnabled" v-model="periodsFormData.bookingClosesRec">
         {{ amLabels.apply_to_all }}
         <el-tooltip effect="dark" placement="top">
           <template #content>
@@ -311,10 +294,10 @@ let localLanguage = inject('localLanguage')
 
 let minDate = ref(moment())
 
-function isInPeriod (value) {
+function isInPeriod(value) {
   let validEnds = periodsFormData.value.periods
-    .map(item => item.endDate)
-    .filter(end => end instanceof Date && !isNaN(end))
+    .map((item) => item.endDate)
+    .filter((end) => end instanceof Date && !isNaN(end))
 
   return moment(value) < minDate.value || moment(value) > moment(new Date(Math.max(...validEnds)))
 }
@@ -351,17 +334,27 @@ function addPeriod() {
   })
 }
 
-function removePeriod (index) {
-  if (store.getters['event/getId'] && periodsFormData.value.periods[index]?.id && periodsFormData.value.periods[index].id) {
+function removePeriod(index) {
+  if (
+    store.getters['event/getId'] &&
+    periodsFormData.value.periods[index]?.id &&
+    periodsFormData.value.periods[index].id
+  ) {
     periodsFormData.value.periods.forEach((period, periodIndex) => {
       if (periodIndex !== index && !period?.id) {
         periodsFormData.value.periods[periodIndex].id = periodsFormData.value.periods[index].id
-        periodsFormData.value.periods[periodIndex].eventId = periodsFormData.value.periods[index].eventId
-        periodsFormData.value.periods[periodIndex].appleCalendarEventId = periodsFormData.value.periods[index].appleCalendarEventId
-        periodsFormData.value.periods[periodIndex].googleCalendarEventId = periodsFormData.value.periods[index].googleCalendarEventId
-        periodsFormData.value.periods[periodIndex].googleMeetUrl = periodsFormData.value.periods[index].googleMeetUrl
-        periodsFormData.value.periods[periodIndex].outlookCalendarEventId = periodsFormData.value.periods[index].outlookCalendarEventId
-        periodsFormData.value.periods[periodIndex].microsoftTeamsUrl = periodsFormData.value.periods[index].microsoftTeamsUrl
+        periodsFormData.value.periods[periodIndex].eventId =
+          periodsFormData.value.periods[index].eventId
+        periodsFormData.value.periods[periodIndex].appleCalendarEventId =
+          periodsFormData.value.periods[index].appleCalendarEventId
+        periodsFormData.value.periods[periodIndex].googleCalendarEventId =
+          periodsFormData.value.periods[index].googleCalendarEventId
+        periodsFormData.value.periods[periodIndex].googleMeetUrl =
+          periodsFormData.value.periods[index].googleMeetUrl
+        periodsFormData.value.periods[periodIndex].outlookCalendarEventId =
+          periodsFormData.value.periods[index].outlookCalendarEventId
+        periodsFormData.value.periods[periodIndex].microsoftTeamsUrl =
+          periodsFormData.value.periods[index].microsoftTeamsUrl
       }
     })
   }
@@ -443,14 +436,8 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-capei-per-text': amColors.value.colorMainText,
-    '--am-c-capei-per-text-op03': useColorTransparency(
-      amColors.value.colorMainText,
-      0.03
-    ),
-    '--am-c-capei-per-inp-bgr-op03': useColorTransparency(
-      amColors.value.colorInpBgr,
-      0.03
-    ),
+    '--am-c-capei-per-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03),
+    '--am-c-capei-per-inp-bgr-op03': useColorTransparency(amColors.value.colorInpBgr, 0.03),
   }
 })
 </script>

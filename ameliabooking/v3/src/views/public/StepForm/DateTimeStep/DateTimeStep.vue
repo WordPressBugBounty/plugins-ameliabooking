@@ -2,15 +2,10 @@
   <div
     ref="dateTimeRef"
     class="am-fs-dt__calendar"
-    :class="[props.globalClass, {'am-oxvisible': (packagesVisibility)}]"
+    :class="[props.globalClass, { 'am-oxvisible': packagesVisibility }]"
   >
-    <div v-if="limitPerEmployeeError" ref="limitError" class="am-fs__payments-error" >
-      <AmAlert
-        type="error"
-        :title="limitPerEmployeeError"
-        :show-icon="true"
-        :closable="false"
-      >
+    <div v-if="limitPerEmployeeError" ref="limitError" class="am-fs__payments-error">
+      <AmAlert type="error" :title="limitPerEmployeeError" :show-icon="true" :closable="false">
       </AmAlert>
     </div>
 
@@ -47,10 +42,10 @@
     >
       <div class="am-fs-dt__rec_popup">
         <p>
-          {{recurringLabels.repeat_appointment}}
+          {{ recurringLabels.repeat_appointment }}
         </p>
         <p v-if="amCustomize.recurringPopup.options.content.visibility">
-          {{recurringLabels.repeat_appointment_quest}}
+          {{ recurringLabels.repeat_appointment_quest }}
         </p>
       </div>
       <template #footer>
@@ -59,13 +54,13 @@
           :type="amCustomize.recurringPopup.options.secondaryButton.buttonType"
           @click="recurringStep(false)"
         >
-          {{recurringLabels.no}}
+          {{ recurringLabels.no }}
         </AmButton>
         <AmButton
           :type="amCustomize.recurringPopup.options.primaryButton.buttonType"
           @click="recurringStep(true)"
         >
-          {{recurringLabels.yes}}
+          {{ recurringLabels.yes }}
         </AmButton>
       </template>
     </AmSlidePopup>
@@ -74,13 +69,11 @@
     <!-- Packages Popup -->
     <PackagesPopup @continue-with-service="packagesVisibility = false"></PackagesPopup>
     <!--/ Packages Popup -->
-
   </div>
-
 </template>
 
 <script setup>
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 import {
   ref,
   provide,
@@ -90,11 +83,11 @@ import {
   watchEffect,
   reactive,
   watch,
-  nextTick
-} from "vue";
-import AmButton from "../../../_components/button/AmButton.vue";
-import AmSlidePopup from "../../../_components/slide-popup/AmSlidePopup.vue";
-import Calendar from "../../Parts/Calendar.vue";
+  nextTick,
+} from 'vue'
+import AmButton from '../../../_components/button/AmButton.vue'
+import AmSlidePopup from '../../../_components/slide-popup/AmSlidePopup.vue'
+import Calendar from '../../Parts/Calendar.vue'
 import {
   useAppointmentParams,
   useRange,
@@ -103,34 +96,31 @@ import {
   useSelectedTime,
   useDeselectedDate,
   useSlotsCallback,
-} from "../../../../assets/js/public/slots.js"
+} from '../../../../assets/js/public/slots.js'
 import { useFormattedPrice } from '../../../../assets/js/common/formatting.js'
 import {
   useFillAppointments,
   useDuration,
   usePaymentError,
   useBusySlots,
-} from "../../../../assets/js/common/appointments.js";
-import {
-  useCart,
-  useCartItem
-} from '../../../../assets/js/public/cart'
-import PackagesPopup from "../PakagesStep/parts/PackagesPopup";
-import { useCurrentUser } from "../../../../assets/js/public/user";
-import { defaultCustomizeSettings } from "../../../../assets/js/common/defaultCustomize";
-import AmAlert from "../../../_components/alert/AmAlert.vue";
-import { useScrollTo } from "../../../../assets/js/common/scrollElements";
-import { useTaxVisibility } from "../../../../assets/js/common/pricing";
+} from '../../../../assets/js/common/appointments.js'
+import { useCart, useCartItem } from '../../../../assets/js/public/cart'
+import PackagesPopup from '../PakagesStep/parts/PackagesPopup'
+import { useCurrentUser } from '../../../../assets/js/public/user'
+import { defaultCustomizeSettings } from '../../../../assets/js/common/defaultCustomize'
+import AmAlert from '../../../_components/alert/AmAlert.vue'
+import { useScrollTo } from '../../../../assets/js/common/scrollElements'
+import { useTaxVisibility } from '../../../../assets/js/common/pricing'
 
 let props = defineProps({
   globalClass: {
     type: String,
-    default: ''
+    default: '',
   },
   showCart: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 let dateTimeRef = ref(null)
@@ -188,7 +178,8 @@ let calendarDateBusynessVisibility = computed(() => {
     return amCustomize.dateTimeStep.options.calendarDateBusynessVisibility.visibility
   }
 
-  return defaultCustomizeSettings.sbsNew.dateTimeStep.options.calendarDateBusynessVisibility.visibility
+  return defaultCustomizeSettings.sbsNew.dateTimeStep.options.calendarDateBusynessVisibility
+    .visibility
 })
 
 const store = useStore()
@@ -207,11 +198,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...globalLabels})
+  let computedLabels = reactive({ ...globalLabels })
 
   if (amSettings.customizedData?.sbsNew?.dateTimeStep?.translations) {
     let customizedLabels = amSettings.customizedData.sbsNew.dateTimeStep.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -223,11 +214,15 @@ let amLabels = computed(() => {
 })
 
 let recurringLabels = computed(() => {
-  let computedLabels = reactive({...globalLabels})
+  let computedLabels = reactive({ ...globalLabels })
 
-  if (amSettings.customizedData && amSettings.customizedData.sbsNew && amSettings.customizedData.sbsNew.recurringPopup.translations) {
+  if (
+    amSettings.customizedData &&
+    amSettings.customizedData.sbsNew &&
+    amSettings.customizedData.sbsNew.recurringPopup.translations
+  ) {
     let customizedLabels = amSettings.customizedData.sbsNew.recurringPopup.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -239,17 +234,21 @@ let recurringLabels = computed(() => {
 })
 
 let date = computed(() => {
-  return cartItem.value &&
-      cartItem.value.index !== '' &&
-      cartItem.value.services[cartItem.value.serviceId].list.length &&
-      cartItem.value.services[cartItem.value.serviceId].list[cartItem.value.index].date
+  return (
+    cartItem.value &&
+    cartItem.value.index !== '' &&
+    cartItem.value.services[cartItem.value.serviceId].list.length &&
+    cartItem.value.services[cartItem.value.serviceId].list[cartItem.value.index].date
+  )
 })
 
 let time = computed(() => {
-  return cartItem.value &&
+  return (
+    cartItem.value &&
     cartItem.value.index !== '' &&
     cartItem.value.services[cartItem.value.serviceId].list.length &&
     cartItem.value.services[cartItem.value.serviceId].list[cartItem.value.index].time
+  )
 })
 
 let cart = useCart(store)
@@ -273,15 +272,15 @@ let slotsParams = computed(() => {
 let stepIndex = inject('stepIndex')
 let shortcodeData = inject('shortcodeData')
 
-let packagesOptions = computed(() => store.getters['entities/filteredPackages'](
-    store.getters['booking/getSelection']
-))
+let packagesOptions = computed(() =>
+  store.getters['entities/filteredPackages'](store.getters['booking/getSelection']),
+)
 
 let packagesVisibility = ref(
   packagesOptions.value.length > 0 &&
-  shortcodeData.value.show !== 'services' &&
-  stepIndex.value === 0 &&
-  cart.length <= 1
+    shortcodeData.value.show !== 'services' &&
+    stepIndex.value === 0 &&
+    cart.length <= 1,
 )
 provide('packagesVisibility', packagesVisibility)
 
@@ -290,7 +289,6 @@ watch(packagesVisibility, (isVisible) => {
     dateTimeRef.value.focus()
   }
 })
-
 
 /**************
  * Navigation *
@@ -301,16 +299,16 @@ const {
   footerButtonReset,
   footerBtnDisabledUpdater,
   footerButtonClicked,
-  headerButtonPreviousClicked
+  headerButtonPreviousClicked,
 } = inject('changingStepsFunctions', {
   nextStep: () => {},
   footerButtonReset: () => {},
   footerBtnDisabledUpdater: () => {},
   footerButtonClicked: {
-    value: false
+    value: false,
   },
   headerButtonPreviousClicked: {
-    value: false
+    value: false,
   },
 })
 
@@ -325,8 +323,11 @@ watchEffect(() => {
     usePaymentError(store, '')
 
     if (
-      service.recurringCycle !== 'disabled' && service.recurringCycle !== null && notLastDay.value && cart.length <= 1
-      && !store.getters['appointmentWaitingListOptions/getIsWaitingListSlot']
+      service.recurringCycle !== 'disabled' &&
+      service.recurringCycle !== null &&
+      notLastDay.value &&
+      cart.length <= 1 &&
+      !store.getters['appointmentWaitingListOptions/getIsWaitingListSlot']
     ) {
       recurringPopupVisibility.value = true
     } else {
@@ -343,14 +344,16 @@ watchEffect(() => {
 
 watchEffect(() => {
   if (limitPerEmployeeError.value && limitError.value) {
-      useScrollTo(dateTimeRef.value, limitError.value, 0, 300)
+    useScrollTo(dateTimeRef.value, limitError.value, 0, 300)
   }
 })
 
-watchEffect(() => {
-  footerBtnDisabledUpdater(!date.value || !time.value)
-}, { flush: 'post' })
-
+watchEffect(
+  () => {
+    footerBtnDisabledUpdater(!date.value || !time.value)
+  },
+  { flush: 'post' },
+)
 
 /*****************
  * Calendar Data *
@@ -388,7 +391,6 @@ provide('useSelectedTime', useSelectedTime)
 
 provide('useDeselectedDate', useDeselectedDate)
 
-
 /*********
  * Other *
  ********/
@@ -399,11 +401,11 @@ let recurringPopupVisibility = ref(false)
 let recurringPopupRef = ref(null)
 
 let { goToRecurringStep } = inject('goToRecurringStep', {
-  goToRecurringStep: () => {}
+  goToRecurringStep: () => {},
 })
 
 let { removeRecurringStep } = inject('removeRecurringStep', {
-  removeRecurringStep: () => {}
+  removeRecurringStep: () => {},
 })
 
 // * Focus management for keyboard navigation on Recurring Appointment Popup
@@ -419,9 +421,10 @@ watch(recurringPopupVisibility, async (isVisible) => {
 })
 
 let notLastDay = computed(() => {
-  if (cartItem.value &&
-      cartItem.value.index !== '' &&
-      cartItem.value.services[cartItem.value.serviceId].list.length
+  if (
+    cartItem.value &&
+    cartItem.value.index !== '' &&
+    cartItem.value.services[cartItem.value.serviceId].list.length
   ) {
     let lastDate = store.getters['booking/getMultipleAppointmentsLastDate']
     let chosenDate = store.getters['booking/getMultipleAppointmentsDate']
@@ -430,11 +433,12 @@ let notLastDay = computed(() => {
   return false
 })
 
-function recurringStep (repeat) {
+function recurringStep(repeat) {
   if (repeat) {
     goToRecurringStep()
   } else {
-    if (cartItem.value &&
+    if (
+      cartItem.value &&
       'serviceId' in cartItem.value &&
       cartItem.value.serviceId in cartItem.value.services &&
       cartItem.value.services[cartItem.value.serviceId].list.length > 1
@@ -453,7 +457,7 @@ function recurringStep (repeat) {
   }
 }
 
-function setDurationsPrices (service, durations) {
+function setDurationsPrices(service, durations) {
   if (service.customPricing.enabled === 'duration') {
     Object.keys(service.customPricing.durations).forEach((duration) => {
       if (!(duration in durations)) {
@@ -467,7 +471,7 @@ function setDurationsPrices (service, durations) {
   return durations
 }
 
-function getDurations () {
+function getDurations() {
   let durations = {}
 
   let serviceId = store.getters['booking/getServiceId']
@@ -476,38 +480,41 @@ function getDurations () {
 
   if (!employeeId && serviceId) {
     let employees = store.getters['entities/filteredEmployees'](
-      store.getters['booking/getSelection']
+      store.getters['booking/getSelection'],
     )
 
     employees.forEach((provider) => {
-      let service = provider.serviceList.find(service => service.id === serviceId)
+      let service = provider.serviceList.find((service) => service.id === serviceId)
 
       durations = setDurationsPrices(service, durations)
     })
   } else {
     let employee = store.getters['entities/getEmployee'](store.getters['booking/getEmployeeId'])
 
-    let service = employee.serviceList.find(service => service.id === serviceId)
+    let service = employee.serviceList.find((service) => service.id === serviceId)
 
     durations = setDurationsPrices(service, durations)
   }
 
   let result = []
 
-  Object.keys(durations).sort((a, b) => a - b).forEach((duration) => {
-    let min = Math.min(...durations[duration])
+  Object.keys(durations)
+    .sort((a, b) => a - b)
+    .forEach((duration) => {
+      let min = Math.min(...durations[duration])
 
-    let max = Math.max(...durations[duration])
+      let max = Math.max(...durations[duration])
 
-    result.push(
-      {
+      result.push({
         duration: parseInt(duration),
-        priceLabel: min !== max
-          ? useFormattedPrice(min) + ' - ' + useFormattedPrice(max)
-          : (min === 0 ? '' : useFormattedPrice(min))
-      }
-    )
-  })
+        priceLabel:
+          min !== max
+            ? useFormattedPrice(min) + ' - ' + useFormattedPrice(max)
+            : min === 0
+              ? ''
+              : useFormattedPrice(min),
+      })
+    })
 
   return result
 }
@@ -517,22 +524,26 @@ onMounted(() => {
     return
   }
 
-  service = store.getters['entities/getService'](
-    cartItem.value.serviceId
-  )
+  service = store.getters['entities/getService'](cartItem.value.serviceId)
 
   calendarServiceDurations.value = getDurations()
 
   let serviceDuration = store.getters['booking/getBookingDuration']
 
-  serviceDuration = serviceDuration && calendarServiceDurations.value.filter(i => i.duration === serviceDuration).length
-    ? serviceDuration : service.duration
+  serviceDuration =
+    serviceDuration &&
+    calendarServiceDurations.value.filter((i) => i.duration === serviceDuration).length
+      ? serviceDuration
+      : service.duration
 
   store.commit('booking/setBookingDuration', serviceDuration)
 
-  let extrasIds = store.getters['booking/getSelectedExtras'].map(i => i.extraId)
+  let extrasIds = store.getters['booking/getSelectedExtras'].map((i) => i.extraId)
 
-  calendarSlotDuration.value = useDuration(serviceDuration, service.extras.filter(i => extrasIds.includes(i.id)))
+  calendarSlotDuration.value = useDuration(
+    serviceDuration,
+    service.extras.filter((i) => extrasIds.includes(i.id)),
+  )
 
   calendarServiceDuration.value = serviceDuration
 
@@ -551,7 +562,8 @@ onMounted(() => {
 
   useCurrentUser(store, shortcodeData.value.hasApiCall)
 
-  if ('serviceId' in cartItem.value &&
+  if (
+    'serviceId' in cartItem.value &&
     cartItem.value.serviceId in cartItem.value.services &&
     cartItem.value.index in cartItem.value.services[cartItem.value.serviceId].list
   ) {
@@ -578,7 +590,7 @@ export default {
     stepSelectedData: [],
     finished: false,
     selected: false,
-  }
+  },
 }
 </script>
 

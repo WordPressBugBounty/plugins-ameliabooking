@@ -2,51 +2,37 @@
   <div
     ref="initItemRef"
     class="am-fs__init-item"
-    :class="[
-      { 'am--selected': props.selected },
-      { 'am--disabled': props.disabled }
-    ]"
+    :class="[{ 'am--selected': props.selected }, { 'am--disabled': props.disabled }]"
     :tabindex="props.disabled || props.keyboardSelectionDisabled ? -1 : 0"
     @click="selectItem(props.item)"
     @keydown.enter="selectItemWithKeyboard(props.item)"
   >
     <div v-if="componentWidth > 370" class="am-fs__init-item__img">
-      <img
-        :src="usePictureLoad(baseUrls, item, props.isPerson)"
-        :alt="props.itemName"
-      />
+      <img :src="usePictureLoad(baseUrls, item, props.isPerson)" :alt="props.itemName" />
     </div>
     <div
       class="am-fs__init-item__content"
-      :class="[responsiveClass, {'am-justify-center': !props.infoItems.length && !props.infoBtnVisibility && !props.packagesBtnVisibility}]"
+      :class="[
+        responsiveClass,
+        {
+          'am-justify-center':
+            !props.infoItems.length && !props.infoBtnVisibility && !props.packagesBtnVisibility,
+        },
+      ]"
     >
       <!-- Heading -->
       <div class="am-fs__init-item__heading" :class="responsiveClass">
-        <div
-          v-if="componentWidth <= 370"
-          class="am-fs__init-item__img"
-          :class="responsiveClass"
-        >
-          <img
-            :src="usePictureLoad(baseUrls, item, props.isPerson)"
-            :alt="props.itemName"
-          />
+        <div v-if="componentWidth <= 370" class="am-fs__init-item__img" :class="responsiveClass">
+          <img :src="usePictureLoad(baseUrls, item, props.isPerson)" :alt="props.itemName" />
         </div>
         <div class="am-fs__init-item__name" :class="responsiveClass">
           {{ props.itemName }}
         </div>
-        <div
-          v-if="props.priceVisibility"
-          class="am-fs__init-item__cost"
-          :class="responsiveClass"
-        >
+        <div v-if="props.priceVisibility" class="am-fs__init-item__cost" :class="responsiveClass">
           <div class="am-fs__init-item__price">
             {{ props.price }}
           </div>
-          <div
-            v-if="props.taxVisibility"
-            class="am-fs__init-item__price am-fs__init-item__tax"
-          >
+          <div v-if="props.taxVisibility" class="am-fs__init-item__price am-fs__init-item__tax">
             {{ props.taxExcluded ? `+${props.labels.total_tax_colon}` : props.labels.incl_tax }}
           </div>
         </div>
@@ -54,16 +40,13 @@
       <!-- Heading -->
 
       <!-- Info items -->
-      <div
-        v-if="props.infoItems.length"
-        class="am-fs__init-item__info"
-      >
+      <div v-if="props.infoItems.length" class="am-fs__init-item__info">
         <div
           v-for="(infoItem, index) in props.infoItems"
           :key="index"
           class="am-fs__init-item__info-inner"
         >
-          <IconComponent :icon="infoItem.icon"/>
+          <IconComponent :icon="infoItem.icon" />
           <a
             v-if="'isLink' in infoItem && infoItem.isLink"
             class="am-fs__init-item__info-name"
@@ -118,7 +101,7 @@ import { useElementSize } from '@vueuse/core'
 
 // * Composables
 import { usePictureLoad } from '../../../../assets/js/common/image'
-import { useResponsiveClass} from '../../../../assets/js/common/responsive'
+import { useResponsiveClass } from '../../../../assets/js/common/responsive'
 
 // * Components
 import IconComponent from '../../../_components/icons/IconComponent.vue'
@@ -126,64 +109,64 @@ import IconComponent from '../../../_components/icons/IconComponent.vue'
 const props = defineProps({
   item: {
     type: Object,
-    required: true
+    required: true,
   },
   itemName: {
     type: String,
-    required: true
+    required: true,
   },
   selected: {
     type: Boolean,
-    required: true
+    required: true,
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   parentWidth: {
     type: Number,
-    default: 0
+    default: 0,
   },
   isPerson: {
     type: Boolean,
-    default: false
+    default: false,
   },
   priceVisibility: {
     type: Boolean,
-    default: false
+    default: false,
   },
   price: {
     type: String,
-    default: ''
+    default: '',
   },
   taxVisibility: {
     type: Boolean,
-    default: false
+    default: false,
   },
   taxExcluded: {
     type: Boolean,
-    default: false
+    default: false,
   },
   infoItems: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   infoBtnVisibility: {
     type: Boolean,
-    default: false
+    default: false,
   },
   packagesBtnVisibility: {
     type: Boolean,
-    default: false
+    default: false,
   },
   keyboardSelectionDisabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   labels: {
     type: Object,
     required: true,
-    default: () => ({})
+    default: () => ({}),
   },
 })
 
@@ -456,4 +439,3 @@ function triggerPackagesPopup(item) {
   }
 }
 </style>
-

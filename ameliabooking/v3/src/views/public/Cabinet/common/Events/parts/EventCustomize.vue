@@ -1,42 +1,28 @@
 <template>
-  <el-form
-    ref="customizeFormRef"
-    :model="eventCustomizeForm"
-    class="am-capei-custef"
-  >
+  <el-form ref="customizeFormRef" :model="eventCustomizeForm" class="am-capei-custef">
     <div class="am-capei-custef__heading">
       {{ amLabels.event_colors }}
     </div>
 
     <AmRadioGroup v-model="colorType">
       <el-form-item class="am-capei-custef__item">
-        <AmRadio :value="1">
-          {{ amLabels.event_colors_preset }}:
-        </AmRadio>
+        <AmRadio :value="1"> {{ amLabels.event_colors_preset }}: </AmRadio>
         <div class="am-capei-custef__colors">
           <div
             v-for="color in colorPalette"
             :key="color"
             class="am-capei-custef__colors-item"
-            :class="{'am-disabled': colorType === 2}"
+            :class="{ 'am-disabled': colorType === 2 }"
             @click="store.commit('event/setColor', color)"
           >
-            <div
-              class="am-capei-custef__colors-item__inner"
-              :style="{backgroundColor: color}"
-            >
-              <span
-                v-if="color === eventCustomizeForm.color"
-                class="am-icon-check"
-              />
+            <div class="am-capei-custef__colors-item__inner" :style="{ backgroundColor: color }">
+              <span v-if="color === eventCustomizeForm.color" class="am-icon-check" />
             </div>
           </div>
         </div>
       </el-form-item>
       <el-form-item class="am-capei-custef__item">
-        <AmRadio :value="2">
-          {{ amLabels.event_colors_custom }}:
-        </AmRadio>
+        <AmRadio :value="2"> {{ amLabels.event_colors_custom }}: </AmRadio>
         <el-color-picker
           v-model="eventCustomizeForm.color"
           :disabled="colorType === 1"
@@ -44,10 +30,7 @@
         />
       </el-form-item>
       <el-form-item class="am-capei-custef__item">
-        <AmCheckbox
-          v-model="eventCustomizeForm.show"
-          :label="amLabels.event_show_on_site"
-        />
+        <AmCheckbox v-model="eventCustomizeForm.show" :label="amLabels.event_show_on_site" />
       </el-form-item>
     </AmRadioGroup>
   </el-form>
@@ -55,12 +38,7 @@
 
 <script setup>
 // * Import form Vue
-import {
-  ref,
-  computed,
-  inject,
-  onMounted
-} from 'vue'
+import { ref, computed, inject, onMounted } from 'vue'
 
 // * Import store
 import { useStore } from 'vuex'
@@ -91,7 +69,7 @@ let colorPalette = ref([
   '#26CC2B',
   '#FD7E35',
   '#E38587',
-  '#774DFB'
+  '#774DFB',
 ])
 
 // * Form data
@@ -113,7 +91,8 @@ let eventCustomizeForm = ref({
 // * Lifecycle Hooks
 onMounted(() => {
   let selectedColor = store.getters['event/getColor']
-  let colorTypeRecognition = colorPalette.value.filter((color) => color === selectedColor).length > 0
+  let colorTypeRecognition =
+    colorPalette.value.filter((color) => color === selectedColor).length > 0
   if (colorTypeRecognition) {
     colorType.value = 1
   } else {

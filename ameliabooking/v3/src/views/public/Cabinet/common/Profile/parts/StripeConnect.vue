@@ -11,29 +11,19 @@
     trigger="click"
   >
     <template #reference>
-      <AmButton
-        @click="clickItem"
-      >
-        {{ amLabels.stripe_connect }} {{ '(' + (stripeProvider.email ? stripeProvider.email : stripeProvider.id) + ')' }}
+      <AmButton @click="clickItem">
+        {{ amLabels.stripe_connect }}
+        {{ '(' + (stripeProvider.email ? stripeProvider.email : stripeProvider.id) + ')' }}
       </AmButton>
     </template>
-    <div
-      v-click-outside="close"
-      class="am-cc__edit"
-    >
-      <div
-        class="am-cc__edit-item"
-        @click="stripePreview()"
-      >
+    <div v-click-outside="close" class="am-cc__edit">
+      <div class="am-cc__edit-item" @click="stripePreview()">
         <span class="am-cc__edit-text">
           {{ amLabels.stripe_preview }}
         </span>
       </div>
 
-      <div
-        class="am-cc__edit-item"
-        @click="stripeDisconnect()"
-      >
+      <div class="am-cc__edit-item" @click="stripeDisconnect()">
         <span class="am-cc__edit-text">
           {{ amLabels.disconnect }}
         </span>
@@ -52,29 +42,19 @@
     trigger="click"
   >
     <template #reference>
-      <AmButton
-        @click="clickItem"
-      >
-        {{ amLabels.stripe_connect }} {{ '(' + (stripeProvider.email ? stripeProvider.email : stripeProvider.id) + ')' }}
+      <AmButton @click="clickItem">
+        {{ amLabels.stripe_connect }}
+        {{ '(' + (stripeProvider.email ? stripeProvider.email : stripeProvider.id) + ')' }}
       </AmButton>
     </template>
-    <div
-      v-click-outside="close"
-      class="am-cc__edit"
-    >
-      <div
-        class="am-cc__edit-item"
-        @click="stripeConnect(stripeProvider.type)"
-      >
+    <div v-click-outside="close" class="am-cc__edit">
+      <div class="am-cc__edit-item" @click="stripeConnect(stripeProvider.type)">
         <span class="am-cc__edit-text">
           {{ amLabels.stripe_onboard }}
         </span>
       </div>
 
-      <div
-        class="am-cc__edit-item"
-        @click="stripeDisconnect()"
-      >
+      <div class="am-cc__edit-item" @click="stripeDisconnect()">
         <span class="am-cc__edit-text">
           {{ amLabels.disconnect }}
         </span>
@@ -93,29 +73,18 @@
     trigger="click"
   >
     <template #reference>
-      <AmButton
-        @click="clickItem"
-      >
+      <AmButton @click="clickItem">
         {{ amLabels.stripe_connect }}
       </AmButton>
     </template>
-    <div
-      v-click-outside="close"
-      class="am-cc__edit"
-    >
-      <div
-        class="am-cc__edit-item"
-        @click="stripeConnect('standard')"
-      >
+    <div v-click-outside="close" class="am-cc__edit">
+      <div class="am-cc__edit-item" @click="stripeConnect('standard')">
         <span class="am-cc__edit-text">
           {{ amLabels.stripe_account_standard }}
         </span>
       </div>
 
-      <div
-        class="am-cc__edit-item"
-        @click="stripeConnect('express')"
-      >
+      <div class="am-cc__edit-item" @click="stripeConnect('express')">
         <span class="am-cc__edit-text">
           {{ amLabels.stripe_account_express }}
         </span>
@@ -126,29 +95,24 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  inject,
-  computed,
-} from "vue";
+import { ref, inject, computed } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import from Libraries
-import { ClickOutside as vClickOutside } from "element-plus";
+import { ClickOutside as vClickOutside } from 'element-plus'
 
 // * Dedicated components
-import AmButton from "../../../../../_components/button/AmButton.vue";
-
+import AmButton from '../../../../../_components/button/AmButton.vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 import {
   useStripeConnect,
   useStripeDisconnect,
   useStripePreview,
-} from "../../../../../../assets/js/common/integrationStripe";
+} from '../../../../../../assets/js/common/integrationStripe'
 
 // * Store
 let store = useStore()
@@ -160,32 +124,32 @@ let stripeProvider = computed(() => store.getters['auth/getStripeProvider'])
 
 let stripeConnectPopVisible = ref(false)
 
-function clickItem (e) {
+function clickItem(e) {
   e.stopPropagation()
 
-  stripeConnectPopVisible.value= !stripeConnectPopVisible.value
+  stripeConnectPopVisible.value = !stripeConnectPopVisible.value
 }
 
-function stripeConnect (accountType) {
+function stripeConnect(accountType) {
   useStripeConnect(store, accountType)
 
   close()
 }
 
-function stripePreview () {
+function stripePreview() {
   useStripePreview(store)
 
   close()
 }
 
-function stripeDisconnect () {
+function stripeDisconnect() {
   useStripeDisconnect(store)
 
   close()
 }
 
-function close () {
-  stripeConnectPopVisible.value= false
+function close() {
+  stripeConnectPopVisible.value = false
 }
 
 /*************
@@ -212,7 +176,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: 'StripeConnect'
+  name: 'StripeConnect',
 }
 </script>
 

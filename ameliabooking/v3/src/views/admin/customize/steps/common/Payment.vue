@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="am-payments"
-    :class="[props.componentClass, props.globalClass]"
-    :style="cssVars"
-  >
+  <div class="am-payments" :class="[props.componentClass, props.globalClass]" :style="cssVars">
     <div class="am-payments__heading">
       <span class="am-payments__heading-main">
         {{ props.customizedLabels.summary }}
@@ -22,7 +18,7 @@
       v-model="paymentDeposit"
       class="am-payments__full"
       :label="props.customizedLabels.full_amount_consent"
-      :class="{'am-payments__full-checked': paymentDeposit}"
+      :class="{ 'am-payments__full-checked': paymentDeposit }"
     >
     </AmCheckbox>
 
@@ -32,22 +28,30 @@
       </p>
       <div
         class="am-payments__method-cards"
-        :class="{'am-payments__method-cards-wrap': wrapCards}"
+        :class="{ 'am-payments__method-cards-wrap': wrapCards }"
       >
         <div
           v-for="(available, gateway) in availablePayments"
           :key="gateway"
           class="am-payments__method-button"
-          :class="[{'am-payments__method-button__selected' : paymentGateway === gateway }, responsiveClass, `am-payments__method-button-${paymentList.length}`]"
+          :class="[
+            { 'am-payments__method-button__selected': paymentGateway === gateway },
+            responsiveClass,
+            `am-payments__method-button-${paymentList.length}`,
+          ]"
           @click="setPaymentGateway(gateway)"
         >
           <img
             :src="`${baseUrls.wpAmeliaPluginURL}/v3/src/assets/img/icons/${gateway === 'mollie' ? 'stripe' : gateway}.svg`"
             :class="gateway"
-          >
+          />
           <div>
             <p>
-              {{ gateway === 'onSite' ? props.customizedLabels.on_site : paymentsBtnText.filter(item => item.key === gateway)[0].text }}
+              {{
+                gateway === 'onSite'
+                  ? props.customizedLabels.on_site
+                  : paymentsBtnText.filter((item) => item.key === gateway)[0].text
+              }}
             </p>
           </div>
         </div>
@@ -63,40 +67,36 @@
 
 <script setup>
 // * _components
-import AmCheckbox from "../../../../_components/checkbox/AmCheckbox.vue";
+import AmCheckbox from '../../../../_components/checkbox/AmCheckbox.vue'
 
 // * Parts
-import EventPaymentInfo from "../Events/common/EventPayment/parts/EventPaymentInfo.vue";
+import EventPaymentInfo from '../Events/common/EventPayment/parts/EventPaymentInfo.vue'
 
 // * Import from Vue
-import {
-  computed,
-  inject,
-  markRaw, ref
-} from "vue";
+import { computed, inject, markRaw, ref } from 'vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
-import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
 
 // * Components Properties
 let props = defineProps({
   globalClass: {
     type: String,
-    default: ''
+    default: '',
   },
   componentClass: {
     type: String,
-    default: ''
+    default: '',
   },
   selectedItem: {
     type: Object,
-    required: true
+    required: true,
   },
   customizedLabels: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 // * Base Urls
@@ -122,12 +122,12 @@ const availablePayments = {
   onSite: true,
   stripe: true,
   payPal: true,
-  razorpay: true
+  razorpay: true,
 }
 
 let paymentList = computed(() => {
   let arr = []
-  Object.keys(availablePayments).forEach(a => {
+  Object.keys(availablePayments).forEach((a) => {
     if (availablePayments[a]) {
       arr.push(a)
     }
@@ -138,18 +138,18 @@ let paymentList = computed(() => {
 
 let paymentGateway = ref('onSite')
 
-function setPaymentGateway (gateway) {
+function setPaymentGateway(gateway) {
   paymentGateway.value = gateway
 }
 
 let paymentsBtnText = []
 
-Object.keys(availablePayments).forEach(key => {
-  paymentsBtnText.push({key, text:getPaymentBtnString(key)})
+Object.keys(availablePayments).forEach((key) => {
+  paymentsBtnText.push({ key, text: getPaymentBtnString(key) })
 })
 
-function getPaymentBtnString (key) {
-  switch(key) {
+function getPaymentBtnString(key) {
+  switch (key) {
     case 'onSite':
       return props.customizedLabels['on_site']
     case 'payPal':
@@ -183,7 +183,9 @@ let responsiveClass = computed(() => {
   return useResponsiveClass(cWidth.value)
 })
 
-let wrapCards = computed(() => cWidth.value < 450 || (cWidth.value > 560 && (cWidth.value - 240 < 450)))
+let wrapCards = computed(
+  () => cWidth.value < 450 || (cWidth.value > 560 && cWidth.value - 240 < 450),
+)
 
 // * Fonts
 let amFonts = inject('amFonts')
@@ -193,7 +195,7 @@ let amColors = inject('amColors')
 
 // * Css Variables
 const cssVars = computed(() => {
-  return  {
+  return {
     '--am-font-family': amFonts.value.fontFamily,
     '--am-c-ps-price-bgr': useColorTransparency(amColors.value.colorBtnPrim, 0.05),
     '--am-c-ps-total-price': amColors.value.colorBtnPrim,
@@ -206,20 +208,19 @@ const cssVars = computed(() => {
     '--am-c-ps-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
     '--am-c-ps-primary': amColors.value.colorPrimary,
     '--am-c-ps-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
-    '--am-c-ps-primary-op06': useColorTransparency(amColors.value.colorPrimary, 0.06)
+    '--am-c-ps-primary-op06': useColorTransparency(amColors.value.colorPrimary, 0.06),
   }
 })
 </script>
 
 <style lang="scss">
 #amelia-app-backend-new #amelia-container {
-
   .am-payments {
     & > * {
       $count: 6;
       @for $i from 0 through $count {
         &:nth-child(#{$i + 1}) {
-          animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+          animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
           animation-fill-mode: both;
         }
       }
@@ -232,11 +233,12 @@ const cssVars = computed(() => {
       line-height: 1.6;
       color: var(--am-c-ps-text);
       margin-bottom: 4px;
-      animation: 600ms cubic-bezier(.45,1,.4,1.2) #{100}ms am-animation-slide-up;
+      animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{100}ms am-animation-slide-up;
       animation-fill-mode: both;
     }
 
-    &__price {}
+    &__price {
+    }
 
     &__sentence {
       display: flex;
@@ -288,7 +290,7 @@ const cssVars = computed(() => {
     }
 
     &__error {
-      animation: 600ms cubic-bezier(.45,1,.4,1.2) #{100}ms am-animation-slide-up;
+      animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{100}ms am-animation-slide-up;
       animation-fill-mode: both;
       margin-bottom: 10px;
     }

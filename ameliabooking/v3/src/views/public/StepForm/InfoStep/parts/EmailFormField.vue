@@ -12,26 +12,21 @@
         {{ amLabels.email_colon }}
       </span>
     </template>
-    <AmInput
-      v-model="model"
-      name="email"
-      type="email"
-      :placeholder="amLabels.enter_email"
-    />
+    <AmInput v-model="model" name="email" type="email" :placeholder="amLabels.enter_email" />
   </el-form-item>
   <!-- /Email -->
 </template>
 
 <script setup>
-import AmInput from'../../../../_components/input/AmInput.vue'
+import AmInput from '../../../../_components/input/AmInput.vue'
 
-import {inject, ref, computed} from "vue";
+import { inject, ref, computed } from 'vue'
 
 let props = defineProps({
   modelValue: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 })
 
 let emits = defineEmits(['update:modelValue'])
@@ -40,7 +35,7 @@ let model = computed({
   get: () => props.modelValue,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 let primeFieldRef = ref(null)
@@ -52,12 +47,12 @@ let amLabels = inject('amLabels')
 let amCustomize = inject('amCustomize')
 
 defineExpose({
-  primeFieldRef
+  primeFieldRef,
 })
 </script>
 
 <script>
 export default {
-  name: "EmailFormField"
+  name: 'EmailFormField',
 }
 </script>

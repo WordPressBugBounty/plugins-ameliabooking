@@ -1,29 +1,16 @@
 <template>
-  <div
-    class="am-capai-pay__content"
-    :class="props.responsiveClass"
-    :style="cssVars"
-  >
-    <template
-      v-for="(payment, paymentIndex) in payments"
-      :key="paymentIndex"
-    >
-      <div
-        class="am-capai-pay__row"
-        :class="props.responsiveClass"
-      >
+  <div class="am-capai-pay__content" :class="props.responsiveClass" :style="cssVars">
+    <template v-for="(payment, paymentIndex) in payments" :key="paymentIndex">
+      <div class="am-capai-pay__row" :class="props.responsiveClass">
         <div class="am-capai-pay__row-label">
           {{ amLabels.date }}
         </div>
         <div class="am-capai-pay__row-value">
-          {{getFrontedFormattedDate(payment.dateTime.split(' ')[0]) }}
+          {{ getFrontedFormattedDate(payment.dateTime.split(' ')[0]) }}
         </div>
       </div>
 
-      <div
-        class="am-capai-pay__row"
-        :class="props.responsiveClass"
-      >
+      <div class="am-capai-pay__row" :class="props.responsiveClass">
         <div class="am-capai-pay__row-label">
           {{ amLabels.payment_method }}
         </div>
@@ -32,17 +19,14 @@
         </div>
       </div>
 
-      <div
-        class="am-capai-pay__row"
-        :class="props.responsiveClass"
-      >
+      <div class="am-capai-pay__row" :class="props.responsiveClass">
         <div class="am-capai-pay__row-label">
           {{ amLabels.status }}
         </div>
         <div class="am-capai-pay__row-value">
           <span
             :class="usePaymentStatusIcon(payment.status, amColors).icon"
-            :style="{color: usePaymentStatusIcon(payment.status, amColors).color}"
+            :style="{ color: usePaymentStatusIcon(payment.status, amColors).color }"
           />
           {{ usePaymentStatusName(payment.status) }}
         </div>
@@ -51,107 +35,69 @@
 
     <div v-if="props.pageWidth > 480" class="am-divider" />
 
-    <div
-      class="am-capai-pay__row"
-      :class="props.responsiveClass"
-    >
+    <div class="am-capai-pay__row" :class="props.responsiveClass">
       <div class="am-capai-pay__row-label">
         {{ amLabels.price }}
       </div>
-      <div
-        class="am-capai-pay__row-value"
-        :class="{'am-pl-34': props.pageWidth > 480}"
-      >
+      <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': props.pageWidth > 480 }">
         {{ useFormattedPrice(paymentData.price) }}
       </div>
     </div>
 
-    <div
-      class="am-capai-pay__row"
-      :class="props.responsiveClass"
-    >
+    <div class="am-capai-pay__row" :class="props.responsiveClass">
       <div class="am-capai-pay__row-label">
         {{ amLabels.discount_amount }}
       </div>
-      <div
-        class="am-capai-pay__row-value"
-        :class="{'am-pl-34': props.pageWidth > 480}"
-      >
+      <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': props.pageWidth > 480 }">
         {{ useFormattedPrice(paymentData.discount) }}
       </div>
     </div>
 
-    <div
-      class="am-capai-pay__row"
-      :class="props.responsiveClass"
-    >
+    <div class="am-capai-pay__row" :class="props.responsiveClass">
       <div class="am-capai-pay__row-label">
         {{ amLabels.tax }}
       </div>
-      <div
-        class="am-capai-pay__row-value"
-        :class="{'am-pl-34': props.pageWidth > 480}"
-      >
+      <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': props.pageWidth > 480 }">
         {{ useFormattedPrice(paymentData.tax) }}
       </div>
     </div>
 
-    <div
-      class="am-capai-pay__row"
-      :class="props.responsiveClass"
-    >
+    <div class="am-capai-pay__row" :class="props.responsiveClass">
       <div class="am-capai-pay__row-label">
         {{ amLabels.paid_deposit }}
       </div>
-      <div
-        class="am-capai-pay__row-value"
-        :class="{'am-pl-34': props.pageWidth > 480}"
-      >
+      <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': props.pageWidth > 480 }">
         {{ useFormattedPrice(paymentData.deposit) }}
       </div>
     </div>
 
-    <div
-      class="am-capai-pay__row"
-      :class="props.responsiveClass"
-    >
+    <div class="am-capai-pay__row" :class="props.responsiveClass">
       <div class="am-capai-pay__row-label">
         {{ amLabels.paid_remaining_amount }}
       </div>
-      <div
-        class="am-capai-pay__row-value"
-        :class="{'am-pl-34': props.pageWidth > 480}"
-      >
+      <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': props.pageWidth > 480 }">
         {{ useFormattedPrice(paymentData.paid - paymentData.deposit) }}
       </div>
     </div>
 
-    <div
-      class="am-capai-pay__row"
-      :class="props.responsiveClass"
-    >
+    <div class="am-capai-pay__row" :class="props.responsiveClass">
       <div class="am-capai-pay__row-label">
         {{ amLabels.due }}
       </div>
-      <div
-        class="am-capai-pay__row-value"
-        :class="{'am-pl-34': props.pageWidth > 480}"
-      >
-        {{ useFormattedPrice(paymentData.paid - (paymentData.price - paymentData.discount + paymentData.tax)) }}
+      <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': props.pageWidth > 480 }">
+        {{
+          useFormattedPrice(
+            paymentData.paid - (paymentData.price - paymentData.discount + paymentData.tax),
+          )
+        }}
       </div>
     </div>
 
-    <div
-      class="am-capai-pay__row"
-      :class="props.responsiveClass"
-    >
+    <div class="am-capai-pay__row" :class="props.responsiveClass">
       <div class="am-capai-pay__row-label">
         {{ amLabels.total }}
       </div>
-      <div
-        class="am-capai-pay__row-value"
-        :class="{'am-pl-34': props.pageWidth > 480}"
-      >
+      <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': props.pageWidth > 480 }">
         {{ useFormattedPrice(paymentData.price - paymentData.discount + paymentData.tax) }}
       </div>
     </div>
@@ -160,24 +106,21 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject,
-} from "vue";
+import { computed, inject } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import Composables
 import {
   usePaymentGatewayName,
   usePaymentStatusName,
   usePaymentStatusIcon,
-} from "../../../../../../assets/js/admin/payment";
-import { getFrontedFormattedDate } from "../../../../../../assets/js/common/date";
-import { useFormattedPrice } from "../../../../../../assets/js/common/formatting";
-import { useAttendeeAmount } from "../../../../../../assets/js/common/attendees";
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation";
+} from '../../../../../../assets/js/admin/payment'
+import { getFrontedFormattedDate } from '../../../../../../assets/js/common/date'
+import { useFormattedPrice } from '../../../../../../assets/js/common/formatting'
+import { useAttendeeAmount } from '../../../../../../assets/js/common/attendees'
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 
 // * Component Props
 const props = defineProps({
@@ -199,16 +142,12 @@ let amLabels = inject('amLabels')
 
 let payments = computed(() => store.getters['attendee/getPayments'])
 
-let paymentData = computed(() => Object.assign(
-  useAttendeeAmount(store),
-  {
+let paymentData = computed(() =>
+  Object.assign(useAttendeeAmount(store), {
     deposit: payments.value[0].amount,
-    paid: payments.value.reduce(
-      (sum, payment) => sum + payment.amount,
-      0
-    ),
-  }
-))
+    paid: payments.value.reduce((sum, payment) => sum + payment.amount, 0),
+  }),
+)
 
 // * Colors
 let amColors = inject('amColors')
@@ -216,7 +155,7 @@ let amColors = inject('amColors')
 // * CSS Variables
 let cssVars = computed(() => {
   return {
-    '--am-c-pay-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03)
+    '--am-c-pay-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03),
   }
 })
 </script>
@@ -267,7 +206,8 @@ let cssVars = computed(() => {
         }
       }
 
-      &-label, &-value {
+      &-label,
+      &-value {
         width: calc(50% - 12px);
         display: flex;
         align-items: center;
@@ -290,7 +230,6 @@ let cssVars = computed(() => {
         }
       }
     }
-
   }
 }
 

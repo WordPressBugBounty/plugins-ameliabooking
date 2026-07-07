@@ -7,21 +7,15 @@
     :aria-labelledby="ticketsHeadingId"
   >
     <div class="am-elt__header">
-      <div  class="am-elt__header-left">
-        <p
-          :id="ticketsHeadingId"
-          class="am-elt__heading"
-        >
+      <div class="am-elt__header-left">
+        <p :id="ticketsHeadingId" class="am-elt__heading">
           {{ amLabels.event_tickets }}
         </p>
         <p>
           {{ amLabels.event_tickets_context }}
         </p>
       </div>
-      <div
-        v-if="capacity"
-        class="am-elt__header-right"
-      >
+      <div v-if="capacity" class="am-elt__header-right">
         <p class="am-elt__heading">
           {{ amLabels.event_ticket_types }}
         </p>
@@ -29,14 +23,13 @@
           <span>
             {{ capacity - totalSold - ticketGlobalSpots }}
           </span>
-          {{ `${(capacity - totalSold - ticketGlobalSpots) === 1 ? amLabels.event_ticket_left : amLabels.event_tickets_left}` }}
+          {{
+            `${capacity - totalSold - ticketGlobalSpots === 1 ? amLabels.event_ticket_left : amLabels.event_tickets_left}`
+          }}
         </p>
       </div>
     </div>
-    <template
-      v-for="ticket in tickets"
-      :key="ticket.id"
-    >
+    <template v-for="ticket in tickets" :key="ticket.id">
       <EventTicket
         :ticket="ticket"
         :capacity="capacity ? capacity - totalSold : null"
@@ -53,17 +46,10 @@
 import EventTicket from '../../Common/Parts/EventTicket.vue'
 
 // * Import from Vue
-import {
-  ref,
-  reactive,
-  computed,
-  inject,
-  watchEffect,
-  onMounted
-} from "vue";
+import { ref, reactive, computed, inject, watchEffect, onMounted } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Composables
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation.js'
@@ -72,29 +58,27 @@ import useAction from '../../../../../assets/js/public/actions'
 let props = defineProps({
   globalClass: {
     type: String,
-    default: ''
+    default: '',
   },
   inDialog: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const uid = Math.random().toString(36).slice(2, 8)
 const ticketsHeadingId = `am-elt-heading-${uid}`
 
 // * Step functionality
-let {
-  nextStep,
-  footerButtonClicked,
-  footerBtnDisabled,
-  footerButtonReset
-} = inject('changingStepsFunctions', {
-  nextStep: () => {},
-  footerButtonReset: () => {},
-  footerButtonClicked: ref(false),
-  footerBtnDisabled: ref(false)
-})
+let { nextStep, footerButtonClicked, footerBtnDisabled, footerButtonReset } = inject(
+  'changingStepsFunctions',
+  {
+    nextStep: () => {},
+    footerButtonReset: () => {},
+    footerButtonClicked: ref(false),
+    footerBtnDisabled: ref(false),
+  },
+)
 
 // * Define store
 const store = useStore()
@@ -116,11 +100,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   if (customizedDataForm.value.tickets.translations) {
     let customizedLabels = customizedDataForm.value.tickets.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -141,11 +125,16 @@ let tickets = computed(() => {
     let override
     useAction(
       store,
-      { tickets: sorted, setTickets: arr => { if (Array.isArray(arr)) override = arr } },
+      {
+        tickets: sorted,
+        setTickets: (arr) => {
+          if (Array.isArray(arr)) override = arr
+        },
+      },
       'EventTickets',
       'event',
       null,
-      null
+      null,
     )
     return Array.isArray(override) ? override : sorted
   }
@@ -161,7 +150,7 @@ let extraPeople = computed(() => store.getters['tickets/getMaxExtraPeople'])
 let ticketGlobalSpots = computed(() => store.getters['tickets/getEventGlobalSpots'])
 let totalSold = computed(() => {
   let spots = 0
-  tickets.value.forEach(t => {
+  tickets.value.forEach((t) => {
     spots += isWaitingList.value ? t.waiting : t.sold
   })
 
@@ -203,16 +192,15 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: "EventTickets",
+  name: 'EventTickets',
   key: 'tickets',
-  label: 'event_select_tickets'
+  label: 'event_select_tickets',
 }
 </script>
 
 <style lang="scss">
 .amelia-v2-booking #amelia-container {
   .am-elt {
-
     & > * {
       font-family: var(--am-font-family), sans-serif;
       box-sizing: border-box;
@@ -221,7 +209,7 @@ export default {
       $count: 100;
       @for $i from 0 through $count {
         &:nth-child(#{$i + 1}) {
-          animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+          animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
           animation-fill-mode: both;
         }
       }
@@ -237,7 +225,7 @@ export default {
           font-size: 13px;
           font-weight: 400;
           line-height: 18px;
-          color: var(--am-c-elt-text-op80);/* $shade-700 */
+          color: var(--am-c-elt-text-op80); /* $shade-700 */
           margin: 0;
         }
 
@@ -260,7 +248,7 @@ export default {
           font-weight: 400;
           font-size: 15px;
           line-height: 1.6;
-          color: var(--am-c-elt-text-op90);/* $shade-800 */
+          color: var(--am-c-elt-text-op90); /* $shade-800 */
 
           span {
             font-weight: 700;

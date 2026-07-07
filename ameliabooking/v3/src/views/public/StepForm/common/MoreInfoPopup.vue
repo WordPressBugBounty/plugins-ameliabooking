@@ -14,25 +14,16 @@
     </template>
     <div class="am-fs-iipu__content">
       <div class="am-fs-iipu__heading">
-        <img
-          :src="usePictureLoad(baseUrls, props.item, props.isPerson)"
-          :alt="props.itemName"
-        />
+        <img :src="usePictureLoad(baseUrls, props.item, props.isPerson)" :alt="props.itemName" />
         <div class="am-fs-iipu__name">{{ props.itemName }}</div>
       </div>
 
       <!-- EMPLOYEES -->
-      <div
-        v-if="props.employeesData.length"
-        class="am-fs-iipu__employee"
-      >
+      <div v-if="props.employeesData.length" class="am-fs-iipu__employee">
         <div class="am-fs-iipu__employee-label">
           {{ `${props.employeesHeading}:` }}
         </div>
-        <div
-          class="am-fs-iipu__employee-wrapper"
-          @click="expandEmployeesData()"
-        >
+        <div class="am-fs-iipu__employee-wrapper" @click="expandEmployeesData()">
           <img
             v-for="employee in props.employeesData"
             :key="employee.id"
@@ -41,10 +32,7 @@
             :alt="`${employee.firstName} ${employee.lastName}`"
           />
         </div>
-        <div
-          v-if="expandEmployees"
-          class="am-fs-iipu__employee-display__wrapper"
-        >
+        <div v-if="expandEmployees" class="am-fs-iipu__employee-display__wrapper">
           <div
             v-for="employee in props.employeesData"
             :key="employee.id"
@@ -68,10 +56,7 @@
       <!-- /EMPLOYEES -->
 
       <!-- LOCATIONS -->
-      <div
-        v-if="props.locationsData.length"
-        class="am-fs-iipu__location"
-      >
+      <div v-if="props.locationsData.length" class="am-fs-iipu__location">
         <div class="am-fs-iipu__location-label">
           {{ `${props.locationsHeading}:` }}
         </div>
@@ -81,10 +66,10 @@
             :key="location.id"
             class="am-fs-iipu__location-inner"
           >
-          <span>
-            {{ location.name }}
-            <template v-if="location.address"> - </template>
-          </span>
+            <span>
+              {{ location.name }}
+              <template v-if="location.address"> - </template>
+            </span>
             <a
               v-if="location.address"
               class="am-cc__data-text"
@@ -126,7 +111,7 @@ import AmSlidePopup from '../../../_components/slide-popup/AmSlidePopup.vue'
 const props = defineProps({
   visibility: {
     type: Boolean,
-    default: false
+    default: false,
   },
   heading: {
     type: String,
@@ -200,15 +185,12 @@ const amColors = inject(
     colorBtnPrimText: '#FFFFFF',
     colorBtnSec: '#1A2C37',
     colorBtnSecText: '#FFFFFF',
-  })
+  }),
 )
 
 let cssVars = computed(() => {
   return {
-    '--am-c-primary-op05': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.05
-    ),
+    '--am-c-primary-op05': useColorTransparency(amColors.value.colorPrimary, 0.05),
   }
 })
 </script>

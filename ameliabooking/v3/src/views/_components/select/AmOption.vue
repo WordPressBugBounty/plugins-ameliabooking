@@ -7,7 +7,7 @@
     :label="label"
     :disabled="disabled"
   >
-    <slot/>
+    <slot />
   </el-option>
   <!-- /Option -->
 </template>
@@ -18,19 +18,19 @@ import { ref } from 'vue'
 /**
  * Component Props
  */
-defineProps ({
+defineProps({
   value: {
     type: [String, Number, Object],
-    required: true
+    required: true,
   },
   label: {
     type: [String, Number],
-    default: ''
+    default: '',
   },
   disabled: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 /**
@@ -53,7 +53,7 @@ const amSelectOption = ref(null)
   --am-ff-select-option: var(--am-font-family);
   background-color: var(--am-c-option-bgr) !important;
 
-  &.el-select__popper.el-popper[role=tooltip] {
+  &.el-select__popper.el-popper[role='tooltip'] {
     background-color: transparent;
     border-color: var(--am-c-option-border);
     overflow: hidden;
@@ -88,7 +88,8 @@ const amSelectOption = ref(null)
       margin: var(--am-mar-select-option) !important;
       white-space: normal;
 
-      &:hover, &.is-hovering {
+      &:hover,
+      &.is-hovering {
         --am-c-select-option-bgr: var(--am-c-option-hover);
       }
 

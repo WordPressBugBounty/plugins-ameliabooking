@@ -76,12 +76,7 @@ let amFonts = computed(() => {
 })
 provide('amFonts', amFonts)
 
-let stepsArray = ref([
-  categoriesList,
-  categoryItemsList,
-  categoryService,
-  categoryPackage,
-])
+let stepsArray = ref([categoriesList, categoryItemsList, categoryService, categoryPackage])
 
 // * Component reference
 let ameliaContainer = ref(null)
@@ -171,7 +166,7 @@ let amColors = computed(() => {
     ? amCustomize.value[pageRenderKey.value].colors
     : defaultCustomizeSettings[pageRenderKey.value].colors
 
-    return { ...colors }
+  return { ...colors }
 })
 
 provide('amColors', amColors)
@@ -210,9 +205,7 @@ let cssVars = computed(() => {
     // css properties
     // -mw- max width
     // -brad- border-radius
-    '--am-mw-main': amCustomize.value.sbsNew.sidebar.options.self.visibility
-      ? '760px'
-      : '520px',
+    '--am-mw-main': amCustomize.value.sbsNew.sidebar.options.self.visibility ? '760px' : '520px',
     '--am-brad-main': amCustomize.value.sbsNew.sidebar.options.self.visibility
       ? '0 0.5rem 0.5rem 0'
       : '0.5rem',

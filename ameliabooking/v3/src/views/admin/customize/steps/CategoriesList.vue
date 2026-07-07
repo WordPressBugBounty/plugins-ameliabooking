@@ -19,10 +19,7 @@
               :style="
                 customizeOptions.cardColor.visibility
                   ? {
-                      backgroundColor: useColorTransparency(
-                        category.color,
-                        0.1
-                      ),
+                      backgroundColor: useColorTransparency(category.color, 0.1),
                     }
                   : {}
               "
@@ -35,9 +32,7 @@
                   v-if="customizeOptions.services.visibility"
                   class="am-fcl__item-segments__item"
                 >
-                  <span
-                    class="am-fcl__item-segments__item-icon am-icon-service"
-                  ></span>
+                  <span class="am-fcl__item-segments__item-icon am-icon-service"></span>
                   <span class="am-fcl__item-segments__item-count">
                     {{ category.serviceList.length }}
                   </span>
@@ -46,9 +41,7 @@
                   v-if="features.packages && customizeOptions.packages.visibility"
                   class="am-fcl__item-segments__item"
                 >
-                  <span
-                    class="am-fcl__item-segments__item-icon am-icon-shipment"
-                  ></span>
+                  <span class="am-fcl__item-segments__item-icon am-icon-shipment"></span>
                   <span class="am-fcl__item-segments__item-count">
                     {{ category.packageList.length }}
                   </span>
@@ -75,7 +68,7 @@
 
 <script setup>
 // * Import from Vue
-import {inject, ref, computed, onMounted, provide} from 'vue'
+import { inject, ref, computed, onMounted, provide } from 'vue'
 
 // * Composables
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation.js'
@@ -186,9 +179,7 @@ let amLabels = inject('labels')
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
     let translations = amCustomize.value.cbf.categoriesList.translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -200,10 +191,7 @@ let amColors = inject('amColors')
 
 let cssVars = computed(() => {
   return {
-    '--am-c-fcl-card-text-op80': useColorTransparency(
-      amColors.value.colorCardText,
-      0.8
-    ),
+    '--am-c-fcl-card-text-op80': useColorTransparency(amColors.value.colorCardText, 0.8),
   }
 })
 </script>

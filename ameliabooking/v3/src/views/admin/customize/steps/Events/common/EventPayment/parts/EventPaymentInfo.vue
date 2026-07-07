@@ -68,25 +68,22 @@
           </template>
         </AmCollapseItem>
       </AmCollapse>
-      <div
-        v-else
-        class="am-pei__segment-wrapper"
-      >
+      <div v-else class="am-pei__segment-wrapper">
         <div class="am-pei__segment">
           <div class="am-pei__segment-info">
-          <span>
-            {{ labelsDisplay('summary_event') }}
-          </span>
+            <span>
+              {{ labelsDisplay('summary_event') }}
+            </span>
           </div>
           <div class="am-pei__segment-open">
             <div class="am-pei__segment-sub">
               <p>
-                {{ `${props.selectedItem.name} (${useFormattedPrice(10)})`}}
+                {{ `${props.selectedItem.name} (${useFormattedPrice(10)})` }}
                 <span>
                   {{ `x 1 ${labelsDisplay('summary_person')}` }}
                 </span>
               </p>
-              <p class="am-amount"> {{ useFormattedPrice(10) }} </p>
+              <p class="am-amount">{{ useFormattedPrice(10) }}</p>
             </div>
           </div>
         </div>
@@ -107,11 +104,7 @@
             <template #label>
               <span>{{ `${labelsDisplay('coupon')}:` }}</span>
             </template>
-            <AmInput
-              v-model="couponFormData.coupon"
-              size="small"
-              :prefix-icon="IconCoupon"
-            />
+            <AmInput v-model="couponFormData.coupon" size="small" :prefix-icon="IconCoupon" />
           </el-form-item>
           <AmButton size="small">
             {{ labelsDisplay('add_coupon_btn') }}
@@ -119,10 +112,7 @@
         </div>
       </el-form>
 
-      <div
-        v-if="features.coupons"
-        class="am-pei__info-discount am-pei__info-discount-green"
-      >
+      <div v-if="features.coupons" class="am-pei__info-discount am-pei__info-discount-green">
         <span>
           {{ `${props.customizedLabels.discount_amount_colon}:` }}
         </span>
@@ -131,10 +121,7 @@
         </span>
       </div>
 
-      <div
-        v-if="taxVisibility && amSettings.payments.taxes.excluded"
-        class="am-pei__info-tax"
-      >
+      <div v-if="taxVisibility && amSettings.payments.taxes.excluded" class="am-pei__info-tax">
         <span>
           {{ `${props.customizedLabels.total_tax_colon}:` }}
         </span>
@@ -157,11 +144,7 @@
         <div class="am-pei__info-total">
           <span> {{ props.customizedLabels.paying_now }}: </span>
           <span class="am-amount">
-            {{
-              paymentDeposit
-                ? useFormattedPrice(totalAmount)
-                : useFormattedPrice(depositAmount)
-            }}
+            {{ paymentDeposit ? useFormattedPrice(totalAmount) : useFormattedPrice(depositAmount) }}
           </span>
         </div>
 
@@ -276,9 +259,7 @@ let rules = computed(() => {
   return {
     coupon: [
       {
-        required:
-          amCustomize.value[pageRenderKey.value].payment.options.coupon
-            .required,
+        required: amCustomize.value[pageRenderKey.value].payment.options.coupon.required,
         trigger: ['blur', 'change'],
       },
     ],
@@ -319,9 +300,7 @@ function onCollapseOpen(el) {
 }
 
 let taxVisibility = computed(() => {
-  return (
-    amSettings.payments?.taxes?.enabled && !licence.isStarter && !licence.isLite
-  )
+  return amSettings.payments?.taxes?.enabled && !licence.isStarter && !licence.isLite
 })
 
 // * Customize Object
@@ -341,11 +320,8 @@ let amLabels = inject('labels')
 
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    let translations =
-      amCustomize.value[pageRenderKey.value][stepName.value].translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    let translations = amCustomize.value[pageRenderKey.value][stepName.value].translations
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -364,22 +340,10 @@ let cssVars = computed(() => {
   return {
     '--am-font-family': amFonts.value.fontFamily,
     '--am-c-pay-text': amColors.value.colorMainText,
-    '--am-c-pay-text-op70': useColorTransparency(
-      amColors.value.colorMainText,
-      0.7
-    ),
-    '--am-c-pay-text-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
-    '--am-c-pay-text-op30': useColorTransparency(
-      amColors.value.colorMainText,
-      0.3
-    ),
-    '--am-c-pay-text-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
+    '--am-c-pay-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
+    '--am-c-pay-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-pay-text-op30': useColorTransparency(amColors.value.colorMainText, 0.3),
+    '--am-c-pay-text-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
     '--am-c-pay-border': useColorTransparency(amColors.value.colorInpBorder),
     '--am-c-pay-success': amColors.value.colorSuccess,
     '--am-c-pay-primary': amColors.value.colorPrimary,

@@ -35,7 +35,7 @@
 </template>
 
 <script setup>
-import {computed} from "vue";
+import { computed } from 'vue'
 
 /**
  * Component Props
@@ -43,11 +43,11 @@ import {computed} from "vue";
 const props = defineProps({
   customClass: {
     type: String,
-    default: ''
+    default: '',
   },
   iconOnly: {
     type: Boolean,
-    default: false
+    default: false,
   },
   // default / medium / small / mini / micro
   btnSize: {
@@ -55,69 +55,69 @@ const props = defineProps({
     default: 'default',
     validator(value) {
       return ['default', 'medium', 'small', 'mini', 'micro'].includes(value)
-    }
+    },
   },
   size: {
     // large / default / medium /small
     type: String,
-    default: 'default'
+    default: 'default',
   },
   type: {
     // primary / success / warning / danger / info / text
     type: String,
-    default: ''
+    default: '',
   },
   nativeType: {
     // button / submit / reset
     type: String,
-    default: 'button'
+    default: 'button',
   },
   plain: {
     type: Boolean,
-    default: false
+    default: false,
   },
   round: {
     type: Boolean,
-    default: false
+    default: false,
   },
   circle: {
     type: Boolean,
-    default: false
+    default: false,
   },
   loading: {
     type: Boolean,
-    default: false
+    default: false,
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   autofocus: {
     type: Boolean,
-    default: false
+    default: false,
   },
   autoInsertSpace: {
-    type: Boolean
+    type: Boolean,
   },
   icon: {
     type: [String, Object, Function],
-    default: ''
+    default: '',
   },
   loadingIcon: {
     type: [String, Object, Function],
-    default: ''
+    default: '',
   },
   prefixIcon: {
     type: [String, Object, Function],
-    default: ''
+    default: '',
   },
   suffixIcon: {
     type: [String, Object, Function],
-    default: ''
-  }
+    default: '',
+  },
 })
 
-const isIconClass = computed(() => props.iconOnly ? `am-adv-button__${props.btnSize}-icon` : '')
+const isIconClass = computed(() => (props.iconOnly ? `am-adv-button__${props.btnSize}-icon` : ''))
 
 /**
  * Component Emits
@@ -136,26 +136,27 @@ const handleClick = (event) => {
 $button: 'am-adv-button__';
 
 // Colors
-$defaultButtonBackgroundColor: #FFFFFF;
-$defaultButtonTextColor: #1A2C37;
-$defaultButtonBorderColor: #E0E2E4;
-
+$defaultButtonBackgroundColor: #ffffff;
+$defaultButtonTextColor: #1a2c37;
+$defaultButtonBorderColor: #e0e2e4;
 
 #amelia-container {
   .am-adv-button {
-
     // Button sizes
     // Default
-    &__default {}
+    &__default {
+    }
     // Medium
-    &__medium {}
+    &__medium {
+    }
     // Mini
-    &__mini {}
+    &__mini {
+    }
     // Micro
     &__micro {
       height: 24px;
       font-size: 16px;
-      transition: all .3s ease-in-out;
+      transition: all 0.3s ease-in-out;
 
       // Only contains icon
       &-icon {

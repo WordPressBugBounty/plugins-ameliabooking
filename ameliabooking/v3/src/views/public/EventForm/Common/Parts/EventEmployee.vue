@@ -1,29 +1,26 @@
 <template>
-  <div
-    v-if="Object.keys(props.employee).length"
-    class="am-eli__organizer"
-  >
+  <div v-if="Object.keys(props.employee).length" class="am-eli__organizer">
     <el-divider v-if="props.divider" />
     <div class="am-eli__organizer-item">
       <span
         class="am-eli__organizer-img"
-        :style="{backgroundImage: `url(${props.employee.pictureThumbPath})`}"
+        :style="{ backgroundImage: `url(${props.employee.pictureThumbPath})` }"
       >
         {{ employeeInitials }}
       </span>
       <div class="am-eli__organizer-inner">
         <p class="am-eli__organizer-name">
-          {{`${props.employee.firstName} ${props.employee.lastName}`}}
+          {{ `${props.employee.firstName} ${props.employee.lastName}` }}
           <span
             v-if="props.employee.badge"
-            :style="{background: props.employee.badge.color}"
+            :style="{ background: props.employee.badge.color }"
             class="am-eli__organizer-badge"
           >
             {{ props.employee.badge.content }}
           </span>
         </p>
         <p v-if="props.rank" class="am-eli__organizer-rank">
-          {{props.rank}}
+          {{ props.rank }}
         </p>
       </div>
     </div>
@@ -38,36 +35,34 @@
 </template>
 
 <script setup>
-import DescriptionItem from "./DescriptionItem.vue";
+import DescriptionItem from './DescriptionItem.vue'
 
-import {
-  computed
-} from "vue";
+import { computed } from 'vue'
 
 let props = defineProps({
   customizedLabels: {
     type: Object,
-    required: true
+    required: true,
   },
   employee: {
     type: Object,
-    required: true
+    required: true,
   },
   rank: {
     type: String,
-    default: ''
+    default: '',
   },
   divider: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 let employeeInitials = computed(() => {
   let initials = ''
   if (props.employee && !props.employee.pictureThumbPath) {
     let fullName = `${props.employee.firstName} ${props.employee.lastName}`
-    fullName.split(' ').forEach(item => {
+    fullName.split(' ').forEach((item) => {
       initials += item.charAt(0).toUpperCase()
     })
   }
@@ -77,7 +72,7 @@ let employeeInitials = computed(() => {
 
 <script>
 export default {
-  name: "EventEmployee"
+  name: 'EventEmployee',
 }
 </script>
 
@@ -125,7 +120,7 @@ export default {
       }
 
       &-badge {
-        color: #FFF;
+        color: #fff;
         border-radius: 4px;
         padding: 0 4px;
         font-size: 13px;

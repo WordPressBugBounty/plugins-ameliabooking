@@ -1,13 +1,10 @@
-function getStickyOrFixedHeaderHeight (options = {}) {
+function getStickyOrFixedHeaderHeight(options = {}) {
   let root = options.root
   let win = options.win || window
   let edgeSlop = typeof options.edgeSlop === 'number' ? options.edgeSlop : 4
-  let headerThreshold =
-    typeof options.headerThreshold === 'number' ? options.headerThreshold : 200
+  let headerThreshold = typeof options.headerThreshold === 'number' ? options.headerThreshold : 200
   let elementsFromPointMaxDepth =
-    typeof options.elementsFromPointMaxDepth === 'number'
-      ? options.elementsFromPointMaxDepth
-      : 24
+    typeof options.elementsFromPointMaxDepth === 'number' ? options.elementsFromPointMaxDepth : 24
   let ancestorMaxDepth =
     typeof options.ancestorMaxDepth === 'number' ? options.ancestorMaxDepth : 14
 
@@ -25,7 +22,7 @@ function getStickyOrFixedHeaderHeight (options = {}) {
     body,
     doc,
     elementsFromPointMaxDepth,
-    ancestorMaxDepth
+    ancestorMaxDepth,
   )
 
   let maxBottom = 0
@@ -46,7 +43,11 @@ function getStickyOrFixedHeaderHeight (options = {}) {
       return
     }
 
-    if (style.display === 'none' || style.visibility === 'hidden' || parseFloat(style.opacity) === 0) {
+    if (
+      style.display === 'none' ||
+      style.visibility === 'hidden' ||
+      parseFloat(style.opacity) === 0
+    ) {
       return
     }
 
@@ -68,16 +69,9 @@ function getStickyOrFixedHeaderHeight (options = {}) {
   return Math.round(maxBottom)
 }
 
-function collectTopChromeCandidates (
-  body,
-  doc,
-  elementsFromPointMaxDepth,
-  ancestorMaxDepth
-) {
+function collectTopChromeCandidates(body, doc, elementsFromPointMaxDepth, ancestorMaxDepth) {
   let set = new Set()
-  let semantic = body.querySelectorAll(
-    'header, [role="banner"], .site-header, nav, #wpadminbar'
-  )
+  let semantic = body.querySelectorAll('header, [role="banner"], .site-header, nav, #wpadminbar')
 
   for (let i = 0; i < semantic.length; i++) {
     set.add(semantic[i])
@@ -116,7 +110,7 @@ function collectTopChromeCandidates (
   return set
 }
 
-function addAncestorsWithinBody (set, el, body, maxDepth) {
+function addAncestorsWithinBody(set, el, body, maxDepth) {
   let node = el
   let depth = 0
 
@@ -133,6 +127,4 @@ function addAncestorsWithinBody (set, el, body, maxDepth) {
   }
 }
 
-export {
-  getStickyOrFixedHeaderHeight,
-}
+export { getStickyOrFixedHeaderHeight }

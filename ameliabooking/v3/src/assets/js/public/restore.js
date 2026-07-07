@@ -1,19 +1,20 @@
-import { useRemoveUrlParameter } from "../common/helper.js";
+import { useRemoveUrlParameter } from '../common/helper.js'
 import {
   useAppointmentCalendarData,
   usePackageCalendarData,
   useEventCalendarData,
   useBookingError,
-  useNotify
-} from "./booking.js";
-import httpClient from "../../../plugins/axios";
-import {settings} from "../../../plugins/settings";
+  useNotify,
+} from './booking.js'
+import httpClient from '../../../plugins/axios'
+import { settings } from '../../../plugins/settings'
 
-function fixType (item, key) {
-  item[key] = (item[key] === undefined || item[key] === null || item[key] === '') ? null : parseInt(item[key])
+function fixType(item, key) {
+  item[key] =
+    item[key] === undefined || item[key] === null || item[key] === '' ? null : parseInt(item[key])
 }
 
-function fixCacheData (data) {
+function fixCacheData(data) {
   let keys = []
 
   data.request.state.attachments = []
@@ -67,46 +68,53 @@ function fixCacheData (data) {
   })
 }
 
-function useRestore (store, shortcodeData) {
-  let data = 'ameliaCache' in window && window.ameliaCache.length && window.ameliaCache[0] ?
-    JSON.parse(window.ameliaCache[0]) : null
+function useRestore(store, shortcodeData) {
+  let data =
+    'ameliaCache' in window && window.ameliaCache.length && window.ameliaCache[0]
+      ? JSON.parse(window.ameliaCache[0])
+      : null
 
   let userClickedBack = false
 
-  if (!data || (!data.status && parseInt(data.request.form.shortcode.counter) !== parseInt(shortcodeData.counter))) {
+  if (
+    !data ||
+    (!data.status &&
+      parseInt(data.request.form.shortcode.counter) !== parseInt(shortcodeData.counter))
+  ) {
     let savedData = sessionStorage.getItem('ameliaCacheData')
-    const navEntries = performance.getEntriesByType("navigation");
-    const navType = navEntries && navEntries.length > 0 ? navEntries[0].type : performance.navigation.type;
+    const navEntries = performance.getEntriesByType('navigation')
+    const navType =
+      navEntries && navEntries.length > 0 ? navEntries[0].type : performance.navigation.type
     if (savedData && JSON.parse(savedData) && (navType === 'back_forward' || navType === 2)) {
       data = JSON.parse(savedData)
       userClickedBack = true
     } else {
       if (savedData) {
-        sessionStorage.setItem("ameliaCacheData", null)
+        sessionStorage.setItem('ameliaCacheData', null)
       }
       return null
     }
   }
 
-  sessionStorage.removeItem("ameliaCacheData")
+  sessionStorage.removeItem('ameliaCacheData')
 
   try {
     window.history.replaceState(
       null,
       null,
       useRemoveUrlParameter(
-        useRemoveUrlParameter(
-          window.location.href,
-          'ameliaWcCache'
-        ),
-        'ameliaCache'
-      )
+        useRemoveUrlParameter(window.location.href, 'ameliaWcCache'),
+        'ameliaCache',
+      ),
     )
   } catch (e) {
     console.log(e)
   }
 
-  if (data.request.state.attachments && (data.request.state.attachments.length || Object.keys(data.request.state.attachments).length)) {
+  if (
+    data.request.state.attachments &&
+    (data.request.state.attachments.length || Object.keys(data.request.state.attachments).length)
+  ) {
     fixCacheData(data)
   }
 
@@ -129,39 +137,35 @@ function useRestore (store, shortcodeData) {
       store.dispatch('eventEntities/requestEvents', 'upcoming')
     } else {
       store.dispatch('eventEntities/requestEvents')
-
     }
     store.dispatch('customFields/filterEventCustomFields')
-
   } else {
-    store.state.booking = {...data.request.state }
+    store.state.booking = { ...data.request.state }
   }
 
   if (userClickedBack) {
     if ((data.paymentMethod === 'mollie' || data.paymentMethod === 'barion') && data.bookings) {
       if (data.packageCustomer) {
-        httpClient.post(
-            '/bookings/delete/remotely/' + data.packageCustomer.id,
-            {
-              skipEventHandler: true,
-              type: 'package',
-              token: data.packageCustomer.token
-            }
-        ).catch(e => {
-          console.log(e.message)
-        })
-      } else {
-        data.bookings.forEach(booking => {
-          httpClient.post(
-              '/bookings/delete/remotely/' + booking.id,
-              {
-                skipEventHandler: true,
-                type: data.type,
-                token: booking.token
-              }
-          ).catch(e => {
+        httpClient
+          .post('/bookings/delete/remotely/' + data.packageCustomer.id, {
+            skipEventHandler: true,
+            type: 'package',
+            token: data.packageCustomer.token,
+          })
+          .catch((e) => {
             console.log(e.message)
           })
+      } else {
+        data.bookings.forEach((booking) => {
+          httpClient
+            .post('/bookings/delete/remotely/' + booking.id, {
+              skipEventHandler: true,
+              type: data.type,
+              token: booking.token,
+            })
+            .catch((e) => {
+              console.log(e.message)
+            })
         })
       }
     }
@@ -176,17 +180,26 @@ function useRestore (store, shortcodeData) {
   if (settings.payments.mollie.cancelBooking && data.status === null) {
     let bookings = []
     if (data.response.type === 'package') {
-      bookings = data.response.package.map(p => p.booking)
+      bookings = data.response.package.map((p) => p.booking)
     } else {
-      bookings = [data.response.booking].concat(data.response.recurring.map(r => r.booking))
+      bookings = [data.response.booking].concat(data.response.recurring.map((r) => r.booking))
     }
 
-    bookings.forEach(booking => {
-      httpClient.get(
-          '/bookings/cancel/' + booking.id + '&token=' + booking.token + '&type=' + data.response.type + '&fromForm=' + true,
-      ).catch(e => {
-        console.log(e.message)
-      })
+    bookings.forEach((booking) => {
+      httpClient
+        .get(
+          '/bookings/cancel/' +
+            booking.id +
+            '&token=' +
+            booking.token +
+            '&type=' +
+            data.response.type +
+            '&fromForm=' +
+            true,
+        )
+        .catch((e) => {
+          console.log(e.message)
+        })
     })
 
     return {
@@ -195,8 +208,8 @@ function useRestore (store, shortcodeData) {
       sidebar: data.request.form.sidebar,
     }
   } else {
-    switch ((data.status !== null) ? data.status : 'paid') {
-      case ('canceled'):
+    switch (data.status !== null ? data.status : 'paid') {
+      case 'canceled':
         store.commit('booking/setError', window.wpAmeliaLabels['payment_canceled'])
 
         return {
@@ -205,7 +218,7 @@ function useRestore (store, shortcodeData) {
           sidebar: data.request.form.sidebar,
         }
 
-      case ('failed'):
+      case 'failed':
         store.commit('booking/setError', useBookingError(data, store))
 
         return {
@@ -214,32 +227,40 @@ function useRestore (store, shortcodeData) {
           sidebar: data.request.form.sidebar,
         }
 
-      case ('paid'):
+      case 'paid':
         switch (data.response.type) {
-          case ('appointment'):
+          case 'appointment':
             store.commit('booking/setBooked', useAppointmentCalendarData(store, data.response))
 
             break
 
-          case ('package'):
+          case 'package':
             store.commit('booking/setBooked', usePackageCalendarData(store, data.response))
 
             break
 
-          case ('event'):
+          case 'event':
             store.commit('eventBooking/setBooked', useEventCalendarData(store, data.response))
 
             break
         }
 
-
-        if (!('request' in data &&
-          'form' in data.request &&
-          'shortcode' && data.request.form &&
-          'trigger' in data.request.form.shortcode &&
-          data.request.form.shortcode.trigger
-        )) {
-          useNotify(store, data.response, () => {}, () => {})
+        if (
+          !(
+            'request' in data &&
+            'form' in data.request &&
+            'shortcode' &&
+            data.request.form &&
+            'trigger' in data.request.form.shortcode &&
+            data.request.form.shortcode.trigger
+          )
+        ) {
+          useNotify(
+            store,
+            data.response,
+            () => {},
+            () => {},
+          )
         }
 
         return {

@@ -1,6 +1,6 @@
-import httpClient from "../../../plugins/axios";
+import httpClient from '../../../plugins/axios'
 
-function useZoomUsers (store) {
+function useZoomUsers(store) {
   store.commit('auth/setZoomLoading', true)
 
   httpClient
@@ -11,10 +11,7 @@ function useZoomUsers (store) {
     })
     .then((response) => {
       if ('data' in response.data && 'users' in response.data.data) {
-        store.commit(
-          'auth/setZoomUsers',
-          response.data.data?.users ? response.data.data.users : []
-        )
+        store.commit('auth/setZoomUsers', response.data.data?.users ? response.data.data.users : [])
       }
     })
     .catch((error) => {
@@ -25,6 +22,4 @@ function useZoomUsers (store) {
     })
 }
 
-export {
-  useZoomUsers,
-}
+export { useZoomUsers }

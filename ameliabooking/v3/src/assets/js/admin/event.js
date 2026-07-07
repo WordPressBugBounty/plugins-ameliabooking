@@ -1,17 +1,14 @@
-import moment from "moment";
-import { useConvertedUtcToLocalDateTime } from "../common/date";
-import {
-  getNameTranslated,
-  getTicketTranslated
-} from "../public/translation";
-import {useAmount} from "../common/pricing";
+import moment from 'moment'
+import { useConvertedUtcToLocalDateTime } from '../common/date'
+import { getNameTranslated, getTicketTranslated } from '../public/translation'
+import { useAmount } from '../common/pricing'
 
-function useParsedEvents (events, timeZone, store) {
+function useParsedEvents(events, timeZone, store) {
   let eventsDay = {}
 
-  events.forEach(event => {
+  events.forEach((event) => {
     if (timeZone === '') {
-      event.periods.forEach(period => {
+      event.periods.forEach((period) => {
         period.periodStart = useConvertedUtcToLocalDateTime(period.periodStart)
         period.periodEnd = useConvertedUtcToLocalDateTime(period.periodEnd)
       })
@@ -20,11 +17,14 @@ function useParsedEvents (events, timeZone, store) {
     let startDate = moment(event.periods[0].periodStart, 'YYYY-MM-DD HH:mm:ss')
     let dateString = startDate.format('YYYY-MM-DD')
 
-    let availableTranslationsShort = store.getters['getSettings'].general.usedLanguages.map(
-      key => key.length > 2 ? key.slice(0, 2) : key
+    let availableTranslationsShort = store.getters['getSettings'].general.usedLanguages.map((key) =>
+      key.length > 2 ? key.slice(0, 2) : key,
     )
 
-    let useTranslations = store.getters['getSettings'].general.usedLanguages.indexOf(store.getters['getLocalLanguage']) !== -1 ||
+    let useTranslations =
+      store.getters['getSettings'].general.usedLanguages.indexOf(
+        store.getters['getLocalLanguage'],
+      ) !== -1 ||
       availableTranslationsShort.indexOf(store.getters['getLocalLanguage'].split('_')[0]) !== -1
 
     if (useTranslations) {
@@ -42,11 +42,11 @@ function useParsedEvents (events, timeZone, store) {
     if (!(dateString in eventsDay)) {
       eventsDay[dateString] = {
         date: dateString,
-        events: []
+        events: [],
       }
     }
 
-    let isWaiting = event.bookings.some(booking => booking.status === 'waiting')
+    let isWaiting = event.bookings.some((booking) => booking.status === 'waiting')
 
     if (event.full && event.status === 'approved') {
       event.status = 'full'
@@ -76,7 +76,7 @@ function useParsedEvents (events, timeZone, store) {
   return eventsDay
 }
 
-function useEventBookingsPrice (event) {
+function useEventBookingsPrice(event) {
   let price = 0
 
   event.bookings.forEach((booking) => {
@@ -136,10 +136,14 @@ function usePeriodsData(connectedPeriods) {
         endTime: endTime,
         periodStart: dateString + ' ' + startTime,
         periodEnd: dateString + ' ' + endTime,
-        zoomLink: connectedPeriods.length > 1 && period.zoomMeeting ? period.zoomMeeting.joinUrl : '',
-        lessonSpaceLink: connectedPeriods.length > 1 && period.lessonSpace ? period.lessonSpace : '',
-        googleMeetLink: connectedPeriods.length > 1 && period.googleMeetUrl ? period.googleMeetUrl : '',
-        microsoftTeamsLink: connectedPeriods.length > 1 && period.microsoftTeamsUrl ? period.microsoftTeamsUrl : '',
+        zoomLink:
+          connectedPeriods.length > 1 && period.zoomMeeting ? period.zoomMeeting.joinUrl : '',
+        lessonSpaceLink:
+          connectedPeriods.length > 1 && period.lessonSpace ? period.lessonSpace : '',
+        googleMeetLink:
+          connectedPeriods.length > 1 && period.googleMeetUrl ? period.googleMeetUrl : '',
+        microsoftTeamsLink:
+          connectedPeriods.length > 1 && period.microsoftTeamsUrl ? period.microsoftTeamsUrl : '',
       })
     })
   })
@@ -151,17 +155,22 @@ function useTicketsData(event) {
   let result = {}
 
   event.bookings.forEach((booking) => {
-    if (['approved', 'pending'].includes(booking.status) && booking.ticketsData && booking.ticketsData.length) {
+    if (
+      ['approved', 'pending'].includes(booking.status) &&
+      booking.ticketsData &&
+      booking.ticketsData.length
+    ) {
       booking.ticketsData.forEach((ticketData) => {
         if (!(ticketData.eventTicketId in result)) {
           result[ticketData.eventTicketId] = {
             persons: 0,
             price: ticketData.price,
-            name: event.customTickets.find(i => i.id === ticketData.eventTicketId).name,
+            name: event.customTickets.find((i) => i.id === ticketData.eventTicketId).name,
           }
         }
 
-        result[ticketData.eventTicketId].persons = result[ticketData.eventTicketId].persons + ticketData.persons
+        result[ticketData.eventTicketId].persons =
+          result[ticketData.eventTicketId].persons + ticketData.persons
       })
     }
   })
@@ -169,33 +178,33 @@ function useTicketsData(event) {
   return result
 }
 
-function useEventLocation (store, event) {
+function useEventLocation(store, event) {
   let locations = store.getters['entities/getLocations']
 
   if (event.locationId && locations.length) {
-    let location = locations.find(location => location.id === event.locationId)
+    let location = locations.find((location) => location.id === event.locationId)
     return typeof location !== 'undefined' ? location : null
   } else if (event.customLocation) {
     return {
       address: '',
-      name: event.customLocation
+      name: event.customLocation,
     }
   }
 
   return null
 }
 
-function useEventQrCodes (event) {
+function useEventQrCodes(event) {
   let qrCodesArr = []
 
   event.bookings.forEach((booking) => {
     if (['approved', 'pending'].includes(booking.status) && booking.qrCodes) {
       let arr = JSON.parse(booking.qrCodes)
-      arr = arr.map(qr => {
+      arr = arr.map((qr) => {
         return {
           ...qr,
           bookingId: booking.id,
-          eventId: event.id
+          eventId: event.id,
         }
       })
 
@@ -212,5 +221,5 @@ export {
   usePeriodsData,
   useTicketsData,
   useEventLocation,
-  useEventQrCodes
+  useEventQrCodes,
 }

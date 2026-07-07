@@ -13,7 +13,7 @@ export default {
   }),
 
   getters: {
-    getCoupon (state) {
+    getCoupon(state) {
       return {
         code: state.code,
         discount: state.discount,
@@ -24,25 +24,25 @@ export default {
       }
     },
 
-    getCouponValidated (state) {
-      return !state.required || (state.code !== '')
+    getCouponValidated(state) {
+      return !state.required || state.code !== ''
     },
 
-    getCode (state) {
+    getCode(state) {
       return state.code
     },
 
-    getError (state) {
+    getError(state) {
       return state.error
     },
 
-    getLoading (state) {
+    getLoading(state) {
       return state.loading
     },
   },
 
   mutations: {
-    setCoupon (state, payload) {
+    setCoupon(state, payload) {
       state.code = payload.code
       state.discount = payload.discount
       state.deduction = payload.deduction
@@ -50,25 +50,25 @@ export default {
       state.servicesIds = payload.servicesIds
     },
 
-    setCode (state, payload) {
+    setCode(state, payload) {
       state.code = payload
     },
 
-    setError (state, payload) {
+    setError(state, payload) {
       state.error = payload
     },
 
-    setLoading (state, payload) {
+    setLoading(state, payload) {
       state.loading = payload
     },
 
-    setCouponRequired (state, payload) {
+    setCouponRequired(state, payload) {
       state.required = payload
     },
   },
 
   actions: {
-    resetCoupon ({commit}) {
+    resetCoupon({ commit }) {
       commit('setCoupon', {
         code: '',
         discount: '',
@@ -76,6 +76,6 @@ export default {
         limit: '',
         servicesIds: [],
       })
-    }
-  }
+    },
+  },
 }

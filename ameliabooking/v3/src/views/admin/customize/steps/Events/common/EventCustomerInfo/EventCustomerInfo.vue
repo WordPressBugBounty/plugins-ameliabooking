@@ -9,17 +9,12 @@
         <div class="am-elfci__social-wrapper__social-buttons">
           <img
             v-if="features.googleSocialLogin"
-            :src="
-              baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/google.svg'
-            "
+            :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/google.svg'"
             height="32"
           />
           <img
             v-if="features.facebookSocialLogin"
-            :src="
-              baseUrls.wpAmeliaPluginURL +
-              '/v3/src/assets/img/icons/facebook.svg'
-            "
+            :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/facebook.svg'"
             height="32"
           />
         </div>
@@ -27,9 +22,7 @@
 
       <!-- Social Divider -->
       <div class="am-elfci__social-divider">
-        <span class="par-sm">{{
-          labelsDisplay('or_enter_details_below')
-        }}</span>
+        <span class="par-sm">{{ labelsDisplay('or_enter_details_below') }}</span>
       </div>
       <!-- /Social Divider -->
     </div>
@@ -49,25 +42,27 @@
           v-if="infoFormConstruction[item.id].visibility"
           ref="customerCollectorRef"
           v-model="infoFormData[item.id]"
-          v-model:countryPhoneIso="
-            infoFormConstruction[item.id].countryPhoneIso
-          "
+          v-model:countryPhoneIso="infoFormConstruction[item.id].countryPhoneIso"
           v-bind="infoFormConstruction[item.id].props"
-          v-on="'handlers' in infoFormConstruction[item.id] ? infoFormConstruction[item.id].handlers : {}"
+          v-on="
+            'handlers' in infoFormConstruction[item.id]
+              ? infoFormConstruction[item.id].handlers
+              : {}
+          "
         ></component>
       </template>
 
       <el-form-item
-          v-if="
-            amSettings.featuresIntegrations.mailchimp.enabled &&
-            amSettings.mailchimp.subscribeFieldVisible &&
-            amCustomize[pageRenderKey].customerInfo.options.email.visibility
-          "
-          class="am-elfci__item am-subscribe"
+        v-if="
+          amSettings.featuresIntegrations.mailchimp.enabled &&
+          amSettings.mailchimp.subscribeFieldVisible &&
+          amCustomize[pageRenderKey].customerInfo.options.email.visibility
+        "
+        class="am-elfci__item am-subscribe"
       >
         <AmCheckbox
-            :value="amSettings.mailchimp.checkedByDefault"
-            :label="labelsDisplay('subscribe_to_mailing_list')"
+          :value="amSettings.mailchimp.checkedByDefault"
+          :label="labelsDisplay('subscribe_to_mailing_list')"
         >
         </AmCheckbox>
       </el-form-item>
@@ -87,6 +82,7 @@ import { formFieldsTemplates } from '../../../../../../../assets/js/common/formF
 // * Composables
 import { useResponsiveClass } from '../../../../../../../assets/js/common/responsive'
 import { useReactiveCustomize } from '../../../../../../../assets/js/admin/useReactiveCustomize.js'
+import { getInternationalPhoneValue } from '../../../../../../../assets/js/common/phone'
 
 // * Components
 let props = defineProps({
@@ -134,11 +130,8 @@ let amLabels = inject('labels')
 
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    let translations =
-      amCustomize.value[pageRenderKey.value].customerInfo.translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    let translations = amCustomize.value[pageRenderKey.value].customerInfo.translations
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -205,7 +198,11 @@ let infoFormConstruction = ref({
     },
     handlers: {
       handlePhoneData: (phoneData) => {
-        infoFormData.value.phone = phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, '') : ''
+        infoFormData.value.phone = getInternationalPhoneValue(
+          phoneData?.phoneNumber ?? phoneData?.e164,
+          phoneData,
+          phoneData?.countryCode
+        )
       },
     },
   },
@@ -349,11 +346,7 @@ export default {
         $count: 100;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms
-              cubic-bezier(0.45, 1, 0.4, 1.2)
-              #{$i *
-              100}ms
-              am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }

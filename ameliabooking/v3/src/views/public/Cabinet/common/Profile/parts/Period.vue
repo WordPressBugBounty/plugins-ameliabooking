@@ -11,11 +11,7 @@
         {{ props.title }}
       </div>
     </template>
-    <div
-      v-if="period"
-      ref="popupPeriodRef"
-      class="am-csd__period-content"
-    >
+    <div v-if="period" ref="popupPeriodRef" class="am-csd__period-content">
       <div class="am-csd__period-content__inner">
         <AmAlert
           v-if="alertVisibility"
@@ -27,9 +23,7 @@
           @close="closeAlert"
           @trigger-close="closeAlert"
         >
-          <template #title>
-            <span class="am-icon-clearable"/> {{ alertMessage }}
-          </template>
+          <template #title> <span class="am-icon-clearable" /> {{ alertMessage }} </template>
         </AmAlert>
 
         <el-form
@@ -51,7 +45,11 @@
               :placeholder="amLabels.from"
               start="00:00"
               :end="getPreviousSlot('24:00')"
-              :min-time="props.periodIndex === 0 ? null : getPreviousSlot(periods[props.periodIndex - 1].endTime)"
+              :min-time="
+                props.periodIndex === 0
+                  ? null
+                  : getPreviousSlot(periods[props.periodIndex - 1].endTime)
+              "
               :max-time="props.periodIndex === periods.length - 1 ? null : period.endTime"
               :step="useSecondsInTime(amSettings.general.timeSlotLength)"
             />
@@ -72,7 +70,11 @@
               :start="getNextSlot('00:00')"
               end="24:00"
               :min-time="period.startTime"
-              :max-time="props.periodIndex === periods.length - 1 ? null : getNextSlot(periods[props.periodIndex + 1].startTime)"
+              :max-time="
+                props.periodIndex === periods.length - 1
+                  ? null
+                  : getNextSlot(periods[props.periodIndex + 1].startTime)
+              "
               :step="useSecondsInTime(amSettings.general.timeSlotLength)"
             />
           </el-form-item>
@@ -126,10 +128,7 @@
       </div>
     </div>
     <template #footer>
-      <div
-        class="am-csd__period-footer"
-        :class="responsiveClass"
-      >
+      <div class="am-csd__period-footer" :class="responsiveClass">
         <AmButton
           category="secondary"
           type="plain"
@@ -138,10 +137,7 @@
         >
           {{ amLabels.cancel }}
         </AmButton>
-        <AmButton
-          :size="pageWidth > 430 ? 'default' : 'small'"
-          @click="savePeriod"
-        >
+        <AmButton :size="pageWidth > 430 ? 'default' : 'small'" @click="savePeriod">
           {{ amLabels.save }}
         </AmButton>
       </div>
@@ -151,30 +147,24 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  computed,
-  inject,
-  watch,
-  provide,
-} from "vue";
+import { ref, computed, inject, watch, provide } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * _components
-import AmSlidePopup from "../../../../../_components/slide-popup/AmSlidePopup.vue";
-import AmButton from "../../../../../_components/button/AmButton.vue";
-import AmOption from "../../../../../_components/select/AmOption.vue";
-import AmSelect from "../../../../../_components/select/AmSelect.vue";
-import AmAlert from "../../../../../_components/alert/AmAlert.vue";
-import AmTimeSelect from "../../../../../_components/time-select/AmTimeSelect.vue";
+import AmSlidePopup from '../../../../../_components/slide-popup/AmSlidePopup.vue'
+import AmButton from '../../../../../_components/button/AmButton.vue'
+import AmOption from '../../../../../_components/select/AmOption.vue'
+import AmSelect from '../../../../../_components/select/AmSelect.vue'
+import AmAlert from '../../../../../_components/alert/AmAlert.vue'
+import AmTimeSelect from '../../../../../_components/time-select/AmTimeSelect.vue'
 
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation.js";
-import { useSecondsInTime, useTimeInSeconds } from "../../../../../../assets/js/common/date";
-import { useResponsiveClass } from "../../../../../../assets/js/common/responsive";
-import { useElementSize } from "@vueuse/core";
-import { useEmployeeServices } from "../../../../../../assets/js/common/employee";
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation.js'
+import { useSecondsInTime, useTimeInSeconds } from '../../../../../../assets/js/common/date'
+import { useResponsiveClass } from '../../../../../../assets/js/common/responsive'
+import { useElementSize } from '@vueuse/core'
+import { useEmployeeServices } from '../../../../../../assets/js/common/employee'
 
 // * Vars
 let store = useStore()
@@ -197,27 +187,27 @@ let pageWidth = inject('pageWidth')
 let props = defineProps({
   title: {
     type: String,
-    default: ''
+    default: '',
   },
   visibility: {
     type: Boolean,
-    default: false
+    default: false,
   },
   origin: {
     type: String,
-    default: ''
+    default: '',
   },
   periodIndex: {
     type: Number,
-    default: 0
+    default: 0,
   },
   originIndex: {
     type: Number,
-    default: 0
+    default: 0,
   },
   isNew: {
     type: Boolean,
-    default: false
+    default: false,
   },
 })
 
@@ -243,7 +233,7 @@ let alertVisibility = ref(false)
 let alertContainer = ref(null)
 let alertMessage = ref('')
 
-function closeAlert () {
+function closeAlert() {
   alertVisibility.value = false
   alertMessage.value = ''
 }
@@ -259,25 +249,25 @@ let periodFormData = ref({
     get: () => period.value.startTime,
     set: (val) => {
       period.value.startTime = val
-    }
+    },
   }),
   endTime: computed({
     get: () => period.value.endTime,
     set: (val) => {
       period.value.endTime = val
-    }
+    },
   }),
   periodServiceList: computed({
     get: () => period.value.periodServiceList,
     set: (val) => {
       period.value.periodServiceList = val
-    }
+    },
   }),
   periodLocationList: computed({
     get: () => period.value.periodLocationList,
     set: (val) => {
       period.value.periodLocationList = val
-    }
+    },
   }),
 })
 
@@ -291,15 +281,15 @@ let rules = computed(() => {
         required: true,
         message: amLabels.select_time_warning,
         trigger: ['submit', 'change'],
-      }
+      },
     ],
     endTime: [
       {
         required: true,
         message: amLabels.select_time_warning,
         trigger: ['submit', 'change'],
-      }
-    ]
+      },
+    ],
   }
 })
 
@@ -312,9 +302,13 @@ let locations = ref(store.getters['entities/getLocations'])
 let services = computed(() => {
   let employeeServices = useEmployeeServices(store)
 
-  let missingServicesIds = period.value.periodServiceList.filter(id => employeeServices.map(i => i.id).indexOf(id) === -1)
+  let missingServicesIds = period.value.periodServiceList.filter(
+    (id) => employeeServices.map((i) => i.id).indexOf(id) === -1,
+  )
 
-  return employeeServices.concat(store.getters['entities/getServices'].filter(i => missingServicesIds.indexOf(i.id) !== -1))
+  return employeeServices.concat(
+    store.getters['entities/getServices'].filter((i) => missingServicesIds.indexOf(i.id) !== -1),
+  )
 })
 
 // ! Periods needs to be refactored
@@ -327,17 +321,17 @@ let period = computed(() => {
   return props.periodIndex !== null ? periods.value[props.periodIndex] : null
 })
 
-function getPreviousSlot (time) {
+function getPreviousSlot(time) {
   return useSecondsInTime(useTimeInSeconds(time) - amSettings.general.timeSlotLength)
 }
 
-function getNextSlot (time) {
+function getNextSlot(time) {
   let nextSlot = useSecondsInTime(useTimeInSeconds(time) + amSettings.general.timeSlotLength)
 
   return nextSlot === '00:00' ? null : nextSlot
 }
 
-function savePeriod () {
+function savePeriod() {
   periodFormRef.value.validate((valid) => {
     if (valid) {
       emits('close')
@@ -345,9 +339,8 @@ function savePeriod () {
   })
 }
 
-
 // ! cancelEditPeriod needs to be refactored
-function cancelEditPeriod () {
+function cancelEditPeriod() {
   if (props.isNew) {
     periods.value.pop()
   } else {
@@ -380,7 +373,7 @@ let cssDialogVars = computed(() => {
 
 <script>
 export default {
-  name: 'WorkPeriod'
+  name: 'WorkPeriod',
 }
 </script>
 
@@ -410,7 +403,7 @@ export default {
 
       // * Header
       .am-slide-popup__block {
-        &-header{
+        &-header {
           padding: 16px 16px 16px 24px;
           background-color: var(--am-c-csd-bgr);
         }

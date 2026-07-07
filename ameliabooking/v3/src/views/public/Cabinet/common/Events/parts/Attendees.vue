@@ -20,9 +20,7 @@
         <div class="am-capei-att__top-text">
           {{ props.event.name }}
         </div>
-        <div v-if="maxCount" class="am-capei-att__top-places">
-          {{ places }} {{ placesLabels }}
-        </div>
+        <div v-if="maxCount" class="am-capei-att__top-places">{{ places }} {{ placesLabels }}</div>
       </div>
 
       <AmButton
@@ -59,12 +57,7 @@
         "
         :loading="searchingCustomers"
         @focus="useFocusCustomers(store)"
-        @change="
-          getBookings(
-            activeTab === 'approved' ? ['approved', 'canceled'] : ['waiting'],
-            1
-          )
-        "
+        @change="getBookings(activeTab === 'approved' ? ['approved', 'canceled'] : ['waiting'], 1)"
       >
         <AmOption
           v-for="item in customers"
@@ -76,16 +69,10 @@
             <div class="am-cap__cust-option__heading">
               {{ item.firstName + ' ' + item.lastName }}
             </div>
-            <div
-              v-if="customerEmailVisibility"
-              class="am-cap__cust-option__inner"
-            >
+            <div v-if="customerEmailVisibility" class="am-cap__cust-option__inner">
               {{ item.email }}
             </div>
-            <div
-              v-if="customerPhoneVisibility"
-              class="am-cap__cust-option__inner"
-            >
+            <div v-if="customerPhoneVisibility" class="am-cap__cust-option__inner">
               {{ item.phone }}
             </div>
           </div>
@@ -103,11 +90,7 @@
       </AmButton>
     </div>
 
-    <el-tabs
-      v-if="!eventAttendeeVisibility"
-      v-model="activeTab"
-      @tab-click="tabClick"
-    >
+    <el-tabs v-if="!eventAttendeeVisibility" v-model="activeTab" @tab-click="tabClick">
       <!-- Attendees -->
       <el-tab-pane :label="amLabels.attendees" name="approved">
         <div v-if="!approvedBookingsLoading" class="am-capei-att__card-wrapper">
@@ -118,20 +101,11 @@
               class="am-capei-att__card"
               :class="props.responsiveClass"
             >
-              <div
-                class="am-capei-att__card-inner"
-                :class="props.responsiveClass"
-              >
+              <div class="am-capei-att__card-inner" :class="props.responsiveClass">
                 <div class="am-capei-att__info" :class="props.responsiveClass">
                   <!-- Customer Name -->
-                  <div
-                    class="am-capei-customer__name"
-                    :class="noShowData(0).class"
-                  >
-                    <span
-                      v-if="noShowData(0).icon"
-                      :class="`am-icon-${noShowData(0).icon}`"
-                    />
+                  <div class="am-capei-customer__name" :class="noShowData(0).class">
+                    <span v-if="noShowData(0).icon" :class="`am-icon-${noShowData(0).icon}`" />
                     {{ item.customer.firstName + ' ' + item.customer.lastName }}
                   </div>
                   <!-- /Customer Name -->
@@ -173,12 +147,8 @@
                   v-model="item.status"
                   :placeholder="amLabels.select"
                   :disabled="!amSettings.roles.allowWriteEvents"
-                  :prefix-icon="
-                    attendeeStatuses.find((i) => i.value === item.status).icon
-                  "
-                  :prefix-icon-color="
-                    attendeeStatuses.find((i) => i.value === item.status).color
-                  "
+                  :prefix-icon="attendeeStatuses.find((i) => i.value === item.status).icon"
+                  :prefix-icon-color="attendeeStatuses.find((i) => i.value === item.status).color"
                   popper-class="am-capei-att__popper"
                   :parent-class="props.responsiveClass"
                   @change="
@@ -193,22 +163,14 @@
                     :value="status.value"
                     :label="status.label"
                   >
-                    <span
-                      :class="`am-icon-${status.icon}`"
-                      :style="{ color: status.color }"
-                    />
+                    <span :class="`am-icon-${status.icon}`" :style="{ color: status.color }" />
                     {{ status.label }}
                   </AmOption>
                 </AmSelect>
               </div>
 
-              <div
-                v-if="item.ticketsData.length"
-                class="am-capei-att__card-tickets"
-              >
-                <div class="am-capei-att__card-label">
-                  {{ amLabels.event_book_tickets }}:
-                </div>
+              <div v-if="item.ticketsData.length" class="am-capei-att__card-tickets">
+                <div class="am-capei-att__card-label">{{ amLabels.event_book_tickets }}:</div>
                 <div class="am-capei-att__card-tickets__inner">
                   <div
                     v-for="(ticket, i) in item.ticketsData"
@@ -216,44 +178,29 @@
                     class="am-capei-att__card-ticket"
                   >
                     {{ ticket.persons }} x
-                    {{
-                      props.event.customTickets.find(
-                        (a) => a.id === ticket.eventTicketId
-                      ).name
-                    }}
+                    {{ props.event.customTickets.find((a) => a.id === ticket.eventTicketId).name }}
                   </div>
                 </div>
               </div>
               <div v-else class="am-capei-att__card-persons">
-                <div class="am-capei-att__card-label">
-                  {{ amLabels.event_book_persons }}:
-                </div>
+                <div class="am-capei-att__card-label">{{ amLabels.event_book_persons }}:</div>
                 <div class="am-capei-att__card-person">
                   {{ item.persons }}
                 </div>
               </div>
 
               <div
-                v-if="
-                  amSettings.featuresIntegrations.eTickets.enabled &&
-                  item.qrCodes
-                "
+                v-if="amSettings.featuresIntegrations.eTickets.enabled && item.qrCodes"
                 class="am-capei-att__card-etickets"
               >
-                <div class="am-capei-att__card-etickets__label">
-                  {{ amLabels.checked_in }}:
-                </div>
+                <div class="am-capei-att__card-etickets__label">{{ amLabels.checked_in }}:</div>
                 <div
                   v-for="(val, date) in getQrCodesBooking(item.qrCodes)"
                   :key="date"
                   class="am-capei-att__card-etickets__item"
                 >
-                  <span class="am-capei-att__card-etickets__date"
-                    >{{ date }}:</span
-                  >
-                  <span class="am-capei-att__card-etickets__capacity">{{
-                    val
-                  }}</span>
+                  <span class="am-capei-att__card-etickets__date">{{ date }}:</span>
+                  <span class="am-capei-att__card-etickets__capacity">{{ val }}</span>
                 </div>
               </div>
 
@@ -300,20 +247,11 @@
               :key="index"
               class="am-capei-att__card"
             >
-              <div
-                class="am-capei-att__card-inner"
-                :class="props.responsiveClass"
-              >
+              <div class="am-capei-att__card-inner" :class="props.responsiveClass">
                 <div class="am-capei-att__info" :class="props.responsiveClass">
                   <!-- Customer Name -->
-                  <div
-                    class="am-capei-customer__name"
-                    :class="noShowData(0).class"
-                  >
-                    <span
-                      v-if="noShowData(0).icon"
-                      :class="`am-icon-${noShowData(0).icon}`"
-                    />
+                  <div class="am-capei-customer__name" :class="noShowData(0).class">
+                    <span v-if="noShowData(0).icon" :class="`am-icon-${noShowData(0).icon}`" />
                     {{ item.customer.firstName + ' ' + item.customer.lastName }}
                   </div>
                   <!-- /Customer Name -->
@@ -355,12 +293,8 @@
                   v-model="item.status"
                   :placeholder="amLabels.select"
                   :disabled="!amSettings.roles.allowWriteEvents"
-                  :prefix-icon="
-                    attendeeStatuses.find((i) => i.value === item.status).icon
-                  "
-                  :prefix-icon-color="
-                    attendeeStatuses.find((i) => i.value === item.status).color
-                  "
+                  :prefix-icon="attendeeStatuses.find((i) => i.value === item.status).icon"
+                  :prefix-icon-color="attendeeStatuses.find((i) => i.value === item.status).color"
                   popper-class="am-capei-att__popper"
                   @change="
                     (changedStatus) => {
@@ -374,22 +308,14 @@
                     :value="status.value"
                     :label="status.label"
                   >
-                    <span
-                      :class="`am-icon-${status.icon}`"
-                      :style="{ color: status.color }"
-                    />
+                    <span :class="`am-icon-${status.icon}`" :style="{ color: status.color }" />
                     {{ status.label }}
                   </AmOption>
                 </AmSelect>
               </div>
 
-              <div
-                v-if="Object.keys(item.ticketsData).length"
-                class="am-capei-att__card-tickets"
-              >
-                <div class="am-capei-att__card-label">
-                  {{ amLabels.event_book_tickets }}:
-                </div>
+              <div v-if="Object.keys(item.ticketsData).length" class="am-capei-att__card-tickets">
+                <div class="am-capei-att__card-label">{{ amLabels.event_book_tickets }}:</div>
                 <div class="am-capei-att__card-tickets__inner">
                   <div
                     v-for="(ticket, i) in item.ticketsData"
@@ -397,18 +323,12 @@
                     class="am-capei-att__card-ticket"
                   >
                     {{ ticket.persons }} x
-                    {{
-                      props.event.customTickets.find(
-                        (a) => a.id === ticket.eventTicketId
-                      ).name
-                    }}
+                    {{ props.event.customTickets.find((a) => a.id === ticket.eventTicketId).name }}
                   </div>
                 </div>
               </div>
               <div v-else class="am-capei-att__card-persons">
-                <div class="am-capei-att__card-label">
-                  {{ amLabels.event_book_persons }}:
-                </div>
+                <div class="am-capei-att__card-label">{{ amLabels.event_book_persons }}:</div>
                 <div class="am-capei-att__card-person">
                   {{ item.persons }}
                 </div>
@@ -459,11 +379,7 @@
     <Attendee
       v-if="eventAttendeeVisibility"
       :visibility="eventAttendeeVisibility"
-      :title="
-        editAttendeeRecognition
-          ? amLabels.event_edit_attendee
-          : amLabels.event_add_attendee
-      "
+      :title="editAttendeeRecognition ? amLabels.event_edit_attendee : amLabels.event_add_attendee"
       :event="props.event"
       :page-width="props.pageWidth"
       :is-new="!editAttendeeRecognition"
@@ -486,10 +402,7 @@ import httpClient from '../../../../../../plugins/axios'
 // * Composables
 import { useUrlParams } from '../../../../../../assets/js/common/helper'
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
-import {
-  useFocusCustomers,
-  useSearchCustomers,
-} from '../../../../../../assets/js/admin/customers'
+import { useFocusCustomers, useSearchCustomers } from '../../../../../../assets/js/admin/customers'
 import { useScrollTo } from '../../../../../../assets/js/common/scrollElements'
 import {
   useAttendeeStatuses,
@@ -546,12 +459,12 @@ let amCustomize = inject('amCustomize')
 let customerPhoneVisibility = computed(() =>
   shortcodeData.value.cabinetType === 'employee'
     ? amCustomize.value.events.options.customerPhone.visibility
-    : true
+    : true,
 )
 let customerEmailVisibility = computed(() =>
   shortcodeData.value.cabinetType === 'employee'
     ? amCustomize.value.events.options.customerEmail.visibility
-    : true
+    : true,
 )
 
 // * Alert block
@@ -628,9 +541,7 @@ function savedAttendee() {
     }, 500)
   }
 
-  getBookings(
-    activeTab.value === 'approved' ? ['approved', 'canceled'] : ['waiting']
-  )
+  getBookings(activeTab.value === 'approved' ? ['approved', 'canceled'] : ['waiting'])
 
   closedAttendee()
 }
@@ -644,11 +555,7 @@ function closedAttendee() {
 function addEventAttendee() {
   store.commit(
     'attendee/setAttendee',
-    useInitAttendee(
-      store,
-      store.getters['attendee/getDefaultAttendee'],
-      props.event
-    )
+    useInitAttendee(store, store.getters['attendee/getDefaultAttendee'], props.event),
   )
 
   eventAttendeeVisibility.value = true
@@ -672,10 +579,7 @@ function editEventAttendee(attendee) {
     store.commit('customerInfo/setCustomersIds', customersIds)
   }
 
-  store.commit(
-    'attendee/setAttendee',
-    useInitAttendee(store, attendee, props.event)
-  )
+  store.commit('attendee/setAttendee', useInitAttendee(store, attendee, props.event))
 
   editAttendeeRecognition.value = true
   eventAttendeeVisibility.value = true
@@ -700,16 +604,12 @@ function tabClick() {
     default:
   }
 
-  getBookings(
-    activeTab.value === 'approved' ? ['approved', 'canceled'] : ['waiting']
-  )
+  getBookings(activeTab.value === 'approved' ? ['approved', 'canceled'] : ['waiting'])
 }
 
 let customerId = ref(null)
 
-let searchingCustomers = computed(
-  () => store.getters['customerInfo/getLoading']
-)
+let searchingCustomers = computed(() => store.getters['customerInfo/getLoading'])
 
 let customers = computed(() => store.getters['customerInfo/getCustomers'])
 
@@ -742,12 +642,9 @@ function getBookings(statuses, page = 1) {
             actual.push(
               useInitAttendee(
                 store,
-                useFrontAttendee(
-                  current,
-                  store.getters['attendee/getAttendee']
-                ),
-                props.event
-              )
+                useFrontAttendee(current, store.getters['attendee/getAttendee']),
+                props.event,
+              ),
             )
 
             return actual
@@ -789,11 +686,13 @@ function updateBookingStatus(id, status) {
       },
       {
         params: { source: 'cabinet-provider' },
-      }
+      },
     )
     .then((result) => {
       alertVisibility.value = true
-      alertMessage.value = amLabels.value.event_status_changed + (amLabels.value[result.data.data.booking.status]).toLowerCase()
+      alertMessage.value =
+        amLabels.value.event_status_changed +
+        amLabels.value[result.data.data.booking.status].toLowerCase()
 
       if (attendeesContainer.value && alertContainer.value) {
         setTimeout(function () {
@@ -808,8 +707,7 @@ function updateBookingStatus(id, status) {
 }
 
 function bookingsPageChange(page) {
-  let statuses =
-    activeTab.value === 'approved' ? ['approved', 'canceled'] : ['waiting']
+  let statuses = activeTab.value === 'approved' ? ['approved', 'canceled'] : ['waiting']
 
   if (statuses[0] === 'approved') {
     approvedBookingsPage.value = page
@@ -830,15 +728,11 @@ function removeEventAttendee() {
   }
 
   httpClient
-    .post(
-      '/events/bookings/delete/' + targetAttendee.value.id,
-      useBackAttendee(store),
-      {
-        params: {
-          source: 'cabinet-provider',
-        },
-      }
-    )
+    .post('/events/bookings/delete/' + targetAttendee.value.id, useBackAttendee(store), {
+      params: {
+        source: 'cabinet-provider',
+      },
+    })
     .then(() => {
       bookingsPageChange(approvedBookingsPage.value)
     })
@@ -853,15 +747,12 @@ let attendeeStatuses = ref(
     (i) =>
       (!amSettings.featuresIntegrations.waitingList.enabled ||
       (eventSettings.value
-        ? 'waitingList' in eventSettings.value &&
-          !eventSettings.value.waitingList.enabled
+        ? 'waitingList' in eventSettings.value && !eventSettings.value.waitingList.enabled
         : true)
         ? i.value !== 'waiting'
         : true) &&
-      (!amSettings.featuresIntegrations.noShowTag.enabled
-        ? i.value !== 'no-show'
-        : true)
-  )
+      (!amSettings.featuresIntegrations.noShowTag.enabled ? i.value !== 'no-show' : true),
+  ),
 )
 
 let bookedCount = ref(0)
@@ -874,9 +765,7 @@ let places = computed(() => {
 })
 
 let placesLabels = computed(() => {
-  return bookedCount.value === 1
-    ? amLabels.value.attendee
-    : amLabels.value.attendees
+  return bookedCount.value === 1 ? amLabels.value.attendee : amLabels.value.attendees
 })
 
 function getQrCodesBooking(qrCodes) {
@@ -941,17 +830,14 @@ function getQrCodesBooking(qrCodes) {
   return Object.fromEntries(
     Object.entries(eDates)
       .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
-      .map(([date, counts]) => [date, `${counts.scanned}/${counts.total}`])
+      .map(([date, counts]) => [date, `${counts.scanned}/${counts.total}`]),
   )
 }
 
 onMounted(() => {
   getBookings(['approved', 'canceled'])
 
-  store.commit(
-    'customerInfo/setCustomers',
-    store.getters['auth/getPreloadedCustomers']
-  )
+  store.commit('customerInfo/setCustomers', store.getters['auth/getPreloadedCustomers'])
 })
 
 // * Colors
@@ -961,14 +847,8 @@ let cssVars = computed(() => {
   return {
     '--am-c-capei-att-primary': amColors.value.colorPrimary,
     '--am-c-capei-att-text': amColors.value.colorMainText,
-    '--am-c-capei-att-text-op90': useColorTransparency(
-      amColors.value.colorMainText,
-      0.9
-    ),
-    '--am-c-capei-att-text-op10': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
+    '--am-c-capei-att-text-op90': useColorTransparency(amColors.value.colorMainText, 0.9),
+    '--am-c-capei-att-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
   }
 })
 </script>

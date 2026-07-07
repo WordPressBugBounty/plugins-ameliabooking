@@ -15,9 +15,7 @@
       @close="closeAlert"
       @trigger-close="closeAlert"
     >
-      <template #title>
-        <span class="am-icon-clearable" /> {{ alertMessage }}
-      </template>
+      <template #title> <span class="am-icon-clearable" /> {{ alertMessage }} </template>
     </AmAlert>
 
     <el-tabs v-model="activeTab">
@@ -37,39 +35,21 @@
         :label="amLabels.custom_fields"
         name="customFields"
       >
-        <AttendeeCustomFields
-          ref="attendeeCustomFieldsRef"
-          :event="props.event"
-        />
+        <AttendeeCustomFields ref="attendeeCustomFieldsRef" :event="props.event" />
       </el-tab-pane>
       <!-- /Custom Fields -->
       <!-- Payment -->
-      <el-tab-pane
-        v-if="store.getters['attendee/getId']"
-        :label="amLabels.payment"
-        name="payment"
-      >
+      <el-tab-pane v-if="store.getters['attendee/getId']" :label="amLabels.payment" name="payment">
         <AttendeePayment :event="props.event" :page-width="props.pageWidth" />
       </el-tab-pane>
       <!-- /Payment -->
     </el-tabs>
 
     <div class="am-capei-atti__footer">
-      <AmButton
-        category="secondary"
-        :size="'default'"
-        :type="'plain'"
-        @click="close"
-      >
-        {{
-          amSettings.roles.allowWriteEvents ? amLabels.cancel : amLabels.close
-        }}
+      <AmButton category="secondary" :size="'default'" :type="'plain'" @click="close">
+        {{ amSettings.roles.allowWriteEvents ? amLabels.cancel : amLabels.close }}
       </AmButton>
-      <AmButton
-        v-if="amSettings.roles.allowWriteEvents"
-        :size="'default'"
-        @click="validateSave"
-      >
+      <AmButton v-if="amSettings.roles.allowWriteEvents" :size="'default'" @click="validateSave">
         {{ amLabels.save }}
       </AmButton>
     </div>
@@ -114,10 +94,7 @@ import CancelPopup from '../../parts/CancelPopup.vue'
 import httpClient from '../../../../../../plugins/axios'
 
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation.js'
-import {
-  useAttendeeAmount,
-  useBackAttendee,
-} from '../../../../../../assets/js/common/attendees'
+import { useAttendeeAmount, useBackAttendee } from '../../../../../../assets/js/common/attendees'
 
 // * Components props
 let props = defineProps({
@@ -224,9 +201,7 @@ async function validateSave() {
   let paymentLinksEnabled =
     amSettings.payments.paymentLinks && amSettings.payments.paymentLinks.enabled
 
-  let eventSettings = props.event.settings
-    ? JSON.parse(props.event.settings)
-    : null
+  let eventSettings = props.event.settings ? JSON.parse(props.event.settings) : null
 
   if (
     eventSettings &&
@@ -237,11 +212,7 @@ async function validateSave() {
     paymentLinksEnabled = eventSettings.payments.paymentLinks.enabled
   }
 
-  if (
-    paymentLinksEnabled &&
-    store.getters['attendee/getId'] &&
-    getAmount() > oldAmount.value
-  ) {
+  if (paymentLinksEnabled && store.getters['attendee/getId'] && getAmount() > oldAmount.value) {
     amountChanged.value = true
   } else {
     saveAttendee(false)
@@ -264,7 +235,7 @@ function saveAttendee(createPaymentLinks) {
         params: {
           source: 'cabinet-provider',
         },
-      }
+      },
     )
     .then(() => {
       emits('save')
@@ -301,22 +272,13 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-capai-text': amColors.value.colorMainText,
-    '--am-c-capai-text-op10': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
+    '--am-c-capai-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
     '--am-c-capai-primary': amColors.value.colorPrimary,
 
     '--am-c-cust-no1': amColors.value.colorMainText,
-    '--am-c-cust-no1-bgr': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
+    '--am-c-cust-no1-bgr': useColorTransparency(amColors.value.colorMainText, 0.1),
     '--am-c-cust-no2': amColors.value.colorWarning,
-    '--am-c-cust-no2-bgr': useColorTransparency(
-      amColors.value.colorWarning,
-      0.1
-    ),
+    '--am-c-cust-no2-bgr': useColorTransparency(amColors.value.colorWarning, 0.1),
     '--am-c-cust-no3': amColors.value.colorError,
     '--am-c-cust-no3-bgr': useColorTransparency(amColors.value.colorError, 0.1),
     '--am-c-cust-link': useColorTransparency(amColors.value.colorMainText, 0.5),

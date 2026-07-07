@@ -1,125 +1,160 @@
 <template>
   <div>
     <div>
-      <AmInput
-        v-model="searchFilter"
-        :prefix-icon="iconSearch"
-        aria-label="Search"
-      />
+      <AmInput v-model="searchFilter" :prefix-icon="iconSearch" aria-label="Search" />
     </div>
 
-  <el-collapse
-    v-model="activeCategoryIndex"
-    class="am-caes"
-    :style="cssVars"
-  >
-    <el-collapse-item
-      v-for="category in categories"
-      :key="'category_' + category.id"
-      :name="'category_' + category.id"
-      class="am-caes__category"
-    >
-      <template #title>
-        <div class="am-caes__category-header">
-          <AmCheckbox
-            v-model="categoriesCheckbox[category.id]"
-            :indeterminate="categoryIndeterminate(category)"
-            @click="(e) => {
-              e.stopPropagation()
-              activeCategoryIndex = `category_${category.id}`
-            }"
-            @change="(val) => toggleCategoryServices(val, category)"
-            @keydown.enter="(e) => {
-              e.stopPropagation()
-              activeCategoryIndex = `category_${category.id}`
-              categoriesCheckbox[category.id] = !categoriesCheckbox[category.id]
-              toggleCategoryServices(categoriesCheckbox[category.id], category)
-            }"
-          />
-          <div class="am-caes__category-header__text">
-            {{ category.name }}
-          </div>
-        </div>
-      </template>
-      <el-collapse
-        v-model="activeServiceIndex"
-        class="am-caes__inner"
+    <el-collapse v-model="activeCategoryIndex" class="am-caes" :style="cssVars">
+      <el-collapse-item
+        v-for="category in categories"
+        :key="'category_' + category.id"
+        :name="'category_' + category.id"
+        class="am-caes__category"
       >
-        <el-collapse-item
-          v-for="service in categories.find((c) => c.id === category.id).serviceList.filter(i => !searchFilter.trim() || i.name.toLowerCase().includes(searchFilter.toLowerCase()))"
-          :key="`service_${service.id}`"
-          :name="`service_${service.id}`"
-          class="am-caes__service"
-        >
-          <template #title>
-            <div class="am-caes__service-header">
-              <AmCheckbox
-                v-model="employee.serviceList[category.id][service.id].enabled"
-                @click="(e) => {
+        <template #title>
+          <div class="am-caes__category-header">
+            <AmCheckbox
+              v-model="categoriesCheckbox[category.id]"
+              :indeterminate="categoryIndeterminate(category)"
+              @click="
+                (e) => {
                   e.stopPropagation()
-                  activeServiceIndex = `service_${service.id}`
-                }"
-                @change="changeCategoryState(category)"
-                @keydown.enter="(e) => {
+                  activeCategoryIndex = `category_${category.id}`
+                }
+              "
+              @change="(val) => toggleCategoryServices(val, category)"
+              @keydown.enter="
+                (e) => {
                   e.stopPropagation()
-                  activeServiceIndex = `service_${service.id}`
-                  employee.serviceList[category.id][service.id].enabled = !employee.serviceList[category.id][service.id].enabled
-                  changeCategoryState(category)
-                }"
-              />
-              <div class="am-caes__service-header__text">
-                {{ service.name }}
-              </div>
+                  activeCategoryIndex = `category_${category.id}`
+                  categoriesCheckbox[category.id] = !categoriesCheckbox[category.id]
+                  toggleCategoryServices(categoriesCheckbox[category.id], category)
+                }
+              "
+            />
+            <div class="am-caes__category-header__text">
+              {{ category.name }}
             </div>
-          </template>
-
-          <div class="am-caes__service-content">
-
-            <!-- Minimum Capacity -->
-            <div
-              class="am-caes__service-content__item"
-              :class="props.responsiveClass"
-            >
-              <div class="am-caes__service-content__text">
-                {{ amLabels.minimum_capacity }}
+          </div>
+        </template>
+        <el-collapse v-model="activeServiceIndex" class="am-caes__inner">
+          <el-collapse-item
+            v-for="service in categories
+              .find((c) => c.id === category.id)
+              .serviceList.filter(
+                (i) =>
+                  !searchFilter.trim() || i.name.toLowerCase().includes(searchFilter.toLowerCase()),
+              )"
+            :key="`service_${service.id}`"
+            :name="`service_${service.id}`"
+            class="am-caes__service"
+          >
+            <template #title>
+              <div class="am-caes__service-header">
+                <AmCheckbox
+                  v-model="employee.serviceList[category.id][service.id].enabled"
+                  @click="
+                    (e) => {
+                      e.stopPropagation()
+                      activeServiceIndex = `service_${service.id}`
+                    }
+                  "
+                  @change="changeCategoryState(category)"
+                  @keydown.enter="
+                    (e) => {
+                      e.stopPropagation()
+                      activeServiceIndex = `service_${service.id}`
+                      employee.serviceList[category.id][service.id].enabled =
+                        !employee.serviceList[category.id][service.id].enabled
+                      changeCategoryState(category)
+                    }
+                  "
+                />
+                <div class="am-caes__service-header__text">
+                  {{ service.name }}
+                </div>
               </div>
-              <AmInputNumber
-                v-model="employee.serviceList[category.id][service.id].minCapacity"
-                class="am-caes__service-content__inner"
-                :min="1"
-                size="small"
-              />
-            </div>
-            <!-- /Minimum Capacity -->
+            </template>
 
-            <!-- Maximum Capacity -->
-            <div
-              class="am-caes__service-content__item"
-              :class="props.responsiveClass"
-            >
-              <div class="am-caes__service-content__text">
-                {{ amLabels.maximum_capacity }}
+            <div class="am-caes__service-content">
+              <!-- Minimum Capacity -->
+              <div class="am-caes__service-content__item" :class="props.responsiveClass">
+                <div class="am-caes__service-content__text">
+                  {{ amLabels.minimum_capacity }}
+                </div>
+                <AmInputNumber
+                  v-model="employee.serviceList[category.id][service.id].minCapacity"
+                  class="am-caes__service-content__inner"
+                  :min="1"
+                  size="small"
+                />
               </div>
-              <AmInputNumber
-                v-model="employee.serviceList[category.id][service.id].maxCapacity"
-                class="am-caes__service-content__inner"
-                :min="employee.serviceList[category.id][service.id].minCapacity"
-                size="small"
-                :aria-label="amLabels.maximum_capacity"
-              />
-            </div>
-            <!-- /Maximum Capacity -->
+              <!-- /Minimum Capacity -->
 
-            <!-- Duration and Price -->
-            <template
-              v-for="(item, durationIndex) in employee.serviceList[category.id][service.id].customPricing.enabled === 'duration'
-                ? employee.serviceList[category.id][service.id].customPricing.durations
-                : []"
-              :key="durationIndex"
-            >
-              <!-- Duration -->
+              <!-- Maximum Capacity -->
+              <div class="am-caes__service-content__item" :class="props.responsiveClass">
+                <div class="am-caes__service-content__text">
+                  {{ amLabels.maximum_capacity }}
+                </div>
+                <AmInputNumber
+                  v-model="employee.serviceList[category.id][service.id].maxCapacity"
+                  class="am-caes__service-content__inner"
+                  :min="employee.serviceList[category.id][service.id].minCapacity"
+                  size="small"
+                  :aria-label="amLabels.maximum_capacity"
+                />
+              </div>
+              <!-- /Maximum Capacity -->
+
+              <!-- Duration and Price -->
+              <template
+                v-for="(item, durationIndex) in employee.serviceList[category.id][service.id]
+                  .customPricing.enabled === 'duration'
+                  ? employee.serviceList[category.id][service.id].customPricing.durations
+                  : []"
+                :key="durationIndex"
+              >
+                <!-- Duration -->
+                <div
+                  v-if="
+                    employee.serviceList[category.id][service.id].customPricing.enabled ===
+                    'duration'
+                  "
+                  class="am-caes__service-content__item"
+                  :class="props.responsiveClass"
+                >
+                  <div class="am-caes__service-content__text">
+                    {{ amLabels.duration }}
+                  </div>
+                  <div class="am-caes__service-content__inner am-caes__service-content__disabled">
+                    {{ useSecondsToDuration(durationIndex, amLabels.h, amLabels.min) }}
+                  </div>
+                </div>
+                <!-- /Duration -->
+
+                <!-- Price -->
+                <div class="am-caes__service-content__item" :class="props.responsiveClass">
+                  <div class="am-caes__service-content__text">
+                    {{ amLabels.price }}
+                  </div>
+                  <AmInput
+                    v-model="item.price"
+                    class="am-caes__service-content__inner"
+                    placeholder=""
+                    :aria-label="amLabels.price"
+                    size="small"
+                    :is-money="true"
+                  />
+                </div>
+                <!-- /Price -->
+              </template>
+
               <div
-                v-if="employee.serviceList[category.id][service.id].customPricing.enabled === 'duration'"
+                v-if="
+                  employee.serviceList[category.id][service.id].customPricing.enabled ===
+                    'period' ||
+                  employee.serviceList[category.id][service.id].customPricing.enabled === null
+                "
                 class="am-caes__service-content__item"
                 :class="props.responsiveClass"
               >
@@ -127,13 +162,18 @@
                   {{ amLabels.duration }}
                 </div>
                 <div class="am-caes__service-content__inner am-caes__service-content__disabled">
-                  {{ useSecondsToDuration(durationIndex, amLabels.h, amLabels.min) }}
+                  {{ useSecondsToDuration(service.duration, amLabels.h, amLabels.min) }}
                 </div>
               </div>
               <!-- /Duration -->
 
               <!-- Price -->
               <div
+                v-if="
+                  employee.serviceList[category.id][service.id].customPricing.enabled ===
+                    'period' ||
+                  employee.serviceList[category.id][service.id].customPricing.enabled === null
+                "
                 class="am-caes__service-content__item"
                 :class="props.responsiveClass"
               >
@@ -141,7 +181,7 @@
                   {{ amLabels.price }}
                 </div>
                 <AmInput
-                  v-model="item.price"
+                  v-model="employee.serviceList[category.id][service.id].price"
                   class="am-caes__service-content__inner"
                   placeholder=""
                   :aria-label="amLabels.price"
@@ -150,196 +190,166 @@
                 />
               </div>
               <!-- /Price -->
-            </template>
 
-            <div
-              v-if="employee.serviceList[category.id][service.id].customPricing.enabled === 'period' || employee.serviceList[category.id][service.id].customPricing.enabled === null"
-              class="am-caes__service-content__item"
-              :class="props.responsiveClass"
-            >
-              <div class="am-caes__service-content__text">
-                {{ amLabels.duration }}
-              </div>
-              <div class="am-caes__service-content__inner am-caes__service-content__disabled">
-                {{ useSecondsToDuration(service.duration, amLabels.h, amLabels.min) }}
-              </div>
+              <!-- Persons and Price -->
+              <template
+                v-for="(item, personIndex) in employee.serviceList[category.id][service.id]
+                  .customPricing.enabled === 'person'
+                  ? employee.serviceList[category.id][service.id].customPricing.persons
+                  : []"
+                :key="personIndex"
+              >
+                <!-- Persons -->
+                <div class="am-caes__service-content__item" :class="props.responsiveClass">
+                  <div class="am-caes__service-content__text">
+                    {{ amLabels.capacity }}
+                  </div>
+                  <div class="am-caes__service-content__inner am-caes__service-content__disabled">
+                    {{ item.from }} - {{ personIndex }}
+                  </div>
+                </div>
+                <!-- /Persons -->
+
+                <!-- Price -->
+                <div class="am-caes__service-content__item" :class="props.responsiveClass">
+                  <div class="am-caes__service-content__text">
+                    {{ amLabels.price }}
+                  </div>
+                  <AmInput
+                    v-model="item.price"
+                    class="am-caes__service-content__inner"
+                    placeholder=""
+                    size="small"
+                    :is-money="true"
+                  />
+                </div>
+                <!-- /Price -->
+              </template>
+              <!-- /Persons and Price -->
             </div>
-            <!-- /Duration -->
 
-            <!-- Price -->
-            <div
-              v-if="employee.serviceList[category.id][service.id].customPricing.enabled === 'period' || employee.serviceList[category.id][service.id].customPricing.enabled === null"
-              class="am-caes__service-content__item"
-              :class="props.responsiveClass"
-            >
-              <div class="am-caes__service-content__text">
-                {{ amLabels.price }}
-              </div>
-              <AmInput
-                v-model="employee.serviceList[category.id][service.id].price"
-                class="am-caes__service-content__inner"
-                placeholder=""
-                :aria-label="amLabels.price"
-                size="small"
-                :is-money="true"
-              />
-            </div>
-            <!-- /Price -->
-
-            <!-- Persons and Price -->
+            <!-- Periods and Price -->
             <template
-              v-for="(item, personIndex) in employee.serviceList[category.id][service.id].customPricing.enabled === 'person'
-                ? employee.serviceList[category.id][service.id].customPricing.persons
-                : []"
-              :key="personIndex"
+              v-if="
+                employee.serviceList[category.id][service.id].customPricing.enabled === 'period' &&
+                !licence.isLite &&
+                !licence.isStarter &&
+                !licence.isBasic
+              "
             >
-              <!-- Persons -->
-              <div
-                class="am-caes__service-content__item"
-                :class="props.responsiveClass"
-              >
-                <div class="am-caes__service-content__text">
-                  {{ amLabels.capacity }}
-                </div>
-                <div class="am-caes__service-content__inner am-caes__service-content__disabled">
-                  {{ item.from }} - {{ personIndex }}
-                </div>
-              </div>
-              <!-- /Persons -->
+              <el-tabs class="am-caes__service-tabs" :stretch="true">
+                <el-tab-pane
+                  v-if="
+                    employee.serviceList[category.id][service.id].customPricing.periods.default
+                      .length
+                  "
+                  :label="amLabels.week_days"
+                >
+                  <div
+                    v-for="(periodsItem, periodsIndex) in employee.serviceList[category.id][
+                      service.id
+                    ].customPricing.periods.default"
+                    :key="periodsIndex"
+                    class="am-caes__service__week"
+                  >
+                    <div class="am-caes__service__week-days">
+                      <div
+                        v-for="(day, i) in weekDays"
+                        :key="i"
+                        class="am-caes__service__week-day"
+                        :class="{
+                          'am-caes__service__week-day-selected':
+                            periodsItem.days.indexOf(day.value) !== -1,
+                        }"
+                      >
+                        <span>{{ day.label }}</span>
+                      </div>
+                    </div>
 
-              <!-- Price -->
-              <div
-                class="am-caes__service-content__item"
-                :class="props.responsiveClass"
-              >
-                <div class="am-caes__service-content__text">
-                  {{ amLabels.price }}
-                </div>
-                <AmInput
-                  v-model="item.price"
-                  class="am-caes__service-content__inner"
-                  placeholder=""
-                  size="small"
-                  :is-money="true"
-                />
-              </div>
-              <!-- /Price -->
+                    <div class="am-caes__service__week-periods">
+                      <div
+                        v-for="(rangeItem, rangeIndex) in periodsItem.ranges"
+                        :key="rangeIndex"
+                        class="am-caes__service__week-periods-item"
+                      >
+                        <div class="am-caes__service__week-periods-item-range">
+                          <span>{{ rangeItem.from }}</span> - <span>{{ rangeItem.to }}</span>
+                        </div>
+
+                        <!-- Price -->
+                        <div
+                          :class="props.responsiveClass"
+                          class="am-caes__service__week-periods-item-price"
+                        >
+                          <AmInput
+                            v-model="rangeItem.price"
+                            placeholder=""
+                            :aria-label="amLabels.price"
+                            size="small"
+                            :is-money="true"
+                          />
+                        </div>
+                        <!-- /Price -->
+                      </div>
+                    </div>
+                  </div>
+                </el-tab-pane>
+
+                <el-tab-pane
+                  v-if="
+                    employee.serviceList[category.id][service.id].customPricing.periods.custom
+                      .length
+                  "
+                  :label="amLabels.custom_days"
+                >
+                  <div
+                    v-for="(periodsItem, periodsIndex) in employee.serviceList[category.id][
+                      service.id
+                    ].customPricing.periods.custom"
+                    :key="periodsIndex"
+                    class="am-caes__service__week"
+                  >
+                    <div class="am-caes__service__date">
+                      <span class="am-icon-calendar"></span
+                      >{{ getFrontedFormattedDate(periodsItem.dates.start) }} -
+                      {{ getFrontedFormattedDate(periodsItem.dates.end) }}
+                    </div>
+
+                    <div class="am-caes__service__week-periods">
+                      <div
+                        v-for="(rangeItem, rangeIndex) in periodsItem.ranges"
+                        :key="rangeIndex"
+                        class="am-caes__service__week-periods-item"
+                      >
+                        <div class="am-caes__service__week-periods-item-range">
+                          <span>{{ rangeItem.from }}</span> - <span>{{ rangeItem.to }}</span>
+                        </div>
+
+                        <!-- Price -->
+                        <div
+                          :class="props.responsiveClass"
+                          class="am-caes__service__week-periods-item-price"
+                        >
+                          <AmInput
+                            v-model="rangeItem.price"
+                            placeholder=""
+                            :aria-label="amLabels.price"
+                            size="small"
+                            :is-money="true"
+                          />
+                        </div>
+                        <!-- /Price -->
+                      </div>
+                    </div>
+                  </div>
+                </el-tab-pane>
+              </el-tabs>
             </template>
-            <!-- /Persons and Price -->
-
-          </div>
-
-          <!-- Periods and Price -->
-          <template v-if="employee.serviceList[category.id][service.id].customPricing.enabled === 'period' && !licence.isLite && !licence.isStarter && !licence.isBasic">
-            <el-tabs
-              class="am-caes__service-tabs"
-              :stretch="true"
-            >
-              <el-tab-pane
-                v-if="employee.serviceList[category.id][service.id].customPricing.periods.default.length"
-                :label="amLabels.week_days"
-              >
-                <div
-                  v-for="(periodsItem, periodsIndex) in employee.serviceList[category.id][service.id].customPricing.periods.default"
-                  :key="periodsIndex"
-                  class="am-caes__service__week"
-                >
-                  <div class="am-caes__service__week-days">
-                    <div
-                      v-for="(day, i) in weekDays"
-                      :key="i"
-                      class="am-caes__service__week-day"
-                      :class="{'am-caes__service__week-day-selected' : periodsItem.days.indexOf(day.value) !== -1}"
-                    >
-                      <span>{{ day.label }}</span>
-                    </div>
-                  </div>
-
-                  <div
-                    class="am-caes__service__week-periods"
-                  >
-                    <div
-                      v-for="(rangeItem, rangeIndex) in periodsItem.ranges"
-                      :key="rangeIndex"
-                      class="am-caes__service__week-periods-item"
-                    >
-                      <div
-                        class="am-caes__service__week-periods-item-range"
-                      >
-                        <span>{{ rangeItem.from }}</span> - <span>{{ rangeItem.to }}</span>
-                      </div>
-
-                      <!-- Price -->
-                      <div
-                        :class="props.responsiveClass"
-                        class="am-caes__service__week-periods-item-price"
-                      >
-                        <AmInput
-                          v-model="rangeItem.price"
-                          placeholder=""
-                          :aria-label="amLabels.price"
-                          size="small"
-                          :is-money="true"
-                        />
-                      </div>
-                      <!-- /Price -->
-                    </div>
-                  </div>
-                </div>
-              </el-tab-pane>
-
-              <el-tab-pane
-                v-if="employee.serviceList[category.id][service.id].customPricing.periods.custom.length"
-                :label="amLabels.custom_days"
-              >
-                <div
-                  v-for="(periodsItem, periodsIndex) in employee.serviceList[category.id][service.id].customPricing.periods.custom"
-                  :key="periodsIndex"
-                  class="am-caes__service__week"
-                >
-                  <div class="am-caes__service__date">
-                    <span class="am-icon-calendar"></span>{{ getFrontedFormattedDate(periodsItem.dates.start) }} - {{ getFrontedFormattedDate(periodsItem.dates.end) }}
-                  </div>
-
-                  <div
-                    class="am-caes__service__week-periods"
-                  >
-                    <div
-                      v-for="(rangeItem, rangeIndex) in periodsItem.ranges"
-                      :key="rangeIndex"
-                      class="am-caes__service__week-periods-item"
-                    >
-                      <div
-                        class="am-caes__service__week-periods-item-range"
-                      >
-                        <span>{{ rangeItem.from }}</span> - <span>{{ rangeItem.to }}</span>
-                      </div>
-
-                      <!-- Price -->
-                      <div
-                        :class="props.responsiveClass"
-                        class="am-caes__service__week-periods-item-price"
-                      >
-                        <AmInput
-                          v-model="rangeItem.price"
-                          placeholder=""
-                          :aria-label="amLabels.price"
-                          size="small"
-                          :is-money="true"
-                        />
-                      </div>
-                      <!-- /Price -->
-                    </div>
-                  </div>
-                </div>
-              </el-tab-pane>
-            </el-tabs>
-          </template>
-          <!-- /Periods and Price -->
-        </el-collapse-item>
-      </el-collapse>
-    </el-collapse-item>
-  </el-collapse>
+            <!-- /Periods and Price -->
+          </el-collapse-item>
+        </el-collapse>
+      </el-collapse-item>
+    </el-collapse>
   </div>
 </template>
 
@@ -362,9 +372,9 @@ import { useColorTransparency } from '../../../../../../assets/js/common/colorMa
 // * Dedicated components
 import AmCheckbox from '../../../../../_components/checkbox/AmCheckbox.vue'
 import AmInputNumber from '../../../../../_components/input-number/AmInputNumber.vue'
-import AmInput from "../../../../../_components/input/AmInput.vue";
-import IconComponent from "../../../../../_components/icons/IconComponent.vue";
-import { shortLocale } from "../../../../../../plugins/settings";
+import AmInput from '../../../../../_components/input/AmInput.vue'
+import IconComponent from '../../../../../_components/icons/IconComponent.vue'
+import { shortLocale } from '../../../../../../plugins/settings'
 
 // * Props
 const props = defineProps({
@@ -386,18 +396,18 @@ let amLabels = inject('amLabels')
 let searchFilter = ref('')
 
 let iconSearch = {
-  components: {IconComponent},
-  template: `<IconComponent icon="search"/>`
+  components: { IconComponent },
+  template: `<IconComponent icon="search"/>`,
 }
 
 let weekDays = ref([
-  {label: 'Mon', labelFull: 'Monday', value: 0},
-  {label: 'Tue', labelFull: 'Tuesday', value: 1},
-  {label: 'Wed', labelFull: 'Wednesday', value: 2},
-  {label: 'Thu', labelFull: 'Thursday', value: 3},
-  {label: 'Fri', labelFull: 'Friday', value: 4},
-  {label: 'Sat', labelFull: 'Saturday', value: 5},
-  {label: 'Sun', labelFull: 'Sunday', value: 6}
+  { label: 'Mon', labelFull: 'Monday', value: 0 },
+  { label: 'Tue', labelFull: 'Tuesday', value: 1 },
+  { label: 'Wed', labelFull: 'Wednesday', value: 2 },
+  { label: 'Thu', labelFull: 'Thursday', value: 3 },
+  { label: 'Fri', labelFull: 'Friday', value: 4 },
+  { label: 'Sat', labelFull: 'Saturday', value: 5 },
+  { label: 'Sun', labelFull: 'Sunday', value: 6 },
 ])
 
 // * Categories Checkbox
@@ -412,31 +422,40 @@ let categories = computed(() => {
     return (
       c.status === 'visible' &&
       c.serviceList.length > 0 &&
-      (!searchFilter.value.trim() || c.serviceList.filter(i => i.name.toLowerCase().includes(searchFilter.value.toLowerCase().trim())).length)
+      (!searchFilter.value.trim() ||
+        c.serviceList.filter((i) =>
+          i.name.toLowerCase().includes(searchFilter.value.toLowerCase().trim()),
+        ).length)
     )
   })
 })
 
-let activeCategoryIndex = ref(categories.value.length === 1 ? 'category_' + categories.value[0].id : null)
+let activeCategoryIndex = ref(
+  categories.value.length === 1 ? 'category_' + categories.value[0].id : null,
+)
 
 let activeServiceIndex = ref(0)
 
 function categoryIndeterminate(category) {
-  const enabledServices = category.serviceList.filter(service => employee.value.serviceList[category.id][service.id].enabled);
-  return enabledServices.length > 0 && enabledServices.length < category.serviceList.length;
+  const enabledServices = category.serviceList.filter(
+    (service) => employee.value.serviceList[category.id][service.id].enabled,
+  )
+  return enabledServices.length > 0 && enabledServices.length < category.serviceList.length
 }
 
 function changeCategoryState(category) {
-  const enabledServices = category.serviceList.filter(service => employee.value.serviceList[category.id][service.id].enabled);
-  categoriesCheckbox.value[category.id] = enabledServices.length !== 0;
+  const enabledServices = category.serviceList.filter(
+    (service) => employee.value.serviceList[category.id][service.id].enabled,
+  )
+  categoriesCheckbox.value[category.id] = enabledServices.length !== 0
 }
 
-function  toggleCategoryServices(value, category) {
-  category.serviceList.forEach(s => {
+function toggleCategoryServices(value, category) {
+  category.serviceList.forEach((s) => {
     store.commit('employee/setServiceEnabled', {
       categoryId: category.id,
       serviceId: s.id,
-      value
+      value,
     })
   })
 }
@@ -453,7 +472,10 @@ onMounted(() => {
   }
 
   categories.value.forEach((category) => {
-    categoriesCheckbox.value[category.id] = category.serviceList.filter(service => employee.value.serviceList[category.id][service.id].enabled).length !== 0
+    categoriesCheckbox.value[category.id] =
+      category.serviceList.filter(
+        (service) => employee.value.serviceList[category.id][service.id].enabled,
+      ).length !== 0
   })
 })
 
@@ -520,7 +542,7 @@ export default {
         }
       }
 
-       .el-collapse-item {
+      .el-collapse-item {
         &__header {
           height: unset;
           background-color: transparent;
@@ -698,9 +720,9 @@ export default {
         color: var(--am-c-caes-text-op50);
         border-radius: 6px;
 
-         span {
-           font-size: 24px;
-         }
+        span {
+          font-size: 24px;
+        }
       }
     }
   }

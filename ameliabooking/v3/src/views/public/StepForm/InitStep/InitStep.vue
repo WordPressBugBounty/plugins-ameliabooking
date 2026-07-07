@@ -2,7 +2,7 @@
   <div
     v-if="loaded"
     class="am-fs__init"
-    :class="[props.globalClass, {'am-oxvisible': (bringingAnyoneVisibility || packagesVisibility)}]"
+    :class="[props.globalClass, { 'am-oxvisible': bringingAnyoneVisibility || packagesVisibility }]"
   >
     <el-form
       ref="initFormRef"
@@ -12,10 +12,7 @@
       class="am-fs__init-form"
     >
       <template v-for="field in amCustomize.initStep.order" :key="field.id">
-        <component
-          :is="amFields[field.id].template"
-          v-bind="amFields[field.id].props"
-        ></component>
+        <component :is="amFields[field.id].template" v-bind="amFields[field.id].props"></component>
       </template>
     </el-form>
 
@@ -26,35 +23,49 @@
       :visibility="bringingAnyoneVisibility"
       class="am-fs__init__bringing"
     >
-      <p
-        class="am-fs__popup-x"
-        :class="{'am-rtl': isRtl}"
-        @click="closeBringingPopup"
-      >
+      <p class="am-fs__popup-x" :class="{ 'am-rtl': isRtl }" @click="closeBringingPopup">
         <AmeliaIconClose></AmeliaIconClose>
       </p>
       <BringingAnyone :in-popup="true" />
       <template #footer>
         <AmButton
-          v-if="(bringingAnyoneOptions.min !== bringingAnyoneOptions.max) &&  bringingAnyoneOptions.min <= 0"
+          v-if="
+            bringingAnyoneOptions.min !== bringingAnyoneOptions.max &&
+            bringingAnyoneOptions.min <= 0
+          "
           category="secondary"
           :type="amCustomize.bringingAnyone.options.secondaryButton.buttonType"
-          :disabled="(bringingAnyoneOptions.min === bringingAnyoneOptions.max) || (!amSettings.appointments.allowBookingIfNotMin && bringingAnyoneOptions.min > 0)"
+          :disabled="
+            bringingAnyoneOptions.min === bringingAnyoneOptions.max ||
+            (!amSettings.appointments.allowBookingIfNotMin && bringingAnyoneOptions.min > 0)
+          "
           @click="noOneBringWith"
         >
-          {{bringingLabels.bringing_no}}
+          {{ bringingLabels.bringing_no }}
         </AmButton>
         <AmButton
-          :type="(bringingAnyoneOptions.min !== bringingAnyoneOptions.max) &&  bringingAnyoneOptions.min <= 0 ?
-          amCustomize.bringingAnyone.options.primaryButton.buttonType : amCustomize.bringingAnyone.options.primaryFooterButton.buttonType"
-          :disabled="bookingPersons === (amSettings.appointments.bringingAnyoneLogic === 'additional' ? 1 : 0)"
+          :type="
+            bringingAnyoneOptions.min !== bringingAnyoneOptions.max &&
+            bringingAnyoneOptions.min <= 0
+              ? amCustomize.bringingAnyone.options.primaryButton.buttonType
+              : amCustomize.bringingAnyone.options.primaryFooterButton.buttonType
+          "
+          :disabled="
+            bookingPersons ===
+            (amSettings.appointments.bringingAnyoneLogic === 'additional' ? 1 : 0)
+          "
           @click="bringPeopleWithYou"
         >
-          <template v-if="(bringingAnyoneOptions.min !== bringingAnyoneOptions.max) &&  bringingAnyoneOptions.min <= 0">
-            {{bringingLabels.bringing_yes}}
+          <template
+            v-if="
+              bringingAnyoneOptions.min !== bringingAnyoneOptions.max &&
+              bringingAnyoneOptions.min <= 0
+            "
+          >
+            {{ bringingLabels.bringing_yes }}
           </template>
           <template v-else>
-            {{bringingLabels.continue}}
+            {{ bringingLabels.continue }}
           </template>
         </AmButton>
       </template>
@@ -62,10 +73,7 @@
     <!--/ Bringing Anyone with you -->
 
     <!-- Packages Popup -->
-    <PackagesPopup
-      class="am-fs__init__package"
-      @continue-with-service="continueWithService()"
-    />
+    <PackagesPopup class="am-fs__init__package" @continue-with-service="continueWithService()" />
     <!--/ Packages Popup -->
   </div>
 
@@ -84,28 +92,38 @@
 </template>
 
 <script setup>
-import { useStore } from "vuex";
-import {ref, reactive, computed, watchEffect, inject, provide, markRaw, nextTick, watch} from 'vue'
+import { useStore } from 'vuex'
+import {
+  ref,
+  reactive,
+  computed,
+  watchEffect,
+  inject,
+  provide,
+  markRaw,
+  nextTick,
+  watch,
+} from 'vue'
 
-import AmSlidePopup from "../../../_components/slide-popup/AmSlidePopup.vue";
-import AmButton from "../../../_components/button/AmButton.vue";
-import BringingAnyone from "../BringingAnyone/BringingAnyone.vue";
-import AmeliaIconClose from "../../../_components/icons/IconClose";
-import PackagesPopup from "../PakagesStep/parts/PackagesPopup";
+import AmSlidePopup from '../../../_components/slide-popup/AmSlidePopup.vue'
+import AmButton from '../../../_components/button/AmButton.vue'
+import BringingAnyone from '../BringingAnyone/BringingAnyone.vue'
+import AmeliaIconClose from '../../../_components/icons/IconClose'
+import PackagesPopup from '../PakagesStep/parts/PackagesPopup'
 
-import ServiceFormField from "../_fields/ServiceFormField.vue";
-import LocationFormField from "../_fields/LocationFormField.vue";
-import EmployeeFormField from "../_fields/EmployeeFormField.vue";
+import ServiceFormField from '../_fields/ServiceFormField.vue'
+import LocationFormField from '../_fields/LocationFormField.vue'
+import EmployeeFormField from '../_fields/EmployeeFormField.vue'
 
-import { useColorTransparency } from "../../../../assets/js/common/colorManipulation";
-import { useCapacity } from "../../../../assets/js/common/appointments";
+import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
+import { useCapacity } from '../../../../assets/js/common/appointments'
 import { useCart } from '../../../../assets/js/public/cart'
 
 let props = defineProps({
   globalClass: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 let amCustomize = inject('amCustomize')
@@ -114,15 +132,15 @@ let amCustomize = inject('amCustomize')
 const amSettings = inject('settings')
 
 // * Store
-let store = useStore();
+let store = useStore()
 
 // * Document text orientation
 let isRtl = computed(() => store.getters['getIsRtl'])
 
 function isFieldFilterable(key) {
-  return  (amCustomize.initStep.options[key] &&
-    'filterable' in amCustomize.initStep.options[key]) ?
-    amCustomize.initStep.options[key].filterable : true
+  return amCustomize.initStep.options[key] && 'filterable' in amCustomize.initStep.options[key]
+    ? amCustomize.initStep.options[key].filterable
+    : true
 }
 
 let amFields = reactive({
@@ -131,25 +149,25 @@ let amFields = reactive({
     props: {
       class: isRtl.value ? 'am-rtl' : '',
       filterable: isFieldFilterable('service'),
-      taxVisible: amCustomize.initStep.options.tax?.visibility ?? true
-    }
+      taxVisible: amCustomize.initStep.options.tax?.visibility ?? true,
+    },
   },
   location: {
     template: markRaw(LocationFormField),
     props: {
       class: isRtl.value ? 'am-rtl' : '',
       visibility: amCustomize.initStep.options.location.visibility,
-      filterable: isFieldFilterable('location')
-    }
+      filterable: isFieldFilterable('location'),
+    },
   },
   employee: {
     template: markRaw(EmployeeFormField),
     props: {
       class: isRtl.value ? 'am-rtl' : '',
       visibility: amCustomize.initStep.options.employee.visibility,
-      filterable: isFieldFilterable('employee')
-    }
-  }
+      filterable: isFieldFilterable('employee'),
+    },
+  },
 })
 
 let loaded = computed(() => {
@@ -174,11 +192,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...globalLabels})
+  let computedLabels = reactive({ ...globalLabels })
 
   if (amSettings.customizedData?.sbsNew?.initStep?.translations) {
     let customizedLabels = amSettings.customizedData.sbsNew.initStep.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -192,11 +210,15 @@ let amLabels = computed(() => {
 provide('amLabels', amLabels)
 
 let bringingLabels = computed(() => {
-  let computedLabels = reactive({...globalLabels})
+  let computedLabels = reactive({ ...globalLabels })
 
-  if (amSettings.customizedData && amSettings.customizedData.sbsNew && amSettings.customizedData.sbsNew.bringingAnyone.translations) {
+  if (
+    amSettings.customizedData &&
+    amSettings.customizedData.sbsNew &&
+    amSettings.customizedData.sbsNew.bringingAnyone.translations
+  ) {
     let customizedLabels = amSettings.customizedData.sbsNew.bringingAnyone.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -212,8 +234,8 @@ const { nextStep, footerButtonReset, footerButtonClicked } = inject('changingSte
   nextStep: () => {},
   footerButtonReset: () => {},
   footerButtonClicked: {
-    value: false
-  }
+    value: false,
+  },
 })
 
 /**
@@ -221,13 +243,15 @@ const { nextStep, footerButtonReset, footerButtonClicked } = inject('changingSte
  */
 
 let bringingAnyoneOptions = computed(() => {
-  return useCapacity(store.getters['entities/getEmployeeServices'](
-    store.getters['booking/getServiceProviderSelection']
-  ))
+  return useCapacity(
+    store.getters['entities/getEmployeeServices'](
+      store.getters['booking/getServiceProviderSelection'],
+    ),
+  )
 })
 
 provide('bringingOptions', {
-  bringingAnyoneOptions
+  bringingAnyoneOptions,
 })
 
 // * Bringing anyone with you popup visibility
@@ -266,19 +290,18 @@ function continueWithService() {
   }
 }
 
-function closeBringingPopup () {
+function closeBringingPopup() {
   bringingAnyoneVisibility.value = false
 }
 
 // * Package popup
-let packagesOptions = computed(() => store.getters['entities/filteredPackages'](
-    store.getters['booking/getSelection']
-))
+let packagesOptions = computed(() =>
+  store.getters['entities/filteredPackages'](store.getters['booking/getSelection']),
+)
 
 let packagesVisibility = ref(false)
 
 provide('packagesVisibility', packagesVisibility)
-
 
 /**
  * Form Block start
@@ -290,32 +313,32 @@ let initFormRef = ref(null)
 let initFormData = ref({
   service: computed({
     get: () => {
-      if (store.getters['booking/getCategoryId'] === null && store.getters['booking/getServiceId'] === null) {
+      if (
+        store.getters['booking/getCategoryId'] === null &&
+        store.getters['booking/getServiceId'] === null
+      ) {
         return null
       }
-      return [
-        store.getters['booking/getCategoryId'],
-        store.getters['booking/getServiceId']
-      ]
+      return [store.getters['booking/getCategoryId'], store.getters['booking/getServiceId']]
     },
     set: (val) => {
       store.commit('booking/setCategoryId', val ? val[0] : null)
       store.commit('booking/setServiceId', val ? val[1] : null)
       store.commit('booking/setBookableType', 'appointment')
-    }
+    },
   }),
   onlyService: computed({
     get: () => store.getters['booking/getServiceId'],
     set: (val) => {
       store.commit('booking/setServiceId', val ? val : null)
       store.commit('booking/setBookableType', 'appointment')
-    }
+    },
   }),
   location: computed({
     get: () => store.getters['booking/getLocationId'],
     set: (val) => {
       store.commit('booking/setLocationId', val ? val : null)
-    }
+    },
   }),
   employee: computed({
     get: () => store.getters['booking/getEmployeeId'],
@@ -323,8 +346,8 @@ let initFormData = ref({
       // let employee = employeeOptions.value.find(item => item.id === val)
       // store.commit('booking/setEmployeeId', employee ? employee.id : null)
       store.commit('booking/setEmployeeId', val ? val : null)
-    }
-  })
+    },
+  }),
 })
 
 provide('initFormData', initFormData)
@@ -336,28 +359,28 @@ let rules = ref({
       required: true,
       message: amLabels.value.please_select_service,
       trigger: ['blur', 'change'],
-    }
+    },
   ],
   onlyService: [
     {
       required: true,
       message: amLabels.value.please_select_service,
       trigger: ['blur', 'change'],
-    }
+    },
   ],
   location: [
     {
       required: amCustomize.initStep.options.location.required,
       message: amLabels.value.please_select_location,
       trigger: ['blur', 'change'],
-    }
+    },
   ],
   employee: [
     {
       required: amCustomize.initStep.options.employee.required,
       message: amLabels.value.please_select_employee,
       trigger: ['blur', 'change'],
-    }
+    },
   ],
 })
 
@@ -368,7 +391,11 @@ function submitForm() {
   initFormRef.value.validate((valid) => {
     footerButtonReset()
     if (valid) {
-      if (packagesOptions.value.length && shortcodeData.value.show !== 'services' && useCart(store).length <= 1) {
+      if (
+        packagesOptions.value.length &&
+        shortcodeData.value.show !== 'services' &&
+        useCart(store).length <= 1
+      ) {
         packagesVisibility.value = true
       } else {
         continueWithService()
@@ -406,7 +433,7 @@ export default {
     stepSelectedData: [],
     finished: false,
     selected: false,
-  }
+  },
 }
 </script>
 
@@ -433,7 +460,7 @@ export default {
           $count: 100;
           @for $i from 0 through $count {
             &:nth-child(#{$i + 1}) {
-              animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+              animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
               animation-fill-mode: both;
             }
           }
@@ -471,8 +498,8 @@ export default {
 
     &__popup-x {
       position: absolute;
-      top:16px;
-      right:16px;
+      top: 16px;
+      right: 16px;
       cursor: pointer;
       color: var(--am-c-main-text);
       margin: 0;
@@ -523,19 +550,20 @@ export default {
           margin: 20px 0;
           color: var(--am-c-ps-text-op60);
 
-          &:before, &:after{
-            content: "";
+          &:before,
+          &:after {
+            content: '';
             flex: 1 1;
             border-bottom: 1px solid var(--am-c-ps-text-op20);
             margin: auto;
           }
 
           &:before {
-            margin-right: 10px
+            margin-right: 10px;
           }
 
           &:after {
-            margin-left: 10px
+            margin-left: 10px;
           }
         }
 
@@ -550,7 +578,7 @@ export default {
 
           &-mobile {
             &.am-button.am-button--medium {
-              --am-fs-btn: 12px
+              --am-fs-btn: 12px;
             }
           }
         }

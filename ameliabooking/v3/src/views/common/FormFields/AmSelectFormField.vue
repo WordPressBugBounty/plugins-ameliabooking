@@ -35,59 +35,55 @@ import AmSelect from '../../_components/select/AmSelect.vue'
 import AmOption from '../../_components/select/AmOption.vue'
 
 // * Import from Vue
-import {
-  computed,
-  ref,
-  toRefs
-} from "vue";
+import { computed, ref, toRefs } from 'vue'
 
 // * Form Item Props
 let props = defineProps({
   modelValue: {
     type: [String, Array, Object, Number, null],
-    required: true
+    required: true,
   },
   itemName: {
     type: String,
-    required: true
+    required: true,
   },
   label: {
-    type: String
+    type: String,
   },
   labelPosition: {
     type: String,
-    default: 'top'
+    default: 'top',
   },
   options: {
     type: Array,
   },
   prefixIcon: {
     type: [String, Object],
-    default: ''
+    default: '',
   },
   placeholder: {
     type: String,
-    default: ''
+    default: '',
   },
   clearable: {
     type: Boolean,
-    default: true
+    default: true,
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   loading: {
     type: Boolean,
-    default: false
+    default: false,
   },
   loadingText: {
     type: String,
-    default: 'Loading...'
+    default: 'Loading...',
   },
   teleported: {
     type: Boolean,
-    default: true
+    default: true,
   },
 })
 
@@ -100,19 +96,19 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 // * Form Item Reference
 let formFieldRef = ref(null)
 
 defineExpose({
-  formFieldRef
+  formFieldRef,
 })
 </script>
 
 <script>
 export default {
-  name: "SelectFormField"
+  name: 'SelectFormField',
 }
 </script>

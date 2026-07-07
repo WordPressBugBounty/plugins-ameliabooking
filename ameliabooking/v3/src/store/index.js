@@ -9,7 +9,7 @@ const store = createStore({
     entities,
     booking,
     eventEntities,
-    eventBooking
+    eventBooking,
   },
 })
 

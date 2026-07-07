@@ -6,54 +6,54 @@ export default {
     ticketsData: [],
     maxCustomCapacity: null,
     maxExtraPeople: null,
-    globalSpots: 0
+    globalSpots: 0,
   }),
 
   getters: {
-    getMaxCustomCapacity (state) {
+    getMaxCustomCapacity(state) {
       return state.maxCustomCapacity
     },
 
-    getMaxExtraPeople (state) {
+    getMaxExtraPeople(state) {
       return state.maxExtraPeople
     },
 
     getTicketNumber: (state) => (id) => {
-      return state.ticketsData.find(t => t.id === id).persons
+      return state.ticketsData.find((t) => t.id === id).persons
     },
 
-    getTicketsSum (state) {
+    getTicketsSum(state) {
       let persons = 0
-      state.ticketsData.forEach(t => {
+      state.ticketsData.forEach((t) => {
         persons += t.persons
       })
 
       return persons
     },
 
-    getTicketsData (state) {
+    getTicketsData(state) {
       return state.ticketsData
     },
 
-    getEventGlobalSpots (state) {
+    getEventGlobalSpots(state) {
       return state.globalSpots
     },
 
-    getAllData (state) {
+    getAllData(state) {
       return {
         tickets: state.tickets,
         ticketsData: state.ticketsData,
         maxCustomCapacity: state.maxCustomCapacity,
         maxExtraPeople: state.maxExtraPeople,
-        globalSpots: state.globalSpots
+        globalSpots: state.globalSpots,
       }
-    }
+    },
   },
 
   mutations: {
-    setTickets (state, payload) {
+    setTickets(state, payload) {
       state.tickets = payload
-      payload.forEach(item => {
+      payload.forEach((item) => {
         if (item.enabled) {
           let obj = {
             spots: item.spots,
@@ -64,53 +64,53 @@ export default {
             id: item.id,
             eventTicketId: item.id,
             waiting: item.waiting,
-            waitingListSpots: item.waitingListSpots
+            waitingListSpots: item.waitingListSpots,
           }
           state.ticketsData.push(obj)
         }
       })
     },
 
-    setMaxCustomCapacity (state, payload) {
+    setMaxCustomCapacity(state, payload) {
       state.maxCustomCapacity = payload
     },
 
-    setReduceMaxExtraPeople (state, payload) {
-      state.maxExtraPeople = (state.maxExtraPeople + 1) - payload
+    setReduceMaxExtraPeople(state, payload) {
+      state.maxExtraPeople = state.maxExtraPeople + 1 - payload
     },
 
-    setMaxExtraPeople (state, payload) {
+    setMaxExtraPeople(state, payload) {
       state.maxExtraPeople = payload
     },
 
-    setTicketNumber (state, payload) {
-      state.ticketsData.forEach(t => {
+    setTicketNumber(state, payload) {
+      state.ticketsData.forEach((t) => {
         if (t.id === payload.id) t.persons = parseInt(payload.numb)
       })
     },
 
-    setEventGlobalSpots (state, payload) {
+    setEventGlobalSpots(state, payload) {
       state.globalSpots += payload
     },
 
-    setAllData (state, payload) {
+    setAllData(state, payload) {
       state.tickets = payload.tickets
       state.ticketsData = payload.ticketsData
       state.maxCustomCapacity = payload.maxCustomCapacity
       state.maxExtraPeople = payload.maxExtraPeople
       state.globalSpots = payload.globalSpots
-    }
+    },
   },
 
   actions: {
-    resetCustomTickets ({commit}) {
+    resetCustomTickets({ commit }) {
       commit('setAllData', {
         tickets: [],
         ticketsData: [],
         maxCustomCapacity: null,
         maxExtraPeople: null,
-        globalSpots: 0
+        globalSpots: 0,
       })
-    }
-  }
+    },
+  },
 }

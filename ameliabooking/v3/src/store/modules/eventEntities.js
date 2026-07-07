@@ -1,8 +1,5 @@
-import httpClient from "../../plugins/axios.js"
-import {
-  useUrlParams,
-  useUrlQueryParams
-} from "../../assets/js/common/helper"
+import httpClient from '../../plugins/axios.js'
+import { useUrlParams, useUrlQueryParams } from '../../assets/js/common/helper'
 import {
   useTranslateEntities,
   getNameTranslated,
@@ -31,9 +28,7 @@ function setTicketsData(event) {
 function setEmployeeBadgesData(employees, providerBadges) {
   employees.forEach((employee) => {
     if (employee.badgeId) {
-      employee.badge = providerBadges.find(
-        (badge) => badge.id === employee.badgeId
-      )
+      employee.badge = providerBadges.find((badge) => badge.id === employee.badgeId)
     } else {
       employee.badge = null
     }
@@ -47,10 +42,10 @@ function setEventWaitingListSettings(event, settings) {
     addingMethod: 'Manually',
     maxExtraPeopleEnabled: false,
     maxExtraPeople: 0,
-    peopleWaiting: 0
+    peopleWaiting: 0,
   }
 
-  if(!settings.featuresIntegrations?.waitingList?.enabled) {
+  if (!settings.featuresIntegrations?.waitingList?.enabled) {
     return defaultWaitingList
   }
 
@@ -65,8 +60,8 @@ function getEntitiesVariableName() {
   return 'ameliaEventEntities' in window
     ? 'ameliaEventEntities'
     : 'ameliaEntities' in window
-    ? 'ameliaEntities'
-    : false
+      ? 'ameliaEntities'
+      : false
 }
 
 export default {
@@ -93,10 +88,7 @@ export default {
     },
 
     getEvent: (state) => (id) => {
-      return (
-        state.events.find((event) => parseInt(event.id) === parseInt(id)) ||
-        null
-      )
+      return state.events.find((event) => parseInt(event.id) === parseInt(id)) || null
     },
 
     getTags(state) {
@@ -112,7 +104,7 @@ export default {
     },
 
     getLocation: (state) => (id) => {
-      return state.locations.find(i => parseInt(i.id) === parseInt(id)) || null
+      return state.locations.find((i) => parseInt(i.id) === parseInt(id)) || null
     },
 
     getCustomFields(state) {
@@ -121,8 +113,7 @@ export default {
 
     getEventCustomFields: (state) => (id) => {
       return state.customFields.filter(
-        (customField) =>
-          customField.events.filter((event) => event.id === id).length
+        (customField) => customField.events.filter((event) => event.id === id).length,
       )
     },
 
@@ -130,23 +121,21 @@ export default {
       return state.locations.filter((l) =>
         shortcode.locations && shortcode.locations.length > 0
           ? shortcode.locations.find((loc) => parseInt(loc) === l.id)
-          : true
+          : true,
       )
     },
 
     getFilteredTags: (state) => (shortcode) => {
       return state.tags.filter(
         (t) =>
-          (shortcode.tags && shortcode.tags.length > 0
-            ? shortcode.tags.includes(t.name)
-            : true) &&
+          (shortcode.tags && shortcode.tags.length > 0 ? shortcode.tags.includes(t.name) : true) &&
           // ! this cause problems on visibility filter tag field
           (shortcode.ids && shortcode.ids.length > 0
             ? state.events
                 .map((e) => e.tags)
                 .flat()
                 .filter((tag) => tag.name === t.name).length > 0
-            : true)
+            : true),
       )
     },
 
@@ -218,9 +207,7 @@ export default {
 
     setArrayPartsToEvents(state, payload) {
       const eventIds = new Set(state.events.map((item) => item.id))
-      const filteredArrayParts = payload.filter(
-        (item) => !eventIds.has(item.id)
-      )
+      const filteredArrayParts = payload.filter((item) => !eventIds.has(item.id))
 
       state.events = [...state.events, ...filteredArrayParts]
     },
@@ -245,11 +232,7 @@ export default {
   actions: {
     requestEntities({ dispatch, commit, rootGetters }, payload) {
       commit('setReady', false, { root: true })
-      commit(
-        'params/setParams',
-        rootGetters['shortcodeParams/getShortcodeParams'],
-        { root: true }
-      )
+      commit('params/setParams', rootGetters['shortcodeParams/getShortcodeParams'], { root: true })
 
       let serverData = {
         types: payload.types,
@@ -263,9 +246,7 @@ export default {
           .then((response) => {
             window.ameliaEventEntities = response.data.data
 
-            serverData.entities = JSON.parse(
-              JSON.stringify(window.ameliaEventEntities)
-            )
+            serverData.entities = JSON.parse(JSON.stringify(window.ameliaEventEntities))
 
             dispatch('fillingOutData', serverData)
           })
@@ -285,18 +266,13 @@ export default {
     },
 
     fillingOutData({ commit, dispatch, rootState, getters }, payload) {
-      let availableTranslationsShort =
-        rootState.settings.general.usedLanguages.map((key) =>
-          key.length > 2 ? key.slice(0, 2) : key
-        )
+      let availableTranslationsShort = rootState.settings.general.usedLanguages.map((key) =>
+        key.length > 2 ? key.slice(0, 2) : key,
+      )
 
       if (
-        rootState.settings.general.usedLanguages.indexOf(
-          rootState.localLanguage
-        ) !== -1 ||
-        availableTranslationsShort.indexOf(
-          rootState.localLanguage.split('_')[0]
-        ) !== -1
+        rootState.settings.general.usedLanguages.indexOf(rootState.localLanguage) !== -1 ||
+        availableTranslationsShort.indexOf(rootState.localLanguage.split('_')[0]) !== -1
       ) {
         useTranslateEntities(payload.entities)
 
@@ -307,7 +283,7 @@ export default {
 
       setEmployeeBadgesData(
         payload.entities.employees,
-        rootState.settings.roles.providerBadges.badges ?? []
+        rootState.settings.roles.providerBadges.badges ?? [],
       )
 
       payload.types.forEach((ent) => {
@@ -315,7 +291,10 @@ export default {
           payload.entities[ent] = []
         }
 
-        if (ent === 'customFields' && !rootState.settings.featuresIntegrations.customFields.enabled) {
+        if (
+          ent === 'customFields' &&
+          !rootState.settings.featuresIntegrations.customFields.enabled
+        ) {
           payload.entities['customFields'] = []
 
           return
@@ -330,7 +309,7 @@ export default {
                 }
                 return a['saveType'].localeCompare(b['saveType'])
               })
-            : payload.entities[ent]
+            : payload.entities[ent],
         )
       })
 
@@ -381,25 +360,20 @@ export default {
         eventParams['idPopup'] = parseInt(urlParams.ameliaEventPopup)
       }
 
-      let loadingCounter = payload === 'upcoming' ? getters['getLoadingUpcomingCounter'] : getters['getLoadingCounter']
+      let loadingCounter =
+        payload === 'upcoming' ? getters['getLoadingUpcomingCounter'] : getters['getLoadingCounter']
 
       commit(
-        payload === 'upcoming'
-          ? 'setLoadingUpcomingCounter'
-          : 'setLoadingCounter',
-        ++loadingCounter
+        payload === 'upcoming' ? 'setLoadingUpcomingCounter' : 'setLoadingCounter',
+        ++loadingCounter,
       )
 
       httpClient
-        .get('/events', { params: useUrlParams(Object.assign({bookings: false}, eventParams)) })
+        .get('/events', { params: useUrlParams(Object.assign({ bookings: false }, eventParams)) })
         .then((response) => {
           if (
             loadingCounter !==
-            getters[
-              payload === 'upcoming'
-                ? 'getLoadingUpcomingCounter'
-                : 'getLoadingCounter'
-            ]
+            getters[payload === 'upcoming' ? 'getLoadingUpcomingCounter' : 'getLoadingCounter']
           ) {
             return
           }
@@ -407,31 +381,20 @@ export default {
           commit('pagination/setCount', response.data.data.count, {
             root: true,
           })
-          commit(
-            'pagination/setShow',
-            rootState.settings.general.itemsPerPage,
-            { root: true }
-          )
+          commit('pagination/setShow', rootState.settings.general.itemsPerPage, { root: true })
 
           let events = []
 
-          let availableTranslationsShort =
-            rootState.settings.general.usedLanguages.map((key) =>
-              key.length > 2 ? key.slice(0, 2) : key
-            )
+          let availableTranslationsShort = rootState.settings.general.usedLanguages.map((key) =>
+            key.length > 2 ? key.slice(0, 2) : key,
+          )
 
           let useTranslations =
-            rootState.settings.general.usedLanguages.indexOf(
-              rootState.localLanguage
-            ) !== -1 ||
-            availableTranslationsShort.indexOf(
-              rootState.localLanguage.split('_')[0]
-            ) !== -1
+            rootState.settings.general.usedLanguages.indexOf(rootState.localLanguage) !== -1 ||
+            availableTranslationsShort.indexOf(rootState.localLanguage.split('_')[0]) !== -1
 
           response.data.data.events.forEach(function (event) {
-            event.gallery = event.gallery.sort((a, b) =>
-              a.position > b.position ? 1 : -1
-            )
+            event.gallery = event.gallery.sort((a, b) => (a.position > b.position ? 1 : -1))
 
             if (useTranslations) {
               event.name = getNameTranslated(event)
@@ -446,10 +409,7 @@ export default {
               event.bookingToEventTickets = setTicketsData(event)
             }
 
-            event.waitingList = setEventWaitingListSettings(
-              event,
-              rootState.settings
-            )
+            event.waitingList = setEventWaitingListSettings(event, rootState.settings)
 
             if (!rootState.settings.featuresIntegrations.depositPayment.enabled) {
               event.depositPayment = 'disabled'
@@ -459,16 +419,10 @@ export default {
 
             if (rootState.settings.general.showClientTimeZone) {
               event.periods.forEach(function (period) {
-                let utcOffsetStart = moment(
-                  period.periodStart,
-                  'YYYY-MM-DD HH:mm:ss'
-                )
+                let utcOffsetStart = moment(period.periodStart, 'YYYY-MM-DD HH:mm:ss')
                   .toDate()
                   .getTimezoneOffset()
-                let utcOffsetEnd = moment(
-                  period.periodEnd,
-                  'YYYY-MM-DD HH:mm:ss'
-                )
+                let utcOffsetEnd = moment(period.periodEnd, 'YYYY-MM-DD HH:mm:ss')
                   .toDate()
                   .getTimezoneOffset()
 

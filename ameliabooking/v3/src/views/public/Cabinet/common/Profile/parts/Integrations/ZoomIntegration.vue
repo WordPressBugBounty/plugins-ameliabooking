@@ -4,9 +4,7 @@
     <div v-if="showBack" class="am-zoom-integration__header">
       <div class="am-zoom-integration__header-back" @click="handleBack">
         <span class="am-icon-arrow-big-left"></span>
-        <span class="am-zoom-integration__header-title">{{
-          amLabels.zoom
-        }}</span>
+        <span class="am-zoom-integration__header-title">{{ amLabels.zoom }}</span>
       </div>
     </div>
     <!-- /Navigation Header -->

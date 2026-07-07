@@ -1,30 +1,17 @@
 <script setup>
-import AmDialog from "../../_components/dialog/AmDialog.vue"
+import AmDialog from '../../_components/dialog/AmDialog.vue'
 
-import SbsForm from "../StepForm/BookingStepForm.vue"
-import CbfForm from "../CatalogForm/CatalogForm.vue"
-import ElfForm from "../EventForm/EventListForm/EventsListForm.vue"
-import EcfForm from "../EventForm/EventCalendarForm/EvensCalendarForm.vue"
+import SbsForm from '../StepForm/BookingStepForm.vue'
+import CbfForm from '../CatalogForm/CatalogForm.vue'
+import ElfForm from '../EventForm/EventListForm/EventsListForm.vue'
+import EcfForm from '../EventForm/EventCalendarForm/EvensCalendarForm.vue'
 
 // * Import from Vue
-import {
-  markRaw,
-  reactive,
-  ref,
-  inject,
-  computed,
-  onMounted,
-  watchEffect,
-  provide
-} from "vue";
+import { markRaw, reactive, ref, inject, computed, onMounted, watchEffect, provide } from 'vue'
 
 // * Import composables
-import {
-  defaultCustomizeSettings
-} from "../../../assets/js/common/defaultCustomize";
-import {
-  useRenderAction
-} from "../../../assets/js/public/renderActions";
+import { defaultCustomizeSettings } from '../../../assets/js/common/defaultCustomize'
+import { useRenderAction } from '../../../assets/js/public/renderActions'
 
 // * Shortcode Data
 let shortcodeData = inject('shortcodeData')
@@ -34,7 +21,7 @@ let formList = reactive({
   sbsNew: markRaw(SbsForm),
   cbf: markRaw(CbfForm),
   elf: markRaw(ElfForm),
-  ecf: markRaw(EcfForm)
+  ecf: markRaw(EcfForm),
 })
 
 let dialogWrapperWidth = ref(0)
@@ -43,17 +30,21 @@ provide('dialogWrapperWidth', dialogWrapperWidth)
 let dialogVisibility = ref(false)
 provide('formDialogVisibility', dialogVisibility)
 
-let isRestored = computed(() => 'isRestored' in shortcodeData.value ? shortcodeData.value.isRestored : false)
+let isRestored = computed(() =>
+  'isRestored' in shortcodeData.value ? shortcodeData.value.isRestored : false,
+)
 
-let externalButtons = shortcodeData.value.trigger_type && shortcodeData.value.trigger_type === 'class' ? [...document.getElementsByClassName(shortcodeData.value.trigger)]
-  : [document.getElementById(shortcodeData.value.trigger)]
+let externalButtons =
+  shortcodeData.value.trigger_type && shortcodeData.value.trigger_type === 'class'
+    ? [...document.getElementsByClassName(shortcodeData.value.trigger)]
+    : [document.getElementById(shortcodeData.value.trigger)]
 
 let resizeAfter = ref(100)
 
 let loadDialogCounter = ref(0)
 provide('loadDialogCounter', loadDialogCounter)
 
-externalButtons.forEach(btn => {
+externalButtons.forEach((btn) => {
   btn.addEventListener('click', (a) => {
     a.preventDefault()
     a.stopPropagation()
@@ -64,20 +55,20 @@ externalButtons.forEach(btn => {
     }
 
     setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
+      window.dispatchEvent(new Event('resize'))
     }, resizeAfter.value)
   })
 })
 
 watchEffect(() => {
-  if(isRestored.value) {
-    externalButtons.forEach(btn => {
+  if (isRestored.value) {
+    externalButtons.forEach((btn) => {
       btn.dispatchEvent(new Event('click'))
     })
   }
 })
 
-function resetDialogState () {
+function resetDialogState() {
   dialogVisibility.value = false
 }
 
@@ -94,12 +85,9 @@ let isMounted = inject('isMounted')
 onMounted(() => {
   isMounted.value = true
 
-  useRenderAction(
-    'renderPopup',
-    {
-      resizeAfter
-    },
-  )
+  useRenderAction('renderPopup', {
+    resizeAfter,
+  })
 
   updateVH()
 })
@@ -109,11 +97,17 @@ const amSettings = inject('settings')
 
 // * Colors block
 let amColors = computed(() => {
-  return amSettings.customizedData && shortcodeData.value.triggered_form in amSettings.customizedData ? amSettings.customizedData[shortcodeData.value.triggered_form].colors : defaultCustomizeSettings[shortcodeData.value.triggered_form].colors
+  return amSettings.customizedData &&
+    shortcodeData.value.triggered_form in amSettings.customizedData
+    ? amSettings.customizedData[shortcodeData.value.triggered_form].colors
+    : defaultCustomizeSettings[shortcodeData.value.triggered_form].colors
 })
 
 let formData = computed(() => {
-  return amSettings.customizedData && shortcodeData.value.triggered_form in amSettings.customizedData ? amSettings.customizedData[shortcodeData.value.triggered_form] : defaultCustomizeSettings[shortcodeData.value.triggered_form]
+  return amSettings.customizedData &&
+    shortcodeData.value.triggered_form in amSettings.customizedData
+    ? amSettings.customizedData[shortcodeData.value.triggered_form]
+    : defaultCustomizeSettings[shortcodeData.value.triggered_form]
 })
 
 let cssVars = computed(() => {
@@ -129,25 +123,27 @@ let cssVars = computed(() => {
   }
 })
 
-watchEffect(() => {
-  if (shortcodeData.value.triggered_form === 'sbsNew') {
-    dialogWrapperWidth.value = formData.value.sidebar.options.self.visibility ? '760px' : '520px'
-  }
+watchEffect(
+  () => {
+    if (shortcodeData.value.triggered_form === 'sbsNew') {
+      dialogWrapperWidth.value = formData.value.sidebar.options.self.visibility ? '760px' : '520px'
+    }
 
-  if (shortcodeData.value.triggered_form === 'cbf') {
-    dialogWrapperWidth.value = '1140px'
-  }
+    if (shortcodeData.value.triggered_form === 'cbf') {
+      dialogWrapperWidth.value = '1140px'
+    }
 
-  if (shortcodeData.value.triggered_form === 'elf') {
-    dialogWrapperWidth.value = '792px'
-  }
-
-}, {flush: 'post'})
+    if (shortcodeData.value.triggered_form === 'elf') {
+      dialogWrapperWidth.value = '792px'
+    }
+  },
+  { flush: 'post' },
+)
 </script>
 
 <script>
 export default {
-  name: "AmeliaDialogForms",
+  name: 'AmeliaDialogForms',
 }
 </script>
 
@@ -170,7 +166,7 @@ export default {
 <style lang="scss">
 .amelia-v2-booking {
   &.am-forms-dialog {
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 9999999 !important;
 
     &.am-cbf {

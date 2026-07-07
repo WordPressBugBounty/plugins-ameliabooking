@@ -4,9 +4,7 @@
     <div v-if="showBack" class="am-outlook-integration__header">
       <div class="am-outlook-integration__header-back" @click="handleBack">
         <span class="am-icon-arrow-big-left"></span>
-        <span class="am-outlook-integration__header-title">{{
-          amLabels.outlook_calendar
-        }}</span>
+        <span class="am-outlook-integration__header-title">{{ amLabels.outlook_calendar }}</span>
       </div>
     </div>
     <!-- /Navigation Header -->
@@ -29,8 +27,8 @@
             isAdminConnected
               ? amLabels.red_employee_outlook_calendar_connected_by_admin
               : account.token
-              ? getAccountPrimaryCalendarName(account)
-              : amLabels.red_employee_outlook_description
+                ? getAccountPrimaryCalendarName(account)
+                : amLabels.red_employee_outlook_description
           "
           :is-connected="!!account.token"
           :is-connect-button-needed="true"
@@ -65,9 +63,7 @@
       >
         <!-- Sync With -->
         <div class="am-outlook-integration__field">
-          <label class="am-outlook-integration__label">{{
-            amLabels.red_sync_with
-          }}</label>
+          <label class="am-outlook-integration__label">{{ amLabels.red_sync_with }}</label>
           <AmSelect
             v-model="outlookId"
             :placeholder="amLabels.select_calendar"
@@ -99,9 +95,7 @@
             :key="index"
             class="am-outlook-integration__blocked-item"
           >
-            <div
-              class="am-outlook-integration__field am-outlook-integration__field--grow"
-            >
+            <div class="am-outlook-integration__field am-outlook-integration__field--grow">
               <AmSelect
                 :model-value="blockedCalendarId"
                 :placeholder="amLabels.calendar_name"
@@ -254,8 +248,7 @@ const outlookId = computed({
 
 const blockedCalendars = computed({
   get: () => store.getters['employee/getOutlookCalendarBlockedCalendars'] || [],
-  set: (val) =>
-    store.commit('employee/setOutlookCalendarBlockedCalendars', val),
+  set: (val) => store.commit('employee/setOutlookCalendarBlockedCalendars', val),
 })
 
 const handleDisconnect = (account) => {
@@ -298,21 +291,15 @@ const getAvailableCalendarsForBlockedCalendar = (currentIndex) => {
     selectedSet.add(String(outlookId.value))
   }
 
-  return allCalendars.value.filter(
-    (calendar) => !selectedSet.has(String(calendar.id))
-  )
+  return allCalendars.value.filter((calendar) => !selectedSet.has(String(calendar.id)))
 }
 
 const getAccountPrimaryCalendarName = (account) => {
   if (account.calendarList && account.calendarList.length > 0) {
     const primaryCalendar = account.calendarList.find(
-      (calendar) => calendar.owner || calendar.primary
+      (calendar) => calendar.owner || calendar.primary,
     )
-    return (
-      primaryCalendar?.owner ||
-      primaryCalendar?.name ||
-      primaryCalendar?.summary
-    )
+    return primaryCalendar?.owner || primaryCalendar?.name || primaryCalendar?.summary
   }
   return undefined
 }
@@ -334,9 +321,7 @@ const filteredSyncCalendars = computed(() => {
   const query = calendarFilterQuery.value['sync'] || ''
   if (!query) return allCalendars.value
   return allCalendars.value.filter((calendar) =>
-    (calendar.name || calendar.summary || '')
-      .toLowerCase()
-      .includes(query.toLowerCase())
+    (calendar.name || calendar.summary || '').toLowerCase().includes(query.toLowerCase()),
   )
 })
 
@@ -345,9 +330,7 @@ const getFilteredAvailableCalendars = (index) => {
   const query = calendarFilterQuery.value[index] || ''
   if (!query) return available
   return available.filter((calendar) =>
-    (calendar.name || calendar.summary || '')
-      .toLowerCase()
-      .includes(query.toLowerCase())
+    (calendar.name || calendar.summary || '').toLowerCase().includes(query.toLowerCase()),
   )
 }
 
@@ -359,7 +342,7 @@ watch(
   () => outlookId.value,
   (newCalendarId) => {
     if (newCalendarId) removeSyncCalendarFromBlocked(newCalendarId)
-  }
+  },
 )
 </script>
 

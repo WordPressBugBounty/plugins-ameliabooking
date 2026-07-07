@@ -1,12 +1,6 @@
 <template>
-  <div
-    class="am-cc__customers"
-    :class="responsiveClass"
-  >
-    <template
-      v-for="(item, index) in props.data"
-      :key="index"
-    >
+  <div class="am-cc__customers" :class="responsiveClass">
+    <template v-for="(item, index) in props.data" :key="index">
       <div class="am-cc__customers-item">
         <div class="am-cc__customers-item_inner">
           <span class="am-cc__customers-name">
@@ -16,10 +10,20 @@
             ></span>
             {{ item.firstName }} {{ item.lastName }}
           </span>
-          <span v-if="!customizedOptions || customizedOptions.appointments.options.customerEmail.visibility" class="am-cc__customers-info">
+          <span
+            v-if="
+              !customizedOptions || customizedOptions.appointments.options.customerEmail.visibility
+            "
+            class="am-cc__customers-info"
+          >
             {{ item.email }}
           </span>
-          <span v-if="!customizedOptions || customizedOptions.appointments.options.customerPhone.visibility" class="am-cc__customers-info">
+          <span
+            v-if="
+              !customizedOptions || customizedOptions.appointments.options.customerPhone.visibility
+            "
+            class="am-cc__customers-info"
+          >
             {{ item.phone }}
           </span>
         </div>
@@ -30,22 +34,19 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject
-} from "vue";
+import { computed, inject } from 'vue'
 
 // * Composables
-import { useResponsiveClass } from "../../../../../../../../assets/js/common/responsive.js";
+import { useResponsiveClass } from '../../../../../../../../assets/js/common/responsive.js'
 
 let props = defineProps({
   data: {
-    type: [Array, Object, String]
+    type: [Array, Object, String],
   },
   customizedOptions: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 let cWidth = inject('containerWidth')
@@ -57,7 +58,7 @@ let responsiveClass = computed(() => {
 
 <script>
 export default {
-  name: "TemplateCustomers"
+  name: 'TemplateCustomers',
 }
 </script>
 

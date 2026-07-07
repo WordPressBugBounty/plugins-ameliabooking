@@ -5,13 +5,13 @@
 </template>
 
 <script setup>
-import { provide } from 'vue';
+import { provide } from 'vue'
 
 const props = defineProps({
   multiple: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 provide('multiple', props.multiple)
 </script>
@@ -19,7 +19,8 @@ provide('multiple', props.multiple)
 <style lang="scss">
 // am  -- amelia
 @mixin am-collapse-block {
-  .am-collapse {}
+  .am-collapse {
+  }
 }
 
 // public

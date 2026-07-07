@@ -1,12 +1,8 @@
 <template>
   <div class="am-fs__payments-wrapper" :style="cssVars">
     <div class="am-fs__payments">
-
       <!-- Recurring Service -->
-      <AmCollapse
-        v-if="isRecurring"
-        class="am-fs__payments-services"
-      >
+      <AmCollapse v-if="isRecurring" class="am-fs__payments-services">
         <AmCollapseItem
           :side="true"
           @collapse-open="recurringCollapseState = false"
@@ -21,19 +17,21 @@
           </template>
           <template #icon-below>
             <Transition
-              :duration="{enter: 500, leave: 500}"
+              :duration="{ enter: 500, leave: 500 }"
               @enter="onCollapseClose"
               @leave="onCollapseOpen"
             >
-              <div
-                v-show="recurringCollapseState"
-                class="am-fs__payments-services-sub"
-              >
+              <div v-show="recurringCollapseState" class="am-fs__payments-services-sub">
                 <p>
                   {{ amLabels.summary_services_subtotal }}
                 </p>
                 <p class="am-amount">
-                  {{ useFormattedPrice(appointmentsAmount.prepaid.totalServiceAmount + appointmentsAmount.postpaid.totalServiceAmount) }}
+                  {{
+                    useFormattedPrice(
+                      appointmentsAmount.prepaid.totalServiceAmount +
+                        appointmentsAmount.postpaid.totalServiceAmount,
+                    )
+                  }}
                 </p>
               </div>
             </Transition>
@@ -46,12 +44,14 @@
                   :key="sPrice"
                   class="am-fs__payments-services-open-text"
                 >
-                <span>
-                  {{`${service.name} (${useFormattedPrice(sPrice)}) x ${persons} ${personsLabel}`}}
-                </span>
+                  <span>
+                    {{
+                      `${service.name} (${useFormattedPrice(sPrice)}) x ${persons} ${personsLabel}`
+                    }}
+                  </span>
                   <span class="am-amount">
-                  {{ useFormattedPrice(sPrice*(service.aggregatedPrice ? persons : 1)) }}
-                </span>
+                    {{ useFormattedPrice(sPrice * (service.aggregatedPrice ? persons : 1)) }}
+                  </span>
                 </div>
               </div>
 
@@ -62,9 +62,11 @@
                   :key="sPrice"
                   class="am-fs__payments-services-open-total am-fs__payments-services-open-text"
                 >
-                <span>
-                  {{ `${sNum} ${recurrenceLabel(sNum)} x ${service.name} (${useFormattedPrice(sPrice)}) x ${persons} ${personsLabel}` }}
-                </span>
+                  <span>
+                    {{
+                      `${sNum} ${recurrenceLabel(sNum)} x ${service.name} (${useFormattedPrice(sPrice)}) x ${persons} ${personsLabel}`
+                    }}
+                  </span>
                 </div>
               </div>
 
@@ -73,7 +75,12 @@
                   {{ amLabels.summary_services_subtotal }}
                 </p>
                 <p class="am-amount">
-                  {{ useFormattedPrice(appointmentsAmount.prepaid.totalServiceAmount + appointmentsAmount.postpaid.totalServiceAmount) }}
+                  {{
+                    useFormattedPrice(
+                      appointmentsAmount.prepaid.totalServiceAmount +
+                        appointmentsAmount.postpaid.totalServiceAmount,
+                    )
+                  }}
                 </p>
               </div>
             </div>
@@ -89,24 +96,30 @@
           </span>
         </div>
         <div class="am-fs__payments-services-open">
-          <div v-for="(sNum, sPrice) in appointmentsAmount.servicesPrices" :key="sPrice" class="am-fs__payments-services-sub">
+          <div
+            v-for="(sNum, sPrice) in appointmentsAmount.servicesPrices"
+            :key="sPrice"
+            class="am-fs__payments-services-sub"
+          >
             <p>
               {{ `${service.name} (${useFormattedPrice(sPrice)})` }}
               <span v-if="service.aggregatedPrice">
-                {{ `x ${persons} ${personsLabel}`}}
+                {{ `x ${persons} ${personsLabel}` }}
               </span>
             </p>
             <p class="am-amount">
-              {{ useFormattedPrice(appointmentsAmount.prepaid.totalServiceAmount + appointmentsAmount.postpaid.totalServiceAmount) }}
+              {{
+                useFormattedPrice(
+                  appointmentsAmount.prepaid.totalServiceAmount +
+                    appointmentsAmount.postpaid.totalServiceAmount,
+                )
+              }}
             </p>
           </div>
         </div>
       </div>
 
-      <AmCollapse
-        v-if="extras.length > 0"
-        class="am-fs__payments-services"
-      >
+      <AmCollapse v-if="extras.length > 0" class="am-fs__payments-services">
         <!--  -->
         <AmCollapseItem
           :side="true"
@@ -122,41 +135,48 @@
           </template>
           <template #icon-below>
             <Transition
-              :duration="{enter: 500, leave: 500}"
+              :duration="{ enter: 500, leave: 500 }"
               @enter="onCollapseClose"
               @leave="onCollapseOpen"
             >
-              <div
-                v-show="extrasCollapseState"
-                class="am-fs__payments-services-sub"
-              >
+              <div v-show="extrasCollapseState" class="am-fs__payments-services-sub">
                 <p>
                   {{ amLabels.summary_extras_subtotal }}
                 </p>
                 <p class="am-amount">
-                  {{ useFormattedPrice(appointmentsAmount.prepaid.totalExtrasAmount + appointmentsAmount.postpaid.totalExtrasAmount) }}
+                  {{
+                    useFormattedPrice(
+                      appointmentsAmount.prepaid.totalExtrasAmount +
+                        appointmentsAmount.postpaid.totalExtrasAmount,
+                    )
+                  }}
                 </p>
               </div>
             </Transition>
           </template>
           <template #default>
             <div class="am-fs__payments-services-open">
-              <div :class="{'am-fs__payments-services-open-bordered': isRecurring}">
+              <div :class="{ 'am-fs__payments-services-open-bordered': isRecurring }">
                 <div
                   v-for="extra in extras"
                   :key="extra.extraId"
                   class="am-fs__payments-services-open-text"
                 >
-                <span>
-                  {{ `${extra.quantity} x ${extra.name} (${useFormattedPrice(extra.price)})` }}
-                  <span
-                    v-if="extra.aggregatedPrice === null ? service.aggregatedPrice : extra.aggregatedPrice">
-                    {{ `x ${persons} ${personsLabel}` }}
+                  <span>
+                    {{ `${extra.quantity} x ${extra.name} (${useFormattedPrice(extra.price)})` }}
+                    <span
+                      v-if="
+                        extra.aggregatedPrice === null
+                          ? service.aggregatedPrice
+                          : extra.aggregatedPrice
+                      "
+                    >
+                      {{ `x ${persons} ${personsLabel}` }}
+                    </span>
                   </span>
-                </span>
                   <span class="am-amount">
-                  {{ useFormattedPrice(useAppointmentExtraAmount(service, extra, persons)) }}
-                </span>
+                    {{ useFormattedPrice(useAppointmentExtraAmount(service, extra, persons)) }}
+                  </span>
                 </div>
               </div>
 
@@ -164,11 +184,14 @@
                 <div
                   v-for="(extra, index) in extras"
                   v-show="isRecurring"
-                  :key="index" class="am-fs__payments-services-open-total am-fs__payments-services-open-text"
+                  :key="index"
+                  class="am-fs__payments-services-open-total am-fs__payments-services-open-text"
                 >
-                <span>
-                  {{ `${bookingsCount} ${amLabels.summary_recurrences} x ${extra.name} ( ${useFormattedPrice(useAppointmentExtraAmount(service, extra, persons))} )` }}
-                </span>
+                  <span>
+                    {{
+                      `${bookingsCount} ${amLabels.summary_recurrences} x ${extra.name} ( ${useFormattedPrice(useAppointmentExtraAmount(service, extra, persons))} )`
+                    }}
+                  </span>
                 </div>
               </div>
 
@@ -177,7 +200,12 @@
                   {{ amLabels.summary_extras_subtotal }}
                 </p>
                 <p class="am-amount">
-                  {{ useFormattedPrice(appointmentsAmount.prepaid.totalExtrasAmount + appointmentsAmount.postpaid.totalExtrasAmount) }}
+                  {{
+                    useFormattedPrice(
+                      appointmentsAmount.prepaid.totalExtrasAmount +
+                        appointmentsAmount.postpaid.totalExtrasAmount,
+                    )
+                  }}
                 </p>
               </div>
             </div>
@@ -193,14 +221,26 @@
         <div class="am-fs__payments-services-open">
           <div class="am-fs__payments-services-sub">
             <p>
-              {{ `${extras[0].quantity} ${extras[0].name} (${useFormattedPrice(extras[0].price)})` }}
+              {{
+                `${extras[0].quantity} ${extras[0].name} (${useFormattedPrice(extras[0].price)})`
+              }}
               <span
-                v-if="extras[0].aggregatedPrice === null ? service.aggregatedPrice : extras[0].aggregatedPrice">
+                v-if="
+                  extras[0].aggregatedPrice === null
+                    ? service.aggregatedPrice
+                    : extras[0].aggregatedPrice
+                "
+              >
                 {{ `x ${persons} ${personsLabel}` }}
               </span>
             </p>
             <p class="am-amount">
-              {{ useFormattedPrice(appointmentsAmount.prepaid.totalExtrasAmount + appointmentsAmount.postpaid.totalExtrasAmount) }}
+              {{
+                useFormattedPrice(
+                  appointmentsAmount.prepaid.totalExtrasAmount +
+                    appointmentsAmount.postpaid.totalExtrasAmount,
+                )
+              }}
             </p>
           </div>
         </div>
@@ -216,15 +256,16 @@
         @coupon-applied="couponApplied"
       />
 
-      <div
-        v-if="!onlyTotal"
-        class="am-fs__payments-app-info-subtotal"
-      >
+      <div v-if="!onlyTotal" class="am-fs__payments-app-info-subtotal">
         <span>
-          {{`${amLabels.subtotal}:`}}
+          {{ `${amLabels.subtotal}:` }}
         </span>
         <span class="am-amount">
-          {{ useFormattedPrice(appointmentsAmount.prepaid.totalAmount + appointmentsAmount.postpaid.totalAmount) }}
+          {{
+            useFormattedPrice(
+              appointmentsAmount.prepaid.totalAmount + appointmentsAmount.postpaid.totalAmount,
+            )
+          }}
         </span>
       </div>
 
@@ -233,15 +274,28 @@
           v-if="settings.payments.coupons"
           v-show="appointmentsAmount.prepaid.discountAmount > 0"
           class="am-fs__payments-app-info-discount"
-          :class="{'am-fs__payments-app-info-discount-green': appointmentsAmount.prepaid.discountAmount > 0 }"
+          :class="{
+            'am-fs__payments-app-info-discount-green':
+              appointmentsAmount.prepaid.discountAmount > 0,
+          }"
         >
           <span>
-            {{`${amLabels.discount_amount_colon}:`}}
+            {{ `${amLabels.discount_amount_colon}:` }}
           </span>
           <span class="am-amount">
-            {{ appointmentsAmount.prepaid.discountAmount + appointmentsAmount.postpaid.discountAmount > appointmentsAmount.prepaid.totalAmount + appointmentsAmount.postpaid.totalAmount
-            ? useFormattedPrice(appointmentsAmount.prepaid.totalAmount + appointmentsAmount.postpaid.totalAmount)
-            : useFormattedPrice(appointmentsAmount.prepaid.discountAmount + appointmentsAmount.postpaid.discountAmount) }}
+            {{
+              appointmentsAmount.prepaid.discountAmount +
+                appointmentsAmount.postpaid.discountAmount >
+              appointmentsAmount.prepaid.totalAmount + appointmentsAmount.postpaid.totalAmount
+                ? useFormattedPrice(
+                    appointmentsAmount.prepaid.totalAmount +
+                      appointmentsAmount.postpaid.totalAmount,
+                  )
+                : useFormattedPrice(
+                    appointmentsAmount.prepaid.discountAmount +
+                      appointmentsAmount.postpaid.discountAmount,
+                  )
+            }}
           </span>
         </div>
       </Transition>
@@ -250,26 +304,35 @@
         v-if="appointmentsAmount.prepaid.taxAmount + appointmentsAmount.postpaid.taxAmount > 0"
         class="am-fs__payments-app-info-tax"
       >
-        <span>{{ amLabels.total_tax_colon}}:</span>
+        <span>{{ amLabels.total_tax_colon }}:</span>
         <span class="am-amount">
-          {{ useFormattedPrice(appointmentsAmount.prepaid.taxAmount + appointmentsAmount.postpaid.taxAmount) }}
+          {{
+            useFormattedPrice(
+              appointmentsAmount.prepaid.taxAmount + appointmentsAmount.postpaid.taxAmount,
+            )
+          }}
         </span>
       </div>
 
       <div
         class="am-fs__payments-app-info-total"
-        :class="{'am-single-row': onlyTotal, 'am-fs__payments-bordered': !onlyTotal}"
+        :class="{ 'am-single-row': onlyTotal, 'am-fs__payments-bordered': !onlyTotal }"
       >
-        <span>{{amLabels.total_amount_colon}}</span>
+        <span>{{ amLabels.total_amount_colon }}</span>
         <span class="am-amount">
           {{ useFormattedPrice(getTotalAmount()) }}
           <template v-if="taxVisibility && !amSettings.payments.taxes.excluded">
-            {{amLabels.incl_tax}}
+            {{ amLabels.incl_tax }}
           </template>
         </span>
       </div>
 
-      <div v-if="(hasDeposit || (isRecurring && appointmentsAmount.postpaid.totalAmount)) && paymentGateway !== 'onSite'">
+      <div
+        v-if="
+          (hasDeposit || (isRecurring && appointmentsAmount.postpaid.totalAmount)) &&
+          paymentGateway !== 'onSite'
+        "
+      >
         <div class="am-fs__payments-app-info-deposit">
           <span>
             {{ `${amLabels.paying_now}:` }}
@@ -301,11 +364,11 @@ import { useStore } from 'vuex'
 import { useFormattedPrice } from '../../../../../assets/js/common/formatting.js'
 import {
   useAppointmentExtraAmount,
-  useAppointmentsAmountInfo
+  useAppointmentsAmountInfo,
 } from '../../../../../assets/js/common/appointments.js'
-import { useCartItem } from "../../../../../assets/js/public/cart";
+import { useCartItem } from '../../../../../assets/js/public/cart'
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation.js'
-import {useTaxVisibility} from "../../../../../assets/js/common/pricing";
+import { useTaxVisibility } from '../../../../../assets/js/common/pricing'
 
 const store = useStore()
 
@@ -325,7 +388,7 @@ let personsLabel = computed(() => {
   return persons.value > 1 ? amLabels.value.summary_persons : amLabels.value.summary_person
 })
 
-function recurrenceLabel (num) {
+function recurrenceLabel(num) {
   return num > 1 ? amLabels.value.summary_recurrences : amLabels.value.summary_recurrence
 }
 
@@ -352,7 +415,7 @@ let appointmentsAmount = computed(() => {
       discountAmount: 0,
       taxAmount: 0,
       depositAmount: 0,
-    }
+    },
   }
 
   amountInfo.forEach((item) => {
@@ -383,29 +446,35 @@ let appointmentsAmount = computed(() => {
   return amount
 })
 
-function getPrepaidAmount () {
-  const { totalAmount, discountAmount, taxAmount, depositAmount } = appointmentsAmount.value.prepaid;
-  const total = totalAmount - discountAmount + taxAmount;
+function getPrepaidAmount() {
+  const { totalAmount, discountAmount, taxAmount, depositAmount } = appointmentsAmount.value.prepaid
+  const total = totalAmount - discountAmount + taxAmount
 
-  return depositAmount ? Math.min(total, depositAmount) : total;
+  return depositAmount ? Math.min(total, depositAmount) : total
 }
 
-function getPostpaidAmount () {
+function getPostpaidAmount() {
   return getTotalAmount() - getPrepaidAmount()
 }
 
-function getTotalAmount () {
-  return appointmentsAmount.value.prepaid.totalAmount +
+function getTotalAmount() {
+  return (
+    appointmentsAmount.value.prepaid.totalAmount +
     appointmentsAmount.value.postpaid.totalAmount +
     appointmentsAmount.value.prepaid.taxAmount +
     appointmentsAmount.value.postpaid.taxAmount -
     appointmentsAmount.value.prepaid.discountAmount -
     appointmentsAmount.value.postpaid.discountAmount
+  )
 }
 
 let onlyTotal = computed(() => {
-  return (!settings.payments.coupons || appointmentsAmount.value.prepaid.discountAmount === 0) &&
-    (!settings.payments.taxes.enabled || (appointmentsAmount.value.prepaid.taxAmount + appointmentsAmount.value.postpaid.taxAmount === 0))
+  return (
+    (!settings.payments.coupons || appointmentsAmount.value.prepaid.discountAmount === 0) &&
+    (!settings.payments.taxes.enabled ||
+      appointmentsAmount.value.prepaid.taxAmount + appointmentsAmount.value.postpaid.taxAmount ===
+        0)
+  )
 })
 
 let paymentGateway = computed(() => store.getters['booking/getPaymentGateway'])
@@ -414,22 +483,25 @@ let bookingsCount = ref(0)
 
 provide('bookingsCount', bookingsCount)
 
-let service = reactive(store.getters['entities/getService'](
-  useCartItem(store).serviceId
-))
+let service = reactive(store.getters['entities/getService'](useCartItem(store).serviceId))
 
 const emits = defineEmits(['setOnSitePayment'])
 
-function couponApplied () {
+function couponApplied() {
   emits(
     'setOnSitePayment',
-    appointmentsAmount.value.prepaid.totalAmount - appointmentsAmount.value.prepaid.discountAmount + appointmentsAmount.value.prepaid.taxAmount <= 0
+    appointmentsAmount.value.prepaid.totalAmount -
+      appointmentsAmount.value.prepaid.discountAmount +
+      appointmentsAmount.value.prepaid.taxAmount <=
+      0,
   )
 }
 onMounted(() => {
-  isRecurring.value = appointmentsAmount.value.prepaid.count > 1 || appointmentsAmount.value.postpaid.count > 0
+  isRecurring.value =
+    appointmentsAmount.value.prepaid.count > 1 || appointmentsAmount.value.postpaid.count > 0
 
-  bookingsCount.value = appointmentsAmount.value.prepaid.count + appointmentsAmount.value.postpaid.count
+  bookingsCount.value =
+    appointmentsAmount.value.prepaid.count + appointmentsAmount.value.postpaid.count
 
   store.commit('booking/setBookingsCount', bookingsCount.value)
 })
@@ -438,7 +510,7 @@ onMounted(() => {
 let recurringCollapseState = ref(true)
 let extrasCollapseState = ref(true)
 
-function onCollapseClose (el) {
+function onCollapseClose(el) {
   el.style.opacity = 0
   setTimeout(() => {
     el.style.opacity = 1
@@ -446,7 +518,7 @@ function onCollapseClose (el) {
   }, 200)
 }
 
-function onCollapseOpen (el) {
+function onCollapseOpen(el) {
   el.style.opacity = 0
   el.style.setProperty('--am-h-services-sub', `${el.offsetHeight}px`)
   setTimeout(() => {
@@ -472,10 +544,9 @@ let cssVars = computed(() => {
 })
 </script>
 
-
 <script>
 export default {
-  name: 'AppointmentInfo'
+  name: 'AppointmentInfo',
 }
 </script>
 
@@ -503,7 +574,8 @@ export default {
           }
         }
 
-        &-discount, &-tax {
+        &-discount,
+        &-tax {
           display: flex;
           justify-content: space-between;
           font-size: 13px;
@@ -527,7 +599,9 @@ export default {
           margin-top: 8px;
         }
 
-        &-total, &-deposit, &-remaining {
+        &-total,
+        &-deposit,
+        &-remaining {
           display: flex;
           justify-content: space-between;
           font-size: 15px;
@@ -546,7 +620,8 @@ export default {
         }
       }
 
-      &-service, &-extra {
+      &-service,
+      &-extra {
         border: 1px solid var(--am-c-pay-text-op30);
         border-radius: 8px;
         padding: 12px;
@@ -562,14 +637,14 @@ export default {
           flex-wrap: wrap;
           width: 100%;
           padding: 12px;
-          transition-delay: .5s;
+          transition-delay: 0.5s;
 
           &-side {
             transition-delay: 0s;
           }
 
           .am-collapse-item__trigger {
-            padding: 0
+            padding: 0;
           }
         }
         .am-collapse-item__content {
@@ -591,7 +666,7 @@ export default {
           width: 100%;
           display: flex;
           justify-content: space-between;
-          transition: all ease-in-out .3s;
+          transition: all ease-in-out 0.3s;
 
           p {
             font-size: 13px;
@@ -614,7 +689,7 @@ export default {
 
           &-total {
             & > span {
-              color: var(--am-c-pay-text-op70)
+              color: var(--am-c-pay-text-op70);
             }
 
             &:last-child {
@@ -630,7 +705,6 @@ export default {
             color: var(--am-c-pay-text);
           }
         }
-
       }
 
       .am-amount {

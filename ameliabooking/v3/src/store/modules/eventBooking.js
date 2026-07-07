@@ -7,22 +7,22 @@ export default {
   }),
 
   getters: {
-    getSelectedEventId (state) {
+    getSelectedEventId(state) {
       return state.eventId
     },
 
-    getBooked (state) {
+    getBooked(state) {
       return state.booked
-    }
+    },
   },
 
   mutations: {
-    setEventId (state, payload) {
+    setEventId(state, payload) {
       state.eventId = payload
     },
 
-    setBooked (state, payload) {
+    setBooked(state, payload) {
       state.booked = payload
-    }
-  }
+    },
+  },
 }

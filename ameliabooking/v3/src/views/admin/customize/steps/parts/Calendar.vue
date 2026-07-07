@@ -5,14 +5,31 @@
       :id="0"
       :slots="calendarEvents"
       :calendar-minimum-date="moment().format('YYYY-MM-DD hh:mm')"
-      :calendar-maximum-date="moment().add(1,'year').format('YYYY-MM-DD hh:mm')"
-      :time-zone="features.timeZones && amCustomize[pageRenderKey][stepRecognition].options.timeZoneVisibility.visibility"
+      :calendar-maximum-date="moment().add(1, 'year').format('YYYY-MM-DD hh:mm')"
+      :time-zone="
+        features.timeZones &&
+        amCustomize[pageRenderKey][stepRecognition].options.timeZoneVisibility.visibility
+      "
       :end-time="amCustomize[pageRenderKey][stepRecognition].options.endTimeVisibility.visibility"
       :show-calendar-date-busyness="showCalendarDateBusyness"
       :busyness="previewCalendarBusyness"
-      :show-estimated-pricing="stepRecognition === 'rescheduleAppointment' ? amCustomize[pageRenderKey][stepRecognition].options.estimatedPricingVisibility.visibility : false"
-      :show-indicator-pricing="stepRecognition === 'rescheduleAppointment' ? amCustomize[pageRenderKey][stepRecognition].options.indicatorPricingVisibility.visibility : false"
-      :show-slot-pricing="stepRecognition === 'rescheduleAppointment' ? amCustomize[pageRenderKey][stepRecognition].options.slotPricingVisibility.visibility : false"
+      :show-estimated-pricing="
+        stepRecognition === 'rescheduleAppointment'
+          ? amCustomize[pageRenderKey][stepRecognition].options.estimatedPricingVisibility
+              .visibility
+          : false
+      "
+      :show-indicator-pricing="
+        stepRecognition === 'rescheduleAppointment'
+          ? amCustomize[pageRenderKey][stepRecognition].options.indicatorPricingVisibility
+              .visibility
+          : false
+      "
+      :show-slot-pricing="
+        stepRecognition === 'rescheduleAppointment'
+          ? amCustomize[pageRenderKey][stepRecognition].options.slotPricingVisibility.visibility
+          : false
+      "
       :label-slots-selected="labelsDisplay('date_time_slots_selected')"
       :period-pricing="stepRecognition === 'rescheduleAppointment' ? periodPricing : {}"
       @selected-date="setSelectedDate"
@@ -106,53 +123,56 @@ let showCalendar = ref(false)
 
 let periodPricing = ref({})
 
-function getCustomPeriodsPricing () {
+function getCustomPeriodsPricing() {
   let result = {}
   let today = moment()
 
   let current = today.clone()
 
   for (let i = 0; i <= 31; i++) {
-    let type = current.day() === 6 || current.day() === 0
-      ? 'high'
-      : (current.day() === 1 || current.day() === 2 ? 'low' : 'mid')
+    let type =
+      current.day() === 6 || current.day() === 0
+        ? 'high'
+        : current.day() === 1 || current.day() === 2
+          ? 'low'
+          : 'mid'
 
     result[current.format('YYYY-MM-DD')] = {
       type: type,
       slots: {
         '09:00': {
           type: type === 'mid' ? 'low' : type,
-          price: type === 'mid' ? 5 : (type === 'low' ? 5 : 15)
+          price: type === 'mid' ? 5 : type === 'low' ? 5 : 15,
         },
         '09:30': {
           type: type === 'mid' ? 'low' : type,
-          price: type === 'mid' ? 5 : (type === 'low' ? 5 : 15)
+          price: type === 'mid' ? 5 : type === 'low' ? 5 : 15,
         },
         '10:00': {
           type: type,
-          price: type === 'mid' ? 10 : (type === 'low' ? 5 : 15)
+          price: type === 'mid' ? 10 : type === 'low' ? 5 : 15,
         },
         '10:30': {
           type: type,
-          price: type === 'mid' ? 10 : (type === 'low' ? 5 : 15)
+          price: type === 'mid' ? 10 : type === 'low' ? 5 : 15,
         },
         '11:00': {
           type: type,
-          price: type === 'mid' ? 10 : (type === 'low' ? 5 : 15)
+          price: type === 'mid' ? 10 : type === 'low' ? 5 : 15,
         },
         '11:30': {
           type: type,
-          price: type === 'mid' ? 10 : (type === 'low' ? 5 : 15)
+          price: type === 'mid' ? 10 : type === 'low' ? 5 : 15,
         },
         '12:00': {
           type: type === 'mid' ? 'high' : type,
-          price: type === 'mid' ? 15 : (type === 'high' ? 15 : 5)
+          price: type === 'mid' ? 15 : type === 'high' ? 15 : 5,
         },
         '12:30': {
           type: type === 'mid' ? 'high' : type,
-          price: type === 'mid' ? 15 : (type === 'high' ? 15 : 5)
+          price: type === 'mid' ? 15 : type === 'high' ? 15 : 5,
         },
-      }
+      },
     }
 
     current.add(1, 'day')
@@ -165,9 +185,9 @@ function getCustomPeriodsPricing () {
       high: 15,
       uniqueMin: true,
       uniqueMid: true,
-      uniqueMax: true
+      uniqueMax: true,
     },
-    dates: result
+    dates: result,
   }
 }
 
@@ -228,14 +248,14 @@ provide('calendarSlotDuration', calendarSlotDuration)
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepRecognition.value]
-      .translations &&
-      amCustomize.value[pageRenderKey.value][stepRecognition.value]
-        .translations[label] &&
-      amCustomize.value[pageRenderKey.value][stepRecognition.value]
-        .translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepRecognition.value]
-          .translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepRecognition.value].translations &&
+      amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label][
+        langKey.value
+      ]
+      ? amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label][
+          langKey.value
+        ]
       : amLabels[label]
   })
 
@@ -243,18 +263,19 @@ function labelsDisplay(label) {
 }
 
 onMounted(() => {
-  periodPricing.value = !licence.isBasic && !licence.isStarter && !licence.isLite ? getCustomPeriodsPricing() : {}
+  periodPricing.value =
+    !licence.isBasic && !licence.isStarter && !licence.isLite ? getCustomPeriodsPricing() : {}
 
   showCalendar.value = true
 })
 
-function setSelectedDate (value) {
+function setSelectedDate(value) {
   unselectDate()
 
   for (let i = 0; i < 18; i++) {
     if (i > 8 && i < 13) {
-      calendarEventSlots.value.push(`${i < 10 ? '0'+i:i}:00`)
-      calendarEventSlots.value.push(`${i < 10 ? '0'+i:i}:30`)
+      calendarEventSlots.value.push(`${i < 10 ? '0' + i : i}:00`)
+      calendarEventSlots.value.push(`${i < 10 ? '0' + i : i}:30`)
     }
   }
 

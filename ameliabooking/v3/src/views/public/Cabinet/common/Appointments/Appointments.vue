@@ -16,10 +16,7 @@
         @trigger-close="closeAlert"
       >
         <template #title>
-          <span
-            v-if="alertType === 'success'"
-            class="am-icon-checkmark-circle-full"
-          ></span>
+          <span v-if="alertType === 'success'" class="am-icon-checkmark-circle-full"></span>
           <span v-if="alertType === 'error'" class="am-icon-clearable"></span>
           {{ alertMessage }}
         </template>
@@ -156,9 +153,7 @@ const labels = inject('labels')
 const localLanguage = inject('localLanguage')
 
 // * if local lang is in settings lang
-let langDetection = computed(() =>
-  amSettings.general.usedLanguages.includes(localLanguage.value)
-)
+let langDetection = computed(() => amSettings.general.usedLanguages.includes(localLanguage.value))
 
 // * Computed labels
 let amLabels = computed(() => {
@@ -167,12 +162,8 @@ let amLabels = computed(() => {
   let customizedLabels = amCustomize.value.appointments.translations
   if (customizedLabels) {
     Object.keys(customizedLabels).forEach((labelKey) => {
-      if (
-        customizedLabels[labelKey][localLanguage.value] &&
-        langDetection.value
-      ) {
-        computedLabels[labelKey] =
-          customizedLabels[labelKey][localLanguage.value]
+      if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
+        computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
         computedLabels[labelKey] = customizedLabels[labelKey].default
       }
@@ -246,9 +237,7 @@ function appointmentsPageChange(page) {
 function getAppointments(passedData = null, page = 1) {
   store.commit('cabinet/setAppointmentsLoading', true)
 
-  let params = JSON.parse(
-    JSON.stringify(store.getters['cabinetFilters/getAppointmentsFilters'])
-  )
+  let params = JSON.parse(JSON.stringify(store.getters['cabinetFilters/getAppointmentsFilters']))
   let timeZone = store.getters['cabinet/getTimeZone']
 
   params.dates = params.dates.map((d) => moment(d).format('YYYY-MM-DD'))
@@ -259,7 +248,7 @@ function getAppointments(passedData = null, page = 1) {
 
   store.commit(
     'auth/setLoadingAppointmentsCounter',
-    store.getters['auth/getLoadingAppointmentsCounter'] + 1
+    store.getters['auth/getLoadingAppointmentsCounter'] + 1,
   )
 
   let loadingCounter = store.getters['auth/getLoadingAppointmentsCounter']
@@ -269,9 +258,7 @@ function getAppointments(passedData = null, page = 1) {
       params: useUrlParams(params),
     })
     .then((response) => {
-      if (
-        loadingCounter !== store.getters['auth/getLoadingAppointmentsCounter']
-      ) {
+      if (loadingCounter !== store.getters['auth/getLoadingAppointmentsCounter']) {
         return
       }
 
@@ -280,7 +267,7 @@ function getAppointments(passedData = null, page = 1) {
       dateGroupedAppointments.value = useParsedAppointments(
         response.data.data.appointments,
         timeZone,
-        cabinetType.value === 'provider'
+        cabinetType.value === 'provider',
       )
     })
     .catch((error) => {
@@ -294,9 +281,7 @@ function getAppointments(passedData = null, page = 1) {
       console.log(error)
     })
     .finally(() => {
-      if (
-        loadingCounter !== store.getters['auth/getLoadingAppointmentsCounter']
-      ) {
+      if (loadingCounter !== store.getters['auth/getLoadingAppointmentsCounter']) {
         return
       }
 
@@ -333,9 +318,7 @@ function editAppointment(appointment) {
     .then((response) => {
       let startDateTime = response.data.data.appointment.bookingStart.split(' ')
 
-      let service = store.getters['entities/getService'](
-        response.data.data.appointment.serviceId
-      )
+      let service = store.getters['entities/getService'](response.data.data.appointment.serviceId)
 
       let bookings = []
 
@@ -350,24 +333,17 @@ function editAppointment(appointment) {
               quantity: 0,
             })
 
-            let bookingExtra = booking.extras.find(
-              (i) => i.extraId === extra.id
-            )
+            let bookingExtra = booking.extras.find((i) => i.extraId === extra.id)
 
             if (typeof bookingExtra !== 'undefined') {
               extras[extras.length - 1] = bookingExtra
             }
           })
 
-        let customFields = booking.customFields
-          ? JSON.parse(booking.customFields)
-          : {}
+        let customFields = booking.customFields ? JSON.parse(booking.customFields) : {}
 
         store.getters['entities/getCustomFields'].forEach((customField) => {
-          if (
-            customField.allServices ||
-            customField.services.some((e) => e.id === service.id)
-          ) {
+          if (customField.allServices || customField.services.some((e) => e.id === service.id)) {
             customFields[customField.id] = customFields[customField.id]
               ? Object.assign({}, customFields[customField.id], {
                   value:
@@ -388,8 +364,7 @@ function editAppointment(appointment) {
 
         bookings.push({
           id: booking.id,
-          customer: appointment.bookings.find((b) => b.id === booking.id)
-            .customer,
+          customer: appointment.bookings.find((b) => b.id === booking.id).customer,
           persons: booking.persons,
           status: booking.status,
           duration: booking.duration ? booking.duration.toString() : null,
@@ -413,7 +388,7 @@ function editAppointment(appointment) {
         lessonSpace:
           response.data.data.appointment.lessonSpace !== null
             ? response.data.data.appointment.lessonSpace.split(
-                'https://www.thelessonspace.com/space/'
+                'https://www.thelessonspace.com/space/',
               )[1]
             : null,
         startDate: moment(startDateTime[0]).toDate(),
@@ -484,7 +459,7 @@ watch(
   () => props.loadBookingsCounter,
   () => {
     getAppointments()
-  }
+  },
 )
 
 onMounted(() => {

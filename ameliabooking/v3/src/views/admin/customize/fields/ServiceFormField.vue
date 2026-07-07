@@ -1,9 +1,5 @@
 <template>
-  <el-form-item
-    class="am-fs__init-form__item"
-    prop="service"
-    label-position="top"
-  >
+  <el-form-item class="am-fs__init-form__item" prop="service" label-position="top">
     <template #label>
       <span class="am-fs__init-form__label">
         {{ `${labelsDisplay('service_colon')}:` }}
@@ -13,9 +9,7 @@
       v-model="formData.service"
       :options="categoryOptions"
       :props-data="advSelectProps"
-      :filterable="
-        amCustomize[pageRenderKey].initStep.options.service.filterable
-      "
+      :filterable="amCustomize[pageRenderKey].initStep.options.service.filterable"
       :placeholder="labelsDisplay('select_service')"
       :category-name="labelsDisplay('dropdown_category_heading')"
       :sub-category-name="labelsDisplay('dropdown_items_heading')"
@@ -41,12 +35,8 @@ function labelsDisplay(label) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value].initStep.translations &&
       amCustomize.value[pageRenderKey.value].initStep.translations[label] &&
-      amCustomize.value[pageRenderKey.value].initStep.translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value].initStep.translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value].initStep.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].initStep.translations[label][langKey.value]
       : amLabels[label]
   })
 

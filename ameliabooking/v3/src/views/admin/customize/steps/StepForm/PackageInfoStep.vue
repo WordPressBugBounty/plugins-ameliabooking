@@ -1,6 +1,5 @@
 <template>
   <div class="am-fs__pis" :class="props.globalClass" :style="cssVars">
-
     <PackageInfo :pack="pack"></PackageInfo>
 
     <div class="am-fs__pis-includes">
@@ -8,18 +7,10 @@
         {{ `${pack.name} ${labelsDisplay('package_info_includes')}:` }}
       </p>
       <AmCollapse>
-        <AmCollapseItem
-          v-for="book in pack.bookable"
-          :key="book.id"
-          :side="true"
-          :delay="500"
-        >
+        <AmCollapseItem v-for="book in pack.bookable" :key="book.id" :side="true" :delay="500">
           <template #heading>
             <div class="am-fs__pis-service">
-              <img
-                :src="usePictureLoad(baseUrls, book.service, false)"
-                :alt="book.service.name"
-              />
+              <img :src="usePictureLoad(baseUrls, book.service, false)" :alt="book.service.name" />
               {{ `${book.service.name} x ${book.quantity}` }}
             </div>
           </template>
@@ -67,19 +58,12 @@ let pageRenderKey = inject('pageRenderKey')
 const { amCustomize } = useReactiveCustomize()
 
 // * Label computed function
-function labelsDisplay (label) {
+function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value].packageInfoStep
-      .translations &&
-      amCustomize.value[pageRenderKey.value].packageInfoStep.translations[
-        label
-      ] &&
-      amCustomize.value[pageRenderKey.value].packageInfoStep.translations[
-        label
-      ][langKey.value]
-      ? amCustomize.value[pageRenderKey.value].packageInfoStep.translations[
-          label
-        ][langKey.value]
+    return amCustomize.value[pageRenderKey.value].packageInfoStep.translations &&
+      amCustomize.value[pageRenderKey.value].packageInfoStep.translations[label] &&
+      amCustomize.value[pageRenderKey.value].packageInfoStep.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].packageInfoStep.translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -219,14 +203,10 @@ onMounted(() => {
 let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
-    '--am-c-pis-text-op80': useColorTransparency(
-      amColors.value.colorMainText,
-      0.8
-    ),
+    '--am-c-pis-text-op80': useColorTransparency(amColors.value.colorMainText, 0.8),
   }
 })
 </script>
-
 
 <script>
 export default {
@@ -242,7 +222,6 @@ export default {
 }
 </script>
 
-
 <style lang="scss">
 #amelia-app-backend-new {
   #amelia-container {
@@ -257,11 +236,7 @@ export default {
         $count: 2;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms
-              cubic-bezier(0.45, 1, 0.4, 1.2)
-              #{$i *
-              100}ms
-              am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }
@@ -274,11 +249,7 @@ export default {
           $count: 100;
           @for $i from 0 through $count {
             &:nth-child(#{$i + 1}) {
-              animation: 600ms
-                cubic-bezier(0.45, 1, 0.4, 1.2)
-                #{$i *
-                100}ms
-                am-animation-slide-up;
+              animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
               animation-fill-mode: both;
             }
           }
@@ -355,7 +326,6 @@ export default {
             }
           }
         }
-
       }
     }
   }

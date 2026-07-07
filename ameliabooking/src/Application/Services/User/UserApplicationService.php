@@ -168,7 +168,7 @@ class UserApplicationService
             return false;
         }
 
-        do_action('amelia_set_wp_user_for_new_customer', $user->toArray());
+        do_action('amelia_set_wp_user_for_new_' . $type, $user->toArray());
 
         /** @var CreateWPUser $createWPUserService */
         $createWPUserService = $this->container->get('user.create.wp.user');
@@ -268,6 +268,22 @@ class UserApplicationService
         }
 
         return true;
+    }
+
+    /**
+     * Check if the external ID is allowed for the given type
+     *
+     * @param int    $externalId
+     * @param string $type
+     *
+     * @return boolean
+     *
+     */
+    public function isRoleForExternalIdAllowed($externalId, $type)
+    {
+        $user = get_user_by('ID', $externalId);
+
+        return $user && array_intersect(["wpamelia-$type"], (array)$user->roles);
     }
 
     /**

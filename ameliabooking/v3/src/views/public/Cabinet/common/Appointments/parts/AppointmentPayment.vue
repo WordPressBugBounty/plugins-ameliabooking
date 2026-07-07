@@ -14,17 +14,19 @@
       <template #title>
         <div
           class="am-capai-pay__heading"
-          :class="{'am-pb-16': !((item.customer.email && customerEmailVisibility) || (item.customer.phone && customerPhoneVisibility))}"
+          :class="{
+            'am-pb-16': !(
+              (item.customer.email && customerEmailVisibility) ||
+              (item.customer.phone && customerPhoneVisibility)
+            ),
+          }"
         >
           <!-- Customer Name -->
-          <div
-            class="am-capai-customer__name"
-            :class="noShowData(item.customer.noShowCount).class"
-          >
-          <span
-            v-if="noShowData(item.customer.noShowCount).icon"
-            :class="`am-icon-${noShowData(item.customer.noShowCount).icon}`"
-          />
+          <div class="am-capai-customer__name" :class="noShowData(item.customer.noShowCount).class">
+            <span
+              v-if="noShowData(item.customer.noShowCount).icon"
+              :class="`am-icon-${noShowData(item.customer.noShowCount).icon}`"
+            />
             {{ item.customer.firstName + ' ' + item.customer.lastName }}
           </div>
           <!-- /Customer Name -->
@@ -33,7 +35,7 @@
           <div class="am-capai-pay__heading-status">
             <span
               :class="usePaymentStatusIcon(paymentData[index].status, amColors).icon"
-              :style="{color: usePaymentStatusIcon(paymentData[index].status, amColors).color}"
+              :style="{ color: usePaymentStatusIcon(paymentData[index].status, amColors).color }"
             />
             <div class="am-capai-pay__heading-status__text">
               {{ usePaymentStatusName(paymentData[index].status) }}
@@ -45,7 +47,10 @@
 
       <!-- Customer Info -->
       <div
-        v-if="(item.customer.email && customerEmailVisibility) || (item.customer.phone && customerPhoneVisibility)"
+        v-if="
+          (item.customer.email && customerEmailVisibility) ||
+          (item.customer.phone && customerPhoneVisibility)
+        "
         class="am-capai-customer__data-wrapper"
         :class="props.responsiveClass"
       >
@@ -77,30 +82,18 @@
       </div>
       <!-- /Customer Info -->
 
-      <div
-        class="am-capai-pay__content"
-        :class="props.responsiveClass"
-      >
-        <template
-          v-for="(payment, paymentIndex) in item.payments"
-          :key="paymentIndex"
-        >
-          <div
-            class="am-capai-pay__row"
-            :class="props.responsiveClass"
-          >
+      <div class="am-capai-pay__content" :class="props.responsiveClass">
+        <template v-for="(payment, paymentIndex) in item.payments" :key="paymentIndex">
+          <div class="am-capai-pay__row" :class="props.responsiveClass">
             <div class="am-capai-pay__row-label">
               {{ amLabels.date }}
             </div>
             <div class="am-capai-pay__row-value">
-              {{getFrontedFormattedDate(payment.dateTime.split(' ')[0]) }}
+              {{ getFrontedFormattedDate(payment.dateTime.split(' ')[0]) }}
             </div>
           </div>
 
-          <div
-            class="am-capai-pay__row"
-            :class="props.responsiveClass"
-          >
+          <div class="am-capai-pay__row" :class="props.responsiveClass">
             <div class="am-capai-pay__row-label">
               {{ amLabels.payment_method }}
             </div>
@@ -109,17 +102,14 @@
             </div>
           </div>
 
-          <div
-            class="am-capai-pay__row"
-            :class="props.responsiveClass"
-          >
+          <div class="am-capai-pay__row" :class="props.responsiveClass">
             <div class="am-capai-pay__row-label">
               {{ amLabels.status }}
             </div>
             <div class="am-capai-pay__row-value">
               <span
                 :class="usePaymentStatusIcon(payment.status, amColors).icon"
-                :style="{color: usePaymentStatusIcon(payment.status, amColors).color}"
+                :style="{ color: usePaymentStatusIcon(payment.status, amColors).color }"
               />
               {{ usePaymentStatusName(payment.status) }}
             </div>
@@ -128,77 +118,47 @@
 
         <div v-if="pageWidth > 480" class="am-divider" />
 
-        <div
-          class="am-capai-pay__row"
-          :class="props.responsiveClass"
-        >
+        <div class="am-capai-pay__row" :class="props.responsiveClass">
           <div class="am-capai-pay__row-label">
             {{ amLabels.price }}
           </div>
-          <div
-            class="am-capai-pay__row-value"
-            :class="{'am-pl-34': pageWidth > 480}"
-          >
+          <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': pageWidth > 480 }">
             {{ useFormattedPrice(paymentData[index].bookable) }}
           </div>
         </div>
 
-        <div
-          class="am-capai-pay__row"
-          :class="props.responsiveClass"
-        >
+        <div class="am-capai-pay__row" :class="props.responsiveClass">
           <div class="am-capai-pay__row-label">
             {{ amLabels.extras }}
           </div>
-          <div
-            class="am-capai-pay__row-value"
-            :class="{'am-pl-34': pageWidth > 480}"
-          >
+          <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': pageWidth > 480 }">
             {{ useFormattedPrice(paymentData[index].total - paymentData[index].bookable) }}
           </div>
         </div>
 
-        <div
-          class="am-capai-pay__row"
-          :class="props.responsiveClass"
-        >
+        <div class="am-capai-pay__row" :class="props.responsiveClass">
           <div class="am-capai-pay__row-label">
             {{ amLabels.subtotal }}
           </div>
-          <div
-            class="am-capai-pay__row-value"
-            :class="{'am-pl-34': pageWidth > 480}"
-          >
+          <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': pageWidth > 480 }">
             {{ useFormattedPrice(paymentData[index].total) }}
           </div>
         </div>
 
-        <div
-          class="am-capai-pay__row"
-          :class="props.responsiveClass"
-        >
+        <div class="am-capai-pay__row" :class="props.responsiveClass">
           <div class="am-capai-pay__row-label">
             {{ amLabels.discount_amount }}
           </div>
-          <div
-            class="am-capai-pay__row-value"
-            :class="{'am-pl-34': pageWidth > 480}"
-          >
+          <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': pageWidth > 480 }">
             {{ useFormattedPrice(paymentData[index].discount) }}
           </div>
         </div>
 
-        <div
-          class="am-capai-pay__row"
-          :class="props.responsiveClass"
-        >
+        <div class="am-capai-pay__row" :class="props.responsiveClass">
           <div class="am-capai-pay__row-label">
             {{ amLabels.tax }}
           </div>
-          <div
-            class="am-capai-pay__row-value"
-            :class="{'am-pl-34': pageWidth > 480}"
-          >
+          <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': pageWidth > 480 }">
             {{ useFormattedPrice(paymentData[index].tax) }}
           </div>
         </div>
@@ -208,44 +168,31 @@
           class="am-capai-pay__row"
           :class="props.responsiveClass"
         >
-          <div class="am-capai-pay__row-label">
-            {{ amLabels.tax }} (Woo)
-          </div>
-          <div
-            class="am-capai-pay__row-value"
-            :class="{'am-pl-34': pageWidth > 480}"
-          >
+          <div class="am-capai-pay__row-label">{{ amLabels.tax }} (Woo)</div>
+          <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': pageWidth > 480 }">
             {{ useFormattedPrice(paymentData[index].wcTax) }}
           </div>
         </div>
 
-        <div
-          class="am-capai-pay__row"
-          :class="props.responsiveClass"
-        >
+        <div class="am-capai-pay__row" :class="props.responsiveClass">
           <div class="am-capai-pay__row-label">
             {{ amLabels.paid_deposit }}
           </div>
-          <div
-            class="am-capai-pay__row-value"
-            :class="{'am-pl-34': pageWidth > 480}"
-          >
+          <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': pageWidth > 480 }">
             {{ useFormattedPrice(paymentData[index].deposit) }}
           </div>
         </div>
 
-        <div
-          class="am-capai-pay__row"
-          :class="props.responsiveClass"
-        >
+        <div class="am-capai-pay__row" :class="props.responsiveClass">
           <div class="am-capai-pay__row-label">
             {{ amLabels.paid_remaining_amount }}
           </div>
-          <div
-            class="am-capai-pay__row-value"
-            :class="{'am-pl-34': pageWidth > 480}"
-          >
-            {{ useFormattedPrice(paymentData[index].paid ? paymentData[index].paid - paymentData[index].deposit : 0) }}
+          <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': pageWidth > 480 }">
+            {{
+              useFormattedPrice(
+                paymentData[index].paid ? paymentData[index].paid - paymentData[index].deposit : 0,
+              )
+            }}
           </div>
         </div>
 
@@ -257,41 +204,41 @@
           <div class="am-capai-pay__row-label">
             {{ amLabels.refunded }}
           </div>
-          <div
-            class="am-capai-pay__row-value"
-            :class="{'am-pl-34': pageWidth > 480}"
-          >
+          <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': pageWidth > 480 }">
             {{ useFormattedPrice(paymentData[index].refunded) }}
           </div>
         </div>
 
-        <div
-          class="am-capai-pay__row"
-          :class="props.responsiveClass"
-        >
+        <div class="am-capai-pay__row" :class="props.responsiveClass">
           <div class="am-capai-pay__row-label">
             {{ amLabels.due }}
           </div>
-          <div
-            class="am-capai-pay__row-value"
-            :class="{'am-pl-34': pageWidth > 480}"
-          >
-            {{ useFormattedPrice(paymentData[index].paid - (paymentData[index].total - paymentData[index].discount + paymentData[index].tax + paymentData[index].wcTax)) }}
+          <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': pageWidth > 480 }">
+            {{
+              useFormattedPrice(
+                paymentData[index].paid -
+                  (paymentData[index].total -
+                    paymentData[index].discount +
+                    paymentData[index].tax +
+                    paymentData[index].wcTax),
+              )
+            }}
           </div>
         </div>
 
-        <div
-          class="am-capai-pay__row"
-          :class="props.responsiveClass"
-        >
+        <div class="am-capai-pay__row" :class="props.responsiveClass">
           <div class="am-capai-pay__row-label">
             {{ amLabels.total }}
           </div>
-          <div
-            class="am-capai-pay__row-value"
-            :class="{'am-pl-34': pageWidth > 480}"
-          >
-            {{ useFormattedPrice(paymentData[index].total - paymentData[index].discount + paymentData[index].tax + paymentData[index].wcTax) }}
+          <div class="am-capai-pay__row-value" :class="{ 'am-pl-34': pageWidth > 480 }">
+            {{
+              useFormattedPrice(
+                paymentData[index].total -
+                  paymentData[index].discount +
+                  paymentData[index].tax +
+                  paymentData[index].wcTax,
+              )
+            }}
           </div>
         </div>
       </div>
@@ -301,42 +248,37 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  onMounted,
-  computed,
-  inject,
-} from "vue";
+import { ref, onMounted, computed, inject } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import Composables
 import {
   usePaymentGatewayName,
   usePaymentStatusIcon,
   usePaymentStatusName,
-} from "../../../../../../assets/js/admin/payment";
-import { getFrontedFormattedDate } from "../../../../../../assets/js/common/date";
-import { useFormattedPrice } from "../../../../../../assets/js/common/formatting";
+} from '../../../../../../assets/js/admin/payment'
+import { getFrontedFormattedDate } from '../../../../../../assets/js/common/date'
+import { useFormattedPrice } from '../../../../../../assets/js/common/formatting'
 import {
   useAppointmentBookingAmountData,
   useAppointmentServicePrice,
   useChangedBookingPrice,
-} from "../../../../../../assets/js/common/appointments";
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation";
+} from '../../../../../../assets/js/common/appointments'
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 
 // * Props
 let props = defineProps({
   responsiveClass: {
     type: String,
-    default: "",
+    default: '',
   },
   savedAppointment: {
     type: Object,
     default: () => {},
   },
-});
+})
 
 // * Store
 let store = useStore()
@@ -354,15 +296,25 @@ let pageWidth = inject('pageWidth')
 let amLabels = inject('amLabels')
 
 // * Customized options
-let customerPhoneVisibility = computed(() => shortcodeData.value.cabinetType === 'employee' ? amCustomize.value.appointments.options.customerPhone.visibility : true)
-let customerEmailVisibility = computed(() => shortcodeData.value.cabinetType === 'employee' ? amCustomize.value.appointments.options.customerEmail.visibility : true)
+let customerPhoneVisibility = computed(() =>
+  shortcodeData.value.cabinetType === 'employee'
+    ? amCustomize.value.appointments.options.customerPhone.visibility
+    : true,
+)
+let customerEmailVisibility = computed(() =>
+  shortcodeData.value.cabinetType === 'employee'
+    ? amCustomize.value.appointments.options.customerEmail.visibility
+    : true,
+)
 
 let activeBookingIndex = ref(null)
 
 let service = computed(() => store.getters['appointment/getEmployeeService'])
 
 let appointmentBookings = computed(() => {
-  return store.getters['appointment/getBookings'].filter((b) => 'id' in b && b.id && b.status !== 'canceled' && b.status !== 'rejected')
+  return store.getters['appointment/getBookings'].filter(
+    (b) => 'id' in b && b.id && b.status !== 'canceled' && b.status !== 'rejected',
+  )
 })
 
 let paymentData = computed(() => {
@@ -373,7 +325,7 @@ let paymentData = computed(() => {
       store.getters['appointment/getAppointmentData'],
       props.savedAppointment,
       booking,
-      service.value
+      service.value,
     )
 
     amountData.push(
@@ -389,38 +341,39 @@ let paymentData = computed(() => {
           serviceId: store.getters['appointment/getServiceId'],
           tax: booking.tax,
           coupon: booking.coupon,
-          wcTax: booking.payments.filter(p => p.wcOrderId && p.wcItemTaxValue).reduce(
-            (sum, payment) => sum + payment.wcItemTaxValue,
-            0
-          )
+          wcTax: booking.payments
+            .filter((p) => p.wcOrderId && p.wcItemTaxValue)
+            .reduce((sum, payment) => sum + payment.wcItemTaxValue, 0),
         },
-        false
-      )
+        false,
+      ),
     )
 
-    amountData[index].deposit = booking.payments.length && (booking.payments[0].status === 'paid' || booking.payments[0].status === 'partiallyPaid')
-      ? booking.payments[0].amount
-      : 0
+    amountData[index].deposit =
+      booking.payments.length &&
+      (booking.payments[0].status === 'paid' || booking.payments[0].status === 'partiallyPaid')
+        ? booking.payments[0].amount
+        : 0
 
-    amountData[index].paid = booking.payments.filter(p => p.status === 'paid' || p.status === 'partiallyPaid').reduce(
-      (sum, payment) => sum + payment.amount,
-      0
-    )
+    amountData[index].paid = booking.payments
+      .filter((p) => p.status === 'paid' || p.status === 'partiallyPaid')
+      .reduce((sum, payment) => sum + payment.amount, 0)
 
-    amountData[index].refunded = booking.payments.filter(p => p.status === 'refunded').reduce(
-      (sum, payment) => sum + payment.amount,
-      0
-    )
+    amountData[index].refunded = booking.payments
+      .filter((p) => p.status === 'refunded')
+      .reduce((sum, payment) => sum + payment.amount, 0)
 
-    amountData[index].status = booking.payments.reduce(
-      (sum, payment) => sum + payment.amount,
-      0
-    )
+    amountData[index].status = booking.payments.reduce((sum, payment) => sum + payment.amount, 0)
 
-    if (booking.payments.filter(i => i.status !== 'refunded').length === 0) {
+    if (booking.payments.filter((i) => i.status !== 'refunded').length === 0) {
       amountData[index].status = 'refunded'
     } else if (
-      amountData[index].paid - (amountData[index].total - amountData[index].discount + amountData[index].tax + amountData[index].wcTax) === 0
+      amountData[index].paid -
+        (amountData[index].total -
+          amountData[index].discount +
+          amountData[index].tax +
+          amountData[index].wcTax) ===
+      0
     ) {
       amountData[index].status = 'paid'
     } else if (amountData[index].paid) {
@@ -441,12 +394,16 @@ let amColors = inject('amColors')
 // * CSS Variables
 let cssVars = computed(() => {
   return {
-    '--am-c-pay-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03)
+    '--am-c-pay-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03),
   }
 })
 
 onMounted(() => {
-  if (store.getters['appointment/getBookings'].filter((b) => b.status !== 'canceled' && b.status !== 'rejected').length < 2) {
+  if (
+    store.getters['appointment/getBookings'].filter(
+      (b) => b.status !== 'canceled' && b.status !== 'rejected',
+    ).length < 2
+  ) {
     activeBookingIndex.value = 0
   }
 })
@@ -458,7 +415,6 @@ onMounted(() => {
   // capai - cabinet-panel-appointment-item
   // pay   - payment
   .am-capai-pay {
-
     // Heading
     &__heading {
       width: 100%;
@@ -481,7 +437,6 @@ onMounted(() => {
         }
 
         &__text {
-
           font-size: 15px;
           font-style: normal;
           font-weight: 500;
@@ -531,7 +486,8 @@ onMounted(() => {
         }
       }
 
-      &-label, &-value {
+      &-label,
+      &-value {
         width: calc(50% - 12px);
         display: flex;
         align-items: center;
@@ -554,7 +510,6 @@ onMounted(() => {
         }
       }
     }
-
   }
 }
 

@@ -1,13 +1,13 @@
 import { parsePhoneNumberFromString } from 'libphonenumber-js'
 import { settings } from '../../../plugins/settings'
 
-function getCountryIsoMutation (store) {
+function getCountryIsoMutation(store) {
   return store.getters['booking/getBookableType'] === 'event'
     ? 'customerInfo/setCustomerCountryPhoneIso'
     : 'booking/setCustomerCountryPhoneIso'
 }
 
-function applyIvyPhoneValue (store, infoFormData, rawPhone) {
+function applyIvyPhoneValue(store, infoFormData, rawPhone) {
   const value = rawPhone == null ? '' : String(rawPhone).trim()
 
   if (!value) {
@@ -39,26 +39,18 @@ function applyIvyPhoneValue (store, infoFormData, rawPhone) {
   return true
 }
 
-function useIvyMapping (store, shortcodeData, infoFormData) {
+function useIvyMapping(store, shortcodeData, infoFormData) {
   const formId = shortcodeData.value?.ivy?.formId
   const ivyValues = shortcodeData.value?.ivy?.values
   let phoneMapped = false
 
-  if (
-      formId &&
-      settings?.ivy &&
-      formId in settings.ivy
-  ) {
+  if (formId && settings?.ivy && formId in settings.ivy) {
     const formMapping = settings.ivy[formId]
 
-    if (
-      formMapping &&
-      ivyValues &&
-      typeof ivyValues === 'object'
-    ) {
+    if (formMapping && ivyValues && typeof ivyValues === 'object') {
       const keys = ['firstName', 'lastName', 'email', 'phone']
 
-      keys.forEach(key => {
+      keys.forEach((key) => {
         const fieldMapping = formMapping[key]
 
         if (key in formMapping && fieldMapping) {
@@ -102,6 +94,4 @@ function useIvyMapping (store, shortcodeData, infoFormData) {
   return phoneMapped
 }
 
-export {
-    useIvyMapping,
-}
+export { useIvyMapping }

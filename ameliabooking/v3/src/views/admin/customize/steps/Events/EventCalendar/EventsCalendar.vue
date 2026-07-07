@@ -9,16 +9,12 @@
       ref="mainBlockRef"
       class="am-ecs__main"
       :class="{
-        'am-full-width':
-          pageWidth < 992 || !customizeOptions.upcomingBlock.visibility,
+        'am-full-width': pageWidth < 992 || !customizeOptions.upcomingBlock.visibility,
       }"
     >
       <!-- Filters -->
       <div
-        v-if="
-          customizeOptions.search.visibility ||
-          customizeOptions.filters.visibility
-        "
+        v-if="customizeOptions.search.visibility || customizeOptions.filters.visibility"
         ref="filtersRef"
         class="am-ecs__filters"
       >
@@ -38,10 +34,7 @@
           <div
             v-if="customizeOptions.filters.visibility"
             class="am-ecs__filters-btn"
-            :class="[
-              { 'am-single': !customizeOptions.search.visibility },
-              filterResponsiveClass,
-            ]"
+            :class="[{ 'am-single': !customizeOptions.search.visibility }, filterResponsiveClass]"
           >
             <AmButton
               :icon="filterIcon"
@@ -53,9 +46,7 @@
               @click="filtersMenuVisibility = !filtersMenuVisibility"
             >
               <span class="am-icon-filter"></span>
-              <span v-if="filtersWidth > 500">{{
-                labelsDisplay('event_filters')
-              }}</span>
+              <span v-if="filtersWidth > 500">{{ labelsDisplay('event_filters') }}</span>
             </AmButton>
           </div>
         </div>
@@ -67,7 +58,7 @@
             :class="filterResponsiveClass"
           >
             <div
-            v-if="amSettings.featuresIntegrations.eventTags.enabled"
+              v-if="amSettings.featuresIntegrations.eventTags.enabled"
               class="am-ecs__filters-menu__items"
               :class="[filterResponsiveClass, filterClassWidth.tag]"
             >
@@ -204,11 +195,7 @@
           </div>
         </div>
         <div class="am-ecs__header-selection" :class="responsiveCalClass">
-          <AmSelect
-            v-model="selectedMonth"
-            size="small"
-            @change="dateSelection"
-          >
+          <AmSelect v-model="selectedMonth" size="small" @change="dateSelection">
             <AmOption
               v-for="month in dropdownMonths"
               :key="month.value"
@@ -217,11 +204,7 @@
             ></AmOption>
           </AmSelect>
           <AmSelect v-model="selectedYear" size="small" @change="dateSelection">
-            <AmOption
-              v-for="year in dropdownYears"
-              :key="year.value"
-              :value="year.value"
-            >
+            <AmOption v-for="year in dropdownYears" :key="year.value" :value="year.value">
             </AmOption>
           </AmSelect>
         </div>
@@ -230,8 +213,7 @@
 
       <!-- Calendar -->
       <div class="am-ecs">
-        <FullCalendar ref="eventCalendarRef" :options="calendarOptions">
-        </FullCalendar>
+        <FullCalendar ref="eventCalendarRef" :options="calendarOptions"> </FullCalendar>
       </div>
       <!-- /Calendar -->
     </div>
@@ -248,11 +230,7 @@
         <div class="am-ecs__side-header__range">
           <div>
             {{
-              `${
-                translationObject[
-                  `month${moment(upcomingRange[0]).format('M')}`
-                ]
-              }
+              `${translationObject[`month${moment(upcomingRange[0]).format('M')}`]}
             ${moment(upcomingRange[0]).format('YYYY')}`
             }}
           </div>
@@ -278,11 +256,7 @@
         </div>
       </div>
 
-      <div
-        v-if="features.waitingList"
-        ref="sideTabRef"
-        class="am-ecs__side-tab"
-      >
+      <div v-if="features.waitingList" ref="sideTabRef" class="am-ecs__side-tab">
         <div
           v-for="(item, index) in sideTabs"
           :key="index"
@@ -311,16 +285,10 @@
             }"
           >
             <div class="am-ecs__side-card__header">
-              <span
-                v-if="multipleDaysEvent(evt.periods)"
-                class="am-ecs__side-card__begins"
-              >
+              <span v-if="multipleDaysEvent(evt.periods)" class="am-ecs__side-card__begins">
                 {{ labelsDisplay('event_begins') }}
               </span>
-              <span
-                v-if="customizeOptions.price.visibility"
-                class="am-ecs__side-card__price"
-              >
+              <span v-if="customizeOptions.price.visibility" class="am-ecs__side-card__price">
                 {{ calculatedEventPrice(evt) }}
                 <template v-if="taxVisibility">
                   {{
@@ -333,44 +301,28 @@
             </div>
             <div class="am-ecs__side-card__date-time">
               <span class="am-ecs__side-card__day">
-                {{
-                  moment(evt.periods[0].periodStart.split(' ')[0]).format('DD')
-                }}
+                {{ moment(evt.periods[0].periodStart.split(' ')[0]).format('DD') }}
               </span>
               <span class="am-ecs__side-card__month">
                 {{
                   translationObject.months[
-                    moment(evt.periods[0].periodStart.split(' ')[0])
-                      .format('MMM')
-                      .toLowerCase()
+                    moment(evt.periods[0].periodStart.split(' ')[0]).format('MMM').toLowerCase()
                   ].toUpperCase()
                 }}
               </span>
-              <span class="am-ecs__side-card__at">{{
-                labelsDisplay('event_at')
-              }}</span>
+              <span class="am-ecs__side-card__at">{{ labelsDisplay('event_at') }}</span>
               <span class="am-ecs__side-card__time">
-                {{
-                  getEventFrontedFormattedTime(
-                    evt.periods[0].periodStart.split(' ')[1]
-                  )
-                }}
+                {{ getEventFrontedFormattedTime(evt.periods[0].periodStart.split(' ')[1]) }}
               </span>
             </div>
             <div class="am-ecs__side-card__name">
               {{ evt.name }}
             </div>
-            <div
-              v-if="customizeOptions.location.visibility"
-              class="am-ecs__side-card__location"
-            >
+            <div v-if="customizeOptions.location.visibility" class="am-ecs__side-card__location">
               {{ useEventLocation(evt, locations) }}
             </div>
             <div
-              v-if="
-                customizeOptions.status.visibility ||
-                customizeOptions.capacity.visibility
-              "
+              v-if="customizeOptions.status.visibility || customizeOptions.capacity.visibility"
               class="am-ecs__side-card__footer"
             >
               <div
@@ -380,14 +332,8 @@
               >
                 {{ labelsDisplay(useEventStatus(evt)) }}
               </div>
-              <div
-                v-if="customizeOptions.capacity.visibility"
-                class="am-ecs__side-card__spots"
-              >
-                <span
-                  v-if="placesCalculation(evt)"
-                  class="am-ecs__side-card__spots-numb"
-                >
+              <div v-if="customizeOptions.capacity.visibility" class="am-ecs__side-card__spots">
+                <span v-if="placesCalculation(evt)" class="am-ecs__side-card__spots-numb">
                   {{ placesCalculation(evt) }}
                 </span>
                 <span class="am-ecs__side-card__spots-text">
@@ -410,16 +356,10 @@
             }"
           >
             <div class="am-ecs__side-card__header">
-              <span
-                v-if="multipleDaysEvent(evt.periods)"
-                class="am-ecs__side-card__begins"
-              >
+              <span v-if="multipleDaysEvent(evt.periods)" class="am-ecs__side-card__begins">
                 {{ labelsDisplay('event_begins') }}
               </span>
-              <span
-                v-if="customizeOptions.price.visibility"
-                class="am-ecs__side-card__price"
-              >
+              <span v-if="customizeOptions.price.visibility" class="am-ecs__side-card__price">
                 {{ calculatedEventPrice(evt) }}
                 <template v-if="taxVisibility">
                   {{
@@ -432,44 +372,28 @@
             </div>
             <div class="am-ecs__side-card__date-time">
               <span class="am-ecs__side-card__day">
-                {{
-                  moment(evt.periods[0].periodStart.split(' ')[0]).format('DD')
-                }}
+                {{ moment(evt.periods[0].periodStart.split(' ')[0]).format('DD') }}
               </span>
               <span class="am-ecs__side-card__month">
                 {{
                   translationObject.months[
-                    moment(evt.periods[0].periodStart.split(' ')[0])
-                      .format('MMM')
-                      .toLowerCase()
+                    moment(evt.periods[0].periodStart.split(' ')[0]).format('MMM').toLowerCase()
                   ].toUpperCase()
                 }}
               </span>
-              <span class="am-ecs__side-card__at">{{
-                labelsDisplay('event_at')
-              }}</span>
+              <span class="am-ecs__side-card__at">{{ labelsDisplay('event_at') }}</span>
               <span class="am-ecs__side-card__time">
-                {{
-                  getEventFrontedFormattedTime(
-                    evt.periods[0].periodStart.split(' ')[1]
-                  )
-                }}
+                {{ getEventFrontedFormattedTime(evt.periods[0].periodStart.split(' ')[1]) }}
               </span>
             </div>
             <div class="am-ecs__side-card__name">
               {{ evt.name }}
             </div>
-            <div
-              v-if="customizeOptions.location.visibility"
-              class="am-ecs__side-card__location"
-            >
+            <div v-if="customizeOptions.location.visibility" class="am-ecs__side-card__location">
               {{ useEventLocation(evt, locations) }}
             </div>
             <div
-              v-if="
-                customizeOptions.status.visibility ||
-                customizeOptions.capacity.visibility
-              "
+              v-if="customizeOptions.status.visibility || customizeOptions.capacity.visibility"
               class="am-ecs__side-card__footer"
             >
               <div
@@ -478,14 +402,8 @@
               >
                 {{ labelsDisplay('waiting_list') }}
               </div>
-              <div
-                v-if="customizeOptions.capacity.visibility"
-                class="am-ecs__side-card__spots"
-              >
-                <span
-                  v-if="placesCalculation(evt)"
-                  class="am-ecs__side-card__spots-numb"
-                >
+              <div v-if="customizeOptions.capacity.visibility" class="am-ecs__side-card__spots">
+                <span v-if="placesCalculation(evt)" class="am-ecs__side-card__spots-numb">
                   {{ placesCalculation(evt) }}
                 </span>
                 <span class="am-ecs__side-card__spots-text">
@@ -521,7 +439,7 @@ import {
   ref,
   watch,
   watchEffect,
-  onBeforeUnmount
+  onBeforeUnmount,
 } from 'vue'
 
 // * Components Width and Height
@@ -578,11 +496,8 @@ const { width: calWidth, height: calHeight } = useElementSize(eventCalendarRef)
 
 // * Filters Reference
 let filtersRef = ref(null)
-const { width: filtersWidth, height: filtersHeight } =
-  useElementSize(filtersRef)
-let filterResponsiveClass = computed(() =>
-  useResponsiveClass(filtersWidth.value)
-)
+const { width: filtersWidth, height: filtersHeight } = useElementSize(filtersRef)
+let filterResponsiveClass = computed(() => useResponsiveClass(filtersWidth.value))
 
 // * Header Reference
 let headerRef = ref(null)
@@ -619,16 +534,12 @@ let langKey = inject('langKey')
 let amLabels = inject('labels')
 
 // * This object contains translations for months days etc
-let translationObject = computed(
-  () => elementPlusTranslations(langKey.value).el.datepicker
-)
+let translationObject = computed(() => elementPlusTranslations(langKey.value).el.datepicker)
 
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
     let translations = amCustomize.value.ecf.calendar.translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -1982,9 +1893,7 @@ function calendarEventBlock(eventInfo) {
   ) {
     spotsWrapper = customizeOptions.value.status.visibility ? spotsWrapper : ''
   } else {
-    spotsWrapper = customizeOptions.value.capacity.visibility
-      ? spotsWrapper
-      : ''
+    spotsWrapper = customizeOptions.value.capacity.visibility ? spotsWrapper : ''
   }
 
   // * event card classes
@@ -2014,8 +1923,7 @@ function calendarEventBlock(eventInfo) {
 
 function calendarEventClick(eventInfo) {
   calendarOptions.value.events.map((event) => {
-    event.hovered =
-      parseInt(event.evtId) === parseInt(eventInfo.event.extendedProps.evtId)
+    event.hovered = parseInt(event.evtId) === parseInt(eventInfo.event.extendedProps.evtId)
   })
 }
 
@@ -2034,13 +1942,7 @@ function calendarMoreLinkBlock(moreLinkInfo) {
   }
 
   return {
-    html:
-      '<div class="am-evt-more-link-inner">' +
-      '+' +
-      moreLinkInfo.num +
-      ' ' +
-      text +
-      '</div>',
+    html: '<div class="am-evt-more-link-inner">' + '+' + moreLinkInfo.num + ' ' + text + '</div>',
   }
 }
 
@@ -2084,28 +1986,17 @@ function eventArrayBuilder(evtArr) {
   let buildArr = []
   evtArr.forEach(function (event) {
     mergePeriods(event.periods).forEach((period) => {
-      let periodStartDate = moment(
-        period.periodStart.split(' ')[0],
-        'YYYY-MM-DD'
-      )
+      let periodStartDate = moment(period.periodStart.split(' ')[0], 'YYYY-MM-DD')
       let periodEndDate = moment(period.periodEnd.split(' ')[0], 'YYYY-MM-DD')
-      let periodStartTime = moment(
-        period.periodStart.split(' ')[1],
-        'HH:mm:ss'
-      ).format('HH:mm:ss')
-      let periodEndTime = moment(
-        period.periodEnd.split(' ')[1],
-        'HH:mm:ss'
-      ).format('HH:mm:ss')
+      let periodStartTime = moment(period.periodStart.split(' ')[1], 'HH:mm:ss').format('HH:mm:ss')
+      let periodEndTime = moment(period.periodEnd.split(' ')[1], 'HH:mm:ss').format('HH:mm:ss')
 
       if (periodEndTime === '00:00:00') {
         periodEndTime = '24:00:00'
         periodEndDate.subtract(1, 'days')
       }
 
-      let isWaiting =
-        event.name === 'Event 10' &&
-        features.value.waitingList
+      let isWaiting = event.name === 'Event 10' && features.value.waitingList
 
       buildArr.push({
         evtId: event.id,
@@ -2128,8 +2019,7 @@ function eventArrayBuilder(evtArr) {
   buildArr.forEach((a) => {
     if (
       !eventsToDisplay.find(
-        (b) =>
-          b.evtId === a.evtId && b.start.split(' ')[0] === a.start.split(' ')[0]
+        (b) => b.evtId === a.evtId && b.start.split(' ')[0] === a.start.split(' ')[0],
       )
     ) {
       eventsToDisplay.push(a)
@@ -2183,14 +2073,8 @@ function placesCalculation(evt) {
 
 function getEventBasedOnDateChange() {
   return [
-    moment(dateReference.value)
-      .startOf('month')
-      .subtract(15, 'days')
-      .format('YYYY-MM-DD'),
-    moment(dateReference.value)
-      .endOf('month')
-      .add(15, 'days')
-      .format('YYYY-MM-DD'),
+    moment(dateReference.value).startOf('month').subtract(15, 'days').format('YYYY-MM-DD'),
+    moment(dateReference.value).endOf('month').add(15, 'days').format('YYYY-MM-DD'),
   ]
 }
 function calendarChangeMonth(monthType) {
@@ -2204,9 +2088,9 @@ function calendarChangeMonth(monthType) {
     eventCalendarRef.value.getApi().next()
   }
 
-  dateReference.value = moment(
-    eventCalendarRef.value.getApi().getDate().toUTCString()
-  ).format('YYYY-MM-DD')
+  dateReference.value = moment(eventCalendarRef.value.getApi().getDate().toUTCString()).format(
+    'YYYY-MM-DD',
+  )
 
   selectedMonth.value = moment(dateReference.value).format('MM')
   selectedYear.value = moment(dateReference.value).format('YYYY')
@@ -2282,10 +2166,9 @@ let dropdownYears = ref([
 ])
 
 function dateSelection() {
-  dateReference.value = moment(
-    `${selectedYear.value}-${selectedMonth.value}`,
-    'YYYY-MM'
-  ).format('YYYY-MM-DD')
+  dateReference.value = moment(`${selectedYear.value}-${selectedMonth.value}`, 'YYYY-MM').format(
+    'YYYY-MM-DD',
+  )
   getEventBasedOnDateChange()
 }
 
@@ -2331,7 +2214,6 @@ let filtersMenuVisibility = ref(false)
 
 // * Locations array
 let locations = computed(() => {
-
   if (licence.isLite || licence.isStarter) return []
 
   return [
@@ -2471,14 +2353,16 @@ watchEffect(() => {
   }
 
   if (calWidth.value < 448) {
-    calendarOptions.value.moreLinkClassNames +=
-      !calendarOptions.value.moreLinkClassNames.includes('mobile')
-        ? ' mobile'
-        : ''
-    calendarOptions.value.dayCellClassNames +=
-      !calendarOptions.value.dayCellClassNames.includes('mobile')
-        ? ' mobile'
-        : ''
+    calendarOptions.value.moreLinkClassNames += !calendarOptions.value.moreLinkClassNames.includes(
+      'mobile',
+    )
+      ? ' mobile'
+      : ''
+    calendarOptions.value.dayCellClassNames += !calendarOptions.value.dayCellClassNames.includes(
+      'mobile',
+    )
+      ? ' mobile'
+      : ''
   } else {
     calendarOptions.value.moreLinkClassNames = 'am-evt-more-link'
     calendarOptions.value.dayCellClassNames = 'am-evt-day-wrapper'
@@ -3802,8 +3686,8 @@ let upcomingArray = ref([
 ])
 let upcomingEvents = ref(
   upcomingArray.value.filter(
-    (e) => useEventStatus(e) === 'open' || useEventStatus(e) === 'upcoming'
-  )
+    (e) => useEventStatus(e) === 'open' || useEventStatus(e) === 'upcoming',
+  ),
 )
 
 // * Upcoming Number
@@ -4393,17 +4277,13 @@ let waitingEvents = ref([
 function calculatedEventPrice(evt) {
   if (evt.customPricing) {
     if (useCheckIfEventNotFree(evt)) {
-      return `${labelsDisplay('from')} ${useFormattedPrice(
-        useMinTicketPrice(evt)
-      )}`
+      return `${labelsDisplay('from')} ${useFormattedPrice(useMinTicketPrice(evt))}`
     } else {
       return labelsDisplay('event_free')
     }
   }
 
-  return useCheckIfEventNotFree(evt)
-    ? useFormattedPrice(evt.price)
-    : labelsDisplay('event_free')
+  return useCheckIfEventNotFree(evt) ? useFormattedPrice(evt.price) : labelsDisplay('event_free')
 }
 
 function multipleDaysEvent(arr) {
@@ -4418,10 +4298,7 @@ function multipleDaysEvent(arr) {
 
 function eventPlacesBlock(evt) {
   let spots = placesCalculation(evt)
-  let spotsText =
-    spots === 1
-      ? labelsDisplay('event_slot_left')
-      : labelsDisplay('event_slots_left')
+  let spotsText = spots === 1 ? labelsDisplay('event_slot_left') : labelsDisplay('event_slots_left')
   let noSpotsText = labelsDisplay('event_no_spots')
 
   return spots <= 0 ? noSpotsText : spotsText
@@ -4454,60 +4331,24 @@ let cssVars = computed(() => {
   return {
     '--am-c-ecal-bgr': amColors.value.colorMainBgr,
     '--am-c-ecal-heading-text': amColors.value.colorMainHeadingText,
-    '--am-c-ecal-heading-text-op70': useColorTransparency(
-      amColors.value.colorMainHeadingText,
-      0.7
-    ),
+    '--am-c-ecal-heading-text-op70': useColorTransparency(amColors.value.colorMainHeadingText, 0.7),
     '--am-c-ecal-text': amColors.value.colorMainText,
-    '--am-c-ecal-text-op03': useColorTransparency(
-      amColors.value.colorMainText,
-      0.03
-    ),
-    '--am-c-ecal-text-op05': useColorTransparency(
-      amColors.value.colorMainText,
-      0.05
-    ),
-    '--am-c-ecal-text-op10': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
-    '--am-c-ecal-text-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
-    '--am-c-ecal-text-op30': useColorTransparency(
-      amColors.value.colorMainText,
-      0.3
-    ),
-    '--am-c-ecal-text-op50': useColorTransparency(
-      amColors.value.colorMainText,
-      0.5
-    ),
-    '--am-c-ecal-text-op70': useColorTransparency(
-      amColors.value.colorMainText,
-      0.7
-    ),
+    '--am-c-ecal-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03),
+    '--am-c-ecal-text-op05': useColorTransparency(amColors.value.colorMainText, 0.05),
+    '--am-c-ecal-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
+    '--am-c-ecal-text-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
+    '--am-c-ecal-text-op30': useColorTransparency(amColors.value.colorMainText, 0.3),
+    '--am-c-ecal-text-op50': useColorTransparency(amColors.value.colorMainText, 0.5),
+    '--am-c-ecal-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
     '--am-c-ecal-card-bgr': amColors.value.colorCardBgr,
     '--am-c-ecal-card-border': amColors.value.colorCardBorder,
-    '--am-c-ecal-card-border-op10': useColorTransparency(
-      amColors.value.colorCardBorder,
-      0.1
-    ),
+    '--am-c-ecal-card-border-op10': useColorTransparency(amColors.value.colorCardBorder, 0.1),
     '--am-c-ecal-card-text': amColors.value.colorCardText,
-    '--am-c-ecal-card-text-op80': useColorTransparency(
-      amColors.value.colorCardText,
-      0.8
-    ),
-    '--am-c-ecal-card-text-op50': useColorTransparency(
-      amColors.value.colorCardText,
-      0.5
-    ),
+    '--am-c-ecal-card-text-op80': useColorTransparency(amColors.value.colorCardText, 0.8),
+    '--am-c-ecal-card-text-op50': useColorTransparency(amColors.value.colorCardText, 0.5),
     '--am-c-ecal-error': amColors.value.colorError,
     '--am-c-ecal-primary': amColors.value.colorPrimary,
-    '--am-c-ecal-primary-op30': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.3
-    ),
+    '--am-c-ecal-primary-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
     '--am-c-ecal-success': amColors.value.colorSuccess,
     '--am-c-ecal-warning': amColors.value.colorWarning,
   }
@@ -4920,7 +4761,8 @@ export default {
         padding: 12px 16px 12px 24px;
         border-radius: 8px;
         background-color: var(--am-c-ecal-card-bgr);
-        box-shadow: 4px 0 0 0 var(--am-c-evt) inset,
+        box-shadow:
+          4px 0 0 0 var(--am-c-evt) inset,
           0 2px 2px -1px var(--am-c-ecal-card-border),
           0 0 11px 0px var(--am-c-ecal-card-border-op10);
         margin: 0 0 12px;
@@ -5312,7 +5154,8 @@ export default {
         border-radius: 4px;
         padding: 2px 2px 2px 6px;
         overflow: hidden;
-        box-shadow: 2px 0 0 0 var(--am-c-evt) inset,
+        box-shadow:
+          2px 0 0 0 var(--am-c-evt) inset,
           0px 1px 1px 0px var(--am-c-ecal-text-op30);
         box-sizing: border-box;
         transition: 0.5s all ease-in-out;

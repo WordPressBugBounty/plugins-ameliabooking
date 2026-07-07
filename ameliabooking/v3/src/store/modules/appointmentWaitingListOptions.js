@@ -12,11 +12,11 @@ export default {
   }),
 
   getters: {
-    getIsWaitingListSlot (state) {
+    getIsWaitingListSlot(state) {
       return state.isWaitingListSlot
     },
 
-    getWaitingListOptions (state) {
+    getWaitingListOptions(state) {
       return {
         enabled: state.enabled,
         maxCapacity: state.maxCapacity,
@@ -28,7 +28,7 @@ export default {
       }
     },
 
-    getOptions (state) {
+    getOptions(state) {
       return {
         enabled: state.enabled,
         maxCapacity: state.maxCapacity,
@@ -38,11 +38,11 @@ export default {
         isWaitingListSlot: state.isWaitingListSlot,
         selectedProviderId: state.selectedProviderId,
       }
-    }
+    },
   },
 
   mutations: {
-    setAllData (state, payload) {
+    setAllData(state, payload) {
       state.enabled = payload.enabled
       state.maxCapacity = payload.maxCapacity
       state.maxExtraPeople = payload.maxExtraPeople
@@ -51,19 +51,19 @@ export default {
       state.isWaitingListSlot = 'isWaitingListSlot' in payload ? payload.isWaitingListSlot : false
       state.selectedProviderId = 'selectedProviderId' in payload ? payload.selectedProviderId : null
     },
-    setIsWaitingListSlot (state, payload) {
+    setIsWaitingListSlot(state, payload) {
       state.isWaitingListSlot = !!payload
     },
-    setPeopleWaiting (state, payload) {
+    setPeopleWaiting(state, payload) {
       state.peopleWaiting = payload
     },
-    setSelectedProviderId (state, payload) {
+    setSelectedProviderId(state, payload) {
       state.selectedProviderId = payload
-    }
+    },
   },
 
   actions: {
-    resetWaitingOptions ({commit}) {
+    resetWaitingOptions({ commit }) {
       commit('setAllData', {
         enabled: false,
         maxCapacity: 0,
@@ -73,6 +73,6 @@ export default {
         isWaitingListSlot: false,
         selectedProviderId: null,
       })
-    }
-  }
+    },
+  },
 }

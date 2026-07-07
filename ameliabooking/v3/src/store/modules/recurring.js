@@ -8,64 +8,64 @@ export default {
     occurrenceDate: null,
     occurrenceCount: 1,
     days: [
-      {value: 'monday', selected: false},
-      {value: 'tuesday', selected: false},
-      {value: 'wednesday', selected: false},
-      {value: 'thursday', selected: false},
-      {value: 'friday', selected: false},
-      {value: 'saturday', selected: false},
-      {value: 'sunday', selected: false}
+      { value: 'monday', selected: false },
+      { value: 'tuesday', selected: false },
+      { value: 'wednesday', selected: false },
+      { value: 'thursday', selected: false },
+      { value: 'friday', selected: false },
+      { value: 'saturday', selected: false },
+      { value: 'sunday', selected: false },
     ],
     monthly: 0,
   }),
 
   getters: {
-    getRepeatType (state) {
+    getRepeatType(state) {
       return state.repeatType
     },
-    getRepeatInterval (state) {
+    getRepeatInterval(state) {
       return state.repeatInterval
     },
-    getOccurrenceType (state) {
+    getOccurrenceType(state) {
       return state.occurrenceType
     },
-    getOccurrenceDate (state) {
+    getOccurrenceDate(state) {
       return state.occurrenceDate
     },
-    getOccurrenceCount (state) {
+    getOccurrenceCount(state) {
       return state.occurrenceCount
     },
-    getMonthly (state) {
+    getMonthly(state) {
       return state.monthly
     },
-    getDays (state) {
+    getDays(state) {
       return state.days
     },
   },
 
   mutations: {
-    setRepeatType (state, payload) {
+    setRepeatType(state, payload) {
       state.repeatType = payload
     },
-    setRepeatInterval (state, payload) {
+    setRepeatInterval(state, payload) {
       state.repeatInterval = payload
     },
-    setOccurrenceType (state, payload) {
+    setOccurrenceType(state, payload) {
       state.occurrenceType = payload
     },
-    setOccurrenceDate (state, payload) {
+    setOccurrenceDate(state, payload) {
       state.occurrenceDate = payload
     },
-    setOccurrenceCount (state, payload) {
+    setOccurrenceCount(state, payload) {
       state.occurrenceCount = payload
     },
-    setMonthly (state, payload) {
+    setMonthly(state, payload) {
       state.monthly = payload
     },
-    setDays (state, payload) {
-      state.days.find(day => day.value === payload.value).selected = payload.selected
+    setDays(state, payload) {
+      state.days.find((day) => day.value === payload.value).selected = payload.selected
     },
   },
 
-  actions: {}
+  actions: {},
 }

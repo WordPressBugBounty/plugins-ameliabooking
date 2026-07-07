@@ -2,10 +2,7 @@
   <div class="am-fs__bringing" :style="cssVars">
     <div class="am-fs__bringing-main">
       <div
-        v-if="
-          inPopup &&
-          amCustomize[pageRenderKey].bringingAnyone.options.heading.visibility
-        "
+        v-if="inPopup && amCustomize[pageRenderKey].bringingAnyone.options.heading.visibility"
         class="am-fs__bringing-heading"
       >
         {{ labelsDisplay('bringing_anyone_title') }}
@@ -17,16 +14,11 @@
             labelsDisplay(
               amSettings.appointments.bringingAnyoneLogic === 'additional'
                 ? 'bringing_people'
-                : 'bringing_people_total'
+                : 'bringing_people_total',
             )
           }}</span>
         </span>
-        <AmInputNumber
-          v-model="persons"
-          :min="options.min"
-          :max="options.max"
-          size="small"
-        />
+        <AmInputNumber v-model="persons" :min="options.min" :max="options.max" size="small" />
       </div>
       <div
         v-if="amCustomize[pageRenderKey].bringingAnyone.options.info.visibility"
@@ -36,7 +28,7 @@
           labelsDisplay(
             amSettings.appointments.bringingAnyoneLogic === 'additional'
               ? 'add_people'
-              : 'add_people_total'
+              : 'add_people_total',
           )
         }}
       </div>
@@ -45,8 +37,7 @@
     <div
       v-if="
         features.customPricing &&
-        amCustomize[pageRenderKey].bringingAnyone.options.bringingPrice
-          .visibility
+        amCustomize[pageRenderKey].bringingAnyone.options.bringingPrice.visibility
       "
       class="am-fs__bringing-main"
     >
@@ -74,9 +65,7 @@
           <span>{{
             item.prices[0] === item.prices[1]
               ? useFormattedPrice(item.prices[0])
-              : useFormattedPrice(item.prices[0]) +
-                ' - ' +
-                useFormattedPrice(item.prices[1])
+              : useFormattedPrice(item.prices[0]) + ' - ' + useFormattedPrice(item.prices[1])
           }}</span>
         </p>
       </div>
@@ -116,15 +105,9 @@ let licence = inject('licence')
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value].bringingAnyone.translations &&
-      amCustomize.value[pageRenderKey.value].bringingAnyone.translations[
-        label
-      ] &&
-      amCustomize.value[pageRenderKey.value].bringingAnyone.translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value].bringingAnyone.translations[
-          label
-        ][langKey.value]
+      amCustomize.value[pageRenderKey.value].bringingAnyone.translations[label] &&
+      amCustomize.value[pageRenderKey.value].bringingAnyone.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].bringingAnyone.translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -145,19 +128,10 @@ let persons = ref(1)
 let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
-    '--am-bringing-color-border': useColorTransparency(
-      amColors.value.colorMainText,
-      0.25
-    ),
-    '--am-bringing-color-text-opacity60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
+    '--am-bringing-color-border': useColorTransparency(amColors.value.colorMainText, 0.25),
+    '--am-bringing-color-text-opacity60': useColorTransparency(amColors.value.colorMainText, 0.6),
     '--am-c-ps-primary': amColors.value.colorPrimary,
-    '--am-c-ps-primary-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
+    '--am-c-ps-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
   }
 })
 </script>

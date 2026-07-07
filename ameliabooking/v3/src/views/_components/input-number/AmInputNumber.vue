@@ -26,12 +26,7 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  toRefs,
-  inject,
-  computed
-} from 'vue'
+import { ref, toRefs, inject, computed } from 'vue'
 
 // * Composables
 import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
@@ -154,29 +149,17 @@ let amColors = inject(
     colorBtnPrimText: '#FFFFFF',
     colorBtnSec: '#1A2C37',
     colorBtnSecText: '#FFFFFF',
-  })
+  }),
 )
 let cssVars = computed(() => {
   return {
     '--am-c-inp-number-bgr': amColors.value.colorInpBgr,
     '--am-c-inp-number-border': amColors.value.colorInpBorder,
     '--am-c-inp-number-text': amColors.value.colorInpText,
-    '--am-c-inp-number-text-op10': useColorTransparency(
-      amColors.value.colorInpText,
-      0.1
-    ),
-    '--am-c-inp-number-text-op03': useColorTransparency(
-      amColors.value.colorInpText,
-      0.03
-    ),
-    '--am-c-inp-number-text-op40': useColorTransparency(
-      amColors.value.colorInpText,
-      0.4
-    ),
-    '--am-c-inp-number-text-op60': useColorTransparency(
-      amColors.value.colorInpText,
-      0.6
-    ),
+    '--am-c-inp-number-text-op10': useColorTransparency(amColors.value.colorInpText, 0.1),
+    '--am-c-inp-number-text-op03': useColorTransparency(amColors.value.colorInpText, 0.03),
+    '--am-c-inp-number-text-op40': useColorTransparency(amColors.value.colorInpText, 0.4),
+    '--am-c-inp-number-text-op60': useColorTransparency(amColors.value.colorInpText, 0.6),
     '--am-c-inp-number-placeholder': amColors.value.colorInpPlaceHolder,
   }
 })

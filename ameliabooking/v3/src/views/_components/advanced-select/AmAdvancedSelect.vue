@@ -1,16 +1,13 @@
 <template>
-  <div
-    ref="advSelectWrapperRef"
-    class="am-adv-select__wrapper"
-  >
+  <div ref="advSelectWrapperRef" class="am-adv-select__wrapper">
     <el-cascader
       ref="advSelect"
       v-model="model"
       class="am-adv-select"
       :class="[
         `am-adv-select--${size}`,
-        {'am-adv-select--disabled': disabled},
-        {'am-rtl': isRtl}
+        { 'am-adv-select--disabled': disabled },
+        { 'am-rtl': isRtl },
       ]"
       :options="props.options"
       :props="props.propsData"
@@ -45,22 +42,15 @@
     >
       <template v-if="props.prefixIcon" #prefix>
         <component :is="props.prefixIcon" v-if="typeof props.prefixIcon === 'object'" />
-        <span
-          v-if="typeof props.prefixIcon === 'string'"
-          :class="`am-icon-${props.prefixIcon}`"
-        />
+        <span v-if="typeof props.prefixIcon === 'string'" :class="`am-icon-${props.prefixIcon}`" />
       </template>
       <template #empty>
         <span>
           {{ emptyStateString }}
         </span>
       </template>
-      <template #default="{node, data}">
-        <div
-          v-if="!node.isLeaf"
-          class="am-adv-select__item"
-          :style="cssDropdownVars"
-        >
+      <template #default="{ node, data }">
+        <div v-if="!node.isLeaf" class="am-adv-select__item" :style="cssDropdownVars">
           <span class="am-adv-select__item-label">
             {{ data[props.propsData.label] }}
           </span>
@@ -71,23 +61,20 @@
         <div
           v-if="node.isLeaf"
           class="am-adv-select__item"
-          :class="{'am-adv-select__item-checked': node.checked}"
+          :class="{ 'am-adv-select__item-checked': node.checked }"
           :style="cssDropdownVars"
         >
           <span class="am-adv-select__item-label">
             {{ data[props.propsData.label] }}
           </span>
           <span v-if="data.price" class="am-adv-select__item-price">
-            {{` ${useFormattedPrice(data.price)}` }}
-            <span
-              v-if="taxVisibility(data.id)"
-              class="am-adv-select__item-tax"
-            >
-              <template v-if="props.taxOptions.find(a => a.id === data.id).excluded">
+            {{ ` ${useFormattedPrice(data.price)}` }}
+            <span v-if="taxVisibility(data.id)" class="am-adv-select__item-tax">
+              <template v-if="props.taxOptions.find((a) => a.id === data.id).excluded">
                 {{ props.taxLabel }}
               </template>
               <template v-else>
-                {{props.taxLabelIncl}}
+                {{ props.taxLabelIncl }}
               </template>
             </span>
           </span>
@@ -98,7 +85,7 @@
     <teleport
       v-if="teleportCategoryDisable && categoryName"
       :to="`${popperId} .am-adv-select__popper-${uniqueClassSuffix} .el-cascader-panel .el-cascader-menu:nth-child(1)`"
-      :disabled="!teleportCategoryDisable  && categoryName"
+      :disabled="!teleportCategoryDisable && categoryName"
     >
       <span v-if="options.length" class="am-adv-select__popper-heading" :style="cssTeleport">
         {{ categoryName }}
@@ -118,14 +105,8 @@
 </template>
 
 <script setup>
-import {
-  computed,
-  inject,
-  nextTick,
-  ref,
-  toRefs
-} from 'vue'
-import { useColorTransparency } from "../../../assets/js/common/colorManipulation";
+import { computed, inject, nextTick, ref, toRefs } from 'vue'
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
 import { useFormattedPrice } from '../../../assets/js/common/formatting'
 import { useElementSize } from '@vueuse/core'
 
@@ -134,7 +115,7 @@ import { useElementSize } from '@vueuse/core'
  */
 const props = defineProps({
   id: {
-    type: String
+    type: String,
   },
   modelValue: {
     type: [String, Array, Object, Number],
@@ -142,7 +123,7 @@ const props = defineProps({
   options: {
     // * data of the options, the key of value and label can be customize by CascaderProps
     type: Array,
-    default: () => []
+    default: () => [],
   },
   propsData: {
     // * configuration options, see the following CascaderProps table.
@@ -154,16 +135,16 @@ const props = defineProps({
     default: 'default',
     validator(value) {
       return ['default', 'medium', 'small', 'mini', 'micro'].includes(value)
-    }
+    },
   },
   placeholder: {
     type: String,
-    default: ''
+    default: '',
   },
   disabled: {
     // * whether Cascader is disabled
     type: Boolean,
-    default: false
+    default: false,
   },
   clearable: {
     // * whether selected value can be cleared
@@ -173,27 +154,27 @@ const props = defineProps({
   showAllLevels: {
     // * whether to display all levels of the selected value in the input
     type: Boolean,
-    default: true
+    default: true,
   },
   collapseTags: {
     // * whether to collapse tags in multiple selection mode
     type: Boolean,
-    default: true
+    default: true,
   },
   collapseTagsTooltip: {
     // * whether show all selected tags when mouse hover text of collapse-tags. To use this, collapse-tags must be true
     type: Boolean,
-    default: false
+    default: false,
   },
   separator: {
     // * option label separator
     type: String,
-    default: ' / '
+    default: ' / ',
   },
   filterable: {
     // * whether to filter options
     type: Boolean,
-    default: true
+    default: true,
   },
   filterMethod: {
     // * customize search logic, the first parameter is node, the second is keyword, and need return a boolean value indicating whether it hits.
@@ -203,26 +184,26 @@ const props = defineProps({
       let label = node.text.toLowerCase()
 
       return label.includes(search)
-    }
+    },
   },
   debounce: {
     // * debounce delay when typing filter keyword, in milliseconds
     type: Number,
-    default: 300
+    default: 300,
   },
   beforeFilter: {
     // * hook function before filtering with the value to be filtered as its parameter. If false is returned or a Promise is returned and then is rejected, filtering will be aborted
-    type: Function
+    type: Function,
   },
   popperClass: {
     // * custom class name for Cascader's dropdown
     type: String,
-    default: ''
+    default: '',
   },
   teleported: {
     // * whether cascader popup is teleported
     type: Boolean,
-    default: true
+    default: true,
   },
   tagType: {
     // * tag type
@@ -230,7 +211,7 @@ const props = defineProps({
     default: 'info',
     validator(value) {
       return ['info', 'success', 'warning', 'danger'].includes(value)
-    }
+    },
   },
   tagEffect: {
     // * tag effect
@@ -238,27 +219,27 @@ const props = defineProps({
     default: 'light',
     validator(value) {
       return ['dark', 'light', 'plain'].includes(value)
-    }
+    },
   },
   validateEvent: {
     // * event name that triggers validation
     type: Boolean,
-    default: true
+    default: true,
   },
   maxCollapseTags: {
     // * The max tags number to be shown. To use this, collpase-tags must be true
     type: Number,
-    default: 1
+    default: 1,
   },
   persistent: {
     // * when dropdown is inactive and persistent is false, dropdown will be destroyed
     type: Boolean,
-    default: true
+    default: true,
   },
   fallbackPlacements: {
     // * ist of possible positions for Tooltip popper.js
     type: Array,
-    default: () => ['bottom-start', 'top-start', 'right', 'left']
+    default: () => ['bottom-start', 'top-start', 'right', 'left'],
   },
   placement: {
     // * placement of the dropdown, default is bottom-start
@@ -277,51 +258,51 @@ const props = defineProps({
         'left-end',
         'right',
         'right-start',
-        'right-end'
+        'right-end',
       ].includes(value)
     },
   },
   prefixIcon: {
     type: [String, Object],
-    default: ''
+    default: '',
   },
   currencySymbol: {
     type: String,
-    default: '$'
+    default: '$',
   },
   categoryName: {
     type: String,
-    default: ''
+    default: '',
   },
   subCategoryName: {
     type: String,
-    default: ''
+    default: '',
   },
   emptyStateString: {
     type: String,
-    default: 'No matching data'
+    default: 'No matching data',
   },
   taxOptions: {
     type: [Object, Array],
     default: () => {
       return []
-    }
+    },
   },
   taxLabel: {
     type: String,
-    default: ''
+    default: '',
   },
   taxLabelIncl: {
     type: String,
-    default: ''
+    default: '',
   },
   taxVisible: {
     type: Boolean,
-    default: true
+    default: true,
   },
   ariaLabel: {
     type: String,
-    default: 'dropdown'
+    default: 'dropdown',
   },
 })
 
@@ -329,7 +310,15 @@ const props = defineProps({
  * Component Emits
  * @type {EmitFn<(string)[]>}
  */
-const emits = defineEmits(['change', 'expand-change', 'blur', 'focus', 'visible-change', 'remove-tag', 'update:modelValue'])
+const emits = defineEmits([
+  'change',
+  'expand-change',
+  'blur',
+  'focus',
+  'visible-change',
+  'remove-tag',
+  'update:modelValue',
+])
 
 // * Component model
 let { modelValue } = toRefs(props)
@@ -337,12 +326,12 @@ let model = computed({
   get: () => modelValue.value,
   set: (val) => {
     emits('update:modelValue', val)
-  }
+  },
 })
 
 // * Tat Visibility
-function taxVisibility (id) {
-  return props.taxVisible && !!props.taxOptions.filter(a => a.id === id).length
+function taxVisibility(id) {
+  return props.taxVisible && !!props.taxOptions.filter((a) => a.id === id).length
 }
 
 // * Container Width
@@ -352,7 +341,7 @@ let checkScreen = computed(() => cWidth.value < 560 || (cWidth.value > 560 && cW
 // * Element Wrapper Size
 const advSelectWrapperRef = ref(null)
 
-const {width: wrapperWidth} = useElementSize(advSelectWrapperRef)
+const { width: wrapperWidth } = useElementSize(advSelectWrapperRef)
 
 // * Component reference
 const advSelect = ref(null)
@@ -381,7 +370,10 @@ let uniqueClassSuffix = ref(Math.floor(Math.random() * 1000) + 1)
  * @type {ComputedRef<string>}
  */
 let popperClasses = computed(() => {
-  return `am-adv-select__popper-${uniqueClassSuffix.value} am-adv-select__popper${props.popperClass ? ' ' + props.popperClass : ''}` + (checkScreen.value ? ' am-adv-select__popper-mobile':'')
+  return (
+    `am-adv-select__popper-${uniqueClassSuffix.value} am-adv-select__popper${props.popperClass ? ' ' + props.popperClass : ''}` +
+    (checkScreen.value ? ' am-adv-select__popper-mobile' : '')
+  )
 })
 
 /**
@@ -391,37 +383,43 @@ let teleportSubCategoryDisable = ref(false)
 let teleportCategoryDisable = ref(false)
 
 // * Fonts
-let amFonts = inject('amFonts', ref({
-  fontFamily: 'Amelia Roboto, sans-serif',
-  fontUrl: '',
-  customFontFamily: '',
-  fontFormat: '',
-  customFontSelected: false
-}))
+let amFonts = inject(
+  'amFonts',
+  ref({
+    fontFamily: 'Amelia Roboto, sans-serif',
+    fontUrl: '',
+    customFontFamily: '',
+    fontFormat: '',
+    customFontSelected: false,
+  }),
+)
 
 // * Colors
-let amColors = inject('amColors', ref({
-  colorPrimary: '#1246D6',
-  colorSuccess: '#019719',
-  colorError: '#B4190F',
-  colorWarning: '#CCA20C',
-  colorMainBgr: '#FFFFFF',
-  colorMainHeadingText: '#33434C',
-  colorMainText: '#1A2C37',
-  colorSbBgr: '#17295A',
-  colorSbText: '#FFFFFF',
-  colorInpBgr: '#FFFFFF',
-  colorInpBorder: '#D1D5D7',
-  colorInpText: '#1A2C37',
-  colorInpPlaceHolder: '#1A2C37',
-  colorDropBgr: '#FFFFFF',
-  colorDropBorder: '#D1D5D7',
-  colorDropText: '#0E1920',
-  colorBtnPrim: '#265CF2',
-  colorBtnPrimText: '#FFFFFF',
-  colorBtnSec: '#1A2C37',
-  colorBtnSecText: '#FFFFFF',
-}))
+let amColors = inject(
+  'amColors',
+  ref({
+    colorPrimary: '#1246D6',
+    colorSuccess: '#019719',
+    colorError: '#B4190F',
+    colorWarning: '#CCA20C',
+    colorMainBgr: '#FFFFFF',
+    colorMainHeadingText: '#33434C',
+    colorMainText: '#1A2C37',
+    colorSbBgr: '#17295A',
+    colorSbText: '#FFFFFF',
+    colorInpBgr: '#FFFFFF',
+    colorInpBorder: '#D1D5D7',
+    colorInpText: '#1A2C37',
+    colorInpPlaceHolder: '#1A2C37',
+    colorDropBgr: '#FFFFFF',
+    colorDropBorder: '#D1D5D7',
+    colorDropText: '#0E1920',
+    colorBtnPrim: '#265CF2',
+    colorBtnPrimText: '#FFFFFF',
+    colorBtnSec: '#1A2C37',
+    colorBtnSecText: '#FFFFFF',
+  }),
+)
 
 // * Adv css vars
 let cssVars = computed(() => {
@@ -434,7 +432,7 @@ let cssVars = computed(() => {
     '--am-c-advs-text-op60': useColorTransparency(amColors.value.colorInpText, 0.6),
     '--am-c-advs-text-op40': useColorTransparency(amColors.value.colorInpText, 0.4),
     '--am-c-advs-text-op10': useColorTransparency(amColors.value.colorInpText, 0.03),
-    '--am-font-family': amFonts.value.fontFamily
+    '--am-font-family': amFonts.value.fontFamily,
   }
 })
 
@@ -445,7 +443,7 @@ let cssDropdownVars = computed(() => {
     '--am-c-advs-item-price-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
     '--am-c-advs-item-selected': amColors.value.colorPrimary,
     '--am-c-advs-item-label-op40': useColorTransparency(amColors.value.colorDropText, 0.4),
-    '--am-font-family': amFonts.value.fontFamily
+    '--am-font-family': amFonts.value.fontFamily,
   }
 })
 
@@ -483,12 +481,30 @@ function handleVisibleChange(e) {
 
     teleportCategoryDisable.value = true
     if (advSelect.value) {
-      advSelect.value.contentRef.style.setProperty('--am-c-advs-item-bgr', amColors.value.colorDropBgr)
-      advSelect.value.contentRef.style.setProperty('--am-c-advs-item-border', amColors.value.colorDropBorder)
-      advSelect.value.contentRef.style.setProperty('--am-c-advs-item-bgr-op10', useColorTransparency(amColors.value.colorDropText, 0.1))
-      advSelect.value.contentRef.style.setProperty('--am-c-advs-item-label', amColors.value.colorDropText)
-      advSelect.value.contentRef.style.setProperty('--am-c-advs-item-label-op65', useColorTransparency(amColors.value.colorDropText, 0.65))
-      advSelect.value.contentRef.style.setProperty('--am-c-advs-item-border-op10', useColorTransparency(amColors.value.colorDropText, 0.1))
+      advSelect.value.contentRef.style.setProperty(
+        '--am-c-advs-item-bgr',
+        amColors.value.colorDropBgr,
+      )
+      advSelect.value.contentRef.style.setProperty(
+        '--am-c-advs-item-border',
+        amColors.value.colorDropBorder,
+      )
+      advSelect.value.contentRef.style.setProperty(
+        '--am-c-advs-item-bgr-op10',
+        useColorTransparency(amColors.value.colorDropText, 0.1),
+      )
+      advSelect.value.contentRef.style.setProperty(
+        '--am-c-advs-item-label',
+        amColors.value.colorDropText,
+      )
+      advSelect.value.contentRef.style.setProperty(
+        '--am-c-advs-item-label-op65',
+        useColorTransparency(amColors.value.colorDropText, 0.65),
+      )
+      advSelect.value.contentRef.style.setProperty(
+        '--am-c-advs-item-border-op10',
+        useColorTransparency(amColors.value.colorDropText, 0.1),
+      )
       advSelect.value.contentRef.style.setProperty('--am-font-family', amFonts.value.fontFamily)
       advSelect.value.contentRef.style.setProperty('width', `${wrapperWidth.value}px`)
     }
@@ -589,7 +605,8 @@ let cssTeleport = computed(() => {
           --am-c-advs-border: var(--am-c-advs-text-op40);
         }
 
-        &:focus, &:active &.is-focus {
+        &:focus,
+        &:active &.is-focus {
           --am-c-advs-border: var(--am-c-primary);
         }
       }
@@ -606,16 +623,20 @@ let cssTeleport = computed(() => {
         padding: 0;
         width: 100%;
 
-        &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+        &::-webkit-input-placeholder {
+          /* Chrome/Opera/Safari */
           color: var(--am-c-advs-placeholder);
         }
-        &::-moz-placeholder { /* Firefox 19+ */
+        &::-moz-placeholder {
+          /* Firefox 19+ */
           color: var(--am-c-advs-placeholder);
         }
-        &:-ms-input-placeholder { /* IE 10+ */
+        &:-ms-input-placeholder {
+          /* IE 10+ */
           color: var(--am-c-advs-placeholder);
         }
-        &:-moz-placeholder { /* Firefox 18- */
+        &:-moz-placeholder {
+          /* Firefox 18- */
           color: var(--am-c-advs-placeholder);
         }
 
@@ -704,7 +725,7 @@ let cssTeleport = computed(() => {
   width: 100%;
   z-index: 9999999999 !important;
 
-  &.el-cascader__dropdown.el-popper[role=tooltip] {
+  &.el-cascader__dropdown.el-popper[role='tooltip'] {
     background-color: transparent;
     border-color: var(--am-c-advs-item-border);
     overflow: hidden;
@@ -783,7 +804,8 @@ let cssTeleport = computed(() => {
       height: unset;
       padding: 0;
 
-      &:not(.is-disabled):hover, &:not(.is-disabled):focus {
+      &:not(.is-disabled):hover,
+      &:not(.is-disabled):focus {
         background-color: var(--am-c-advs-item-bgr-op10);
       }
 
@@ -899,9 +921,7 @@ let cssTeleport = computed(() => {
           overflow-y: scroll;
         }
       }
-
     }
   }
 }
 </style>
-

@@ -1,42 +1,52 @@
 <template>
   <div
     class="am-ec"
-    :class="[{'am-no-border': !props.borderVisibility}, responsiveClass]"
+    :class="[{ 'am-no-border': !props.borderVisibility }, responsiveClass]"
     :style="cssVars"
     role="listitem"
   >
     <!-- Period -->
-    <div
-      class="am-ec__period"
-      :class="responsiveClass"
-    >
+    <div class="am-ec__period" :class="responsiveClass">
       <p
-        v-if="multipleDaysEvent(props.event.periods) && (eventStatus === 'open' || eventStatus === 'upcoming')"
+        v-if="
+          multipleDaysEvent(props.event.periods) &&
+          (eventStatus === 'open' || eventStatus === 'upcoming')
+        "
         class="am-ec__period-text"
         :class="responsiveClass"
       >
         {{ props.labels.event_begins }}
       </p>
-      <p
-        class="am-ec__period-date"
-        :class="responsiveClass"
-      >
+      <p class="am-ec__period-date" :class="responsiveClass">
         <span
           class="am-ec__period-date__day"
-          :class="[{'am-ghost': (eventStatus === 'canceled' || eventStatus === 'closed')}, responsiveClass]"
+          :class="[
+            { 'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed' },
+            responsiveClass,
+          ]"
         >
           {{ getEventFrontedFormattedDateDay(props.event.periods[0].periodStart.split(' ')[0]) }}
         </span>
         <span
           class="am-ec__period-date__month"
-          :class="[{'am-ghost': (eventStatus === 'canceled' || eventStatus === 'closed')}, responsiveClass]"
+          :class="[
+            { 'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed' },
+            responsiveClass,
+          ]"
         >
-          {{ monthsTranslationsShort(localLanguage)[moment(props.event.periods[0].periodStart.split(' ')[0]).format('M')] }}
+          {{
+            monthsTranslationsShort(localLanguage)[
+              moment(props.event.periods[0].periodStart.split(' ')[0]).format('M')
+            ]
+          }}
         </span>
       </p>
       <p
         class="am-ec__period-time"
-        :class="[{'am-ghost': (eventStatus === 'canceled' || eventStatus === 'closed')}, responsiveClass]"
+        :class="[
+          { 'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed' },
+          responsiveClass,
+        ]"
       >
         {{ getEventFrontedFormattedTime(props.event.periods[0].periodStart.split(' ')[1]) }}
       </p>
@@ -44,10 +54,16 @@
 
     <!-- Image -->
     <div
-      v-if="(props.event.gallery.length || props.event.pictureFullPath) && props.imageVisibility && props.customizedOptions.imgTab.visibility"
+      v-if="
+        (props.event.gallery.length || props.event.pictureFullPath) &&
+        props.imageVisibility &&
+        props.customizedOptions.imgTab.visibility
+      "
       class="am-ec__image"
       :class="responsiveClass"
-      :style="{backgroundImage: `url(${props.event.pictureFullPath ? props.event.pictureFullPath : props.event.gallery[0].pictureFullPath})`}"
+      :style="{
+        backgroundImage: `url(${props.event.pictureFullPath ? props.event.pictureFullPath : props.event.gallery[0].pictureFullPath})`,
+      }"
       role="img"
       :aria-label="props.event.name"
     ></div>
@@ -56,9 +72,9 @@
     <div class="am-ec__info">
       <p
         class="am-ec__info-name"
-        :class="{'am-ghost': (eventStatus === 'canceled' || eventStatus === 'closed')}"
+        :class="{ 'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed' }"
       >
-        {{props.event.name}}
+        {{ props.event.name }}
       </p>
       <p
         v-if="inHeader && componentWidth <= 500 && props.customizedOptions.price.visibility"
@@ -70,14 +86,16 @@
             {{ `+${props.labels.total_tax_colon}` }}
           </template>
           <template v-else>
-            {{props.labels.incl_tax}}
+            {{ props.labels.incl_tax }}
           </template>
         </template>
       </p>
       <p
-        v-if="props.customizedOptions.location.visibility && useEventLocation(props.event, locations)"
+        v-if="
+          props.customizedOptions.location.visibility && useEventLocation(props.event, locations)
+        "
         class="am-ec__info-location"
-        :class="{'am-ghost': (eventStatus === 'canceled' || eventStatus === 'closed')}"
+        :class="{ 'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed' }"
       >
         {{ useEventLocation(props.event, locations) }}
       </p>
@@ -89,11 +107,19 @@
           {{ props.labels[eventStatus] }}
         </p>
         <p
-          v-if="props.customizedOptions.slots.visibility && useWaitingListAvailability(props.event) && useWaitingListOccupancy(props.event) > 0"
+          v-if="
+            props.customizedOptions.slots.visibility &&
+            useWaitingListAvailability(props.event) &&
+            useWaitingListOccupancy(props.event) > 0
+          "
           class="am-ec__info-waiting-list"
         >
           {{ useWaitingListOccupancy(props.event) }}
-          {{ useWaitingListOccupancy(props.event) === 1 ? props.labels.person_waiting : props.labels.people_waiting }}
+          {{
+            useWaitingListOccupancy(props.event) === 1
+              ? props.labels.person_waiting
+              : props.labels.people_waiting
+          }}
         </p>
         <p
           v-if="props.customizedOptions.slots.visibility && showEventCapacity(eventStatus)"
@@ -103,7 +129,11 @@
             {{ eventPlaces }}
           </span>
           <span class="am-ec__info-capacity__text">
-            {{ eventPlaces === 1 ? ` ${props.labels.event_slot_left}` : ` ${props.labels.event_slots_left}` }}
+            {{
+              eventPlaces === 1
+                ? ` ${props.labels.event_slot_left}`
+                : ` ${props.labels.event_slots_left}`
+            }}
           </span>
         </p>
       </div>
@@ -113,7 +143,10 @@
     <div
       v-if="!inHeader || componentWidth > 500"
       class="am-ec__actions"
-      :class="[{'am-vertical-center': !props.customizedOptions.price.visibility}, responsiveClass]"
+      :class="[
+        { 'am-vertical-center': !props.customizedOptions.price.visibility },
+        responsiveClass,
+      ]"
     >
       <div
         v-if="props.customizedOptions.price.visibility"
@@ -123,22 +156,16 @@
         <p>
           {{ eventCardPrice }}
         </p>
-        <p
-          v-if="useCheckIfEventNotFree(props.event) && props.taxVisible"
-          class="am-tax"
-        >
+        <p v-if="useCheckIfEventNotFree(props.event) && props.taxVisible" class="am-tax">
           <template v-if="amSettings.payments.taxes.excluded">
             {{ `+${props.labels.total_tax_colon}` }}
           </template>
           <template v-else>
-            {{props.labels.incl_tax}}
+            {{ props.labels.incl_tax }}
           </template>
         </p>
       </div>
-      <p
-       v-if="props.btnVisibility"
-        class="am-ec__actions-btn"
-      >
+      <p v-if="props.btnVisibility" class="am-ec__actions-btn">
         <AmButton
           :size="componentWidth > 500 ? 'small' : 'medium'"
           :type="bookingBtnType"
@@ -146,7 +173,13 @@
           :aria-label="`${useWaitingListAvailability(props.event) ? props.labels.join_waiting_list : eventStatus !== 'open' ? props.labels.event_learn_more : props.labels.event_read_more}: ${props.event.name}`"
           @click="selectEvent(props.event.id)"
         >
-          {{ useWaitingListAvailability(props.event) ? props.labels.join_waiting_list : eventStatus !== 'open' ? props.labels.event_learn_more : props.labels.event_read_more }}
+          {{
+            useWaitingListAvailability(props.event)
+              ? props.labels.join_waiting_list
+              : eventStatus !== 'open'
+                ? props.labels.event_learn_more
+                : props.labels.event_read_more
+          }}
         </AmButton>
       </p>
     </div>
@@ -155,16 +188,13 @@
 
 <script setup>
 // * _components
-import AmButton from "../../../../_components/button/AmButton.vue";
+import AmButton from '../../../../_components/button/AmButton.vue'
 
 // * Import from Vue
-import {
-  computed,
-  inject
-} from "vue";
+import { computed, inject } from 'vue'
 
 // * Libraries
-import moment from "moment";
+import moment from 'moment'
 
 // * Composables
 import {
@@ -174,97 +204,95 @@ import {
   useEventStatus,
   useCheckIfEventNotFree,
   useWaitingListAvailability,
-  useWaitingListOccupancy
-} from "../../../../../assets/js/public/events.js";
+  useWaitingListOccupancy,
+} from '../../../../../assets/js/public/events.js'
 import {
   getEventFrontedFormattedTime,
-  getEventFrontedFormattedDateDay
-} from "../../../../../assets/js/common/date.js";
-import {
-  useFormattedPrice
-} from "../../../../../assets/js/common/formatting";
-import { useColorTransparency } from "../../../../../assets/js/common/colorManipulation";
-import { useResponsiveClass } from "../../../../../assets/js/common/responsive";
-import { monthsTranslationsShort } from "../../../../../assets/js/common/translationsElementPlus";
+  getEventFrontedFormattedDateDay,
+} from '../../../../../assets/js/common/date.js'
+import { useFormattedPrice } from '../../../../../assets/js/common/formatting'
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
+import { monthsTranslationsShort } from '../../../../../assets/js/common/translationsElementPlus'
 
 // * Component Properties
 let props = defineProps({
   event: {
     type: [Object, Function, Array],
-    required: true
+    required: true,
   },
   labels: {
     type: Object,
-    required: true
+    required: true,
   },
   customizedOptions: {
     type: Object,
     default: () => {
       return {
         bookingBtn: {
-          buttonType: 'filled'
+          buttonType: 'filled',
         },
         infoBtn: {
-          buttonType: 'plain'
+          buttonType: 'plain',
         },
         imgTab: {
-          visibility: true
+          visibility: true,
         },
         location: {
-          visibility: true
+          visibility: true,
         },
         price: {
-          visibility: true
+          visibility: true,
         },
         slots: {
-          visibility: true
+          visibility: true,
         },
         status: {
-          visibility: true
-        }
+          visibility: true,
+        },
       }
-    }
+    },
   },
   tickets: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   locations: {
     type: Array,
-    required: true
+    required: true,
   },
   borderVisibility: {
     type: Boolean,
-    default: true
+    default: true,
   },
   btnVisibility: {
     type: Boolean,
-    default: true
+    default: true,
   },
   autoInfoHeight: {
     type: Boolean,
-    default: false
+    default: false,
   },
   imageVisibility: {
     type: Boolean,
-    default: true
+    default: true,
   },
   verticalOrientation: {
     type: String,
-    default: 'center'
+    default: 'center',
   },
   inHeader: {
     type: Boolean,
-    default: false
+    default: false,
   },
   inDialog: {
     type: Boolean,
-    default: false
+    default: false,
   },
   taxVisible: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 // * Component Emits
@@ -292,8 +320,6 @@ let eventStatus = computed(() => {
   return useEventStatus(props.event)
 })
 
-
-
 let bookingBtnType = computed(() => {
   if (useWaitingListAvailability(props.event)) {
     if ('waitingBtn' in props.customizedOptions) {
@@ -317,18 +343,17 @@ let eventPlaces = computed(() => {
 
     if (props.event.maxCustomCapacity) {
       let sold = 0
-      eventTickets.forEach(t => {
+      eventTickets.forEach((t) => {
         if ('enabled' in t ? t.enabled : true) {
           sold += t.sold
         }
       })
 
       places = props.event.maxCustomCapacity - sold
-    }
-    else {
-      eventTickets.forEach(t => {
+    } else {
+      eventTickets.forEach((t) => {
         if ('enabled' in t ? t.enabled : true) {
-          places += (t.spots - t.sold) - ('persons' in t ? t.persons : 0)
+          places += t.spots - t.sold - ('persons' in t ? t.persons : 0)
         }
       })
     }
@@ -348,16 +373,18 @@ let eventCardPrice = computed(() => {
     }
   }
 
-  return useCheckIfEventNotFree(props.event) ? useFormattedPrice(props.event.price) : props.labels.event_free
+  return useCheckIfEventNotFree(props.event)
+    ? useFormattedPrice(props.event.price)
+    : props.labels.event_free
 })
 
-function selectEvent (id) {
+function selectEvent(id) {
   emits('click', id)
 }
 
-function multipleDaysEvent (arr) {
+function multipleDaysEvent(arr) {
   let testArr = []
-  arr.forEach(period => {
+  arr.forEach((period) => {
     testArr.push(period.periodStart.split(' ')[0])
     testArr.push(period.periodEnd.split(' ')[0])
   })
@@ -385,14 +412,23 @@ let cssVars = computed(() => {
     '--am-c-ec-warning': amColors.value.colorWarning,
     '--am-c-ec-bgr': props.inHeader ? amColors.value.colorMainBgr : amColors.value.colorCardBgr,
     '--am-c-ec-text': props.inHeader ? amColors.value.colorMainText : amColors.value.colorCardText,
-    '--am-c-ec-text-op90': useColorTransparency(props.inHeader ? amColors.value.colorMainText : amColors.value.colorCardText, 0.9),
-    '--am-c-ec-text-op80': useColorTransparency(props.inHeader ? amColors.value.colorMainText : amColors.value.colorCardText, 0.8),
-    '--am-c-ec-text-op50': useColorTransparency(props.inHeader ? amColors.value.colorMainText : amColors.value.colorCardText, 0.5),
+    '--am-c-ec-text-op90': useColorTransparency(
+      props.inHeader ? amColors.value.colorMainText : amColors.value.colorCardText,
+      0.9,
+    ),
+    '--am-c-ec-text-op80': useColorTransparency(
+      props.inHeader ? amColors.value.colorMainText : amColors.value.colorCardText,
+      0.8,
+    ),
+    '--am-c-ec-text-op50': useColorTransparency(
+      props.inHeader ? amColors.value.colorMainText : amColors.value.colorCardText,
+      0.5,
+    ),
     '--am-c-ec-error-op70': useColorTransparency(amColors.value.colorError, 0.7),
     // ? Height of card content
     '--am-h-ec-info': props.autoInfoHeight ? 'unset' : '84px',
     '--am-vo-ec': props.verticalOrientation,
-    '--am-fs-ec-title': props.inHeader ? '18px' : '16px'
+    '--am-fs-ec-title': props.inHeader ? '18px' : '16px',
   }
 
   if (!props.borderVisibility) delete obj.boxShadow
@@ -403,7 +439,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: "EventCard"
+  name: 'EventCard',
 }
 </script>
 

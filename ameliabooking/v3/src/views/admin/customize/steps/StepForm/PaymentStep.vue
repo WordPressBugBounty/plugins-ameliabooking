@@ -8,10 +8,7 @@
       </div>
 
       <div class="am-fs__payments-price">
-        <component
-          :is="componentTypes[bookableType]"
-          :payment-gateway="paymentGateway"
-        ></component>
+        <component :is="componentTypes[bookableType]" :payment-gateway="paymentGateway"></component>
       </div>
 
       <AmCheckbox
@@ -23,35 +20,30 @@
       >
       </AmCheckbox>
 
-      <p
-        v-if="!licence.isLite && !licence.isStarter"
-        class="am-fs__payments-method"
-      >
+      <p v-if="!licence.isLite && !licence.isStarter" class="am-fs__payments-method">
         {{ labelsDisplay('payment_method') }}
       </p>
-      <div
-        v-if="!licence.isLite && !licence.isStarter"
-        class="am-fs__payments-main"
-      >
+      <div v-if="!licence.isLite && !licence.isStarter" class="am-fs__payments-main">
         <div class="am-fs__payments-main-cards">
           <div
             v-for="(available, gateway) in availablePayments"
             :key="gateway"
             class="am-fs__payments-main-button"
             :class="{
-              'am-fs__payments-main-button_selected':
-                paymentGateway === gateway,
+              'am-fs__payments-main-button_selected': paymentGateway === gateway,
             }"
             @click="setPaymentGateway(gateway)"
           >
-            <img :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/' + gateway + '.svg'" :alt="gateway" />
+            <img
+              :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/' + gateway + '.svg'"
+              :alt="gateway"
+            />
             <div>
               <p>
                 {{
                   gateway === 'onSite'
                     ? labelsDisplay('on_site')
-                    : paymentsBtnText.filter((item) => item.key === gateway)[0]
-                        .text
+                    : paymentsBtnText.filter((item) => item.key === gateway)[0].text
                 }}
               </p>
             </div>
@@ -64,8 +56,8 @@
             paymentGateway === 'onSite'
               ? labelsDisplay('payment_onsite_sentence')
               : paymentGateway === 'mollie' || paymentGateway === 'wc'
-              ? labelsDisplay('payment_wc_mollie_sentence')
-              : ''
+                ? labelsDisplay('payment_wc_mollie_sentence')
+                : ''
           }}
         </p>
       </div>
@@ -130,12 +122,8 @@ function labelsDisplay(label) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value].paymentStep.translations &&
       amCustomize.value[pageRenderKey.value].paymentStep.translations[label] &&
-      amCustomize.value[pageRenderKey.value].paymentStep.translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value].paymentStep.translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value].paymentStep.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].paymentStep.translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -146,36 +134,15 @@ function labelsDisplay(label) {
 let amColors = inject('amColors')
 const cssVars = computed(() => {
   return {
-    '--am-c-ps-price-bgr': useColorTransparency(
-      amColors.value.colorBtnPrim,
-      0.05
-    ),
+    '--am-c-ps-price-bgr': useColorTransparency(amColors.value.colorBtnPrim, 0.05),
     '--am-c-ps-total-price': amColors.value.colorBtnPrim,
-    '--am-c-ps-text-op50': useColorTransparency(
-      amColors.value.colorMainText,
-      0.5
-    ),
-    '--am-c-ps-text-op25': useColorTransparency(
-      amColors.value.colorMainText,
-      0.25
-    ),
-    '--am-c-ps-text-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
-    '--am-c-ps-text-op06': useColorTransparency(
-      amColors.value.colorMainText,
-      0.06
-    ),
+    '--am-c-ps-text-op50': useColorTransparency(amColors.value.colorMainText, 0.5),
+    '--am-c-ps-text-op25': useColorTransparency(amColors.value.colorMainText, 0.25),
+    '--am-c-ps-text-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
+    '--am-c-ps-text-op06': useColorTransparency(amColors.value.colorMainText, 0.06),
     '--am-c-ps-primary': amColors.value.colorPrimary,
-    '--am-c-ps-primary-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
-    '--am-c-ps-primary-op06': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.06
-    ),
+    '--am-c-ps-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
+    '--am-c-ps-primary-op06': useColorTransparency(amColors.value.colorPrimary, 0.06),
   }
 })
 
@@ -231,11 +198,7 @@ export default {
       $count: 6;
       @for $i from 0 through $count {
         &:nth-child(#{$i + 1}) {
-          animation: 600ms
-            cubic-bezier(0.45, 1, 0.4, 1.2)
-            #{$i *
-            100}ms
-            am-animation-slide-up;
+          animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
           animation-fill-mode: both;
         }
       }

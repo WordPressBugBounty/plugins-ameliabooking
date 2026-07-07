@@ -1,23 +1,32 @@
 <template>
   <div
     class="am-capa__wrapper"
-    :class="[{'am-no-border': props.groupedAppointments && Object.keys(props.groupedAppointments).length === 1}, props.responsiveClass]"
+    :class="[
+      {
+        'am-no-border':
+          props.groupedAppointments && Object.keys(props.groupedAppointments).length === 1,
+      },
+      props.responsiveClass,
+    ]"
     :style="cssVars"
   >
-    <div
-      v-for="(item, dateKey) in props.groupedAppointments"
-      :key="dateKey"
-      class="am-capa"
-    >
+    <div v-for="(item, dateKey) in props.groupedAppointments" :key="dateKey" class="am-capa">
       <div
         class="am-capa__date"
         :class="[
-          {'am-today': getFrontedFormattedDate(dateKey) === getFrontedFormattedDate(moment().format('YYYY-MM-DD'))},
-          {'am-no-flag': props.groupedAppointments && Object.keys(props.groupedAppointments).length === 1},
-          props.responsiveClass
+          {
+            'am-today':
+              getFrontedFormattedDate(dateKey) ===
+              getFrontedFormattedDate(moment().format('YYYY-MM-DD')),
+          },
+          {
+            'am-no-flag':
+              props.groupedAppointments && Object.keys(props.groupedAppointments).length === 1,
+          },
+          props.responsiveClass,
         ]"
       >
-        {{getFrontedFormattedDate(dateKey)}}
+        {{ getFrontedFormattedDate(dateKey) }}
       </div>
       <template v-for="(appointment, index) in item.appointments" :key="index">
         <CollapseCard
@@ -29,10 +38,19 @@
           :price="getPrice(appointment)"
           :duration="useAppointmentDuration(store, appointment)"
           :periods="[]"
-          :extras="useExtrasData(appointment.bookings, store.getters['entities/getService'](appointment.serviceId))"
+          :extras="
+            useExtrasData(
+              appointment.bookings,
+              store.getters['entities/getService'](appointment.serviceId),
+            )
+          "
           :tickets="[]"
           :custom-fields="useCustomFieldsData(appointment.bookings, cabinetType)"
-          :location="appointment.locationId ? store.getters['entities/getLocation'](appointment.locationId) : null"
+          :location="
+            appointment.locationId
+              ? store.getters['entities/getLocation'](appointment.locationId)
+              : null
+          "
           :google-meet-link="appointment.googleMeetUrl"
           :microsoft-teams-link="appointment.microsoftTeamsUrl"
           :zoom-link="appointment.zoomMeeting ? appointment.zoomMeeting.joinUrl : ''"
@@ -44,9 +62,17 @@
           :responsive-class="props.responsiveClass"
           :parent-width="props.pageWidth"
           :customized-options="customizedOptions(props.stepKey)"
-          @cancel-booking="(data) => { targetBooking = data }"
+          @cancel-booking="
+            (data) => {
+              targetBooking = data
+            }
+          "
           @rescheduling="rescheduling"
-          @edit-appointment="(data) => {emits('editAppointment', data)}"
+          @edit-appointment="
+            (data) => {
+              emits('editAppointment', data)
+            }
+          "
           @status-change="(message, type) => emits('statusChange', message, type)"
         ></CollapseCard>
       </template>
@@ -84,78 +110,59 @@
 
 <script setup>
 // * Import from libraries
-import moment from "moment/moment";
+import moment from 'moment/moment'
 
 // * Import from Axios
-import httpClient from "../../../../../../plugins/axios";
+import httpClient from '../../../../../../plugins/axios'
 
 // * Import from Vue
-import {
-  ref,
-  inject,
-  computed,
-  reactive
-} from "vue";
+import { ref, inject, computed, reactive } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Composables
 import {
   getFrontedFormattedDate,
-  getFrontedFormattedTime
-} from "../../../../../../assets/js/common/date";
-import {
-  useAppointmentDuration,
-} from "../../../../../../assets/js/admin/appointment";
-import {
-  useAppointmentBookingAmountData,
-} from "../../../../../../assets/js/common/appointments";
-import {
-  useCustomFieldsData,
-  useExtrasData
-} from "../../../../../../assets/js/admin/booking";
-import {
-  useColorTransparency
-} from "../../../../../../assets/js/common/colorManipulation";
+  getFrontedFormattedTime,
+} from '../../../../../../assets/js/common/date'
+import { useAppointmentDuration } from '../../../../../../assets/js/admin/appointment'
+import { useAppointmentBookingAmountData } from '../../../../../../assets/js/common/appointments'
+import { useCustomFieldsData, useExtrasData } from '../../../../../../assets/js/admin/booking'
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 
 // * Dedicated components
-import CollapseCard from "../../parts/CollapseCard/CollapseCard.vue";
-import AppointmentBooking from "../../parts/AppointmentBooking.vue";
-import CancelPopup from "../../parts/CancelPopup.vue";
+import CollapseCard from '../../parts/CollapseCard/CollapseCard.vue'
+import AppointmentBooking from '../../parts/AppointmentBooking.vue'
+import CancelPopup from '../../parts/CancelPopup.vue'
 
 // * Component properties
 let props = defineProps({
   groupedAppointments: {
     type: Object,
-    default: null
+    default: null,
   },
   responsiveClass: {
     type: String,
-    default: ''
+    default: '',
   },
   pageWidth: {
     type: Number,
   },
   isPackageBooking: {
     type: Boolean,
-    default: false
+    default: false,
   },
   stepKey: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 })
 
 let store = useStore()
 
 // * Components emits
-let emits = defineEmits([
-  'booked',
-  'canceled',
-  'editAppointment',
-  'statusChange'
-])
+let emits = defineEmits(['booked', 'canceled', 'editAppointment', 'statusChange'])
 
 let originKey = inject('originKey')
 
@@ -174,30 +181,34 @@ let targetAppointment = ref(null)
 
 let slotsParams = ref(null)
 
-function successfulAddBooking (passedData = null) {
+function successfulAddBooking(passedData = null) {
   targetAppointment.value = null
   emits('booked', passedData)
 }
 
 let waitingForCancelation = ref(false)
 
-function cancelBooking () {
+function cancelBooking() {
   waitingForCancelation.value = true
-  httpClient.post(
-    '/bookings/cancel/' + targetBooking.value.id,
-    {type: 'appointment'},
-    {params: {source: 'cabinet-' + cabinetType.value}}
-  ).then(() => {
-    targetBooking.value = null
-    emits('canceled', {message: amLabels.value.appointment_canceled})
-  }).catch((e) => {
-    console.log(e)
-  }).finally(() => {
-    waitingForCancelation.value = false
-  })
+  httpClient
+    .post(
+      '/bookings/cancel/' + targetBooking.value.id,
+      { type: 'appointment' },
+      { params: { source: 'cabinet-' + cabinetType.value } },
+    )
+    .then(() => {
+      targetBooking.value = null
+      emits('canceled', { message: amLabels.value.appointment_canceled })
+    })
+    .catch((e) => {
+      console.log(e)
+    })
+    .finally(() => {
+      waitingForCancelation.value = false
+    })
 }
 
-function getPrice (appointment) {
+function getPrice(appointment) {
   let amountData = {
     total: 0,
     bookable: 0,
@@ -215,9 +226,9 @@ function getPrice (appointment) {
           aggregatedPrice: booking.aggregatedPrice,
           extras: booking.extras,
           tax: booking.tax,
-          coupon: booking.coupon
+          coupon: booking.coupon,
         },
-        false
+        false,
       )
 
       amountData.total += bookingAmountData.total
@@ -230,7 +241,7 @@ function getPrice (appointment) {
   return amountData.total - amountData.discount + amountData.tax
 }
 
-function rescheduling (data) {
+function rescheduling(data) {
   let extras = []
 
   let duration = 0
@@ -241,11 +252,12 @@ function rescheduling (data) {
     bookItem.extras.forEach((extItem) => {
       extras.push({
         id: extItem.extraId,
-        quantity: extItem.quantity
+        quantity: extItem.quantity,
       })
     })
 
-    if ('duration' in bookItem &&
+    if (
+      'duration' in bookItem &&
       bookItem.duration &&
       bookItem.duration > duration &&
       (bookItem.status === 'approved' || bookItem.status === 'pending')
@@ -286,7 +298,7 @@ function appointmentCustomers(appointment) {
       } else {
         customer = b.customer
       }
-      
+
       // Add booking status to customer data
       customer.bookingStatus = b.status
       return customer
@@ -305,12 +317,12 @@ const localLanguage = inject('localLanguage')
 // * if local lang is in settings lang
 let langDetection = computed(() => amSettings.general.usedLanguages.includes(localLanguage.value))
 
-function customizedLabels (step) {
-  let computedLabels = reactive({...labels})
+function customizedLabels(step) {
+  let computedLabels = reactive({ ...labels })
 
   let customizedLabels = amCustomize.value[step].translations
   if (customizedLabels) {
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -321,7 +333,7 @@ function customizedLabels (step) {
   return computedLabels
 }
 
-function customizedOptions (step) {
+function customizedOptions(step) {
   return amCustomize.value[step].options
 }
 
@@ -341,7 +353,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: 'CabinetAppointmentsList'
+  name: 'CabinetAppointmentsList',
 }
 </script>
 
@@ -363,8 +375,24 @@ export default {
         position: absolute;
         top: 4px;
         left: 8px;
-        background-image: linear-gradient(180deg, transparent, transparent 50%, var(--am-c-capa-bgr) 50%, var(--am-c-capa-bgr) 100%), linear-gradient(180deg, var(--am-c-capa-text-op25), var(--am-c-capa-text-op25), var(--am-c-capa-text-op25), var(--am-c-capa-text-op25));
-        background-size: 3px 12px, 100% 20px;
+        background-image:
+          linear-gradient(
+            180deg,
+            transparent,
+            transparent 50%,
+            var(--am-c-capa-bgr) 50%,
+            var(--am-c-capa-bgr) 100%
+          ),
+          linear-gradient(
+            180deg,
+            var(--am-c-capa-text-op25),
+            var(--am-c-capa-text-op25),
+            var(--am-c-capa-text-op25),
+            var(--am-c-capa-text-op25)
+          );
+        background-size:
+          3px 12px,
+          100% 20px;
       }
 
       &.am-no-border {
@@ -424,7 +452,8 @@ export default {
       }
 
       &.am-no-flag {
-        &:before, &:after {
+        &:before,
+        &:after {
           display: none;
         }
       }

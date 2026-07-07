@@ -1,15 +1,11 @@
 <template>
-  <div
-    role="navigation"
-    class="am-cat__sidemenu"
-    :style="cssVars"
-  >
+  <div role="navigation" class="am-cat__sidemenu" :style="cssVars">
     <div class="am-cat__sidemenu-item__wrapper">
       <div
         v-for="(item, index) in menuItems"
         :key="index"
         class="am-cat__sidemenu-item"
-        :class="{'am-active': props.initSelection === item[props.identifier]}"
+        :class="{ 'am-active': props.initSelection === item[props.identifier] }"
         @click="() => selectItem(item)"
       >
         {{ item[props.nameIdentifier] }}
@@ -27,37 +23,37 @@
 </template>
 
 <script setup>
-import { computed, inject } from "vue";
-import { useColorTransparency } from "../../../../assets/js/common/colorManipulation";
+import { computed, inject } from 'vue'
+import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
 
 let props = defineProps({
   menuItems: {
     type: Array,
-    required: true
+    required: true,
   },
   initSelection: {
-    type: [String, Number]
+    type: [String, Number],
   },
   identifier: {
     type: String,
-    required: true
+    required: true,
   },
   nameIdentifier: {
     type: String,
-    required: true
+    required: true,
   },
   footerString: {
     type: String,
-    default: ''
+    default: '',
   },
   companyEmail: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 let emits = defineEmits(['click'])
 
-function selectItem (item) {
+function selectItem(item) {
   emits('click', item)
 }
 
@@ -76,7 +72,7 @@ let cssVars = computed(() => {
 
 <script>
 export default {
-  name: "SideMenu"
+  name: 'SideMenu',
 }
 </script>
 

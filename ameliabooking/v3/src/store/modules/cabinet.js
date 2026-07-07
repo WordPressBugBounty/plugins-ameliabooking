@@ -10,51 +10,51 @@ export default {
     paymentLinkError: {
       appointment: false,
       event: false,
-      package: false
-    }
+      package: false,
+    },
   }),
 
   getters: {
-    getPaymentLinkLoader (state) {
+    getPaymentLinkLoader(state) {
       return state.paymentLinkLoader
     },
-    getTimeZone (state) {
+    getTimeZone(state) {
       return state.timeZone
     },
-    getAppointmentsLoading (state) {
+    getAppointmentsLoading(state) {
       return state.appointmentsLoading
     },
-    getPackageLoading (state) {
+    getPackageLoading(state) {
       return state.packageLoading
     },
-    getEventsLoading (state) {
+    getEventsLoading(state) {
       return state.eventsLoading
     },
-    getPaymentLinkError (state) {
+    getPaymentLinkError(state) {
       return state.paymentLinkError
     },
   },
 
   mutations: {
-    setPaymentLinkLoader (state, payload) {
+    setPaymentLinkLoader(state, payload) {
       state.paymentLinkLoader = payload
     },
-    setTimeZone (state, payload) {
+    setTimeZone(state, payload) {
       state.timeZone = payload
     },
-    setAppointmentsLoading (state, payload) {
+    setAppointmentsLoading(state, payload) {
       state.appointmentsLoading = payload
     },
-    setPackageLoading (state, payload) {
+    setPackageLoading(state, payload) {
       state.packageLoading = payload
     },
-    setEventsLoading (state, payload) {
+    setEventsLoading(state, payload) {
       state.eventsLoading = payload
     },
-    setPaymentLinkError (state, payload) {
+    setPaymentLinkError(state, payload) {
       state.paymentLinkError[payload.type] = payload.value
     },
   },
 
-  actions: {}
+  actions: {},
 }

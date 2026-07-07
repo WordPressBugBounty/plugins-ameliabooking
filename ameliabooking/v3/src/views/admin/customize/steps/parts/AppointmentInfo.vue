@@ -18,10 +18,7 @@
               @enter="onCollapseClose"
               @leave="onCollapseOpen"
             >
-              <div
-                v-show="recurringCollapseState"
-                class="am-fs__payments-services-sub"
-              >
+              <div v-show="recurringCollapseState" class="am-fs__payments-services-sub">
                 <p>{{ labelsDisplay('summary_services_subtotal') }}</p>
                 <p>1000.00$</p>
               </div>
@@ -43,8 +40,8 @@
                 class="am-fs__payments-services-open-total"
               >
                 <span
-                  >2 {{ labelsDisplay('summary_recurrences') }} x Service 1
-                  (125.00$) x 4 {{ labelsDisplay('summary_persons') }}</span
+                  >2 {{ labelsDisplay('summary_recurrences') }} x Service 1 (125.00$) x 4
+                  {{ labelsDisplay('summary_persons') }}</span
                 >
               </div>
 
@@ -74,10 +71,7 @@
               @enter="onCollapseClose"
               @leave="onCollapseOpen"
             >
-              <div
-                v-show="extrasCollapseState"
-                class="am-fs__payments-services-sub"
-              >
+              <div v-show="extrasCollapseState" class="am-fs__payments-services-sub">
                 <p>{{ labelsDisplay('summary_extras_subtotal') }}</p>
                 <p>224.00$</p>
               </div>
@@ -87,9 +81,8 @@
             <div class="am-fs__payments-services-open">
               <div v-for="extra in extras" :key="extra.extraId">
                 <span
-                  >x {{ extra.times }} {{ extra.name }} ({{
-                    useFormattedPrice(extra.price)
-                  }}) <span>x 4 {{ labelsDisplay('summary_persons') }}</span>
+                  >x {{ extra.times }} {{ extra.name }} ({{ useFormattedPrice(extra.price) }})
+                  <span>x 4 {{ labelsDisplay('summary_persons') }}</span>
                 </span>
                 <span>{{ extra.sum }}</span>
               </div>
@@ -123,11 +116,7 @@
             <template #label>
               <span>{{ `${labelsDisplay('coupon')}:` }}</span>
             </template>
-            <AmInput
-              v-model="couponFormData.coupon"
-              size="small"
-              :prefix-icon="IconCoupon"
-            />
+            <AmInput v-model="couponFormData.coupon" size="small" :prefix-icon="IconCoupon" />
           </el-form-item>
 
           <AmButton size="small">
@@ -206,9 +195,7 @@ let rules = computed(() => {
   return {
     coupon: [
       {
-        required:
-          amCustomize.value[pageRenderKey.value].paymentStep.options.coupon
-            .required,
+        required: amCustomize.value[pageRenderKey.value].paymentStep.options.coupon.required,
         trigger: ['blur', 'change'],
       },
     ],
@@ -235,12 +222,8 @@ function labelsDisplay(label) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value].paymentStep.translations &&
       amCustomize.value[pageRenderKey.value].paymentStep.translations[label] &&
-      amCustomize.value[pageRenderKey.value].paymentStep.translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value].paymentStep.translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value].paymentStep.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].paymentStep.translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -272,18 +255,9 @@ let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
     '--am-c-pay-text': amColors.value.colorMainText,
-    '--am-c-pay-text-op70': useColorTransparency(
-      amColors.value.colorMainText,
-      0.7
-    ),
-    '--am-c-pay-text-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
-    '--am-c-pay-text-op30': useColorTransparency(
-      amColors.value.colorMainText,
-      0.3
-    ),
+    '--am-c-pay-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
+    '--am-c-pay-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-pay-text-op30': useColorTransparency(amColors.value.colorMainText, 0.3),
     '--am-c-pay-success': amColors.value.colorSuccess,
     '--am-c-pay-primary': amColors.value.colorPrimary,
   }

@@ -1,43 +1,34 @@
 <template>
-  <div
-    ref="infoFormWrapperRef"
-    class="am-elfci"
-    :class="props.globalClass"
-  >
+  <div ref="infoFormWrapperRef" class="am-elfci" :class="props.globalClass">
     <div v-show="!loading">
       <div
         v-if="(paymentError && instantBooking) || (paymentError && isWaitingAvailable)"
         class="am-elfci__error"
       >
-        <AmAlert
-          type="error"
-          :title="paymentError"
-          :show-icon="true"
-          :closable="false"
-        >
-        </AmAlert>
+        <AmAlert type="error" :title="paymentError" :show-icon="true" :closable="false"> </AmAlert>
       </div>
 
       <div v-if="authError" class="am-elfci__error">
-        <AmAlert
-            type="error"
-            :title="authErrorMessage"
-            :show-icon="true"
-            :closable="true"
-        >
+        <AmAlert type="error" :title="authErrorMessage" :show-icon="true" :closable="true">
         </AmAlert>
       </div>
 
       <!-- Social Buttons -->
-      <div v-if="(settings.socialLogin.googleLoginEnabled && settings.general.googleClientId && !store.getters['customerInfo/getLoggedUser']) || (settings.socialLogin.facebookLoginEnabled && settings.socialLogin.facebookCredentialsEnabled && !store.getters['customerInfo/getLoggedUser'])">
+      <div
+        v-if="
+          (settings.socialLogin.googleLoginEnabled &&
+            settings.general.googleClientId &&
+            !store.getters['customerInfo/getLoggedUser']) ||
+          (settings.socialLogin.facebookLoginEnabled &&
+            settings.socialLogin.facebookCredentialsEnabled &&
+            !store.getters['customerInfo/getLoggedUser'])
+        "
+      >
         <div class="am-elfci__social-wrapper">
           <div class="am-elfci__social-wrapper__label">
-            {{amLabels.auto_fill_your_details}}
+            {{ amLabels.auto_fill_your_details }}
           </div>
-          <am-social-button
-            :provider="socialProvider"
-            @social-action="onSignupSocial"
-          />
+          <am-social-button :provider="socialProvider" @social-action="onSignupSocial" />
         </div>
 
         <!-- Social Divider -->
@@ -45,7 +36,6 @@
           <span class="par-sm">{{ amLabels.or_enter_details_below }}</span>
         </div>
         <!-- /Social Divider -->
-
       </div>
       <!-- /Social Buttons -->
 
@@ -60,12 +50,20 @@
         <template v-for="item in customizedOrder" :key="item.id">
           <component
             :is="infoFormConstruction[item.id].template"
-            v-if="item.id in customizedOptions && 'visibility' in customizedOptions[item.id] ? customizedOptions[item.id].visibility : true"
+            v-if="
+              item.id in customizedOptions && 'visibility' in customizedOptions[item.id]
+                ? customizedOptions[item.id].visibility
+                : true
+            "
             ref="customerCollectorRef"
             v-model="infoFormData[item.id]"
             v-model:countryCode="infoFormConstruction[item.id].countryCode"
             v-bind="infoFormConstruction[item.id].props"
-            v-on="'handlers' in infoFormConstruction[item.id] ? infoFormConstruction[item.id].handlers : {}"
+            v-on="
+              'handlers' in infoFormConstruction[item.id]
+                ? infoFormConstruction[item.id].handlers
+                : {}
+            "
           ></component>
         </template>
 
@@ -77,10 +75,7 @@
           "
           class="am-elfci__item am-subscribe"
         >
-          <AmCheckbox
-            v-model="subscribeToMailchimp"
-            :label="amLabels.subscribe_to_mailing_list"
-          >
+          <AmCheckbox v-model="subscribeToMailchimp" :label="amLabels.subscribe_to_mailing_list">
           </AmCheckbox>
         </el-form-item>
 
@@ -100,14 +95,25 @@
 
     <div v-show="!loading">
       <PaymentOnSite
-        v-if="isWaitingAvailable || (instantBooking && (amSettings.payments.wc.enabled ? amSettings.payments.wc.onSiteIfFree || !wcEventEnabled : true))"
+        v-if="
+          isWaitingAvailable ||
+          (instantBooking &&
+            (amSettings.payments.wc.enabled
+              ? amSettings.payments.wc.onSiteIfFree || !wcEventEnabled
+              : true))
+        "
         ref="refOnSiteBooking"
         :instant-booking="instantBooking"
         @payment-error="callPaymentError"
       />
 
       <PaymentWc
-        v-if="instantBooking && amSettings.payments.wc.enabled && !amSettings.payments.wc.onSiteIfFree && wcEventEnabled"
+        v-if="
+          instantBooking &&
+          amSettings.payments.wc.enabled &&
+          !amSettings.payments.wc.onSiteIfFree &&
+          wcEventEnabled
+        "
         ref="refWcBooking"
         :instant-booking="instantBooking"
         @payment-error="callPaymentError"
@@ -122,19 +128,10 @@
 // * Dedicated parts
 import PaymentOnSite from '../../../Parts/Payment/Methods/PaymentOnSite.vue'
 import PaymentWc from '../../../Parts/Payment/Methods/PaymentWc.vue'
-import CustomerInfoSkeleton from "../../../Parts/Skeletons/CustomerInfoSkeleton.vue";
+import CustomerInfoSkeleton from '../../../Parts/Skeletons/CustomerInfoSkeleton.vue'
 
 // * Import from Vue
-import {
-  ref,
-  reactive,
-  computed,
-  inject,
-  onMounted,
-  nextTick,
-  watchEffect,
-  watch
-} from 'vue'
+import { ref, reactive, computed, inject, onMounted, nextTick, watchEffect, watch } from 'vue'
 import VueAuthenticate from 'vue-authenticate'
 
 // * Form Fields Templates
@@ -145,29 +142,30 @@ import { useStore } from 'vuex'
 
 // * Composables
 import { useScrollTo } from '../../../../../assets/js/common/scrollElements.js'
-import { useResponsiveClass } from "../../../../../assets/js/common/responsive.js";
-import { usePrepaidPrice } from "../../../../../assets/js/common/appointments";
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive.js'
+import { usePrepaidPrice } from '../../../../../assets/js/common/appointments'
 
 // * _components
-import AmAlert from "../../../../_components/alert/AmAlert.vue";
-import useAction from "../../../../../assets/js/public/actions";
-import {settings} from "../../../../../plugins/settings";
-import httpClient from "../../../../../plugins/axios";
-import AmSocialButton from "../../../../common/FormFields/AmSocialButton.vue";
-import {SocialAuthOptions} from "../../../../../assets/js/admin/socialAuthOptions";
-import AmCheckbox from "../../../../_components/checkbox/AmCheckbox.vue";
-import {mapAddressComponentsForXML} from "../../../../../assets/js/common/helper";
-import { useIvyMapping } from "../../../../../assets/js/public/ivy";
+import AmAlert from '../../../../_components/alert/AmAlert.vue'
+import useAction from '../../../../../assets/js/public/actions'
+import { settings } from '../../../../../plugins/settings'
+import httpClient from '../../../../../plugins/axios'
+import AmSocialButton from '../../../../common/FormFields/AmSocialButton.vue'
+import { SocialAuthOptions } from '../../../../../assets/js/admin/socialAuthOptions'
+import AmCheckbox from '../../../../_components/checkbox/AmCheckbox.vue'
+import { mapAddressComponentsForXML } from '../../../../../assets/js/common/helper'
+import { useIvyMapping } from '../../../../../assets/js/public/ivy'
+import { getInternationalPhoneValue } from '../../../../../assets/js/common/phone'
 
 let props = defineProps({
   globalClass: {
     type: String,
-    default: ''
+    default: '',
   },
   inDialog: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 // * Store
@@ -181,18 +179,18 @@ store.dispatch('customFields/filterEventCustomFields')
 const shortcodeData = inject('shortcodeData')
 
 watch(
-    () => store.getters['customerInfo/getLoggedUser'],
-    (newValue, oldValue) => {
-      if (newValue) {
-        let customer = store.getters['customerInfo/getCustomer']
+  () => store.getters['customerInfo/getLoggedUser'],
+  (newValue, oldValue) => {
+    if (newValue) {
+      let customer = store.getters['customerInfo/getCustomer']
 
-        store.commit('customFields/populateCustomerCustomFields', customer)
+      store.commit('customFields/populateCustomerCustomFields', customer)
 
-        if (customer.customFields.includes('datepicker')) {
-          refreshDatePickerValue.value = true
-        }
+      if (customer.customFields.includes('datepicker')) {
+        refreshDatePickerValue.value = true
       }
     }
+  },
 )
 
 // * Loading State
@@ -225,11 +223,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   if (customizedDataForm.value.customerInfo.translations) {
     let customizedLabels = customizedDataForm.value.customerInfo.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -241,22 +239,22 @@ let amLabels = computed(() => {
 })
 
 // * Step functionality
-let {
-  nextStep,
-  footerButtonClicked,
-  footerButtonReset
-} = inject('changingStepsFunctions', {
+let { nextStep, footerButtonClicked, footerButtonReset } = inject('changingStepsFunctions', {
   nextStep: () => {},
   footerButtonReset: () => {},
   footerButtonClicked: {
-    value: false
-  }
+    value: false,
+  },
 })
 
-let selectedEvent = computed(() => store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId']))
+let selectedEvent = computed(() =>
+  store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId']),
+)
 
 // * Custom Fields Array
-let eventCustomFieldsArray = computed(() => store.getters['customFields/getFilteredCustomFieldsArray'])
+let eventCustomFieldsArray = computed(
+  () => store.getters['customFields/getFilteredCustomFieldsArray'],
+)
 
 // * Event Custom Fields
 let customFields = computed(() => store.getters['customFields/getCustomFields'])
@@ -309,26 +307,26 @@ let infoFormData = ref({
   firstName: computed({
     get: () => store.getters['customerInfo/getCustomerFirstName'],
     set: (val) => {
-      store.commit('customerInfo/setCustomerFirstName', val ? val : "")
-    }
+      store.commit('customerInfo/setCustomerFirstName', val ? val : '')
+    },
   }),
   lastName: computed({
     get: () => store.getters['customerInfo/getCustomerLastName'],
     set: (val) => {
-      store.commit('customerInfo/setCustomerLastName', val ? val : "")
-    }
+      store.commit('customerInfo/setCustomerLastName', val ? val : '')
+    },
   }),
   email: computed({
     get: () => store.getters['customerInfo/getCustomerEmail'],
     set: (val) => {
-      store.commit('customerInfo/setCustomerEmail', val ? val : "")
-    }
+      store.commit('customerInfo/setCustomerEmail', val ? val : '')
+    },
   }),
   phone: computed({
     get: () => store.getters['customerInfo/getCustomerPhone'],
     set: (val) => {
-      store.commit('customerInfo/setCustomerPhone', val ? val : "")
-    }
+      store.commit('customerInfo/setCustomerPhone', val ? val : '')
+    },
   }),
 })
 
@@ -341,7 +339,7 @@ let infoFormConstruction = ref({
       label: amLabels.value.first_name_colon,
       placeholder: amLabels.value.enter_first_name,
       class: 'am-elfci__item',
-    }
+    },
   },
   lastName: {
     template: formFieldsTemplates.text,
@@ -350,7 +348,7 @@ let infoFormConstruction = ref({
       label: amLabels.value.last_name_colon,
       placeholder: amLabels.value.enter_last_name,
       class: 'am-elfci__item',
-    }
+    },
   },
   email: {
     template: formFieldsTemplates.text,
@@ -359,7 +357,7 @@ let infoFormConstruction = ref({
       label: amLabels.value.email_colon,
       placeholder: amLabels.value.enter_email,
       class: 'am-elfci__item',
-    }
+    },
   },
   phone: {
     countryCode: computed({
@@ -369,7 +367,7 @@ let infoFormConstruction = ref({
       },
       set: (val) => {
         store.commit('customerInfo/setCustomerCountryPhoneIso', val ? val.toLowerCase() : '')
-      }
+      },
     }),
     template: formFieldsTemplates.phone,
     props: {
@@ -377,24 +375,48 @@ let infoFormConstruction = ref({
       label: amLabels.value.phone_colon,
       placeholder: amLabels.value.enter_phone,
       phoneError: computed(() => phoneError.value && !isPhoneValid.value),
-      errorMessage: computed(() => phoneError.value && !isPhoneValid.value && infoFormData.value.phone ? amLabels.value.enter_valid_phone_warning : ''),
+      errorMessage: computed(() =>
+        phoneError.value && !isPhoneValid.value && infoFormData.value.phone
+          ? amLabels.value.enter_valid_phone_warning
+          : '',
+      ),
       whatsAppLabel: amLabels.value.whatsapp_opt_in_text,
-      isWhatsApp: computed(() => amSettings.notifications.whatsAppEnabled && !(phoneError.value && !isPhoneValid.value)),
+      isWhatsApp: computed(
+        () =>
+          amSettings.notifications.whatsAppEnabled && !(phoneError.value && !isPhoneValid.value),
+      ),
       class: 'am-elfci__item',
       noResultsLabel: amLabels.value.no_results_found,
       refreshTrigger: computed(() => refreshPhoneComponent.value),
     },
     handlers: {
       handlePhoneData: (phoneData) => {
-        if (phoneData && !phoneData.countryCode && !store.getters['customerInfo/getCustomerCountryPhoneIso'] && amSettings.general.phoneDefaultCountryCode !== 'auto') {
-          store.commit('customerInfo/setCustomerCountryPhoneIso', amSettings.general.phoneDefaultCountryCode.toLowerCase())
+        if (
+          phoneData &&
+          !phoneData.countryCode &&
+          !store.getters['customerInfo/getCustomerCountryPhoneIso'] &&
+          amSettings.general.phoneDefaultCountryCode !== 'auto'
+        ) {
+          store.commit(
+            'customerInfo/setCustomerCountryPhoneIso',
+            amSettings.general.phoneDefaultCountryCode.toLowerCase(),
+          )
         }
 
-        store.commit('customerInfo/setCustomerPhone', phoneData && typeof phoneData.formatNational === 'string' ? phoneData.formatNational.replace(/\s+/g, "") : "")
+        const countryCode = (
+          phoneData?.countryCode ||
+          store.getters['customerInfo/getCustomerCountryPhoneIso'] ||
+          ''
+        ).toUpperCase()
+
+        store.commit(
+          'customerInfo/setCustomerPhone',
+          getInternationalPhoneValue(phoneData?.phoneNumber ?? phoneData?.e164, phoneData, countryCode)
+        )
 
         isPhoneValid.value = !!phoneData.isValid
-      }
-    }
+      },
+    },
   },
 })
 
@@ -405,14 +427,14 @@ let infoFormRules = ref({
       required: true,
       message: amLabels.value.enter_first_name_warning,
       trigger: 'submit',
-    }
+    },
   ],
   lastName: [
     {
       required: customizedOptions.value.lastName.required,
       message: amLabels.value.enter_last_name_warning,
       trigger: 'submit',
-    }
+    },
   ],
   email: [
     {
@@ -420,14 +442,14 @@ let infoFormRules = ref({
       type: 'email',
       message: amLabels.value.enter_valid_email_warning,
       trigger: 'submit',
-    }
+    },
   ],
   phone: [
     {
       required: customizedOptions.value.phone.required,
       message: amLabels.value.enter_phone_warning,
       trigger: ['blur', 'submit'],
-    }
+    },
   ],
 })
 
@@ -435,7 +457,7 @@ let subscribeToMailchimp = computed({
   get: () => store.getters['customerInfo/getCustomerSubscribe'],
   set: (val) => {
     store.commit('customerInfo/setCustomerSubscribe', val)
-  }
+  },
 })
 
 Object.keys(customFields.value).forEach((fieldKey) => {
@@ -445,18 +467,20 @@ Object.keys(customFields.value).forEach((fieldKey) => {
     set: (val) => {
       let obj = {
         key: fieldKey,
-        value: val
+        value: val,
       }
       store.commit('customFields/setCustomFieldValue', obj)
-    }
+    },
   })
 
   // * Form Rules
-  infoFormRules.value[fieldKey] = [{
-    message: amLabels.value.required_field,
-    required: customFields.value[fieldKey].required,
-    trigger: 'submit'
-  }]
+  infoFormRules.value[fieldKey] = [
+    {
+      message: amLabels.value.required_field,
+      required: customFields.value[fieldKey].required,
+      trigger: 'submit',
+    },
+  ]
 
   // * Form Construction
   infoFormConstruction.value[fieldKey] = {
@@ -466,15 +490,20 @@ Object.keys(customFields.value).forEach((fieldKey) => {
       itemName: fieldKey,
       label: customFields.value[fieldKey].label,
       options: customFields.value[fieldKey].options,
-      class: `am-elfci__item am-cf-width-${customFields.value[fieldKey].width}`
-    }
+      class: `am-elfci__item am-cf-width-${customFields.value[fieldKey].width}`,
+    },
   }
 
-  if (customFields.value[fieldKey].type === 'checkbox' || customFields.value[fieldKey].type === 'radio') {
-    infoFormConstruction.value[fieldKey].props.options = infoFormConstruction.value[fieldKey].props.options.map((option) => {
+  if (
+    customFields.value[fieldKey].type === 'checkbox' ||
+    customFields.value[fieldKey].type === 'radio'
+  ) {
+    infoFormConstruction.value[fieldKey].props.options = infoFormConstruction.value[
+      fieldKey
+    ].props.options.map((option) => {
       return {
         ...option,
-        value: option.label
+        value: option.label,
       }
     })
   }
@@ -482,22 +511,22 @@ Object.keys(customFields.value).forEach((fieldKey) => {
   if (customFields.value[fieldKey].type === 'text-area') {
     infoFormConstruction.value[fieldKey].props = {
       ...infoFormConstruction.value[fieldKey].props,
-      ...{itemType: 'textarea'}
+      ...{ itemType: 'textarea' },
     }
   }
 
   if (customFields.value[fieldKey].type === 'file') {
     infoFormConstruction.value[fieldKey].props = {
       ...infoFormConstruction.value[fieldKey].props,
-      ...{btnLabel: amLabels.value.upload_file_here}
+      ...{ btnLabel: amLabels.value.upload_file_here },
     }
   }
 
   if (customFields.value[fieldKey].type === 'datepicker') {
     infoFormConstruction.value[fieldKey].props = {
       ...infoFormConstruction.value[fieldKey].props,
-      ...{weekStartsFromDay: amSettings.wordpress.startOfWeek},
-      refreshValue: refreshDatePickerValue
+      ...{ weekStartsFromDay: amSettings.wordpress.startOfWeek },
+      refreshValue: refreshDatePickerValue,
     }
   }
 })
@@ -505,11 +534,15 @@ Object.keys(customFields.value).forEach((fieldKey) => {
 let wcEventEnabled = ref(false)
 
 onMounted(() => {
-  let eventPayments = selectedEvent && selectedEvent.value.settings ? JSON.parse(selectedEvent.value.settings)['payments'] : null
+  let eventPayments =
+    selectedEvent && selectedEvent.value.settings
+      ? JSON.parse(selectedEvent.value.settings)['payments']
+      : null
 
-  wcEventEnabled.value = eventPayments && 'wc' in eventPayments
-    ? !('enabled' in eventPayments.wc) || eventPayments.wc.enabled
-    : settings.payments.wc.enabled
+  wcEventEnabled.value =
+    eventPayments && 'wc' in eventPayments
+      ? !('enabled' in eventPayments.wc) || eventPayments.wc.enabled
+      : settings.payments.wc.enabled
 
   if (isWaitingAvailable.value) {
     if (eventFluidStepKey.value.indexOf('eventPayment') !== -1) {
@@ -535,13 +568,13 @@ onMounted(() => {
 
   nextTick(() => {
     setTimeout(() => {
-      customerCollectorRef.value.forEach(el => {
+      customerCollectorRef.value.forEach((el) => {
         if (el.formFieldRef) {
           allFieldsRefs.value.push(el.formFieldRef)
         }
       })
 
-      customFieldsCollectorRefs.value.forEach(el => {
+      customFieldsCollectorRefs.value.forEach((el) => {
         if (el.formFieldRef) {
           allFieldsRefs.value.push(el.formFieldRef)
         }
@@ -551,29 +584,32 @@ onMounted(() => {
 
   Object.keys(customFields.value).forEach((fieldKey) => {
     // * Placeholder implementation for custom input and textarea
-    if (customFields.value[fieldKey].type === 'text' || customFields.value[fieldKey].type === 'text-area') {
-      refCFPlaceholders.value[fieldKey] = {placeholder: ''}
+    if (
+      customFields.value[fieldKey].type === 'text' ||
+      customFields.value[fieldKey].type === 'text-area'
+    ) {
+      refCFPlaceholders.value[fieldKey] = { placeholder: '' }
     }
   })
 
   useAction(
-      store,
-      { customFields, customFieldsPlaceholders: refCFPlaceholders, couponCode },
-      'InitInfoStep',
-      'event',
-      null,
-      null
+    store,
+    { customFields, customFieldsPlaceholders: refCFPlaceholders, couponCode },
+    'InitInfoStep',
+    'event',
+    null,
+    null,
   )
 
   if (couponCode.value) {
     store.commit('coupon/setCode', couponCode.value)
   }
 
-  if (Object.values(refCFPlaceholders.value).filter(cf => cf.placeholder !== '').length) {
+  if (Object.values(refCFPlaceholders.value).filter((cf) => cf.placeholder !== '').length) {
     Object.keys(refCFPlaceholders.value).forEach((fieldKey) => {
       infoFormConstruction.value[fieldKey].props = {
         ...infoFormConstruction.value[fieldKey].props,
-        placeholder: refCFPlaceholders.value[fieldKey].placeholder
+        placeholder: refCFPlaceholders.value[fieldKey].placeholder,
       }
     })
   }
@@ -593,14 +629,7 @@ function submitForm() {
   infoFormData.value.lastName = infoFormData.value.lastName.trim()
   infoFormData.value.email = infoFormData.value.email.trim()
 
-  useAction(
-      store,
-      {rules: infoFormRules.value},
-      'customValidation',
-      'event',
-      null,
-      null
-  )
+  useAction(store, { rules: infoFormRules.value }, 'customValidation', 'event', null, null)
 
   infoFormRef.value.validate((valid) => {
     if (valid && (customizedOptions.value.phone.required ? isPhoneValid.value : true)) {
@@ -613,7 +642,11 @@ function submitForm() {
         if (!instantBooking.value) {
           nextStep()
         } else {
-          if (amSettings.payments.wc.enabled && !amSettings.payments.wc.onSiteIfFree && wcEventEnabled.value) {
+          if (
+            amSettings.payments.wc.enabled &&
+            !amSettings.payments.wc.onSiteIfFree &&
+            wcEventEnabled.value
+          ) {
             store.commit('payment/setPaymentGateway', 'wc')
 
             refWcBooking.value.continueWithBooking()
@@ -628,18 +661,19 @@ function submitForm() {
       // store.commit('setLoading', false)
       let fieldElement
 
-      let phoneField = infoFormRef.value.fields.find(el => el.prop === 'phone')
-      let shouldFlagPhone = phoneField
-        && customizedOptions.value.phone.visibility
-        && (customizedOptions.value.phone.required || !!infoFormData.value.phone)
-        && !isPhoneValid.value
+      let phoneField = infoFormRef.value.fields.find((el) => el.prop === 'phone')
+      let shouldFlagPhone =
+        phoneField &&
+        customizedOptions.value.phone.visibility &&
+        (customizedOptions.value.phone.required || !!infoFormData.value.phone) &&
+        !isPhoneValid.value
 
       if (shouldFlagPhone) {
         phoneField.validateState = 'error'
       }
       phoneError.value = !!(phoneField && phoneField.validateState === 'error')
 
-      infoFormRef.value.fields.some(el => {
+      infoFormRef.value.fields.some((el) => {
         if (el.validateState === 'error') {
           fieldElement = el.$el
           return el.validateState === 'error'
@@ -662,13 +696,13 @@ watchEffect(() => {
 
 let paymentError = computed(() => store.getters['payment/getError'])
 
-function callPaymentError (msg) {
+function callPaymentError(msg) {
   store.commit('payment/setError', msg)
 }
 
 let visibilityFlags = ref({})
 
-function checkCustomerCustomFieldVisibility (cf) {
+function checkCustomerCustomFieldVisibility(cf) {
   if (cf.saveType === 'customer') {
     let customerCustomFields = store.getters['customerInfo/getCustomer'].customFields
 
@@ -683,10 +717,12 @@ function checkCustomerCustomFieldVisibility (cf) {
     switch (cf.type) {
       case 'checkbox':
       case 'file':
-        visibilityFlags.value[cf.id] = !cf.saveFirstChoice && customFields.value['cf' + cf.id].value !== []
+        visibilityFlags.value[cf.id] =
+          !cf.saveFirstChoice && customFields.value['cf' + cf.id].value !== []
         return visibilityFlags.value[cf.id]
       default:
-        visibilityFlags.value[cf.id] = !cf.saveFirstChoice && customFields.value['cf' + cf.id].value !== ''
+        visibilityFlags.value[cf.id] =
+          !cf.saveFirstChoice && customFields.value['cf' + cf.id].value !== ''
         return visibilityFlags.value[cf.id]
     }
   }
@@ -694,7 +730,7 @@ function checkCustomerCustomFieldVisibility (cf) {
   return true
 }
 
-function addressSelected (addressComponents, cfId) {
+function addressSelected(addressComponents, cfId) {
   if (addressComponents && store.getters['customFields/getCustomFields']['cf' + cfId]) {
     const cf = store.getters['customFields/getCustomFields']['cf' + cfId]
     cf.components = mapAddressComponentsForXML(addressComponents)
@@ -725,21 +761,23 @@ function onSignupSocial({ provider, credentials }) {
 
   if (provider === 'google') {
     data.code = credentials
-    httpClient.post(`${socialCheckUrl}`, data).then(response => {
+    httpClient.post(`${socialCheckUrl}`, data).then((response) => {
       setDataFromSocialLogin(response.data.data.user)
     })
   }
   if (provider === 'facebook') {
     VueAuthenticateInstance.options.providers[provider].url = `${socialCheckUrl}`
-    VueAuthenticateInstance.authenticate(provider, data).then((response) => {
-      setDataFromSocialLogin(response.data.data.user)
-    }).catch((error) => {
-      if (!VueAuthenticateInstance.isAuthenticated()) {
-        authError.value = true
-        authErrorMessage.value = 'User is not authenticated.'
-        store.commit('setLoading', false)
-      }
-    })
+    VueAuthenticateInstance.authenticate(provider, data)
+      .then((response) => {
+        setDataFromSocialLogin(response.data.data.user)
+      })
+      .catch((error) => {
+        if (!VueAuthenticateInstance.isAuthenticated()) {
+          authError.value = true
+          authErrorMessage.value = 'User is not authenticated.'
+          store.commit('setLoading', false)
+        }
+      })
   }
 }
 
@@ -758,9 +796,9 @@ function setDataFromSocialLogin(data) {
 
 <script>
 export default {
-  name: "EventCustomerInfo",
+  name: 'EventCustomerInfo',
   key: 'customerInfo',
-  label: 'event_customer_info'
+  label: 'event_customer_info',
 }
 </script>
 
@@ -768,7 +806,6 @@ export default {
 .amelia-v2-booking #amelia-container {
   // elfci - event list form customer info
   .am-elfci {
-
     * {
       box-sizing: border-box;
       word-break: break-word;
@@ -796,7 +833,7 @@ export default {
       &__label {
         font-weight: 500;
         font-size: 15px;
-        color: var(--black, #04080B);
+        color: var(--black, #04080b);
       }
 
       &-button {
@@ -810,12 +847,12 @@ export default {
         height: 40px;
         box-sizing: border-box;
         border: 1px solid $shade-250;
-        background: var(--white, #FFF);
+        background: var(--white, #fff);
         cursor: pointer;
         width: 100%;
         max-width: 100%;
         box-shadow: 0 2px 2px 0 rgba(14, 25, 32, 0.03);
-        color: var(--black, #04080B);
+        color: var(--black, #04080b);
         font-size: 15px;
         font-weight: 500;
       }
@@ -829,7 +866,7 @@ export default {
       // Before & After
       &:before,
       &:after {
-        background: var(--shade-250, #D1D5D7);
+        background: var(--shade-250, #d1d5d7);
         content: '';
         height: 1px;
         width: 100%;
@@ -841,7 +878,7 @@ export default {
         font-style: normal;
         font-weight: 400;
         line-height: 24px;
-        color: var(--shade-500, #808A90);
+        color: var(--shade-500, #808a90);
         margin-left: 8px;
         margin-right: 8px;
       }
@@ -859,7 +896,7 @@ export default {
 
     &__event-customer-info {
       &-error {
-        animation: 600ms cubic-bezier(.45,1,.4,1.2) #{100}ms am-animation-slide-up;
+        animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{100}ms am-animation-slide-up;
         animation-fill-mode: both;
         margin-bottom: 10px;
       }
@@ -880,7 +917,7 @@ export default {
         $count: 100;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }
@@ -940,7 +977,7 @@ export default {
           width: 100%;
         }
         &-s {
-          gap: 0
+          gap: 0;
         }
       }
 
@@ -954,7 +991,7 @@ export default {
     }
 
     &__error {
-      animation: 600ms cubic-bezier(.45,1,.4,1.2) #{100}ms am-animation-slide-up;
+      animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{100}ms am-animation-slide-up;
       animation-fill-mode: both;
       margin-bottom: 10px;
     }

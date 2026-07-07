@@ -1,10 +1,7 @@
 <template>
   <div class="am-capai-warn" :style="cssVars">
     <span class="am-icon-triangle-info"></span>
-    <div
-      v-if="props.heading || props.text"
-      class="am-capai-warn__content"
-    >
+    <div v-if="props.heading || props.text" class="am-capai-warn__content">
       <div v-if="props.heading" class="am-capai-warn__heading">
         {{ props.heading }}
       </div>
@@ -17,25 +14,22 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject
-} from 'vue'
+import { computed, inject } from 'vue'
 
 // * Props
 const props = defineProps({
   heading: {
     type: String,
-    default: ''
+    default: '',
   },
   text: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 })
 
 // * Functions
-import { useColorTransparency } from "../../../../../../../assets/js/common/colorManipulation";
+import { useColorTransparency } from '../../../../../../../assets/js/common/colorManipulation'
 
 // * Colors
 let amColors = inject('amColors')

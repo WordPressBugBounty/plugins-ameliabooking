@@ -5,8 +5,8 @@
       !props.inPopup && checkScreen
         ? 'am-fs__bringing-full-mobile'
         : !props.inPopup
-        ? 'am-fs__bringing-full'
-        : '',
+          ? 'am-fs__bringing-full'
+          : '',
       { 'am-fs__bringing-full-mobile-s': mobileS },
     ]"
     :style="cssVars"
@@ -38,12 +38,7 @@
             }}
           </span>
         </span>
-        <AmInputNumber
-          v-model="persons"
-          :min="options.min"
-          :max="options.max"
-          size="small"
-        />
+        <AmInputNumber v-model="persons" :min="options.min" :max="options.max" size="small" />
       </div>
       <div
         v-if="infoVisibility"
@@ -69,45 +64,41 @@
       <div v-if="service.customPricing.enabled === 'person'" class="am-fs__bringing-content-price">
         <span class="am-fs__bringing-content-price-left">
           <span class="am-icon-service"></span>
-          <span class="am-fs__bringing-content-text">{{amLabels.bringing_price}}</span>
+          <span class="am-fs__bringing-content-text">{{ amLabels.bringing_price }}</span>
         </span>
         <p
           v-for="(item, range) in personPricing"
           :key="range"
           class="am-fs__bringing-content-text am-fs__bringing-content-price-text"
-          :class="{'am-fs__bringing-content-price-text-selected': selectedGroup(item.from, item.to)}"
+          :class="{
+            'am-fs__bringing-content-price-text-selected': selectedGroup(item.from, item.to),
+          }"
           tabindex="0"
           role="button"
-          :aria-label="`${item.from === item.to ? item.from : item.from + ' - ' + item.to }: ${item.prices[0] === item.prices[1] ? useFormattedPrice(item.prices[0]) : useFormattedPrice(item.prices[0])  + ' - ' + useFormattedPrice(item.prices[1])}`"
+          :aria-label="`${item.from === item.to ? item.from : item.from + ' - ' + item.to}: ${item.prices[0] === item.prices[1] ? useFormattedPrice(item.prices[0]) : useFormattedPrice(item.prices[0]) + ' - ' + useFormattedPrice(item.prices[1])}`"
           @click="rangeSelected(item.from)"
           @keydown.enter="rangeSelected(item.from)"
           @keydown.space.prevent="rangeSelected(item.from)"
         >
           <span class="am-icon-users"></span>
-          <span>{{item.from === item.to ? item.from : item.from + ' - ' + item.to }}</span>
-          <span>{{item.prices[0] === item.prices[1] ? useFormattedPrice(item.prices[0]) : useFormattedPrice(item.prices[0])  + ' - ' + useFormattedPrice(item.prices[1])}}</span>
+          <span>{{ item.from === item.to ? item.from : item.from + ' - ' + item.to }}</span>
+          <span>{{
+            item.prices[0] === item.prices[1]
+              ? useFormattedPrice(item.prices[0])
+              : useFormattedPrice(item.prices[0]) + ' - ' + useFormattedPrice(item.prices[1])
+          }}</span>
         </p>
       </div>
     </div>
 
     <!-- Packages Popup -->
-    <PackagesPopup
-      @continue-with-service="packagesVisibility = false"
-    />
+    <PackagesPopup @continue-with-service="packagesVisibility = false" />
     <!--/ Packages Popup -->
   </div>
 </template>
 
 <script setup>
-import {
-  ref,
-  reactive,
-  computed,
-  inject,
-  watchEffect,
-  provide,
-  onMounted,
-} from 'vue'
+import { ref, reactive, computed, inject, watchEffect, provide, onMounted } from 'vue'
 import { useStore } from 'vuex'
 
 import AmInputNumber from '../../../_components/input-number/AmInputNumber.vue'
@@ -131,9 +122,7 @@ let props = defineProps({
 
 // Container Width
 let cWidth = inject('containerWidth', 0)
-let checkScreen = computed(
-  () => cWidth.value < 560 || (cWidth.value > 560 && cWidth.value < 640)
-)
+let checkScreen = computed(() => cWidth.value < 560 || (cWidth.value > 560 && cWidth.value < 640))
 let mobileS = computed(() => cWidth.value < 340)
 
 // * Store
@@ -149,9 +138,7 @@ const amSettings = inject('settings')
 const localLanguage = inject('localLanguage')
 
 // * if local lang is in settings lang
-let langDetection = computed(() =>
-  amSettings.general.usedLanguages.includes(localLanguage.value)
-)
+let langDetection = computed(() => amSettings.general.usedLanguages.includes(localLanguage.value))
 
 // * Labels
 const globalLabels = inject('labels')
@@ -159,17 +146,18 @@ const globalLabels = inject('labels')
 // * Customize
 const amCustomize = inject('amCustomize')
 
-let { bringingAnyoneOptions } = inject('bringingOptions', ref({
-  availability: false,
-  min: 0,
-  max: 1,
-}))
+let { bringingAnyoneOptions } = inject(
+  'bringingOptions',
+  ref({
+    availability: false,
+    min: 0,
+    max: 1,
+  }),
+)
 
 // * Package
 let packagesOptions = computed(() =>
-  store.getters['entities/filteredPackages'](
-    store.getters['booking/getSelection']
-  )
+  store.getters['entities/filteredPackages'](store.getters['booking/getSelection']),
 )
 
 let packagesVisibility = ref(false)
@@ -180,15 +168,10 @@ let amLabels = computed(() => {
   let computedLabels = reactive({ ...globalLabels })
 
   if (amSettings.customizedData?.sbsNew?.bringingAnyone?.translations) {
-    let customizedLabels =
-      amSettings.customizedData.sbsNew.bringingAnyone.translations
+    let customizedLabels = amSettings.customizedData.sbsNew.bringingAnyone.translations
     Object.keys(customizedLabels).forEach((labelKey) => {
-      if (
-        customizedLabels[labelKey][localLanguage.value] &&
-        langDetection.value
-      ) {
-        computedLabels[labelKey] =
-          customizedLabels[labelKey][localLanguage.value]
+      if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
+        computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
         computedLabels[labelKey] = customizedLabels[labelKey].default
       }
@@ -197,39 +180,32 @@ let amLabels = computed(() => {
   return computedLabels
 })
 
-let headingVisibility = amCustomize
-  ? amCustomize.bringingAnyone.options.heading.visibility
-  : true
-let infoVisibility = amCustomize
-  ? amCustomize.bringingAnyone.options.info.visibility
-  : true
+let headingVisibility = amCustomize ? amCustomize.bringingAnyone.options.heading.visibility : true
+let infoVisibility = amCustomize ? amCustomize.bringingAnyone.options.info.visibility : true
 let pricingVisibility = computed(() => {
-  return (
-    'bringingPrice' in amCustomize.bringingAnyone.options
-      ? amCustomize.bringingAnyone.options.bringingPrice.visibility
-      : true
-  )
+  return 'bringingPrice' in amCustomize.bringingAnyone.options
+    ? amCustomize.bringingAnyone.options.bringingPrice.visibility
+    : true
 })
 
 // * Step functionality
-let { nextStep, footerButtonReset, footerButtonClicked } = inject(
-  'changingStepsFunctions',
-  {
-    nextStep: () => {},
-    footerButtonReset: () => {},
-    footerButtonClicked: {
-      value: false,
-    },
-  }
+let { nextStep, footerButtonReset, footerButtonClicked } = inject('changingStepsFunctions', {
+  nextStep: () => {},
+  footerButtonReset: () => {},
+  footerButtonClicked: {
+    value: false,
+  },
+})
+
+let service = computed(() =>
+  store.getters['entities/getService'](store.getters['booking/getServiceId']),
 )
 
-let service = computed(() => store.getters['entities/getService'](
-  store.getters['booking/getServiceId']
-))
-
-let employeesServices = computed(() => store.getters['entities/getEmployeeServices'](
-  store.getters['booking/getServiceProviderSelection']
-))
+let employeesServices = computed(() =>
+  store.getters['entities/getEmployeeServices'](
+    store.getters['booking/getServiceProviderSelection'],
+  ),
+)
 
 let options = computed(() => {
   if (props.inPopup) {
@@ -253,11 +229,7 @@ let persons = computed({
 
 if (!props.inPopup) {
   onMounted(() => {
-    if (
-      !props.inPopup &&
-      packagesOptions.value.length &&
-      shortcodeData.value.show !== 'services'
-    ) {
+    if (!props.inPopup && packagesOptions.value.length && shortcodeData.value.show !== 'services') {
       packagesVisibility.value = true
     }
   })
@@ -271,14 +243,15 @@ if (!props.inPopup) {
   })
 }
 
-function rangeSelected (range) {
-  store.commit('booking/setBookingPersons', range - (amSettings.appointments.bringingAnyoneLogic === 'additional' ? 1 : 0))
+function rangeSelected(range) {
+  store.commit(
+    'booking/setBookingPersons',
+    range - (amSettings.appointments.bringingAnyoneLogic === 'additional' ? 1 : 0),
+  )
 }
 
 let personPricing = computed(() => {
-  let service = store.getters['entities/getService'](
-    store.getters['booking/getServiceId']
-  )
+  let service = store.getters['entities/getService'](store.getters['booking/getServiceId'])
 
   let maxCapacity = 0
 
@@ -305,15 +278,24 @@ let personPricing = computed(() => {
   let additionalOffset = amSettings.appointments.bringingAnyoneLogic === 'additional' ? 1 : 0
 
   Object.keys(service.customPricing.persons).forEach((key) => {
-    if (service.customPricing.persons[key].from in allowedRanges && service.customPricing.persons[key].from <= options.value.max + additionalOffset) {
-      ranges[service.customPricing.persons[key].from] = {from: service.customPricing.persons[key].from, to: parseInt(key), prices: []}
+    if (
+      service.customPricing.persons[key].from in allowedRanges &&
+      service.customPricing.persons[key].from <= options.value.max + additionalOffset
+    ) {
+      ranges[service.customPricing.persons[key].from] = {
+        from: service.customPricing.persons[key].from,
+        to: parseInt(key),
+        prices: [],
+      }
     }
   })
 
   employeesServices.value.forEach((service) => {
     Object.keys(service.customPricing.persons).forEach((key, index) => {
       if (service.customPricing.persons[key].from in ranges) {
-        ranges[service.customPricing.persons[key].from].prices.push(service.customPricing.persons[key].price)
+        ranges[service.customPricing.persons[key].from].prices.push(
+          service.customPricing.persons[key].price,
+        )
 
         if (Object.keys(allowedRanges).length - 1 === index) {
           ranges[service.customPricing.persons[key].from].to = maxCapacity
@@ -329,29 +311,23 @@ let personPricing = computed(() => {
   return ranges
 })
 
-function selectedGroup (from, range) {
+function selectedGroup(from, range) {
   let start = amSettings.appointments.bringingAnyoneLogic === 'additional' ? 1 : 0
 
-  return (persons.value === (start ? 0 : 1) && from === 1) || (persons.value + start >= from && persons.value + start <= range)
+  return (
+    (persons.value === (start ? 0 : 1) && from === 1) ||
+    (persons.value + start >= from && persons.value + start <= range)
+  )
 }
 
 // * Global colors
 let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
-    '--am-bringing-color-border': useColorTransparency(
-      amColors.value.colorMainText,
-      0.25
-    ),
-    '--am-bringing-color-text-opacity60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
+    '--am-bringing-color-border': useColorTransparency(amColors.value.colorMainText, 0.25),
+    '--am-bringing-color-text-opacity60': useColorTransparency(amColors.value.colorMainText, 0.6),
     '--am-c-ps-primary': amColors.value.colorPrimary,
-    '--am-c-ps-primary-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
+    '--am-c-ps-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
   }
 })
 </script>
@@ -434,7 +410,7 @@ export default {
 
           &-selected {
             border-color: var(--am-c-ps-primary);
-            background-color: #FFFFFF;
+            background-color: #ffffff;
           }
 
           span:nth-child(3) {
@@ -448,7 +424,8 @@ export default {
         display: flex;
       }
 
-      &-content, &-content-price {
+      &-content,
+      &-content-price {
         align-items: center;
         justify-content: space-between;
         padding: 12px 16px;

@@ -2,7 +2,7 @@ export default {
   namespaced: true,
 
   state: () => ({
-    addingMethod: "Manually",
+    addingMethod: 'Manually',
     enabled: false,
     maxCapacity: 0,
     maxExtraPeople: 0,
@@ -13,23 +13,23 @@ export default {
   }),
 
   getters: {
-    getAvailability (state) {
+    getAvailability(state) {
       return state.isAvailable
     },
 
-    getOptions (state) {
+    getOptions(state) {
       return {
         enabled: state.enabled,
         maxCapacity: state.maxCapacity,
         maxExtraPeople: state.maxExtraPeople,
         maxExtraPeopleEnabled: state.maxExtraPeopleEnabled,
-        peopleWaiting: state.peopleWaiting
+        peopleWaiting: state.peopleWaiting,
       }
-    }
+    },
   },
 
   mutations: {
-    setAllData (state, payload) {
+    setAllData(state, payload) {
       state.addingMethod = payload.addingMethod
       state.enabled = payload.enabled
       state.maxCapacity = payload.maxCapacity
@@ -37,13 +37,13 @@ export default {
       state.maxExtraPeopleEnabled = payload.maxExtraPeopleEnabled
       state.peopleWaiting = payload.peopleWaiting
       state.isAvailable = payload.isAvailable
-    }
+    },
   },
 
   actions: {
-    resetWaitingOptions ({commit}) {
+    resetWaitingOptions({ commit }) {
       commit('setAllData', {
-        addingMethod: "Manually",
+        addingMethod: 'Manually',
         enabled: false,
         maxCapacity: 0,
         maxExtraPeople: 0,
@@ -51,6 +51,6 @@ export default {
         peopleWaiting: 0,
         isAvailable: false,
       })
-    }
-  }
+    },
+  },
 }

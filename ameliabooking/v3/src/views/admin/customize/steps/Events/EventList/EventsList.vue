@@ -3,9 +3,7 @@
     <div v-if="customizeOptions.header.visibility" class="am-els__available">
       {{
         `${total} ${
-          total === 1
-            ? labelsDisplay('event_available')
-            : labelsDisplay('events_available')
+          total === 1 ? labelsDisplay('event_available') : labelsDisplay('events_available')
         }`
       }}
     </div>
@@ -29,20 +27,14 @@
             @click="filtersMenuVisibility = !filtersMenuVisibility"
           >
             <span class="am-icon-filter"></span>
-            <span v-if="cWidth > 500">{{
-              labelsDisplay('event_filters')
-            }}</span>
+            <span v-if="cWidth > 500">{{ labelsDisplay('event_filters') }}</span>
           </AmButton>
         </div>
       </div>
       <Transition name="am-slide-fade">
-        <div
-          v-if="filtersMenuVisibility"
-          class="am-els__filters-menu"
-          :class="responsiveClass"
-        >
+        <div v-if="filtersMenuVisibility" class="am-els__filters-menu" :class="responsiveClass">
           <div
-          v-if="amSettings.featuresIntegrations.eventTags.enabled"
+            v-if="amSettings.featuresIntegrations.eventTags.enabled"
             class="am-els__filters-menu__items"
             :class="[responsiveClass, filterClassWidth.tag]"
           >
@@ -108,16 +100,9 @@
     <!-- /Event List -->
 
     <!-- Events Pagination -->
-    <div
-      v-if="total && Math.ceil(total / showItems) > 1"
-      class="am-els__pagination"
-    >
+    <div v-if="total && Math.ceil(total / showItems) > 1" class="am-els__pagination">
       <div class="am-els__pagination-info">
-        {{
-          `${labelsDisplay('event_page')} ${currentPage} / ${Math.ceil(
-            total / showItems
-          )}`
-        }}
+        {{ `${labelsDisplay('event_page')} ${currentPage} / ${Math.ceil(total / showItems)}` }}
       </div>
       <AmPagination
         v-model:current-page="currentPage"
@@ -243,14 +228,8 @@ let events = ref([
       {
         id: 1,
         eventId: 1,
-        periodStart: moment()
-          .add(2, 'days')
-          .add(5, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
-        periodEnd: moment()
-          .add(4, 'days')
-          .add(10, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
+        periodStart: moment().add(2, 'days').add(5, 'hours').format('YYYY-MM-DD hh:mm:ss'),
+        periodEnd: moment().add(4, 'days').add(10, 'hours').format('YYYY-MM-DD hh:mm:ss'),
       },
     ],
     pictureFullPath: null,
@@ -332,14 +311,8 @@ let events = ref([
       {
         id: 1,
         eventId: 1,
-        periodStart: moment()
-          .add(2, 'days')
-          .add(5, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
-        periodEnd: moment()
-          .add(4, 'days')
-          .add(10, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
+        periodStart: moment().add(2, 'days').add(5, 'hours').format('YYYY-MM-DD hh:mm:ss'),
+        periodEnd: moment().add(4, 'days').add(10, 'hours').format('YYYY-MM-DD hh:mm:ss'),
       },
     ],
     pictureFullPath: null,
@@ -421,14 +394,8 @@ let events = ref([
       {
         id: 1,
         eventId: 1,
-        periodStart: moment()
-          .add(2, 'days')
-          .add(5, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
-        periodEnd: moment()
-          .add(4, 'days')
-          .add(10, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
+        periodStart: moment().add(2, 'days').add(5, 'hours').format('YYYY-MM-DD hh:mm:ss'),
+        periodEnd: moment().add(4, 'days').add(10, 'hours').format('YYYY-MM-DD hh:mm:ss'),
       },
     ],
     pictureFullPath: null,
@@ -510,14 +477,8 @@ let events = ref([
       {
         id: 1,
         eventId: 1,
-        periodStart: moment()
-          .add(2, 'days')
-          .add(5, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
-        periodEnd: moment()
-          .add(4, 'days')
-          .add(10, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
+        periodStart: moment().add(2, 'days').add(5, 'hours').format('YYYY-MM-DD hh:mm:ss'),
+        periodEnd: moment().add(4, 'days').add(10, 'hours').format('YYYY-MM-DD hh:mm:ss'),
       },
     ],
     pictureFullPath: null,
@@ -600,14 +561,8 @@ let events = ref([
       {
         id: 1,
         eventId: 1,
-        periodStart: moment()
-          .add(2, 'days')
-          .add(5, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
-        periodEnd: moment()
-          .add(4, 'days')
-          .add(10, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
+        periodStart: moment().add(2, 'days').add(5, 'hours').format('YYYY-MM-DD hh:mm:ss'),
+        periodEnd: moment().add(4, 'days').add(10, 'hours').format('YYYY-MM-DD hh:mm:ss'),
       },
     ],
     pictureFullPath: null,
@@ -690,14 +645,8 @@ let events = ref([
       {
         id: 1,
         eventId: 1,
-        periodStart: moment()
-          .add(2, 'days')
-          .add(5, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
-        periodEnd: moment()
-          .add(4, 'days')
-          .add(10, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
+        periodStart: moment().add(2, 'days').add(5, 'hours').format('YYYY-MM-DD hh:mm:ss'),
+        periodEnd: moment().add(4, 'days').add(10, 'hours').format('YYYY-MM-DD hh:mm:ss'),
       },
     ],
     pictureFullPath: null,
@@ -779,14 +728,8 @@ let events = ref([
       {
         id: 1,
         eventId: 1,
-        periodStart: moment()
-          .add(2, 'days')
-          .add(5, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
-        periodEnd: moment()
-          .add(4, 'days')
-          .add(10, 'hours')
-          .format('YYYY-MM-DD hh:mm:ss'),
+        periodStart: moment().add(2, 'days').add(5, 'hours').format('YYYY-MM-DD hh:mm:ss'),
+        periodEnd: moment().add(4, 'days').add(10, 'hours').format('YYYY-MM-DD hh:mm:ss'),
       },
     ],
     pictureFullPath: null,
@@ -850,7 +793,7 @@ let filterClassWidth = computed(() => {
   let classFilter = {
     tag: 'am-mw33',
     location: 'am-mw33',
-    date: 'am-mw33'
+    date: 'am-mw33',
   }
 
   if (!tagVisibility) {
@@ -908,9 +851,7 @@ let amLabels = inject('labels')
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
     let translations = amCustomize.value.elf.list.translations
-    return translations &&
-      translations[label] &&
-      translations[label][langKey.value]
+    return translations && translations[label] && translations[label][langKey.value]
       ? translations[label][langKey.value]
       : amLabels[label]
   })
@@ -927,18 +868,9 @@ let cssVars = computed(() => {
     '--am-c-els-text': amColors.value.colorMainText,
     '--am-c-els-head-text': amColors.value.colorMainText,
     '--am-c-els-bgr': amColors.value.colorMainBgr,
-    '--am-c-els-text-op10': useColorTransparency(
-      amColors.value.colorMainText,
-      0.1
-    ),
-    '--am-c-els-text-op25': useColorTransparency(
-      amColors.value.colorMainText,
-      0.25
-    ),
-    '--am-c-els-text-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
+    '--am-c-els-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
+    '--am-c-els-text-op25': useColorTransparency(amColors.value.colorMainText, 0.25),
+    '--am-c-els-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
   }
 })
 </script>

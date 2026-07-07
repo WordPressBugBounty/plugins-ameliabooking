@@ -4,13 +4,7 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  computed,
-  markRaw,
-  inject,
-  provide
-} from 'vue'
+import { ref, computed, markRaw, inject, provide } from 'vue'
 
 // * Form Component Collection
 import SignIn from './parts/SignIn.vue'
@@ -20,9 +14,7 @@ import SetPass from './parts/SetPass.vue'
 import ChangePassSuccess from './parts/SetPassSuccess.vue'
 
 // * import composable
-import {
-  defaultCustomizeSettings
-} from '@/assets/js/common/defaultCustomize'
+import { defaultCustomizeSettings } from '@/assets/js/common/defaultCustomize'
 
 // * Root Settings
 const amSettings = inject('settings')
@@ -43,13 +35,14 @@ let pageKey = ref('signIn')
 provide('pageKey', pageKey)
 
 // * Fonts
-const amFonts = ref(amSettings.customizedData ? amSettings.customizedData.fonts : defaultCustomizeSettings.fonts)
+const amFonts = ref(
+  amSettings.customizedData ? amSettings.customizedData.fonts : defaultCustomizeSettings.fonts,
+)
 provide('amFonts', amFonts)
 
 // * Colors block
 let amColors = computed(() => {
-  return amSettings.customizedData &&
-    originKey.value in amSettings.customizedData
+  return amSettings.customizedData && originKey.value in amSettings.customizedData
     ? amSettings.customizedData[originKey.value].colors
     : defaultCustomizeSettings[originKey.value].colors
 })
@@ -59,6 +52,6 @@ provide('amColors', amColors)
 
 <script>
 export default {
-  name: 'AuthWrapper'
+  name: 'AuthWrapper',
 }
 </script>

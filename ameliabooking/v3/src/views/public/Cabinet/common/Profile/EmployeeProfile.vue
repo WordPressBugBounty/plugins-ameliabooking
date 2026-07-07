@@ -1,15 +1,6 @@
 <template>
-  <div
-    ref="pageContainer"
-    class="am-caep"
-    :style="cssVars"
-  >
-    <div
-      v-if="ready"
-      v-show="!loading"
-      class="am-caep__inner"
-      :class="responsiveClass"
-    >
+  <div ref="pageContainer" class="am-caep" :style="cssVars">
+    <div v-if="ready" v-show="!loading" class="am-caep__inner" :class="responsiveClass">
       <AmAlert
         v-if="alertVisibility"
         :type="messageType"
@@ -24,18 +15,9 @@
         </template>
       </AmAlert>
 
-      <el-tabs
-        v-model="activeTab"
-      >
-        <el-tab-pane
-          :label="amLabels.details"
-          name="details"
-          @click="tabClick"
-        >
-          <Details
-            ref="detailsRef"
-            :responsive-class="responsiveClass"
-          />
+      <el-tabs v-model="activeTab">
+        <el-tab-pane :label="amLabels.details" name="details" @click="tabClick">
+          <Details ref="detailsRef" :responsive-class="responsiveClass" />
         </el-tab-pane>
 
         <el-tab-pane
@@ -43,9 +25,7 @@
           :label="amLabels.heading_services"
           name="services"
         >
-          <Services
-            :responsive-class="responsiveClass"
-          />
+          <Services :responsive-class="responsiveClass" />
         </el-tab-pane>
 
         <el-tab-pane
@@ -53,9 +33,7 @@
           :label="amLabels.working_hours"
           name="workingHours"
         >
-          <WeekDays
-            :responsive-class="responsiveClass"
-          />
+          <WeekDays :responsive-class="responsiveClass" />
         </el-tab-pane>
 
         <el-tab-pane
@@ -63,10 +41,7 @@
           :label="amLabels.special_days"
           name="specialDays"
         >
-          <SpecialDays
-            ref="specialDaysRef"
-            :responsive-class="responsiveClass"
-          />
+          <SpecialDays ref="specialDaysRef" :responsive-class="responsiveClass" />
         </el-tab-pane>
 
         <el-tab-pane
@@ -74,26 +49,12 @@
           :label="amLabels.days_off"
           name="daysOff"
         >
-          <DaysOff
-            ref="daysOffRef"
-            :responsive-class="responsiveClass"
-          />
+          <DaysOff ref="daysOffRef" :responsive-class="responsiveClass" />
         </el-tab-pane>
 
-        <el-tab-pane
-          v-if="changePasswordEnabled"
-          :label="amLabels.password"
-          name="password"
-        >
-          <ChangePassword
-            v-if="!loading"
-            ref="changePassRef"
-          />
-          <ProfileSkeleton
-            v-else
-            :item-direction="'column'"
-            :count="2"
-          ></ProfileSkeleton>
+        <el-tab-pane v-if="changePasswordEnabled" :label="amLabels.password" name="password">
+          <ChangePassword v-if="!loading" ref="changePassRef" />
+          <ProfileSkeleton v-else :item-direction="'column'" :count="2"></ProfileSkeleton>
         </el-tab-pane>
 
         <el-tab-pane
@@ -102,8 +63,7 @@
             amSettings.googleCalendar.enabled ||
             amSettings.outlookCalendar.enabled ||
             amSettings.appleCalendar.enabled ||
-            (amSettings.payments.stripe.enabled &&
-              amSettings.payments.stripe.connect.enabled)
+            (amSettings.payments.stripe.enabled && amSettings.payments.stripe.connect.enabled)
           "
           :label="amLabels.integrations_settings"
           name="integrations"
@@ -128,31 +88,20 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  inject,
-  computed,
-  provide,
-} from "vue";
+import { ref, inject, computed, provide } from 'vue'
 
-import { useElementSize } from "@vueuse/core";
+import { useElementSize } from '@vueuse/core'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import for axios
-import httpClient from "../../../../../plugins/axios";
+import httpClient from '../../../../../plugins/axios'
 
 // * Composables
-import {
-  useBackendEmployee,
-} from "../../../../../assets/js/common/employee";
-import {
-  useResponsiveClass,
-} from "../../../../../assets/js/common/responsive";
-import {
-  useColorTransparency
-} from "../../../../../assets/js/common/colorManipulation";
+import { useBackendEmployee } from '../../../../../assets/js/common/employee'
+import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
+import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
 
 // * Dedicated components
 import Skeleton from '../Authentication/parts/Skeleton.vue'
@@ -201,11 +150,11 @@ let messageType = ref('success')
 // * Change Password Alert visibility
 let alertVisibility = ref(false)
 
-function tabClick () {
+function tabClick() {
   alertVisibility.value = false
 }
 
-function closeAlert () {
+function closeAlert() {
   alertVisibility.value = false
   message.value = ''
 }
@@ -225,9 +174,14 @@ let loading = ref(false)
 
 let timeZone = inject('timeZone')
 
-function saveEmployee () {
+function saveEmployee() {
   Promise.all([
-    detailsRef.value?.employeeFormRef ? detailsRef.value.employeeFormRef.validate().then(() => true).catch(() => false) : Promise.resolve(true),
+    detailsRef.value?.employeeFormRef
+      ? detailsRef.value.employeeFormRef
+          .validate()
+          .then(() => true)
+          .catch(() => false)
+      : Promise.resolve(true),
     daysOffRef.value ? daysOffRef.value.validate() : Promise.resolve(true),
     specialDaysRef.value ? specialDaysRef.value.validate() : Promise.resolve(true),
   ]).then(([detailsValid, daysOffValid, specialDaysValid]) => {
@@ -248,26 +202,34 @@ function saveEmployee () {
 
     loading.value = true
 
-    httpClient.post(
-      '/users/providers/' + employee.value.id,
-      useBackendEmployee(store, timeZone.value),
-      {params: {source: 'cabinet-provider'}}
-    ).then((response) => {
-      store.commit('employee/setSavedSpecialDayList', JSON.parse(JSON.stringify(response.data.data.user.specialDayList)))
-      store.commit('employee/setSavedDayOffList', JSON.parse(JSON.stringify(response.data.data.user.dayOffList)))
+    httpClient
+      .post('/users/providers/' + employee.value.id, useBackendEmployee(store, timeZone.value), {
+        params: { source: 'cabinet-provider' },
+      })
+      .then((response) => {
+        store.commit(
+          'employee/setSavedSpecialDayList',
+          JSON.parse(JSON.stringify(response.data.data.user.specialDayList)),
+        )
+        store.commit(
+          'employee/setSavedDayOffList',
+          JSON.parse(JSON.stringify(response.data.data.user.dayOffList)),
+        )
 
-      if (daysOffRef.value) daysOffRef.value.commitEditedState()
-      if (specialDaysRef.value) specialDaysRef.value.commitEditedState()
+        if (daysOffRef.value) daysOffRef.value.commitEditedState()
+        if (specialDaysRef.value) specialDaysRef.value.commitEditedState()
 
-      message.value = amLabels.profile_data_success
-      messageType.value = 'success'
-    }).catch((error) => {
-      message.value = error.response.data.message
-      messageType.value = 'error'
-    }).finally(() => {
-      alertVisibility.value = true
-      loading.value = false
-    })
+        message.value = amLabels.profile_data_success
+        messageType.value = 'success'
+      })
+      .catch((error) => {
+        message.value = error.response.data.message
+        messageType.value = 'error'
+      })
+      .finally(() => {
+        alertVisibility.value = true
+        loading.value = false
+      })
   })
 }
 
@@ -277,37 +239,38 @@ function saveEmployee () {
 let changePassRef = ref(null)
 let changePasswordEnabled = ref(false)
 
-function changePassword () {
+function changePassword() {
   changePasswordEnabled.value = true
   activeTab.value = 'password'
 }
 
-function savePassword () {
+function savePassword() {
   changePassRef.value.passFormRef.validate((valid) => {
     if (valid) {
       let user = store.getters['auth/getProfile']
 
       loading.value = true
 
-      httpClient.post(
-        '/users/providers/' + user.id,
-        {password: store.getters['auth/getNewPassword']}
-      ).then(() => {
-        message.value = amLabels.password_success
-        messageType.value = 'success'
-        alertVisibility.value = true
+      httpClient
+        .post('/users/providers/' + user.id, { password: store.getters['auth/getNewPassword'] })
+        .then(() => {
+          message.value = amLabels.password_success
+          messageType.value = 'success'
+          alertVisibility.value = true
 
-        changePasswordEnabled.value = false
+          changePasswordEnabled.value = false
 
-        activeTab.value = 'details'
+          activeTab.value = 'details'
 
-        store.commit('auth/setNewPassword', '')
-        store.commit('auth/setConfirmPassword', '')
-      }).catch(() => {
-        alertVisibility.value = true
-      }).finally(() => {
-        loading.value = false
-      })
+          store.commit('auth/setNewPassword', '')
+          store.commit('auth/setConfirmPassword', '')
+        })
+        .catch(() => {
+          alertVisibility.value = true
+        })
+        .finally(() => {
+          loading.value = false
+        })
     }
   })
 }
@@ -319,14 +282,14 @@ let cssVars = computed(() => {
   return {
     '--am-c-caep-primary': amColors.value.colorPrimary,
     '--am-c-caep-text': amColors.value.colorMainText,
-    '--am-c-caep-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1)
+    '--am-c-caep-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
   }
 })
 </script>
 
 <script>
 export default {
-  name: 'CabinetEmployeeProfile'
+  name: 'CabinetEmployeeProfile',
 }
 </script>
 

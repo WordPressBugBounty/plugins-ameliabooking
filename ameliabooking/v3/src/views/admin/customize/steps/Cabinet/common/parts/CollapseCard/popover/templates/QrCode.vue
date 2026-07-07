@@ -1,14 +1,8 @@
 <template>
   <div class="am-cc__qr-codes">
-    <div
-      v-for="(item, index) in props.data"
-      :key="index"
-      class="am-cc__qr-codes__item"
-    >
+    <div v-for="(item, index) in props.data" :key="index" class="am-cc__qr-codes__item">
       {{
-        `${item.eventName} - ${
-          item.type === 'ticket' ? 'Single Ticket.pdf' : 'Group Ticket.pdf'
-        }`
+        `${item.eventName} - ${item.type === 'ticket' ? 'Single Ticket.pdf' : 'Group Ticket.pdf'}`
       }}
     </div>
   </div>

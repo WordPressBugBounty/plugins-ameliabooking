@@ -34,7 +34,7 @@ let responsiveClass = computed(() => {
   return useResponsiveClass(cWidth.value)
 })
 
-let langKey =inject('langKey')
+let langKey = inject('langKey')
 let amLabels = inject('labels')
 
 // * Customize
@@ -47,15 +47,9 @@ let pageRenderKey = inject('pageRenderKey')
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value].bringingAnyone.translations &&
-      amCustomize.value[pageRenderKey.value].bringingAnyone.translations[
-        label
-      ] &&
-      amCustomize.value[pageRenderKey.value].bringingAnyone.translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value].bringingAnyone.translations[
-          label
-        ][langKey.value]
+      amCustomize.value[pageRenderKey.value].bringingAnyone.translations[label] &&
+      amCustomize.value[pageRenderKey.value].bringingAnyone.translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value].bringingAnyone.translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -78,14 +72,8 @@ let amColors = inject('amColors')
 // * Css Variables
 let cssVars = computed(() => {
   return {
-    '--am-bringing-color-border': useColorTransparency(
-      amColors.value.colorMainText,
-      0.25
-    ),
-    '--am-bringing-color-text-opacity60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
+    '--am-bringing-color-border': useColorTransparency(amColors.value.colorMainText, 0.25),
+    '--am-bringing-color-text-opacity60': useColorTransparency(amColors.value.colorMainText, 0.6),
   }
 })
 </script>

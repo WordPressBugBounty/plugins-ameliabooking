@@ -7,13 +7,11 @@
     class="am-capai-cfields am-capai-cfields__form"
     :class="props.responsiveClass"
   >
-    <el-collapse
-      v-model="activeBookingIndex"
-      class="am-capai-collapse"
-      accordion
-    >
+    <el-collapse v-model="activeBookingIndex" class="am-capai-collapse" accordion>
       <el-collapse-item
-        v-for="(item, index) in store.getters['appointment/getBookings'].filter((b) => b.status !== 'canceled' && b.status !== 'rejected')"
+        v-for="(item, index) in store.getters['appointment/getBookings'].filter(
+          (b) => b.status !== 'canceled' && b.status !== 'rejected',
+        )"
         :key="index"
         :name="index"
         class="am-capai-collapse__item"
@@ -22,12 +20,20 @@
           <!-- Customer Name -->
           <div
             class="am-capai-customer__name"
-            :class="[{'am-pb-16': !((item.customer.email && customerEmailVisibility) || (item.customer.phone && customerPhoneVisibility))}, noShowData(item.customer.noShowCount).class]"
+            :class="[
+              {
+                'am-pb-16': !(
+                  (item.customer.email && customerEmailVisibility) ||
+                  (item.customer.phone && customerPhoneVisibility)
+                ),
+              },
+              noShowData(item.customer.noShowCount).class,
+            ]"
           >
-          <span
-            v-if="noShowData(item.customer.noShowCount).icon"
-            :class="`am-icon-${noShowData(item.customer.noShowCount).icon}`"
-          />
+            <span
+              v-if="noShowData(item.customer.noShowCount).icon"
+              :class="`am-icon-${noShowData(item.customer.noShowCount).icon}`"
+            />
             {{ item.customer.firstName + ' ' + item.customer.lastName }}
           </div>
           <!-- /Customer Name -->
@@ -35,7 +41,10 @@
 
         <!-- Customer Info -->
         <div
-          v-if="(item.customer.email && customerEmailVisibility) || (item.customer.phone && customerPhoneVisibility)"
+          v-if="
+            (item.customer.email && customerEmailVisibility) ||
+            (item.customer.phone && customerPhoneVisibility)
+          "
           class="am-capai-customer__data-wrapper"
           :class="props.responsiveClass"
         >
@@ -67,14 +76,14 @@
         </div>
         <!-- /Customer Info -->
 
-          <template v-for="cf in customFields" :key="index + '_' + cf.id">
-            <component
-              :is="cfFormConstruction[index][cf.id].template"
-              v-if="index in cfFormConstruction && `${index}cf${cf.id}` in customFieldsForm"
-              v-model="customFieldsForm[`${index}cf${cf.id}`]"
-              v-bind="cfFormConstruction[index][cf.id].props"
-            ></component>
-          </template>
+        <template v-for="cf in customFields" :key="index + '_' + cf.id">
+          <component
+            :is="cfFormConstruction[index][cf.id].template"
+            v-if="index in cfFormConstruction && `${index}cf${cf.id}` in customFieldsForm"
+            v-model="customFieldsForm[`${index}cf${cf.id}`]"
+            v-bind="cfFormConstruction[index][cf.id].props"
+          ></component>
+        </template>
       </el-collapse-item>
     </el-collapse>
   </el-form>
@@ -82,14 +91,7 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  inject,
-  computed,
-  watch,
-  onBeforeMount,
-  onMounted
-} from 'vue'
+import { ref, inject, computed, watch, onBeforeMount, onMounted } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -122,9 +124,7 @@ let amLabels = inject('amLabels')
 
 let customFieldsFormRef = ref(null)
 let customFieldsForm = ref({})
-let customFieldsFormRules = computed(
-  () => store.getters['appointment/getCustomFieldsRules']
-)
+let customFieldsFormRules = computed(() => store.getters['appointment/getCustomFieldsRules'])
 let cfFormConstruction = ref({})
 
 let customFields = computed(() => store.getters['appointment/getCustomFields'])
@@ -170,7 +170,9 @@ function setFormConstruction(index, field) {
   }
 
   if (field.type === 'checkbox' || field.type === 'radio') {
-    cfFormConstruction.value[index][field.id].props.options = cfFormConstruction.value[index][field.id].props.options.map((option) => {
+    cfFormConstruction.value[index][field.id].props.options = cfFormConstruction.value[index][
+      field.id
+    ].props.options.map((option) => {
       return {
         ...option,
         value: option.label,
@@ -216,8 +218,16 @@ function initCustomFieldsForm() {
 const { noShowData } = inject('noShowData')
 
 // * Customized options
-let customerPhoneVisibility = computed(() => shortcodeData.value.cabinetType === 'employee' ? amCustomize.value.appointments.options.customerPhone.visibility : true)
-let customerEmailVisibility = computed(() => shortcodeData.value.cabinetType === 'employee' ? amCustomize.value.appointments.options.customerEmail.visibility : true)
+let customerPhoneVisibility = computed(() =>
+  shortcodeData.value.cabinetType === 'employee'
+    ? amCustomize.value.appointments.options.customerPhone.visibility
+    : true,
+)
+let customerEmailVisibility = computed(() =>
+  shortcodeData.value.cabinetType === 'employee'
+    ? amCustomize.value.appointments.options.customerEmail.visibility
+    : true,
+)
 
 watch([serviceId, customersIds], () => {
   initCustomFieldsForm()
@@ -228,7 +238,11 @@ onBeforeMount(() => {
 })
 
 onMounted(() => {
-  if (store.getters['appointment/getBookings'].filter((b) => b.status !== 'canceled' && b.status !== 'rejected').length < 2) {
+  if (
+    store.getters['appointment/getBookings'].filter(
+      (b) => b.status !== 'canceled' && b.status !== 'rejected',
+    ).length < 2
+  ) {
     activeBookingIndex.value = 0
   }
 })
@@ -255,7 +269,7 @@ defineExpose({
         $count: 100;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }

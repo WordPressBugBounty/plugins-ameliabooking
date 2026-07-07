@@ -1,8 +1,13 @@
 <template>
   <template v-if="!amFonts.customFontSelected">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" type="text/css" :href="`${baseUrls.wpAmeliaPluginURL}v3/src/assets/scss/common/fonts/font.css`" media="all">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      :href="`${baseUrls.wpAmeliaPluginURL}v3/src/assets/scss/common/fonts/font.css`"
+      media="all"
+    />
   </template>
   <div
     id="amelia-container"
@@ -12,91 +17,81 @@
     role="main"
     :aria-busy="!ready || loading"
   >
-      <!-- Events List -->
-      <EventsList />
-      <!-- /Events List -->
+    <!-- Events List -->
+    <EventsList />
+    <!-- /Events List -->
 
-      <AmDialog
-        v-model="popupVisible"
-        width="650px"
-        :append-to-body="true"
-        :destroy-on-close="true"
-        :align-center="true"
-        :close-on-click-modal="false"
-        :close-on-press-escape="false"
-        :show-close="ready && !loading"
-        modal-class="amelia-v2-booking am-dialog-el"
-        :custom-styles="cssVars"
-        aria-labelledby="am-elf-dialog-title"
-        @close="onCloseEventDialog"
-        @closed="onClosedEventDialog"
-        @opened="onOpenedEventDialog"
-      >
-        <template #default>
-          <div
-            id="amelia-container"
-            ref="dialogContainer"
-          >
-            <!-- Visually-hidden dialog title for screen readers -->
-            <div id="am-elf-dialog-title" class="am-sr-only">
-              {{ customizedStepLabels.event_booking || labels.event_booking || 'Event Booking' }}
-            </div>
-            <div v-if="stepIndex > 0" class="am-dialog-el-header">
-              <EventListHeader
-                :ready="ready"
-                :loading="loading"
-                :loading-upcoming="false"
-                :customized-labels="customizedStepLabels"
-              />
-            </div>
-            <component
-              :is="stepsArray[stepIndex]"
-              :in-dialog="true"
-              global-class="am-dialog-el__main-container"
-            ></component>
-            <EventListFooter
+    <AmDialog
+      v-model="popupVisible"
+      width="650px"
+      :append-to-body="true"
+      :destroy-on-close="true"
+      :align-center="true"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="ready && !loading"
+      modal-class="amelia-v2-booking am-dialog-el"
+      :custom-styles="cssVars"
+      aria-labelledby="am-elf-dialog-title"
+      @close="onCloseEventDialog"
+      @closed="onClosedEventDialog"
+      @opened="onOpenedEventDialog"
+    >
+      <template #default>
+        <div id="amelia-container" ref="dialogContainer">
+          <!-- Visually-hidden dialog title for screen readers -->
+          <div id="am-elf-dialog-title" class="am-sr-only">
+            {{ customizedStepLabels.event_booking || labels.event_booking || 'Event Booking' }}
+          </div>
+          <div v-if="stepIndex > 0" class="am-dialog-el-header">
+            <EventListHeader
               :ready="ready"
               :loading="loading"
               :loading-upcoming="false"
-              :second-button-show="secBtnShow && customerCabinetButton"
-              :payment-gateway="store.getters['payment/getPaymentGateway']"
               :customized-labels="customizedStepLabels"
-              :primary-footer-button-type="isWaitingList && stepsArray[stepIndex].name === 'EventInfo' ? waitingButtonTypeEnabled : customizedStepOptions.primBtn.buttonType"
-              :secondary-footer-button-type="customizedStepOptions.secBtn.buttonType"
-              :is-waiting-list="isWaitingList"
             />
           </div>
-        </template>
-      </AmDialog>
+          <component
+            :is="stepsArray[stepIndex]"
+            :in-dialog="true"
+            global-class="am-dialog-el__main-container"
+          ></component>
+          <EventListFooter
+            :ready="ready"
+            :loading="loading"
+            :loading-upcoming="false"
+            :second-button-show="secBtnShow && customerCabinetButton"
+            :payment-gateway="store.getters['payment/getPaymentGateway']"
+            :customized-labels="customizedStepLabels"
+            :primary-footer-button-type="
+              isWaitingList && stepsArray[stepIndex].name === 'EventInfo'
+                ? waitingButtonTypeEnabled
+                : customizedStepOptions.primBtn.buttonType
+            "
+            :secondary-footer-button-type="customizedStepOptions.secBtn.buttonType"
+            :is-waiting-list="isWaitingList"
+          />
+        </div>
+      </template>
+    </AmDialog>
   </div>
-  <BackLink/>
+  <BackLink />
 </template>
 
 <script setup>
 // * import from Vue
-import {
-  computed,
-  ref,
-  inject,
-  provide,
-  markRaw,
-  nextTick,
-  watch,
-  onMounted
-} from 'vue'
+import { computed, ref, inject, provide, markRaw, nextTick, watch, onMounted } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
 
 // * import composable
-import {
-  defaultCustomizeSettings
-} from '../../../../assets/js/common/defaultCustomize'
+import { defaultCustomizeSettings } from '../../../../assets/js/common/defaultCustomize'
 import useAction from '../../../../assets/js/public/actions'
-import useRestore from "../../../../assets/js/public/restore";
+import useRestore from '../../../../assets/js/public/restore'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
-import { useScrollTo } from "../../../../assets/js/common/scrollElements";
-import { useWaitingListAvailability } from "../../../../assets/js/public/events";
+import { useScrollTo } from '../../../../assets/js/common/scrollElements'
+import { useWaitingListAvailability } from '../../../../assets/js/public/events'
 
 // * Parts
 import BackLink from '../../Parts/BackLink'
@@ -161,11 +156,8 @@ let dialogContainer = ref(null)
 // * Events array
 let events = computed(() => store.getters['eventEntities/getEvents'])
 
-function useEvents (hookModifiedEvents) {
-  store.commit(
-      'eventEntities/setEvents',
-      hookModifiedEvents
-  )
+function useEvents(hookModifiedEvents) {
+  store.commit('eventEntities/setEvents', hookModifiedEvents)
 }
 
 // * Plugin wrapper width
@@ -177,7 +169,7 @@ let dialogWidth = ref(0)
 provide('dialogWidth', dialogWidth)
 
 // * window resize listener
-window.addEventListener('resize', resize);
+window.addEventListener('resize', resize)
 
 // * Resize function
 function resize() {
@@ -206,13 +198,7 @@ const stepIndex = ref(0)
 provide('stepIndex', stepIndex)
 
 // * Array of step components
-const stepsArray = ref(
-  [
-    eventInfo,
-    eventCustomerInfo,
-    eventCongratulations
-  ]
-)
+const stepsArray = ref([eventInfo, eventCustomerInfo, eventCongratulations])
 
 provide('stepsArray', stepsArray)
 
@@ -220,53 +206,75 @@ provide('stepsArray', stepsArray)
 let eventFluidStepKey = ref([])
 provide('eventFluidStepKey', eventFluidStepKey)
 
-watch(eventFluidStepKey ,(current) => {
-  // * Add tickets step
-  if (current.indexOf('eventTickets') > -1 && stepsArray.value.find(step => step.name === 'EventTickets') === undefined) {
-    stepsArray.value.splice((stepIndex.value + 1), 0, eventTickets)
-  }
+watch(
+  eventFluidStepKey,
+  (current) => {
+    // * Add tickets step
+    if (
+      current.indexOf('eventTickets') > -1 &&
+      stepsArray.value.find((step) => step.name === 'EventTickets') === undefined
+    ) {
+      stepsArray.value.splice(stepIndex.value + 1, 0, eventTickets)
+    }
 
-  // * Remove tickets step
-  if (current.indexOf('eventTickets') < 0 && stepsArray.value.find(step => step.name === 'EventTickets') !== undefined) {
-    let index = stepsArray.value.indexOf(eventTickets)
-    stepsArray.value.splice(index, 1)
-  }
+    // * Remove tickets step
+    if (
+      current.indexOf('eventTickets') < 0 &&
+      stepsArray.value.find((step) => step.name === 'EventTickets') !== undefined
+    ) {
+      let index = stepsArray.value.indexOf(eventTickets)
+      stepsArray.value.splice(index, 1)
+    }
 
-  // * Add payment step
-  if (current.indexOf('eventPayment') > -1 && stepsArray.value.find(step => step.name === 'EventPayment') === undefined) {
-    stepsArray.value.splice((stepIndex.value + 1), 0, eventPayment)
-  }
+    // * Add payment step
+    if (
+      current.indexOf('eventPayment') > -1 &&
+      stepsArray.value.find((step) => step.name === 'EventPayment') === undefined
+    ) {
+      stepsArray.value.splice(stepIndex.value + 1, 0, eventPayment)
+    }
 
-  // * Remove payment step
-  if (current.indexOf('eventPayment') < 0 && stepsArray.value.find(step => step.name === 'EventPayment') !== undefined) {
-    let index = stepsArray.value.indexOf(eventPayment)
-    stepsArray.value.splice(index, 1)
-  }
-
-}, {deep: true})
+    // * Remove payment step
+    if (
+      current.indexOf('eventPayment') < 0 &&
+      stepsArray.value.find((step) => step.name === 'EventPayment') !== undefined
+    ) {
+      let index = stepsArray.value.indexOf(eventPayment)
+      stepsArray.value.splice(index, 1)
+    }
+  },
+  { deep: true },
+)
 
 // * Waiting list: vuex options aligned with selected event (parity with Events Calendar dialog flow).
-let isWaitingList = computed(() => useWaitingListAvailability(store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId'])))
+let isWaitingList = computed(() =>
+  useWaitingListAvailability(
+    store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId']),
+  ),
+)
 
-function syncEventWaitingListOptionsForSelectedEvent () {
-  const event = store.getters['eventEntities/getEvent'](store.getters['eventBooking/getSelectedEventId'])
+function syncEventWaitingListOptionsForSelectedEvent() {
+  const event = store.getters['eventEntities/getEvent'](
+    store.getters['eventBooking/getSelectedEventId'],
+  )
   if (event && useWaitingListAvailability(event)) {
-    const waitingOptions = event.waitingList != null
-      ? JSON.parse(JSON.stringify(event.waitingList))
-      : {}
-    store.commit('eventWaitingListOptions/setAllData', {...waitingOptions, isAvailable: true})
+    const waitingOptions =
+      event.waitingList != null ? JSON.parse(JSON.stringify(event.waitingList)) : {}
+    store.commit('eventWaitingListOptions/setAllData', { ...waitingOptions, isAvailable: true })
   } else {
     store.dispatch('eventWaitingListOptions/resetWaitingOptions')
   }
 }
 
-watch(() => store.getters['eventBooking/getSelectedEventId'], (eventId) => {
-  if (eventId == null) {
-    return
-  }
-  syncEventWaitingListOptionsForSelectedEvent()
-})
-
+watch(
+  () => store.getters['eventBooking/getSelectedEventId'],
+  (eventId) => {
+    if (eventId == null) {
+      return
+    }
+    syncEventWaitingListOptionsForSelectedEvent()
+  },
+)
 
 // * Bringing anyone with you - popup visibility
 let bringingAnyoneVisibility = ref(false)
@@ -295,41 +303,41 @@ let customerCabinetButton = computed(() => {
 })
 
 // * Move to next Form Step
-function nextStep () {
+function nextStep() {
   store.commit('setLoading', true)
   stepIndex.value = stepIndex.value + 1
 }
 
 // * Move to previous Form Step
-function previousStep () {
+function previousStep() {
   store.commit('setLoading', true)
   stepIndex.value = stepIndex.value - 1
   headerButtonPreviousClicked.value = !headerButtonPreviousClicked.value
 }
 
 // * Footer btn click functionality
-function footerButtonClick () {
+function footerButtonClick() {
   footerButtonClicked.value = true
 
   let dialogEl = document.getElementsByClassName('am-dialog-el')[0]
   useScrollTo(dialogEl.children[0], dialogEl.children[0].children[0], 50, 300)
 }
 
-function footerButtonReset () {
+function footerButtonReset() {
   footerButtonClicked.value = false
 }
 
-function footerBtnDisabledUpdater (data) {
+function footerBtnDisabledUpdater(data) {
   footerBtnDisabled.value = data
 }
 
 // * Header btn click functionality
 let headerButtonPreviousClicked = ref(false)
-function headerButtonPreviousClick () {
+function headerButtonPreviousClick() {
   headerButtonPreviousClicked.value = true
 }
 
-function headerButtonPreviousReset () {
+function headerButtonPreviousReset() {
   headerButtonPreviousClicked.value = false
 }
 
@@ -342,7 +350,7 @@ function secondButtonClick() {
 }
 
 provide('secondButton', {
-  secondButtonClick
+  secondButtonClick,
 })
 
 provide('changingStepsFunctions', {
@@ -355,23 +363,14 @@ provide('changingStepsFunctions', {
   footerBtnDisabled,
   headerButtonPreviousClick,
   headerButtonPreviousReset,
-  headerButtonPreviousClicked
+  headerButtonPreviousClicked,
 })
 
 // * Get Entities from server
-store.dispatch(
-  'eventEntities/requestEntities',
-  {
-    types: [
-      'tags',
-      'employees',
-      'locations',
-      'customFields',
-      'taxes',
-    ],
-    loadEntities: shortcodeData.value.hasApiCall || shortcodeData.value.trigger,
-  }
-)
+store.dispatch('eventEntities/requestEntities', {
+  types: ['tags', 'employees', 'locations', 'customFields', 'taxes'],
+  loadEntities: shortcodeData.value.hasApiCall || shortcodeData.value.trigger,
+})
 
 const loadDialogCounter = inject('loadDialogCounter', ref(null))
 
@@ -384,18 +383,18 @@ watch(loadDialogCounter, () => {
 })
 
 onMounted(() => {
-  document.getElementById(
-    'amelia-v2-booking-' + shortcodeData.value.counter
-  ).classList.add('amelia-v2-booking-' + shortcodeData.value.counter + '-loaded')
+  document
+    .getElementById('amelia-v2-booking-' + shortcodeData.value.counter)
+    .classList.add('amelia-v2-booking-' + shortcodeData.value.counter + '-loaded')
 
   watch(ready, (current) => {
-    if(current) {
-      useAction(store, {events, useEvents}, 'ViewContent', 'event', null, null)
+    if (current) {
+      useAction(store, { events, useEvents }, 'ViewContent', 'event', null, null)
     }
   })
 
   nextTick(() => {
-    if(ameliaContainer.value) {
+    if (ameliaContainer.value) {
       containerWidth.value = ameliaContainer.value.offsetWidth
     }
 
@@ -404,12 +403,12 @@ onMounted(() => {
     }
   })
 
-  useAction(store, {containerWidth}, 'ContainerWidth', 'event', null, null)
+  useAction(store, { containerWidth }, 'ContainerWidth', 'event', null, null)
 
   updateVH()
 })
 
-function onCloseEventDialog () {
+function onCloseEventDialog() {
   if (stepsArray.value[stepIndex.value].name === 'CongratulationsStep') {
     window.location.reload()
   }
@@ -418,7 +417,7 @@ function onCloseEventDialog () {
   stepIndex.value = 0
 }
 
-function onClosedEventDialog () {
+function onClosedEventDialog() {
   nextTick(() => {
     store.commit('eventBooking/setEventId', null)
     store.dispatch('persons/resetPersons')
@@ -429,7 +428,7 @@ function onClosedEventDialog () {
   })
 }
 
-function onOpenedEventDialog () {
+function onOpenedEventDialog() {
   nextTick(() => {
     syncEventWaitingListOptionsForSelectedEvent()
     if (dialogContainer.value) {
@@ -439,60 +438,62 @@ function onOpenedEventDialog () {
 }
 
 onMounted(() => {
-    let restore = useRestore(store, shortcodeData.value)
+  let restore = useRestore(store, shortcodeData.value)
 
-    if (restore) {
-      stepsArray.value.splice(0, stepsArray.value.length)
+  if (restore) {
+    stepsArray.value.splice(0, stepsArray.value.length)
 
-      stepIndex.value = 0
+    stepIndex.value = 0
 
-      restore.steps.forEach((key) => {
-        switch (key) {
-          case ('EventInfo'):
-            stepsArray.value.push(eventInfo)
+    restore.steps.forEach((key) => {
+      switch (key) {
+        case 'EventInfo':
+          stepsArray.value.push(eventInfo)
 
-            break
+          break
 
-          case ('EventTickets'):
-            stepsArray.value.push(eventTickets)
+        case 'EventTickets':
+          stepsArray.value.push(eventTickets)
 
-            break
+          break
 
-          case ('EventCustomerInfo'):
-            stepsArray.value.push(eventCustomerInfo)
+        case 'EventCustomerInfo':
+          stepsArray.value.push(eventCustomerInfo)
 
-            break
+          break
 
-          case ('EventPayment'):
-            stepsArray.value.push(eventPayment)
+        case 'EventPayment':
+          stepsArray.value.push(eventPayment)
 
-            break
+          break
 
-          case ('CongratulationsStep'):
-            stepsArray.value.push(eventCongratulations)
+        case 'CongratulationsStep':
+          stepsArray.value.push(eventCongratulations)
 
-            break
-        }
-
-        stepIndex.value++
-      })
-
-      let index = -1
-
-      if (restore.result === 'success') {
-        index = stepsArray.value.length - 1
-      } else if (restore.result === 'error' || restore.result === 'canceled') {
-        index = stepsArray.value.length - 2
+          break
       }
 
-      stepIndex.value = index
-      popupVisible.value = true
+      stepIndex.value++
+    })
+
+    let index = -1
+
+    if (restore.result === 'success') {
+      index = stepsArray.value.length - 1
+    } else if (restore.result === 'error' || restore.result === 'canceled') {
+      index = stepsArray.value.length - 2
     }
+
+    stepIndex.value = index
+    popupVisible.value = true
+  }
 })
 
 // * Customized data form
 let customizedDataForm = computed(() => {
-  return amSettings.customizedData && 'elf' in amSettings.customizedData ? amSettings.customizedData.elf : defaultCustomizeSettings.elf
+  return amSettings.customizedData && 'elf' in amSettings.customizedData
+    ? amSettings.customizedData.elf
+    : defaultCustomizeSettings.elf
 })
 provide('customizedDataForm', customizedDataForm)
 
@@ -508,9 +509,10 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 let customizedStepLabels = computed(() => {
   let customLabels = {}
 
-  let customizedLabels = customizedDataForm.value[stepsArray.value[stepIndex.value].key].translations
+  let customizedLabels =
+    customizedDataForm.value[stepsArray.value[stepIndex.value].key].translations
   if (customizedLabels) {
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         customLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -528,7 +530,10 @@ let customizedStepOptions = computed(() => {
 
 // * Second button visibility
 let secBtnShow = computed(() => {
-  if ('secBtn' in customizedStepOptions.value && 'visibility' in customizedStepOptions.value.secBtn) {
+  if (
+    'secBtn' in customizedStepOptions.value &&
+    'visibility' in customizedStepOptions.value.secBtn
+  ) {
     return customizedStepOptions.value.secBtn.visibility
   }
 
@@ -536,19 +541,25 @@ let secBtnShow = computed(() => {
 })
 
 let waitingButtonTypeEnabled = computed(() => {
-  return 'waitingBtn' in customizedStepOptions.value ? customizedStepOptions.value.waitingBtn.buttonType : 'filled'
+  return 'waitingBtn' in customizedStepOptions.value
+    ? customizedStepOptions.value.waitingBtn.buttonType
+    : 'filled'
 })
 
 // * Fonts
-const amFonts = ref(amSettings.customizedData ? amSettings.customizedData.fonts : defaultCustomizeSettings.fonts)
+const amFonts = ref(
+  amSettings.customizedData ? amSettings.customizedData.fonts : defaultCustomizeSettings.fonts,
+)
 provide('amFonts', amFonts)
 
 // * Colors block
 let amColors = computed(() => {
-  return amSettings.customizedData && 'elf' in amSettings.customizedData ? amSettings.customizedData.elf.colors : defaultCustomizeSettings.elf.colors
+  return amSettings.customizedData && 'elf' in amSettings.customizedData
+    ? amSettings.customizedData.elf.colors
+    : defaultCustomizeSettings.elf.colors
 })
 
-provide('amColors', amColors);
+provide('amColors', amColors)
 
 let cssVars = computed(() => {
   return {
@@ -584,18 +595,18 @@ let cssVars = computed(() => {
     // -mw- max width
     '--am-mw-main': '792px',
     // -hd- height dialog
-    '--am-hd-main': stepIndex.value > 0 ? '592px' :'652px',
+    '--am-hd-main': stepIndex.value > 0 ? '592px' : '652px',
     '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
     '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
 
     '--am-rad-inp': '6px',
 
     // -mb- margin bottom
-    '--am-mb-dialog': '300px'
+    '--am-mb-dialog': '300px',
   }
 })
 
-function activateCustomFontStyles () {
+function activateCustomFontStyles() {
   let head = document.head || document.getElementsByTagName('head')[0]
   if (head.querySelector('#amCustomFont')) {
     head.querySelector('#amCustomFont').remove()
@@ -614,7 +625,7 @@ if (amFonts.value.customFontSelected) activateCustomFontStyles()
 
 <script>
 export default {
-  name: "EventsListFormWrapper"
+  name: 'EventsListFormWrapper',
 }
 </script>
 
@@ -643,7 +654,7 @@ export default {
   --am-c-main-heading-text: #{$shade-800};
   --am-c-main-text: #{$shade-900};
   // sidebar container colors - left part of the form
-  --am-c-sb-bgr: #17295A;
+  --am-c-sb-bgr: #17295a;
   --am-c-sb-text: #{$am-white};
   // input global colors - usage input, textarea, checkbox, radio button, select input, adv select input
   --am-c-inp-bgr: #{$am-white};
@@ -755,7 +766,7 @@ export default {
       max-width: var(--am-mw-main);
       background-color: var(--am-c-main-bgr);
       padding: 16px;
-      border-radius: 12px
+      border-radius: 12px;
     }
 
     * {

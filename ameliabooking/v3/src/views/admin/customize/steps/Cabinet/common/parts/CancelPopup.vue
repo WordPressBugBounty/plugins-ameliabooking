@@ -26,20 +26,14 @@
         <AmButton
           category="secondary"
           :size="cWidth <= 360 ? 'small' : 'default'"
-          :type="
-            amCustomize[pageRenderKey][stepRecognition].options.cancelBtn
-              .buttonType
-          "
+          :type="amCustomize[pageRenderKey][stepRecognition].options.cancelBtn.buttonType"
         >
           {{ labelsDisplay('close') }}
         </AmButton>
         <AmButton
           category="danger"
           :size="cWidth <= 360 ? 'small' : 'default'"
-          :type="
-            amCustomize[pageRenderKey][stepRecognition].options.confirmBtn
-              .buttonType
-          "
+          :type="amCustomize[pageRenderKey][stepRecognition].options.confirmBtn.buttonType"
         >
           {{ labelsDisplay('confirm') }}
         </AmButton>
@@ -100,14 +94,14 @@ let stepRecognition = computed(() => {
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value][stepRecognition.value]
-      .translations &&
-      amCustomize.value[pageRenderKey.value][stepRecognition.value]
-        .translations[label] &&
-      amCustomize.value[pageRenderKey.value][stepRecognition.value]
-        .translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value][stepRecognition.value]
-          .translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value][stepRecognition.value].translations &&
+      amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label] &&
+      amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label][
+        langKey.value
+      ]
+      ? amCustomize.value[pageRenderKey.value][stepRecognition.value].translations[label][
+          langKey.value
+        ]
       : amLabels[label]
   })
 

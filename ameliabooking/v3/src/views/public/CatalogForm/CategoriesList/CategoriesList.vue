@@ -1,55 +1,58 @@
 <template>
-  <div
-    v-if="!empty"
-    ref="ameliaContainer"
-    class="am-fcl"
-    role="main"
-    :style="cssVars"
-  >
+  <div v-if="!empty" ref="ameliaContainer" class="am-fcl" role="main" :style="cssVars">
     <template v-for="category in categoriesList" :key="category.id">
-      <div
-        class="am-fcl__item"
-        role="group"
-        :class="itemWidth"
-      >
+      <div class="am-fcl__item" role="group" :class="itemWidth">
         <div class="am-fcl__item-inner">
           <div
             class="am-fcl__item-content"
-            :style="customizedOptions.cardSideColor.visibility
-            ? {
-              borderLeft: '7px solid',
-              borderLeftColor: category.color
-            }
-            : {}"
+            :style="
+              customizedOptions.cardSideColor.visibility
+                ? {
+                    borderLeft: '7px solid',
+                    borderLeftColor: category.color,
+                  }
+                : {}
+            "
           >
             <div
               class="am-fcl__item-heading"
-              :style="customizedOptions.cardColor && customizedOptions.cardColor.visibility
-              ? {
-                backgroundColor: useColorTransparency(category.color, 0.1)
-              } : {}"
+              :style="
+                customizedOptions.cardColor && customizedOptions.cardColor.visibility
+                  ? {
+                      backgroundColor: useColorTransparency(category.color, 0.1),
+                    }
+                  : {}
+              "
             >
               <div
                 v-if="category.pictureFullPath"
-                :style="{backgroundImage: `url(${category.pictureFullPath})`}"
+                :style="{ backgroundImage: `url(${category.pictureFullPath})` }"
                 class="am-fcl__item-hero"
-              >
-              </div>
+              ></div>
               <div class="am-fcl__item-name">
                 {{ category.name }}
               </div>
               <div class="am-fcl__item-segments">
                 <div
-                  v-if="(!preselected.show || preselected.show === 'services') && customizedOptions.services.visibility"
+                  v-if="
+                    (!preselected.show || preselected.show === 'services') &&
+                    customizedOptions.services.visibility
+                  "
                   class="am-fcl__item-segments__item"
                 >
                   <span class="am-fcl__item-segments__item-icon am-icon-service"></span>
                   <span class="am-fcl__item-segments__item-count">
-                    {{ useAvailableServiceIdsInCategory(shortcodeData, category, amEntities).length }}
+                    {{
+                      useAvailableServiceIdsInCategory(shortcodeData, category, amEntities).length
+                    }}
                   </span>
                 </div>
                 <div
-                  v-if="(!preselected.show || preselected.show === 'packages') && category.packageList.length && customizedOptions.packages.visibility"
+                  v-if="
+                    (!preselected.show || preselected.show === 'packages') &&
+                    category.packageList.length &&
+                    customizedOptions.packages.visibility
+                  "
                   class="am-fcl__item-segments__item"
                 >
                   <span class="am-fcl__item-segments__item-icon am-icon-shipment"></span>
@@ -76,20 +79,24 @@
       </div>
     </template>
   </div>
-  <div
-    v-else
-    ref="ameliaContainer"
-    class="am-empty"
-  >
+  <div v-else ref="ameliaContainer" class="am-empty">
     <img
-      :src="baseUrls.wpAmeliaPluginURL+'/v3/src/assets/img/am-empty-booking.svg'"
-      :alt="preselected.show !== 'packages' ? amLabels.no_services_employees : amLabels.no_package_services"
-    >
+      :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/am-empty-booking.svg'"
+      :alt="
+        preselected.show !== 'packages'
+          ? amLabels.no_services_employees
+          : amLabels.no_package_services
+      "
+    />
     <div class="am-empty__heading">
       {{ amLabels.oops }}
     </div>
     <div class="am-empty__subheading">
-      {{ preselected.show !== 'packages' ? amLabels.no_services_employees : amLabels.no_package_services }}
+      {{
+        preselected.show !== 'packages'
+          ? amLabels.no_services_employees
+          : amLabels.no_package_services
+      }}
     </div>
     <div class="am-empty__text">
       <span v-if="preselected.show !== 'packages'">
@@ -98,9 +105,7 @@
       <a href="https://wpamelia.com/services-and-categories/" rel="nofollow">
         {{ amLabels.add_services_url }}&nbsp;
       </a>
-      <span v-if="preselected.show !== 'packages'">
-        {{ amLabels.and }}&nbsp;
-      </span>
+      <span v-if="preselected.show !== 'packages'"> {{ amLabels.and }}&nbsp; </span>
       <a
         v-if="preselected.show !== 'packages'"
         href="https://wpamelia.com/employees/"
@@ -114,29 +119,18 @@
 
 <script setup>
 import AmButton from '../../../_components/button/AmButton.vue'
-import IconArrowRight from "../../../_components/icons/IconArrowRight";
+import IconArrowRight from '../../../_components/icons/IconArrowRight'
 
 // * Vue
-import {
-  ref,
-  computed,
-  inject,
-  reactive,
-  onMounted,
-  onBeforeUnmount,
-} from "vue";
+import { ref, computed, inject, reactive, onMounted, onBeforeUnmount } from 'vue'
 
 // * Store
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Composables
-import {
-  useAvailableServiceIdsInCategory
-} from '../../../../assets/js/public/catalog.js'
-import {
-  useColorTransparency
-} from '../../../../assets/js/common/colorManipulation.js'
-import useAction from "../../../../assets/js/public/actions";
+import { useAvailableServiceIdsInCategory } from '../../../../assets/js/public/catalog.js'
+import { useColorTransparency } from '../../../../assets/js/common/colorManipulation.js'
+import useAction from '../../../../assets/js/public/actions'
 
 // * Root Urls
 const baseUrls = inject('baseUrls')
@@ -184,7 +178,7 @@ let itemWidth = computed(() => {
 
 // * Step functionality
 let { nextPage } = inject('changingPageFunctions', {
-  nextPage: () => {}
+  nextPage: () => {},
 })
 
 // * Root Settings
@@ -212,7 +206,7 @@ let availableCategories = inject('availableCategories')
 let categoriesList = computed(() => availableCategories.value)
 
 let categorySelected = inject('categorySelected')
-function chooseCategory (id) {
+function chooseCategory(id) {
   categorySelected.value = id
   store.commit('booking/setCategoryId', parseInt(id))
 
@@ -237,11 +231,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   if (amSettings.customizedData?.cbf?.categoriesList?.translations) {
     let customizedLabels = amSettings.customizedData.cbf.categoriesList.translations
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -256,15 +250,15 @@ let amLabels = computed(() => {
 let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
-    '--am-c-fcl-card-text-op80': useColorTransparency(amColors.value.colorCardText, 0.8)
+    '--am-c-fcl-card-text-op80': useColorTransparency(amColors.value.colorCardText, 0.8),
   }
 })
 </script>
 
 <script>
 export default {
-  name: "CategoriesList",
-  key: "categoriesList"
+  name: 'CategoriesList',
+  key: 'categoriesList',
 }
 </script>
 

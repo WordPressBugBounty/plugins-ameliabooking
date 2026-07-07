@@ -8,7 +8,7 @@
 
 <script>
 export default {
-  name: "CongratsInfo"
+  name: 'CongratsInfo',
 }
 </script>
 
@@ -28,7 +28,7 @@ export default {
       $count: 20;
       @for $i from 0 through $count {
         &:nth-child(#{$i + 1}) {
-          animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+          animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
           animation-fill-mode: both;
         }
       }

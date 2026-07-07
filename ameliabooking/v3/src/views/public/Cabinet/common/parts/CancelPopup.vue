@@ -13,7 +13,11 @@
           </div>
           <div
             class="am-csd__header-btn"
-            @click="() => { emits('close') }"
+            @click="
+              () => {
+                emits('close')
+              }
+            "
           >
             <IconComponent icon="close"></IconComponent>
           </div>
@@ -24,11 +28,7 @@
           </p>
         </div>
       </template>
-      <el-skeleton
-        v-else
-        animated
-        class="am-ccpss"
-      >
+      <el-skeleton v-else animated class="am-ccpss">
         <template #template>
           <div class="am-ccpss__heading">
             <el-skeleton-item variant="rect" />
@@ -47,7 +47,11 @@
           :size="cWidth <= 360 ? 'small' : 'default'"
           :type="customizedOptions.cancelBtn.buttonType"
           :disabled="loading"
-          @click="() => { emits('decline') }"
+          @click="
+            () => {
+              emits('decline')
+            }
+          "
         >
           {{ props.closeBtnText }}
         </AmButton>
@@ -56,7 +60,11 @@
           :size="cWidth <= 360 ? 'small' : 'default'"
           :type="customizedOptions.confirmBtn.buttonType"
           :disabled="loading"
-          @click="() => { emits('confirm') }"
+          @click="
+            () => {
+              emits('confirm')
+            }
+          "
         >
           {{ props.confirmBtnText }}
         </AmButton>
@@ -67,15 +75,12 @@
 
 <script setup>
 // * import from Vue
-import {
-  computed,
-  inject,
-} from "vue";
+import { computed, inject } from 'vue'
 
 // * _components
-import AmSlidePopup from "../../../../_components/slide-popup/AmSlidePopup.vue";
-import IconComponent from "../../../../_components/icons/IconComponent.vue";
-import AmButton from "../../../../_components/button/AmButton.vue";
+import AmSlidePopup from '../../../../_components/slide-popup/AmSlidePopup.vue'
+import IconComponent from '../../../../_components/icons/IconComponent.vue'
+import AmButton from '../../../../_components/button/AmButton.vue'
 
 // * Component emits
 const emits = defineEmits(['close', 'confirm', 'decline'])
@@ -90,32 +95,32 @@ let props = defineProps({
   },
   title: {
     type: String,
-    default: ''
+    default: '',
   },
   description: {
     type: String,
-    default: ''
+    default: '',
   },
   closeBtnText: {
     type: String,
-    required: true
+    required: true,
   },
   confirmBtnText: {
     type: String,
-    required: true
+    required: true,
   },
   loading: {
     type: Boolean,
-    default: false
+    default: false,
   },
   count: {
     type: Number,
-    default: 1
+    default: 1,
   },
   customizedOptions: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 let cWidth = inject('containerWidth')
@@ -136,12 +141,11 @@ let cssDialogVars = computed(() => {
     '--am-font-family': amFonts.value.fontFamily,
   }
 })
-
 </script>
 
 <script>
 export default {
-  name: 'CancelBooking'
+  name: 'CancelBooking',
 }
 </script>
 
@@ -182,7 +186,8 @@ export default {
       }
     }
 
-    &__inner {}
+    &__inner {
+    }
 
     &__header {
       display: flex;
@@ -203,7 +208,7 @@ export default {
     }
 
     &__content {
-      padding: 0  24px;
+      padding: 0 24px;
     }
 
     &__footer {
@@ -228,7 +233,8 @@ export default {
         height: 25px;
       }
 
-      .el-skeleton-item, .el-skeleton-item-wrapper-title {
+      .el-skeleton-item,
+      .el-skeleton-item-wrapper-title {
         padding: 6px 0;
       }
     }

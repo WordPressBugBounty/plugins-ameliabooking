@@ -6,13 +6,13 @@
 defineProps({
   icon: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 })
 </script>
 
 <script>
 export default {
-  name: "IconComponent"
+  name: 'IconComponent',
 }
 </script>

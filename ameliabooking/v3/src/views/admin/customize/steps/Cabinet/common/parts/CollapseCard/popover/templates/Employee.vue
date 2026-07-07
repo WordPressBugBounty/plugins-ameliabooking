@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="am-cc__employee"
-    :class="responsiveClass"
-  >
+  <div class="am-cc__employee" :class="responsiveClass">
     <template v-if="isObjType">
       <div class="am-cc__employee-heading">
         <span class="am-cc__employee-img" :style="imgStyles(props.data)">
@@ -14,7 +11,11 @@
           <span class="am-cc__employee-name">
             {{ `${props.data.firstName} ${props.data.lastName}` }}
           </span>
-          <span v-if="props.data.badge" class="am-cc__employee-badge" :style="{background: props.data.badge.color}">
+          <span
+            v-if="props.data.badge"
+            class="am-cc__employee-badge"
+            :style="{ background: props.data.badge.color }"
+          >
             {{ props.data.badge.content }}
           </span>
         </div>
@@ -27,10 +28,7 @@
     </template>
 
     <div v-else class="am-cc__employee-wrapper">
-      <template
-        v-for="empl in props.data"
-        :key="empl.id"
-      >
+      <template v-for="empl in props.data" :key="empl.id">
         <div class="am-cc__employee-heading">
           <span class="am-cc__employee-img" :style="imgStyles(empl)">
             <template v-if="!empl.pictureThumbPath">
@@ -41,7 +39,11 @@
             <span class="am-cc__employee-name">
               {{ `${empl.firstName} ${empl.lastName}` }}
             </span>
-            <span v-if="empl.badge" class="am-cc__employee-badge" :style="{background: empl.badge.color}">
+            <span
+              v-if="empl.badge"
+              class="am-cc__employee-badge"
+              :style="{ background: empl.badge.color }"
+            >
               {{ empl.badge.content }}
             </span>
           </div>
@@ -58,18 +60,15 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject
-} from "vue";
+import { computed, inject } from 'vue'
 
 // * Composables
-import { useResponsiveClass } from "../../../../../../../../../../assets/js/common/responsive"
+import { useResponsiveClass } from '../../../../../../../../../../assets/js/common/responsive'
 
 let props = defineProps({
   data: {
-    type: [Object, Array]
-  }
+    type: [Object, Array],
+  },
 })
 
 let isObjType = computed(() => !Array.isArray(props.data))
@@ -88,17 +87,16 @@ function imagePlaceholder(empl) {
 
 function imgStyles(empl) {
   if (empl.pictureThumbPath) {
-    return {backgroundImage: `url(${empl.pictureThumbPath})`}
+    return { backgroundImage: `url(${empl.pictureThumbPath})` }
   }
 
   return {}
 }
-
 </script>
 
 <script>
 export default {
-  name: "TemplateEmployee"
+  name: 'TemplateEmployee',
 }
 </script>
 
@@ -121,7 +119,7 @@ export default {
         margin-bottom: 16px;
       }
 
-        // Main Scroll styles
+      // Main Scroll styles
       &::-webkit-scrollbar {
         width: 6px;
       }

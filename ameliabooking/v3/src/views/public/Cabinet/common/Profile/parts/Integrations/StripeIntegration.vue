@@ -4,9 +4,7 @@
     <div v-if="showBack" class="am-stripe-integration__header">
       <div class="am-stripe-integration__header-back" @click="handleBack">
         <span class="am-icon-arrow-big-left"></span>
-        <span class="am-stripe-integration__header-title">{{
-          amLabels.stripe_connect
-        }}</span>
+        <span class="am-stripe-integration__header-title">{{ amLabels.stripe_connect }}</span>
       </div>
     </div>
     <!-- /Navigation Header -->

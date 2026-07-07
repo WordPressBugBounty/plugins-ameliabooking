@@ -12,10 +12,12 @@
         'am--selected': anyLocation,
       }"
       tabindex="0"
-      @click="() => {
-        selectedLocation = null
-        anyLocation = true
-      }"
+      @click="
+        () => {
+          selectedLocation = null
+          anyLocation = true
+        }
+      "
     >
       <div class="am-fs__init-item__img am-item-any">
         <span class="am-icon-locations" />
@@ -46,17 +48,21 @@
               {
                 icon: 'locations',
                 name: location.address,
-                isLink: true
+                isLink: true,
               },
             ]
           : []
       "
       :parent-width="componentWidth"
-      :info-btn-visibility="!!location.description && amCustomize[pageRenderKey].locationStep.options.moreBtn.visibility"
-      @select-item="() => {
-        selectedLocation = location
-        anyLocation = false
-      }"
+      :info-btn-visibility="
+        !!location.description && amCustomize[pageRenderKey].locationStep.options.moreBtn.visibility
+      "
+      @select-item="
+        () => {
+          selectedLocation = location
+          anyLocation = false
+        }
+      "
       @trigger-info-popup="
         () => {
           moreInfoVisibility = true
@@ -96,7 +102,7 @@ const props = defineProps({
   class: {
     type: String,
     default: '',
-  }
+  },
 })
 
 // * Lang key
@@ -111,9 +117,7 @@ let amCustomize = inject('customize')
 
 // * Component References
 const stepCardLayoutReference = ref(null)
-const stepCardLayoutDom = computed(
-  () => stepCardLayoutReference.value?.stepCardLayoutRef || null
-)
+const stepCardLayoutDom = computed(() => stepCardLayoutReference.value?.stepCardLayoutRef || null)
 
 // * Component width
 const { width: componentWidth } = useElementSize(stepCardLayoutDom)
@@ -126,9 +130,9 @@ let responsiveClass = computed(() => {
 function labelsDisplay(label) {
   return computed(() => {
     return (
-      amCustomize.value[pageRenderKey.value]?.[stepName.value]?.translations?.[
-        label
-        ]?.[langKey.value] || amLabels[label]
+      amCustomize.value[pageRenderKey.value]?.[stepName.value]?.translations?.[label]?.[
+        langKey.value
+      ] || amLabels[label]
     )
   }).value
 }
@@ -144,50 +148,58 @@ let locationOptions = ref([
     id: 1,
     name: 'Nail Lounge',
     address: '123 Beauty Street, Downtown, NY 10001',
-    description: 'Premium nail salon offering luxury manicures, pedicures, and nail art services in a relaxing spa-like environment.'
+    description:
+      'Premium nail salon offering luxury manicures, pedicures, and nail art services in a relaxing spa-like environment.',
   },
   {
     id: 2,
     name: 'Medical Center',
     address: '456 Health Ave, Medical District, NY 10002',
-    description: 'Full-service medical facility providing comprehensive healthcare services with state-of-the-art equipment and experienced medical professionals.'
+    description:
+      'Full-service medical facility providing comprehensive healthcare services with state-of-the-art equipment and experienced medical professionals.',
   },
   {
     id: 3,
     name: 'Fitness Gym',
     address: '789 Workout Blvd, Sports Complex, NY 10003',
-    description: 'Modern fitness center with cutting-edge equipment, personal training services, and group fitness classes for all fitness levels.'
+    description:
+      'Modern fitness center with cutting-edge equipment, personal training services, and group fitness classes for all fitness levels.',
   },
   {
     id: 4,
     name: 'Downtown Salon',
     address: '321 Style Street, Fashion District, NY 10004',
-    description: 'Trendy hair salon specializing in cuts, coloring, styling, and treatments using premium products and latest techniques.'
+    description:
+      'Trendy hair salon specializing in cuts, coloring, styling, and treatments using premium products and latest techniques.',
   },
   {
     id: 5,
     name: 'Wellness Center',
     address: '654 Serenity Lane, Wellness Quarter, NY 10005',
-    description: 'Holistic wellness facility offering massage therapy, meditation classes, yoga sessions, and various healing treatments.'
+    description:
+      'Holistic wellness facility offering massage therapy, meditation classes, yoga sessions, and various healing treatments.',
   },
   {
     id: 6,
     name: 'Beauty Spa',
     address: '987 Pamper Plaza, Luxury District, NY 10006',
-    description: 'Luxurious spa retreat providing facial treatments, body therapies, and rejuvenating services in an elegant setting.'
+    description:
+      'Luxurious spa retreat providing facial treatments, body therapies, and rejuvenating services in an elegant setting.',
   },
   {
     id: 7,
     name: 'Beauty Studio',
     address: '147 Glamour Street, Beauty Row, NY 10007',
-    description: 'Contemporary beauty studio offering makeup services, eyebrow shaping, eyelash extensions, and skincare treatments.'
+    description:
+      'Contemporary beauty studio offering makeup services, eyebrow shaping, eyelash extensions, and skincare treatments.',
   },
   {
     id: 8,
     name: 'Color Studio',
     address: '258 Artistic Ave, Creative Quarter, NY 10008',
-    description: 'Specialized color studio focusing on hair coloring, balayage, highlights, and creative color transformations.'
-  }
+    description:
+      'Specialized color studio focusing on hair coloring, balayage, highlights, and creative color transformations.',
+  },
 ])
 
 // * Location - More Info

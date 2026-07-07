@@ -1,56 +1,36 @@
 <template>
-  <div
-    class="am-cc__cf"
-    :class="responsiveClass"
-  >
-    <template
-      v-for="(item, index) in props.data"
-      :key="index"
-    >
+  <div class="am-cc__cf" :class="responsiveClass">
+    <template v-for="(item, index) in props.data" :key="index">
       <div class="am-cc__cf-item">
         <span class="am-cc__cf-name">
           {{ item.label }}
         </span>
-        <div
-          v-if="Array.isArray(item.value)"
-          class="am-cc__cf-value"
-        >
-          <span
-            v-for="(val, num) in item.value"
-            :key="num"
-            class="am-cc__cf-value__inner"
-          >
+        <div v-if="Array.isArray(item.value)" class="am-cc__cf-value">
+          <span v-for="(val, num) in item.value" :key="num" class="am-cc__cf-value__inner">
             {{ val }}
           </span>
         </div>
-        <div
-          v-else
-          class="am-cc__cf-value"
-        >
+        <div v-else class="am-cc__cf-value">
           <span class="am-cc__cf-value__inner">
             {{ item.value ? item.value : '/' }}
           </span>
         </div>
       </div>
     </template>
-
   </div>
 </template>
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject
-} from "vue";
+import { computed, inject } from 'vue'
 
 // * Composables
-import { useResponsiveClass } from "../../../../../../../../../../assets/js/common/responsive";
+import { useResponsiveClass } from '../../../../../../../../../../assets/js/common/responsive'
 
 let props = defineProps({
   data: {
-    type: [Array, Object, String]
-  }
+    type: [Array, Object, String],
+  },
 })
 
 let cWidth = inject('containerWidth')
@@ -62,7 +42,7 @@ let responsiveClass = computed(() => {
 
 <script>
 export default {
-  name: "TemplateCustomFields"
+  name: 'TemplateCustomFields',
 }
 </script>
 

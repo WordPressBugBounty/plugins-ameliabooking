@@ -18,7 +18,7 @@
         <AmInput
           v-model="selectedDate"
           class="am-dp__input"
-          :class="{'am-dp__input-focused': visible}"
+          :class="{ 'am-dp__input-focused': visible }"
           :disabled="props.disabled"
           :prefix-icon="calendarIcon"
           :readonly="props.readonly"
@@ -57,33 +57,25 @@
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import allLocales from "@fullcalendar/core/locales-all";
-import moment from "moment";
+import allLocales from '@fullcalendar/core/locales-all'
+import moment from 'moment'
 
 // * Import from Vue
-import {
-  onBeforeMount,
-  onMounted,
-  computed,
-  inject,
-  ref,
-  nextTick,
-  watch,
-} from "vue";
+import { onBeforeMount, onMounted, computed, inject, ref, nextTick, watch } from 'vue'
 
 // * Sttings
-import { shortLocale } from "../../../plugins/settings";
+import { shortLocale } from '../../../plugins/settings'
 
 // * Composables
-import { useColorTransparency } from "../../../assets/js/common/colorManipulation";
-import { getFrontedFormattedDate } from "../../../assets/js/common/date";
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
+import { getFrontedFormattedDate } from '../../../assets/js/common/date'
 
 // * _components
-import AmInput from "../input/AmInput";
-import IconComponent from "../icons/IconComponent.vue";
+import AmInput from '../input/AmInput'
+import IconComponent from '../icons/IconComponent.vue'
 
 // * Import from Element Plus
-import { ClickOutside as vClickOutside } from "element-plus";
+import { ClickOutside as vClickOutside } from 'element-plus'
 
 /**
  * Component Props
@@ -91,70 +83,67 @@ import { ClickOutside as vClickOutside } from "element-plus";
 const props = defineProps({
   initialView: {
     type: String,
-    default: 'dayGridMonth'
+    default: 'dayGridMonth',
   },
   weekDaysVisibility: {
     type: Boolean,
-    default: true
+    default: true,
   },
   calendarMinimumDate: {
     type: String,
-    default: ''
+    default: '',
   },
   calendarMaximumDate: {
     type: String,
-    default: ''
+    default: '',
   },
   id: {
     type: Number,
-    default: 0
+    default: 0,
   },
   disabled: {
     type: Boolean,
-    default: true
+    default: true,
   },
   inputPlaceholder: {
     type: String,
-    default: ''
+    default: '',
   },
   existingDate: {
     type: [String, Object],
-    default: ''
+    default: '',
   },
   persistent: {
     type: Boolean,
-    default: true
+    default: true,
   },
   weekStartsFromDay: {
     type: [String, Number],
-    default: 1
+    default: 1,
   },
   refreshValue: {
     type: Boolean,
-    default: false
+    default: false,
   },
   clearable: {
     type: Boolean,
-    default: false
+    default: false,
   },
   readonly: {
     type: Boolean,
-    default: true
+    default: true,
   },
   ariaLabel: {
     type: String,
-    default: 'date picker'
-  }
+    default: 'date picker',
+  },
 })
 
 let popoverRef = ref(null)
 let popCalendarRef = ref(null)
 let inputWrapperRef = ref(null)
 
-const emits = defineEmits([
-  'selectedDate',
-  'clearDate'
-])
+const emits = defineEmits(['selectedDate', 'clearDate'])
 
 const visible = ref(false)
 
@@ -171,14 +160,14 @@ let calendarIcon = {
   template: `<IconComponent icon='calendar'/>`,
 }
 
-function selectCalendar () {
+function selectCalendar() {
   if (!props.disabled) {
     visible.value = true
   }
 }
 
 // * Keyboard: open/close calendar from the input field
-function handleInputKeydown (event) {
+function handleInputKeydown(event) {
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
     if (!props.disabled) {
@@ -206,7 +195,7 @@ function handleInputKeydown (event) {
  * "row 2, column 4 of 7" when a user navigates with arrow keys.
  * The grid is labelled by the visible month/year title via aria-labelledby.
  */
-function initGridAriaRoles () {
+function initGridAriaRoles() {
   const calendarEl = popCalendarRef.value?.$el
   if (!calendarEl) return
 
@@ -229,7 +218,7 @@ function initGridAriaRoles () {
   // Explicitly set role="row" on every week row.
   // The prior role="presentation" on the ancestor table would have stripped
   // the implicit row semantics from <tr> elements; we restore them here.
-  calendarEl.querySelectorAll('.fc-daygrid-body table tr').forEach(row => {
+  calendarEl.querySelectorAll('.fc-daygrid-body table tr').forEach((row) => {
     row.setAttribute('role', 'row')
   })
 }
@@ -241,7 +230,7 @@ function initGridAriaRoles () {
  * Both selectable and disabled cells are included so arrow keys traverse
  * the full grid (matching the WCAG grid navigation pattern).
  */
-function getDayCells () {
+function getDayCells() {
   const calendarEl = popCalendarRef.value?.$el
   if (!calendarEl) return []
   return Array.from(calendarEl.querySelectorAll('td.fc-day'))
@@ -251,8 +240,8 @@ function getDayCells () {
  * Moves the roving tabindex seat to `targetEl` and focuses it.
  * All other day cells are set to tabindex="-1".
  */
-function setRovingFocus (targetEl) {
-  getDayCells().forEach(cell => {
+function setRovingFocus(targetEl) {
+  getDayCells().forEach((cell) => {
     cell.setAttribute('tabindex', cell === targetEl ? '0' : '-1')
   })
   targetEl.focus()
@@ -264,14 +253,14 @@ function setRovingFocus (targetEl) {
  * Priority: selected day → today (non-disabled) → first non-disabled,
  * non-other-month cell → first cell.
  */
-function initRovingTabindex () {
+function initRovingTabindex() {
   const calendarEl = popCalendarRef.value?.$el
   if (!calendarEl) return
 
   const cells = getDayCells()
   if (!cells.length) return
 
-  cells.forEach(cell => cell.setAttribute('tabindex', '-1'))
+  cells.forEach((cell) => cell.setAttribute('tabindex', '-1'))
 
   const popCalendar = popCalendarRef.value.getApi()
   const viewType = popCalendar.currentData.currentViewType
@@ -281,7 +270,9 @@ function initRovingTabindex () {
   const homeCell =
     calendarEl.querySelector(`td.fc-day.${selectedClass}`) ||
     calendarEl.querySelector(`td.fc-day-today:not(.${disabledClass})`) ||
-    cells.find(c => !c.classList.contains(disabledClass) && !c.classList.contains('fc-day-other')) ||
+    cells.find(
+      (c) => !c.classList.contains(disabledClass) && !c.classList.contains('fc-day-other'),
+    ) ||
     cells[0]
 
   if (homeCell) {
@@ -290,17 +281,17 @@ function initRovingTabindex () {
 }
 
 // * Update roving seat whenever any day cell receives focus (e.g. via mouse click)
-function handleCalendarFocusin (event) {
+function handleCalendarFocusin(event) {
   const dayCell = event.target.closest?.('td.fc-day')
   if (!dayCell) return
 
-  getDayCells().forEach(cell => {
+  getDayCells().forEach((cell) => {
     cell.setAttribute('tabindex', cell === dayCell ? '0' : '-1')
   })
 }
 
 // * Keyboard: close calendar or navigate the day grid with arrow keys
-function handleCalendarKeydown (event) {
+function handleCalendarKeydown(event) {
   if (event.key === 'Escape') {
     event.preventDefault()
     event.stopPropagation()
@@ -335,7 +326,7 @@ function handleCalendarKeydown (event) {
 }
 
 // * Close calendar and return focus to the input
-function closeCalendar () {
+function closeCalendar() {
   visible.value = false
   nextTick(() => {
     const input = inputWrapperRef.value?.querySelector('input')
@@ -343,16 +334,21 @@ function closeCalendar () {
   })
 }
 
-watch(() => props.refreshValue, (newValue) => {
-  if (newValue) {
-    selectedDate.value = getFrontedFormattedDate(
-        props.existingDate ? moment(props.existingDate).format('YYYY-MM-DD') : ''
-    )
-  }
-})
+watch(
+  () => props.refreshValue,
+  (newValue) => {
+    if (newValue) {
+      selectedDate.value = getFrontedFormattedDate(
+        props.existingDate ? moment(props.existingDate).format('YYYY-MM-DD') : '',
+      )
+    }
+  },
+)
 
 const options = ref({
-  initialDate: props.calendarMinimumDate ? moment(props.calendarMinimumDate, 'YYYY-MM-DD HH:mm').toDate() : null,
+  initialDate: props.calendarMinimumDate
+    ? moment(props.calendarMinimumDate, 'YYYY-MM-DD HH:mm').toDate()
+    : null,
   locales: allLocales,
   locale: shortLocale,
   plugins: [dayGridPlugin, interactionPlugin],
@@ -360,10 +356,7 @@ const options = ref({
   dayCellDidMount: function (info) {
     // Start every cell at -1; initRovingTabindex() promotes the "home" cell to 0
     info.el.setAttribute('tabindex', '-1')
-    info.el.setAttribute(
-      'aria-label',
-      `Select date ${info.date.toDateString()}`
-    )
+    info.el.setAttribute('aria-label', `Select date ${info.date.toDateString()}`)
 
     // role="gridcell" (not "button") preserves row/column context in the
     // role="grid" table so screen readers can announce position information.
@@ -374,10 +367,10 @@ const options = ref({
     // Reflect initial selection and disabled state to AT
     const viewType = info.view.type
     const selectedClass = `am-dp__${viewType}-selected`
-    const disabledClass  = `am-dp__${viewType}-disabled`
+    const disabledClass = `am-dp__${viewType}-disabled`
     info.el.setAttribute(
       'aria-selected',
-      info.el.classList.contains(selectedClass) ? 'true' : 'false'
+      info.el.classList.contains(selectedClass) ? 'true' : 'false',
     )
     if (info.el.classList.contains(disabledClass)) {
       info.el.setAttribute('aria-disabled', 'true')
@@ -412,7 +405,7 @@ const options = ref({
   headerToolbar: {
     start: 'title',
     center: '',
-    end: 'prevYear,prev,next,nextYear'
+    end: 'prevYear,prev,next,nextYear',
   },
   weekends: props.weekDaysVisibility,
   views: {
@@ -421,12 +414,12 @@ const options = ref({
   slotLabelFormat: {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: false
+    hour12: false,
   },
   eventTimeFormat: {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: false
+    hour12: false,
   },
   aspectRatio: 1.45,
   firstDay: props.weekStartsFromDay,
@@ -442,42 +435,48 @@ const options = ref({
   },
   dayHeaderClassNames: calendarDayHeaderClassBuilder,
   dayCellClassNames: calendarDayClassBuilder,
-  dateClick: calendarDateClick
+  dateClick: calendarDateClick,
 })
 
-function calendarDayHeaderClassBuilder (data) {
-  let classCollector = [`am-dp__${data.view.type}-header-cell`];
+function calendarDayHeaderClassBuilder(data) {
+  let classCollector = [`am-dp__${data.view.type}-header-cell`]
 
   // * Week days class
   if (data.date.getDay() === 0 || data.date.getDay() === 6) {
-    classCollector.push(`am-dp__${data.view.type}-header-weekend`);
+    classCollector.push(`am-dp__${data.view.type}-header-weekend`)
   }
 
-  return classCollector;
+  return classCollector
 }
 
-function calendarDayClassBuilder (data) {
+function calendarDayClassBuilder(data) {
   let classCollector = [`am-dp__${data.view.type}-cell`]
 
-  if (moment(data.date).isSameOrBefore(minimumDate.value) || moment(data.date).isSameOrAfter(maximumDate.value)) {
+  if (
+    moment(data.date).isSameOrBefore(minimumDate.value) ||
+    moment(data.date).isSameOrAfter(maximumDate.value)
+  ) {
     classCollector.push(`am-dp__${data.view.type}-disabled`)
   }
 
-  if (moment(data.date).format('YYYY-MM-DD') === moment(nonFormattedSelectedDate.value).format('YYYY-MM-DD')) {
+  if (
+    moment(data.date).format('YYYY-MM-DD') ===
+    moment(nonFormattedSelectedDate.value).format('YYYY-MM-DD')
+  ) {
     classCollector.push(`am-dp__${data.view.type}-selected`)
   }
 
-  return classCollector;
+  return classCollector
 }
 
-function calendarDateClick (data) {
+function calendarDateClick(data) {
   const popCalendar = popCalendarRef.value.getApi()
   const popCalendarType = popCalendar.currentData.currentViewType
   const disabledDayClass = `am-dp__${popCalendarType}-disabled`
   const selectedDayClass = `am-dp__${popCalendarType}-selected`
 
   // Remove selected class and clear aria-selected on the previously selected cell
-  popCalendar.el.querySelectorAll(`.${selectedDayClass}`).forEach(el => {
+  popCalendar.el.querySelectorAll(`.${selectedDayClass}`).forEach((el) => {
     el.classList.remove(selectedDayClass)
     el.setAttribute('aria-selected', 'false')
   })
@@ -492,11 +491,11 @@ function calendarDateClick (data) {
   }
 }
 
-function onClickOutside () {
+function onClickOutside() {
   visible.value = false
 }
 
-function reRenderCalendar () {
+function reRenderCalendar() {
   nextTick(() => {
     popCalendarRef.value.getApi().render()
     // Initialise roving tabindex and ARIA grid structure, then move focus to
@@ -513,13 +512,13 @@ function reRenderCalendar () {
   })
 }
 
-function selectDate (date) {
+function selectDate(date) {
   if (date) {
     selectedDate.value = getFrontedFormattedDate(moment(date).format('YYYY-MM-DD'))
   }
 }
 
-function clearCalendar () {
+function clearCalendar() {
   emits('clearDate')
   setTimeout(() => {
     const popCalendar = popCalendarRef.value.getApi()
@@ -527,7 +526,7 @@ function clearCalendar () {
     const selectedDayClass = `am-dp__${popCalendarType}-selected`
 
     // Remove visual selection and aria-selected from all previously selected cells
-    popCalendar.el.querySelectorAll(`.${selectedDayClass}`).forEach(el => {
+    popCalendar.el.querySelectorAll(`.${selectedDayClass}`).forEach((el) => {
       el.classList.remove(selectedDayClass)
       el.setAttribute('aria-selected', 'false')
     })
@@ -537,7 +536,7 @@ function clearCalendar () {
 }
 
 // * Color Vars
-let amColors = inject('amColors',  {
+let amColors = inject('amColors', {
   amColors: {
     value: {
       colorPrimary: '#1246D6',
@@ -570,8 +569,8 @@ let amColors = inject('amColors',  {
       colorBtnPrimText: '#FFFFFF',
       colorBtnSec: '#1A2C37',
       colorBtnSecText: '#FFFFFF',
-    }
-  }
+    },
+  },
 })
 
 let cssPopVars = computed(() => {
@@ -604,9 +603,7 @@ onMounted(() => {
 })
 </script>
 
-<script>
-
-</script>
+<script></script>
 <style lang="scss">
 //Amelia Calendar
 $amCalClass: am-dp;
@@ -632,14 +629,16 @@ $amCalClass: am-dp;
         $count: 5;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms cubic-bezier(.45,1,.4,1.2) #{$i*100}ms am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }
       }
     }
 
-    table, tr, th {
+    table,
+    tr,
+    th {
       background-color: transparent;
       margin: 0;
     }
@@ -692,7 +691,8 @@ $amCalClass: am-dp;
           }
         }
 
-        th, td {
+        th,
+        td {
           border: none;
         }
 

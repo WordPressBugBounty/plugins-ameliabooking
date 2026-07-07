@@ -1,5 +1,5 @@
-import httpClient from "../../plugins/axios";
-import {settings} from "../../plugins/settings";
+import httpClient from '../../plugins/axios'
+import { settings } from '../../plugins/settings'
 
 export default {
   namespaced: true,
@@ -22,63 +22,63 @@ export default {
     customersIds: [],
     wpUsers: [],
     customFields: null,
-    subscribeToMailchimp: settings.mailchimp.checkedByDefault
+    subscribeToMailchimp: settings.mailchimp.checkedByDefault,
   }),
 
   getters: {
-    getCustomerId (state) {
+    getCustomerId(state) {
       return state.id
     },
 
-    getCustomerExternalId (state) {
+    getCustomerExternalId(state) {
       return state.externalId
     },
 
-    getCustomerFirstName (state) {
+    getCustomerFirstName(state) {
       return state.firstName
     },
 
-    getCustomerLastName (state) {
+    getCustomerLastName(state) {
       return state.lastName
     },
 
-    getCustomerEmail (state) {
+    getCustomerEmail(state) {
       return state.email
     },
 
-    getCustomerPhone (state) {
+    getCustomerPhone(state) {
       return state.phone
     },
 
-    getCustomerCountryPhoneIso (state) {
+    getCustomerCountryPhoneIso(state) {
       return state.countryPhoneIso
     },
 
-    getCustomerLanguage (state) {
+    getCustomerLanguage(state) {
       return state.translations.defaultLanguage
     },
 
-    getCustomerCustomFields (state) {
+    getCustomerCustomFields(state) {
       return state.customFields
     },
 
-    getCustomerBirthday (state) {
+    getCustomerBirthday(state) {
       return state.birthday
     },
 
-    getCustomerGender (state) {
+    getCustomerGender(state) {
       return state.gender
     },
 
-    getCustomerNote (state) {
+    getCustomerNote(state) {
       return state.note
     },
 
-    getLoggedUser (state) {
+    getLoggedUser(state) {
       return state.loggedUser
     },
 
-    getAllData (state) {
+    getAllData(state) {
       return {
         id: state.id,
         externalId: state.externalId,
@@ -86,33 +86,33 @@ export default {
         lastName: state.lastName,
         email: state.email,
         phone: state.phone,
-        countryPhoneIso : state.countryPhoneIso,
+        countryPhoneIso: state.countryPhoneIso,
         loggedUser: state.loggedUser,
-        customFields: state.customFields
+        customFields: state.customFields,
       }
     },
 
-    getLoading (state) {
+    getLoading(state) {
       return state.loading
     },
 
-    getCustomers (state) {
+    getCustomers(state) {
       return state.customers
     },
 
-    getCustomersIds (state) {
+    getCustomersIds(state) {
       return state.customersIds
     },
 
-    getWpUsers (state) {
+    getWpUsers(state) {
       return state.wpUsers
     },
 
-    getCustomerSubscribe (state) {
+    getCustomerSubscribe(state) {
       return state.subscribeToMailchimp
     },
 
-    getCustomer (state) {
+    getCustomer(state) {
       return {
         id: state.id,
         externalId: state.externalId,
@@ -127,59 +127,59 @@ export default {
         note: state.note,
         customFields: state.customFields,
       }
-    }
+    },
   },
 
   mutations: {
-    setCustomerId (state, payload) {
+    setCustomerId(state, payload) {
       state.id = payload
     },
 
-    setCustomerExternalId (state, payload) {
+    setCustomerExternalId(state, payload) {
       state.externalId = payload
     },
 
-    setCustomerFirstName (state, payload) {
+    setCustomerFirstName(state, payload) {
       state.firstName = payload
     },
 
-    setCustomerLastName (state, payload) {
+    setCustomerLastName(state, payload) {
       state.lastName = payload
     },
 
-    setCustomerEmail (state, payload) {
+    setCustomerEmail(state, payload) {
       state.email = payload
     },
 
-    setCustomerPhone (state, payload) {
+    setCustomerPhone(state, payload) {
       state.phone = payload
     },
 
-    setCustomerCountryPhoneIso (state, payload) {
+    setCustomerCountryPhoneIso(state, payload) {
       state.countryPhoneIso = payload
     },
 
-    setCustomerBirthday (state, payload) {
+    setCustomerBirthday(state, payload) {
       state.birthday = payload
     },
 
-    setCustomerLanguage (state, payload) {
+    setCustomerLanguage(state, payload) {
       state.translations.defaultLanguage = payload
     },
 
-    setCustomerGender (state, payload) {
+    setCustomerGender(state, payload) {
       state.gender = payload
     },
 
-    setCustomerNote (state, payload) {
+    setCustomerNote(state, payload) {
       state.note = payload
     },
 
-    setLoggedUser (state, payload) {
+    setLoggedUser(state, payload) {
       state.loggedUser = payload
     },
 
-    setCurrentUser (state, payload) {
+    setCurrentUser(state, payload) {
       state.id = payload.id
       state.externalid = payload.externalid
       state.firstName = payload.firstName
@@ -190,7 +190,7 @@ export default {
       state.customFields = payload.customFields || ''
     },
 
-    setAllData (state, payload) {
+    setAllData(state, payload) {
       state.id = payload.id
       state.externalId = payload.externalId
       state.firstName = payload.firstName
@@ -202,7 +202,7 @@ export default {
       state.customFields = payload.customFields
     },
 
-    setCustomer (state, payload) {
+    setCustomer(state, payload) {
       state.id = payload.id
       state.externalId = payload.externalId
       state.firstName = payload.firstName
@@ -217,87 +217,90 @@ export default {
       state.customFields = payload.customFields
     },
 
-    setLoading (state, payload) {
+    setLoading(state, payload) {
       state.loading = payload
     },
 
-    setCustomers (state, payload) {
+    setCustomers(state, payload) {
       state.customers = payload
     },
 
-    setCustomersIds (state, payload) {
+    setCustomersIds(state, payload) {
       state.customersIds = payload
     },
 
-    setWpUsers (state, payload) {
+    setWpUsers(state, payload) {
       state.wpUsers = payload
     },
 
-    setCustomerSubscribe (state, payload) {
+    setCustomerSubscribe(state, payload) {
       state.subscribeToMailchimp = payload
     },
   },
 
   actions: {
-    requestCurrentUserData ({ commit }) {
-      commit('setLoading', true, {root: true})
+    requestCurrentUserData({ commit }) {
+      commit('setLoading', true, { root: true })
       if (!('ameliaUser' in window) || !window.ameliaUser) {
-        httpClient.get(
-          '/users/current'
-        ).then((response) => {
-          if (response.data.data.user) {
-            window.ameliaUser = response.data.data.user ? response.data.data.user : null
-
-            commit('setCurrentUser', window.ameliaUser)
-            commit('setLoggedUser', true)
-          }
-          commit('setLoading', false, {root: true})
-        }).catch(() => {
-          commit('setLoading', false, {root: true})
-        })
-      } else {
-        let ameliaApiInterval = setInterval(
-          () => {
-            if ('ameliaUser' in window) {
-              clearInterval(ameliaApiInterval)
+        httpClient
+          .get('/users/current')
+          .then((response) => {
+            if (response.data.data.user) {
+              window.ameliaUser = response.data.data.user ? response.data.data.user : null
 
               commit('setCurrentUser', window.ameliaUser)
               commit('setLoggedUser', true)
             }
-            commit('setLoading', false, {root: true})
-          },
-          1000
-        )
+            commit('setLoading', false, { root: true })
+          })
+          .catch(() => {
+            commit('setLoading', false, { root: true })
+          })
+      } else {
+        let ameliaApiInterval = setInterval(() => {
+          if ('ameliaUser' in window) {
+            clearInterval(ameliaApiInterval)
+
+            commit('setCurrentUser', window.ameliaUser)
+            commit('setLoggedUser', true)
+          }
+          commit('setLoading', false, { root: true })
+        }, 1000)
       }
     },
 
-    requestWpUsers ({ commit, getters }, payload) {
+    requestWpUsers({ commit, getters }, payload) {
       let { label } = payload
       commit('setLoading', true)
-      httpClient.get(
-        'users/wp-users',
-        {
+      httpClient
+        .get('users/wp-users', {
           params: {
             id: getters['getCustomerId'],
-            role: 'customer'
+            role: 'customer',
+          },
+        })
+        .then((response) => {
+          commit('setWpUsers', [{ value: 0, label: label }, ...response.data.data.users])
+
+          if (
+            getters['getWpUsers']
+              .map((user) => user.value)
+              .indexOf(getters['getCustomerExternalId']) === -1
+          ) {
+            commit('setCustomerExternalId', null)
           }
-        }
-      ).then((response) => {
-        commit('setWpUsers', [{value: 0, label: label}, ...response.data.data.users])
 
-        if (getters['getWpUsers'].map(user => user.value).indexOf(getters['getCustomerExternalId']) === -1) {
-          commit('setCustomerExternalId', null)
-        }
-
-        commit('setLoading', false)
-      }).catch(() => {
-        commit('setLoading', false)
-      }).finally(() => {
-        commit('setLoading', false)
-      })
+          commit('setLoading', false)
+        })
+        .catch(() => {
+          commit('setLoading', false)
+        })
+        .finally(() => {
+          commit('setLoading', false)
+        })
     },
 
-    resetCustomer({commit}) {
+    resetCustomer({ commit }) {
       commit('setCustomer', {
         id: null,
         externalId: '',
@@ -306,12 +309,12 @@ export default {
         email: '',
         phone: '',
         countryPhoneIso: '',
-        translations: {defaultLanguage: ''},
+        translations: { defaultLanguage: '' },
         gender: '',
         birthday: '',
         note: '',
-        customFields: null
+        customFields: null,
       })
-    }
-  }
+    },
+  },
 }

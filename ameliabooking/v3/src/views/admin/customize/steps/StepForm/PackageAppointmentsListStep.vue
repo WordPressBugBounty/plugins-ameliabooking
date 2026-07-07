@@ -11,14 +11,13 @@
       </div>
       <div>
         <AmCollapse>
-          <AmCollapseItem
-            v-for="book in packageAppointments"
-            :key="book.id"
-            :side="true"
-          >
+          <AmCollapseItem v-for="book in packageAppointments" :key="book.id" :side="true">
             <template #heading>
               <div class="am-fs__ps-overview-service">
-                <img :src="usePictureLoad(baseUrls, book.service, false)" :alt="book.service.name">
+                <img
+                  :src="usePictureLoad(baseUrls, book.service, false)"
+                  :alt="book.service.name"
+                />
                 {{ `${book.service.name} x ${book.quantity}` }}
               </div>
             </template>
@@ -211,14 +210,14 @@ const { amCustomize } = useReactiveCustomize()
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value].packageAppointmentsListStep
-      .translations &&
-      amCustomize.value[pageRenderKey.value].packageAppointmentsListStep
-        .translations[label] &&
-      amCustomize.value[pageRenderKey.value].packageAppointmentsListStep
-        .translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value].packageAppointmentsListStep
-          .translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value].packageAppointmentsListStep.translations &&
+      amCustomize.value[pageRenderKey.value].packageAppointmentsListStep.translations[label] &&
+      amCustomize.value[pageRenderKey.value].packageAppointmentsListStep.translations[label][
+        langKey.value
+      ]
+      ? amCustomize.value[pageRenderKey.value].packageAppointmentsListStep.translations[label][
+          langKey.value
+        ]
       : amLabels[label]
   })
 
@@ -229,22 +228,10 @@ function labelsDisplay(label) {
 let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
-    '--am-c-pso-text-op50': useColorTransparency(
-      amColors.value.colorMainText,
-      0.5
-    ),
-    '--am-c-pso-success-op10': useColorTransparency(
-      amColors.value.colorSuccess,
-      0.1
-    ),
-    '--am-c-pso-success-op60': useColorTransparency(
-      amColors.value.colorSuccess,
-      0.6
-    ),
-    '--am-c-pso-primary-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
+    '--am-c-pso-text-op50': useColorTransparency(amColors.value.colorMainText, 0.5),
+    '--am-c-pso-success-op10': useColorTransparency(amColors.value.colorSuccess, 0.1),
+    '--am-c-pso-success-op60': useColorTransparency(amColors.value.colorSuccess, 0.6),
+    '--am-c-pso-primary-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
   }
 })
 </script>
@@ -281,11 +268,7 @@ export default {
         $count: 5;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms
-              cubic-bezier(0.45, 1, 0.4, 1.2)
-              #{$i *
-              100}ms
-              am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }
@@ -435,11 +418,7 @@ export default {
         $count: 20;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 600ms
-              cubic-bezier(0.45, 1, 0.4, 1.2)
-              #{$i *
-              100}ms
-              am-animation-slide-up;
+            animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
             animation-fill-mode: both;
           }
         }

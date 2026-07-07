@@ -17,7 +17,7 @@ function getDefaultAttendee() {
     price: 0,
     aggregatedPrice: true,
     coupon: null,
-    payment: {gateway: 'onSite'},
+    payment: { gateway: 'onSite' },
     payments: [],
     active: false,
   }

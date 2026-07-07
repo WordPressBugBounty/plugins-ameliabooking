@@ -6,22 +6,14 @@
     <div class="am-fs__pas-msg">
       {{
         `${labelsDisplay('package_appointment_required')}: 1. ${labelsDisplay(
-          'package_appointment_remaining'
+          'package_appointment_remaining',
         )}`
       }}
     </div>
-    <el-form
-      ref="packageFormRef"
-      :rules="rules"
-      :model="packageFormData"
-      label-position="top"
-    >
+    <el-form ref="packageFormRef" :rules="rules" :model="packageFormData" label-position="top">
       <div class="am-fs__pas-filter">
         <el-form-item
-          v-if="
-            amCustomize[pageRenderKey].packageAppointmentsStep.options.employee
-              .visibility
-          "
+          v-if="amCustomize[pageRenderKey].packageAppointmentsStep.options.employee.visibility"
           :prop="'provider'"
         >
           <template #label>
@@ -44,9 +36,7 @@
                 :identifier="provider.id"
                 :label="`${provider.firstName} ${provider.lastName}`"
                 :dialog-title="labelsDisplay('employee_information_package')"
-                :dialog-button-text="
-                  labelsDisplay('select_this_employee_package')
-                "
+                :dialog-button-text="labelsDisplay('select_this_employee_package')"
                 :description="provider.description"
               ></AmOptionTemplate2>
             </AmOption>
@@ -54,10 +44,7 @@
         </el-form-item>
 
         <el-form-item
-          v-if="
-            amCustomize[pageRenderKey].packageAppointmentsStep.options.location
-              .visibility
-          "
+          v-if="amCustomize[pageRenderKey].packageAppointmentsStep.options.location.visibility"
           :prop="'location'"
         >
           <template #label>
@@ -117,8 +104,7 @@
           <span
             class="am-fs__pas-app-text"
             :class="{
-              'am-fs__pas-app-text-selected':
-                appointment.date && appointment.time,
+              'am-fs__pas-app-text-selected': appointment.date && appointment.time,
             }"
           >
             {{
@@ -134,22 +120,18 @@
               :id="0"
               :slots="calendarEvents"
               :calendar-minimum-date="moment().format('YYYY-MM-DD hh:mm')"
-              :calendar-maximum-date="
-                moment().add(1, 'year').format('YYYY-MM-DD hh:mm')
-              "
+              :calendar-maximum-date="moment().add(1, 'year').format('YYYY-MM-DD hh:mm')"
               :time-zone="
                 features.timeZones &&
-                amCustomize[pageRenderKey].packageAppointmentsStep.options
-                  .timeZoneVisibility.visibility
+                amCustomize[pageRenderKey].packageAppointmentsStep.options.timeZoneVisibility
+                  .visibility
               "
               :show-people-waiting="false"
               :show-calendar-date-busyness="
                 amCustomize[pageRenderKey].packageAppointmentsStep.options
                   .calendarDateBusynessVisibility?.visibility ?? true
               "
-              :label-slots-selected="
-                labelsDisplay('package_appointments_slots_selected')
-              "
+              :label-slots-selected="labelsDisplay('package_appointments_slots_selected')"
               :busyness="previewCalendarBusyness"
             ></AmAdvancedSlotCalendar>
           </div>
@@ -158,12 +140,7 @@
     </AmCollapse>
 
     <div class="am-fs__pas-btn">
-      <AmButton
-        size="medium"
-        category="secondary"
-        type="plain"
-        :prefix="'plus'"
-      >
+      <AmButton size="medium" category="secondary" type="plain" :prefix="'plus'">
         {{ labelsDisplay('package_appointments_add_more') }}
       </AmButton>
     </div>
@@ -269,8 +246,7 @@ const { amCustomize } = useReactiveCustomize()
 let pageRenderKey = inject('pageRenderKey')
 
 let previewCalendarBusyness = computed(() => {
-  const opts =
-    amCustomize.value[pageRenderKey.value].packageAppointmentsStep.options
+  const opts = amCustomize.value[pageRenderKey.value].packageAppointmentsStep.options
   if (!(opts.calendarDateBusynessVisibility?.visibility ?? true)) {
     return {}
   }
@@ -287,8 +263,7 @@ let rules = computed(() => {
     provider: [
       {
         required:
-          amCustomize.value[pageRenderKey.value].packageAppointmentsStep.options
-            .employee.required,
+          amCustomize.value[pageRenderKey.value].packageAppointmentsStep.options.employee.required,
         message: labelsDisplay('please_select_employee', 'initStep'),
         trigger: ['blur', 'change'],
       },
@@ -296,8 +271,7 @@ let rules = computed(() => {
     location: [
       {
         required:
-          amCustomize.value[pageRenderKey.value].packageAppointmentsStep.options
-            .location.required,
+          amCustomize.value[pageRenderKey.value].packageAppointmentsStep.options.location.required,
         message: labelsDisplay('please_select_location', 'initStep'),
         trigger: ['blur', 'change'],
       },
@@ -376,14 +350,14 @@ function selectCalendar() {}
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
-    return amCustomize.value[pageRenderKey.value].packageAppointmentsStep
-      .translations &&
-      amCustomize.value[pageRenderKey.value].packageAppointmentsStep
-        .translations[label] &&
-      amCustomize.value[pageRenderKey.value].packageAppointmentsStep
-        .translations[label][langKey.value]
-      ? amCustomize.value[pageRenderKey.value].packageAppointmentsStep
-          .translations[label][langKey.value]
+    return amCustomize.value[pageRenderKey.value].packageAppointmentsStep.translations &&
+      amCustomize.value[pageRenderKey.value].packageAppointmentsStep.translations[label] &&
+      amCustomize.value[pageRenderKey.value].packageAppointmentsStep.translations[label][
+        langKey.value
+      ]
+      ? amCustomize.value[pageRenderKey.value].packageAppointmentsStep.translations[label][
+          langKey.value
+        ]
       : amLabels[label]
   })
 
@@ -423,11 +397,7 @@ export default {
           $count: 5;
           @for $i from 0 through $count {
             &:nth-child(#{$i + 1}) {
-              animation: 600ms
-                cubic-bezier(0.45, 1, 0.4, 1.2)
-                #{$i *
-                100}ms
-                am-animation-slide-up;
+              animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
               animation-fill-mode: both;
             }
           }
@@ -555,11 +525,7 @@ export default {
           $count: 20;
           @for $i from 0 through $count {
             &:nth-child(#{$i + 1}) {
-              animation: 600ms
-                cubic-bezier(0.45, 1, 0.4, 1.2)
-                #{$i *
-                100}ms
-                am-animation-slide-up;
+              animation: 600ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 100}ms am-animation-slide-up;
               animation-fill-mode: both;
             }
           }

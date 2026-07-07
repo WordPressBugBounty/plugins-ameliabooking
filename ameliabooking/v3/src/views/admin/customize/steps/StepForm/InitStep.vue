@@ -7,10 +7,7 @@
       label-position="top"
       class="am-fs__init-form"
     >
-      <template
-        v-for="item in amCustomize[pageRenderKey][stepName].order"
-        :key="item.id"
-      >
+      <template v-for="item in amCustomize[pageRenderKey][stepName].order" :key="item.id">
         <component :is="formFields[item.id]"></component>
       </template>
     </el-form>
@@ -24,18 +21,12 @@
       <template #footer>
         <AmButton
           category="secondary"
-          :type="
-            amCustomize[pageRenderKey].bringingAnyone.options.secondaryButton
-              .buttonType
-          "
+          :type="amCustomize[pageRenderKey].bringingAnyone.options.secondaryButton.buttonType"
         >
           {{ labelsDisplay('bringing_no', 'bringingAnyone') }}
         </AmButton>
         <AmButton
-          :type="
-            amCustomize[pageRenderKey].bringingAnyone.options.primaryButton
-              .buttonType
-          "
+          :type="amCustomize[pageRenderKey].bringingAnyone.options.primaryButton.buttonType"
         >
           {{ labelsDisplay('bringing_yes', 'bringingAnyone') }}
         </AmButton>
@@ -50,9 +41,7 @@
       </p>
       <div class="am-fs__ps-popup">
         <div
-          v-if="
-            amCustomize[pageRenderKey].packageStep.options.heading.visibility
-          "
+          v-if="amCustomize[pageRenderKey].packageStep.options.heading.visibility"
           class="am-fs__ps-popup__heading"
         >
           {{ labelsDisplay('package_heading', 'packageStep') }}
@@ -69,10 +58,7 @@
           :class="`am-fs__ps-popup__btn${checkScreen ? '-mobile' : ''}`"
           category="primary"
           size="medium"
-          :type="
-            amCustomize[pageRenderKey].packageStep.options.primaryButton
-              .buttonType
-          "
+          :type="amCustomize[pageRenderKey].packageStep.options.primaryButton.buttonType"
           :suffix="pill"
         >
           {{ labelsDisplay('continue_without_package', 'packageStep') }}
@@ -121,12 +107,8 @@ function labelsDisplay(label, stepKey) {
   let computedLabel = computed(() => {
     return amCustomize.value[pageRenderKey.value][stepKey].translations &&
       amCustomize.value[pageRenderKey.value][stepKey].translations[label] &&
-      amCustomize.value[pageRenderKey.value][stepKey].translations[label][
-        langKey.value
-      ]
-      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][
-          langKey.value
-        ]
+      amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
+      ? amCustomize.value[pageRenderKey.value][stepKey].translations[label][langKey.value]
       : amLabels[label]
   })
 
@@ -153,18 +135,14 @@ let rules = computed(() => {
     ],
     location: [
       {
-        required:
-          amCustomize.value[pageRenderKey.value][stepName.value].options
-            .location.required,
+        required: amCustomize.value[pageRenderKey.value][stepName.value].options.location.required,
         message: labelsDisplay('please_select_location', 'initStep'),
         trigger: ['blur', 'change'],
       },
     ],
     employee: [
       {
-        required:
-          amCustomize.value[pageRenderKey.value][stepName.value].options
-            .employee.required,
+        required: amCustomize.value[pageRenderKey.value][stepName.value].options.employee.required,
         message: labelsDisplay('please_select_employee', 'initStep'),
         trigger: ['blur', 'change'],
       },
@@ -175,8 +153,7 @@ let rules = computed(() => {
 // * Form Fields Array
 let formFields = ref({
   service: markRaw(ServiceFormField),
-  location:
-    !licence.isLite && !licence.isStarter ? markRaw(LocationFormField) : null,
+  location: !licence.isLite && !licence.isStarter ? markRaw(LocationFormField) : null,
   employee: !licence.isLite ? markRaw(EmployeeFormField) : null,
 })
 
@@ -202,14 +179,8 @@ let pill = defineComponent({
 let amColors = inject('amColors')
 let cssPackage = computed(() => {
   return {
-    '--am-c-ps-text-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
-    '--am-c-ps-text-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
+    '--am-c-ps-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
+    '--am-c-ps-text-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
   }
 })
 

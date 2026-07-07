@@ -16,11 +16,7 @@
 
     <template v-if="stepsArray[stepIndex].key !== 'calendar'">
       <div v-if="stepIndex > 1" class="am-dialog-el-header">
-        <EventListHeader
-          :ready="true"
-          :loading="false"
-          :customized-labels="globalStepLabels()"
-        />
+        <EventListHeader :ready="true" :loading="false" :customized-labels="globalStepLabels()" />
       </div>
       <component
         :is="stepsArray[stepIndex]"
@@ -31,9 +27,7 @@
         v-if="stepsArray[stepIndex].key !== 'calendar'"
         :customized-labels="globalStepLabels()"
         :primary-footer-button-type="
-          isWaiting && stepsArray[stepIndex].name === 'EventInfo'
-            ? waitingBtnType
-            : primBtn
+          isWaiting && stepsArray[stepIndex].name === 'EventInfo' ? waitingBtnType : primBtn
         "
         :secondary-footer-button-type="secBtn"
         :second-button-show="!licence.isLite ? secBtnVisible : false"
@@ -159,8 +153,7 @@ let primBtn = computed(() => {
     amCustomize.value[pageRenderKey.value][stepName.value] &&
     'primBtn' in amCustomize.value[pageRenderKey.value][stepName.value].options
   ) {
-    return amCustomize.value[pageRenderKey.value][stepName.value].options
-      .primBtn.buttonType
+    return amCustomize.value[pageRenderKey.value][stepName.value].options.primBtn.buttonType
   }
   return 'filled'
 })
@@ -170,8 +163,7 @@ let secBtn = computed(() => {
     amCustomize.value[pageRenderKey.value][stepName.value] &&
     'secBtn' in amCustomize.value[pageRenderKey.value][stepName.value].options
   ) {
-    return amCustomize.value[pageRenderKey.value][stepName.value].options.secBtn
-      .buttonType
+    return amCustomize.value[pageRenderKey.value][stepName.value].options.secBtn.buttonType
   }
   return 'plain'
 })
@@ -181,8 +173,7 @@ let secBtnVisible = computed(() => {
     amCustomize.value[pageRenderKey.value][stepName.value] &&
     'secBtn' in amCustomize.value[pageRenderKey.value][stepName.value].options
   ) {
-    return amCustomize.value[pageRenderKey.value][stepName.value].options.secBtn
-      .visibility
+    return amCustomize.value[pageRenderKey.value][stepName.value].options.secBtn.visibility
   }
   return true
 })
@@ -190,11 +181,9 @@ let secBtnVisible = computed(() => {
 let waitingBtnType = computed(() => {
   if (
     amCustomize.value[pageRenderKey.value][stepName.value] &&
-    'waitingBtn' in
-      amCustomize.value[pageRenderKey.value][stepName.value].options
+    'waitingBtn' in amCustomize.value[pageRenderKey.value][stepName.value].options
   ) {
-    return amCustomize.value[pageRenderKey.value][stepName.value].options
-      .waitingBtn.buttonType
+    return amCustomize.value[pageRenderKey.value][stepName.value].options.waitingBtn.buttonType
   }
   return 'filled'
 })
@@ -216,7 +205,7 @@ onMounted(() => {
       eventInfo,
       eventCustomerInfo,
       eventPayment,
-      eventCongratulations
+      eventCongratulations,
     ]
   }
 })
@@ -281,17 +270,14 @@ onBeforeMount(() => {
 
 function globalStepLabels() {
   let stepLabels = {}
-  let customizedLabels =
-    amCustomize.value[pageRenderKey.value][stepName.value].translations
+  let customizedLabels = amCustomize.value[pageRenderKey.value][stepName.value].translations
   if (customizedLabels && Object.keys(customizedLabels)) {
-    Object.keys(
-      amCustomize.value[pageRenderKey.value][stepName.value].translations
-    ).forEach((label) => {
-      stepLabels[label] =
-        amCustomize.value[pageRenderKey.value][stepName.value].translations[
-          label
-        ][langKey.value]
-    })
+    Object.keys(amCustomize.value[pageRenderKey.value][stepName.value].translations).forEach(
+      (label) => {
+        stepLabels[label] =
+          amCustomize.value[pageRenderKey.value][stepName.value].translations[label][langKey.value]
+      },
+    )
   } else {
     stepLabels = {}
   }
@@ -306,7 +292,7 @@ let amColors = computed(() => {
     ? amCustomize.value[pageRenderKey.value].colors
     : defaultCustomizeSettings[pageRenderKey.value].colors
 
-    return { ...colors }
+  return { ...colors }
 })
 
 provide('amColors', amColors)
@@ -334,27 +320,15 @@ let cssVars = computed(() => {
     '--am-c-btn-prim-text': amColors.value.colorBtnPrimText,
     '--am-c-btn-sec': amColors.value.colorBtnSec,
     '--am-c-btn-sec-text': amColors.value.colorBtnSecText,
-    '--am-c-skeleton-op20': useColorTransparency(
-      amColors.value.colorMainText,
-      0.2
-    ),
-    '--am-c-skeleton-op60': useColorTransparency(
-      amColors.value.colorMainText,
-      0.6
-    ),
+    '--am-c-skeleton-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
+    '--am-c-skeleton-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
     '--am-font-family': amFonts.value.fontFamily,
 
     // -mw- max width
     '--am-mw-main': '792px',
     '--am-hd-main': stepIndex.value > 0 ? '592px' : '652px',
-    '--am-c-scroll-op30': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.3
-    ),
-    '--am-c-scroll-op10': useColorTransparency(
-      amColors.value.colorPrimary,
-      0.1
-    ),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
 
     '--am-rad-inp': '6px',
 

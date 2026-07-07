@@ -3,12 +3,7 @@
     <div class="am-integration-connect-box__wrapper">
       <div class="am-integration-connect-box__icon">
         <img
-          :src="
-            baseUrls.wpAmeliaPluginURL +
-            '/v3/src/assets/img/icons/' +
-            iconName +
-            '.svg'
-          "
+          :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/icons/' + iconName + '.svg'"
           height="30"
           alt=""
           aria-hidden="true"
@@ -23,21 +18,14 @@
           </div>
         </div>
 
-        <div
-          v-if="isConnectButtonNeeded"
-          class="am-integration-connect-box__actions"
-        >
+        <div v-if="isConnectButtonNeeded" class="am-integration-connect-box__actions">
           <AmButton
             size="small"
             :category="isConnected ? 'danger' : 'primary'"
             :disabled="isDisabled"
             @click="!isConnected ? onConnect?.() : onDisconnect?.()"
           >
-            {{
-              isConnected
-                ? amLabels.disconnect
-                : amLabels.connect
-            }}
+            {{ isConnected ? amLabels.disconnect : amLabels.connect }}
           </AmButton>
         </div>
       </div>

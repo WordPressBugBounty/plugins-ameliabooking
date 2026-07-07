@@ -1,19 +1,14 @@
 <template>
-  <div
-    class="am-cc__periods"
-    :class="responsiveClass"
-  >
-    <div
-      v-for="(item, index) in props.data"
-      :key="index"
-      class="am-cc__periods-item"
-    >
+  <div class="am-cc__periods" :class="responsiveClass">
+    <div v-for="(item, index) in props.data" :key="index" class="am-cc__periods-item">
       <span class="am-cc__periods-date">
         {{ getFrontedFormattedDate(item.date) }}
       </span>
 
       <span class="am-cc__periods-time">
-        {{ `${getFrontedFormattedTime(item.startTime)} - ${getFrontedFormattedTime(item.endTime)}` }}
+        {{
+          `${getFrontedFormattedTime(item.startTime)} - ${getFrontedFormattedTime(item.endTime)}`
+        }}
       </span>
 
       <div
@@ -26,28 +21,48 @@
         class="am-cc__periods-link__list"
       >
         <!-- GoogleMeet Link -->
-        <a v-if="amSettings.featuresIntegrations.googleCalendar.enabled && item.googleMeetLink" class="am-cc__periods-link" :href="item.googleMeetLink" target="_blank">
+        <a
+          v-if="amSettings.featuresIntegrations.googleCalendar.enabled && item.googleMeetLink"
+          class="am-cc__periods-link"
+          :href="item.googleMeetLink"
+          target="_blank"
+        >
           <span class="am-icon-link"></span>
           {{ amLabels.google_meet_link }}
         </a>
         <!-- /GoogleMeet link -->
 
         <!-- Microsoft Teams Link -->
-        <a v-if="amSettings.featuresIntegrations.outlookCalendar.enabled && item.microsoftTeamsLink" class="am-cc__periods-link" :href="item.microsoftTeamsLink" target="_blank">
+        <a
+          v-if="amSettings.featuresIntegrations.outlookCalendar.enabled && item.microsoftTeamsLink"
+          class="am-cc__periods-link"
+          :href="item.microsoftTeamsLink"
+          target="_blank"
+        >
           <span class="am-icon-link"></span>
           {{ amLabels.microsoft_teams_link }}
         </a>
         <!-- /Microsoft Teams link -->
 
         <!-- Zoom Link -->
-        <a v-if="amSettings.featuresIntegrations.zoom.enabled && item.zoomLink" class="am-cc__periods-link" :href="item.zoomLink" target="_blank">
+        <a
+          v-if="amSettings.featuresIntegrations.zoom.enabled && item.zoomLink"
+          class="am-cc__periods-link"
+          :href="item.zoomLink"
+          target="_blank"
+        >
           <span class="am-icon-link"></span>
           {{ amLabels.zoom_link }}
         </a>
         <!-- /Zoom link -->
 
         <!-- Lesson Space Link -->
-        <a v-if="amSettings.featuresIntegrations.lessonSpace.enabled && item.lessonSpaceLink" class="am-cc__periods-link" :href="item.lessonSpaceLink" target="_blank">
+        <a
+          v-if="amSettings.featuresIntegrations.lessonSpace.enabled && item.lessonSpaceLink"
+          class="am-cc__periods-link"
+          :href="item.lessonSpaceLink"
+          target="_blank"
+        >
           <span class="am-icon-link"></span>
           {{ amLabels.lesson_space_link }}
         </a>
@@ -59,14 +74,14 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject
-} from "vue";
+import { computed, inject } from 'vue'
 
 // * Composables
-import { useResponsiveClass } from "../../../../../../../../assets/js/common/responsive.js";
-import { getFrontedFormattedDate, getFrontedFormattedTime } from "../../../../../../../../assets/js/common/date";
+import { useResponsiveClass } from '../../../../../../../../assets/js/common/responsive.js'
+import {
+  getFrontedFormattedDate,
+  getFrontedFormattedTime,
+} from '../../../../../../../../assets/js/common/date'
 
 // * Vars
 const amLabels = inject('amLabels')
@@ -76,8 +91,8 @@ const amSettings = inject('settings')
 
 let props = defineProps({
   data: {
-    type: [Array, Object, String]
-  }
+    type: [Array, Object, String],
+  },
 })
 
 let cWidth = inject('containerWidth')
@@ -89,7 +104,7 @@ let responsiveClass = computed(() => {
 
 <script>
 export default {
-  name: "TemplatePeriods"
+  name: 'TemplatePeriods',
 }
 </script>
 
@@ -113,7 +128,8 @@ export default {
       }
     }
 
-    &-date, &-time {
+    &-date,
+    &-time {
       display: inline-flex;
       font-size: 14px;
       font-weight: 400;
@@ -133,12 +149,12 @@ export default {
       &:hover {
         color: var(--am-c-cc-primary-op70);
 
-        [class^="am-icon"] {
+        [class^='am-icon'] {
           color: var(--am-c-cc-primary-op70);
         }
       }
 
-      [class^="am-icon"] {
+      [class^='am-icon'] {
         font-size: 18px;
         color: var(--am-c-cc-primary);
       }

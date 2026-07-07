@@ -6,7 +6,9 @@
     :style="cssVars"
   >
     <el-collapse-item
-      v-for="(item, index) in appointmentBookings.filter((b) => b.status !== 'canceled' && b.status !== 'rejected')"
+      v-for="(item, index) in appointmentBookings.filter(
+        (b) => b.status !== 'canceled' && b.status !== 'rejected',
+      )"
       :key="index"
       :name="index"
       class="am-capai-ext__item am-capai-collapse__item"
@@ -14,13 +16,15 @@
       <template #title>
         <div
           class="am-capai-ext__heading"
-          :class="{'am-pb-16': !((item.customer.email && customerEmailVisibility) || (item.customer.phone && customerPhoneVisibility))}"
+          :class="{
+            'am-pb-16': !(
+              (item.customer.email && customerEmailVisibility) ||
+              (item.customer.phone && customerPhoneVisibility)
+            ),
+          }"
         >
           <!-- Customer Name -->
-          <div
-            class="am-capai-customer__name"
-            :class="noShowData(item.customer.noShowCount).class"
-          >
+          <div class="am-capai-customer__name" :class="noShowData(item.customer.noShowCount).class">
             <span
               v-if="noShowData(item.customer.noShowCount).icon"
               :class="`am-icon-${noShowData(item.customer.noShowCount).icon}`"
@@ -30,11 +34,8 @@
           <!-- /Customer Name -->
 
           <!-- Selected Extras Number -->
-          <div
-            v-if="selectedExtrasCount(item.extras) > 0"
-            class="am-capai-ext__heading-extra"
-          >
-            {{`${amLabels.extras}: ${selectedExtrasCount(item.extras)}` }}
+          <div v-if="selectedExtrasCount(item.extras) > 0" class="am-capai-ext__heading-extra">
+            {{ `${amLabels.extras}: ${selectedExtrasCount(item.extras)}` }}
           </div>
           <!-- /Selected Extras Number -->
         </div>
@@ -42,7 +43,10 @@
 
       <!-- Customer Info -->
       <div
-        v-if="(item.customer.email && customerEmailVisibility) || (item.customer.phone && customerPhoneVisibility)"
+        v-if="
+          (item.customer.email && customerEmailVisibility) ||
+          (item.customer.phone && customerPhoneVisibility)
+        "
         class="am-capai-customer__data-wrapper"
         :class="props.responsiveClass"
       >
@@ -80,29 +84,31 @@
           v-for="(extra, extraIndex) in employeeService.extras"
           :key="extraIndex"
           class="am-capai-ext__inner"
-          :class="[{'am-border-bottom': extraIndex !== employeeService.extras.length - 1}, props.responsiveClass]"
+          :class="[
+            { 'am-border-bottom': extraIndex !== employeeService.extras.length - 1 },
+            props.responsiveClass,
+          ]"
         >
           <div class="am-capai-ext__inner-info">
             <div class="am-capai-ext__inner-name">
               {{ extra.name }}
             </div>
-            <div
-              v-if="extra.duration"
-              class="am-capai-ext__inner-duration"
-            >
-              {{ `${amLabels.duration}: ${useSecondsToDuration(extra.duration, amLabels.h, amLabels.min)}` }}
+            <div v-if="extra.duration" class="am-capai-ext__inner-duration">
+              {{
+                `${amLabels.duration}: ${useSecondsToDuration(extra.duration, amLabels.h, amLabels.min)}`
+              }}
             </div>
           </div>
-          <div
-            class="am-capai-ext__inner-selection"
-            :class="props.responsiveClass"
-          >
-            <div
-              class="am-capai-ext__inner-price"
-              :class="props.responsiveClass"
-            >
+          <div class="am-capai-ext__inner-selection" :class="props.responsiveClass">
+            <div class="am-capai-ext__inner-price" :class="props.responsiveClass">
               <template v-if="extra.price">
-                {{ useFormattedPrice('price' in item.extras[extraIndex] ? item.extras[extraIndex].price : extra.price) }}
+                {{
+                  useFormattedPrice(
+                    'price' in item.extras[extraIndex]
+                      ? item.extras[extraIndex].price
+                      : extra.price,
+                  )
+                }}
               </template>
               <template v-else>
                 {{ amLabels.free }}
@@ -120,7 +126,7 @@
         </div>
 
         <div class="am-capai-ext__total">
-          {{ `${amLabels.subtotal}: ${useFormattedPrice(getBookingExtrasSubtotal(item))}`}}
+          {{ `${amLabels.subtotal}: ${useFormattedPrice(getBookingExtrasSubtotal(item))}` }}
         </div>
       </div>
       <!-- /Extra -->
@@ -130,37 +136,32 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject,
-  onMounted,
-  ref,
-} from "vue";
+import { computed, inject, onMounted, ref } from 'vue'
 
 // * Import from Vuex
-import { useStore } from "vuex";
+import { useStore } from 'vuex'
 
 // * Import Composables
-import { useSecondsToDuration } from "../../../../../../assets/js/common/date";
-import { useFormattedPrice } from "../../../../../../assets/js/common/formatting";
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation";
+import { useSecondsToDuration } from '../../../../../../assets/js/common/date'
+import { useFormattedPrice } from '../../../../../../assets/js/common/formatting'
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 
 // * Components
-import AmInputNumber from "../../../../../_components/input-number/AmInputNumber.vue";
+import AmInputNumber from '../../../../../_components/input-number/AmInputNumber.vue'
 
 // * Props
 const props = defineProps({
   responsiveClass: {
     type: String,
-    default: "",
+    default: '',
   },
-});
+})
 
 // * Emits
-const emits = defineEmits(["changedSlotCondition"]);
+const emits = defineEmits(['changedSlotCondition'])
 
 // * Store
-const store = useStore();
+const store = useStore()
 
 // * Data in shortcode
 const shortcodeData = inject('shortcodeData')
@@ -172,15 +173,18 @@ let amCustomize = inject('amCustomize')
 let amLabels = inject('amLabels')
 
 // * Employee Service
-let employeeService = computed(() => store.getters["appointment/getEmployeeService"]);
+let employeeService = computed(() => store.getters['appointment/getEmployeeService'])
 
 // * Appointment Bookings
-let appointmentBookings = computed(() => store.getters["appointment/getBookings"])
+let appointmentBookings = computed(() => store.getters['appointment/getBookings'])
 
 let activeBookingIndex = ref(null)
 
 function changeExtraQuantity(serviceExtra, extraIndex, booking) {
-  if (serviceExtra.duration && (booking.extras[extraIndex].quantity === 0 || booking.extras[extraIndex].quantity === 1)) {
+  if (
+    serviceExtra.duration &&
+    (booking.extras[extraIndex].quantity === 0 || booking.extras[extraIndex].quantity === 1)
+  ) {
     emits('changedSlotCondition')
   }
 }
@@ -188,7 +192,13 @@ function changeExtraQuantity(serviceExtra, extraIndex, booking) {
 function getBookingExtrasSubtotal(item) {
   if (item.extras.length) {
     return item.extras.reduce((acc, extra) => {
-      return acc + ('price' in extra ? extra.price : employeeService.value.extras.find(e => e.id === extra.extraId).price) * extra.quantity
+      return (
+        acc +
+        ('price' in extra
+          ? extra.price
+          : employeeService.value.extras.find((e) => e.id === extra.extraId).price) *
+          extra.quantity
+      )
     }, 0)
   }
   return 0
@@ -201,20 +211,31 @@ function selectedExtrasCount(extras) {
 const { noShowData } = inject('noShowData')
 
 // * Customized options
-let customerPhoneVisibility = computed(() => shortcodeData.value.cabinetType === 'employee' ? amCustomize.value.appointments.options.customerPhone.visibility : true)
-let customerEmailVisibility = computed(() => shortcodeData.value.cabinetType === 'employee' ? amCustomize.value.appointments.options.customerEmail.visibility : true)
+let customerPhoneVisibility = computed(() =>
+  shortcodeData.value.cabinetType === 'employee'
+    ? amCustomize.value.appointments.options.customerPhone.visibility
+    : true,
+)
+let customerEmailVisibility = computed(() =>
+  shortcodeData.value.cabinetType === 'employee'
+    ? amCustomize.value.appointments.options.customerEmail.visibility
+    : true,
+)
 
 // * Colors
 let amColors = inject('amColors')
 // * CSS Variables
 let cssVars = computed(() => {
   return {
-    '--am-c-ext-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6)
+    '--am-c-ext-text-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
   }
 })
 
 onMounted(() => {
-  if (appointmentBookings.value.filter((b) => b.status !== 'canceled' && b.status !== 'rejected').length < 2) {
+  if (
+    appointmentBookings.value.filter((b) => b.status !== 'canceled' && b.status !== 'rejected')
+      .length < 2
+  ) {
     activeBookingIndex.value = 0
   }
 })

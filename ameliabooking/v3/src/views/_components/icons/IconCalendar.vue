@@ -4,6 +4,6 @@
 
 <script>
 export default {
-  name: "AmeliaIconCalendar"
+  name: 'AmeliaIconCalendar',
 }
 </script>

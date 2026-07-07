@@ -56,17 +56,16 @@
     </AmButton>
 
     <div v-if="amSettings.roles[cabinetType + 'Cabinet']['loginEnabled']" class="am-asi__footer">
-      <AmButton
-        class="am-asi__footer-signin__btn"
-        type="text"
-        @click="goToSignIn"
-      >
+      <AmButton class="am-asi__footer-signin__btn" type="text" @click="goToSignIn">
         {{ amLabels.sign_in }}
       </AmButton>
     </div>
 
     <div
-      v-if="amSettings.general.googleRecaptcha.enabled && amSettings.roles[cabinetType + 'Cabinet'].googleRecaptcha"
+      v-if="
+        amSettings.general.googleRecaptcha.enabled &&
+        amSettings.roles[cabinetType + 'Cabinet'].googleRecaptcha
+      "
       id="am-recaptcha"
       class="am-recaptcha-holder"
     >
@@ -86,15 +85,8 @@
 
 <script setup>
 // * import from Vue
-import {
-  ref,
-  reactive,
-  computed,
-  inject,
-  watch,
-  nextTick,
-} from 'vue'
-import {VueRecaptcha} from 'vue-recaptcha'
+import { ref, reactive, computed, inject, watch, nextTick } from 'vue'
+import { VueRecaptcha } from 'vue-recaptcha'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -110,7 +102,7 @@ import { useColorTransparency } from '../../../../../../assets/js/common/colorMa
 import { formFieldsTemplates } from '../../../../../../assets/js/common/formFieldsTemplates'
 import AmButton from '../../../../../_components/button/AmButton.vue'
 import Skeleton from './Skeleton'
-import AmAlert from "../../../../../_components/alert/AmAlert.vue";
+import AmAlert from '../../../../../_components/alert/AmAlert.vue'
 
 // * Vars
 let store = useStore()
@@ -132,11 +124,11 @@ let langDetection = computed(() => amSettings.general.usedLanguages.includes(loc
 
 // * Computed labels
 let amLabels = computed(() => {
-  let computedLabels = reactive({...labels})
+  let computedLabels = reactive({ ...labels })
 
   let customizedLabels = amCustomize.value.accessLink.translations
   if (customizedLabels) {
-    Object.keys(customizedLabels).forEach(labelKey => {
+    Object.keys(customizedLabels).forEach((labelKey) => {
       if (customizedLabels[labelKey][localLanguage.value] && langDetection.value) {
         computedLabels[labelKey] = customizedLabels[labelKey][localLanguage.value]
       } else if (customizedLabels[labelKey].default) {
@@ -156,17 +148,19 @@ let sendLinkContainerRef = ref(null)
 let authErrorAlertRef = ref(null)
 let hasInitialFocus = ref(false)
 
-function focusFirstInput () {
+function focusFirstInput() {
   if (!sendLinkContainerRef.value) {
     return
   }
-  const firstInput = sendLinkContainerRef.value.querySelector('.am-asi__form input, .am-asi__form textarea, .am-asi__form select')
+  const firstInput = sendLinkContainerRef.value.querySelector(
+    '.am-asi__form input, .am-asi__form textarea, .am-asi__form select',
+  )
   if (firstInput) {
     firstInput.focus()
   }
 }
 
-function goToSignIn () {
+function goToSignIn() {
   pageKey.value = 'signIn'
 }
 
@@ -179,7 +173,6 @@ watch(authError, (hasError) => {
   }
 })
 
-
 /*************
  * Recaptcha *
  ************/
@@ -190,14 +183,14 @@ let recaptchaValid = ref(false)
 
 let recaptchaResponse = ref(null)
 
-function onRecaptchaExpired () {
+function onRecaptchaExpired() {
   recaptchaValid.value = false
 
   authError.value = true
   authErrorMessage.value = amLabels.value.recaptcha_invalid_error
 }
 
-function onRecaptchaVerify (response) {
+function onRecaptchaVerify(response) {
   recaptchaValid.value = true
 
   recaptchaResponse.value = response
@@ -219,7 +212,7 @@ let infoFormData = ref({
     get: () => store.getters['auth/getEmail'],
     set: (val) => {
       store.commit('auth/setEmail', val ? val : '')
-    }
+    },
   }),
 })
 
@@ -230,8 +223,8 @@ let infoFormRules = ref({
       required: true,
       message: amLabels.value.enter_email_warning,
       trigger: 'submit',
-    }
-  ]
+    },
+  ],
 })
 
 // * Form construction
@@ -243,8 +236,8 @@ let signInFormConstruction = ref({
       itemType: 'email',
       label: amLabels.value.email,
       placeholder: '',
-      class: 'am-asi__item'
-    }
+      class: 'am-asi__item',
+    },
   },
 })
 
@@ -260,20 +253,27 @@ let loading = computed(() => {
 })
 
 // * Move focus to first field once loading completes
-watch(loading, (isLoading) => {
-  if (!isLoading && !hasInitialFocus.value) {
-    hasInitialFocus.value = true
-    nextTick(() => {
-      focusFirstInput()
-    })
-  }
-}, {immediate: true})
+watch(
+  loading,
+  (isLoading) => {
+    if (!isLoading && !hasInitialFocus.value) {
+      hasInitialFocus.value = true
+      nextTick(() => {
+        focusFirstInput()
+      })
+    }
+  },
+  { immediate: true },
+)
 
 // * Submit Form
 function submitForm() {
   authFormRef.value.validate((valid) => {
     if (valid) {
-      if (amSettings.general.googleRecaptcha.enabled && amSettings.roles[cabinetType.value + 'Cabinet'].googleRecaptcha) {
+      if (
+        amSettings.general.googleRecaptcha.enabled &&
+        amSettings.roles[cabinetType.value + 'Cabinet'].googleRecaptcha
+      ) {
         if (amSettings.general.googleRecaptcha.invisible) {
           recaptchaRef.value.execute()
         } else if (!recaptchaValid.value) {
@@ -299,22 +299,22 @@ function reauthorize() {
   let params = {
     email: store.getters['auth/getEmail'],
     locale: window.localeLanguage[0],
-    cabinetType: cabinetType.value
+    cabinetType: cabinetType.value,
   }
 
   if (recaptchaResponse.value !== null) {
     params.recaptcha = recaptchaResponse.value
   }
 
-  httpClient.post(
-    '/users/customers/reauthorize',
-    params
-  ).then(() => {
-    pageKey.value = 'sendAccessLinkProcess'
-  }).catch(() => {
-  }).finally(() => {
-    store.commit('setLoading', false)
-  })
+  httpClient
+    .post('/users/customers/reauthorize', params)
+    .then(() => {
+      pageKey.value = 'sendAccessLinkProcess'
+    })
+    .catch(() => {})
+    .finally(() => {
+      store.commit('setLoading', false)
+    })
 }
 
 /*************
@@ -362,7 +362,6 @@ let cssVars = computed(() => {
 </script>
 
 <script>
-
 export default {
   name: 'AuthReset',
 }
@@ -376,7 +375,9 @@ export default {
     max-width: 400px;
     width: 100%;
     background-color: var(--am-c-main-bgr);
-    box-shadow: 0 0 9px -4px var(--am-c-main-text-op40), 0px 17px 35px -12px var(--am-c-main-text-op25);
+    box-shadow:
+      0 0 9px -4px var(--am-c-main-text-op40),
+      0px 17px 35px -12px var(--am-c-main-text-op25);
     border-radius: 12px;
     padding: 32px 24px 24px;
     margin: 0 auto;

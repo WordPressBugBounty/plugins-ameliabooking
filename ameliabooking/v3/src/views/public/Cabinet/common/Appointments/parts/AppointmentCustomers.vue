@@ -1,10 +1,7 @@
 <template>
   <div class="am-capai-cuf" :style="cssVars">
     <!-- Warning -->
-    <WarningBlock
-      v-if="props.capacityWarning"
-      :heading="props.capacityWarning"
-    />
+    <WarningBlock v-if="props.capacityWarning" :heading="props.capacityWarning" />
     <!-- /Warning -->
 
     <!-- Heading -->
@@ -17,10 +14,7 @@
         class="am-capai-cuf__heading-form"
         :class="props.responsiveClass"
       >
-        <el-form-item
-          :prop="'customersIds'"
-          class="am-capai-cuf__heading-form__item"
-        >
+        <el-form-item :prop="'customersIds'" class="am-capai-cuf__heading-form__item">
           <AmSelect
             v-model="customersForm.customersIds"
             filterable
@@ -84,8 +78,7 @@
         icon="plus"
         :icon-only="pageWidth <= 540"
         :disabled="
-          employeeService?.maxCapacity === appointmentCapacity &&
-          !hasWaitingListCapacity()
+          employeeService?.maxCapacity === appointmentCapacity && !hasWaitingListCapacity()
         "
         @click="addCustomer"
       >
@@ -115,16 +108,12 @@
           :parent-class="`am-capai-cuf__bulk-status ${props.responsiveClass}`"
           :prefix-icon="
             bulkBookingStatus
-              ? getBookingStatuses(true).find(
-                  (i) => i.value === bulkBookingStatus
-                )?.icon
+              ? getBookingStatuses(true).find((i) => i.value === bulkBookingStatus)?.icon
               : 'circle-empty'
           "
           :prefix-icon-color="
             bulkBookingStatus
-              ? getBookingStatuses(true).find(
-                  (i) => i.value === bulkBookingStatus
-                )?.color
+              ? getBookingStatuses(true).find((i) => i.value === bulkBookingStatus)?.color
               : 'var(--am-c-select-text-op40)'
           "
           @change="bulkChangeStatus"
@@ -135,10 +124,7 @@
             :value="item.value"
             :label="item.label"
           >
-            <span
-              :class="`am-icon-${item.icon}`"
-              :style="`color: ${item.color}`"
-            ></span>
+            <span :class="`am-icon-${item.icon}`" :style="`color: ${item.color}`"></span>
             {{ item.label }}
           </AmOption>
         </AmSelect>
@@ -155,10 +141,7 @@
         <!-- Card Info -->
         <div class="am-capai-cuf__card-info" :class="props.responsiveClass">
           <!-- Customer Name -->
-          <div
-            class="am-capai-customer__name"
-            :class="noShowData(item.customer.noShowCount).class"
-          >
+          <div class="am-capai-customer__name" :class="noShowData(item.customer.noShowCount).class">
             <span
               v-if="noShowData(item.customer.noShowCount).icon"
               :class="`am-icon-${noShowData(item.customer.noShowCount).icon}`"
@@ -198,13 +181,9 @@
           <!-- Status -->
           <AmSelect
             v-model="item.status"
-            :prefix-icon="
-              getBookingStatuses(false).find((i) => i.value === item.status)
-                ?.icon
-            "
+            :prefix-icon="getBookingStatuses(false).find((i) => i.value === item.status)?.icon"
             :prefix-icon-color="
-              getBookingStatuses(false).find((i) => i.value === item.status)
-                ?.color
+              getBookingStatuses(false).find((i) => i.value === item.status)?.color
             "
             popper-class="am-capai-cuf__popper"
             size="small"
@@ -217,10 +196,7 @@
               :value="status.value"
               :label="status.label"
             >
-              <span
-                :class="`am-icon-${status.icon}`"
-                :style="`color: ${status.color}`"
-              />
+              <span :class="`am-icon-${status.icon}`" :style="`color: ${status.color}`" />
               {{ status.label }}
             </AmOption>
           </AmSelect>
@@ -232,7 +208,7 @@
             v-model="item.persons"
             :parent-class="`${bookingClassDropdown(
               employeeService.maxCapacity > 1,
-              employeeService.customPricing.enabled === 'duration'
+              employeeService.customPricing.enabled === 'duration',
             )} ${props.responsiveClass}`"
             :placeholder="amLabels.persons"
             prefix-icon="users"
@@ -257,7 +233,7 @@
             v-model="item.duration"
             :parent-class="`${bookingClassDropdown(
               employeeService.maxCapacity > 1,
-              employeeService.customPricing.enabled === 'duration'
+              employeeService.customPricing.enabled === 'duration',
             )} ${props.responsiveClass}`"
             :placeholder="amLabels.duration"
             prefix-icon="clock"
@@ -266,9 +242,7 @@
             @change="(value) => changeBookingDuration(index, value)"
           >
             <AmOption
-              v-for="duration in Object.keys(
-                employeeService.customPricing.durations
-              )"
+              v-for="duration in Object.keys(employeeService.customPricing.durations)"
               :key="duration"
               :value="duration"
               :label="useSecondsToDuration(duration, amLabels.h, amLabels.min)"
@@ -312,10 +286,7 @@ import httpClient from '../../../../../../plugins/axios'
 
 // * Import Composable
 import { useFrontendCustomer } from '../../../../../../assets/js/common/customer'
-import {
-  useFocusCustomers,
-  useSearchCustomers,
-} from '../../../../../../assets/js/admin/customers'
+import { useFocusCustomers, useSearchCustomers } from '../../../../../../assets/js/admin/customers'
 import { useSecondsToDuration } from '../../../../../../assets/js/common/date'
 import { useStatuses } from '../../../../../../assets/js/admin/status'
 
@@ -371,9 +342,7 @@ let amLabels = inject('amLabels')
 let pageWidth = inject('pageWidth')
 
 // * Employee Service
-let employeeService = computed(
-  () => store.getters['appointment/getEmployeeService']
-)
+let employeeService = computed(() => store.getters['appointment/getEmployeeService'])
 
 // * Form Reference
 let customersFormRef = ref(null)
@@ -398,9 +367,7 @@ let customersFormRules = ref({
 })
 
 // * Customer Searching
-let searchingCustomers = computed(
-  () => store.getters['customerInfo/getLoading']
-)
+let searchingCustomers = computed(() => store.getters['customerInfo/getLoading'])
 
 // * Customers
 let customers = computed(() => store.getters['customerInfo/getCustomers'])
@@ -411,9 +378,7 @@ let bulkBookingStatus = ref(amSettings.general.defaultAppointmentStatus)
 // * Service settings
 const serviceSettings = computed(() => {
   try {
-    return employeeService.value?.settings
-      ? JSON.parse(employeeService.value.settings)
-      : null
+    return employeeService.value?.settings ? JSON.parse(employeeService.value.settings) : null
   } catch (e) {
     return null
   }
@@ -428,9 +393,7 @@ const isWaitingListEnabled = computed(() => {
 })
 
 // * Capacities (regular and waiting list)
-const regularMaxCapacity = computed(
-  () => employeeService.value?.maxCapacity || 0
-)
+const regularMaxCapacity = computed(() => employeeService.value?.maxCapacity || 0)
 const waitingListMaxCapacity = computed(() => {
   if (!isWaitingListEnabled.value) return 0
   return serviceSettings.value?.waitingList?.maxCapacity || 0
@@ -476,7 +439,7 @@ function getBookingStatuses(isGroup) {
   const hasId = !!store.getters['appointment/getId']
   const statuses = useStatuses()
   const allowedStatuses = ['approved', 'pending'].concat(
-    isWaitingListEnabled.value ? ['waiting'] : []
+    isWaitingListEnabled.value ? ['waiting'] : [],
   )
 
   let list = statuses
@@ -505,10 +468,7 @@ function addedCustomer(customer) {
   const isExisting = existingIds.includes(customer.id)
 
   if (!isExisting) {
-    store.commit(
-      'customerInfo/setCustomersIds',
-      [customer.id].concat(existingIds)
-    )
+    store.commit('customerInfo/setCustomersIds', [customer.id].concat(existingIds))
   }
 
   const existingCustomers = store.getters['customerInfo/getCustomers']
@@ -519,10 +479,7 @@ function addedCustomer(customer) {
     updatedCustomers[customerIndex] = customer
     store.commit('customerInfo/setCustomers', updatedCustomers)
   } else {
-    store.commit(
-      'customerInfo/setCustomers',
-      [customer].concat(existingCustomers)
-    )
+    store.commit('customerInfo/setCustomers', [customer].concat(existingCustomers))
   }
 
   if (!isExisting) {
@@ -533,14 +490,12 @@ function addedCustomer(customer) {
 // * Select Customer
 function selectCustomer() {
   let bookingsCustomersIds = store.getters['appointment/getBookings'].map((i) =>
-    parseInt(i.customer.id)
+    parseInt(i.customer.id),
   )
 
   let changedCapacity = false
 
-  let settings = employeeService.value.settings
-    ? JSON.parse(employeeService.value.settings)
-    : null
+  let settings = employeeService.value.settings ? JSON.parse(employeeService.value.settings) : null
 
   customersForm.value.customersIds
     .filter((id) => !bookingsCustomersIds.includes(id))
@@ -559,9 +514,7 @@ function selectCustomer() {
 
       // Determine status with capacity & waiting list logic
       let defaultStatus =
-        settings &&
-        'general' in settings &&
-        'defaultAppointmentStatus' in settings.general
+        settings && 'general' in settings && 'defaultAppointmentStatus' in settings.general
           ? settings.general.defaultAppointmentStatus
           : amSettings.general.defaultAppointmentStatus
 
@@ -576,10 +529,7 @@ function selectCustomer() {
       let statusToSet = defaultStatus
       if (regCount >= regularMaxCapacity.value) {
         // No regular space, attempt waiting list
-        if (
-          isWaitingListEnabled.value &&
-          waitCount < waitingListMaxCapacity.value
-        ) {
+        if (isWaitingListEnabled.value && waitCount < waitingListMaxCapacity.value) {
           statusToSet = 'waiting'
         }
       }
@@ -591,25 +541,23 @@ function selectCustomer() {
             customer: customers.value.find((c) => c.id === parseInt(id)),
             persons: 1,
             status: statusToSet,
-            duration: Object.keys(
-              employeeService.value.customPricing.durations
-            )[0],
+            duration: Object.keys(employeeService.value.customPricing.durations)[0],
             extras: employeeService.value.extras.map(
               (e) =>
                 new Object({
                   extraId: e.id,
                   quantity: 0,
-                })
+                }),
             ),
             customFields: {},
           },
-          booking
-        )
+          booking,
+        ),
       )
 
       store.dispatch(
         'appointment/resetBookingCustomFields',
-        store.getters['appointment/getBookings'].length - 1
+        store.getters['appointment/getBookings'].length - 1,
       )
       store.dispatch('appointment/addCustomFieldsFormRules', {
         key: store.getters['appointment/getBookings'].length - 1,
@@ -626,7 +574,7 @@ function selectCustomer() {
     })
 
   let removedCustomersIds = bookingsCustomersIds.filter(
-    (x) => !customersForm.value.customersIds.includes(x)
+    (x) => !customersForm.value.customersIds.includes(x),
   )
 
   let removedIndexes = []
@@ -672,10 +620,7 @@ function editCustomer(id) {
       },
     })
     .then((response) => {
-      store.commit(
-        'customerInfo/setCustomer',
-        useFrontendCustomer(store, response.data.data.user)
-      )
+      store.commit('customerInfo/setCustomer', useFrontendCustomer(store, response.data.data.user))
     })
     .catch((error) => {
       console.log(error)
@@ -736,9 +681,7 @@ function changeBookingStatus(index, value) {
   // Moving to regular (approved/pending)
   const prospectiveRegularCount =
     currentRegularCount.value -
-    (booking.status === 'approved' || booking.status === 'pending'
-      ? booking.persons || 1
-      : 0) +
+    (booking.status === 'approved' || booking.status === 'pending' ? booking.persons || 1 : 0) +
     (booking.persons || 1)
   if (prospectiveRegularCount <= regularMaxCapacity.value) {
     store.commit('appointment/setBookingStatus', { index, value })
@@ -793,10 +736,7 @@ function disablePersonsOption(booking, personsValue) {
   }
   // Regular status
   const otherRegular = (store.getters['appointment/getBookings'] || [])
-    .filter(
-      (b) =>
-        b !== booking && (b.status === 'approved' || b.status === 'pending')
-    )
+    .filter((b) => b !== booking && (b.status === 'approved' || b.status === 'pending'))
     .reduce((acc, b) => acc + (b.persons || 1), 0)
   const newTotal = otherRegular + personsValue
   return newTotal > regularMaxCapacity.value
@@ -813,12 +753,12 @@ function changeBookingDuration(index, value) {
 let customerPhoneVisibility = computed(() =>
   shortcodeData.value.cabinetType === 'employee'
     ? amCustomize.value.appointments.options.customerPhone.visibility
-    : true
+    : true,
 )
 let customerEmailVisibility = computed(() =>
   shortcodeData.value.cabinetType === 'employee'
     ? amCustomize.value.appointments.options.customerEmail.visibility
-    : true
+    : true,
 )
 
 // * Colors
@@ -832,9 +772,7 @@ let cssVars = computed(() => {
 
 onMounted(() => {
   if (store.getters['appointment/getId']) {
-    let customersIds = store.getters['appointment/getBookings'].map(
-      (i) => i.customer.id
-    )
+    let customersIds = store.getters['appointment/getBookings'].map((i) => i.customer.id)
 
     store.commit('customerInfo/setCustomersIds', customersIds)
 
@@ -852,20 +790,15 @@ onMounted(() => {
             .concat(
               store.getters['auth/getPreloadedCustomers'].filter(
                 (i) =>
-                  store.getters['customerInfo/getCustomers']
-                    .map((j) => j.id)
-                    .indexOf(i.id) === -1
-              )
+                  store.getters['customerInfo/getCustomers'].map((j) => j.id).indexOf(i.id) === -1,
+              ),
             )
-            .sort((a, b) => a.id - b.id)
+            .sort((a, b) => a.id - b.id),
         )
-      }
+      },
     )
   } else {
-    store.commit(
-      'customerInfo/setCustomers',
-      store.getters['auth/getPreloadedCustomers']
-    )
+    store.commit('customerInfo/setCustomers', store.getters['auth/getPreloadedCustomers'])
   }
 })
 

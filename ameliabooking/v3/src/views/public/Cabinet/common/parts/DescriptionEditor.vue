@@ -39,14 +39,10 @@
 
 <script setup>
 // * Import from Vue
-import {
-  ref,
-  computed,
-  inject,
-} from 'vue'
+import { ref, computed, inject } from 'vue'
 
 // * Import from Quill
-import AmQuill from "./AmQuill.vue";
+import AmQuill from './AmQuill.vue'
 
 // * Components
 import AmButtonGroup from '../../../../_components/button/AmButtonGroup.vue'
@@ -143,21 +139,15 @@ let amColors = inject(
     colorBtnPrimText: '#FFFFFF',
     colorBtnSec: '#1A2C37',
     colorBtnSecText: '#FFFFFF',
-  })
+  }),
 )
 
 // * Css Variables
 let cssVars = computed(() => {
   // desce - description editor
   return {
-    '--am-c-desce-text-op03': useColorTransparency(
-      amColors.value.colorMainText,
-      0.03
-    ),
-    '--am-c-desce-warn-op10': useColorTransparency(
-      amColors.value.colorWarning,
-      0.1
-    ),
+    '--am-c-desce-text-op03': useColorTransparency(amColors.value.colorMainText, 0.03),
+    '--am-c-desce-warn-op10': useColorTransparency(amColors.value.colorWarning, 0.1),
   }
 })
 </script>

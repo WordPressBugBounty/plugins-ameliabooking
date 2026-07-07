@@ -16,14 +16,11 @@
 
 <script setup>
 // * Import from Vue
-import {
-  computed,
-  inject
-} from "vue";
+import { computed, inject } from 'vue'
 
 // * Composables
-import { useColorTransparency } from "../../../../../../assets/js/common/colorManipulation";
-import { useResponsiveClass } from "../../../../../../assets/js/common/responsive";
+import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
+import { useResponsiveClass } from '../../../../../../assets/js/common/responsive'
 
 let props = defineProps({
   pageWidth: {
@@ -32,28 +29,36 @@ let props = defineProps({
   },
   count: {
     type: [Number, String],
-    default: 2
+    default: 2,
   },
   itemDirection: {
     type: String,
     default: 'row',
     validator(value) {
-      return ['row', 'row-reverse', 'column', 'column-reverse', 'initial', 'revert', 'unset' ].includes(value)
-    }
-  }
+      return [
+        'row',
+        'row-reverse',
+        'column',
+        'column-reverse',
+        'initial',
+        'revert',
+        'unset',
+      ].includes(value)
+    },
+  },
 })
 
 let responsiveClass = computed(() => {
   return useResponsiveClass(props.pageWidth)
 })
 
-let amColors = inject('amColors');
+let amColors = inject('amColors')
 
 let cssVars = computed(() => {
   return {
     '--am-c-skeleton-op20': useColorTransparency(amColors.value.colorMainText, 0.2),
     '--am-c-skeleton-op60': useColorTransparency(amColors.value.colorMainText, 0.6),
-    '--am-c-flex-direction': props.itemDirection
+    '--am-c-flex-direction': props.itemDirection,
   }
 })
 </script>

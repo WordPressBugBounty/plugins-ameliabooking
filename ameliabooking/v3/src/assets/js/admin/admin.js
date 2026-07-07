@@ -9,33 +9,27 @@ import store from '../../../store'
 window.stylesInjectedV3 = async function () {}
 
 const CustomizeCatalogWrapper = defineAsyncComponent({
-  loader: () =>
-    import('../../../views/admin/customize/pages/CustomizeCatalog.vue'),
+  loader: () => import('../../../views/admin/customize/pages/CustomizeCatalog.vue'),
 })
 
 const CustomizeCustomerPanelWrapper = defineAsyncComponent({
-  loader: () =>
-    import('../../../views/admin/customize/pages/CustomizeCustomerPanel.vue'),
+  loader: () => import('../../../views/admin/customize/pages/CustomizeCustomerPanel.vue'),
 })
 
 const CustomizeEmployeePanelWrapper = defineAsyncComponent({
-  loader: () =>
-    import('../../../views/admin/customize/pages/CustomizeEmployeePanel.vue'),
+  loader: () => import('../../../views/admin/customize/pages/CustomizeEmployeePanel.vue'),
 })
 
 const CustomizeEventCalendarWrapper = defineAsyncComponent({
-  loader: () =>
-    import('../../../views/admin/customize/pages/CustomizeEventCalendar.vue'),
+  loader: () => import('../../../views/admin/customize/pages/CustomizeEventCalendar.vue'),
 })
 
 const CustomizeEventListWrapper = defineAsyncComponent({
-  loader: () =>
-    import('../../../views/admin/customize/pages/CustomizeEventList.vue'),
+  loader: () => import('../../../views/admin/customize/pages/CustomizeEventList.vue'),
 })
 
 const CustomizeStepNewWrapper = defineAsyncComponent({
-  loader: () =>
-    import('../../../views/admin/customize/pages/CustomizeStepNew.vue'),
+  loader: () => import('../../../views/admin/customize/pages/CustomizeStepNew.vue'),
 })
 
 const dynamicCdn = window.wpAmeliaUrls.wpAmeliaPluginURL + 'v3/public/'
@@ -70,13 +64,13 @@ function getVueStyleElements() {
     const linkElements = Array.from(document.getElementsByTagName('link')).filter(
       (el) =>
         el.getAttribute('rel') === 'stylesheet' &&
-        el.getAttribute('href')?.includes('ameliabooking/v3/public/assets')
+        el.getAttribute('href')?.includes('ameliabooking/v3/public/assets'),
     )
 
     // Collect inline style elements that contain /* purgecss start ignore */
     // These are styles injected by maz-ui and other third-party components
-    const inlineStyleElements = Array.from(document.getElementsByTagName('style')).filter(
-      (el) => el.textContent?.includes('/* purgecss start ignore */')
+    const inlineStyleElements = Array.from(document.getElementsByTagName('style')).filter((el) =>
+      el.textContent?.includes('/* purgecss start ignore */'),
     )
 
     styleElements = [...linkElements, ...inlineStyleElements]
@@ -92,11 +86,7 @@ async function injectVueStyles(shadowRoot) {
       // Check immediately first
       const checkStyles = () => {
         const styles = getVueStyleElements()
-        if (
-          styles !== undefined &&
-          styles.length > 0 &&
-          window.customizeComponentLoaded
-        ) {
+        if (styles !== undefined && styles.length > 0 && window.customizeComponentLoaded) {
           return styles
         }
         return null
@@ -166,9 +156,7 @@ function waitForMountElement() {
   }
 
   const componentToMount =
-    window.v3?.componentToMount !== undefined
-      ? window.v3.componentToMount
-      : 'Customize'
+    window.v3?.componentToMount !== undefined ? window.v3.componentToMount : 'Customize'
 
   let selectedComponent
   let componentName
@@ -208,9 +196,7 @@ function waitForMountElement() {
       const baseURLs = ref(window.wpAmeliaUrls)
       const languages = reactive(window.wpAmeliaLanguages)
       const settings = reactive(window.wpAmeliaSettings)
-      const timeZone = ref(
-        'wpAmeliaTimeZone' in window ? window.wpAmeliaTimeZone[0] : ''
-      )
+      const timeZone = ref('wpAmeliaTimeZone' in window ? window.wpAmeliaTimeZone[0] : '')
       const localLanguage = ref(window.localeLanguage[0])
       const labels = reactive(window.wpAmeliaLabels)
       const licence = reactive(useLicence())
@@ -268,8 +254,7 @@ async function unmountV3App() {
     await nextTick()
 
     // Verify unmount by checking if the mount element is empty
-    const isUnmounted =
-      !mountElement?.innerHTML || mountElement.innerHTML.trim() === ''
+    const isUnmounted = !mountElement?.innerHTML || mountElement.innerHTML.trim() === ''
 
     if (typeof window.onUnmountedV3Callback === 'function' && isUnmounted) {
       await window.onUnmountedV3Callback()

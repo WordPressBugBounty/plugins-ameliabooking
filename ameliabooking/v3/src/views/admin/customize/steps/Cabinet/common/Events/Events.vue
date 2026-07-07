@@ -1,15 +1,8 @@
 <template>
   <div ref="pageContainer" class="am-cap" :style="cssVars">
-    <CabinetFilters
-      :param-list="paramList"
-      :responsive-class="responsiveClass"
-    />
+    <CabinetFilters :param-list="paramList" :responsive-class="responsiveClass" />
 
-    <div
-      v-if="pageRenderKey === 'cape'"
-      class="am-cap__actions"
-      :class="responsiveClass"
-    >
+    <div v-if="pageRenderKey === 'cape'" class="am-cap__actions" :class="responsiveClass">
       <AmButton
         v-if="features.eTickets && amCustomize.cape.events.options.scanQrCodeBtn.visibility"
         prefix="scan-qr-code"
@@ -17,7 +10,7 @@
         category="secondary"
         type="plain"
       >
-        {{amLabels.scan_e_ticket}}
+        {{ amLabels.scan_e_ticket }}
       </AmButton>
       <AmButton
         prefix="plus"
@@ -33,17 +26,12 @@
       class="am-cape__wrapper"
       :class="[
         {
-          'am-no-border':
-            dateGroupedEvents && Object.keys(dateGroupedEvents).length === 1,
+          'am-no-border': dateGroupedEvents && Object.keys(dateGroupedEvents).length === 1,
         },
         responsiveClass,
       ]"
     >
-      <div
-        v-for="(item, dateKey) in dateGroupedEvents"
-        :key="dateKey"
-        class="am-cape"
-      >
+      <div v-for="(item, dateKey) in dateGroupedEvents" :key="dateKey" class="am-cape">
         <div
           class="am-cape__date"
           :class="[
@@ -53,9 +41,7 @@
                 getFrontedFormattedDate(moment().format('YYYY-MM-DD')),
             },
             {
-              'am-no-flag':
-                dateGroupedEvents &&
-                Object.keys(dateGroupedEvents).length === 1,
+              'am-no-flag': dateGroupedEvents && Object.keys(dateGroupedEvents).length === 1,
             },
             responsiveClass,
           ]"
@@ -65,15 +51,9 @@
         <CollapseCard
           v-for="(event, index) in item.events"
           :key="index"
-          :start="
-            getFrontedFormattedTime(
-              event.periods[0].periodStart.split(' ')[1].slice(0, 5)
-            )
-          "
+          :start="getFrontedFormattedTime(event.periods[0].periodStart.split(' ')[1].slice(0, 5))"
           :name="event.name"
-          :employee="[
-            { firstName: 'John', lastName: 'Doe', rank: 'organizer' },
-          ]"
+          :employee="[{ firstName: 'John', lastName: 'Doe', rank: 'organizer' }]"
           :price="useEventBookingsPrice(event)"
           :duration="null"
           :periods="(periods = usePeriodsData(event.periods)) ? periods : []"
@@ -123,10 +103,7 @@ import {
   getFrontedFormattedDate,
   getFrontedFormattedTime,
 } from '../../../../../../../assets/js/common/date'
-import {
-  useEventBookingsPrice,
-  usePeriodsData,
-} from '../../../../../../../assets/js/admin/event'
+import { useEventBookingsPrice, usePeriodsData } from '../../../../../../../assets/js/admin/event'
 import { useResponsiveClass } from '../../../../../../../assets/js/common/responsive'
 import { useColorTransparency } from '../../../../../../../assets/js/common/colorManipulation'
 import { useReactiveCustomize } from '../../../../../../../assets/js/admin/useReactiveCustomize.js'
@@ -270,18 +247,14 @@ let dateGroupedEvents = ref({})
 arrApp.forEach((item, index) => {
   if (
     Object.keys(dateGroupedEvents.value).indexOf(
-      moment().add(item.when, 'days').format('YYYY-MM-DD')
+      moment().add(item.when, 'days').format('YYYY-MM-DD'),
     ) < 0
   ) {
-    dateGroupedEvents.value[
-      moment().add(item.when, 'days').format('YYYY-MM-DD')
-    ] = {}
-    dateGroupedEvents.value[
-      moment().add(item.when, 'days').format('YYYY-MM-DD')
-    ].date = moment().add(item.when, 'days').format('YYYY-MM-DD')
-    dateGroupedEvents.value[
-      moment().add(item.when, 'days').format('YYYY-MM-DD')
-    ].events = []
+    dateGroupedEvents.value[moment().add(item.when, 'days').format('YYYY-MM-DD')] = {}
+    dateGroupedEvents.value[moment().add(item.when, 'days').format('YYYY-MM-DD')].date = moment()
+      .add(item.when, 'days')
+      .format('YYYY-MM-DD')
+    dateGroupedEvents.value[moment().add(item.when, 'days').format('YYYY-MM-DD')].events = []
   }
 
   let app = {
@@ -449,9 +422,7 @@ arrApp.forEach((item, index) => {
         periodEnd: `${moment()
           .add(item.when + 1, 'days')
           .format('YYYY-MM-DD')} 23:00:00`,
-        periodStart: `${moment()
-          .add(item.when, 'days')
-          .format('YYYY-MM-DD')} 03:00:00`,
+        periodStart: `${moment().add(item.when, 'days').format('YYYY-MM-DD')} 03:00:00`,
         zoomMeeting: {
           joinUrl: '/',
         },
@@ -524,9 +495,7 @@ arrApp.forEach((item, index) => {
     zoomUserId: null,
   }
 
-  dateGroupedEvents.value[
-    moment().add(item.when, 'days').format('YYYY-MM-DD')
-  ].events.push(app)
+  dateGroupedEvents.value[moment().add(item.when, 'days').format('YYYY-MM-DD')].events.push(app)
 })
 
 // * Qr Codes
@@ -563,14 +532,8 @@ let cssVars = computed(() => {
   return {
     '--am-c-cape-bgr': amColors.value.colorMainBgr,
     '--am-c-cape-text': amColors.value.colorMainText,
-    '--am-c-cape-text-op70': useColorTransparency(
-      amColors.value.colorMainText,
-      0.7
-    ),
-    '--am-c-cape-text-op25': useColorTransparency(
-      amColors.value.colorMainText,
-      0.25
-    ),
+    '--am-c-cape-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
+    '--am-c-cape-text-op25': useColorTransparency(amColors.value.colorMainText, 0.25),
     '--am-c-cape-primary': amColors.value.colorPrimary,
   }
 })
@@ -601,7 +564,8 @@ export default {
         position: absolute;
         top: 4px;
         left: 8px;
-        background-image: linear-gradient(
+        background-image:
+          linear-gradient(
             180deg,
             transparent,
             transparent 50%,
@@ -615,7 +579,9 @@ export default {
             var(--am-c-cape-text-op25),
             var(--am-c-cape-text-op25)
           );
-        background-size: 3px 12px, 100% 20px;
+        background-size:
+          3px 12px,
+          100% 20px;
       }
 
       &.am-no-border {
@@ -715,7 +681,8 @@ export default {
       }
 
       .am-button {
-        .am-icon-plus, .am-icon-scan-qr-code {
+        .am-icon-plus,
+        .am-icon-scan-qr-code {
           font-size: 24px;
         }
       }

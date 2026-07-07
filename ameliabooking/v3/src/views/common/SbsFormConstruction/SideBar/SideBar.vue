@@ -6,37 +6,35 @@
 </template>
 
 <script setup>
-
 // * Color Vars
-import {
-  ref,
-  computed,
-  inject
-} from "vue";
-import { useColorTransparency } from "../../../../assets/js/common/colorManipulation";
+import { ref, computed, inject } from 'vue'
+import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
 
-let amColors = inject('amColors', ref({
-  colorPrimary: '#1246D6',
-  colorSuccess: '#019719',
-  colorError: '#B4190F',
-  colorWarning: '#CCA20C',
-  colorMainBgr: '#FFFFFF',
-  colorMainHeadingText: '#33434C',
-  colorMainText: '#1A2C37',
-  colorSbBgr: '#17295A',
-  colorSbText: '#FFFFFF',
-  colorInpBgr: '#FFFFFF',
-  colorInpBorder: '#D1D5D7',
-  colorInpText: '#1A2C37',
-  colorInpPlaceHolder: '#1A2C37',
-  colorDropBgr: '#FFFFFF',
-  colorDropBorder: '#D1D5D7',
-  colorDropText: '#0E1920',
-  colorBtnPrim: '#265CF2',
-  colorBtnPrimText: '#FFFFFF',
-  colorBtnSec: '#1A2C37',
-  colorBtnSecText: '#FFFFFF',
-}))
+let amColors = inject(
+  'amColors',
+  ref({
+    colorPrimary: '#1246D6',
+    colorSuccess: '#019719',
+    colorError: '#B4190F',
+    colorWarning: '#CCA20C',
+    colorMainBgr: '#FFFFFF',
+    colorMainHeadingText: '#33434C',
+    colorMainText: '#1A2C37',
+    colorSbBgr: '#17295A',
+    colorSbText: '#FFFFFF',
+    colorInpBgr: '#FFFFFF',
+    colorInpBorder: '#D1D5D7',
+    colorInpText: '#1A2C37',
+    colorInpPlaceHolder: '#1A2C37',
+    colorDropBgr: '#FFFFFF',
+    colorDropBorder: '#D1D5D7',
+    colorDropText: '#0E1920',
+    colorBtnPrim: '#265CF2',
+    colorBtnPrimText: '#FFFFFF',
+    colorBtnSec: '#1A2C37',
+    colorBtnSecText: '#FFFFFF',
+  }),
+)
 
 // * Css Variables
 let cssVars = computed(() => {
@@ -44,15 +42,15 @@ let cssVars = computed(() => {
     '--am-c-sb-text-op5': useColorTransparency(amColors.value.colorSbText, 0.05),
     '--am-c-sb-text-op10': useColorTransparency(amColors.value.colorSbText, 0.1),
     '--am-c-sb-text-op60': useColorTransparency(amColors.value.colorSbText, 0.6),
-    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorSbText, 0.30),
-    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorSbText, 0.10),
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorSbText, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorSbText, 0.1),
   }
 })
 </script>
 
 <script>
 export default {
-  name: "SideBar"
+  name: 'SideBar',
 }
 </script>
 
@@ -63,7 +61,7 @@ export default {
   // fs -- form steps
   // sb -- sidebar
   // Amelia Form Steps
-  .am-fs{
+  .am-fs {
     // Sidebar
     &-sb {
       flex: 0 0 auto;
@@ -78,7 +76,7 @@ export default {
       border-radius: 0.5rem 0 0 0.5rem;
       background-color: var(--am-c-sb-bgr);
       padding: 16px 8px 16px;
-      transition: width .3s ease-in-out;
+      transition: width 0.3s ease-in-out;
 
       &.am-rtl {
         border-radius: 0 0.5rem 0.5rem 0;
@@ -102,7 +100,7 @@ export default {
         $count: 100;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 400ms cubic-bezier(.45,1,.4,1.2) #{$i*70}ms am-animation-slide-right;
+            animation: 400ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 70}ms am-animation-slide-right;
             animation-fill-mode: both;
           }
         }
@@ -314,7 +312,6 @@ export default {
           &-packages {
             max-height: 100px;
           }
-
         }
       }
 
@@ -347,7 +344,7 @@ export default {
         $count: 100;
         @for $i from 0 through $count {
           &:nth-child(#{$i + 1}) {
-            animation: 400ms cubic-bezier(.45,1,.4,1.2) #{$i*70}ms am-animation-slide-right;
+            animation: 400ms cubic-bezier(0.45, 1, 0.4, 1.2) #{$i * 70}ms am-animation-slide-right;
             animation-fill-mode: both;
           }
         }
@@ -515,7 +512,7 @@ export default {
             border-radius: 4px;
           }
 
-          [class^="am-icon-"] {
+          [class^='am-icon-'] {
             font-size: 24px;
             color: var(--am-c-sb-text);
             justify-self: flex-end;
@@ -533,7 +530,8 @@ export default {
         cursor: pointer;
 
         &:focus {
-          & [class^="am-icon-"], & [class*=" am-icon-"] {
+          & [class^='am-icon-'],
+          & [class*=' am-icon-'] {
             box-shadow: 0 0 0 1px var(--am-c-sb-text-op60);
             border-radius: 4px;
           }
@@ -554,14 +552,16 @@ export default {
           }
         }
 
-        & [class^="am-icon-"], & [class*=" am-icon-"] {
+        & [class^='am-icon-'],
+        & [class*=' am-icon-'] {
           font-size: 24px;
           color: var(--am-c-sb-text);
           justify-self: flex-end;
         }
 
         &.am-collapsed {
-          & [class^="am-icon-"], & [class*=" am-icon-"] {
+          & [class^='am-icon-'],
+          & [class*=' am-icon-'] {
             margin: auto;
           }
         }

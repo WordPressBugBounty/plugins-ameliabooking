@@ -48,7 +48,7 @@ import uzUz from 'element-plus/dist/locale/uz-uz.mjs'
 import vi from 'element-plus/dist/locale/vi.mjs'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import zhTw from 'element-plus/dist/locale/zh-tw.mjs'
-function elementPlusTranslations (lang) {
+function elementPlusTranslations(lang) {
   let translation
   switch (lang) {
     case 'af':
@@ -236,17 +236,14 @@ function elementPlusTranslations (lang) {
   return translation
 }
 
-function monthsTranslationsShort (lang) {
+function monthsTranslationsShort(lang) {
   let months = {}
   let obj = elementPlusTranslations(lang).el.datepicker.months
   Object.keys(obj).forEach((month, index) => {
-    months[index+1] = obj[month]
+    months[index + 1] = obj[month]
   })
 
   return months
 }
 
-export {
-  elementPlusTranslations,
-  monthsTranslationsShort
-}
+export { elementPlusTranslations, monthsTranslationsShort }
