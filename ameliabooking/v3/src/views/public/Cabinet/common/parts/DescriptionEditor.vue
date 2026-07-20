@@ -31,8 +31,13 @@
       :rows="3"
       :style="{ width: '100%' }"
     />
-    <div v-if="mode === 'text'" class="am-quill-wrapper">
-      <AmQuill v-model:value="model" :options="options" />
+    <div
+      v-if="mode === 'text'"
+      ref="quillWrapperRef"
+      class="am-quill-wrapper"
+      @keydown.esc.capture="unselectDescriptionEditor"
+    >
+      <AmQuill v-model:value="model" :options="options" @ready="setDescriptionQuill" />
     </div>
   </div>
 </template>
@@ -72,6 +77,9 @@ let amLabels = inject('amLabels')
 
 let mode = ref(props.mode)
 
+const quillWrapperRef = ref(null)
+const descriptionQuill = ref(null)
+
 let model = computed({
   get: () => {
     return props.modelValue
@@ -91,6 +99,83 @@ function setHtmlMode() {
   mode.value = 'html'
 
   emit('setMode', 'html')
+}
+
+function setDescriptionQuill(quill) {
+  descriptionQuill.value = quill
+}
+
+function getFocusableElements() {
+  const selector = [
+    'a[href]',
+    'button:not([disabled])',
+    'input:not([disabled])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    '[contenteditable="true"]',
+    '[tabindex]:not([tabindex="-1"])',
+  ].join(',')
+
+  return Array.from(document.querySelectorAll(selector)).filter((element) => {
+    return (
+      element instanceof HTMLElement &&
+      element.tabIndex >= 0 &&
+      element.getAttribute('aria-hidden') !== 'true' &&
+      element.getClientRects().length > 0
+    )
+  })
+}
+
+function focusNextElementAfterEditor() {
+  if (!quillWrapperRef.value) {
+    return false
+  }
+
+  const nextElement = getFocusableElements().find((element) => {
+    return (
+      !quillWrapperRef.value.contains(element) &&
+      quillWrapperRef.value.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING
+    )
+  })
+
+  if (!nextElement) {
+    return false
+  }
+
+  nextElement?.focus()
+  return document.activeElement === nextElement
+}
+
+function unselectDescriptionEditor(event) {
+  if (!event.target.closest?.('.ql-editor')) {
+    return
+  }
+
+  event.preventDefault()
+  event.stopPropagation()
+
+  if (descriptionQuill.value) {
+    descriptionQuill.value.setSelection(null, 'silent')
+
+    if (typeof descriptionQuill.value.blur === 'function') {
+      descriptionQuill.value.blur()
+    }
+  }
+
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur()
+  }
+
+  if (!focusNextElementAfterEditor()) {
+    // deterministic fallback: previous tabbable outside editor
+    const fallback = [...getFocusableElements()].reverse().find((element) => {
+      return (
+        !quillWrapperRef.value?.contains(element) &&
+        quillWrapperRef.value?.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_PRECEDING
+      )
+    })
+    fallback?.focus()
+  }
 }
 
 const options = {

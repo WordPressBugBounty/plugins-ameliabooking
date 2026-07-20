@@ -1,38 +1,64 @@
 <template>
-  <div class="am-caewh" :style="cssVars">
-    <div
-      v-for="(weekDay, weekDayIndex) in employee.weekDayList"
-      :key="weekDayIndex"
-      class="am-caewh__item"
-    >
-      <div class="am-caewh__header">
-        <div class="am-caewh__header-text">
-          {{ weekDays[weekDayIndex].label }}
-        </div>
-
-        <AmSwitch
-          v-model="weekDay.enabled"
-          size="small"
-          :aria-label="weekDays[weekDayIndex].label"
-        />
-      </div>
-
-      <div class="am-caewh__content">
-        <Periods
-          :title="amLabels.working_hours"
-          :enabled="weekDay.enabled"
-          :index="weekDayIndex"
-          :type="'weekDayList'"
-          :responsive-class="props.responsiveClass"
-        />
-      </div>
+  <section
+    class="am-caewh-section"
+    role="region"
+    :aria-label="regionLabel || undefined"
+    :style="cssVars"
+  >
+    <div v-if="regionLabel" class="am-caewh__sr-only">
+      {{ regionLabel }}
     </div>
-  </div>
+
+    <ul class="am-caewh" role="list">
+      <li
+        v-for="(weekDay, weekDayIndex) in employee.weekDayList"
+        :key="weekDays[weekDayIndex].value"
+        class="am-caewh__item"
+      >
+        <section :aria-labelledby="weekDayHeadingId(weekDayIndex)">
+          <div
+            class="am-caewh__header"
+            role="group"
+            :aria-labelledby="weekDayHeadingId(weekDayIndex)"
+          >
+            <div :id="weekDayHeadingId(weekDayIndex)" class="am-caewh__header-text">
+              {{ weekDays[weekDayIndex].label }}
+            </div>
+
+            <AmSwitch
+              :id="weekDaySwitchId(weekDayIndex)"
+              v-model="weekDay.enabled"
+              size="small"
+              :aria-label="weekDaySwitchAriaLabel(weekDayIndex)"
+              :aria-controls="weekDayContentId(weekDayIndex)"
+              :aria-expanded="weekDay.enabled ? 'true' : 'false'"
+            />
+          </div>
+
+          <div
+            :id="weekDayContentId(weekDayIndex)"
+            class="am-caewh__content"
+            role="region"
+            :aria-label="weekDayPeriodsAriaLabel(weekDayIndex)"
+            :hidden="!weekDay.enabled"
+          >
+            <Periods
+              :title="amLabels.working_hours"
+              :enabled="weekDay.enabled"
+              :index="weekDayIndex"
+              :type="'weekDayList'"
+              :responsive-class="props.responsiveClass"
+            />
+          </div>
+        </section>
+      </li>
+    </ul>
+  </section>
 </template>
 
 <script setup>
 // * Import from Vue
-import { ref, inject, computed } from 'vue'
+import { ref, inject, computed, unref } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -58,6 +84,21 @@ let store = useStore()
 
 // * Labels
 let amLabels = inject('amLabels')
+
+function pickAmLabel(keys) {
+  const L = unref(amLabels)
+  if (!L) {
+    return ''
+  }
+  for (const k of keys) {
+    if (L[k]) {
+      return String(L[k])
+    }
+  }
+  return ''
+}
+
+let regionLabel = computed(() => pickAmLabel(['working_hours']))
 
 let employee = computed(() => {
   return store.getters['employee/getEmployee']
@@ -94,6 +135,34 @@ let weekDays = ref([
   },
 ])
 
+function weekDayHeadingId(index) {
+  return `am-caewh-heading-${index}`
+}
+
+function weekDaySwitchId(index) {
+  return `am-caewh-switch-${index}`
+}
+
+function weekDayContentId(index) {
+  return `am-caewh-content-${index}`
+}
+
+function weekDaySwitchAriaLabel(index) {
+  const day = weekDays.value[index]?.label
+  const enabled = employee.value?.weekDayList?.[index]?.enabled
+  const L = unref(amLabels)
+  const status = enabled
+    ? pickAmLabel(['enabled', 'active', 'on'])
+    : pickAmLabel(['disabled', 'inactive', 'off'])
+  return [day, L?.working_hours, status].filter(Boolean).join(', ')
+}
+
+function weekDayPeriodsAriaLabel(index) {
+  const day = weekDays.value[index]?.label
+  const L = unref(amLabels)
+  return [day, L?.working_hours].filter(Boolean).join(', ')
+}
+
 // * Colors
 let amColors = inject('amColors')
 
@@ -118,10 +187,27 @@ export default {
 @mixin am-cabinet-employee-weekdays {
   //am    - amelia
   //caewh - cabinet employee working hours
+  .am-caewh-section {
+    .am-caewh__sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  }
+
   .am-caewh {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 
     &__item {
       padding: 0;
@@ -137,6 +223,10 @@ export default {
       gap: 8px;
 
       &-text {
+        margin: 0;
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
         color: var(--am-c-caewh-text);
       }
     }
@@ -144,6 +234,11 @@ export default {
     &__content {
       display: flex;
       padding: 0 24px;
+    }
+
+    .am-switch .el-switch__core:focus-visible {
+      box-shadow: 0 0 2px 2px var(--am-c-caewh-primary);
+      outline: none;
     }
   }
 }

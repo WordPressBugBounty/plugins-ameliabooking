@@ -35,7 +35,7 @@
               {{ service.name }}
             </span>
             <div v-if="customizedOptions.serviceBadge.visibility" class="am-fcis__badge am-service">
-              <span class="am-icon-service"></span>
+              <span class="am-icon-service" aria-hidden="true"></span>
               <span>
                 {{ amLabels.heading_service }}
               </span>
@@ -65,7 +65,11 @@
               </template>
             </span>
             <span class="am-fcis__header-btn">
-              <AmButton :type="customizedOptions.bookingBtn.buttonType" @click="bookNow">
+              <AmButton
+                native-type="button"
+                :type="customizedOptions.bookingBtn.buttonType"
+                @click="bookNow"
+              >
                 {{ amLabels.book_now }}
               </AmButton>
             </span>
@@ -85,21 +89,21 @@
               v-if="customizedOptions.serviceCategory.visibility && category"
               class="am-fcis__mini-info__inner"
             >
-              <span class="am-icon-folder"></span>
+              <span class="am-icon-folder" aria-hidden="true"></span>
               <span>{{ category.name }}</span>
             </div>
             <div
               v-if="customizedOptions.serviceDuration.visibility"
               class="am-fcis__mini-info__inner"
             >
-              <span class="am-icon-clock"></span>
+              <span class="am-icon-clock" aria-hidden="true"></span>
               <span>{{ useServiceDuration(service.duration) }}</span>
             </div>
             <div
               v-if="customizedOptions.serviceCapacity.visibility && !licence.isLite"
               class="am-fcis__mini-info__inner"
             >
-              <span class="am-icon-user"></span>
+              <span class="am-icon-user" aria-hidden="true"></span>
               <span>{{ useEmployeesServiceCapacity(amEntities, service.id) }}</span>
             </div>
             <div
@@ -111,7 +115,7 @@
               "
               class="am-fcis__mini-info__inner"
             >
-              <span class="am-icon-locations"></span>
+              <span class="am-icon-locations" aria-hidden="true"></span>
               <span>
                 {{ displayServiceLocationLabel(amEntities, service.id) }}
               </span>
@@ -131,6 +135,7 @@
             }"
             role="button"
             tabindex="0"
+            :aria-label="getGalleryImageLabel(0)"
             @click="openGallery(0)"
             @keydown.enter="openGallery(0)"
             @keydown.space.prevent="openGallery(0)"
@@ -147,6 +152,7 @@
               :style="{ backgroundImage: `url(${img.pictureFullPath})` }"
               role="button"
               tabindex="0"
+              :aria-label="getGalleryImageLabel(index + 1)"
               @click="openGallery(index + 1)"
               @keydown.enter="openGallery(index + 1)"
               @keydown.space.prevent="openGallery(index + 1)"
@@ -154,6 +160,7 @@
           </div>
           <AmButton
             v-if="service.gallery.length > 1"
+            native-type="button"
             :custom-class="`am-fcis__gallery-btn${pageWidth < 678 ? ' am-mobile' : ''}`"
             category="secondary"
             type="filled"
@@ -170,10 +177,15 @@
           :modal-class="'amelia-v2-booking amelia-v2-sgd'"
           :append-to-body="true"
           :center="true"
-          :lock-scroll="false"
+          :lock-scroll="true"
           width="768px"
         >
-          <div class="am-gd" :style="cssGalleryDialogVars">
+          <div
+            class="am-gd"
+            :style="cssGalleryDialogVars"
+            role="region"
+            :aria-label="getGalleryDialogLabel()"
+          >
             <div class="am-gd__display-wrapper">
               <div class="am-gd__arrows" style="display: flex; justify-content: space-between">
                 <span
@@ -181,68 +193,58 @@
                   role="button"
                   tabindex="0"
                   :aria-label="amLabels.previous_image || 'Previous image'"
-                  @click="
-                    () =>
-                      (activeImage =
-                        activeImage <= 0 ? service.gallery.length - 1 : activeImage - 1)
-                  "
-                  @keydown.enter="
-                    () =>
-                      (activeImage =
-                        activeImage <= 0 ? service.gallery.length - 1 : activeImage - 1)
-                  "
-                  @keydown.space.prevent="
-                    () =>
-                      (activeImage =
-                        activeImage <= 0 ? service.gallery.length - 1 : activeImage - 1)
-                  "
+                  :aria-controls="getGalleryDisplayId(activeImage)"
+                  @click="showPreviousImage"
+                  @keydown.enter="showPreviousImage"
+                  @keydown.space.prevent="showPreviousImage"
                 ></span>
                 <span
                   class="am-icon-arrow-right"
                   role="button"
                   tabindex="0"
                   :aria-label="amLabels.next_image || 'Next image'"
-                  @click="
-                    () =>
-                      (activeImage =
-                        service.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
-                  "
-                  @keydown.enter="
-                    () =>
-                      (activeImage =
-                        service.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
-                  "
-                  @keydown.space.prevent="
-                    () =>
-                      (activeImage =
-                        service.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
-                  "
+                  :aria-controls="getGalleryDisplayId(activeImage)"
+                  @click="showNextImage"
+                  @keydown.enter="showNextImage"
+                  @keydown.space.prevent="showNextImage"
                 ></span>
               </div>
               <div
                 v-for="(img, index) in service.gallery"
                 :key="index"
+                :id="getGalleryDisplayId(index)"
                 class="am-gd__display"
                 :style="{ display: index === activeImage ? 'flex' : 'none' }"
-                @click="
-                  () =>
-                    (activeImage = service.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
-                "
+                role="button"
+                :tabindex="index === activeImage ? 0 : -1"
+                :aria-hidden="index !== activeImage"
+                :aria-label="`${amLabels.next_image || 'Next image'}: ${getGalleryImageLabel(index)}`"
+                @click="showNextImage"
+                @keydown.enter="showNextImage"
+                @keydown.space.prevent="showNextImage"
               >
-                <img :src="img.pictureFullPath" :alt="`Image ${index + 1}`" />
+                <img :src="img.pictureFullPath" :alt="getGalleryImageLabel(index)" />
               </div>
             </div>
-            <div class="am-gd__selection">
+            <div class="am-gd__selection" aria-live="polite">
               {{ `${activeImage + 1}/${service.gallery.length}` }}
             </div>
-            <div class="am-gd__thumb-wrapper">
+            <div class="am-gd__thumb-wrapper" role="group" :aria-label="amLabels.view_all_photos">
               <div
                 v-for="(img, index) in service.gallery"
                 :key="index"
+                :id="getGalleryThumbId(index)"
                 class="am-gd__thumb"
                 :class="{ 'am-active': index === activeImage }"
                 :style="{ backgroundImage: `url(${img.pictureFullPath})` }"
-                @click="() => (activeImage = index)"
+                role="button"
+                tabindex="0"
+                :aria-label="getGalleryImageLabel(index)"
+                :aria-current="index === activeImage ? 'true' : undefined"
+                :aria-controls="getGalleryDisplayId(index)"
+                @click="selectGalleryImage(index)"
+                @keydown.enter="selectGalleryImage(index)"
+                @keydown.space.prevent="selectGalleryImage(index)"
               ></div>
             </div>
           </div>
@@ -250,31 +252,33 @@
         <!-- /Gallery Images -->
 
         <!-- Service Info - (description, employees) -->
-        <div
-          v-if="
-            (customizedOptions.serviceDescription.visibility &&
-              useDescriptionVisibility(service.description)) ||
-            customizedOptions.serviceEmployees.visibility
-          "
-          class="am-fcis__info"
-        >
-          <div class="am-fcis__info-tab__wrapper">
+        <div v-if="hasDescriptionTab || hasEmployeesTab" class="am-fcis__info">
+          <div class="am-fcis__info-tab__wrapper" role="tablist">
             <div
-              v-if="
-                useDescriptionVisibility(service.description) &&
-                customizedOptions.serviceDescription.visibility
-              "
+              v-if="hasDescriptionTab"
+              :id="getInfoTabId('description')"
               class="am-fcis__info-tab"
               :class="{ 'am-active': tabsActive === 'description' }"
-              @click="() => (tabsActive = 'description')"
+              role="tab"
+              :aria-selected="tabsActive === 'description'"
+              :aria-controls="getInfoPanelId('description')"
+              :tabindex="tabsActive === 'description' ? 0 : -1"
+              @click="selectInfoTab('description')"
+              @keydown="handleInfoTabKeydown($event, 'description')"
             >
               {{ amLabels.about_service }}
             </div>
             <div
-              v-if="customizedOptions.serviceEmployees.visibility && !licence.isLite"
+              v-if="hasEmployeesTab"
+              :id="getInfoTabId('employees')"
               :class="{ 'am-active': tabsActive === 'employees' }"
               class="am-fcis__info-tab"
-              @click="() => (tabsActive = 'employees')"
+              role="tab"
+              :aria-selected="tabsActive === 'employees'"
+              :aria-controls="getInfoPanelId('employees')"
+              :tabindex="tabsActive === 'employees' ? 0 : -1"
+              @click="selectInfoTab('employees')"
+              @keydown="handleInfoTabKeydown($event, 'employees')"
             >
               {{ amLabels.tab_employees }}
             </div>
@@ -282,12 +286,12 @@
           <div class="am-fcis__info-content__wrapper">
             <!-- Description -->
             <div
-              v-if="
-                useDescriptionVisibility(service.description) &&
-                customizedOptions.serviceDescription.visibility
-              "
+              v-if="hasDescriptionTab"
               v-show="tabsActive === 'description'"
+              :id="getInfoPanelId('description')"
               class="am-fcis__info-content"
+              role="tabpanel"
+              :aria-labelledby="getInfoTabId('description')"
             >
               <div
                 class="am-fcis__info-service__desc ql-description"
@@ -298,9 +302,12 @@
 
             <!-- Employees -->
             <div
-              v-if="customizedOptions.serviceEmployees.visibility"
+              v-if="hasEmployeesTab"
               v-show="tabsActive === 'employees'"
+              :id="getInfoPanelId('employees')"
               class="am-fcis__info-content"
+              role="tabpanel"
+              :aria-labelledby="getInfoTabId('employees')"
             >
               <AmCollapse>
                 <AmCollapseItem v-for="employee in serviceEmployees" :key="employee.id" side>
@@ -367,7 +374,12 @@
             <span
               v-if="servicePackages.length > 2"
               class="am-fcis__include-heading__btn"
-              @click="() => (displayAllPackages = !displayAllPackages)"
+              role="button"
+              tabindex="0"
+              :aria-expanded="displayAllPackages"
+              @click="togglePackagesVisibility"
+              @keydown.enter="togglePackagesVisibility"
+              @keydown.space.prevent="togglePackagesVisibility"
             >
               <template v-if="!displayAllPackages">
                 {{ amLabels.more_packages }}
@@ -381,7 +393,12 @@
             v-for="pack in displayServicePackages"
             :key="pack.id"
             class="am-fcis__include"
+            role="button"
+            tabindex="0"
+            :aria-label="getPackageAriaLabel(pack)"
             @click="selectServicePackage(pack)"
+            @keydown.enter="selectServicePackage(pack)"
+            @keydown.space.prevent="selectServicePackage(pack)"
           >
             <div class="am-fcis__include-hero">
               <AmImagePlaceholder
@@ -426,14 +443,14 @@
                     v-if="customizedOptions.packageCategory.visibility && category"
                     class="am-fcis__include-info__inner"
                   >
-                    <span class="am-icon-folder"></span>
+                    <span class="am-icon-folder" aria-hidden="true"></span>
                     <span>{{ category.name }}</span>
                   </div>
                   <div
                     v-if="customizedOptions.packageDuration.visibility"
                     class="am-fcis__include-info__inner"
                   >
-                    <span class="am-icon-clock"></span>
+                    <span class="am-icon-clock" aria-hidden="true"></span>
                     <span v-if="pack.endDate">
                       {{ `${amLabels.expires_at} ${pack.endDate.split(' ')[0]}` }}
                     </span>
@@ -453,14 +470,14 @@
                     v-if="customizedOptions.packageCapacity.visibility"
                     class="am-fcis__include-info__inner"
                   >
-                    <span class="am-icon-user"></span>
+                    <span class="am-icon-user" aria-hidden="true"></span>
                     <span>1/1</span>
                   </div>
                   <div
                     v-if="customizedOptions.packageLocation.visibility && packageLocations.length"
                     class="am-fcis__include-info__inner"
                   >
-                    <span class="am-icon-locations"></span>
+                    <span class="am-icon-locations" aria-hidden="true"></span>
                     <span>
                       {{
                         packageLocations.length === 1
@@ -495,7 +512,7 @@
           :modal-class="'amelia-v2-booking amelia-v2-booking-dialog'"
           :destroy-on-close="true"
           :center="true"
-          :lock-scroll="false"
+          :lock-scroll="true"
           :close-on-click-modal="false"
           :close-on-press-escape="false"
           :width="bookingDialogWidth"
@@ -708,6 +725,7 @@ function displayServiceLocationLabel(entities, id) {
 }
 
 let tabsActive = ref('description')
+let accessibilityId = `am-fcis-${Math.random().toString(36).slice(2, 9)}`
 
 let serviceEmployees = computed(() => {
   let arr = []
@@ -725,6 +743,81 @@ let serviceEmployees = computed(() => {
   return arr
 })
 
+let hasDescriptionTab = computed(() => {
+  return (
+    useDescriptionVisibility(service.value.description) &&
+    customizedOptions.value.serviceDescription.visibility
+  )
+})
+
+let hasEmployeesTab = computed(() => {
+  return customizedOptions.value.serviceEmployees.visibility && !licence.isLite
+})
+
+let availableInfoTabs = computed(() => {
+  let tabs = []
+  if (hasDescriptionTab.value) tabs.push('description')
+  if (hasEmployeesTab.value) tabs.push('employees')
+  return tabs
+})
+
+function getInfoTabId(tab) {
+  return `${accessibilityId}-${tab}-tab`
+}
+
+function getInfoPanelId(tab) {
+  return `${accessibilityId}-${tab}-panel`
+}
+
+function selectInfoTab(tab) {
+  if (availableInfoTabs.value.includes(tab)) {
+    tabsActive.value = tab
+  }
+}
+
+function handleInfoTabKeydown(event, currentTab) {
+  let tabs = availableInfoTabs.value
+  let currentIndex = tabs.indexOf(currentTab)
+  let nextIndex = currentIndex
+
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    selectInfoTab(currentTab)
+    return
+  }
+
+  if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+    event.preventDefault()
+    nextIndex = currentIndex === tabs.length - 1 ? 0 : currentIndex + 1
+  } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+    event.preventDefault()
+    nextIndex = currentIndex <= 0 ? tabs.length - 1 : currentIndex - 1
+  } else if (event.key === 'Home') {
+    event.preventDefault()
+    nextIndex = 0
+  } else if (event.key === 'End') {
+    event.preventDefault()
+    nextIndex = tabs.length - 1
+  } else {
+    return
+  }
+
+  selectInfoTab(tabs[nextIndex])
+  nextTick(() => {
+    document.getElementById(getInfoTabId(tabs[nextIndex]))?.focus()
+  })
+}
+
+watch(
+  availableInfoTabs,
+  (tabs) => {
+    if (!tabs.includes(tabsActive.value) && tabs.length) {
+      tabsActive.value = tabs[0]
+    }
+  },
+  { immediate: true },
+)
+
 function serviceEmployeePrice(employee) {
   let servicePrice = employee.serviceList.find((a) => a.id === service.value.id).price
   if (servicePrice - service.value.price !== 0)
@@ -741,14 +834,46 @@ function openGallery(index) {
   activeImage.value = index
 }
 
+function getGalleryImageLabel(index) {
+  return `${service.value.name || amLabels.value.heading_service || 'Service'} ${
+    amLabels.value.image || 'image'
+  } ${index + 1}`
+}
+
+function getGalleryDialogLabel() {
+  return `${service.value.name || amLabels.value.heading_service || 'Service'} ${
+    amLabels.value.gallery || 'gallery'
+  }`
+}
+
+function getGalleryDisplayId(index) {
+  return `${accessibilityId}-gallery-image-${index}`
+}
+
+function getGalleryThumbId(index) {
+  return `${accessibilityId}-gallery-thumb-${index}`
+}
+
+function selectGalleryImage(index) {
+  activeImage.value = index
+}
+
+function showPreviousImage() {
+  activeImage.value =
+    activeImage.value <= 0 ? service.value.gallery.length - 1 : activeImage.value - 1
+}
+
+function showNextImage() {
+  activeImage.value =
+    service.value.gallery.length - 1 === activeImage.value ? 0 : activeImage.value + 1
+}
+
 function galleryKeydownHandler(e) {
   if (!galleryDialog.value) return
   if (e.key === 'ArrowLeft') {
-    activeImage.value =
-      activeImage.value <= 0 ? service.value.gallery.length - 1 : activeImage.value - 1
+    showPreviousImage()
   } else if (e.key === 'ArrowRight') {
-    activeImage.value =
-      service.value.gallery.length - 1 === activeImage.value ? 0 : activeImage.value + 1
+    showNextImage()
   }
 }
 
@@ -765,8 +890,7 @@ onUnmounted(() => {
 })
 
 onMounted(() => {
-  if (!customizedOptions.value.serviceDescription.visibility) tabsActive.value = 'employees'
-  if (!useDescriptionVisibility(service.value.description)) tabsActive.value = 'employees'
+  if (!hasDescriptionTab.value && hasEmployeesTab.value) tabsActive.value = 'employees'
 })
 
 let serviceThumbsGallery = computed(() => {
@@ -799,6 +923,16 @@ let displayServicePackages = computed(() => {
   if (!displayAllPackages.value) return arr.slice(0, 2)
   return arr
 })
+
+function togglePackagesVisibility() {
+  displayAllPackages.value = !displayAllPackages.value
+}
+
+function getPackageAriaLabel(pack) {
+  return `${pack.name}, ${
+    pack.price ? useFormattedPrice(usePackageAmount(pack)) : amLabels.value.free
+  }`
+}
 
 let packageLocations = computed(() =>
   store.getters['entities/filteredLocations'](store.getters['booking/getSelection']),
@@ -1269,7 +1403,7 @@ export default {
 
         &-thumb {
           position: relative;
-          display: inline-block;
+          display: block;
           width: calc(100% - 16px);
           padding-top: calc(50% - 16px);
           margin: 0 0 16px 16px;
@@ -1362,6 +1496,13 @@ export default {
 
           &:hover {
             color: var(--am-c-fcis-primary);
+          }
+
+          &:focus,
+          &:focus-visible {
+            outline: none;
+            box-shadow: inset 0 0 0 2px var(--am-c-fcis-text-op20);
+            border-radius: 4px;
           }
 
           &.am-active {
@@ -1524,6 +1665,12 @@ export default {
         margin: 12px 0 0;
         cursor: pointer;
 
+        &:focus,
+        &:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 2px var(--am-c-fcis-text-op20);
+        }
+
         &-wrapper {
           padding: 12px;
           background-color: var(--am-c-fcis-text-op03);
@@ -1553,6 +1700,12 @@ export default {
             &:hover {
               transition: background-color 0.3s ease-in-out;
               background-color: var(--am-c-fcis-primary-op20);
+            }
+
+            &:focus,
+            &:focus-visible {
+              outline: none;
+              box-shadow: 0 0 0 2px var(--am-c-fcis-text-op20);
             }
           }
         }
@@ -1738,35 +1891,6 @@ export default {
       width: 100%;
       border-radius: 8px;
       background-color: transparent;
-
-      &__header {
-        padding: 0;
-      }
-
-      &__headerbtn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 19px;
-        height: 19px;
-        background-color: var(--am-c-fcis-bgr);
-        color: var(--am-c-fcis-text);
-        border-radius: 50%;
-        z-index: 1000000;
-
-        .el-dialog__close {
-          line-height: 1;
-        }
-      }
-
-      &__body {
-        padding: 0;
-        word-break: break-word;
-      }
-
-      &__footer {
-        display: none;
-      }
     }
   }
 
@@ -1784,36 +1908,6 @@ export default {
       border-radius: 8px;
       background-color: transparent;
       margin-top: var(--el-dialog-margin-top);
-
-      &__header {
-        padding: 0;
-      }
-
-      &__headerbtn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 19px;
-        height: 19px;
-        background-color: var(--am-c-fcis-bgr);
-        color: var(--am-c-fcis-text);
-        border-radius: 50%;
-        z-index: 1000000;
-
-        .el-dialog__close {
-          line-height: 1;
-        }
-      }
-
-      &__body {
-        padding: 0;
-        word-break: break-word;
-        background-color: transparent;
-      }
-
-      &__footer {
-        display: none;
-      }
     }
 
     .am-gd {
@@ -1829,6 +1923,12 @@ export default {
         display: flex;
         align-items: center;
         justify-content: center;
+
+        &:focus,
+        &:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 2px var(--am-c-fcis-primary);
+        }
 
         img {
           width: 100%;
@@ -1856,6 +1956,12 @@ export default {
           font-size: 38px;
           color: var(--am-c-fcis-text);
           cursor: pointer;
+
+          &:focus,
+          &:focus-visible {
+            outline: none;
+            box-shadow: inset 0 0 0 2px var(--am-c-fcis-primary);
+          }
 
           &::before {
             position: absolute;
@@ -1893,6 +1999,12 @@ export default {
         background-size: cover;
         background-repeat: no-repeat;
         background-position: center;
+
+        &:focus,
+        &:focus-visible {
+          outline: none;
+          box-shadow: inset 0 0 0 2px var(--am-c-fcis-primary);
+        }
 
         &:last-child {
           margin-right: 0;

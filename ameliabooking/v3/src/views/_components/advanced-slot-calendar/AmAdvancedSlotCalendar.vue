@@ -201,9 +201,15 @@
     </div>
     <div
       v-if="isDateSelected && !calendarEventSlots.length && !waitingListDisplayTimes.length"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
       style="text-align: center"
     >
       {{ props.labelSlotsSelected }}
+    </div>
+    <div class="am-sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ selectionAnnouncement }}
     </div>
   </div>
 </template>
@@ -623,6 +629,26 @@ let calendarWaitingListSlots = inject('calendarWaitingListSlots')
 
 // * Slots heading
 let slotsHeading = ref(props.date ? getFrontedFormattedDate(props.date) : '')
+
+const selectionAnnouncement = computed(() => {
+  if (!isDateSelected.value) {
+    return ''
+  }
+
+  if (slotsHeading.value) {
+    return slotsHeading.value
+  }
+
+  if (calendarEventDate?.value && calendarEventSlot?.value) {
+    return `${getFrontedFormattedDate(calendarEventDate.value)} - ${getFrontedFormattedTime(calendarEventSlot.value)}`
+  }
+
+  if (calendarEventDate?.value) {
+    return getFrontedFormattedDate(calendarEventDate.value)
+  }
+
+  return ''
+})
 
 // Computed arrays for display
 const combinedStandardSlots = computed(() =>

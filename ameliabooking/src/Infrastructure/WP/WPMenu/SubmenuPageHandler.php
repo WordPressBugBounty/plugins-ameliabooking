@@ -5,7 +5,7 @@ namespace AmeliaBooking\Infrastructure\WP\WPMenu;
 use AmeliaBooking\Application\Services\Helper\HelperService;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
-use AmeliaBooking\Infrastructure\WP\Integrations\WooCommerce\WooCommerceService;
+use AmeliaBooking\Infrastructure\WP\Integrations\WooCommerce\StarterWooCommerceService;
 use AmeliaBooking\Infrastructure\WP\Translations\BackendStrings;
 use AmeliaBooking\Infrastructure\Licence\Licence;
 
@@ -91,11 +91,11 @@ class SubmenuPageHandler
 
         $wcSettings = $this->settingsService->getSetting('payments', 'wc');
 
-        if ($wcSettings['enabled'] && WooCommerceService::isEnabled()) {
+        if ($wcSettings['enabled'] && StarterWooCommerceService::isEnabled()) {
             wp_localize_script(
                 $scriptId,
                 'wpAmeliaWcProducts',
-                WooCommerceService::getInitialProducts()
+                StarterWooCommerceService::getInitialProducts()
             );
         }
 

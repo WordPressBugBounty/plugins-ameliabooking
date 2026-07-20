@@ -26,8 +26,8 @@
     </div>
 
     <div class="am-eli__main">
-      <el-tabs v-model="activeName">
-        <el-tab-pane :label="labelsDisplay('event_info')" name="first">
+      <AmTabs v-model="activeName">
+        <AmTabsItem :label="labelsDisplay('event_info')" name="first">
           <div v-if="selectedEvent.periods.length" class="am-eli__timetable am-eli__main-item">
             <p class="am-eli__timetable-title am-eli__main-title">
               {{ labelsDisplay('event_timetable') }}
@@ -77,8 +77,8 @@
               class="am-eli__main-item"
             ></EventEmployee>
           </template>
-        </el-tab-pane>
-        <el-tab-pane v-if="features.tickets" :label="labelsDisplay('event_tickets')" name="second">
+        </AmTabsItem>
+        <AmTabsItem v-if="features.tickets" :label="labelsDisplay('event_tickets')" name="second">
           <EventTicket
             v-for="ticket in tickets"
             :key="ticket.id"
@@ -88,8 +88,8 @@
             :customized-labels="customLabels"
             :readonly="true"
           />
-        </el-tab-pane>
-      </el-tabs>
+        </AmTabsItem>
+      </AmTabs>
     </div>
   </div>
 
@@ -122,6 +122,8 @@
 </template>
 
 <script setup>
+import AmTabs from '../../../../../../_components/tabs/AmTabs.vue'
+import AmTabsItem from '../../../../../../_components/tabs/AmTabsItem.vue'
 // * _components
 import AmButton from '../../../../../../_components/button/AmButton.vue'
 import AmSlidePopup from '../../../../../../_components/slide-popup/AmSlidePopup.vue'

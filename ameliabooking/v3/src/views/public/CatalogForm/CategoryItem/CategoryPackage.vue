@@ -12,8 +12,8 @@
       <Header
         :btn-string="amLabels.back_btn"
         :btn-type="customizedOptions.backBtn.buttonType"
-        role="presentation"
-        aria-label="Back"
+        role="navigation"
+        :aria-label="amLabels.back_btn"
         @go-back="goBack"
       ></Header>
     </template>
@@ -31,7 +31,7 @@
             </span>
           </span>
           <div v-if="customizedOptions.packageBadge.visibility" class="am-fcip__badge am-package">
-            <span class="am-icon-shipment"></span>
+            <span class="am-icon-shipment" aria-hidden="true"></span>
             <span>
               {{ amLabels.package }}
             </span>
@@ -80,14 +80,14 @@
       >
         <div class="am-fcip__mini-info">
           <div v-if="catNameVisibility" class="am-fcip__mini-info__inner">
-            <span class="am-icon-folder"></span>
+            <span class="am-icon-folder" aria-hidden="true"></span>
             <span>{{ category.name }}</span>
           </div>
           <div
             v-if="customizedOptions.packageDuration.visibility"
             class="am-fcip__mini-info__inner"
           >
-            <span class="am-icon-clock"></span>
+            <span class="am-icon-clock" aria-hidden="true"></span>
             <span v-if="pack.endDate">
               {{ `${amLabels.expires_at} ${pack.endDate.split(' ')[0]}` }}
             </span>
@@ -107,14 +107,14 @@
             v-if="customizedOptions.packageCapacity.visibility"
             class="am-fcip__mini-info__inner"
           >
-            <span class="am-icon-user"></span>
+            <span class="am-icon-user" aria-hidden="true"></span>
             <span>1/1</span>
           </div>
           <div
             v-if="packLocations.length && customizedOptions.packageLocation.visibility"
             class="am-fcip__mini-info__inner"
           >
-            <span class="am-icon-locations"></span>
+            <span class="am-icon-locations" aria-hidden="true"></span>
             <span>
               {{ displayPackageLocationLabel(packLocations) }}
             </span>
@@ -133,6 +133,8 @@
           }"
           role="button"
           tabindex="0"
+          aria-haspopup="dialog"
+          :aria-label="getGalleryImageLabel(0)"
           @click="openGallery(0)"
           @keydown.enter="openGallery(0)"
           @keydown.space.prevent="openGallery(0)"
@@ -149,6 +151,8 @@
             :style="{ backgroundImage: `url(${img.pictureFullPath})` }"
             role="button"
             tabindex="0"
+            aria-haspopup="dialog"
+            :aria-label="getGalleryImageLabel(index + 1)"
             @click="openGallery(index + 1)"
             @keydown.enter="openGallery(index + 1)"
             @keydown.space.prevent="openGallery(index + 1)"
@@ -161,7 +165,7 @@
           type="filled"
           @click="openGallery(0)"
         >
-          <span class="am-icon-gallery"></span>
+          <span class="am-icon-gallery" aria-hidden="true"></span>
           <span>
             {{ amLabels.view_all_photos }}
           </span>
@@ -186,33 +190,18 @@
                 role="button"
                 tabindex="0"
                 :aria-label="amLabels.previous_image || 'Previous image'"
-                @click="
-                  () => (activeImage = activeImage <= 0 ? pack.gallery.length - 1 : activeImage - 1)
-                "
-                @keydown.enter="
-                  () => (activeImage = activeImage <= 0 ? pack.gallery.length - 1 : activeImage - 1)
-                "
-                @keydown.space.prevent="
-                  () => (activeImage = activeImage <= 0 ? pack.gallery.length - 1 : activeImage - 1)
-                "
+                @click="previousGalleryImage"
+                @keydown.enter="previousGalleryImage"
+                @keydown.space.prevent="previousGalleryImage"
               ></span>
               <span
                 class="am-icon-arrow-right"
                 role="button"
                 tabindex="0"
                 :aria-label="amLabels.next_image || 'Next image'"
-                @click="
-                  () =>
-                    (activeImage = pack.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
-                "
-                @keydown.enter="
-                  () =>
-                    (activeImage = pack.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
-                "
-                @keydown.space.prevent="
-                  () =>
-                    (activeImage = pack.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
-                "
+                @click="nextGalleryImage"
+                @keydown.enter="nextGalleryImage"
+                @keydown.space.prevent="nextGalleryImage"
               ></span>
             </div>
             <div
@@ -220,24 +209,40 @@
               :key="index"
               class="am-gd__display"
               :style="{ display: index === activeImage ? 'flex' : 'none' }"
-              @click="
-                () => (activeImage = pack.gallery.length - 1 === activeImage ? 0 : activeImage + 1)
-              "
+              role="button"
+              :tabindex="index === activeImage ? 0 : -1"
+              :aria-label="`${amLabels.next_image || 'Next image'}: ${getGalleryImageAlt(index)}`"
+              @click="nextGalleryImage"
+              @keydown.enter="nextGalleryImage"
+              @keydown.space.prevent="nextGalleryImage"
             >
-              <img :src="img.pictureFullPath" :alt="index" />
+              <img :src="img.pictureFullPath" :alt="getGalleryImageAlt(index)" />
             </div>
           </div>
-          <div class="am-gd__selection">
+          <div class="am-gd__selection" aria-live="polite">
             {{ `${activeImage + 1}/${pack.gallery.length}` }}
           </div>
-          <div class="am-gd__thumb-wrapper">
+          <div
+            class="am-gd__thumb-wrapper"
+            role="listbox"
+            :aria-label="amLabels.view_all_photos || 'Package gallery'"
+          >
             <div
               v-for="(img, index) in pack.gallery"
               :key="index"
+              :id="`am-fcip-gallery-thumb-${index}`"
               class="am-gd__thumb"
               :class="{ 'am-active': index === activeImage }"
               :style="{ backgroundImage: `url(${img.pictureFullPath})` }"
-              @click="() => (activeImage = index)"
+              role="option"
+              :tabindex="index === activeImage ? 0 : -1"
+              :aria-selected="index === activeImage"
+              :aria-label="getGalleryImageLabel(index)"
+              @click="setActiveGalleryImage(index)"
+              @keydown.enter="setActiveGalleryImage(index)"
+              @keydown.space.prevent="setActiveGalleryImage(index)"
+              @keydown.left.prevent="selectPreviousGalleryThumb"
+              @keydown.right.prevent="selectNextGalleryThumb"
             ></div>
           </div>
         </div>
@@ -253,7 +258,11 @@
         "
         class="am-fcip__info"
       >
-        <div class="am-fcip__info-tab__wrapper">
+        <div
+          class="am-fcip__info-tab__wrapper"
+          role="tablist"
+          :aria-label="amLabels.package || 'Package details'"
+        >
           <div
             v-if="
               useDescriptionVisibility(pack.description) &&
@@ -261,7 +270,13 @@
             "
             class="am-fcip__info-tab"
             :class="{ 'am-active': tabsActive === 'description' }"
-            @click="() => (tabsActive = 'description')"
+            id="am-fcip-description-tab"
+            role="tab"
+            :tabindex="tabsActive === 'description' ? 0 : -1"
+            :aria-selected="tabsActive === 'description'"
+            aria-controls="am-fcip-description-panel"
+            @click="setActiveInfoTab('description')"
+            @keydown="handleInfoTabKeydown($event, 'description')"
           >
             {{ amLabels.about_package }}
           </div>
@@ -269,7 +284,13 @@
             v-if="customizedOptions.packageEmployees.visibility"
             :class="{ 'am-active': tabsActive === 'employees' }"
             class="am-fcip__info-tab"
-            @click="() => (tabsActive = 'employees')"
+            id="am-fcip-employees-tab"
+            role="tab"
+            :tabindex="tabsActive === 'employees' ? 0 : -1"
+            :aria-selected="tabsActive === 'employees'"
+            aria-controls="am-fcip-employees-panel"
+            @click="setActiveInfoTab('employees')"
+            @keydown="handleInfoTabKeydown($event, 'employees')"
           >
             {{ amLabels.tab_employees }}
           </div>
@@ -283,6 +304,10 @@
             "
             v-show="tabsActive === 'description'"
             class="am-fcip__info-content"
+            id="am-fcip-description-panel"
+            role="tabpanel"
+            aria-labelledby="am-fcip-description-tab"
+            tabindex="0"
           >
             <div class="am-fcip__info-service__desc ql-description" v-html="pack.description"></div>
           </div>
@@ -293,6 +318,10 @@
             v-if="customizedOptions.packageEmployees.visibility"
             v-show="tabsActive === 'employees'"
             class="am-fcip__info-content"
+            id="am-fcip-employees-panel"
+            role="tabpanel"
+            aria-labelledby="am-fcip-employees-tab"
+            tabindex="0"
           >
             <AmCollapse>
               <AmCollapseItem v-for="employee in packEmployees" :key="employee.id" side>
@@ -556,17 +585,121 @@ let galleryDialog = ref(false)
 
 function openGallery(index) {
   galleryDialog.value = true
+  setActiveGalleryImage(index)
+}
+
+function setActiveGalleryImage(index) {
   activeImage.value = index
+}
+
+function previousGalleryImage() {
+  activeImage.value = activeImage.value <= 0 ? pack.value.gallery.length - 1 : activeImage.value - 1
+}
+
+function nextGalleryImage() {
+  activeImage.value =
+    pack.value.gallery.length - 1 === activeImage.value ? 0 : activeImage.value + 1
+}
+
+function focusActiveGalleryThumb() {
+  nextTick(() => {
+    const thumbElement = document.getElementById(`am-fcip-gallery-thumb-${activeImage.value}`)
+    if (thumbElement) thumbElement.focus()
+  })
+}
+
+function selectPreviousGalleryThumb() {
+  previousGalleryImage()
+  focusActiveGalleryThumb()
+}
+
+function selectNextGalleryThumb() {
+  nextGalleryImage()
+  focusActiveGalleryThumb()
+}
+
+function getGalleryImageLabel(index) {
+  return `${amLabels.value.view_all_photos || 'View photo'} ${index + 1} ${
+    amLabels.value.of || 'of'
+  } ${pack.value.gallery.length}: ${pack.value.name}`
+}
+
+function getGalleryImageAlt(index) {
+  return `${pack.value.name}, ${index + 1} ${
+    amLabels.value.of || 'of'
+  } ${pack.value.gallery.length}`
 }
 
 function galleryKeydownHandler(e) {
   if (!galleryDialog.value) return
   if (e.key === 'ArrowLeft') {
-    activeImage.value =
-      activeImage.value <= 0 ? pack.value.gallery.length - 1 : activeImage.value - 1
+    previousGalleryImage()
   } else if (e.key === 'ArrowRight') {
-    activeImage.value =
-      pack.value.gallery.length - 1 === activeImage.value ? 0 : activeImage.value + 1
+    nextGalleryImage()
+  }
+}
+
+function visibleInfoTabs() {
+  const tabs = []
+
+  if (
+    useDescriptionVisibility(pack.value.description) &&
+    customizedOptions.value.packageDescription.visibility
+  ) {
+    tabs.push('description')
+  }
+
+  if (customizedOptions.value.packageEmployees.visibility) {
+    tabs.push('employees')
+  }
+
+  return tabs
+}
+
+function getInfoTabId(tab) {
+  return `am-fcip-${tab}-tab`
+}
+
+function setActiveInfoTab(tab, focusTab = false) {
+  tabsActive.value = tab
+
+  if (focusTab) {
+    nextTick(() => {
+      const tabElement = document.getElementById(getInfoTabId(tab))
+      if (tabElement) tabElement.focus()
+    })
+  }
+}
+
+function handleInfoTabKeydown(event, currentTab) {
+  const tabs = visibleInfoTabs()
+  const currentIndex = tabs.indexOf(currentTab)
+
+  if (currentIndex === -1) return
+
+  if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+    event.preventDefault()
+    setActiveInfoTab(tabs[(currentIndex - 1 + tabs.length) % tabs.length], true)
+  }
+
+  if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+    event.preventDefault()
+    setActiveInfoTab(tabs[(currentIndex + 1) % tabs.length], true)
+  }
+
+  if (event.key === 'Home') {
+    event.preventDefault()
+    setActiveInfoTab(tabs[0], true)
+  }
+
+  if (event.key === 'End') {
+    event.preventDefault()
+    setActiveInfoTab(tabs[tabs.length - 1], true)
+  }
+
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    setActiveInfoTab(currentTab)
   }
 }
 
@@ -1107,6 +1240,13 @@ export default {
           padding: 12px 16px;
           cursor: pointer;
 
+          &:focus,
+          &:focus-visible {
+            outline: none;
+            box-shadow: inset 0 0 0 2px var(--am-c-fcip-primary);
+            border-radius: 4px 4px 0 0;
+          }
+
           &:hover {
             color: var(--am-c-fcip-primary);
           }
@@ -1420,38 +1560,11 @@ export default {
       background-color: transparent;
 
       &__header {
-        padding: 0;
-      }
-
-      &__headerbtn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 19px;
-        height: 19px;
-        background-color: var(--am-c-fcip-bgr);
-        color: var(--am-c-fcip-text);
-        border-radius: 50%;
-        z-index: 1000000;
-
-        &:active {
-          position: absolute;
-          border: none;
-          outline: 0;
-        }
-
-        .el-dialog__close {
-          line-height: 1;
-        }
+        min-height: auto;
       }
 
       &__body {
         padding: 0;
-        word-break: break-word;
-      }
-
-      &__footer {
-        display: none;
       }
     }
   }
@@ -1490,16 +1603,6 @@ export default {
           line-height: 1;
         }
       }
-
-      &__body {
-        padding: 0;
-        word-break: break-word;
-        background-color: transparent;
-      }
-
-      &__footer {
-        display: none;
-      }
     }
 
     .am-gd {
@@ -1515,6 +1618,13 @@ export default {
         display: flex;
         align-items: center;
         justify-content: center;
+
+        &:focus,
+        &:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 2px var(--am-c-fcip-primary);
+          border-radius: 8px;
+        }
 
         img {
           width: 100%;
@@ -1542,6 +1652,12 @@ export default {
           font-size: 38px;
           color: var(--am-c-fcip-text);
           cursor: pointer;
+
+          &:focus,
+          &:focus-visible {
+            outline: none;
+            box-shadow: inset 0 0 0 2px var(--am-c-fcip-primary);
+          }
 
           &::before {
             position: absolute;
@@ -1579,6 +1695,12 @@ export default {
         background-size: cover;
         background-repeat: no-repeat;
         background-position: center;
+
+        &:focus,
+        &:focus-visible {
+          outline: none;
+          box-shadow: inset 0 0 0 2px var(--am-c-fcip-primary);
+        }
 
         &:last-child {
           margin-right: 0;

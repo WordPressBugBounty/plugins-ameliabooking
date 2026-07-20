@@ -6,6 +6,10 @@
     :closable="props.closable"
     :lazy="props.lazy"
   >
+    <template v-if="$slots.label" #label>
+      <slot name="label"></slot>
+    </template>
+
     <slot></slot>
   </el-tab-pane>
 </template>
@@ -17,6 +21,7 @@
 const props = defineProps({
   label: {
     type: String,
+    default: '',
   },
   disabled: {
     type: Boolean,

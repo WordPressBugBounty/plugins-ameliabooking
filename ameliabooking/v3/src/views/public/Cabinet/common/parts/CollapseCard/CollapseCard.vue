@@ -133,6 +133,7 @@
                     ? amSettings.roles.allowWriteAppointments
                     : true
                 "
+                :id="editPopperId"
                 ref="editRef"
                 :visible="editPopVisible"
                 :persistent="false"
@@ -163,40 +164,41 @@
                   v-if="
                     (props.reservation.type === 'appointment' &&
                       amSettings.roles.allowWriteAppointments) ||
-                    (props.reservation.type === 'event' && amSettings.roles.allowWriteEvents)
+                    props.reservation.type === 'event'
                   "
                   v-click-outside="closeEditItemPopup"
                   class="am-cc__edit"
                   role="menu"
                   @keydown="onMenuKeydown"
                 >
-                  <!-- Edit Appointment -->
-                  <AmButton
-                    class="am-cc__edit-item am-edit"
-                    category="secondary"
-                    type="text"
-                    prefix="edit"
-                    role="menuitem"
-                    :aria-label="amLabels.edit"
-                    @click="editReservation(props.reservation.type)"
+                  <template
+                    v-if="
+                      (props.reservation.type === 'appointment' &&
+                        amSettings.roles.allowWriteAppointments) ||
+                      (props.reservation.type === 'event' && amSettings.roles.allowWriteEvents)
+                    "
                   >
-                    <span class="am-cc__edit-text">
-                      {{ amLabels.edit }}
-                    </span>
-                  </AmButton>
-                  <!-- /Edit Appointment -->
-                </div>
+                    <!-- Edit Appointment -->
+                    <AmButton
+                      class="am-cc__edit-item am-edit"
+                      category="secondary"
+                      type="text"
+                      prefix="edit"
+                      role="menuitem"
+                      :aria-label="amLabels.edit"
+                      @click="editReservation(props.reservation.type)"
+                    >
+                      <span class="am-cc__edit-text">
+                        {{ amLabels.edit }}
+                      </span>
+                    </AmButton>
+                    <!-- /Edit Appointment -->
+                  </template>
 
-                <template v-if="props.reservation.type === 'event'">
-                  <div
-                    v-if="amSettings.roles.allowWriteEvents"
-                    v-click-outside="closeEditItemPopup"
-                    class="am-cc__edit"
-                    role="menu"
-                    @keydown="onMenuKeydown"
-                  >
+                  <template v-if="props.reservation.type === 'event'">
                     <!-- Edit Attendee -->
                     <AmButton
+                      v-if="amSettings.roles.allowWriteEvents"
                       class="am-cc__edit-item am-edit"
                       category="secondary"
                       type="text"
@@ -210,13 +212,7 @@
                       </span>
                     </AmButton>
                     <!-- /Edit Attendee -->
-                  </div>
-                  <div
-                    v-click-outside="closeEditItemPopup"
-                    class="am-cc__edit"
-                    role="menu"
-                    @keydown="onMenuKeydown"
-                  >
+
                     <!-- List Event Attendees -->
                     <AmButton
                       class="am-cc__edit-item am-edit"
@@ -232,8 +228,8 @@
                       </span>
                     </AmButton>
                     <!-- /List Event Attendees -->
-                  </div>
-                </template>
+                  </template>
+                </div>
               </el-popover>
             </div>
             <div
@@ -262,6 +258,7 @@
                       (amSettings.roles.allowCustomerReschedule &&
                         props.reservation.reschedulable)))
                 "
+                :id="editPopperId"
                 ref="editRef"
                 :visible="editPopVisible"
                 :persistent="false"
@@ -648,7 +645,7 @@
 
 <script setup>
 // * Import from Vue
-import { ref, computed, inject, nextTick } from 'vue'
+import { ref, computed, inject, nextTick, getCurrentInstance } from 'vue'
 
 // * Import from Libraries
 import { ClickOutside as vClickOutside } from 'element-plus'
@@ -800,7 +797,9 @@ const amLabels = inject('amLabels')
 let licence = inject('licence')
 
 let editPopVisible = ref(false)
+let editRef = ref(null)
 let menuTriggerRef = ref(null)
+const editPopperId = `am-cc-edit-popover-${getCurrentInstance().uid}`
 
 function editItem(e) {
   e.stopPropagation()
@@ -824,9 +823,31 @@ function onMenuTriggerKeydown(e) {
   }
 }
 
+function getEditPopperRoot(container = null) {
+  const fromContainer = container?.closest?.('.am-cc__popper')
+
+  if (fromContainer) {
+    return fromContainer
+  }
+
+  if (!editRef.value || !editPopVisible.value) {
+    return null
+  }
+
+  const popperById = document.getElementById(editPopperId)
+
+  if (popperById) {
+    return popperById
+  }
+
+  const trigger = menuTriggerRef.value?.$el || menuTriggerRef.value
+  const describedBy = trigger?.getAttribute?.('aria-describedby')
+
+  return describedBy ? document.getElementById(describedBy) : null
+}
+
 function getVisibleMenuItems(container = null) {
-  const popperRoot =
-    container?.closest('.am-cc__popper') || document.querySelector('.am-cc__popper')
+  const popperRoot = getEditPopperRoot(container)
 
   if (!popperRoot) {
     return []

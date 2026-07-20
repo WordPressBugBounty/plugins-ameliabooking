@@ -90,9 +90,9 @@
       </AmButton>
     </div>
 
-    <el-tabs v-if="!eventAttendeeVisibility" v-model="activeTab" @tab-click="tabClick">
+    <AmTabs v-if="!eventAttendeeVisibility" v-model="activeTab" @tab-click="tabClick">
       <!-- Attendees -->
-      <el-tab-pane :label="amLabels.attendees" name="approved">
+      <AmTabsItem :label="amLabels.attendees" name="approved">
         <div v-if="!approvedBookingsLoading" class="am-capei-att__card-wrapper">
           <template v-if="approvedBookingsList.length">
             <div
@@ -226,11 +226,11 @@
           <EmptyState v-else :heading="amLabels.no_attendees_yet" />
         </div>
         <Skeleton v-else />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Attendees -->
 
       <!-- Waiting List -->
-      <el-tab-pane
+      <AmTabsItem
         v-if="
           amSettings.featuresIntegrations.waitingList.enabled &&
           eventSettings !== null &&
@@ -356,9 +356,9 @@
           <EmptyState v-else :heading="amLabels.no_attendees_yet" />
         </div>
         <Skeleton v-else />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Waiting List -->
-    </el-tabs>
+    </AmTabs>
 
     <CancelPopup
       :visibility="removeDialogVisible"
@@ -390,6 +390,8 @@
 </template>
 
 <script setup>
+import AmTabs from '../../../../../_components/tabs/AmTabs.vue'
+import AmTabsItem from '../../../../../_components/tabs/AmTabsItem.vue'
 // * Import from Vue
 import { ref, inject, onMounted, computed } from 'vue'
 

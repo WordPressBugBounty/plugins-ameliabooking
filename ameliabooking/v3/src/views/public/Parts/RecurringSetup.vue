@@ -98,9 +98,7 @@
         </span>
         <span v-if="repeatType === 'monthly'">
           {{ ` ${amLabels.repeats_on} ${monthlyTypes[repeatMonthly].label}` }}
-          <span v-if="repeatMonthly !== 0">
-            {{ ` ${selectedDayInMonth}` }} </span
-          >,
+          <span v-if="repeatMonthly !== 0"> {{ ` ${selectedDayInMonth}` }} </span>,
         </span>
         <span>
           {{

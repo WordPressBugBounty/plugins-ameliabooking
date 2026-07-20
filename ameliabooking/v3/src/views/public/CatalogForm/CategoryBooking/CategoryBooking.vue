@@ -19,15 +19,21 @@
   >
     <SideBar
       v-if="containerWidth > 560 && sidebarVisibility"
+      :id="sidebarId"
       class="am-fs-sb"
       :class="{ 'am-collapsed': sidebarCollapsed }"
       :style="{
         width: !sidebarCollapsed ? '240px' : '72px',
         paddingBottom: `${sidebarFooterHeight + 16}px`,
       }"
+      :aria-label="amLabels.booking_summary || 'Booking progress'"
     >
       <template #step-list>
-        <div class="am-fs-sb__step-wrapper" tabindex="0">
+        <div
+          class="am-fs-sb__step-wrapper"
+          role="list"
+          :aria-label="amLabels.booking_summary || 'Booking progress'"
+        >
           <template
             v-if="
               stepsArray[stepIndex] !== congratulationsStep ||
@@ -35,9 +41,16 @@
               (booked && booked.data.length === 0)
             "
           >
-            <div v-for="step in sidebarSteps" :key="step.key" class="am-fs-sb__step">
+            <div
+              v-for="step in sidebarSteps"
+              :key="step.key"
+              class="am-fs-sb__step"
+              role="listitem"
+              :aria-current="step.selected ? 'step' : undefined"
+              :aria-label="getSidebarStepAriaLabel(step)"
+            >
               <div class="am-fs-sb__step-inner">
-                <div class="am-fs-sb__step-icon">
+                <div class="am-fs-sb__step-icon" aria-hidden="true">
                   <span :class="`am-icon-${step.icon}`"></span>
                   <span
                     v-if="step.key === 'cartStep' && useCartHasItems(store) !== 0"
@@ -62,6 +75,7 @@
                     { 'am-fs-sb__step-checker-selected': step.selected },
                     sidebarCollapseItemsClass,
                   ]"
+                  aria-hidden="true"
                 >
                   <transition name="fade">
                     <span v-if="step.finished" class="am-icon-check"></span>
@@ -96,13 +110,17 @@
             </div>
           </template>
           <template v-else>
-            <div>
+            <div
+              role="listitem"
+              :aria-current="stepsArray[stepIndex].sidebarData.selected ? 'step' : undefined"
+              :aria-label="getCurrentSidebarStepAriaLabel()"
+            >
               <transition name="fade">
                 <AddToCalendar v-if="!sidebarCollapsed"></AddToCalendar>
               </transition>
               <div v-if="sidebarCollapsed" class="am-fs-sb__step">
                 <div class="am-fs-sb__step-inner">
-                  <div class="am-fs-sb__step-icon">
+                  <div class="am-fs-sb__step-icon" aria-hidden="true">
                     <span :class="`am-icon-${stepsArray[stepIndex].sidebarData.icon}`"></span>
                   </div>
                   <div
@@ -114,6 +132,7 @@
                       },
                       sidebarCollapseItemsClass,
                     ]"
+                    aria-hidden="true"
                   >
                     <transition name="fade">
                       <span
@@ -158,7 +177,7 @@
                 {{ amSettings.company.phone }}
               </template>
               <template v-else>
-                <span class="am-icon-phone"></span>
+                <span class="am-icon-phone" aria-hidden="true"></span>
               </template>
             </a>
             <a
@@ -171,21 +190,31 @@
                 {{ amSettings.company.email }}
               </template>
               <template v-else>
-                <span class="am-icon-email"></span>
+                <span class="am-icon-email" aria-hidden="true"></span>
               </template>
             </a>
           </div>
           <div
             class="am-fs-sb__menu"
             :class="sidebarCollapseItemsClass"
-            @click="sidebarCollapsed = !sidebarCollapsed"
+            role="button"
+            tabindex="0"
+            :aria-controls="sidebarId"
+            :aria-expanded="!sidebarCollapsed"
+            :aria-label="sidebarToggleAriaLabel"
+            @click="toggleSidebar"
+            @keydown.enter.prevent="toggleSidebar"
+            @keyup.space.prevent="toggleSidebar"
           >
             <Transition name="fade">
               <span v-if="!sidebarCollapsed" class="am-fs-sb__menu-text">
                 {{ amLabels.collapse_menu }}
               </span>
             </Transition>
-            <span :class="`am-icon-arrow-circle-${sidebarCollapsed ? 'left' : 'right'}`"></span>
+            <span
+              :class="`am-icon-arrow-circle-${sidebarCollapsed ? 'left' : 'right'}`"
+              aria-hidden="true"
+            ></span>
           </div>
         </div>
       </template>
@@ -290,6 +319,7 @@ import {
   onMounted,
   watchEffect,
   nextTick,
+  getCurrentInstance,
 } from 'vue'
 // * import from Vuex
 import { useStore } from 'vuex'
@@ -398,6 +428,10 @@ provide('amFonts', amFonts)
 let sidebarCollapsed = ref(false)
 provide('sidebarCollapsed', sidebarCollapsed)
 
+function toggleSidebar() {
+  sidebarCollapsed.value = !sidebarCollapsed.value
+}
+
 let sidebarCollapseItemsClass = ref('')
 
 let bookingDialogWidth = inject('bookingDialogWidth')
@@ -482,6 +516,9 @@ let preselected = computed(() => {
   return bookingPreselected
 })
 
+const sidebarIdSuffix = preselected.value.counter || getCurrentInstance().uid
+const sidebarId = `am-category-booking-sidebar-${sidebarIdSuffix}`
+
 store.commit('entities/setPreselected', preselected.value)
 
 let restore = inject('restoreFormData')
@@ -544,6 +581,44 @@ let amLabels = computed(() => {
 })
 
 provide('amLabels', amLabels)
+
+let sidebarToggleAriaLabel = computed(() => {
+  return sidebarCollapsed.value
+    ? amLabels.value.expand_menu || 'Expand menu'
+    : amLabels.value.collapse_menu || 'Collapse menu'
+})
+
+function getSidebarStepAriaLabel(step) {
+  const status = step.selected
+    ? amLabels.value.current || 'Current'
+    : step.finished
+      ? amLabels.value.completed || 'Completed'
+      : amLabels.value.upcoming || 'Upcoming'
+
+  const cartItems =
+    step.key === 'cartStep' && useCartHasItems(store) !== 0
+      ? `, ${useCartHasItems(store)} ${amLabels.value.items || 'items'}`
+      : ''
+
+  const selectedData = step.stepSelectedData.length
+    ? `, ${step.stepSelectedData.map((item) => item.value).join(', ')}`
+    : ''
+
+  return `${step.label}, ${status}${cartItems}${selectedData}`
+}
+
+function getCurrentSidebarStepAriaLabel() {
+  return getSidebarStepAriaLabel({
+    label:
+      amLabels.value[stepsArray.value[stepIndex.value].sidebarData.label] ||
+      amLabels.value.add_to_calendar ||
+      'Add to calendar',
+    key: stepsArray.value[stepIndex.value].key,
+    stepSelectedData: [],
+    finished: stepsArray.value[stepIndex.value].sidebarData.finished,
+    selected: stepsArray.value[stepIndex.value].sidebarData.selected,
+  })
+}
 
 let footerLabels = computed(() => {
   let customLabels = {}

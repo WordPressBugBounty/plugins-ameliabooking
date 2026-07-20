@@ -118,6 +118,7 @@ let arrowDown = {
 }
 
 let payPopVisible = ref(false)
+let payRef = ref(null)
 let menuTriggerRef = ref(null)
 
 function paymentLinkActivated(e) {
@@ -154,9 +155,32 @@ function onMenuTriggerKeydown(e) {
   }
 }
 
+function unwrapMaybeRef(value) {
+  if (value != null && typeof value === 'object' && 'value' in value) {
+    return value.value
+  }
+
+  return value
+}
+
+function getPayPopperRoot() {
+  const popperComponent = unwrapMaybeRef(unwrapMaybeRef(payRef.value)?.popperRef)
+  const contentEl = unwrapMaybeRef(popperComponent?.contentRef)
+
+  if (!(contentEl instanceof HTMLElement)) {
+    return null
+  }
+
+  return contentEl.classList.contains('am-cc__popper')
+    ? contentEl
+    : contentEl.closest('.am-cc__popper')
+}
+
 function getVisibleMenuItems(container = null) {
   const popperRoot =
-    container?.closest('.am-cc__popper') || document.querySelector('.am-cc__popper')
+    getPayPopperRoot() ||
+    container?.closest('.am-cc__popper') ||
+    (!payRef.value && document.querySelector('.am-cc__popper'))
 
   if (!popperRoot) {
     return []

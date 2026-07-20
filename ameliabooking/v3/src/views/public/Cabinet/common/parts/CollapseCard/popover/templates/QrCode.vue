@@ -1,6 +1,6 @@
 <template>
   <div ref="qrCodesRef" class="am-cc__qr-codes">
-    <div v-if="errorMessage" class="am-cc__qr-codes__message" role="alert" aria-live="assertive">
+    <div v-if="errorMessage" class="am-cc__qr-codes__message" role="status" aria-live="polite">
       <span class="am-icon-info-reverse"></span>
       {{ errorMessage }}
     </div>

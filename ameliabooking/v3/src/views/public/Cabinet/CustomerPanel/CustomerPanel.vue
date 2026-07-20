@@ -924,15 +924,13 @@ export default {
         // tabs
         .el-tabs {
           display: flex;
-          flex-direction: column-reverse;
+          flex-direction: column;
           gap: 16px 0;
 
           &__nav {
             gap: 0 40px;
 
             &-wrap {
-              overflow: visible;
-
               &:after {
                 background-color: var(--am-c-main-text-op10);
               }
@@ -950,6 +948,8 @@ export default {
             &-prev {
               color: var(--am-c-main-text);
               top: 11px;
+              background-color: var(--am-c-main-bgr);
+              z-index: 10;
             }
           }
 
@@ -962,21 +962,16 @@ export default {
             line-height: 40px;
             color: var(--am-c-main-text);
             transition: color 0.2s ease-in-out;
-
-            &:nth-child(2) {
-              padding-left: 0;
-            }
-
-            &:last-child {
-              padding-right: 0;
-            }
+            padding: 0 4px;
+            border-radius: 4px;
+            font-size: var(--am-fs-label);
 
             &.is-active {
               color: var(--am-c-primary);
             }
 
             &:focus-visible {
-              box-shadow: 0 0 0 2px var(--am-c-capi-primary);
+              box-shadow: 0 0 0 2px var(--am-c-primary) inset;
             }
 
             &:hover {
@@ -1026,7 +1021,7 @@ export default {
 
           &:focus-visible {
             outline: 2px solid var(--am-c-primary);
-            outline-offset: 2px;
+            outline-offset: -2px;
           }
 
           &.is-disabled {

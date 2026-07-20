@@ -1,12 +1,22 @@
 <template>
-  <div role="navigation" class="am-cat__sidemenu" :style="cssVars">
-    <div class="am-cat__sidemenu-item__wrapper">
+  <div role="navigation" aria-label="Catalog categories" class="am-cat__sidemenu" :style="cssVars">
+    <div class="am-cat__sidemenu-item__wrapper" role="group">
       <div
         v-for="(item, index) in menuItems"
         :key="index"
         class="am-cat__sidemenu-item"
-        :class="{ 'am-active': props.initSelection === item[props.identifier] }"
+        role="button"
+        tabindex="0"
+        :aria-current="isItemSelected(item) ? 'true' : undefined"
+        :aria-label="getItemLabel(item)"
+        :class="{ 'am-active': isItemSelected(item) }"
         @click="() => selectItem(item)"
+        @keydown.enter.prevent="selectItem(item)"
+        @keydown.space.prevent="selectItem(item)"
+        @keydown.down.prevent="focusSideMenuItem($event, index + 1)"
+        @keydown.up.prevent="focusSideMenuItem($event, index - 1)"
+        @keydown.home.prevent="focusSideMenuItem($event, 0)"
+        @keydown.end.prevent="focusSideMenuItem($event, menuItems.length - 1)"
       >
         {{ item[props.nameIdentifier] }}
       </div>
@@ -55,6 +65,29 @@ let emits = defineEmits(['click'])
 
 function selectItem(item) {
   emits('click', item)
+}
+
+function isItemSelected(item) {
+  return props.initSelection === item[props.identifier]
+}
+
+function getItemLabel(item) {
+  return item[props.nameIdentifier]
+}
+
+function focusSideMenuItem(event, index) {
+  let items = event.currentTarget.parentElement.querySelectorAll('.am-cat__sidemenu-item')
+  let targetIndex = index
+
+  if (targetIndex < 0) {
+    targetIndex = items.length - 1
+  }
+
+  if (targetIndex >= items.length) {
+    targetIndex = 0
+  }
+
+  items[targetIndex].focus()
 }
 
 // * Colors
@@ -120,6 +153,12 @@ export default {
           background-color: var(--am-c-csm-text-op10);
         }
 
+        &:focus-visible {
+          outline: 2px solid var(--am-c-csm-primary);
+          outline-offset: 2px;
+          background-color: var(--am-c-csm-text-op10);
+        }
+
         &.am-active {
           color: var(--am-c-csm-primary);
           background-color: var(--am-c-csm-primary-op10);
@@ -142,6 +181,7 @@ export default {
 
         &__text {
           display: -webkit-box;
+          line-clamp: 2;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
@@ -155,6 +195,7 @@ export default {
 
         &__email {
           display: -webkit-box;
+          line-clamp: 2;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
@@ -168,6 +209,12 @@ export default {
 
           &:hover {
             color: var(--am-c-csm-text);
+          }
+
+          &:focus-visible {
+            color: var(--am-c-csm-text);
+            outline: 2px solid var(--am-c-csm-primary);
+            outline-offset: 2px;
           }
         }
       }

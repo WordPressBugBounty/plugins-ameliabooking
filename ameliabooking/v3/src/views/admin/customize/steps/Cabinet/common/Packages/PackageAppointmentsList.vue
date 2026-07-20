@@ -54,8 +54,8 @@
         </div>
       </div>
 
-      <el-tabs v-model="selectedServiceId" class="am-cappa__service" @tab-click="selectService">
-        <el-tab-pane v-for="serviceId in Object.keys(packApps)" :key="serviceId" :name="serviceId">
+      <AmTabs v-model="selectedServiceId" class="am-cappa__service" @tab-click="selectService">
+        <AmTabsItem v-for="serviceId in Object.keys(packApps)" :key="serviceId" :name="serviceId">
           <template #label>
             <div class="am-cappa__service-heading">
               {{ packApps[serviceId].purchaseData.name }}
@@ -113,8 +113,8 @@
               :is-package-booking="true"
             ></AppointmentsList>
           </template>
-        </el-tab-pane>
-      </el-tabs>
+        </AmTabsItem>
+      </AmTabs>
 
       <AppointmentBooking v-if="bookVisibility" :visibility="bookVisibility"> </AppointmentBooking>
 
@@ -130,6 +130,8 @@
 </template>
 
 <script setup>
+import AmTabs from '../../../../../../_components/tabs/AmTabs.vue'
+import AmTabsItem from '../../../../../../_components/tabs/AmTabsItem.vue'
 // * libraries
 import moment from 'moment/moment'
 

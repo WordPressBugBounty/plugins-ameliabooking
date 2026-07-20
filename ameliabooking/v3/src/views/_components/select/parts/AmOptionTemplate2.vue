@@ -407,31 +407,6 @@ export default {
     max-width: 520px;
   }
 
-  .el-dialog {
-    &__header {
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 1.5;
-      color: #808a90;
-      padding: 16px;
-    }
-
-    &__headerbtn {
-      font-size: 10px;
-    }
-
-    &__body {
-      padding: 0 16px 48px;
-    }
-  }
-
-  .el-dialog__close {
-    font-size: 18px;
-    width: 24px;
-    height: 24px;
-    color: var(--am-oit-c-main-heading-text);
-  }
-
   .am-dialog {
     &__title {
       color: var(--am-oit-c-main-heading-text-op90);

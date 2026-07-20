@@ -1,8 +1,12 @@
 <template>
-  <div v-if="!empty" ref="ameliaContainer" class="am-fcl" role="main" :style="cssVars">
+  <div v-if="!empty" ref="ameliaContainer" class="am-fcl" role="list" :style="cssVars">
     <template v-for="category in categoriesList" :key="category.id">
-      <div class="am-fcl__item" role="group" :class="itemWidth">
-        <div class="am-fcl__item-inner">
+      <div class="am-fcl__item" role="listitem" :class="itemWidth">
+        <div
+          class="am-fcl__item-inner"
+          role="group"
+          :aria-labelledby="getCategoryTitleId(category)"
+        >
           <div
             class="am-fcl__item-content"
             :style="
@@ -28,8 +32,9 @@
                 v-if="category.pictureFullPath"
                 :style="{ backgroundImage: `url(${category.pictureFullPath})` }"
                 class="am-fcl__item-hero"
+                aria-hidden="true"
               ></div>
-              <div class="am-fcl__item-name">
+              <div :id="getCategoryTitleId(category)" class="am-fcl__item-name">
                 {{ category.name }}
               </div>
               <div class="am-fcl__item-segments">
@@ -40,24 +45,30 @@
                   "
                   class="am-fcl__item-segments__item"
                 >
-                  <span class="am-fcl__item-segments__item-icon am-icon-service"></span>
-                  <span class="am-fcl__item-segments__item-count">
-                    {{
-                      useAvailableServiceIdsInCategory(shortcodeData, category, amEntities).length
-                    }}
+                  <span class="am-fcl__sr-only">{{ getServicesCountLabel(category) }}</span>
+                  <span
+                    class="am-fcl__item-segments__item-icon am-icon-service"
+                    aria-hidden="true"
+                  ></span>
+                  <span class="am-fcl__item-segments__item-count" aria-hidden="true">
+                    {{ getServicesCount(category) }}
                   </span>
                 </div>
                 <div
                   v-if="
                     (!preselected.show || preselected.show === 'packages') &&
-                    category.packageList.length &&
+                    getPackagesCount(category) &&
                     customizedOptions.packages.visibility
                   "
                   class="am-fcl__item-segments__item"
                 >
-                  <span class="am-fcl__item-segments__item-icon am-icon-shipment"></span>
-                  <span class="am-fcl__item-segments__item-count">
-                    {{ category.packageList.length }}
+                  <span class="am-fcl__sr-only">{{ getPackagesCountLabel(category) }}</span>
+                  <span
+                    class="am-fcl__item-segments__item-icon am-icon-shipment"
+                    aria-hidden="true"
+                  ></span>
+                  <span class="am-fcl__item-segments__item-count" aria-hidden="true">
+                    {{ getPackagesCount(category) }}
                   </span>
                 </div>
               </div>
@@ -69,6 +80,7 @@
                 category="secondary"
                 :type="customizedOptions.cardButton.buttonType"
                 :suffix="IconArrowRight"
+                :aria-label="getChooseCategoryLabel(category)"
                 @click="chooseCategory(category.id)"
               >
                 {{ amLabels.view_all }}
@@ -79,7 +91,7 @@
       </div>
     </template>
   </div>
-  <div v-else ref="ameliaContainer" class="am-empty">
+  <div v-else ref="ameliaContainer" class="am-empty" role="status" aria-live="polite">
     <img
       :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/am-empty-booking.svg'"
       :alt="
@@ -87,6 +99,7 @@
           ? amLabels.no_services_employees
           : amLabels.no_package_services
       "
+      aria-hidden="true"
     />
     <div class="am-empty__heading">
       {{ amLabels.oops }}
@@ -246,6 +259,50 @@ let amLabels = computed(() => {
   return computedLabels
 })
 
+function getCategoryTitleId(category) {
+  return `am-category-${category.id}-title`
+}
+
+function getLabel(key, fallback) {
+  return amLabels.value[key] || fallback
+}
+
+function getServicesCount(category) {
+  if (Array.isArray(category.serviceIdList)) {
+    return category.serviceIdList.length
+  }
+
+  if (
+    !Array.isArray(category.serviceList) ||
+    !Array.isArray(amEntities?.employees) ||
+    !amEntities?.entitiesRelations
+  ) {
+    return 0
+  }
+
+  return useAvailableServiceIdsInCategory(shortcodeData, category, amEntities).length
+}
+
+function getPackagesCount(category) {
+  return Array.isArray(category.packageList) ? category.packageList.length : 0
+}
+
+function getServicesCountLabel(category) {
+  let count = getServicesCount(category)
+
+  return `${count} ${count === 1 ? getLabel('service', 'service') : getLabel('services', 'services')}`
+}
+
+function getPackagesCountLabel(category) {
+  let count = getPackagesCount(category)
+
+  return `${count} ${count === 1 ? getLabel('package', 'package') : getLabel('packages', 'packages')}`
+}
+
+function getChooseCategoryLabel(category) {
+  return `${getLabel('view_all', 'View all')} ${category.name}`
+}
+
 // * Colors
 let amColors = inject('amColors')
 let cssVars = computed(() => {
@@ -284,6 +341,18 @@ export default {
     * {
       font-family: var(--am-ff-fcl);
       box-sizing: border-box;
+    }
+
+    &__sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     &__item {
@@ -345,6 +414,7 @@ export default {
         color: var(--am-c-fcl-card-text);
         margin: 0 0 12px;
         display: -webkit-box;
+        line-clamp: 3;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;

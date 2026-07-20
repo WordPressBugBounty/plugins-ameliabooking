@@ -111,13 +111,13 @@
       </div>
     </div>
 
-    <el-tabs
+    <AmTabs
       v-model="selectedServiceId"
       class="am-cappa__service"
       :aria-label="servicesTabsAriaLabel"
       @tab-click="selectService"
     >
-      <el-tab-pane v-for="serviceId in servicesOrderInPackage" :key="serviceId" :name="serviceId">
+      <AmTabsItem v-for="serviceId in servicesOrderInPackage" :key="serviceId" :name="serviceId">
         <template #label>
           <div class="am-cappa__service-heading">
             {{ props.data.services[serviceId].purchaseData.name }}
@@ -193,8 +193,8 @@
             @booked="getPackageAppointments"
           ></AppointmentsList>
         </template>
-      </el-tab-pane>
-    </el-tabs>
+      </AmTabsItem>
+    </AmTabs>
 
     <CancelPopup
       :loading="waitingForCancelation"
@@ -237,6 +237,8 @@
 </template>
 
 <script setup>
+import AmTabs from '../../../../../_components/tabs/AmTabs.vue'
+import AmTabsItem from '../../../../../_components/tabs/AmTabsItem.vue'
 // * Import from Vue
 import { ref, computed, inject, provide, onMounted, reactive } from 'vue'
 

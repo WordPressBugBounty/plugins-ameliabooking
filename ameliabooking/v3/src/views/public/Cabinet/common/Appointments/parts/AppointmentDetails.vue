@@ -4,7 +4,11 @@
     :model="appointmentFormData"
     :rules="appointmentFormRules"
     class="am-capai-def"
+    :aria-label="formAriaLabel || undefined"
   >
+    <div v-if="formAriaLabel" class="am-capai-def__sr-only">
+      {{ formAriaLabel }}
+    </div>
     <!-- Select Categories -->
     <el-form-item
       v-if="categories.length > 1"
@@ -16,6 +20,7 @@
         clearable
         filterable
         :placeholder="`${amLabels.select_service_category}`"
+        :aria-label="fieldAriaLabel(amLabels.category, amLabels.select_service_category)"
         :filter-method="filterCategory"
       >
         <AmOption
@@ -44,6 +49,7 @@
         clearable
         filterable
         :placeholder="`${amLabels.select_service}`"
+        :aria-label="fieldAriaLabel(amLabels.services_dropdown, amLabels.select_service)"
         :filter-method="filterService"
       >
         <AmOption
@@ -75,6 +81,7 @@
         clearable
         filterable
         :placeholder="`${amLabels.select_location}`"
+        :aria-label="fieldAriaLabel(amLabels.location, amLabels.select_location)"
         :filter-method="filterLocation"
         @change="changedSlotCondition"
       >
@@ -111,6 +118,7 @@
         remote
         :remote-method="searchSpaces"
         :placeholder="`${amLabels.select}`"
+        :aria-label="fieldAriaLabel(amLabels.lesson_space, amLabels.select)"
       >
         <AmOption :key="0" :value="0" :label="amLabels.lesson_space_new_space" />
         <AmOption
@@ -170,6 +178,7 @@
       <AmSelect
         v-model="appointmentFormData.startTime"
         :placeholder="`${amLabels.select_time}`"
+        :aria-label="fieldAriaLabel(amLabels.time, amLabels.select_time)"
         :disabled="!appointmentFormData.startDate"
         prefix-icon="clock"
         @change="selectTime"
@@ -238,7 +247,11 @@
 
     <!-- Internal Notes -->
     <el-form-item :label="`${amLabels.note_internal}`" class="am-capai-def__item">
-      <AmInput v-model="appointmentFormData.internalNotes" :type="'textarea'" />
+      <AmInput
+        v-model="appointmentFormData.internalNotes"
+        :type="'textarea'"
+        :aria-label="fieldAriaLabel(amLabels.note_internal)"
+      />
     </el-form-item>
     <!-- /Internal Notes -->
   </el-form>
@@ -246,7 +259,7 @@
 
 <script setup>
 // * Import form Vue
-import { computed, ref, inject, watch, onMounted } from 'vue'
+import { computed, ref, inject, watch, onMounted, unref } from 'vue'
 
 // * Import store
 import { useStore } from 'vuex'
@@ -314,6 +327,27 @@ let store = useStore()
 
 // * Labels
 let amLabels = inject('amLabels')
+
+function pickAmLabel(keys) {
+  const L = unref(amLabels)
+  if (!L) {
+    return ''
+  }
+  for (const k of keys) {
+    if (L[k]) {
+      return String(L[k])
+    }
+  }
+  return ''
+}
+
+const formAriaLabel = computed(() =>
+  pickAmLabel(['details', 'appointment_details', 'edit_appointment']),
+)
+
+function fieldAriaLabel(label, placeholder = '') {
+  return [label, placeholder].filter(Boolean).map(String).join(', ')
+}
 
 // * Language
 let localLanguage = inject('localLanguage')
@@ -683,6 +717,18 @@ defineExpose({
     flex-wrap: wrap;
     justify-content: space-between;
 
+    .am-capai-def__sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     .am-capai-def {
       &__item {
         width: 100%;
@@ -726,21 +772,6 @@ defineExpose({
     }
   }
 }
-
-//.am-slots-low {
-//  background-color: rgba(196, 255, 201, 1);
-//  border-radius: 50%;
-//}
-//
-//.am-slots-mid {
-//  background-color: rgba(196, 235, 255, 1);
-//  border-radius: 50%;
-//}
-//
-//.am-slots-high {
-//  background-color: rgba(255, 196, 196, 1);
-//  border-radius: 50%;
-//}
 
 .am-slots-loader {
   &:before {

@@ -597,16 +597,6 @@ export default {
           box-shadow: 0 5px 5px var(--am-c-els-text-op10);
           margin-left: 8px;
 
-          //&-inner {
-          //  &.am-button.am-button--plain{
-          //    &:not(.is-disabled):active, &:not(.is-disabled):focus, &:not(.is-disabled):hover {
-          //      --am-c-btn-border: var(--am-c-primary);
-          //      --am-c-btn-shadow: var(--am-c-primary);
-          //      box-shadow: 0 1px 3px var(--am-c-btn-shadow);
-          //    }
-          //  }
-          //}
-
           .am-icon-filter {
             font-size: 24px;
           }

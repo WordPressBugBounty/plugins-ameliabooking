@@ -21,7 +21,7 @@ use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentData;
 use AmeliaBooking\Domain\ValueObjects\String\Url;
 use AmeliaBooking\Infrastructure\WP\HelperService\HelperService;
-use AmeliaBooking\Infrastructure\WP\Integrations\WooCommerce\WooCommerceService;
+use AmeliaBooking\Infrastructure\WP\Integrations\WooCommerce\StarterWooCommerceService;
 
 /**
  * Class PaymentFactory
@@ -90,7 +90,10 @@ class PaymentFactory
             $payment->setCreated(new DateTimeValue(DateTimeService::getCustomDateTimeObjectFromUtc($data['created'])));
         }
 
-        if (!empty($data['wcOrderId']) && WooCommerceService::isEnabled()) {
+        if (
+            !empty($data['wcOrderId']) &&
+            StarterWooCommerceService::isEnabled()
+        ) {
             $payment->setWcOrderId(new Id($data['wcOrderId']));
 
             if (!empty($data['wcOrderItemId'])) {

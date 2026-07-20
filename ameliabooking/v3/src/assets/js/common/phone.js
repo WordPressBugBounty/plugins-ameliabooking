@@ -8,7 +8,7 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js'
  * @param {string|undefined|null} countryCode
  * @returns {string}
  */
-export function getInternationalPhoneValue (value, phoneData, countryCode) {
+export function getInternationalPhoneValue(value, phoneData, countryCode) {
   const normalizedValue = value == null ? '' : String(value).trim()
 
   if (!normalizedValue && !phoneData?.nationalNumber) {

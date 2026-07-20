@@ -8,7 +8,7 @@
     :style="cssVars"
   >
     <AmButton
-      v-if="stepIndex < stepsArray.length - 1"
+      v-if="stepIndex < stepsArray.length - 1 && stepIndex > 0"
       ref="backButtonRef"
       class="am-heading-prev"
       :icon="IconArrowLeft"
@@ -188,10 +188,6 @@ export default {
   // el - event list
   .am-el {
     &__header-inner {
-      height: 60px;
-      padding: 18px 24px;
-      box-shadow: 0 2px 3px var(--am-c-el-text-op15);
-
       &__title {
         font-family: var(--am-font-family);
         font-size: 18px;
@@ -246,7 +242,7 @@ export default {
 }
 
 // Public
-.amelia-v2-booking #amelia-container {
+.amelia-v2-booking {
   @include am-dialog-event-list-header;
 }
 

@@ -10,13 +10,17 @@
     :style="cssVars"
   >
     <div
+      :id="headingId"
       class="am-collapse-item__heading"
       :class="[
         { 'am-collapse-item__heading-active': contentVisibility },
         { 'am-collapse-item__heading-side': contentVisibility && props.side },
         props.headingClass,
       ]"
-      :tabindex="props.side ? 0 : undefined"
+      :role="headingInteractive ? 'button' : undefined"
+      :aria-expanded="headingInteractive ? contentVisibility : undefined"
+      :aria-controls="headingInteractive ? contentId : undefined"
+      :tabindex="headingInteractive ? 0 : -1"
       @click="onHeadingClick"
       @keydown.enter.prevent="onHeadingKeydown"
       @keydown.space.prevent="onHeadingKeydown"
@@ -43,8 +47,11 @@
 
     <template v-if="partsVisibility && !contentClosed">
       <div
+        :id="contentId"
         ref="collapseContent"
         class="am-collapse-item__content"
+        role="region"
+        :aria-labelledby="headingId"
         :class="[
           { 'am-collapse-item__content-no-border': !props.side },
           contentVisibility ? 'am-collapse-item__content-open' : 'am-collapse-item__content-close',
@@ -58,7 +65,10 @@
     <div
       v-if="partsVisibility && !props.side"
       class="am-collapse-item__trigger"
-      :tabindex="partsVisibility && !props.side ? 0 : -1"
+      :role="triggerInteractive ? 'button' : undefined"
+      :aria-expanded="triggerInteractive ? contentVisibility : undefined"
+      :aria-controls="triggerInteractive ? contentId : undefined"
+      :tabindex="triggerInteractive ? 0 : -1"
       @click="onTriggerClick"
       @keydown.enter.prevent="onTriggerKeydown"
       @keydown.space.prevent="onTriggerKeydown"
@@ -77,6 +87,10 @@
     </div>
   </div>
 </template>
+
+<script>
+let collapseItemInstanceCounter = 0
+</script>
 
 <script setup>
 // * Import from Vue
@@ -138,6 +152,18 @@ let slots = useSlots()
 
 let partsVisibility = computed(() => {
   return slots.default().length && slots.default()[0].props !== null
+})
+
+const instanceId = ++collapseItemInstanceCounter
+const headingId = `am-collapse-item-heading-${instanceId}`
+const contentId = `am-collapse-item-content-${instanceId}`
+
+const headingInteractive = computed(() => {
+  return props.side && props.collapsable && partsVisibility.value
+})
+
+const triggerInteractive = computed(() => {
+  return !props.side && props.collapsable && partsVisibility.value
 })
 
 const keyboardToggleHandledKey = '__amCollapseKeyboardToggleHandled'
@@ -355,8 +381,9 @@ $collapseContentHeight: v-bind('collapseHeight.h');
       border: var(--am-combo-collapse-border);
       cursor: var(--am-pointer-collapse);
       transition-delay: var(--am-delay-collapse);
+      outline: none;
 
-      &:focus {
+      &:focus-visible {
         border-color: var(--am-c-collapse-text-op80);
 
         & + .am-collapse-item__content {
@@ -424,8 +451,9 @@ $collapseContentHeight: v-bind('collapseHeight.h');
       border-top: none;
       border-radius: 0 0 8px 8px;
       cursor: pointer;
+      outline: none;
 
-      &:focus {
+      &:focus-visible {
         background-color: var(--am-c-collapse-text-op10);
 
         .am-collapse-item__trigger-label {

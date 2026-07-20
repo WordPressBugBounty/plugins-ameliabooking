@@ -1,42 +1,42 @@
 <template>
   <div v-if="!loading" class="am-capei" :class="props.responsiveClass" :style="cssVars">
-    <el-tabs v-model="activeTab" class="am-ap__tabs">
+    <AmTabs v-model="activeTab" class="am-ap__tabs">
       <!-- Details -->
-      <el-tab-pane :label="amLabels.details" name="details">
+      <AmTabsItem :label="amLabels.details" name="details">
         <EventDetails ref="eventDetailsRef" />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Details -->
 
       <!-- Periods -->
-      <el-tab-pane :label="amLabels.periods" name="periods">
+      <AmTabsItem :label="amLabels.periods" name="periods">
         <EventPeriods ref="eventPeriodsRef" :page-width="props.pageWidth" />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Periods -->
 
       <!-- Recurring -->
-      <el-tab-pane v-if="!licence.isStarter" :label="amLabels.recurring" name="recurring">
+      <AmTabsItem v-if="!licence.isStarter" :label="amLabels.recurring" name="recurring">
         <EventRecurring
           ref="eventRecurringRef"
           :page-width="props.pageWidth"
           :recurring-until="recurringUntil"
         />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Recurring -->
 
       <!-- Pricing -->
-      <el-tab-pane :label="amLabels.pricing" name="pricing">
+      <AmTabsItem :label="amLabels.pricing" name="pricing">
         <EventPricing ref="eventPricingRef" :page-width="props.pageWidth" />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Pricing -->
 
       <!-- Customize -->
-      <el-tab-pane :label="amLabels.customize" name="customize">
+      <AmTabsItem :label="amLabels.customize" name="customize">
         <EventCustomize />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Customize -->
 
       <!-- Waiting List -->
-      <el-tab-pane
+      <AmTabsItem
         v-if="
           amSettings.featuresIntegrations.waitingList.enabled &&
           !licence.isStarter &&
@@ -46,15 +46,15 @@
         name="waitingList"
       >
         <EventWaitingList :page-width="props.pageWidth" />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Waiting List -->
 
       <!-- Settings -->
-      <el-tab-pane :label="amLabels.settings" name="settings">
+      <AmTabsItem :label="amLabels.settings" name="settings">
         <EventSettings />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Settings -->
-    </el-tabs>
+    </AmTabs>
 
     <div
       class="am-capei__footer"
@@ -124,6 +124,8 @@
 </template>
 
 <script setup>
+import AmTabs from '../../../../../_components/tabs/AmTabs.vue'
+import AmTabsItem from '../../../../../_components/tabs/AmTabsItem.vue'
 // * Import from Vue
 import { ref, inject, computed, onMounted } from 'vue'
 

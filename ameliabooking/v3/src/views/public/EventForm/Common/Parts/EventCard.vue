@@ -38,7 +38,16 @@
             monthsTranslationsShort(localLanguage)[
               moment(props.event.periods[0].periodStart.split(' ')[0]).format('M')
             ]
-          }}
+          }},
+        </span>
+        <span
+          class="am-ec__period-date__year"
+          :class="[
+            { 'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed' },
+            responsiveClass,
+          ]"
+        >
+          {{ getEventFrontedFormattedDateYear(props.event.periods[0].periodStart.split(' ')[0]) }}
         </span>
       </p>
       <p
@@ -48,6 +57,9 @@
           responsiveClass,
         ]"
       >
+        <template v-if="componentWidth <= 500">
+          {{ props.labels.event_at }}
+        </template>
         {{ getEventFrontedFormattedTime(props.event.periods[0].periodStart.split(' ')[1]) }}
       </p>
     </div>
@@ -191,7 +203,7 @@
 import AmButton from '../../../../_components/button/AmButton.vue'
 
 // * Import from Vue
-import { computed, inject } from 'vue'
+import { computed, inject, ref } from 'vue'
 
 // * Libraries
 import moment from 'moment'
@@ -209,6 +221,7 @@ import {
 import {
   getEventFrontedFormattedTime,
   getEventFrontedFormattedDateDay,
+  getEventFrontedFormattedDateYear,
 } from '../../../../../assets/js/common/date.js'
 import { useFormattedPrice } from '../../../../../assets/js/common/formatting'
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
@@ -305,8 +318,8 @@ const amSettings = inject('settings')
 const localLanguage = inject('localLanguage')
 
 // * Container width
-let cWidth = inject('containerWidth')
-let dWidth = inject('dialogWidth')
+let cWidth = inject('containerWidth', ref(0))
+let dWidth = inject('dialogWidth', ref(0))
 
 let componentWidth = computed(() => {
   return props.inDialog ? dWidth.value : cWidth.value
@@ -491,8 +504,12 @@ export default {
       }
 
       &-date {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
         padding: 0;
         margin: 0;
+        gap: 0 4px;
 
         &.am-rw-500 {
           display: flex;
@@ -505,21 +522,36 @@ export default {
         }
 
         &__day {
+          width: 100%;
           font-size: 20px;
           font-weight: 500;
           line-height: 1;
-          margin-right: 2px;
 
           &.am-ghost {
             color: var(--am-c-ec-text-op50); // $shade-500
           }
 
           &.am-rw-500 {
+            width: auto;
             font-size: 18px;
           }
         }
 
         &__month {
+          font-size: 13px;
+          font-weight: 400;
+          line-height: 1.23077;
+
+          &.am-ghost {
+            color: var(--am-c-ec-text-op50); // $shade-500
+          }
+
+          &.am-rw-500 {
+            font-size: 14px;
+          }
+        }
+
+        &__year {
           font-size: 13px;
           font-weight: 400;
           line-height: 1.23077;
@@ -712,6 +744,8 @@ export default {
 
           p {
             margin: 0;
+            text-align: start;
+            word-break: break-word;
           }
         }
 

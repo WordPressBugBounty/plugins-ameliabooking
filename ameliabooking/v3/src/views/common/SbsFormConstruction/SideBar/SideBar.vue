@@ -110,7 +110,7 @@ export default {
           padding: 0 8px 0;
           overflow-x: hidden;
 
-          &:focus {
+          &:focus-visible {
             box-shadow: 0 0 0 1px var(--am-c-sb-text-op60);
             border-radius: 4px;
           }
@@ -318,10 +318,11 @@ export default {
       // Sidebar Step
       &__page {
         display: flex;
+        align-items: center;
         min-height: 40px;
         background-color: transparent;
         border-radius: 4px;
-        padding: 8px;
+        padding: 10px 8px;
         margin-bottom: 8px;
         cursor: pointer;
 
@@ -385,6 +386,8 @@ export default {
           align-items: center;
           justify-content: space-between;
           gap: 0 4px;
+          line-height: 20px;
+          height: 20px;
 
           &.am-collapsed {
             justify-content: center;
@@ -437,6 +440,7 @@ export default {
           align-items: center;
           justify-content: center;
           font-size: 24px;
+          line-height: 20px;
           margin-left: auto;
 
           &.am-rtl {
@@ -507,7 +511,7 @@ export default {
           text-decoration: none;
           margin: 4px 0 0;
 
-          &:focus {
+          &:focus-visible {
             box-shadow: 0 0 0 1px var(--am-c-sb-text-op60);
             border-radius: 4px;
           }
@@ -529,7 +533,8 @@ export default {
         padding: 12px 0 0;
         cursor: pointer;
 
-        &:focus {
+        &:focus-visible {
+          outline: none;
           & [class^='am-icon-'],
           & [class*=' am-icon-'] {
             box-shadow: 0 0 0 1px var(--am-c-sb-text-op60);

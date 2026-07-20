@@ -1,6 +1,6 @@
 <template>
   <el-form ref="customizeFormRef" :model="eventCustomizeForm" class="am-capei-custef">
-    <div class="am-capei-custef__heading">
+    <div :id="eventColorsHeadingId" class="am-capei-custef__heading">
       {{ amLabels.event_colors }}
     </div>
 
@@ -8,17 +8,26 @@
       <el-form-item class="am-capei-custef__item">
         <AmRadio :value="1"> {{ amLabels.event_colors_preset }}: </AmRadio>
         <div class="am-capei-custef__colors">
-          <div
+          <AmButton
             v-for="color in colorPalette"
             :key="color"
+            native-type="button"
+            type="plain"
+            size="small"
             class="am-capei-custef__colors-item"
             :class="{ 'am-disabled': colorType === 2 }"
-            @click="store.commit('event/setColor', color)"
+            :disabled="colorType === 2"
+            :aria-label="getPresetColorLabel(color)"
+            @click="selectPresetColor(color)"
           >
-            <div class="am-capei-custef__colors-item__inner" :style="{ backgroundColor: color }">
-              <span v-if="color === eventCustomizeForm.color" class="am-icon-check" />
-            </div>
-          </div>
+            <span class="am-capei-custef__colors-item__inner" :style="{ backgroundColor: color }">
+              <span
+                v-if="color === eventCustomizeForm.color"
+                class="am-icon-check"
+                aria-hidden="true"
+              />
+            </span>
+          </AmButton>
         </div>
       </el-form-item>
       <el-form-item class="am-capei-custef__item">
@@ -44,6 +53,7 @@ import { ref, computed, inject, onMounted } from 'vue'
 import { useStore } from 'vuex'
 
 // * Import Components
+import AmButton from '../../../../../_components/button/AmButton.vue'
 import AmCheckbox from '../../../../../_components/checkbox/AmCheckbox.vue'
 import AmRadioGroup from '../../../../../_components/radio/AmRadioGroup.vue'
 import AmRadio from '../../../../../_components/radio/AmRadio.vue'
@@ -56,6 +66,8 @@ let amLabels = inject('amLabels')
 
 // * Form Reference
 const customizeFormRef = ref(null)
+
+const eventColorsHeadingId = `amelia-event-colors-heading-${Math.random().toString(36).slice(2, 9)}`
 
 let colorType = ref(1)
 
@@ -87,6 +99,22 @@ let eventCustomizeForm = ref({
     },
   }),
 })
+
+function selectPresetColor(color) {
+  if (colorType.value === 1) {
+    store.commit('event/setColor', color)
+  }
+}
+
+function getPresetColorLabel(color) {
+  let label = `${amLabels.event_colors_preset} ${color}`
+
+  if (color === eventCustomizeForm.value.color) {
+    label += `, ${amLabels.selected || 'selected'}`
+  }
+
+  return label
+}
 
 // * Lifecycle Hooks
 onMounted(() => {
@@ -131,6 +159,19 @@ onMounted(() => {
         cursor: pointer;
         padding: 4px;
         border: 1px solid var(--am-c-inp-border);
+        background: transparent;
+        appearance: none;
+
+        &.am-button {
+          .am-button__inner {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+          }
+        }
 
         &.am-disabled {
           cursor: not-allowed;
@@ -147,6 +188,22 @@ onMounted(() => {
             background-color: rgba(255, 255, 255, 0.5);
             border-radius: 4px;
           }
+        }
+
+        &:focus-visible {
+          border-color: var(--am-c-primary);
+        }
+
+        &[role='radio'][aria-checked='true'] {
+          border-color: var(--am-c-primary);
+        }
+
+        &.am-button[role='radio'][aria-checked='true'] {
+          border-color: var(--am-c-primary);
+        }
+
+        &:not(.am-disabled):hover {
+          border-color: var(--am-c-primary);
         }
 
         &__inner {

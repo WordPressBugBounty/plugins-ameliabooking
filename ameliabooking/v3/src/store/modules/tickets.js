@@ -7,6 +7,7 @@ export default {
     maxCustomCapacity: null,
     maxExtraPeople: null,
     globalSpots: 0,
+    pendingPreselectedTickets: [],
   }),
 
   getters: {
@@ -93,12 +94,61 @@ export default {
       state.globalSpots += payload
     },
 
+    setPendingPreselectedTickets(state, payload) {
+      state.pendingPreselectedTickets = Array.isArray(payload) ? payload : []
+    },
+
+    applyPendingPreselectedTickets(state, payload) {
+      if (!state.pendingPreselectedTickets.length || !state.ticketsData.length) {
+        return
+      }
+
+      const waitingMode = !!(payload && payload.waitingMode)
+      const sharedWaitingSpotsLeft =
+        payload && typeof payload.sharedWaitingSpotsLeft === 'number'
+          ? Math.max(0, payload.sharedWaitingSpotsLeft)
+          : null
+      const useSharedWaitingCap = waitingMode && !!state.maxCustomCapacity && sharedWaitingSpotsLeft !== null
+      const pendingById = {}
+
+      state.pendingPreselectedTickets.forEach((ticket) => {
+        const id = parseInt(ticket.id)
+        const quantity = parseInt(ticket.quantity)
+        if (!isNaN(id) && !isNaN(quantity) && quantity > 0) {
+          pendingById[id] = quantity
+        }
+      })
+
+      let selectedTotal = 0
+      let remainingShared = useSharedWaitingCap ? sharedWaitingSpotsLeft : null
+
+      state.ticketsData.forEach((ticket) => {
+        const wanted = ticket.id in pendingById ? pendingById[ticket.id] : 0
+        const maxAllowed = useSharedWaitingCap
+          ? remainingShared
+          : waitingMode
+            ? Math.max(0, (ticket.waitingListSpots || 0) - (ticket.waiting || 0))
+            : Math.max(0, (ticket.spots || 0) - (ticket.sold || 0))
+
+        ticket.persons = Math.max(0, Math.min(wanted, maxAllowed))
+        selectedTotal += ticket.persons
+
+        if (useSharedWaitingCap) {
+          remainingShared = Math.max(0, remainingShared - ticket.persons)
+        }
+      })
+
+      state.globalSpots = selectedTotal
+      state.pendingPreselectedTickets = []
+    },
+
     setAllData(state, payload) {
       state.tickets = payload.tickets
       state.ticketsData = payload.ticketsData
       state.maxCustomCapacity = payload.maxCustomCapacity
       state.maxExtraPeople = payload.maxExtraPeople
       state.globalSpots = payload.globalSpots
+      state.pendingPreselectedTickets = []
     },
   },
 

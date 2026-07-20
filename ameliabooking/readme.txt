@@ -4,9 +4,9 @@ Author URI: https://melograno.io/
 Tags: appointments, booking, event booking system, wpamelia, booking system, scheduling
 Donate link: https://wpamelia.com/
 Requires at least: 6.5
-Tested up to: 7.0
+Tested up to: 7.0.1
 Requires PHP: 7.4
-Stable tag: 2.4.4
+Stable tag: 2.4.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,18 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.4.5
+This update includes a couple of new features, improvements, bug fixes and a security fix. We strongly recommend updating to this version immediately.
+*Feature: Public Event Page – Each Amelia event now automatically gets its own dedicated public page with full event details and booking option.
+*Feature: Data Export & Import – Added the ability to fully export and import all Amelia data, enabling complete migration between websites.
+*Improvement: Added the year to the event date display in the Event List for better date clarity.
+*Improvement: Updated the Date Range picker to comply with WCAG accessibility standards.
+*Improvement: Adapted the Catalog booking form to comply with WCAG accessibility standards.
+*BugFix: Fixed an issue where updating a service's price did not apply correctly when only one employee was assigned to that service.
+*BugFix: Fixed an issue where Square integration defaulted Test Mode to false, preventing sandbox connections from being established.
+*BugFix: Fixed a security vulnerabilities.
+*Additional minor bug fixes and overall stability improvements.
+
 v2.4.4
 This update includes a couple of bug fixes and stability improvements.
 *BugFix: Fixed an issue where the country code was stripped from phone numbers on the booking form, causing incorrect display and empty fields when editing customers.

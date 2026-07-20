@@ -39,6 +39,7 @@
       ref="recurringPopupRef"
       :visibility="recurringPopupVisibility"
       class="am-fs-dt__calendar__recurring"
+      :aria-label="recurringLabels.repeat_appointment"
     >
       <div class="am-fs-dt__rec_popup">
         <p>

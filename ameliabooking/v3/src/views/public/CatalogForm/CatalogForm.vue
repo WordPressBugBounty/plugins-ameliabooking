@@ -573,20 +573,7 @@ export default {
 .am-dialog-popup.amelia-v2-booking.amelia-v2-booking-dialog {
   .el-dialog {
     .el-dialog {
-      &__header {
-        padding: 0;
-      }
-
-      &__headerbtn {
-        width: 19px;
-        height: 19px;
-        top: 16px;
-        right: 16px;
-      }
-
       &__body {
-        padding: 0;
-
         #amelia-container {
           margin: 0 auto;
         }

@@ -411,7 +411,11 @@ let infoFormConstruction = ref({
 
         store.commit(
           'customerInfo/setCustomerPhone',
-          getInternationalPhoneValue(phoneData?.phoneNumber ?? phoneData?.e164, phoneData, countryCode)
+          getInternationalPhoneValue(
+            phoneData?.phoneNumber ?? phoneData?.e164,
+            phoneData,
+            countryCode,
+          ),
         )
 
         isPhoneValid.value = !!phoneData.isValid

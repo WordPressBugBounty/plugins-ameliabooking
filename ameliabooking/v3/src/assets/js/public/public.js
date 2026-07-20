@@ -63,6 +63,11 @@ const EventsCalendarFormWrapper = defineAsyncComponent({
   loader: () => import('../../../views/public/EventForm/EventCalendarForm/EvensCalendarForm.vue'),
 })
 
+const WpaEventsLandingFormWrapper = defineAsyncComponent({
+  loader: () =>
+    import('../../../views/public/EventForm/WpaEventsLandingForm/WpaEventsLandingForm.vue'),
+})
+
 const DialogForms = defineAsyncComponent({
   loader: () => import('../../../views/public/Dialog/DialogForms.vue'),
 })
@@ -367,6 +372,7 @@ function createAmelia(shortcodeData) {
     .component('CatalogFormWrapper', CatalogFormWrapper)
     .component('EventsListFormWrapper', EventsListFormWrapper)
     .component('EventsCalendarFormWrapper', EventsCalendarFormWrapper)
+    .component('WpaEventsLandingFormWrapper', WpaEventsLandingFormWrapper)
     .component('DialogForms', DialogForms)
     .component('CustomerPanelWrapper', CustomerPanelWrapper)
     .use(

@@ -232,7 +232,7 @@ const resolvedPhoneInputAttributes = computed(() => {
   const resolvedAttributes = {
     autocomplete: 'tel',
     inputmode: 'tel',
-    ...(props.phoneInputAttributes || {}),
+    ...props.phoneInputAttributes,
   }
 
   if (!hasPhoneInputAttributes && !hasLegacyName.value) {
@@ -259,9 +259,9 @@ const model = computed({
   set: (val) => {
     emits(
       'update:modelValue',
-      getInternationalPhoneValue(val, lastPhoneData.value, props.countryCode)
+      getInternationalPhoneValue(val, lastPhoneData.value, props.countryCode),
     )
-  }
+  },
 })
 
 const countryCode = computed({
@@ -283,7 +283,7 @@ function handlePhoneData(val) {
   const internationalValue = getInternationalPhoneValue(
     val?.phoneNumber ?? val?.e164 ?? props.modelValue,
     val,
-    props.countryCode
+    props.countryCode,
   )
 
   if (internationalValue !== props.modelValue) {

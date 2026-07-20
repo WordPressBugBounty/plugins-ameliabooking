@@ -123,6 +123,17 @@ let cssVars = computed(() => {
   }
 })
 
+const dialogTitles = {
+  sbsNew: 'Appointment Booking',
+  cbf: 'Catalog Booking',
+  elf: 'Event Booking',
+  ecf: 'Event Calendar Booking',
+}
+
+let dialogTitle = computed(() => {
+  return dialogTitles[shortcodeData.value.triggered_form] || 'Booking'
+})
+
 watchEffect(
   () => {
     if (shortcodeData.value.triggered_form === 'sbsNew') {
@@ -159,6 +170,9 @@ export default {
     :width="dialogWrapperWidth"
     @closed="resetDialogState"
   >
+    <template #title>
+      <span class="am-sr-only">{{ dialogTitle }}</span>
+    </template>
     <component :is="formList[shortcodeData.triggered_form]"></component>
   </AmDialog>
 </template>
@@ -172,30 +186,12 @@ export default {
     &.am-cbf {
       .el-dialog {
         margin-top: 32px;
-        &__headerbtn {
-          top: -32px;
-          right: 0;
-          width: 22px;
-          height: 22px;
-          display: flex;
-          background-color: var(--am-c-main-bgr);
-          border-radius: 50%;
-          align-items: center;
-          justify-content: center;
-
-          &:active {
-            position: absolute;
-            border: none;
-            outline: 0;
-          }
-        }
       }
     }
 
     .el-dialog {
       box-shadow: none;
       border-radius: 8px;
-      background-color: transparent;
 
       @media only screen and (max-width: 768px) {
         margin-top: 0;
@@ -224,9 +220,6 @@ export default {
 
           .am-els {
             &__wrapper {
-              overflow-x: hidden;
-              height: calc(var(--am-dvh, 100vh) - 230px);
-
               &::-webkit-scrollbar {
                 width: 6px;
               }
@@ -243,35 +236,6 @@ export default {
             }
           }
         }
-      }
-
-      .el-dialog__header {
-        padding: 0;
-      }
-
-      &__headerbtn {
-        z-index: 10;
-        top: 16px;
-        right: 16px;
-
-        &:active {
-          position: absolute;
-          border: none;
-          outline: 0;
-          background-color: initial;
-        }
-
-        &:hover {
-          border: none;
-        }
-
-        .el-dialog__close {
-          color: var(--am-c-main-text);
-        }
-      }
-
-      .el-dialog__body {
-        padding: 0;
       }
 
       &__footer {

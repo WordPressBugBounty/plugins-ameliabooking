@@ -118,6 +118,7 @@ import EmployeeFormField from '../_fields/EmployeeFormField.vue'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
 import { useCapacity } from '../../../../assets/js/common/appointments'
 import { useCart } from '../../../../assets/js/public/cart'
+import { announceFormErrors, useLiveAnnouncer } from '../../../../assets/js/common/liveAnnouncer'
 
 let props = defineProps({
   globalClass: {
@@ -127,6 +128,8 @@ let props = defineProps({
 })
 
 let amCustomize = inject('amCustomize')
+
+const { announceAlert } = useLiveAnnouncer()
 
 // * Amelia Settings
 const amSettings = inject('settings')
@@ -401,6 +404,7 @@ function submitForm() {
         continueWithService()
       }
     } else {
+      announceFormErrors(initFormRef, announceAlert)
       return false
     }
   })

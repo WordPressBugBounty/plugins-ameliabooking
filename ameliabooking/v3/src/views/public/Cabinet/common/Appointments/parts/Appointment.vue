@@ -20,9 +20,9 @@
       </template>
     </AmAlert>
 
-    <el-tabs v-model="activeTab">
+    <AmTabs v-model="activeTab">
       <!-- Details -->
-      <el-tab-pane :label="amLabels.details" name="details">
+      <AmTabsItem :label="amLabels.details" name="details">
         <AppointmentDetails
           ref="appointmentDetailsRef"
           :slots-props="slotsProps"
@@ -36,11 +36,11 @@
           @select-date="selectDate"
           @select-time="selectTime"
         />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Details -->
 
       <!-- Customers -->
-      <el-tab-pane v-if="service" :label="amLabels.customers" name="customers">
+      <AmTabsItem v-if="service" :label="amLabels.customers" name="customers">
         <AppointmentCustomers
           ref="appointmentCustomersRef"
           :responsive-class="props.responsiveClass"
@@ -49,11 +49,11 @@
           :saved-appointment="savedAppointment"
           @changed-slot-condition="changedSlotCondition"
         />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Customers -->
 
       <!-- Extras -->
-      <el-tab-pane
+      <AmTabsItem
         v-if="
           amSettings.featuresIntegrations.extras.enabled &&
           service &&
@@ -67,11 +67,11 @@
           :responsive-class="props.responsiveClass"
           @changed-slot-condition="changedSlotCondition"
         />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Extras -->
 
       <!-- Custom Fields -->
-      <el-tab-pane
+      <AmTabsItem
         v-if="
           amSettings.featuresIntegrations.customFields.enabled &&
           service &&
@@ -85,11 +85,11 @@
           ref="appointmentCustomFieldsRef"
           :responsive-class="props.responsiveClass"
         />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Custom Fields -->
 
       <!-- Linked -->
-      <el-tab-pane
+      <AmTabsItem
         v-if="store.getters['appointment/getId'] && linkedAppointments.length"
         :label="amLabels.linked"
         name="linked"
@@ -99,11 +99,11 @@
           :responsive-class="props.responsiveClass"
           @edit-linked-appointment="(data) => emits('editLinkedAppointment', data)"
         />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Linked -->
 
       <!-- Recurring -->
-      <el-tab-pane
+      <AmTabsItem
         v-if="
           amSettings.featuresIntegrations.recurringAppointments.enabled &&
           service &&
@@ -127,11 +127,11 @@
           :responsive-class="props.responsiveClass"
           @fetch-slots="fetchSlots"
         />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Recurring -->
 
       <!-- Payment -->
-      <el-tab-pane
+      <AmTabsItem
         v-if="store.getters['appointment/getId']"
         :label="amLabels.payment"
         name="payment"
@@ -140,9 +140,9 @@
           :responsive-class="props.responsiveClass"
           :saved-appointment="savedAppointment"
         />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Payment -->
-    </el-tabs>
+    </AmTabs>
 
     <div class="am-capai__footer">
       <AmButton
@@ -180,6 +180,8 @@ import { useAppointmentSlots, useSlotsPricing } from '../../../../../../assets/j
 
 // * Components
 import AmButton from '../../../../../_components/button/AmButton.vue'
+import AmTabs from '../../../../../_components/tabs/AmTabs.vue'
+import AmTabsItem from '../../../../../_components/tabs/AmTabsItem.vue'
 
 // * Dedicated components
 import Skeleton from '../../Authentication/parts/Skeleton.vue'

@@ -613,7 +613,7 @@ export default {
         // tabs
         .el-tabs {
           display: flex;
-          flex-direction: column-reverse;
+          flex-direction: column;
           gap: 16px 0;
 
           &__nav {

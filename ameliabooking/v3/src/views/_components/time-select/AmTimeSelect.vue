@@ -460,11 +460,11 @@ onMounted(() => {
       white-space: normal;
 
       &:hover,
-      &.hover {
+      &.is-hovering {
         --am-c-timeselect-option-bgr: var(--am-c-option-hover);
       }
 
-      &.selected {
+      &.is-selected {
         --am-c-timeselect-option-text: var(--am-c-option-selected);
       }
 

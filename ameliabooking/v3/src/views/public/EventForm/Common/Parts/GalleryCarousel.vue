@@ -38,16 +38,14 @@
       :aria-label="getSlideLabel(index, img)"
     ></div>
 
-    <div class="am-gc__bullets" role="tablist" :aria-label="carouselNavigationLabel">
+    <div class="am-gc__bullets" role="group" :aria-label="carouselNavigationLabel">
       <button
         v-for="(img, index) in gallery"
         :key="index"
         class="am-gc__bullets-item"
         :class="{ 'am-active': index === activeImage }"
         type="button"
-        role="tab"
-        :aria-selected="index === activeImage"
-        :tabindex="index === activeImage ? 0 : -1"
+        :aria-current="index === activeImage ? 'true' : 'false'"
         :aria-label="getBulletLabel(index, img)"
         @click="goToImage(index)"
       ></button>

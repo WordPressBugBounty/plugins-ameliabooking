@@ -83,22 +83,21 @@
       <div v-if="props.error" class="am-caeper__error">
         {{ props.error }}
       </div>
-      <AmButton v-if="canAddPeriod()" prefix="plus" size="small" @click="addPeriod()">
+      <AmButton
+        v-if="canAddPeriod()"
+        prefix="plus"
+        size="small"
+        :aria-label="amLabels.add_period"
+        @click="addPeriod()"
+      >
         {{ amLabels.add_period }}
       </AmButton>
-      <!--      <AmButton-->
-      <!--        v-if="periods.length"-->
-      <!--        prefix="plus"-->
-      <!--        size="small"-->
-      <!--        @click="addBreak()"-->
-      <!--      >-->
-      <!--        {{ amLabels.add_break }}-->
-      <!--      </AmButton>-->
       <AmButton
         v-if="props.applyToAllDaysVisible"
         size="small"
         category="secondary"
         type="plain"
+        :aria-label="amLabels.apply_to_all_days"
         @click="applyToAllDays"
       >
         {{ amLabels.apply_to_all_days }}

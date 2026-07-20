@@ -274,6 +274,10 @@ function useConvertedUtcToLocalDateTime(period) {
   }
 }
 
+function getEventFrontedFormattedDateYear(date) {
+  return DateTime.fromFormat(date, 'yyyy-MM-dd').toFormat('yyyy')
+}
+
 function getEventFrontedFormattedDateDay(date) {
   return DateTime.fromFormat(date, 'yyyy-MM-dd').toFormat('dd')
 }
@@ -366,6 +370,7 @@ export {
   getFirstDayOfWeek,
   useSecondsToDuration,
   useConvertedUtcToLocalDateTime,
+  getEventFrontedFormattedDateYear,
   getEventFrontedFormattedDateDay,
   getEventFrontedFormattedDateMonth,
   getEventFrontedFormattedTime,

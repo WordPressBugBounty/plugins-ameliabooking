@@ -287,6 +287,7 @@ import { useCustomFields } from '../../../../assets/js/public/customFields'
 import useAction from '../../../../assets/js/public/actions'
 import { useElementSize } from '@vueuse/core'
 import { useCartHasItems } from '../../../../assets/js/public/cart'
+import { announceFormErrors, useLiveAnnouncer } from '../../../../assets/js/common/liveAnnouncer'
 import httpClient from '../../../../plugins/axios'
 import AmSocialButton from '../../../common/FormFields/AmSocialButton.vue'
 import { SocialAuthOptions } from '../../../../assets/js/admin/socialAuthOptions'
@@ -309,6 +310,8 @@ const amLabels = inject('amLabels')
 
 // * Customize
 let amCustomize = inject('amCustomize')
+
+const { announceAlert } = useLiveAnnouncer()
 
 // * Shortcode data
 const shortcodeData = inject('shortcodeData')
@@ -479,7 +482,11 @@ let formFields = ref({
 
         store.commit(
           'booking/setCustomerPhone',
-          getInternationalPhoneValue(phoneData?.phoneNumber ?? phoneData?.e164, phoneData, countryCode)
+          getInternationalPhoneValue(
+            phoneData?.phoneNumber ?? phoneData?.e164,
+            phoneData,
+            countryCode,
+          ),
         )
 
         isPhoneValid.value = !!phoneData.isValid
@@ -677,6 +684,8 @@ function submitForm() {
 
         useScrollTo(infoFormWrapperRef.value, fieldElement, 20, 300)
       })
+
+      announceFormErrors(infoFormRef, announceAlert)
 
       return false
     }

@@ -300,6 +300,7 @@ let cssVars = computed(() => {
         align-items: center;
         justify-content: center;
         font-size: 24px;
+        line-height: 20px;
         margin-left: auto;
 
         &.am-rtl {

@@ -625,6 +625,11 @@ const cssVars = computed(() => {
   @include am-button-block;
 }
 
+// WPA event landing — tickets column is teleported outside #amelia-container
+.amelia-v2-booking.wpa-events__tickets-am-shell {
+  @include am-button-block;
+}
+
 // Dropdown
 .am-dialog {
   @include am-button-block;

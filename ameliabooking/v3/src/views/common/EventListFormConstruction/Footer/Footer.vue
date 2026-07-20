@@ -44,13 +44,7 @@
 <script setup>
 import AmButton from '../../../_components/button/AmButton.vue'
 
-import {
-  inject,
-  ref,
-  computed,
-  // watch,
-  watchEffect,
-} from 'vue'
+import { inject, ref, computed } from 'vue'
 
 let props = defineProps({
   ready: {
@@ -107,11 +101,12 @@ const { footerButtonClick, footerBtnDisabled } = inject('changingStepsFunctions'
   footerBtnDisabled: ref(false),
 })
 
-// flag for payPal button on congratz step
-let isCongratzStep = ref(false)
-
 const steps = inject('stepsArray')
 const currentStep = inject('stepIndex')
+
+const isCongratzStep = computed(() => {
+  return currentStep.value === steps.value.length - 1
+})
 
 let primaryBtnLabel = computed(() => {
   if (isWaitingList()) {
@@ -142,12 +137,6 @@ let mainBtnClass = computed(() => {
     return 'am-elf__footer-btn__finish'
 
   return ''
-})
-
-watchEffect(() => {
-  if (currentStep.value === steps.value.length - 1) {
-    isCongratzStep.value = true
-  }
 })
 
 const shortcodeData = inject(
@@ -190,11 +179,7 @@ export default {
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      flex-direction: row;
       gap: 28px;
-      padding: 16px 24px;
-      box-shadow: 0 -2px 3px rgba(26, 44, 55, 0.15); // var(--am-c-main-text-op15);
-      border-radius: 0 0 8px 8px;
 
       &.am-congrats {
         justify-content: space-between;
@@ -243,7 +228,7 @@ export default {
 }
 
 // Public
-.amelia-v2-booking #amelia-container {
+.amelia-v2-booking {
   @include main-content-footer;
 }
 

@@ -25,7 +25,12 @@
         :disabled="loading"
         @click="previousStep"
       ></AmButton>
-      <span class="am-fs__main-heading-inner-title">
+      <span
+        class="am-fs__main-heading-inner-title"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         {{
           stepIndex in sidebarSteps && 'label' in sidebarSteps[stepIndex]
             ? sidebarSteps[stepIndex].label

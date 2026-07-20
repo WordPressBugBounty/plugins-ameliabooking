@@ -18,32 +18,32 @@
       <template #title> <span class="am-icon-clearable" /> {{ alertMessage }} </template>
     </AmAlert>
 
-    <el-tabs v-model="activeTab">
+    <AmTabs v-model="activeTab">
       <!-- Details -->
-      <el-tab-pane :label="amLabels.details" name="details">
+      <AmTabsItem :label="amLabels.details" name="details">
         <AttendeeDetails
           ref="attendeeDetailsRef"
           :event="props.event"
           :is-new="props.isNew"
           :page-width="props.pageWidth"
         />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Details -->
       <!-- Custom Fields -->
-      <el-tab-pane
+      <AmTabsItem
         v-if="Object.keys(customFields).length"
         :label="amLabels.custom_fields"
         name="customFields"
       >
         <AttendeeCustomFields ref="attendeeCustomFieldsRef" :event="props.event" />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Custom Fields -->
       <!-- Payment -->
-      <el-tab-pane v-if="store.getters['attendee/getId']" :label="amLabels.payment" name="payment">
+      <AmTabsItem v-if="store.getters['attendee/getId']" :label="amLabels.payment" name="payment">
         <AttendeePayment :event="props.event" :page-width="props.pageWidth" />
-      </el-tab-pane>
+      </AmTabsItem>
       <!-- /Payment -->
-    </el-tabs>
+    </AmTabs>
 
     <div class="am-capei-atti__footer">
       <AmButton category="secondary" :size="'default'" :type="'plain'" @click="close">
@@ -74,6 +74,8 @@
 </template>
 
 <script setup>
+import AmTabs from '../../../../../_components/tabs/AmTabs.vue'
+import AmTabsItem from '../../../../../_components/tabs/AmTabsItem.vue'
 // * import from Vue
 import { ref, computed, inject, provide, onMounted } from 'vue'
 

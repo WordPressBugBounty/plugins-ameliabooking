@@ -17,6 +17,12 @@
     :class="{ 'am-collapsed': sidebarCollapsed }"
     :style="cssVars"
   >
+    <div class="am-sr-only" role="status" aria-live="polite" aria-atomic="true">
+      {{ statusMessage }}
+    </div>
+    <div class="am-sr-only" role="alert" aria-live="assertive" aria-atomic="true">
+      {{ alertMessage }}
+    </div>
     <SideBar
       v-if="containerWidth > 560 && sidebarVisibility"
       class="am-fs-sb"
@@ -363,8 +369,11 @@ import {
   useAddToCart,
   useGoToCartStep,
 } from '../../../assets/js/public/cart'
+import { provideLiveAnnouncer } from '../../../assets/js/common/liveAnnouncer'
 
 let formDialogVisibility = inject('formDialogVisibility', ref(true))
+
+const { statusMessage, alertMessage, announceStatus } = provideLiveAnnouncer()
 
 // * Shortcode data
 const shortcodeData = inject('shortcodeData')
@@ -1377,6 +1386,11 @@ watch(stepIndex, (currStepIndex, prevStepIndex) => {
   if (currStepIndex === sidebarSteps.value.length) {
     sidebarSteps.value[prevStepIndex].selected = false
   }
+
+  const step = sidebarSteps.value[currStepIndex]
+  if (step?.label) {
+    announceStatus(`${step.label}, step ${currStepIndex + 1} of ${sidebarSteps.value.length}`)
+  }
 })
 
 let goBackToPackageBooking = ref(false)
@@ -1570,6 +1584,16 @@ function sidebarDataCollector(data) {
   sidebarSteps.value[stepIndex.value].stepSelectedData.sort((a, b) => {
     return a.position - b.position
   })
+
+  const currentStep = sidebarSteps.value[stepIndex.value]
+  const selections = currentStep.stepSelectedData
+    .map((item) => item.value)
+    .filter(Boolean)
+    .join(', ')
+
+  if (selections) {
+    announceStatus(`${currentStep.label}: ${selections}`)
+  }
 }
 
 provide('sidebarStepsFunctions', {
@@ -1620,6 +1644,11 @@ function addToCart() {
   useAddToCart(store)
 
   useInitCartItem(store)
+
+  const cartCount = useCartHasItems(store)
+  announceStatus(
+    `${amLabels.value.added_to_cart || 'Added to cart'}. ${cartCount} ${cartCount === 1 ? amLabels.value.appointment : amLabels.value.appointments} ${amLabels.value.in_cart}.`,
+  )
 }
 
 function backToCart() {

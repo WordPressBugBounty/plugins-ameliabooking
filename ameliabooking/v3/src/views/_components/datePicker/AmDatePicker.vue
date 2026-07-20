@@ -4,6 +4,7 @@
     <div
       class="am-date-picker__input"
       :class="[`am-${props.type}`, { 'is-disabled': props.disabled }]"
+      aria-hidden="true"
       @click="triggerCalendar"
     >
       <div v-if="props.type === 'date' && model" class="am-date-picker__input-date">
@@ -32,7 +33,7 @@
         :end-placeholder="props.endPlaceholder"
         :type="props.type"
         :format="props.format"
-        :popper-class="props.popperClass"
+        :popper-class="datePickerPopperClass"
         :popper-options="props.popperOptions"
         :popper-style="cssVars"
         :range-separator="props.rangeSeparator"
@@ -52,14 +53,16 @@
         :fallback-placements="props.fallbackPlacements"
         :placement="props.placement"
         class="am-date-picker"
+        :aria-label="datePickerAriaLabel"
         :class="[`am-date-picker--${size}`, { 'am-date-picker--disabled': props.disabled }]"
+        @keydown.capture="handleDatePickerKeydown"
         @change="(eventValue) => $emit('change', eventValue)"
         @blur="(e) => $emit('blur', e)"
         @focus="(e) => $emit('focus', e)"
         @clear="(e) => $emit('clear', e)"
-        @calendar-change="(e) => $emit('calendar-change', e)"
-        @panel-change="(e) => $emit('panel-change', e)"
-        @visible-change="(e) => $emit('visible-change', e)"
+        @calendar-change="handleCalendarChange"
+        @panel-change="handlePanelChange"
+        @visible-change="handleVisibleChange"
       >
       </el-date-picker>
     </el-config-provider>
@@ -69,7 +72,7 @@
 
 <script setup>
 // * Import from Vue
-import { computed, ref, toRefs, inject, markRaw } from 'vue'
+import { computed, ref, toRefs, inject, markRaw, nextTick, onBeforeUnmount } from 'vue'
 
 // * Libraries
 import moment from 'moment'
@@ -300,12 +303,309 @@ let model = computed({
  * Component reference
  */
 const amDatePicker = ref(null)
+let accessibleDatePickerPanel = null
+
+const accessibleDatePickerPopperClass = 'am-date-picker__popper'
+
+let datePickerPopperClass = computed(() => {
+  return [props.popperClass, accessibleDatePickerPopperClass].filter(Boolean).join(' ')
+})
+
+let datePickerAriaLabel = computed(() => {
+  if (props.type === 'daterange') {
+    return (
+      [props.startPlaceholder, props.endPlaceholder].filter(Boolean).join(' - ') ||
+      props.placeholder ||
+      'Date range picker'
+    )
+  }
+
+  return props.placeholder || 'Date picker'
+})
 
 function triggerCalendar() {
   if (amDatePicker.value) {
     amDatePicker.value.focus()
+    amDatePicker.value.handleOpen()
   }
 }
+
+function handleDatePickerKeydown(event) {
+  if (props.disabled || props.readonly) {
+    return
+  }
+
+  if (['Enter', ' ', 'ArrowDown'].includes(event.key)) {
+    event.preventDefault()
+    triggerCalendar()
+  }
+}
+
+function getDatePickerPanel() {
+  return document.querySelector(
+    `.${accessibleDatePickerPopperClass}:not([aria-hidden="true"]) .el-picker-panel`,
+  )
+}
+
+function isVisibleFocusableButton(button) {
+  return (
+    button instanceof HTMLButtonElement &&
+    !button.disabled &&
+    !button.classList.contains('is-disabled') &&
+    button.getClientRects().length > 0
+  )
+}
+
+function getMonthNavigationButtons() {
+  if (!accessibleDatePickerPanel) {
+    return []
+  }
+
+  return Array.from(
+    accessibleDatePickerPanel.querySelectorAll(
+      '.el-picker-panel__icon-btn.arrow-left, .el-picker-panel__icon-btn.arrow-right',
+    ),
+  ).filter(isVisibleFocusableButton)
+}
+
+function getPanelContentForElement(element) {
+  return (
+    element?.closest?.('.el-picker-panel__content') || element?.closest?.('.el-picker-panel__body')
+  )
+}
+
+function getAvailableDateCells() {
+  if (!accessibleDatePickerPanel) {
+    return []
+  }
+
+  return Array.from(
+    accessibleDatePickerPanel.querySelectorAll('td.available:not(.disabled)'),
+  ).filter((cell) => {
+    return cell instanceof HTMLElement && cell.getClientRects().length > 0
+  })
+}
+
+function getFocusedDateCellIndex(dateCells) {
+  const focusedCell = document.activeElement?.closest?.('td.available')
+
+  return dateCells.findIndex((cell) => cell === focusedCell)
+}
+
+function focusDateCell(dateCell) {
+  if (!dateCell) {
+    return
+  }
+
+  getAvailableDateCells().forEach((cell) => {
+    cell.setAttribute('tabindex', cell === dateCell ? '0' : '-1')
+  })
+
+  dateCell.focus()
+}
+
+function focusDateCellByOffset(offset) {
+  const dateCells = getAvailableDateCells()
+  const focusedIndex = getFocusedDateCellIndex(dateCells)
+  const nextIndex = Math.min(Math.max(focusedIndex + offset, 0), dateCells.length - 1)
+
+  focusDateCell(dateCells[nextIndex])
+}
+
+function focusDateCellByRowEdge(edge) {
+  const dateCells = getAvailableDateCells()
+  const focusedIndex = getFocusedDateCellIndex(dateCells)
+  const rowStartIndex = Math.floor(focusedIndex / 7) * 7
+  const nextIndex =
+    edge === 'start' ? rowStartIndex : Math.min(rowStartIndex + 6, dateCells.length - 1)
+
+  focusDateCell(dateCells[nextIndex])
+}
+
+function navigateMonth(direction) {
+  if (!accessibleDatePickerPanel) {
+    return
+  }
+
+  const arrowClass = direction === 'prev' ? 'arrow-left' : 'arrow-right'
+  const focusedContent = getPanelContentForElement(document.activeElement)
+  const focusedCell = document.activeElement?.closest?.('td.available')
+  const panelCells = focusedContent
+    ? getAvailableDateCells().filter((cell) => focusedContent.contains(cell))
+    : getAvailableDateCells()
+  const focusedIndex = focusedCell ? panelCells.indexOf(focusedCell) : -1
+  const focusedDay = focusedCell?.querySelector('.el-date-table-cell__text')?.textContent?.trim()
+  let button = focusedContent?.querySelector(`.el-picker-panel__icon-btn.${arrowClass}`)
+
+  if (!isVisibleFocusableButton(button)) {
+    if (focusedContent?.classList.contains('is-left')) {
+      button = accessibleDatePickerPanel.querySelector(
+        `.el-picker-panel__content.is-right .el-picker-panel__icon-btn.${arrowClass}`,
+      )
+    } else if (focusedContent?.classList.contains('is-right')) {
+      button = accessibleDatePickerPanel.querySelector(
+        `.el-picker-panel__content.is-left .el-picker-panel__icon-btn.${arrowClass}`,
+      )
+    } else {
+      button = accessibleDatePickerPanel.querySelector(`.el-picker-panel__icon-btn.${arrowClass}`)
+    }
+  }
+
+  if (!isVisibleFocusableButton(button)) {
+    return
+  }
+
+  button.click()
+  nextTick(() => {
+    setDateCellAccessibility()
+
+    const refreshedPanelCells = focusedContent
+      ? getAvailableDateCells().filter((cell) => focusedContent.contains(cell))
+      : getAvailableDateCells()
+
+    let replacementCell = focusedDay
+      ? refreshedPanelCells.find(
+          (cell) =>
+            cell.querySelector('.el-date-table-cell__text')?.textContent?.trim() === focusedDay,
+        )
+      : null
+
+    if (!replacementCell && focusedIndex >= 0) {
+      replacementCell = refreshedPanelCells[Math.min(focusedIndex, refreshedPanelCells.length - 1)]
+    }
+
+    if (!replacementCell) {
+      replacementCell =
+        refreshedPanelCells.find((cell) => cell.getAttribute('tabindex') === '0') ||
+        refreshedPanelCells[0]
+    }
+
+    focusDateCell(replacementCell)
+  })
+}
+
+function focusInitialPanelElement() {
+  const initialDateCell = getAvailableDateCells().find(
+    (cell) => cell.getAttribute('tabindex') === '0',
+  )
+
+  if (initialDateCell) {
+    focusDateCell(initialDateCell)
+    return
+  }
+
+  getMonthNavigationButtons()[0]?.focus()
+}
+
+function handleDateCellKeydown(event) {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    amDatePicker.value?.handleClose()
+    amDatePicker.value?.focus()
+    return
+  }
+
+  const focusedDateCell = event.target.closest?.('td.available')
+  if (!focusedDateCell) {
+    return
+  }
+
+  const keyActions = {
+    ArrowLeft: () => focusDateCellByOffset(-1),
+    ArrowRight: () => focusDateCellByOffset(1),
+    ArrowUp: () => focusDateCellByOffset(-7),
+    ArrowDown: () => focusDateCellByOffset(7),
+    Home: () => focusDateCellByRowEdge('start'),
+    End: () => focusDateCellByRowEdge('end'),
+    PageUp: () => navigateMonth('prev'),
+    PageDown: () => navigateMonth('next'),
+  }
+
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    focusedDateCell.click()
+    return
+  }
+
+  if (keyActions[event.key]) {
+    event.preventDefault()
+    keyActions[event.key]()
+  }
+}
+
+function setDateCellAccessibility() {
+  const dateCells = getAvailableDateCells()
+
+  dateCells.forEach((cell) => {
+    const isSelected =
+      cell.classList.contains('current') ||
+      cell.classList.contains('start-date') ||
+      cell.classList.contains('end-date')
+
+    cell.setAttribute('role', 'gridcell')
+    cell.setAttribute('aria-selected', isSelected ? 'true' : 'false')
+    cell.setAttribute('tabindex', isSelected ? '0' : '-1')
+  })
+
+  if (!dateCells.some((cell) => cell.getAttribute('tabindex') === '0')) {
+    dateCells[0]?.setAttribute('tabindex', '0')
+  }
+}
+
+function bindDatePickerPanelKeyboard() {
+  unbindDatePickerPanelKeyboard()
+
+  accessibleDatePickerPanel = getDatePickerPanel()
+
+  if (!accessibleDatePickerPanel) {
+    return false
+  }
+
+  setDateCellAccessibility()
+  accessibleDatePickerPanel.addEventListener('keydown', handleDateCellKeydown)
+  focusInitialPanelElement()
+
+  return true
+}
+
+function unbindDatePickerPanelKeyboard() {
+  accessibleDatePickerPanel?.removeEventListener('keydown', handleDateCellKeydown)
+  accessibleDatePickerPanel = null
+}
+
+function handleVisibleChange(visible) {
+  emits('visible-change', visible)
+
+  if (visible) {
+    nextTick(() => {
+      setTimeout(() => {
+        if (!bindDatePickerPanelKeyboard()) {
+          setTimeout(bindDatePickerPanelKeyboard, 50)
+        }
+      }, 0)
+    })
+  } else {
+    unbindDatePickerPanelKeyboard()
+  }
+}
+
+function handlePanelChange(value, mode, view) {
+  emits('panel-change', value, mode, view)
+
+  if (accessibleDatePickerPanel) {
+    nextTick(setDateCellAccessibility)
+  }
+}
+
+function handleCalendarChange(value) {
+  emits('calendar-change', value)
+
+  if (accessibleDatePickerPanel) {
+    nextTick(setDateCellAccessibility)
+  }
+}
+
+onBeforeUnmount(unbindDatePickerPanelKeyboard)
 
 // * Colors block
 let amColors = inject('amColors')
@@ -610,6 +910,12 @@ let cssVars = computed(() => {
     &:hover {
       color: var(--am-c-btn-prim);
     }
+
+    &:focus-visible {
+      outline: 2px solid var(--am-c-primary);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
   }
 
   &__content {
@@ -638,6 +944,14 @@ let cssVars = computed(() => {
         background: var(--am-c-drop-text);
         border-radius: 50%;
         color: var(--am-c-drop-bgr);
+      }
+      td.available:focus {
+        outline: none;
+
+        .el-date-table-cell__text {
+          outline: 2px solid var(--am-c-primary);
+          outline-offset: 2px;
+        }
       }
       td.in-range > .el-date-table-cell {
         background-color: var(--am-c-drop-text-op10);
@@ -701,8 +1015,8 @@ let cssVars = computed(() => {
     }
     &__prev-btn:focus,
     &__next-btn:focus {
-      //background: transparent;
-      outline: none;
+      outline: 2px solid var(--am-c-primary);
+      outline-offset: 2px;
     }
   }
   &-label:hover {

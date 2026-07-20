@@ -17,9 +17,7 @@
         <span
           class="am-ec__period-date__day"
           :class="[
-            {
-              'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed',
-            },
+            { 'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed' },
             responsiveClass,
           ]"
         >
@@ -28,24 +26,32 @@
         <span
           class="am-ec__period-date__month"
           :class="[
-            {
-              'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed',
-            },
+            { 'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed' },
             responsiveClass,
           ]"
         >
-          {{ getEventFrontedFormattedDateMonth(props.event.periods[0].periodStart.split(' ')[0]) }}
+          {{ getEventFrontedFormattedDateMonth(props.event.periods[0].periodStart.split(' ')[0]) }},
+        </span>
+        <span
+          class="am-ec__period-date__year"
+          :class="[
+            { 'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed' },
+            responsiveClass,
+          ]"
+        >
+          {{ getEventFrontedFormattedDateYear(props.event.periods[0].periodStart.split(' ')[0]) }}
         </span>
       </p>
       <p
         class="am-ec__period-time"
         :class="[
-          {
-            'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed',
-          },
+          { 'am-ghost': eventStatus === 'canceled' || eventStatus === 'closed' },
           responsiveClass,
         ]"
       >
+        <template v-if="componentWidth <= 500">
+          {{ labelsDisplay('event_at') }}
+        </template>
         {{ getEventFrontedFormattedTime(props.event.periods[0].periodStart.split(' ')[1]) }}
       </p>
     </div>
@@ -199,6 +205,7 @@ import {
   getEventFrontedFormattedTime,
   getEventFrontedFormattedDateDay,
   getEventFrontedFormattedDateMonth,
+  getEventFrontedFormattedDateYear,
 } from '../../../../../../../assets/js/common/date.js'
 import { useFormattedPrice } from '../../../../../../../assets/js/common/formatting'
 import { useColorTransparency } from '../../../../../../../assets/js/common/colorManipulation'
@@ -461,8 +468,12 @@ export default {
       }
 
       &-date {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
         padding: 0;
         margin: 0;
+        gap: 0 4px;
 
         &.am-rw-500 {
           display: flex;
@@ -475,21 +486,36 @@ export default {
         }
 
         &__day {
+          width: 100%;
           font-size: 20px;
           font-weight: 500;
           line-height: 1;
-          margin-right: 2px;
 
           &.am-ghost {
             color: var(--am-c-ec-text-op50); // $shade-500
           }
 
           &.am-rw-500 {
+            width: auto;
             font-size: 18px;
           }
         }
 
         &__month {
+          font-size: 13px;
+          font-weight: 400;
+          line-height: 1.23077;
+
+          &.am-ghost {
+            color: var(--am-c-ec-text-op50); // $shade-500
+          }
+
+          &.am-rw-500 {
+            font-size: 14px;
+          }
+        }
+
+        &__year {
           font-size: 13px;
           font-weight: 400;
           line-height: 1.23077;
@@ -679,6 +705,8 @@ export default {
 
           p {
             margin: 0;
+            text-align: start;
+            word-break: break-word;
           }
         }
 

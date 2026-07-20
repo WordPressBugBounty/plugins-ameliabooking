@@ -2803,6 +2803,7 @@ let defaultTranslations = {
         name: globalLabels.event_card,
         labels: {
           event_begins: null,
+          event_at: null,
           from: null,
           event_free: null,
           event_slot_left: null,
@@ -2833,6 +2834,7 @@ let defaultTranslations = {
         name: globalLabels.step_header,
         labels: {
           event_begins: null,
+          event_at: null,
           from: null,
           event_free: null,
           event_slot_left: null,
@@ -3758,6 +3760,7 @@ let defaultTranslations = {
         name: globalLabels.step_header,
         labels: {
           event_begins: null,
+          event_at: null,
           from: null,
           event_free: null,
           event_slot_left: null,

@@ -25,16 +25,20 @@
         ></Header>
         <AmButton
           v-if="filterWidth < 481"
+          id="am-fcil-filter-menu-btn"
           size="medium"
           category="secondary"
           :type="customizedOptions.filterMenuBtn.buttonType"
           custom-class="am-fcil__filter-buttons__menu"
           :icon-only="true"
           :icon="iconSearchMenu"
+          :aria-label="amLabels.filter_input"
+          :aria-expanded="filterMobileMenu"
+          aria-controls="am-fcil-filter-panel"
           @click="() => (filterMobileMenu = !filterMobileMenu)"
         ></AmButton>
       </span>
-      <div class="am-fcil__filter">
+      <div id="am-fcil-filter-panel" class="am-fcil__filter">
         <div
           v-if="customizedOptions.searchInput.visibility"
           role="search"
@@ -152,39 +156,54 @@
             categoryServices.length !== 0 &&
             !useCartHasItems(store)
           "
-          role="search"
-          aria-label="Filter Buttons"
+          role="group"
+          :aria-label="amLabels.filter_input"
           class="am-fcil__filter-item"
           :class="filterClassWidth.buttons"
         >
           <div class="am-fcil__filter-item__btn-wrapper">
-            <div
+            <AmButton
+              native-type="button"
               class="am-fcil__filter-item__btn"
+              category="secondary"
+              type="text"
+              size="mini"
+              :aria-pressed="displayCategoryPackages && displayCategoryServices"
               :class="{ 'am-active': displayCategoryPackages && displayCategoryServices }"
               @click="changeCategoryItemsVisibility('all')"
             >
               <span>
                 {{ amLabels.filter_all }}
               </span>
-            </div>
-            <div
+            </AmButton>
+            <AmButton
+              native-type="button"
               class="am-fcil__filter-item__btn"
+              category="secondary"
+              type="text"
+              size="mini"
+              :aria-pressed="displayCategoryPackages && !displayCategoryServices"
               :class="{ 'am-active': displayCategoryPackages && !displayCategoryServices }"
               @click="changeCategoryItemsVisibility('packages')"
             >
               <span>
                 {{ amLabels.filter_packages }}
               </span>
-            </div>
-            <div
+            </AmButton>
+            <AmButton
+              native-type="button"
               class="am-fcil__filter-item__btn"
+              category="secondary"
+              type="text"
+              size="mini"
+              :aria-pressed="!displayCategoryPackages && displayCategoryServices"
               :class="{ 'am-active': !displayCategoryPackages && displayCategoryServices }"
               @click="changeCategoryItemsVisibility('services')"
             >
               <span>
                 {{ amLabels.filter_services }}
               </span>
-            </div>
+            </AmButton>
           </div>
         </div>
       </div>
@@ -214,323 +233,352 @@
       </div>
     </template>
     <template #content>
-      <!-- Packages -->
-      <template v-if="displayCategoryPackages && !useCartHasItems(store)">
-        <div
-          v-for="item in categoryPackages"
-          :key="item.id"
-          role="group"
-          class="am-fcil__item"
-          :class="{ 'am-mobile': containerWidth < 481 }"
-        >
-          <div class="am-fcil__item-inner" :class="{ 'am-mobile': containerWidth < 481 }">
+      <div class="am-fcil__items-list" role="list" :aria-label="headingStringRender">
+        <!-- Packages -->
+        <template v-if="displayCategoryPackages && !useCartHasItems(store)">
+          <div
+            v-for="item in categoryPackages"
+            :key="item.id"
+            role="listitem"
+            class="am-fcil__item"
+            :class="{ 'am-mobile': containerWidth < 481 }"
+          >
             <div
-              class="am-fcil__item-content"
-              :style="
-                customizedOptions.cardColor && customizedOptions.cardColor.visibility
-                  ? { backgroundColor: useColorTransparency(item.color, 0.1) }
-                  : {}
-              "
+              class="am-fcil__item-inner"
+              role="group"
+              :aria-labelledby="getPackageTitleId(item)"
+              :class="{ 'am-mobile': containerWidth < 481 }"
             >
-              <!-- Card Badge -->
               <div
-                v-if="customizedOptions.packageBadge.visibility"
-                class="am-fcil__item-badge__wrapper"
+                class="am-fcil__item-content"
+                :style="
+                  customizedOptions.cardColor && customizedOptions.cardColor.visibility
+                    ? { backgroundColor: useColorTransparency(item.color, 0.1) }
+                    : {}
+                "
               >
-                <div class="am-fcil__item-badge am-package">
-                  <span class="am-icon-shipment"></span>
-                  <span>
-                    {{ amLabels.package }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- Card Hero Image -->
-              <div
-                v-if="item.pictureFullPath"
-                class="am-fcil__item-hero"
-                :style="{ backgroundImage: `url(${item.pictureFullPath})` }"
-                tabindex="0"
-                @click="selectPackage(item)"
-                @keydown.enter="selectPackage(item)"
-              />
-
-              <!-- Card Heading -->
-              <div class="am-fcil__item-heading">
+                <!-- Card Badge -->
                 <div
-                  class="am-fcil__item-name"
+                  v-if="customizedOptions.packageBadge.visibility"
+                  class="am-fcil__item-badge__wrapper"
+                >
+                  <div class="am-fcil__item-badge am-package">
+                    <span class="am-icon-shipment" aria-hidden="true"></span>
+                    <span>
+                      {{ amLabels.package }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Card Hero Image -->
+                <div
+                  v-if="item.pictureFullPath"
+                  class="am-fcil__item-hero"
+                  :style="{ backgroundImage: `url(${item.pictureFullPath})` }"
                   tabindex="0"
                   @click="selectPackage(item)"
                   @keydown.enter="selectPackage(item)"
-                >
-                  {{ item.name }}
-                </div>
-                <div v-if="customizedOptions.packagePrice.visibility" class="am-fcil__item-cost">
-                  <span v-if="item.discount" class="am-fcil__item-discount">
-                    {{ `${amLabels.save} ${item.discount}%` }}
-                  </span>
-                  <span class="am-fcil__item-price">
-                    {{ item.price ? useFormattedPrice(usePackageAmount(item)) : amLabels.free }}
-                  </span>
-                  <span
-                    v-if="
-                      item.price &&
-                      (customizedOptions.tax?.visibility ?? true) &&
-                      useTaxVisibility(store, item.id, 'package')
-                    "
-                    class="am-fcil__item-price"
+                />
+
+                <!-- Card Heading -->
+                <div class="am-fcil__item-heading">
+                  <div
+                    :id="getPackageTitleId(item)"
+                    class="am-fcil__item-name"
+                    tabindex="0"
+                    @click="selectPackage(item)"
+                    @keydown.enter="selectPackage(item)"
                   >
-                    <template v-if="amSettings.payments.taxes.excluded">
-                      {{ `+${amLabels.total_tax_colon}` }}
-                    </template>
-                    <template v-else>
-                      {{ amLabels.incl_tax }}
-                    </template>
-                  </span>
+                    {{ item.name }}
+                  </div>
+                  <div v-if="customizedOptions.packagePrice.visibility" class="am-fcil__item-cost">
+                    <span v-if="item.discount" class="am-fcil__item-discount">
+                      {{ `${amLabels.save} ${item.discount}%` }}
+                    </span>
+                    <span class="am-fcil__item-price">
+                      {{ item.price ? useFormattedPrice(usePackageAmount(item)) : amLabels.free }}
+                    </span>
+                    <span
+                      v-if="
+                        item.price &&
+                        (customizedOptions.tax?.visibility ?? true) &&
+                        useTaxVisibility(store, item.id, 'package')
+                      "
+                      class="am-fcil__item-price"
+                    >
+                      <template v-if="amSettings.payments.taxes.excluded">
+                        {{ `+${amLabels.total_tax_colon}` }}
+                      </template>
+                      <template v-else>
+                        {{ amLabels.incl_tax }}
+                      </template>
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              <!-- Card Info -->
-              <div class="am-fcil__item-info">
-                <div
-                  v-if="customizedOptions.packageCategory.visibility && categorySelected"
-                  class="am-fcil__item-info__inner"
-                >
-                  <span class="am-icon-folder"></span>
-                  <span>{{ availableCategories.find((a) => a.id === categorySelected).name }}</span>
+                <!-- Card Info -->
+                <div class="am-fcil__item-info">
+                  <div
+                    v-if="customizedOptions.packageCategory.visibility && categorySelected"
+                    class="am-fcil__item-info__inner"
+                  >
+                    <span class="am-icon-folder" aria-hidden="true"></span>
+                    <span>{{
+                      availableCategories.find((a) => a.id === categorySelected).name
+                    }}</span>
+                  </div>
+                  <div
+                    v-if="customizedOptions.packageDuration.visibility"
+                    class="am-fcil__item-info__inner"
+                  >
+                    <span class="am-icon-clock" aria-hidden="true"></span>
+                    <span v-if="item.endDate">
+                      {{ `${amLabels.expires_at} ${item.endDate.split(' ')[0]}` }}
+                    </span>
+                    <span v-else-if="item.durationCount">
+                      {{
+                        `${amLabels.expires_after} ${item.durationCount} ${packageDurationLabel(item.durationCount, item.durationType)}`
+                      }}
+                    </span>
+                    <span v-else>
+                      {{ amLabels.without_expiration }}
+                    </span>
+                  </div>
+                  <div
+                    v-if="customizedOptions.packageCapacity.visibility"
+                    class="am-fcil__item-info__inner"
+                  >
+                    <span class="am-icon-user" aria-hidden="true"></span>
+                    <span>1/1</span>
+                  </div>
+                  <div
+                    v-if="
+                      usePackageLocations(amEntities, item, shortcodeData).length &&
+                      customizedOptions.packageLocation.visibility
+                    "
+                    class="am-fcil__item-info__inner"
+                  >
+                    <span class="am-icon-locations" aria-hidden="true"></span>
+                    <span>
+                      {{ displayPackageLocationLabel(amEntities, item) }}
+                    </span>
+                  </div>
                 </div>
+
                 <div
-                  v-if="customizedOptions.packageDuration.visibility"
-                  class="am-fcil__item-info__inner"
+                  v-if="customizedOptions.packageServices.visibility"
+                  class="am-fcil__item-services"
                 >
-                  <span class="am-icon-clock"></span>
-                  <span v-if="item.endDate">
-                    {{ `${amLabels.expires_at} ${item.endDate.split(' ')[0]}` }}
-                  </span>
-                  <span v-else-if="item.durationCount">
-                    {{
-                      `${amLabels.expires_after} ${item.durationCount} ${packageDurationLabel(item.durationCount, item.durationType)}`
-                    }}
-                  </span>
-                  <span v-else>
-                    {{ amLabels.without_expiration }}
-                  </span>
-                </div>
-                <div
-                  v-if="customizedOptions.packageCapacity.visibility"
-                  class="am-fcil__item-info__inner"
-                >
-                  <span class="am-icon-user"></span>
-                  <span>1/1</span>
-                </div>
-                <div
-                  v-if="
-                    usePackageLocations(amEntities, item, shortcodeData).length &&
-                    customizedOptions.packageLocation.visibility
-                  "
-                  class="am-fcil__item-info__inner"
-                >
-                  <span class="am-icon-locations"></span>
                   <span>
-                    {{ displayPackageLocationLabel(amEntities, item) }}
+                    {{ `${amLabels.in_package}:` }}
+                  </span>
+                  <span v-for="obj in item.bookable" :key="obj.id">
+                    {{ obj.service.name }}
                   </span>
                 </div>
               </div>
 
+              <!-- Card Footer -->
               <div
-                v-if="customizedOptions.packageServices.visibility"
-                class="am-fcil__item-services"
-              >
-                <span>
-                  {{ `${amLabels.in_package}:` }}
-                </span>
-                <span v-for="obj in item.bookable" :key="obj.id">
-                  {{ obj.service.name }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Card Footer -->
-            <div
-              class="am-fcil__item-footer"
-              :class="[{ 'am-mobile': containerWidth < 481 }, { 'am-micro': containerWidth < 320 }]"
-            >
-              <AmButton
-                v-if="customizedOptions.cardEmployeeBtn.visibility"
-                :class="{ 'am-w100': containerWidth < 320 }"
-                size="small"
-                :type="customizedOptions.cardEmployeeBtn.buttonType"
-                @click="getDialogPackageEmployees(item)"
-              >
-                {{ amLabels.view_employees }}
-              </AmButton>
-              <AmButton
+                class="am-fcil__item-footer"
                 :class="[
-                  { 'am-w100': !customizedOptions.cardEmployeeBtn.visibility },
-                  { 'am-micro am-w100': containerWidth < 320 },
+                  { 'am-mobile': containerWidth < 481 },
+                  { 'am-micro': containerWidth < 320 },
                 ]"
-                size="small"
-                :type="customizedOptions.cardContinueBtn.buttonType"
-                @click="selectPackage(item)"
               >
-                {{ amLabels.continue }}
-              </AmButton>
+                <AmButton
+                  v-if="customizedOptions.cardEmployeeBtn.visibility"
+                  :class="{ 'am-w100': containerWidth < 320 }"
+                  size="small"
+                  :type="customizedOptions.cardEmployeeBtn.buttonType"
+                  :aria-label="getEmployeesButtonLabel(item)"
+                  @click="getDialogPackageEmployees(item)"
+                >
+                  {{ amLabels.view_employees }}
+                </AmButton>
+                <AmButton
+                  :class="[
+                    { 'am-w100': !customizedOptions.cardEmployeeBtn.visibility },
+                    { 'am-micro am-w100': containerWidth < 320 },
+                  ]"
+                  size="small"
+                  :type="customizedOptions.cardContinueBtn.buttonType"
+                  :aria-label="getContinueButtonLabel(item)"
+                  @click="selectPackage(item)"
+                >
+                  {{ amLabels.continue }}
+                </AmButton>
+              </div>
             </div>
           </div>
-        </div>
-      </template>
-      <!-- /Packages -->
+        </template>
+        <!-- /Packages -->
 
-      <!-- Services -->
-      <template v-if="displayCategoryServices">
-        <div
-          v-for="item in categoryServices"
-          :key="item.id"
-          class="am-fcil__item"
-          :class="{ 'am-mobile': containerWidth < 481 }"
-        >
-          <div class="am-fcil__item-inner" :class="{ 'am-mobile': containerWidth < 481 }">
+        <!-- Services -->
+        <template v-if="displayCategoryServices">
+          <div
+            v-for="item in categoryServices"
+            :key="item.id"
+            role="listitem"
+            class="am-fcil__item"
+            :class="{ 'am-mobile': containerWidth < 481 }"
+          >
             <div
-              class="am-fcil__item-content"
-              :style="
-                customizedOptions.cardColor && customizedOptions.cardColor.visibility
-                  ? { backgroundColor: useColorTransparency(item.color, 0.1) }
-                  : {}
-              "
+              class="am-fcil__item-inner"
+              role="group"
+              :aria-labelledby="getServiceTitleId(item)"
+              :class="{ 'am-mobile': containerWidth < 481 }"
             >
-              <!-- Card Badge -->
               <div
-                v-if="customizedOptions.serviceBadge.visibility"
-                class="am-fcil__item-badge__wrapper"
+                class="am-fcil__item-content"
+                :style="
+                  customizedOptions.cardColor && customizedOptions.cardColor.visibility
+                    ? { backgroundColor: useColorTransparency(item.color, 0.1) }
+                    : {}
+                "
               >
-                <div class="am-fcil__item-badge am-service">
-                  <span class="am-icon-service"></span>
-                  <span>
-                    {{ amLabels.heading_service }}
-                  </span>
-                </div>
-              </div>
-              <!-- /Card Badge -->
-
-              <!-- Card Hero Image -->
-              <div
-                v-if="item.pictureFullPath"
-                class="am-fcil__item-hero"
-                :style="{ backgroundImage: `url(${item.pictureFullPath})` }"
-                tabindex="0"
-                @click="selectService(item.id)"
-                @keydown.enter="selectService(item.id)"
-              />
-              <!-- /Card Hero Image -->
-
-              <!-- Card Heading -->
-              <div class="am-fcil__item-heading">
+                <!-- Card Badge -->
                 <div
-                  class="am-fcil__item-name"
+                  v-if="customizedOptions.serviceBadge.visibility"
+                  class="am-fcil__item-badge__wrapper"
+                >
+                  <div class="am-fcil__item-badge am-service">
+                    <span class="am-icon-service" aria-hidden="true"></span>
+                    <span>
+                      {{ amLabels.heading_service }}
+                    </span>
+                  </div>
+                </div>
+                <!-- /Card Badge -->
+
+                <!-- Card Hero Image -->
+                <div
+                  v-if="item.pictureFullPath"
+                  class="am-fcil__item-hero"
+                  :style="{ backgroundImage: `url(${item.pictureFullPath})` }"
                   tabindex="0"
                   @click="selectService(item.id)"
                   @keydown.enter="selectService(item.id)"
-                >
-                  {{ item.name }}
-                </div>
-                <div v-if="customizedOptions.servicePrice.visibility" class="am-fcil__item-cost">
-                  <span
-                    v-if="
-                      useServicePrice(amEntities, item.id).min ||
-                      useServicePrice(amEntities, item.id).max
-                    "
-                    class="am-fcil__item-price"
-                  >
-                    {{ useServicePrice(amEntities, item.id).price }}
-                  </span>
-                  <span
-                    v-if="
-                      (customizedOptions.tax?.visibility ?? true) &&
-                      useTaxVisibility(store, item.id, 'service')
-                    "
-                    class="am-fcil__item-price"
-                  >
-                    <template v-if="amSettings.payments.taxes.excluded">
-                      {{ `+${amLabels.total_tax_colon}` }}
-                    </template>
-                    <template v-else>
-                      {{ amLabels.incl_tax }}
-                    </template>
-                  </span>
-                </div>
-              </div>
-              <!-- /Card Heading -->
+                />
+                <!-- /Card Hero Image -->
 
-              <!-- Card Info -->
-              <div class="am-fcil__item-info">
-                <div
-                  v-if="customizedOptions.serviceCategory.visibility && categorySelected"
-                  class="am-fcil__item-info__inner"
-                >
-                  <span class="am-icon-folder"></span>
-                  <span>{{ availableCategories.find((a) => a.id === categorySelected).name }}</span>
+                <!-- Card Heading -->
+                <div class="am-fcil__item-heading">
+                  <div
+                    :id="getServiceTitleId(item)"
+                    class="am-fcil__item-name"
+                    tabindex="0"
+                    @click="selectService(item.id)"
+                    @keydown.enter="selectService(item.id)"
+                  >
+                    {{ item.name }}
+                  </div>
+                  <div v-if="customizedOptions.servicePrice.visibility" class="am-fcil__item-cost">
+                    <span
+                      v-if="
+                        useServicePrice(amEntities, item.id).min ||
+                        useServicePrice(amEntities, item.id).max
+                      "
+                      class="am-fcil__item-price"
+                    >
+                      {{ useServicePrice(amEntities, item.id).price }}
+                    </span>
+                    <span
+                      v-if="
+                        (customizedOptions.tax?.visibility ?? true) &&
+                        useTaxVisibility(store, item.id, 'service')
+                      "
+                      class="am-fcil__item-price"
+                    >
+                      <template v-if="amSettings.payments.taxes.excluded">
+                        {{ `+${amLabels.total_tax_colon}` }}
+                      </template>
+                      <template v-else>
+                        {{ amLabels.incl_tax }}
+                      </template>
+                    </span>
+                  </div>
                 </div>
-                <div
-                  v-if="customizedOptions.serviceDuration.visibility"
-                  class="am-fcil__item-info__inner"
-                >
-                  <span class="am-icon-clock"></span>
-                  <span>{{ useServiceDuration(item.duration) }}</span>
-                </div>
-                <div
-                  v-if="customizedOptions.serviceCapacity.visibility && !licence.isLite"
-                  class="am-fcil__item-info__inner"
-                >
-                  <span class="am-icon-user"></span>
-                  <span>{{ useEmployeesServiceCapacity(amEntities, item.id) }}</span>
-                </div>
-                <div
-                  v-if="
-                    useServiceLocation(amEntities, item.id).length &&
-                    customizedOptions.serviceLocation.visibility
-                  "
-                  class="am-fcil__item-info__inner"
-                >
-                  <span class="am-icon-locations"></span>
-                  <span>
-                    {{ displayServiceLocationLabel(amEntities, item.id) }}
-                  </span>
-                </div>
-              </div>
-              <!-- /Card Info -->
-            </div>
+                <!-- /Card Heading -->
 
-            <!-- Card Footer -->
-            <div
-              class="am-fcil__item-footer"
-              :class="[{ 'am-mobile': containerWidth < 481 }, { 'am-micro': containerWidth < 320 }]"
-            >
-              <AmButton
-                v-if="customizedOptions.cardEmployeeBtn.visibility && !licence.isLite"
-                :class="{ 'am-w100': containerWidth < 320 }"
-                size="small"
-                :type="customizedOptions.cardEmployeeBtn.buttonType"
-                @click="getDialogServiceEmployees(item.id)"
-              >
-                {{ amLabels.view_employees }}
-              </AmButton>
-              <AmButton
+                <!-- Card Info -->
+                <div class="am-fcil__item-info">
+                  <div
+                    v-if="customizedOptions.serviceCategory.visibility && categorySelected"
+                    class="am-fcil__item-info__inner"
+                  >
+                    <span class="am-icon-folder" aria-hidden="true"></span>
+                    <span>{{
+                      availableCategories.find((a) => a.id === categorySelected).name
+                    }}</span>
+                  </div>
+                  <div
+                    v-if="customizedOptions.serviceDuration.visibility"
+                    class="am-fcil__item-info__inner"
+                  >
+                    <span class="am-icon-clock" aria-hidden="true"></span>
+                    <span>{{ useServiceDuration(item.duration) }}</span>
+                  </div>
+                  <div
+                    v-if="customizedOptions.serviceCapacity.visibility && !licence.isLite"
+                    class="am-fcil__item-info__inner"
+                  >
+                    <span class="am-icon-user" aria-hidden="true"></span>
+                    <span>{{ useEmployeesServiceCapacity(amEntities, item.id) }}</span>
+                  </div>
+                  <div
+                    v-if="
+                      useServiceLocation(amEntities, item.id).length &&
+                      customizedOptions.serviceLocation.visibility
+                    "
+                    class="am-fcil__item-info__inner"
+                  >
+                    <span class="am-icon-locations" aria-hidden="true"></span>
+                    <span>
+                      {{ displayServiceLocationLabel(amEntities, item.id) }}
+                    </span>
+                  </div>
+                </div>
+                <!-- /Card Info -->
+              </div>
+
+              <!-- Card Footer -->
+              <div
+                class="am-fcil__item-footer"
                 :class="[
-                  { 'am-w100': !customizedOptions.cardEmployeeBtn.visibility },
-                  { 'am-micro am-w100': containerWidth < 320 },
+                  { 'am-mobile': containerWidth < 481 },
+                  { 'am-micro': containerWidth < 320 },
                 ]"
-                size="small"
-                :type="customizedOptions.cardContinueBtn.buttonType"
-                @click="selectService(item.id)"
               >
-                {{ amLabels.continue }}
-              </AmButton>
+                <AmButton
+                  v-if="customizedOptions.cardEmployeeBtn.visibility && !licence.isLite"
+                  :class="{ 'am-w100': containerWidth < 320 }"
+                  size="small"
+                  :type="customizedOptions.cardEmployeeBtn.buttonType"
+                  :aria-label="getEmployeesButtonLabel(item)"
+                  @click="getDialogServiceEmployees(item.id)"
+                >
+                  {{ amLabels.view_employees }}
+                </AmButton>
+                <AmButton
+                  :class="[
+                    { 'am-w100': !customizedOptions.cardEmployeeBtn.visibility },
+                    { 'am-micro am-w100': containerWidth < 320 },
+                  ]"
+                  size="small"
+                  :type="customizedOptions.cardContinueBtn.buttonType"
+                  :aria-label="getContinueButtonLabel(item)"
+                  @click="selectService(item.id)"
+                >
+                  {{ amLabels.continue }}
+                </AmButton>
+              </div>
+              <!-- /Card Footer -->
             </div>
-            <!-- /Card Footer -->
           </div>
-        </div>
-      </template>
-      <!-- /Services -->
+        </template>
+        <!-- /Services -->
+      </div>
 
       <!-- Employees Dialog -->
       <AmDialog
@@ -549,7 +597,7 @@
           </div>
         </template>
         <template #default>
-          <div>
+          <div class="am-fcil-employee__content">
             <AmCollapse>
               <AmCollapseItem v-for="(employee, index) in dialogEmployeesArray" :key="index" side>
                 <template #heading>
@@ -621,10 +669,11 @@
       </AmDialog>
     </template>
   </Content>
-  <div v-else ref="ameliaContainer" class="am-empty">
+  <div v-else ref="ameliaContainer" class="am-empty" role="status" aria-live="polite">
     <img
       :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/am-empty-booking.svg'"
-      alt="Empty"
+      alt=""
+      aria-hidden="true"
     />
     <div class="am-empty__heading">
       {{ amLabels.oops }}
@@ -841,6 +890,26 @@ let amLabels = computed(() => {
   }
   return computedLabels
 })
+
+function getLabel(key, fallback) {
+  return amLabels.value[key] || fallback
+}
+
+function getPackageTitleId(item) {
+  return `am-package-${item.id}-title`
+}
+
+function getServiceTitleId(item) {
+  return `am-service-${item.id}-title`
+}
+
+function getEmployeesButtonLabel(item) {
+  return `${getLabel('view_employees', 'View employees')} ${item.name}`
+}
+
+function getContinueButtonLabel(item) {
+  return `${getLabel('continue', 'Continue')} ${item.name}`
+}
 
 // * FILTERS
 let searchFilter = ref('')
@@ -1541,24 +1610,34 @@ export default {
         }
 
         &__btn {
-          width: 100%;
-          max-width: 30%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 15px;
-          font-weight: 500;
-          line-height: 1.6;
-          padding: 2px 8px;
-          border-radius: 6px;
-          transition: all 0.2s ease-in-out;
-          cursor: pointer;
-          color: var(--am-c-fcil-filter-placeholder);
+          &.am-button {
+            width: 100%;
+            max-width: 30%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.6;
+            padding: 2px 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            color: var(--am-c-fcil-filter-placeholder);
+            background: transparent;
+            border: 0;
+            font-family: inherit;
 
-          &:hover,
-          &.am-active {
-            color: var(--am-c-fcil-filter-text);
-            background-color: var(--am-c-fcil-filter-inp-bgr);
+            &:hover,
+            &.am-active {
+              color: var(--am-c-fcil-filter-text);
+              background-color: var(--am-c-fcil-filter-inp-bgr);
+            }
+
+            &:focus-visible {
+              color: var(--am-c-fcil-filter-text);
+              background-color: var(--am-c-fcil-filter-inp-bgr);
+            }
           }
 
           & span {
@@ -1665,6 +1744,14 @@ export default {
         max-height: unset;
         overflow-x: unset;
       }
+    }
+
+    &__items-list {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
     }
 
     &__item {
@@ -1913,27 +2000,6 @@ export default {
 
     .el-dialog {
       background-color: var(--am-c-fcil-employee-bgr, $am-white);
-
-      &__header {
-        border: 1px solid transparent;
-        border-bottom-color: var(--am-c-fcil-employee-text-op15);
-        padding: 16px 24px;
-      }
-
-      &__headerbtn {
-        text-decoration: none;
-
-        * {
-          color: var(--am-c-fcil-employee-text);
-        }
-
-        &:hover {
-          * {
-            color: var(--am-c-fcil-employee-primary);
-            text-decoration: none;
-          }
-        }
-      }
     }
 
     .am-collapse-item {
@@ -1961,6 +2027,10 @@ export default {
         font-weight: 500;
         line-height: 1.55555;
         color: var(--am-c-fcil-employee-heading);
+      }
+
+      &__content {
+        padding: 16px 24px 24px;
       }
 
       &__heading {

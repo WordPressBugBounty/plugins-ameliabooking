@@ -70,7 +70,7 @@ function handleData(phoneData) {
   infoFormData.value.phone = getInternationalPhoneValue(
     phoneData?.phoneNumber ?? phoneData?.e164,
     phoneData,
-    phoneData?.countryCode
+    phoneData?.countryCode,
   )
 }
 </script>

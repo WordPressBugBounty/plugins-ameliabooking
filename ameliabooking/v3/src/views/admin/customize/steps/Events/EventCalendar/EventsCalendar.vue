@@ -301,18 +301,25 @@
             </div>
             <div class="am-ecs__side-card__date-time">
               <span class="am-ecs__side-card__day">
-                {{ moment(evt.periods[0].periodStart.split(' ')[0]).format('DD') }}
+                {{ moment(evt.periods?.[0]?.periodStart?.split(' ')?.[0] || '').format('DD') }}
               </span>
               <span class="am-ecs__side-card__month">
                 {{
                   translationObject.months[
-                    moment(evt.periods[0].periodStart.split(' ')[0]).format('MMM').toLowerCase()
-                  ].toUpperCase()
-                }}
+                    moment(evt.periods?.[0]?.periodStart?.split(' ')?.[0] || '')
+                      .format('MMM')
+                      .toLowerCase()
+                  ]?.toUpperCase() || ''
+                }},
+              </span>
+              <span class="am-ecs__side-card__year">
+                {{ moment(evt.periods?.[0]?.periodStart?.split(' ')?.[0] || '').format('YYYY') }}
               </span>
               <span class="am-ecs__side-card__at">{{ labelsDisplay('event_at') }}</span>
               <span class="am-ecs__side-card__time">
-                {{ getEventFrontedFormattedTime(evt.periods[0].periodStart.split(' ')[1]) }}
+                {{
+                  getEventFrontedFormattedTime(evt.periods?.[0]?.periodStart?.split(' ')?.[1] || '')
+                }}
               </span>
             </div>
             <div class="am-ecs__side-card__name">
@@ -372,18 +379,25 @@
             </div>
             <div class="am-ecs__side-card__date-time">
               <span class="am-ecs__side-card__day">
-                {{ moment(evt.periods[0].periodStart.split(' ')[0]).format('DD') }}
+                {{ moment(evt.periods?.[0]?.periodStart?.split(' ')?.[0] || '').format('DD') }}
               </span>
               <span class="am-ecs__side-card__month">
                 {{
                   translationObject.months[
-                    moment(evt.periods[0].periodStart.split(' ')[0]).format('MMM').toLowerCase()
-                  ].toUpperCase()
-                }}
+                    moment(evt.periods?.[0]?.periodStart?.split(' ')?.[0] || '')
+                      .format('MMM')
+                      .toLowerCase()
+                  ]?.toUpperCase() || ''
+                }},
+              </span>
+              <span class="am-ecs__side-card__year">
+                {{ moment(evt.periods?.[0]?.periodStart?.split(' ')?.[0] || '').format('YYYY') }}
               </span>
               <span class="am-ecs__side-card__at">{{ labelsDisplay('event_at') }}</span>
               <span class="am-ecs__side-card__time">
-                {{ getEventFrontedFormattedTime(evt.periods[0].periodStart.split(' ')[1]) }}
+                {{
+                  getEventFrontedFormattedTime(evt.periods?.[0]?.periodStart?.split(' ')?.[1] || '')
+                }}
               </span>
             </div>
             <div class="am-ecs__side-card__name">
@@ -2370,7 +2384,7 @@ watchEffect(() => {
 })
 
 let typingInLabelsInputs = ref(null)
-watch([amCustomize.value, customizeOptions.value], () => {
+watch([amCustomize, customizeOptions], () => {
   clearTimeout(typingInLabelsInputs.value)
   typingInLabelsInputs.value = setTimeout(() => {
     eventCalendarRef.value.getApi().render()
@@ -4804,6 +4818,7 @@ export default {
           align-items: center;
           justify-content: flex-start;
           flex: 0 0 auto;
+          gap: 4px;
         }
 
         &__day {
@@ -4812,18 +4827,17 @@ export default {
           font-weight: 500;
           line-height: 1.111111;
           color: var(--am-c-ecal-card-text);
-          margin: 0 4px 0 0;
         }
 
         &__month,
         &__at,
-        &__time {
+        &__time,
+        &__year {
           font-size: 14px;
           font-style: normal;
           font-weight: 400;
           line-height: 1;
           color: var(--am-c-ecal-card-text);
-          margin: 0 4px 0 0;
         }
 
         &__name {

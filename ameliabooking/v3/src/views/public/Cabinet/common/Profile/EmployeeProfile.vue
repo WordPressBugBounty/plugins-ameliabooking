@@ -1,5 +1,12 @@
 <template>
-  <div ref="pageContainer" class="am-caep" :style="cssVars">
+  <div
+    ref="pageContainer"
+    class="am-caep"
+    :style="cssVars"
+    role="region"
+    :aria-busy="loading ? 'true' : 'false'"
+    :aria-label="currentRegionLabel"
+  >
     <div v-if="ready" v-show="!loading" class="am-caep__inner" :class="responsiveClass">
       <AmAlert
         v-if="alertVisibility"
@@ -7,57 +14,79 @@
         :show-border="true"
         :close-after="5000"
         custom-class="am-capi__alert"
+        :role="alertA11yRole"
+        :aria-live="alertAriaLive"
         @close="closeAlert"
         @trigger-close="closeAlert"
       >
         <template #title>
-          <span class="am-icon-checkmark-circle-full"></span> {{ message }}
+          <span class="am-icon-checkmark-circle-full" aria-hidden="true"></span> {{ message }}
         </template>
       </AmAlert>
 
-      <el-tabs v-model="activeTab">
-        <el-tab-pane :label="amLabels.details" name="details" @click="tabClick">
+      <AmTabs
+        v-model="activeTab"
+        class="am-caep__tabs"
+        :aria-label="tabsAriaLabel"
+        @tab-click="tabClick"
+      >
+        <AmTabsItem class="am-caep__tabs-item" :label="amLabels.details" name="details">
+          <div class="am-caep__sr-only">{{ amLabels.details }}</div>
           <Details ref="detailsRef" :responsive-class="responsiveClass" />
-        </el-tab-pane>
+        </AmTabsItem>
 
-        <el-tab-pane
+        <AmTabsItem
           v-if="amSettings.roles.allowConfigureServices"
+          class="am-caep__tabs-item"
           :label="amLabels.heading_services"
           name="services"
         >
+          <div class="am-caep__sr-only">{{ amLabels.heading_services }}</div>
           <Services :responsive-class="responsiveClass" />
-        </el-tab-pane>
+        </AmTabsItem>
 
-        <el-tab-pane
+        <AmTabsItem
           v-if="amSettings.roles.allowConfigureSchedule"
+          class="am-caep__tabs-item"
           :label="amLabels.working_hours"
           name="workingHours"
         >
+          <div class="am-caep__sr-only">{{ amLabels.working_hours }}</div>
           <WeekDays :responsive-class="responsiveClass" />
-        </el-tab-pane>
+        </AmTabsItem>
 
-        <el-tab-pane
+        <AmTabsItem
           v-if="amSettings.roles.allowConfigureSpecialDays"
+          class="am-caep__tabs-item"
           :label="amLabels.special_days"
           name="specialDays"
         >
+          <div class="am-caep__sr-only">{{ amLabels.special_days }}</div>
           <SpecialDays ref="specialDaysRef" :responsive-class="responsiveClass" />
-        </el-tab-pane>
+        </AmTabsItem>
 
-        <el-tab-pane
+        <AmTabsItem
           v-if="amSettings.roles.allowConfigureDaysOff"
+          class="am-caep__tabs-item"
           :label="amLabels.days_off"
           name="daysOff"
         >
+          <div class="am-caep__sr-only">{{ amLabels.days_off }}</div>
           <DaysOff ref="daysOffRef" :responsive-class="responsiveClass" />
-        </el-tab-pane>
+        </AmTabsItem>
 
-        <el-tab-pane v-if="changePasswordEnabled" :label="amLabels.password" name="password">
+        <AmTabsItem
+          v-if="changePasswordEnabled"
+          class="am-caep__tabs-item"
+          :label="amLabels.password"
+          name="password"
+        >
+          <div class="am-caep__sr-only">{{ amLabels.password }}</div>
           <ChangePassword v-if="!loading" ref="changePassRef" />
           <ProfileSkeleton v-else :item-direction="'column'" :count="2"></ProfileSkeleton>
-        </el-tab-pane>
+        </AmTabsItem>
 
-        <el-tab-pane
+        <AmTabsItem
           v-if="
             amSettings.zoom.enabled ||
             amSettings.googleCalendar.enabled ||
@@ -65,12 +94,14 @@
             amSettings.appleCalendar.enabled ||
             (amSettings.payments.stripe.enabled && amSettings.payments.stripe.connect.enabled)
           "
+          class="am-caep__tabs-item"
           :label="amLabels.integrations_settings"
           name="integrations"
         >
+          <div class="am-caep__sr-only">{{ amLabels.integrations_settings }}</div>
           <EmployeeIntegrations :responsive-class="responsiveClass" />
-        </el-tab-pane>
-      </el-tabs>
+        </AmTabsItem>
+      </AmTabs>
 
       <!-- Profile Footer -->
       <ProfileFooter
@@ -87,8 +118,10 @@
 </template>
 
 <script setup>
+import AmTabs from '../../../../_components/tabs/AmTabs.vue'
+import AmTabsItem from '../../../../_components/tabs/AmTabsItem.vue'
 // * Import from Vue
-import { ref, inject, computed, provide } from 'vue'
+import { ref, inject, computed, provide, unref } from 'vue'
 
 import { useElementSize } from '@vueuse/core'
 
@@ -141,6 +174,70 @@ let ready = computed(() => store.getters['entities/getReady'])
  * Tabs *
  ********/
 const activeTab = ref('details')
+
+function integrationsTabVisible(settings) {
+  return (
+    settings.zoom?.enabled ||
+    settings.googleCalendar?.enabled ||
+    settings.outlookCalendar?.enabled ||
+    settings.appleCalendar?.enabled ||
+    (settings.payments?.stripe?.enabled && settings.payments?.stripe?.connect?.enabled)
+  )
+}
+
+let currentRegionLabel = computed(() => {
+  const L = unref(amLabels)
+  switch (activeTab.value) {
+    case 'services':
+      return L.heading_services
+    case 'workingHours':
+      return L.working_hours
+    case 'specialDays':
+      return L.special_days
+    case 'daysOff':
+      return L.days_off
+    case 'password':
+      return L.password
+    case 'integrations':
+      return L.integrations_settings
+    case 'details':
+    default:
+      return L.details
+  }
+})
+
+let tabsAriaLabel = computed(() => {
+  const L = unref(amLabels)
+  const S = unref(amSettings)
+  const parts = [L.details]
+  if (S.roles?.allowConfigureServices) {
+    parts.push(L.heading_services)
+  }
+  if (S.roles?.allowConfigureSchedule) {
+    parts.push(L.working_hours)
+  }
+  if (S.roles?.allowConfigureSpecialDays) {
+    parts.push(L.special_days)
+  }
+  if (S.roles?.allowConfigureDaysOff) {
+    parts.push(L.days_off)
+  }
+  if (changePasswordEnabled.value) {
+    parts.push(L.password)
+  }
+  if (integrationsTabVisible(S)) {
+    parts.push(L.integrations_settings)
+  }
+  return parts.join(' / ')
+})
+
+let alertA11yRole = computed(() => {
+  return messageType.value === 'error' ? 'alert' : 'status'
+})
+
+let alertAriaLive = computed(() => {
+  return messageType.value === 'error' ? 'assertive' : 'polite'
+})
 
 // * Success message
 let message = ref('')
@@ -300,6 +397,25 @@ export default {
   .am-caep {
     .el-skeleton {
       padding: 32px;
+    }
+
+    &__sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    &__tabs {
+      .el-tabs__item:focus-visible {
+        box-shadow: 0 0 2px 2px var(--am-c-caep-primary) inset;
+        border-radius: 3px;
+      }
     }
 
     &__inner {

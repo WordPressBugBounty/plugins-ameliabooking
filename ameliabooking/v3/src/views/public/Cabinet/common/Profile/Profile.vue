@@ -24,13 +24,13 @@
         </template>
       </AmAlert>
 
-      <el-tabs
+      <AmTabs
         v-model="activeTab"
         class="am-capi__tabs"
         :aria-label="tabsAriaLabel"
         @tab-click="tabClick"
       >
-        <el-tab-pane class="am-capi__tabs-item" :label="amLabels.personal_info" name="first">
+        <AmTabsItem class="am-capi__tabs-item" :label="amLabels.personal_info" name="first">
           <template v-if="!loading">
             <div class="am-capi__sr-only">{{ amLabels.personal_info }}</div>
             <el-form
@@ -60,10 +60,10 @@
             </el-form>
           </template>
           <ProfileSkeleton v-else :count="5" :page-width="pageWidth"></ProfileSkeleton>
-        </el-tab-pane>
+        </AmTabsItem>
 
         <!-- Customer Custom Fields -->
-        <el-tab-pane
+        <AmTabsItem
           v-if="Object.keys(customFields).length"
           :label="amLabels.custom_fields"
           name="third"
@@ -94,10 +94,10 @@
             :count="Object.keys(customFields).length"
             :page-width="pageWidth"
           ></ProfileSkeleton>
-        </el-tab-pane>
+        </AmTabsItem>
         <!-- /Customer Custom Fields -->
 
-        <el-tab-pane class="am-capi__tabs-item" :label="amLabels.password_tab" name="second">
+        <AmTabsItem class="am-capi__tabs-item" :label="amLabels.password_tab" name="second">
           <template v-if="!loading">
             <div class="am-capi__sr-only">{{ amLabels.password_tab }}</div>
             <el-form
@@ -125,8 +125,8 @@
             :count="2"
             :page-width="pageWidth"
           ></ProfileSkeleton>
-        </el-tab-pane>
-      </el-tabs>
+        </AmTabsItem>
+      </AmTabs>
 
       <DeleteProfile
         :visibility="deleteProfileDialog"
@@ -150,6 +150,8 @@
 </template>
 
 <script setup>
+import AmTabs from '../../../../_components/tabs/AmTabs.vue'
+import AmTabsItem from '../../../../_components/tabs/AmTabsItem.vue'
 // * _components
 import AmAlert from '../../../../_components/alert/AmAlert.vue'
 
@@ -439,7 +441,11 @@ let infoFormConstruction = ref({
 
         store.commit(
           'auth/setProfilePhone',
-          getInternationalPhoneValue(phoneData?.phoneNumber ?? phoneData?.e164, phoneData, phoneData?.countryCode)
+          getInternationalPhoneValue(
+            phoneData?.phoneNumber ?? phoneData?.e164,
+            phoneData,
+            phoneData?.countryCode,
+          ),
         )
 
         isPhoneValid.value = !!phoneData.isValid

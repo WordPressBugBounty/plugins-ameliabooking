@@ -31,8 +31,8 @@
     </AmAlert>
 
     <!-- Content -->
-    <el-tabs v-if="!loading" v-model="activeTab">
-      <el-tab-pane class="am-cap__tabs-item" :label="amLabels.details" name="details">
+    <AmTabs v-if="!loading" v-model="activeTab">
+      <AmTabsItem class="am-cap__tabs-item" :label="amLabels.details" name="details">
         <el-form
           ref="customerFormRef"
           :model="customerFormData"
@@ -50,8 +50,8 @@
             />
           </template>
         </el-form>
-      </el-tab-pane>
-      <el-tab-pane
+      </AmTabsItem>
+      <AmTabsItem
         v-if="Object.keys(customFields).length"
         class="am-cap__tabs-item"
         :label="amLabels.custom_fields"
@@ -75,8 +75,8 @@
             </template>
           </el-form>
         </template>
-      </el-tab-pane>
-    </el-tabs>
+      </AmTabsItem>
+    </AmTabs>
     <Skeleton v-else></Skeleton>
     <!-- /Content -->
 
@@ -94,6 +94,8 @@
 </template>
 
 <script setup>
+import AmTabs from '../../../../../../_components/tabs/AmTabs.vue'
+import AmTabsItem from '../../../../../../_components/tabs/AmTabsItem.vue'
 // * Import from Vuex
 import { useStore } from 'vuex'
 
@@ -352,7 +354,11 @@ let customerFormConstruction = ref({
 
         store.commit(
           'customerInfo/setCustomerPhone',
-          getInternationalPhoneValue(phoneData?.phoneNumber ?? phoneData?.e164, phoneData, phoneData?.countryCode)
+          getInternationalPhoneValue(
+            phoneData?.phoneNumber ?? phoneData?.e164,
+            phoneData,
+            phoneData?.countryCode,
+          ),
         )
 
         isPhoneValid.value = !!phoneData.isValid
@@ -582,7 +588,7 @@ let cssVars = computed(() => {
     // Tabs
     .el-tabs {
       display: flex;
-      flex-direction: column-reverse;
+      flex-direction: column;
       flex-grow: 1;
       min-height: 0;
       overflow: auto;

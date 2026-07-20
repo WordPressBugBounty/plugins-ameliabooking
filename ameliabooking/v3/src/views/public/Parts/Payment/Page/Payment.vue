@@ -47,6 +47,7 @@
             :key="gateway"
             tabindex="0"
             role="button"
+            :aria-pressed="paymentGateway === gateway"
             class="am-payments__method-button"
             :class="[
               { 'am-payments__method-button__selected': paymentGateway === gateway },

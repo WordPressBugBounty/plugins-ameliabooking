@@ -42,7 +42,6 @@
           ref="customerCollectorRef"
           v-model="infoFormData[index]"
           v-bind="item.props"
-          @enter="submitForm"
         ></component>
       </template>
     </el-form>
@@ -168,7 +167,7 @@ function goToSignIn() {
 watch(authError, (hasError) => {
   if (hasError) {
     nextTick(() => {
-      authErrorAlertRef.value?.focus()
+      authErrorAlertRef.value?.$el?.focus()
     })
   }
 })

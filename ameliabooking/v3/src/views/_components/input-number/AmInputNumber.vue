@@ -287,6 +287,11 @@ let cssVars = computed(() => {
   @include am-inp-number-block;
 }
 
+// WPA event landing — tickets column is teleported outside #amelia-container
+.amelia-v2-booking.wpa-events__tickets-am-shell {
+  @include am-inp-number-block;
+}
+
 // admin
 #amelia-app-backend-new {
   @include am-inp-number-block;

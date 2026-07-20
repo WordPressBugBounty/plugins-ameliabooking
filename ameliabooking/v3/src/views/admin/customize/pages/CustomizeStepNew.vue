@@ -725,7 +725,7 @@ export default {
   --am-c-error: #{$red-900};
   --am-c-warning: #{$yellow-1000};
   // main container colors - right part of the form
-  --am-c-main-bgr: #{$blue-900};
+  --am-c-main-bgr: #{$am-white};
   --am-c-main-heading-text: #{$shade-800};
   --am-c-main-text: #{$shade-900};
   // sidebar container colors - left part of the form

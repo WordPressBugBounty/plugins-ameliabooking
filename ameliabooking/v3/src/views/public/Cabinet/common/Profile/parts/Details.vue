@@ -6,7 +6,11 @@
     label-position="top"
     class="am-caepif"
     :class="props.responsiveClass"
+    :aria-label="formAriaLabel || undefined"
   >
+    <div v-if="formAriaLabel" class="am-caepif__sr-only">
+      {{ formAriaLabel }}
+    </div>
     <div
       class="am-caepif__block"
       :class="[{ 'am-w-70': employee.pictureFullPath }, props.responsiveClass]"
@@ -29,6 +33,7 @@
     >
       <div
         class="am-caepif__img"
+        aria-hidden="true"
         :style="{ backgroundImage: `url(${employee.pictureFullPath})` }"
       ></div>
     </div>
@@ -46,7 +51,7 @@
           </template>
         </component>
       </template>
-      <el-form-item :label="amLabels.description_colon">
+      <el-form-item prop="description" :label="amLabels.description_colon">
         <DescriptionEditor
           v-model="employeeFormData.description"
           :mode="store.getters['employee/getDescriptionMode']"
@@ -59,7 +64,7 @@
 
 <script setup>
 // * Import from Vue
-import { computed, ref, inject, onBeforeMount } from 'vue'
+import { computed, ref, inject, onBeforeMount, unref } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -87,6 +92,11 @@ const amSettings = inject('settings')
 
 // * Labels
 let amLabels = inject('amLabels')
+
+let formAriaLabel = computed(() => {
+  const L = unref(amLabels)
+  return L?.details || ''
+})
 
 let employee = computed(() => {
   return store.getters['entities/getEmployee'](store.getters['employee/getId'])
@@ -266,7 +276,11 @@ let employeeInfoFormConstruction = ref({
 
         store.commit(
           'employee/setPhone',
-          getInternationalPhoneValue(phoneData?.phoneNumber ?? phoneData?.e164, phoneData, phoneData?.countryCode)
+          getInternationalPhoneValue(
+            phoneData?.phoneNumber ?? phoneData?.e164,
+            phoneData,
+            phoneData?.countryCode,
+          ),
         )
 
         isPhoneValid.value = !!phoneData.isValid
@@ -311,6 +325,25 @@ defineExpose({
     flex-wrap: wrap;
     padding: 24px 0;
     gap: 24px;
+
+    &__sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    // .el-input__wrapper:focus-within,
+    // .el-textarea__inner:focus-visible,
+    // .el-select .el-input__wrapper:focus-within {
+    //   outline: 2px solid var(--am-c-caep-primary, var(--am-c-capi-primary, currentColor));
+    //   outline-offset: 2px;
+    // }
 
     &.am-rw- {
       &620 {

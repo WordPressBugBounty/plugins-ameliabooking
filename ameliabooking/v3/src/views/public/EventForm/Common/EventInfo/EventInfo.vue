@@ -46,9 +46,9 @@
 
     <!-- Main tabbed content -->
     <div class="am-eli__main">
-      <el-tabs v-model="activeName" :aria-label="amLabels.event_info">
+      <AmTabs v-model="activeName" :aria-label="amLabels.event_info">
         <!-- Info tab -->
-        <el-tab-pane :label="amLabels.event_info" name="first">
+        <AmTabsItem :label="amLabels.event_info" name="first">
           <!-- Timetable -->
           <div v-if="selectedEvent.periods.length" class="am-eli__timetable am-eli__main-item">
             <p id="am-eli-timetable-title" class="am-eli__timetable-title am-eli__main-title">
@@ -113,11 +113,11 @@
             ></EventEmployee>
           </template>
           <!--/ Staff -->
-        </el-tab-pane>
+        </AmTabsItem>
         <!--/ Info tab -->
 
         <!-- Tickets tab -->
-        <el-tab-pane v-if="tickets.length" :label="amLabels.event_tickets" name="second">
+        <AmTabsItem v-if="tickets.length" :label="amLabels.event_tickets" name="second">
           <template v-for="ticket in tickets" :key="ticket.id">
             <EventTicket
               :ticket="ticket"
@@ -139,9 +139,9 @@
               :readonly="true"
             />
           </template>
-        </el-tab-pane>
+        </AmTabsItem>
         <!--/ Tickets tab -->
-      </el-tabs>
+      </AmTabs>
     </div>
     <!--/ Main tabbed content -->
   </div>
@@ -196,6 +196,8 @@
 </template>
 
 <script setup>
+import AmTabs from '../../../../_components/tabs/AmTabs.vue'
+import AmTabsItem from '../../../../_components/tabs/AmTabsItem.vue'
 // * _components
 import AmButton from '../../../../_components/button/AmButton.vue'
 import AmSlidePopup from '../../../../_components/slide-popup/AmSlidePopup.vue'
@@ -464,20 +466,44 @@ if (selectedEvent.value.customPricing) {
 
 // * Event Organizer and Staff
 let eventOrganizer = computed(() => {
-  let employeeId = selectedEvent.value.organizerId
-  if (employeeId && employees.value.find((e) => e.id === employeeId)) {
-    return employees.value.find((e) => e.id === employeeId)
+  const employeeId = selectedEvent.value.organizerId
+
+  if (!employeeId) {
+    return {}
   }
 
-  return {}
+  const fromEmployees = employees.value.find((e) => e.id === employeeId)
+
+  if (fromEmployees) {
+    return fromEmployees
+  }
+
+  const organizer = selectedEvent.value.organizer
+
+  if (!organizer?.id) {
+    return {}
+  }
+
+  return {
+    ...organizer,
+    pictureThumbPath: organizer.pictureThumbPath || organizer.picture || null,
+  }
 })
 
 let eventStaff = computed(() => {
-  let filtered = []
-  selectedEvent.value.providers.forEach((emp) => {
-    if (employees.value.some((e) => e.id === emp.id)) {
-      emp.badge = employees.value.find((empl) => empl.id === emp.id).badge
-      filtered.push(emp)
+  const filtered = selectedEvent.value.providers.map((provider) => {
+    const employee = employees.value.find((e) => e.id === provider.id)
+
+    if (employee) {
+      return { ...provider, badge: employee.badge }
+    }
+
+    const staffMember = selectedEvent.value.staff?.find((s) => s.id === provider.id)
+
+    return {
+      ...provider,
+      pictureThumbPath: provider.pictureThumbPath || staffMember?.picture || null,
+      badge: staffMember?.badge || null,
     }
   })
 
@@ -599,6 +625,8 @@ watchEffect(
     if (isWaitingList.value && waitingListOptions.value.maxExtraPeopleEnabled) {
       store.commit('tickets/setMaxExtraPeople', waitingListOptions.value.maxExtraPeople)
     }
+
+    store.commit('tickets/applyPendingPreselectedTickets', { waitingMode: isWaitingList.value })
   },
   { flush: 'post' },
 )
@@ -703,7 +731,6 @@ export default {
       &__header {
         display: flex;
         flex-direction: row;
-        margin: 24px 0 0;
 
         p {
           margin-bottom: 0;

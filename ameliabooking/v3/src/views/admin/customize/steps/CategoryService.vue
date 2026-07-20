@@ -1552,36 +1552,6 @@ export default {
     border-radius: 8px;
     background-color: transparent;
     margin-top: var(--el-dialog-margin-top);
-
-    &__header {
-      padding: 0;
-    }
-
-    &__headerbtn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 19px;
-      height: 19px;
-      background-color: var(--am-c-fcis-bgr);
-      color: var(--am-c-fcis-text);
-      border-radius: 50%;
-      z-index: 1000000;
-
-      .el-dialog__close {
-        line-height: 1;
-      }
-    }
-
-    &__body {
-      padding: 0;
-      word-break: break-word;
-      background-color: transparent;
-    }
-
-    &__footer {
-      display: none;
-    }
   }
 
   .am-gd {

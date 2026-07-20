@@ -1,10 +1,22 @@
 <template>
-  <div>
-    <div>
-      <AmInput v-model="searchFilter" :prefix-icon="iconSearch" aria-label="Search" />
+  <section
+    class="am-caes-section"
+    role="region"
+    :aria-label="regionLabel || undefined"
+    :style="cssVars"
+  >
+    <div v-if="regionLabel" class="am-caes__sr-only">
+      {{ regionLabel }}
+    </div>
+    <div class="am-caes-search">
+      <AmInput
+        v-model="searchFilter"
+        :prefix-icon="iconSearch"
+        :aria-label="searchInputAriaLabel || undefined"
+      />
     </div>
 
-    <el-collapse v-model="activeCategoryIndex" class="am-caes" :style="cssVars">
+    <el-collapse v-model="activeCategoryIndex" class="am-caes">
       <el-collapse-item
         v-for="category in categories"
         :key="'category_' + category.id"
@@ -16,6 +28,7 @@
             <AmCheckbox
               v-model="categoriesCheckbox[category.id]"
               :indeterminate="categoryIndeterminate(category)"
+              :label="categoryCheckboxAriaLabel(category)"
               @click="
                 (e) => {
                   e.stopPropagation()
@@ -31,7 +44,9 @@
                   toggleCategoryServices(categoriesCheckbox[category.id], category)
                 }
               "
-            />
+            >
+              <span class="am-caes__checkbox-slot-sr" aria-hidden="true">&nbsp;</span>
+            </AmCheckbox>
             <div class="am-caes__category-header__text">
               {{ category.name }}
             </div>
@@ -53,6 +68,7 @@
               <div class="am-caes__service-header">
                 <AmCheckbox
                   v-model="employee.serviceList[category.id][service.id].enabled"
+                  :label="serviceCheckboxAriaLabel(category, service)"
                   @click="
                     (e) => {
                       e.stopPropagation()
@@ -69,7 +85,9 @@
                       changeCategoryState(category)
                     }
                   "
-                />
+                >
+                  <span class="am-caes__checkbox-slot-sr" aria-hidden="true">&nbsp;</span>
+                </AmCheckbox>
                 <div class="am-caes__service-header__text">
                   {{ service.name }}
                 </div>
@@ -87,6 +105,7 @@
                   class="am-caes__service-content__inner"
                   :min="1"
                   size="small"
+                  :aria-label="serviceFieldAriaLabel(category, service, amLabels.minimum_capacity)"
                 />
               </div>
               <!-- /Minimum Capacity -->
@@ -101,7 +120,7 @@
                   class="am-caes__service-content__inner"
                   :min="employee.serviceList[category.id][service.id].minCapacity"
                   size="small"
-                  :aria-label="amLabels.maximum_capacity"
+                  :aria-label="serviceFieldAriaLabel(category, service, amLabels.maximum_capacity)"
                 />
               </div>
               <!-- /Maximum Capacity -->
@@ -141,7 +160,7 @@
                     v-model="item.price"
                     class="am-caes__service-content__inner"
                     placeholder=""
-                    :aria-label="amLabels.price"
+                    :aria-label="serviceFieldAriaLabel(category, service, amLabels.price)"
                     size="small"
                     :is-money="true"
                   />
@@ -184,7 +203,7 @@
                   v-model="employee.serviceList[category.id][service.id].price"
                   class="am-caes__service-content__inner"
                   placeholder=""
-                  :aria-label="amLabels.price"
+                  :aria-label="serviceFieldAriaLabel(category, service, amLabels.price)"
                   size="small"
                   :is-money="true"
                 />
@@ -219,6 +238,7 @@
                     v-model="item.price"
                     class="am-caes__service-content__inner"
                     placeholder=""
+                    :aria-label="serviceFieldAriaLabel(category, service, amLabels.price)"
                     size="small"
                     :is-money="true"
                   />
@@ -237,8 +257,12 @@
                 !licence.isBasic
               "
             >
-              <el-tabs class="am-caes__service-tabs" :stretch="true">
-                <el-tab-pane
+              <AmTabs
+                class="am-caes__service-tabs"
+                :stretch="true"
+                :aria-label="periodPricingTabsAriaLabel"
+              >
+                <AmTabsItem
                   v-if="
                     employee.serviceList[category.id][service.id].customPricing.periods.default
                       .length
@@ -252,8 +276,8 @@
                     :key="periodsIndex"
                     class="am-caes__service__week"
                   >
-                    <div class="am-caes__service__week-days">
-                      <div
+                    <ul class="am-caes__service__week-days">
+                      <li
                         v-for="(day, i) in weekDays"
                         :key="i"
                         class="am-caes__service__week-day"
@@ -261,10 +285,11 @@
                           'am-caes__service__week-day-selected':
                             periodsItem.days.indexOf(day.value) !== -1,
                         }"
+                        :aria-label="day.labelFull || day.label"
                       >
-                        <span>{{ day.label }}</span>
-                      </div>
-                    </div>
+                        <span aria-hidden="true">{{ day.label }}</span>
+                      </li>
+                    </ul>
 
                     <div class="am-caes__service__week-periods">
                       <div
@@ -284,7 +309,9 @@
                           <AmInput
                             v-model="rangeItem.price"
                             placeholder=""
-                            :aria-label="amLabels.price"
+                            :aria-label="
+                              periodRangePriceAriaLabel(category, service, rangeItem, 'week')
+                            "
                             size="small"
                             :is-money="true"
                           />
@@ -293,9 +320,9 @@
                       </div>
                     </div>
                   </div>
-                </el-tab-pane>
+                </AmTabsItem>
 
-                <el-tab-pane
+                <AmTabsItem
                   v-if="
                     employee.serviceList[category.id][service.id].customPricing.periods.custom
                       .length
@@ -310,7 +337,7 @@
                     class="am-caes__service__week"
                   >
                     <div class="am-caes__service__date">
-                      <span class="am-icon-calendar"></span
+                      <span class="am-icon-calendar" aria-hidden="true"></span
                       >{{ getFrontedFormattedDate(periodsItem.dates.start) }} -
                       {{ getFrontedFormattedDate(periodsItem.dates.end) }}
                     </div>
@@ -333,7 +360,9 @@
                           <AmInput
                             v-model="rangeItem.price"
                             placeholder=""
-                            :aria-label="amLabels.price"
+                            :aria-label="
+                              periodRangePriceAriaLabel(category, service, rangeItem, 'custom')
+                            "
                             size="small"
                             :is-money="true"
                           />
@@ -342,20 +371,22 @@
                       </div>
                     </div>
                   </div>
-                </el-tab-pane>
-              </el-tabs>
+                </AmTabsItem>
+              </AmTabs>
             </template>
             <!-- /Periods and Price -->
           </el-collapse-item>
         </el-collapse>
       </el-collapse-item>
     </el-collapse>
-  </div>
+  </section>
 </template>
 
 <script setup>
+import AmTabs from '../../../../../_components/tabs/AmTabs.vue'
+import AmTabsItem from '../../../../../_components/tabs/AmTabsItem.vue'
 // * Import from Vue
-import { computed, inject, onMounted, ref } from 'vue'
+import { computed, inject, onMounted, ref, unref } from 'vue'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -392,6 +423,55 @@ let store = useStore()
 
 // * Labels
 let amLabels = inject('amLabels')
+
+function pickAmLabel(keys) {
+  const L = unref(amLabels)
+  if (!L) {
+    return ''
+  }
+  for (const k of keys) {
+    if (L[k]) {
+      return String(L[k])
+    }
+  }
+  return ''
+}
+
+let regionLabel = computed(() => pickAmLabel(['heading_services']))
+
+let searchInputAriaLabel = computed(
+  () =>
+    pickAmLabel(['search', 'search_placeholder', 'search_input', 'filter', 'filter_input']) ||
+    regionLabel.value,
+)
+
+let periodPricingTabsAriaLabel = computed(() => {
+  const L = unref(amLabels)
+  return [L?.week_days, L?.custom_days].filter(Boolean).join(' / ')
+})
+
+function categoryCheckboxAriaLabel(category) {
+  const L = unref(amLabels)
+  return [L?.heading_services, category?.name].filter(Boolean).join(' — ')
+}
+
+function serviceCheckboxAriaLabel(category, service) {
+  return [service?.name, category?.name].filter(Boolean).join(' — ')
+}
+
+function serviceFieldAriaLabel(category, service, fieldLabel) {
+  return [service?.name, category?.name, fieldLabel].filter(Boolean).join(', ')
+}
+
+function periodRangePriceAriaLabel(category, service, rangeItem, periodKind) {
+  const L = unref(amLabels)
+  const from = rangeItem?.from ?? ''
+  const to = rangeItem?.to ?? ''
+  const section = periodKind === 'custom' ? L?.custom_days : L?.week_days
+  return [service?.name, category?.name, section, `${from}–${to}`, L?.price]
+    .filter(Boolean)
+    .join(', ')
+}
 
 let searchFilter = ref('')
 
@@ -505,6 +585,27 @@ export default {
 @mixin am-cabinet-employee-services {
   // am   - amelia
   // caes - cabinet employee services
+  .am-caes-section {
+    .am-caes__sr-only,
+    .am-caes__checkbox-slot-sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .el-collapse-item__header:focus-visible {
+      outline: 2px solid var(--am-c-caes-primary, currentColor);
+      outline-offset: 0px;
+      border-radius: 4px;
+    }
+  }
+
   .am-caes {
     padding-top: 10px;
     display: flex;
@@ -655,6 +756,9 @@ export default {
           display: flex;
           flex-wrap: nowrap;
           gap: 6px;
+          list-style: none;
+          margin: 0;
+          padding: 0;
         }
 
         &-day {

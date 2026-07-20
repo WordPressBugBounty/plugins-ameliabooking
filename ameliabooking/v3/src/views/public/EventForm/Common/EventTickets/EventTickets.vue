@@ -66,6 +66,7 @@ let props = defineProps({
   },
 })
 
+// TODO: We need to use import { useId } from 'vue' when we upgrade to Vue 3.5
 const uid = Math.random().toString(36).slice(2, 8)
 const ticketsHeadingId = `am-elt-heading-${uid}`
 

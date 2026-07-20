@@ -30,7 +30,7 @@
       </template>
     </AmInputPhone>
     <template #error v-if="props.errorMessage">
-      <span class="el-form-item__error">
+      <span class="el-form-item__error" role="alert" aria-live="assertive" aria-atomic="true">
         {{ props.errorMessage }}
       </span>
     </template>

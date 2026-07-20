@@ -194,7 +194,7 @@ export default {
     },
 
     setCustomFields(state, payload) {
-      state.customFields = [...Object.values(payload)]
+      state.customFields = Object.values(payload)
     },
 
     setCalendarEvents(state, payload) {

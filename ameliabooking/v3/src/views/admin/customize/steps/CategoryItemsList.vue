@@ -460,7 +460,7 @@
           </div>
         </template>
         <template #default>
-          <div>
+          <div class="am-fcil-employee__content">
             <AmCollapse>
               <AmCollapseItem v-for="(employee, index) in dialogEmployeesArray" :key="index" side>
                 <template #heading>
@@ -1645,27 +1645,6 @@ export default {
 
     .el-dialog {
       background-color: var(--am-c-fcil-employee-bgr, $am-white);
-
-      &__header {
-        border: 1px solid transparent;
-        border-bottom-color: var(--am-c-fcil-employee-text-op15);
-        padding: 16px 24px;
-      }
-
-      &__headerbtn {
-        text-decoration: none;
-
-        * {
-          color: var(--am-c-fcil-employee-text);
-        }
-
-        &:hover {
-          * {
-            color: var(--am-c-fcil-employee-primary);
-            text-decoration: none;
-          }
-        }
-      }
     }
 
     .am-collapse-item {
@@ -1693,6 +1672,10 @@ export default {
         font-weight: 500;
         line-height: 1.55555;
         color: var(--am-c-fcil-employee-heading);
+      }
+
+      &__content {
+        padding: 16px 24px 24px;
       }
 
       &__heading {

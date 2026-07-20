@@ -26,6 +26,8 @@
       :border-color="borderColor"
       :inline-prompt="inlinePrompt"
       :aria-label="ariaLabel"
+      :aria-controls="ariaControls"
+      :aria-expanded="ariaExpanded"
       @change="(e) => emits('change', e)"
     >
     </el-switch>
@@ -122,6 +124,12 @@ const props = defineProps({
     type: String,
   },
   ariaLabel: {
+    type: String,
+  },
+  ariaControls: {
+    type: String,
+  },
+  ariaExpanded: {
     type: String,
   },
 })

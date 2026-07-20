@@ -15,12 +15,8 @@
         </template>
       </AmAlert>
 
-      <el-tabs v-model="activeTab" class="am-capi__tabs" @tab-click="tabClick">
-        <el-tab-pane
-          class="am-capi__tabs-item"
-          :label="labelsDisplay('personal_info')"
-          name="first"
-        >
+      <AmTabs v-model="activeTab" class="am-capi__tabs" @tab-click="tabClick">
+        <AmTabsItem class="am-capi__tabs-item" :label="labelsDisplay('personal_info')" name="first">
           <el-form
             ref="infoFormRef"
             :model="infoFormData"
@@ -49,12 +45,8 @@
               ></component>
             </template>
           </el-form>
-        </el-tab-pane>
-        <el-tab-pane
-          class="am-capi__tabs-item"
-          :label="labelsDisplay('password_tab')"
-          name="second"
-        >
+        </AmTabsItem>
+        <AmTabsItem class="am-capi__tabs-item" :label="labelsDisplay('password_tab')" name="second">
           <el-form
             ref="passFormRef"
             :model="passFormData"
@@ -72,8 +64,8 @@
               ></component>
             </template>
           </el-form>
-        </el-tab-pane>
-      </el-tabs>
+        </AmTabsItem>
+      </AmTabs>
 
       <DeleteProfile
         :visibility="deleteProfileVisibility"
@@ -93,6 +85,8 @@
 </template>
 
 <script setup>
+import AmTabs from '../../../../../../_components/tabs/AmTabs.vue'
+import AmTabsItem from '../../../../../../_components/tabs/AmTabsItem.vue'
 // * _components
 import AmAlert from '../../../../../../_components/alert/AmAlert.vue'
 
@@ -275,7 +269,7 @@ let infoFormConstruction = computed(() => {
           infoFormData.value.phone = getInternationalPhoneValue(
             phoneData?.phoneNumber ?? phoneData?.e164,
             phoneData,
-            phoneData?.countryCode
+            phoneData?.countryCode,
           )
         },
       },
