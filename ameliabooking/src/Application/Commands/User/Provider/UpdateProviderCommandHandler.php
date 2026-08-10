@@ -20,8 +20,6 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use AmeliaBooking\Infrastructure\Services\Apple\AbstractAppleCalendarService;
 use Exception;
-use Interop\Container\Exception\ContainerException;
-use Slim\Exception\ContainerValueNotFoundException;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\String\Phone;
 
@@ -36,15 +34,16 @@ class UpdateProviderCommandHandler extends CommandHandler
      * @param UpdateProviderCommand $command
      *
      * @return CommandResult
-     * @throws ContainerValueNotFoundException
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
-     * @throws ContainerException
      * @throws Exception
      */
     public function handle(UpdateProviderCommand $command)
     {
+        /** @var AbstractUser $currentUser */
+        $currentUser = $command->authorizeProviderWritePermission((int)$command->getArg('id'));
+
         $result = new CommandResult();
 
         $this->checkMandatoryFields($command);
@@ -60,42 +59,20 @@ class UpdateProviderCommandHandler extends CommandHandler
 
         $userId = (int)$command->getArg('id');
 
-        /** @var AbstractUser $currentUser */
-        $currentUser = $this->container->get('logged.in.user');
-
         /** @var UserApplicationService $userAS */
         $userAS = $this->getContainer()->get('application.user.service');
 
+        /** @var Provider $oldUser */
+        $oldUser = $providerAS->getProviderWithServicesAndSchedule($userId);
+
+        // If the current user is a provider and does not have write others permission, and the externalId is changed, throw an access denied exception
         if (
-            !$command->getPermissionService()->currentUserCanWrite(Entities::EMPLOYEES) ||
-            (
-                !$command->getPermissionService()->currentUserCanWriteOthers(Entities::EMPLOYEES) &&
-                (
-                    !$currentUser->getId() ||
-                    $currentUser->getId()->getValue() !== $userId
-                )
-            )
+            $userAS->isProvider($currentUser) &&
+            !$command->getPermissionService()->currentUserCanWriteOthers(Entities::EMPLOYEES) &&
+            (int)$command->getField('externalId') &&
+            (!$oldUser->getExternalId() || $oldUser->getExternalId()->getValue() !== $command->getField('externalId'))
         ) {
-            $oldUser = $userAS->getAuthenticatedUser($command->getToken(), false, 'providerCabinet');
-
-            if (
-                $oldUser === null ||
-                ($command->getField('externalId') && (!$oldUser->getExternalId() || $oldUser->getExternalId()->getValue() !== $command->getField('externalId')))
-            ) {
-                $result->setResult(CommandResult::RESULT_ERROR);
-                $result->setMessage('Could not retrieve user');
-                $result->setData(
-                    [
-                        'reauthorize' => true
-                    ]
-                );
-
-                return $result;
-            }
-
-            $oldUser = $providerAS->getProviderWithServicesAndSchedule($oldUser->getId()->getValue());
-        } else {
-            $oldUser = $providerAS->getProviderWithServicesAndSchedule($userId);
+            throw new AccessDeniedException('You are not allowed');
         }
 
         $command->setField('id', $userId);

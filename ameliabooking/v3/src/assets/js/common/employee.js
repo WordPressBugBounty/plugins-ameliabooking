@@ -93,13 +93,14 @@ function sortForEmployeeSelection(store, employeesIds, serviceId) {
     case 'roundRobin': {
       let lastBookedProviderId = store.getters['booking/getLastBookedProviderId']
       employeesIds = employeesIds.map((e) => parseInt(e)).sort((a, b) => a - b)
-      // ! employeeId was not used in the loop
-      for (let employeeId of employeesIds) {
+
+      for (let i = 0; i < employeesIds.length; i++) {
         if (parseInt(employeesIds[0]) > parseInt(lastBookedProviderId)) {
           break
         }
         employeesIds.push(employeesIds.shift())
       }
+
       return employeesIds
     }
     case 'lowestPrice':

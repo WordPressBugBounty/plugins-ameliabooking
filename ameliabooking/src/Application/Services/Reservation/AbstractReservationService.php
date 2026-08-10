@@ -73,7 +73,6 @@ use AmeliaBooking\Infrastructure\WP\Integrations\IvyForms\IvyFormsService;
 use AmeliaBooking\Infrastructure\WP\Integrations\PluginInstaller;
 use DateTime;
 use Exception;
-use Slim\Exception\ContainerValueNotFoundException;
 
 /**
  * Class AbstractReservationService
@@ -186,7 +185,6 @@ abstract class AbstractReservationService implements ReservationServiceInterface
      * @return CommandResult
      *
      * @throws ForbiddenFileUploadException
-     * @throws ContainerValueNotFoundException
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
      * @throws Exception
@@ -361,9 +359,6 @@ abstract class AbstractReservationService implements ReservationServiceInterface
      *
      * @return void
      *
-     * @throws \Slim\Exception\ContainerException
-     * @throws \InvalidArgumentException
-     * @throws ContainerValueNotFoundException
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
      * @throws Exception
@@ -625,7 +620,6 @@ abstract class AbstractReservationService implements ReservationServiceInterface
      * @param BookingType   $bookingType
      * @param bool          $isCart
      *
-     * @throws ContainerValueNotFoundException
      * @throws ForbiddenFileUploadException
      * @throws InvalidArgumentException
      */
@@ -907,7 +901,6 @@ abstract class AbstractReservationService implements ReservationServiceInterface
      *
      * @return Payment
      *
-     * @throws ContainerValueNotFoundException
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
      */
@@ -920,7 +913,7 @@ abstract class AbstractReservationService implements ReservationServiceInterface
 
         switch ($paymentData['gateway']) {
             case (PaymentType::WC):
-                $paymentStatus = $paymentData['status'];
+                $paymentStatus = $paymentData['status'] ?? PaymentStatus::PENDING;
                 break;
             case (PaymentType::MOLLIE):
             case (PaymentType::SQUARE):
@@ -1013,7 +1006,6 @@ abstract class AbstractReservationService implements ReservationServiceInterface
      *
      * @return boolean
      *
-     * @throws ContainerValueNotFoundException
      * @throws BookingCancellationException
      */
     public function inspectMinimumCancellationTime($bookingStart, $minimumCancelTime)
@@ -1428,6 +1420,20 @@ abstract class AbstractReservationService implements ReservationServiceInterface
      *
      */
     abstract public function deleteBooking($bookingId);
+
+    /**
+     * @param array $paymentData
+     *
+     * @return bool
+     */
+    protected function isDeferredPaymentGateway($paymentData)
+    {
+        if (empty($paymentData['gateway'])) {
+            return false;
+        }
+
+        return in_array($paymentData['gateway'], [PaymentType::MOLLIE, PaymentType::BARION], true);
+    }
 
     /**
      * @param int $bookingId

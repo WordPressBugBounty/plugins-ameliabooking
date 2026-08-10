@@ -59,7 +59,6 @@ let props = defineProps({
   visibility: {
     type: Boolean,
     default: false,
-    required: true,
   },
   customClass: {
     type: String,
@@ -98,7 +97,7 @@ let props = defineProps({
 })
 
 // * Compomnets Emits
-let emits = defineEmits(['click-outside', 'update:visibility'])
+let emits = defineEmits(['click-outside', 'update:visibility', 'onClose'])
 
 // ---------------------------------------------------------------------------
 // Focus management
@@ -106,6 +105,10 @@ let emits = defineEmits(['click-outside', 'update:visibility'])
 
 // The dialog element itself — used as a programmatic focus target fallback
 const dialogRef = ref(null)
+
+defineExpose({
+  dialogRef,
+})
 
 // The element that had focus before the dialog opened; restored on close
 let triggerEl = null
@@ -174,14 +177,19 @@ function onEscape() {
   emits('update:visibility', false)
 }
 
-// Save the triggering element when the dialog opens; restore it when it closes
+// Save the triggering element when the dialog opens; restore it when it closes.
+// Emit onClose whenever visibility transitions from true → false (X, Esc,
+// click-outside, or parent-driven v-model change).
 watch(
   () => props.visibility,
-  (isVisible) => {
+  (isVisible, wasVisible) => {
     if (isVisible) {
       triggerEl = document.activeElement
       nextTick(focusFirstElement)
     } else {
+      if (wasVisible) {
+        emits('onClose')
+      }
       nextTick(() => {
         triggerEl?.focus()
         triggerEl = null

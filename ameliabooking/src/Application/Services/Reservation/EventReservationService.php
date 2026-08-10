@@ -7,7 +7,6 @@ use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Services\Booking\EventApplicationService;
 use AmeliaBooking\Application\Services\Coupon\CouponApplicationService;
 use AmeliaBooking\Application\Services\Deposit\AbstractDepositApplicationService;
-use AmeliaBooking\Application\Services\Helper\HelperService;
 use AmeliaBooking\Application\Services\QrCode\QrCodeApplicationService;
 use AmeliaBooking\Application\Services\Tax\TaxApplicationService;
 use AmeliaBooking\Domain\Collection\Collection;
@@ -46,7 +45,6 @@ use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
 use AmeliaBooking\Domain\ValueObjects\Number\Float\Price;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\IntegerValue;
-use AmeliaBooking\Domain\ValueObjects\String\AmountType;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentType;
 use AmeliaBooking\Domain\ValueObjects\String\Token;
@@ -62,8 +60,6 @@ use AmeliaBooking\Infrastructure\Repository\User\CustomerRepository;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
 use DateTime;
 use Exception;
-use Slim\Exception\ContainerException;
-use Slim\Exception\ContainerValueNotFoundException;
 
 /**
  * Class EventReservationService
@@ -91,7 +87,6 @@ class EventReservationService extends AbstractReservationService
      * @throws CouponInvalidException
      * @throws CouponUnknownException
      * @throws BookingUnavailableException
-     * @throws ContainerValueNotFoundException
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
      * @throws Exception
@@ -228,14 +223,9 @@ class EventReservationService extends AbstractReservationService
 
         $isCustomer = (!$currentUser || ($currentUser->getType() === AbstractUser::USER_ROLE_CUSTOMER));
 
-        $isProvider =
-            $reservation->getLoggedInUser() &&
-            $reservation->getLoggedInUser()->getType() === AbstractUser::USER_ROLE_PROVIDER;
-
         if (
             $reservation->hasAvailabilityValidation()->getValue() &&
             $isCustomer &&
-            !$isProvider &&
             !$this->isBookable($event, $booking, DateTimeService::getNowDateTimeObject())
         ) {
             throw new BookingUnavailableException(
@@ -433,8 +423,6 @@ class EventReservationService extends AbstractReservationService
      *
      * @return array
      *
-     * @throws ContainerException
-     * @throws ContainerValueNotFoundException
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
      * @throws BookingCancellationException
@@ -503,7 +491,6 @@ class EventReservationService extends AbstractReservationService
      *
      * @return AbstractBookable
      *
-     * @throws ContainerValueNotFoundException
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
@@ -658,7 +645,6 @@ class EventReservationService extends AbstractReservationService
 
         $customerInfo = !empty($booking['info']) ? json_decode($booking['info'], true) : null;
 
-        /** @var EventPeriod $period */
         foreach ($event['periods'] as $period) {
             $dateTimeValues[] = [
                 'start' => $period['periodStart'],
@@ -719,7 +705,6 @@ class EventReservationService extends AbstractReservationService
      *
      * @return Event
      *
-     * @throws ContainerValueNotFoundException
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */

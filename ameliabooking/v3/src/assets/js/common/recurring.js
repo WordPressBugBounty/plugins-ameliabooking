@@ -1,5 +1,4 @@
 import moment from 'moment'
-import { useCartItem } from '../public/cart'
 import { useSortedDateStrings } from './helper'
 
 function getFutureMonthDate(dateString, interval) {

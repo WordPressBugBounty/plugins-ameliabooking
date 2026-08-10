@@ -166,7 +166,7 @@ function mapAddressComponentsForXML(components) {
 
 function createFileUrlFromResponse(response, format = 'pdf') {
   const byteCharacters = atob(response.data)
-  const byteNumbers = new Array(byteCharacters.length)
+  const byteNumbers = Array.from({ length: byteCharacters.length })
   for (let i = 0; i < byteCharacters.length; i++) {
     byteNumbers[i] = byteCharacters.charCodeAt(i)
   }

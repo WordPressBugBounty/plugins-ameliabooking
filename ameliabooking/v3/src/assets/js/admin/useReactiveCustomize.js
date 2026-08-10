@@ -69,47 +69,47 @@ export function useReactiveCustomize() {
   )
 
   const stepIndex = computed(() => {
-    globalWindowV3Tracker.value
+    void globalWindowV3Tracker.value
     return window.v3?.stepIndex !== undefined ? window.v3.stepIndex.value : 0
   })
 
   const stepName = computed(() => {
-    globalWindowV3Tracker.value
+    void globalWindowV3Tracker.value
     return window.v3?.stepName !== undefined ? window.v3.stepName.value : ''
   })
 
   const amTranslations = computed(() => {
-    globalWindowV3Tracker.value
+    void globalWindowV3Tracker.value
     return window.v3?.translations?.value
   })
 
   const flowLayout = computed(() => {
-    globalWindowV3Tracker.value
+    void globalWindowV3Tracker.value
     return window.v3?.flowLayout?.value
   })
 
   const subStepName = computed(() => {
-    globalWindowV3Tracker.value
+    void globalWindowV3Tracker.value
     return window.v3?.subStepName !== undefined ? window.v3.subStepName.value : ''
   })
 
   const bookableType = computed(() => {
-    globalWindowV3Tracker.value
+    void globalWindowV3Tracker.value
     return window.v3?.bookableType !== undefined ? window.v3.bookableType.value : ''
   })
 
   const langKey = computed(() => {
-    globalWindowV3Tracker.value
+    void globalWindowV3Tracker.value
     return window.v3?.langKey !== undefined ? window.v3.langKey.value : ''
   })
 
   const pagesType = computed(() => {
-    globalWindowV3Tracker.value
+    void globalWindowV3Tracker.value
     return window.v3?.pagesType !== undefined ? window.v3.pagesType.value : ''
   })
 
   const features = computed(() => {
-    globalWindowV3Tracker.value
+    void globalWindowV3Tracker.value
     return window.v3?.features !== undefined ? window.v3.features.value : {}
   })
 

@@ -10,12 +10,7 @@
 
     <div class="wpa-events__tickets-scroll">
       <div class="wpa-events__tickets-list">
-        <details
-          v-for="item in items"
-          :key="item.id"
-          class="wpa-events__ticket-card"
-          open
-        >
+        <details v-for="item in items" :key="item.id" class="wpa-events__ticket-card" open>
           <summary
             class="wpa-events__ticket-summary"
             :class="{ 'wpa-events__ticket-summary--end': !item.name }"

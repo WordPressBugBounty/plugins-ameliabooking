@@ -21,7 +21,7 @@
       v-if="props.paymentGateway !== 'payPal' || isCongratzStep"
       :class="[{ mainBtnClass }, { 'square-continue': props.paymentGateway === 'square' }]"
       :type="props.primaryFooterButtonType"
-      :category="isWaitingList() ? 'waiting' : 'primary'"
+      :category="isWaitingListStep() ? 'waiting' : 'primary'"
       size="medium"
       :disabled="footerBtnDisabled"
       @click="footerButtonClick"
@@ -109,7 +109,7 @@ const isCongratzStep = computed(() => {
 })
 
 let primaryBtnLabel = computed(() => {
-  if (isWaitingList()) {
+  if (isWaitingListStep()) {
     // TODO - check from where to pass waitingList settings
     return 'join_waiting_list'
   }
@@ -154,7 +154,7 @@ function displayLabels(label) {
     : amLabels[label]
 }
 
-function isWaitingList() {
+function isWaitingListStep() {
   return (
     (steps.value[currentStep.value].name === 'EventInfo' ||
       steps.value[currentStep.value].name === 'EventTickets') &&

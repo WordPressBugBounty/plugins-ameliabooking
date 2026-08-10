@@ -108,7 +108,8 @@ export default {
         payload && typeof payload.sharedWaitingSpotsLeft === 'number'
           ? Math.max(0, payload.sharedWaitingSpotsLeft)
           : null
-      const useSharedWaitingCap = waitingMode && !!state.maxCustomCapacity && sharedWaitingSpotsLeft !== null
+      const useSharedWaitingCap =
+        waitingMode && !!state.maxCustomCapacity && sharedWaitingSpotsLeft !== null
       const pendingById = {}
 
       state.pendingPreselectedTickets.forEach((ticket) => {

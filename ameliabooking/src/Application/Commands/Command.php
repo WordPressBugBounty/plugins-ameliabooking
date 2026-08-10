@@ -2,6 +2,7 @@
 
 namespace AmeliaBooking\Application\Commands;
 
+use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Commands\Booking\Appointment\AddBookingCommand;
 use AmeliaBooking\Application\Commands\Booking\Appointment\DeleteBookingRemotelyCommand;
 use AmeliaBooking\Application\Commands\Booking\Appointment\SuccessfulBookingCommand;
@@ -11,6 +12,9 @@ use AmeliaBooking\Application\Commands\Payment\CalculatePaymentAmountCommand;
 use AmeliaBooking\Application\Commands\Square\DisconnectFromSquareAccountCommand;
 use AmeliaBooking\Application\Commands\Square\SquareRefundWebhookCommand;
 use AmeliaBooking\Application\Services\User\UserApplicationService;
+use AmeliaBooking\Domain\Entity\Entities;
+use AmeliaBooking\Domain\Entity\User\AbstractUser;
+use AmeliaBooking\Domain\Common\Exceptions\AuthorizationException;
 use AmeliaBooking\Domain\Services\Permissions\PermissionsService;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Infrastructure\WP\SettingsService\SettingsStorage;
@@ -241,5 +245,115 @@ abstract class Command
     public function setUserApplicationService($userApplicationService)
     {
         $this->userApplicationService = $userApplicationService;
+    }
+
+    /**
+     * Authorize user
+     *
+     * @return AbstractUser
+     * @throws AuthorizationException
+     * @throws AccessDeniedException
+     */
+    public function authorize($type = null): AbstractUser
+    {
+        if ($type === AbstractUser::USER_ROLE_PROVIDER || $type === AbstractUser::USER_ROLE_CUSTOMER) {
+            /** @var AbstractUser $user */
+            $user = $this->getUserApplicationService()->authorization(
+                $this->getToken(),
+                $type
+            );
+
+            // If user is admin or manager, return user
+            if (
+                $user && (
+                    $user->getType() === AbstractUser::USER_ROLE_ADMIN ||
+                    $user->getType() === AbstractUser::USER_ROLE_MANAGER
+                )
+            ) {
+                return $user;
+            }
+
+            // If user is not admin or manager, check if user is of the given type
+            if (!$user || $user->getType() !== $type) {
+                throw new AccessDeniedException('You are not allowed');
+            }
+
+            return $user;
+        }
+
+        return $this->getUserApplicationService()->authorization(
+            $this->getPage() === 'cabinet' ? $this->getToken() : null,
+            $this->getCabinetType()
+        );
+    }
+
+    /**
+     * Authorize provider read permission
+     *
+     * @param int    $userId
+     * @param string $entity
+     *
+     * @return AbstractUser
+     *
+     * @throws AuthorizationException
+     * @throws AccessDeniedException
+     */
+    public function authorizeProviderReadPermission(int $userId, string $entity = Entities::EMPLOYEES): AbstractUser
+    {
+        // if logged in user is not WP admin, WP Amelia manager or WP Amelia provider, try to authorize as non WP Amelia provider
+        if (
+            !$this->getPermissionService()->currentUserCanRead($entity) ||
+            !$this->getPermissionService()->currentUserCanReadOthers($entity)
+        ) {
+            /** @var AbstractUser $user */
+            $user = $this->authorize(Entities::PROVIDER);
+
+            // if authorized as non WP Amelia provider, check if user ID is the same as the requested user ID
+            if (
+                $user->getType() === AbstractUser::USER_ROLE_PROVIDER &&
+                $user->getId()->getValue() !== $userId
+            ) {
+                throw new AccessDeniedException('You are not allowed');
+            }
+
+            return $user;
+        }
+
+        return $this->getUserApplicationService()->authorization(null, null);
+    }
+
+    /**
+     * Authorize provider write permission
+     *
+     * @param int    $userId
+     * @param string $entity
+     *
+     * @return AbstractUser
+     *
+     * @throws AuthorizationException
+     * @throws AccessDeniedException
+     */
+    public function authorizeProviderWritePermission(int $userId, string $entity = Entities::EMPLOYEES): AbstractUser
+    {
+        // if logged in user is not WP admin, WP Amelia manager or WP Amelia provider, try to authorize as non WP Amelia provider
+        if (
+            !$this->getPermissionService()->currentUserCanWrite($entity) ||
+            !$this->getPermissionService()->currentUserCanWriteOthers($entity)
+        ) {
+            /** @var AbstractUser $user */
+            $user = $this->authorize(Entities::PROVIDER);
+
+            // if authorized as non WP Amelia provider, check if user ID is the same as the requested user ID
+            if (
+                $user->getType() === AbstractUser::USER_ROLE_PROVIDER &&
+                $user->getId()->getValue() !== $userId
+            ) {
+                throw new AccessDeniedException('You are not allowed');
+            }
+
+            return $user;
+        }
+
+        return $this->getUserApplicationService()->authorization(null, null);
     }
 }

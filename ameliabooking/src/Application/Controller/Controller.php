@@ -7,6 +7,7 @@ use AmeliaBooking\Application\Services\User\UserApplicationService;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\Services\Permissions\PermissionsService;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
+use AmeliaBooking\Domain\Common\Exceptions\AuthorizationException;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Domain\Events\DomainEventBus;
 use AmeliaBooking\Application\Commands\CommandResult;
@@ -145,6 +146,15 @@ abstract class Controller
             );
 
             return $response;
+        } catch (AuthorizationException $e) {
+            $commandResult = new CommandResult();
+
+            $commandResult->setResult(CommandResult::RESULT_ERROR);
+            $commandResult->setData(
+                [
+                    'reauthorize' => true,
+                ]
+            );
         }
 
         if ($commandResult->getResult() === CommandResult::RESULT_ERROR) {

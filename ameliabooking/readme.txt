@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 6.5
 Tested up to: 7.0.1
 Requires PHP: 7.4
-Stable tag: 2.4.5
+Stable tag: 2.4.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,11 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v 2.4.6
+This update includes security fixes. We strongly recommend updating to this version immediately.
+*BugFix: Security vulnerability patch and improvements.
+*Additional minor bug fixes and overall stability improvements.
+
 v2.4.5
 This update includes a couple of new features, improvements, bug fixes and a security fix. We strongly recommend updating to this version immediately.
 *Feature: Public Event Page – Each Amelia event now automatically gets its own dedicated public page with full event details and booking option.

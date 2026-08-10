@@ -109,7 +109,7 @@ let sidebarSteps = inject('sidebarSteps', [
 const sliderValue = computed(() => stepIndex.value)
 
 // * Create marks from number of steps
-const marks = new Array(sidebarSteps.value.length).fill('')
+const marks = Array.from({ length: sidebarSteps.value.length }, () => '')
 
 // * Container Width
 let cWidth = inject('containerWidth', 0)
