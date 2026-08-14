@@ -6,6 +6,7 @@ use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Services\Booking\BookingApplicationService;
 use AmeliaBooking\Application\Services\Helper\HelperService;
+use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Application\Services\Reservation\AbstractReservationService;
 use AmeliaBooking\Application\Services\User\UserApplicationService;
 use AmeliaBooking\Domain\Common\Exceptions\AuthorizationException;
@@ -17,6 +18,8 @@ use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentType;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use Exception;
+use Interop\Container\Exception\ContainerException;
+use Slim\Exception\ContainerValueNotFoundException;
 
 /**
  * Class AddBookingCommandHandler
@@ -36,8 +39,10 @@ class AddBookingCommandHandler extends CommandHandler
      * @param AddBookingCommand $command
      *
      * @return CommandResult
+     * @throws ContainerValueNotFoundException
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
+     * @throws ContainerException
      * @throws Exception
      */
     public function handle(AddBookingCommand $command)
@@ -54,15 +59,32 @@ class AddBookingCommandHandler extends CommandHandler
 
         $appointmentData = $bookingAS->getAppointmentData($command->getFields());
 
-        if (
-            !empty($appointmentData['payment']['gateway']) &&
-            in_array($appointmentData['payment']['gateway'], [PaymentType::WC, PaymentType::MOLLIE, PaymentType::BARION])
-        ) {
-            $result = new CommandResult();
+        /** @var PaymentApplicationService $paymentAS */
+        $paymentAS = $this->container->get('application.payment.service');
 
-            $result->setResult(CommandResult::RESULT_ERROR);
+        // WooCommerce, Mollie and Barion bookings are added through their own command handlers
+        $allowedGateways = array_values(
+            array_diff(
+                $paymentAS->getAvailablePaymentGateways(),
+                [PaymentType::WC, PaymentType::MOLLIE, PaymentType::BARION]
+            )
+        );
 
-            return $result;
+        if (isset($appointmentData['payment'])) {
+            $paymentData = $paymentAS->getValidatedRequestPaymentData(
+                $appointmentData['payment'],
+                $allowedGateways
+            );
+
+            if ($paymentData === null) {
+                $result = new CommandResult();
+
+                $result->setResult(CommandResult::RESULT_ERROR);
+
+                return $result;
+            }
+
+            $appointmentData['payment'] = $paymentData;
         }
 
         $appointmentData = apply_filters('amelia_before_booking_added_filter', $appointmentData);

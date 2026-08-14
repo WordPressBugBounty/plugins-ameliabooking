@@ -935,7 +935,7 @@ abstract class AbstractReservationService implements ReservationServiceInterface
             $paymentData['gateway'] = PaymentType::ON_SITE;
         }
 
-        if (!empty($paymentData['orderStatus'])) {
+        if ($paymentData['gateway'] === PaymentType::WC && !empty($paymentData['orderStatus'])) {
             $paymentStatus = $this->getWcStatus(
                 $entityType,
                 $paymentData['orderStatus'],
@@ -1420,20 +1420,6 @@ abstract class AbstractReservationService implements ReservationServiceInterface
      *
      */
     abstract public function deleteBooking($bookingId);
-
-    /**
-     * @param array $paymentData
-     *
-     * @return bool
-     */
-    protected function isDeferredPaymentGateway($paymentData)
-    {
-        if (empty($paymentData['gateway'])) {
-            return false;
-        }
-
-        return in_array($paymentData['gateway'], [PaymentType::MOLLIE, PaymentType::BARION], true);
-    }
 
     /**
      * @param int $bookingId

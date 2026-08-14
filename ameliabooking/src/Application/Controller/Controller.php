@@ -125,6 +125,10 @@ abstract class Controller
             return $response->withStatus(self::STATUS_FORBIDDEN);
         }
 
+        if (!$validApiCall && !$command->validateCron($request)) {
+            return $response->withStatus(self::STATUS_FORBIDDEN);
+        }
+
         $command->setPermissionService($this->permissionsService);
         $command->setUserApplicationService($this->userApplicationService);
 

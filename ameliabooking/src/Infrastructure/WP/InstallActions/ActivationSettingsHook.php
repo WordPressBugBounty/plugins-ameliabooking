@@ -2180,6 +2180,7 @@ This message does not have an option for responding. If you need additional info
             'v3AsyncLoading'                => false,
             'premiumBannerVisibility'       => true,
             'dismissibleBannerVisibility'   => true,
+            'cronKey'                       => (new Token(null, 32))->getValue(),
         ];
 
         self::initSettings('activation', $settings);

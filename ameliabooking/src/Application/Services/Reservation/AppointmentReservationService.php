@@ -69,6 +69,8 @@ use AmeliaBooking\Infrastructure\WP\Integrations\WooCommerce\StarterWooCommerceS
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
 use DateTime;
 use Exception;
+use Interop\Container\Exception\ContainerException;
+use Slim\Exception\ContainerValueNotFoundException;
 
 /**
  * Class AppointmentReservationService
@@ -95,9 +97,11 @@ class AppointmentReservationService extends AbstractReservationService
      * @throws CouponExpiredException
      * @throws CouponInvalidException
      * @throws CouponUnknownException
+     * @throws ContainerValueNotFoundException
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
      * @throws Exception
+     * @throws ContainerException
      */
     public function book($appointmentData, $reservation, $save)
     {
@@ -160,12 +164,6 @@ class AppointmentReservationService extends AbstractReservationService
                 $customFieldsCollection,
                 $appointmentData['serviceId']
             ) : null;
-
-        $reservation->setMandatoryPendingStatus(
-            new BooleanValueObject(
-                $this->isDeferredPaymentGateway($appointmentData['payment'])
-            )
-        );
 
         $this->bookSingle(
             $reservation,
@@ -279,12 +277,6 @@ class AppointmentReservationService extends AbstractReservationService
                         $recurringAppointmentData['serviceId']
                     ) : null;
 
-                $recurringReservation->setMandatoryPendingStatus(
-                    new BooleanValueObject(
-                        $this->isDeferredPaymentGateway($recurringAppointmentData['payment'])
-                    )
-                );
-
                 try {
                     $this->bookSingle(
                         $recurringReservation,
@@ -345,9 +337,11 @@ class AppointmentReservationService extends AbstractReservationService
      * @throws BookingUnavailableException
      * @throws BookingsLimitReachedException
      * @throws CustomerBookedException
+     * @throws ContainerValueNotFoundException
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
      * @throws Exception
+     * @throws ContainerException
      */
     public function bookSingle(
         $reservation,
@@ -417,7 +411,16 @@ class AppointmentReservationService extends AbstractReservationService
             ) ?: $bookingStatus;
         }
 
-        if ($reservation->hasMandatoryPendingStatus()->getValue()) {
+        if (
+            (
+            (!empty($appointmentData['payment']['gateway']) &&
+                in_array($appointmentData['payment']['gateway'], [PaymentType::MOLLIE, PaymentType::BARION])) || !empty($appointmentData['isMollie'])
+            ) && !(
+                !empty($appointmentData['bookings'][0]['packageCustomerService']['id']) &&
+                $reservation->getLoggedInUser() &&
+                $reservation->getLoggedInUser()->getType() === AbstractUser::USER_ROLE_CUSTOMER
+            )
+        ) {
             $appointmentData['bookings'][0]['status'] = BookingStatus::PENDING;
         }
 
@@ -581,7 +584,8 @@ class AppointmentReservationService extends AbstractReservationService
 
             if (
                 $booking->getPackageCustomerService() &&
-                $booking->getPackageCustomerService()->getId()
+                $booking->getPackageCustomerService()->getId() &&
+                !empty($appointmentData['isCabinetBooking'])
             ) {
                 /** @var AbstractPackageApplicationService $packageApplicationService */
                 $packageApplicationService = $this->container->get('application.bookable.package');
@@ -752,6 +756,9 @@ class AppointmentReservationService extends AbstractReservationService
      *
      * @return array
      *
+     * @throws \Slim\Exception\ContainerException
+     * @throws \InvalidArgumentException
+     * @throws ContainerValueNotFoundException
      * @throws InvalidArgumentException
      * @throws NotFoundException
      * @throws QueryExecutionException
@@ -968,6 +975,7 @@ class AppointmentReservationService extends AbstractReservationService
      * @return AbstractBookable
      *
      * @throws InvalidArgumentException
+     * @throws ContainerValueNotFoundException
      * @throws QueryExecutionException
      * @throws NotFoundException
      */
@@ -1250,6 +1258,8 @@ class AppointmentReservationService extends AbstractReservationService
      * @param Appointment     $appointment
      *
      * @return void
+     *
+     * @throws ContainerException
      */
     public function updateWooCommerceOrder($booking, $appointment)
     {
@@ -1308,6 +1318,7 @@ class AppointmentReservationService extends AbstractReservationService
      *
      * @return Appointment
      *
+     * @throws ContainerValueNotFoundException
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */

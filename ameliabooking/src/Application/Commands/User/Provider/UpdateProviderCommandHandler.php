@@ -132,17 +132,18 @@ class UpdateProviderCommandHandler extends CommandHandler
         $oldExternalId = $oldUser->getExternalId() ? $oldUser->getExternalId()->getValue() : null;
         $newExternalId = $newUser->getExternalId() ? $newUser->getExternalId()->getValue() : null;
 
-        if (
-            $oldExternalId !== $newExternalId &&
-            (
-                !$currentUser ||
-                !(
-                    $currentUser->getType() === AbstractUser::USER_ROLE_ADMIN ||
-                    $currentUser->getType() === AbstractUser::USER_ROLE_MANAGER
-                )
-            )
-        ) {
-           // Non-admin/manager cannot change externalId at all
+        $isAdminOrManager = $currentUser && (
+            $currentUser->getType() === AbstractUser::USER_ROLE_ADMIN ||
+            $currentUser->getType() === AbstractUser::USER_ROLE_MANAGER
+        );
+
+        // externalId === 0 is the front-end asking for a new WP user to be created for this employee.
+        // UserFactory drops empty values, so it never reaches $newExternalId and the comparison below
+        // cannot see it - it has to be detected on the raw field.
+        $createsWpUser = $command->getField('externalId') === 0;
+
+        if (($oldExternalId !== $newExternalId || $createsWpUser) && !$isAdminOrManager) {
+            // Non-admin/manager cannot change externalId at all, nor have a WP user created
 
             $result->setResult(CommandResult::RESULT_ERROR);
             $result->setMessage('Could not update user.');
@@ -271,7 +272,7 @@ class UpdateProviderCommandHandler extends CommandHandler
 
             $providerData = $this->getOutlookCalendarProviderData($providerData, $providerAS, $userId);
 
-            if ($command->getField('externalId') === 0) {
+            if ($createsWpUser && $isAdminOrManager) {
                 /** @var UserApplicationService $userAS */
                 $userAS = $this->getContainer()->get('application.user.service');
 

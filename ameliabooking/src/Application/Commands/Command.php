@@ -6,6 +6,7 @@ use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Commands\Booking\Appointment\AddBookingCommand;
 use AmeliaBooking\Application\Commands\Booking\Appointment\DeleteBookingRemotelyCommand;
 use AmeliaBooking\Application\Commands\Booking\Appointment\SuccessfulBookingCommand;
+use AmeliaBooking\Application\Commands\Notification\SendUndeliveredNotificationsCommand;
 use AmeliaBooking\Application\Commands\Notification\UpdateSMSNotificationHistoryCommand;
 use AmeliaBooking\Application\Commands\Outlook\FetchAccessTokenWithAuthCodeOutlookCommand;
 use AmeliaBooking\Application\Commands\Payment\CalculatePaymentAmountCommand;
@@ -203,6 +204,35 @@ abstract class Command
         }
 
         return true;
+    }
+
+    /**
+     * Commands listed here are meant to be run from an external cron job, so they are reached with a GET request that
+     * carries neither a nonce nor a logged in user. They are protected with a secret key, generated per site and
+     * stored in the "activation" settings, that has to be passed as a "cronKey" query parameter.
+     *
+     * @param $request
+     * @return boolean
+     */
+    public function validateCron($request)
+    {
+        if (!($this instanceof SendUndeliveredNotificationsCommand)) {
+            return true;
+        }
+
+        $settingsService = new SettingsService(new SettingsStorage());
+
+        $cronKey = $settingsService->getSetting('activation', 'cronKey');
+
+        if (empty($cronKey)) {
+            return false;
+        }
+
+        $queryParams = $request->getQueryParams();
+
+        $givenKey = !empty($queryParams['cronKey']) ? $queryParams['cronKey'] : '';
+
+        return is_string($givenKey) && hash_equals((string)$cronKey, $givenKey);
     }
 
     /**

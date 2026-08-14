@@ -222,7 +222,6 @@ import { useColorTransparency } from '../../../../../assets/js/common/colorManip
 import { useCurrentTimeZone, useSortedDateStrings } from '../../../../../assets/js/common/helper.js'
 import { useScrollTo } from '../../../../../assets/js/common/scrollElements'
 import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
-import { useCreateBookingSuccess } from '../../../../../assets/js/public/booking'
 
 // * Vars
 let store = useStore()
@@ -679,11 +678,13 @@ function packageBookingApp() {
 
   data.locationId = parseInt(appointmentLocationId.value)
 
+  data.runInstantPostBookingActions = true
+
   httpClient
     .post('/bookings', data)
     .then((response) => {
       calendarRef.value.calendarSlotsLoading = false
-      useCreateBookingSuccess(store, response)
+
       emits('success', { message: amLabels.value.booking_added_success })
     })
     .catch((error) => {
