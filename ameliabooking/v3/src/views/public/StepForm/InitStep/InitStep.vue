@@ -153,6 +153,7 @@ let amFields = reactive({
       class: isRtl.value ? 'am-rtl' : '',
       filterable: isFieldFilterable('service'),
       taxVisible: amCustomize.initStep.options.tax?.visibility ?? true,
+      multiplePricesVisibility: amCustomize.initStep.options.multiplePrices?.visibility ?? false,
     },
   },
   location: {

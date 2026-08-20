@@ -90,7 +90,6 @@ export default {
     ready: false,
     packageId: null,
     error: '',
-    busyness: [],
     lastBookedProviderId: null,
   }),
 
@@ -362,7 +361,14 @@ export default {
     },
 
     getBusyness(state) {
-      return state.busyness
+      let i = state.appointmentsIndex
+      let serviceId = state.appointments[i].serviceId
+
+      if (!serviceId || !state.appointments[i].services[serviceId]) {
+        return {}
+      }
+
+      return state.appointments[i].services[serviceId].busyness || {}
     },
 
     getLastBookedProviderId(state) {
@@ -684,7 +690,15 @@ export default {
     },
 
     setBusyness(state, payload) {
-      state.busyness = payload
+      let i =
+        payload.cartItemIndex !== undefined && payload.cartItemIndex !== null
+          ? payload.cartItemIndex
+          : state.appointmentsIndex
+      let serviceId = payload.serviceId
+
+      if (serviceId && state.appointments[i] && state.appointments[i].services[serviceId]) {
+        state.appointments[i].services[serviceId].busyness = payload.busyness
+      }
     },
 
     setLastBookedProviderId(state, payload) {

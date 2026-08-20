@@ -5,6 +5,12 @@ function useParams(store, cabinetType) {
   }
 }
 
+function getCabinetSource(userType) {
+  return userType === 'employee' || userType === 'provider'
+    ? 'cabinet-provider'
+    : 'cabinet-customer'
+}
+
 function useCustomFieldsData(bookings, userType) {
   let result = []
 
@@ -25,6 +31,11 @@ function useCustomFieldsData(bookings, userType) {
             result.push({
               label: customFields[customFieldId].label,
               value: value,
+              type: customFields[customFieldId].type,
+              id: customFieldId,
+              entityId: booking.id,
+              customerId: booking.customer?.id,
+              source: getCabinetSource(userType),
             })
           }
         }

@@ -44,4 +44,8 @@ function useFocusCustomers(store) {
   }
 }
 
-export { useCustomers, useSearchCustomers, useFocusCustomers }
+function useCanSearchAllCustomers(settings) {
+  return settings.roles.allowReadAllCustomers || settings.roles.allowWriteCustomers
+}
+
+export { useCustomers, useSearchCustomers, useFocusCustomers, useCanSearchAllCustomers }

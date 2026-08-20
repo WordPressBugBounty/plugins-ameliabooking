@@ -65,7 +65,7 @@ import { computed, inject, markRaw, nextTick, provide, ref, watch, onMounted } f
 import { useStore } from 'vuex'
 
 import { defaultCustomizeSettings } from '@/assets/js/common/defaultCustomize'
-import useRestore from '@/assets/js/public/restore'
+import useRestore, { resolveRestoreStepIndex } from '@/assets/js/public/restore'
 import { useScrollTo } from '@/assets/js/common/scrollElements'
 import { useWaitingListAvailability } from '@/assets/js/public/events'
 
@@ -464,7 +464,7 @@ onMounted(() => {
   if (restore.result === 'success') {
     index = stepsArray.value.length - 1
   } else if (restore.result === 'error' || restore.result === 'canceled') {
-    index = stepsArray.value.length - 2
+    index = resolveRestoreStepIndex(stepsArray.value, restore.targetStep, 'EventPayment')
   }
 
   stepIndex.value = index

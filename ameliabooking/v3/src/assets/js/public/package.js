@@ -21,6 +21,7 @@ function useBuildPackage(index, entity) {
     items[index].services[item.service.id] = {
       fetched: false,
       slots: [],
+      busyness: {},
       providerId: null,
       locationId: null,
       serviceId: item.service.id,
@@ -180,14 +181,7 @@ function useCalculateDiscount(pack) {
   if (pack.discount && !pack.calculatedPrice) {
     return pack.discount
   }
-  if (pack.price) {
-    let originalPrice = pack.bookable.reduce(
-      (partialSum, a) => partialSum + a.service.price * a.quantity,
-      0,
-    )
-    let newPrice = pack.price
-    return originalPrice > newPrice ? ((originalPrice - newPrice) / originalPrice) * 100 : ''
-  }
+
   return 0
 }
 

@@ -597,6 +597,10 @@ function visibleChange(eventValue) {
     useColorTransparency(amColors.value.colorDropText, 0.65),
   )
   amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
+    '--am-c-option-text-op50',
+    useColorTransparency(amColors.value.colorDropText, 0.5),
+  )
+  amSelect.value.tooltipRef.popperRef.contentRef.style.setProperty(
     '--am-c-option-text-op15',
     useColorTransparency(amColors.value.colorDropText, 0.15),
   )

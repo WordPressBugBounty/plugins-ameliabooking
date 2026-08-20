@@ -9,7 +9,7 @@
       <div class="am-cap-customers">
         <!-- Select Customer -->
         <el-form-item
-          v-if="props.isNew"
+          v-if="props.isNew && canSearchAllCustomers"
           :prop="'customerId'"
           class="am-cap__att-form__item am-w-100"
         >
@@ -156,7 +156,7 @@
           <AmInputNumber
             v-model="detailsForm.persons"
             :min="1"
-            :disabled="!amSettings.roles.allowWriteEvents"
+            :disabled="!amSettings.roles.allowWriteCustomers"
           />
         </el-form-item>
 
@@ -174,7 +174,7 @@
             <AmInputNumber
               v-model="item.persons"
               :min="0"
-              :disabled="!amSettings.roles.allowWriteEvents"
+              :disabled="!amSettings.roles.allowWriteCustomers"
             />
           </el-form-item>
         </template>
@@ -197,7 +197,11 @@
 
 <script setup>
 // * Import Composable
-import { useFocusCustomers, useSearchCustomers } from '../../../../../../assets/js/admin/customers'
+import {
+  useFocusCustomers,
+  useSearchCustomers,
+  useCanSearchAllCustomers,
+} from '../../../../../../assets/js/admin/customers'
 import { useResponsiveClass } from '../../../../../../assets/js/common/responsive'
 import { useAttendeeStatuses } from '../../../../../../assets/js/common/attendees'
 
@@ -251,6 +255,8 @@ let amLabels = inject('amLabels')
 
 // * Settings
 const amSettings = inject('settings')
+
+let canSearchAllCustomers = computed(() => useCanSearchAllCustomers(amSettings))
 
 // * Data in shortcode
 const shortcodeData = inject('shortcodeData')
@@ -370,7 +376,7 @@ function addedCustomer(customer) {
 }
 
 onMounted(() => {
-  if (!store.getters['attendee/getId']) {
+  if (!store.getters['attendee/getId'] && canSearchAllCustomers.value) {
     store.commit('customerInfo/setCustomers', store.getters['auth/getPreloadedCustomers'])
   }
 })

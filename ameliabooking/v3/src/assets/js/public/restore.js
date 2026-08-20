@@ -68,6 +68,35 @@ function fixCacheData(data) {
   })
 }
 
+function getRestoreTargetStep(data) {
+  if ('bookableType' in data.request.state && data.request.state.bookableType === 'event') {
+    return 'EventPayment'
+  }
+
+  return 'paymentStep'
+}
+
+export function resolveRestoreStepIndex(steps, targetStep, fallbackStep) {
+  const targetKey = targetStep || fallbackStep
+  let index = steps.findIndex((step) => step.key === targetKey || step.name === targetKey)
+
+  if (index < 0) {
+    index = Math.max(0, steps.length - 2)
+  }
+
+  return index
+}
+
+function setRestoredPaymentGateway(store, data) {
+  const gateway = data.paymentMethod || 'stripe'
+
+  if ('bookableType' in data.request.state && data.request.state.bookableType === 'event') {
+    store.commit('payment/setPaymentGateway', gateway)
+  } else {
+    store.commit('booking/setPaymentGateway', gateway)
+  }
+}
+
 function useRestore(store, shortcodeData) {
   let data =
     'ameliaCache' in window && window.ameliaCache.length && window.ameliaCache[0]
@@ -144,7 +173,12 @@ function useRestore(store, shortcodeData) {
   }
 
   if (userClickedBack) {
-    if ((data.paymentMethod === 'mollie' || data.paymentMethod === 'barion') && data.bookings) {
+    if (
+      (data.paymentMethod === 'mollie' ||
+        data.paymentMethod === 'barion' ||
+        data.paymentMethod === 'razorpay') &&
+      data.bookings
+    ) {
       if (data.packageCustomer) {
         httpClient
           .post('/bookings/delete/remotely/' + data.packageCustomer.id, {
@@ -172,6 +206,7 @@ function useRestore(store, shortcodeData) {
 
     return {
       result: 'error',
+      targetStep: getRestoreTargetStep(data),
       steps: data.request.form.steps,
       sidebar: data.request.form.sidebar,
     }
@@ -204,28 +239,50 @@ function useRestore(store, shortcodeData) {
 
     return {
       result: 'canceled',
+      targetStep: getRestoreTargetStep(data),
       steps: data.request.form.steps,
       sidebar: data.request.form.sidebar,
     }
   } else {
     switch (data.status !== null ? data.status : 'paid') {
       case 'canceled':
-        store.commit('booking/setError', window.wpAmeliaLabels['payment_canceled'])
+        if ('bookableType' in data.request.state && data.request.state.bookableType === 'event') {
+          store.commit('payment/setError', window.wpAmeliaLabels['payment_canceled'])
+        } else {
+          store.commit('booking/setError', window.wpAmeliaLabels['payment_canceled'])
+        }
+
+        setRestoredPaymentGateway(store, data)
 
         return {
           result: 'canceled',
+          targetStep: getRestoreTargetStep(data),
           steps: data.request.form.steps,
           sidebar: data.request.form.sidebar,
         }
 
-      case 'failed':
-        store.commit('booking/setError', useBookingError(data, store))
+      case 'failed': {
+        // Cache may only have status=failed (redirect gateways), or include data from markCompletionFailed
+        const failedErrorResponse =
+          data.data && typeof data.data === 'object'
+            ? { data: data.data }
+            : { data: { paymentSuccessful: false } }
+
+        if ('bookableType' in data.request.state && data.request.state.bookableType === 'event') {
+          store.commit('payment/setError', useBookingError(failedErrorResponse, store))
+        } else {
+          store.commit('booking/setError', useBookingError(failedErrorResponse, store))
+        }
+
+        setRestoredPaymentGateway(store, data)
 
         return {
           result: 'error',
+          targetStep: getRestoreTargetStep(data),
           steps: data.request.form.steps,
           sidebar: data.request.form.sidebar,
         }
+      }
 
       case 'paid':
         switch (data.response.type) {

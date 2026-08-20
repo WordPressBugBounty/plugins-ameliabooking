@@ -193,6 +193,8 @@ class UpdateAppointmentCommandHandler extends CommandHandler
                             )
                         );
                     }
+
+                    $newBooking->setAggregatedPrice($oldBooking->getAggregatedPrice());
                 }
             }
         }

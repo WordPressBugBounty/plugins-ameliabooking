@@ -83,9 +83,14 @@ function payPalPaymentInit() {
           headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
           body: JSON.stringify(useBookingData(store, null, true, {}, null)['data']),
         })
-          .then((r) => {
-            if (!r.ok) return Promise.reject(new Error('HTTP ' + r.status))
-            return r.json()
+          .then(async (r) => {
+            const body = await r.json().catch(() => null)
+
+            if (!r.ok) {
+              return Promise.reject(body || { message: 'HTTP ' + r.status })
+            }
+
+            return body
           })
           .then((response) => {
             transactionReference = response.data.transactionReference
@@ -93,6 +98,7 @@ function payPalPaymentInit() {
           })
           .catch((error) => {
             payPalError(error)
+            return Promise.reject(error)
           })
       },
 
@@ -142,21 +148,30 @@ function payPalPaymentInit() {
 }
 
 function payPalError(error) {
+  if (error && typeof error === 'object' && !(error instanceof Error)) {
+    errorBooking(error)
+    return
+  }
+
   let errorString = error.toString()
 
-  let response = JSON.parse(
-    JSON.stringify(
-      JSON.parse(errorString.substring(errorString.indexOf('{'), errorString.lastIndexOf('}') + 1)),
-    ),
-  )
+  try {
+    let response = JSON.parse(
+      errorString.substring(errorString.indexOf('{'), errorString.lastIndexOf('}') + 1),
+    )
 
-  if (typeof response === 'object' && response.hasOwnProperty('data')) {
-    errorBooking(response)
-  } else if (typeof response === 'object' && response.hasOwnProperty('message')) {
-    usePaymentError(store, function () {
-      emits('payment-error', response.message)
-    })
-  } else {
+    if (typeof response === 'object' && response.hasOwnProperty('data')) {
+      errorBooking(response)
+    } else if (typeof response === 'object' && response.hasOwnProperty('message')) {
+      usePaymentError(store, function () {
+        emits('payment-error', response.message)
+      })
+    } else {
+      usePaymentError(store, function () {
+        emits('payment-error', errorString)
+      })
+    }
+  } catch (e) {
     usePaymentError(store, function () {
       emits('payment-error', errorString)
     })

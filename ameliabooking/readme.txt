@@ -4,9 +4,9 @@ Author URI: https://melograno.io/
 Tags: appointments, booking, event booking system, wpamelia, booking system, scheduling
 Donate link: https://wpamelia.com/
 Requires at least: 6.5
-Tested up to: 7.0.1
+Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 2.4.7
+Stable tag: 2.4.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,12 +289,26 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.4.8
+*Feature: Booking Form Preview - Booking form shortcodes now show a visual preview directly in the Gutenberg, Elementor, and Divi 5 block editors instead of raw shortcode text.
+*Improvement: Added an optional "From" price prefix for services with variable pricing.
+*Improvement: Improved performance when importing large customer lists with automatic user account creation enabled.
+*BugFix: Fixed an issue with past events being incorrectly displayed as upcoming.
+*BugFix: Fixed an issue with notification emails occasionally sending outdated template content.
+*BugFix: Fixed an issue with all services being listed when creating a new appointment, regardless of the selected employee.
+*BugFix: Fixed an issue with the last day of the month appearing disabled in the booking form date picker.
+*BugFix: Fixed an issue with incorrect busyness indicator when one employee is assigned to multiple resources.
+*BugFix: Fixed an issue with default notification templates not being localized on install.
+*BugFix: Fixed an issue with missing Faroese language option in the plugin's language dropdown.
+*BugFix: Security vulnerability patch and improvements.
+*Additional minor bug fixes and overall stability improvements.
+
 v2.4.7
 This update includes security fixes. We strongly recommend updating to this version immediately.
 *BugFix: Security vulnerability patch and improvements.
 *Additional minor bug fixes and overall stability improvements.
 
-v 2.4.6
+v2.4.6
 This update includes security fixes. We strongly recommend updating to this version immediately.
 *BugFix: Security vulnerability patch and improvements.
 *Additional minor bug fixes and overall stability improvements.

@@ -46,8 +46,10 @@
                 'am-fs__payments-main-button' +
                 (paymentGateway === gateway ? ' am-fs__payments-main-button_selected' : '') +
                 ' am-fs__payments-main-button-' +
-                gateway
+                gateway +
+                (stripeCleanupLoading ? ' am-fs__payments-main-button_disabled' : '')
               "
+              :aria-disabled="stripeCleanupLoading"
               tabindex="0"
               @click="setPaymentGateway(gateway)"
               @keydown.enter="setPaymentGateway(gateway)"
@@ -109,6 +111,12 @@ import { settings } from '../../../../plugins/settings'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
 import { usePrepaidPrice, usePaymentError } from '../../../../assets/js/common/appointments'
 import useAction from '../../../../assets/js/public/actions'
+import { useBookingData } from '../../../../assets/js/public/booking.js'
+import {
+  buildStripeIntentCacheKey,
+  prefetchStripePaymentIntent,
+  waitForStripeCleanup,
+} from '../../../../assets/js/public/stripePaymentIntent.js'
 import { useCart, useCartItem, useCartHasItems } from '../../../../assets/js/public/cart'
 
 let props = defineProps({
@@ -121,6 +129,9 @@ let props = defineProps({
 // * Store
 const store = useStore()
 const baseUrls = inject('baseUrls')
+const shortcodeData = inject('shortcodeData')
+const stepsArray = inject('stepsArray')
+const sidebarSteps = inject('sidebarSteps')
 
 // * Labels
 const globalLabels = inject('labels')
@@ -279,6 +290,7 @@ let paymentStepRef = ref(null)
 provide('paymentStepRef', paymentStepRef)
 
 let mandatoryOnSitePayment = ref(false)
+let stripeCleanupLoading = ref(false)
 
 let refOnSitePayment = ref(null)
 
@@ -433,9 +445,63 @@ let availablePayments = computed(() => {
   return {}
 })
 
-function setPaymentGateway(gateway) {
-  store.commit('booking/setPaymentGateway', gateway)
+function getStripePrefetchFormData() {
+  return {
+    shortcode: shortcodeData.value,
+    steps: stepsArray.value.map((i) => i.key),
+    sidebar: sidebarSteps.value.map((i) => Object.assign({ key: i.key, data: i.stepSelectedData })),
+  }
+}
 
+function getStripeIntentCacheKey() {
+  const coupon = store.getters['booking/getCoupon'] || {}
+
+  return buildStripeIntentCacheKey({
+    couponDiscount: coupon.discount,
+    couponDeduction: coupon.deduction,
+    deposit: store.getters['booking/getPaymentDeposit'],
+    counter: shortcodeData.value.counter,
+  })
+}
+
+function prefetchStripeIntent() {
+  if (!settings.payments.stripe.enabled || !availablePayments.value.stripe) {
+    return
+  }
+
+  const bookingData = useBookingData(store, getStripePrefetchFormData(), false, {}, null)
+  bookingData.data.returnUrl = window.location.href
+
+  prefetchStripePaymentIntent(
+    shortcodeData.value.counter,
+    getStripeIntentCacheKey(),
+    bookingData.data,
+    bookingData.options,
+  ).catch(() => {})
+}
+
+async function setPaymentGateway(gateway) {
+  if (stripeCleanupLoading.value || paymentGateway.value === gateway) {
+    return
+  }
+
+  if (paymentGateway.value === 'stripe' || gateway === 'stripe') {
+    stripeCleanupLoading.value = true
+
+    try {
+      await waitForStripeCleanup(shortcodeData.value.counter)
+      usePaymentError(store, '')
+      store.commit('booking/setPaymentGateway', gateway)
+      footerBtnDisabledUpdater(false)
+    } finally {
+      stripeCleanupLoading.value = false
+    }
+
+    return
+  }
+
+  usePaymentError(store, '')
+  store.commit('booking/setPaymentGateway', gateway)
   footerBtnDisabledUpdater(false)
 }
 
@@ -454,19 +520,21 @@ onMounted(() => {
     paymentStepRef.value.focus()
   }
 
+  if (paymentGateway.value === 'stripe') {
+    prefetchStripeIntent()
+  }
+
+  // Keep restored redirect payment errors (canceled/failed) visible until the user
+  // retries or changes payment method. Clear customer-validation and other stale
+  // errors so a corrected name does not keep showing the previous message.
   const isPaymentStatusError =
     paymentError.value &&
     (paymentError.value === globalLabels.payment_canceled ||
       paymentError.value === globalLabels.payment_error ||
       paymentError.value === globalLabels.payment_error_default)
 
-  // If it's a payment status error (canceled/failed) delay clear for 3s
   if (!isPaymentStatusError) {
     usePaymentError(store, '')
-  } else {
-    setTimeout(() => {
-      usePaymentError(store, '')
-    }, 3000)
   }
 
   if (usePrepaidPrice(store) === 0) {

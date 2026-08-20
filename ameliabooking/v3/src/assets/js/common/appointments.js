@@ -10,19 +10,63 @@ import {
   useTaxAmount,
   useTaxedAmount,
 } from './pricing'
+import { getServicePrices } from '../public/catalog'
+import { useFormattedPrice } from './formatting'
+
+const globalSettings = reactive(window.wpAmeliaSettings)
 
 function useEmployeeService(store, serviceId, employeeId) {
+  let entitiesRelations = store.getters['entities/getEntitiesRelations']
+
   let service = store.getters['entities/getService'](serviceId)
 
   let employeeService = employeeId
     ? store.getters['entities/getEmployeeService'](employeeId, serviceId)
     : service
 
+  let employees = store.getters['entities/filteredEmployees'](store.getters['booking/getSelection'])
+
+  let arrPrice = []
+
+  if (service) {
+    arrPrice.push(...getServicePrices(service))
+  }
+
+  if (employeeId) {
+    if (employeeService) {
+      arrPrice.push(...getServicePrices(employeeService))
+    }
+  } else {
+    employees.forEach((employee) => {
+      if (employee.id in entitiesRelations && serviceId in entitiesRelations[employee.id]) {
+        let eService = employee.serviceList.find((service) => service.id === serviceId)
+        if (eService) {
+          arrPrice.push(...getServicePrices(eService))
+        }
+      }
+    })
+  }
+
+  let serviceMinPrice = arrPrice.reduce((prev, curr) => {
+    return curr < prev ? curr : prev
+  }, arrPrice[0])
+
+  let serviceMaxPrice = arrPrice.reduce((prev, curr) => {
+    return curr > prev ? curr : prev
+  }, arrPrice[0])
+
+  let price =
+    serviceMinPrice !== serviceMaxPrice
+      ? `${useFormattedPrice(serviceMinPrice, !globalSettings.payments.hideCurrencySymbolFrontend)} - ${useFormattedPrice(serviceMaxPrice, !globalSettings.payments.hideCurrencySymbolFrontend)}`
+      : useFormattedPrice(serviceMinPrice, !globalSettings.payments.hideCurrencySymbolFrontend)
+
   return Object.assign({}, service, {
     price: employeeService.price,
+    formatedPrice: price,
     minCapacity: employeeService.minCapacity,
     maxCapacity: employeeService.maxCapacity,
     customPricing: employeeService.customPricing,
+    isServiceFree: serviceMinPrice === 0 && serviceMaxPrice === 0,
   })
 }
 

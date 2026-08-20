@@ -150,6 +150,7 @@ class LiteFrontendStrings
             'person_waiting'               => __('person waiting', 'ameliabooking'),
             'minimum'                      => __('Minimum', 'ameliabooking'),
             'maximum'                      => __('Maximum', 'ameliabooking'),
+            'from'                         => __('From', 'ameliabooking'),
         ];
     }
 

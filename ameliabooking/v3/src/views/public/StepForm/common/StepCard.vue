@@ -309,6 +309,7 @@ function triggerPackagesPopup(item) {
       // Card Heading
       &__heading {
         display: flex;
+        flex-wrap: wrap;
         width: 100%;
         align-items: center;
         justify-content: space-between;
@@ -316,7 +317,6 @@ function triggerPackagesPopup(item) {
 
         &.am-rw {
           &-370 {
-            flex-wrap: wrap;
             flex-direction: row;
             align-items: center;
             justify-content: space-between;

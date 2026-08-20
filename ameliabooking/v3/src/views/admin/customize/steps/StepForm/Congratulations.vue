@@ -36,7 +36,7 @@
         </div>
         <div>
           <span>{{ labelsDisplay('email_address_colon') }}:</span>
-          <span>support@wpamelia.com</span>
+          <span>{{ supportEmail }}</span>
         </div>
         <div>
           <span>{{ labelsDisplay('phone_number_colon') }}:</span>
@@ -54,6 +54,7 @@ import PackageInfoService from '../parts/PackageInfoService.vue'
 import { computed, inject, markRaw } from 'vue'
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
 import { useReactiveCustomize } from '../../../../../assets/js/admin/useReactiveCustomize.js'
+import { getSupportEmail } from '../../../../../assets/js/common/whiteLabel.js'
 
 let props = defineProps({
   globalClass: {
@@ -69,6 +70,10 @@ let amLabels = inject('labels')
 
 let pageRenderKey = inject('pageRenderKey')
 const { amCustomize } = useReactiveCustomize()
+
+// * Settings
+const amSettings = inject('settings')
+const supportEmail = computed(() => getSupportEmail(amSettings))
 
 // * Label computed function
 function labelsDisplay(label) {

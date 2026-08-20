@@ -249,6 +249,7 @@
           :loading="loading"
           :ready="ready"
           :payment-gateway="paymentGateway"
+          :pay-pal-button-show="stepsArray[stepIndex] === paymentStep"
           :customized-labels="footerLabels"
           :primary-footer-button-type="primFooterBtnType"
           :secondary-footer-button-type="secFooterBtnType"
@@ -334,6 +335,7 @@ import {
   useCheckingIfAllNotFree,
 } from '../../../../assets/js/common/appointments'
 import { useRenderAction } from '../../../../assets/js/public/renderActions'
+import { resolveRestoreStepIndex } from '../../../../assets/js/public/restore.js'
 import {
   useAddToCart,
   useCart,
@@ -1333,7 +1335,7 @@ onMounted(() => {
     if (restore.value.result === 'success') {
       index = stepsArray.value.length - 1
     } else if (restore.value.result === 'error' || restore.value.result === 'canceled') {
-      index = stepsArray.value.length - 2
+      index = resolveRestoreStepIndex(stepsArray.value, restore.value.targetStep, 'paymentStep')
     }
 
     for (let i = 0; i <= index; i++) {

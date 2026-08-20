@@ -53,7 +53,9 @@
             <span
               v-if="
                 (customizedOptions.tax?.visibility ?? true) &&
-                useTaxVisibility(store, service.id, 'service')
+                useTaxVisibility(store, service.id, 'service') &&
+                (useServicePrice(amEntities, service.id).min ||
+                  useServicePrice(amEntities, service.id).max)
               "
               class="am-fcis__header-tax"
             >

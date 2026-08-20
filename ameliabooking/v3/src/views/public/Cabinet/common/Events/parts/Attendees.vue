@@ -40,6 +40,7 @@
       :class="props.responsiveClass"
     >
       <AmSelect
+        v-if="canSearchAllCustomers"
         v-model="customerId"
         filterable
         clearable
@@ -78,9 +79,39 @@
           </div>
         </AmOption>
       </AmSelect>
+      <AmSelect
+        v-else
+        v-model="customerId"
+        filterable
+        clearable
+        prefix-icon="search"
+        prefix-icon-color="var(--am-c-capei-att-text)"
+        popper-class="am-cap-cust__popper"
+        :placeholder="amLabels.event_attendees_search"
+        @change="getBookings(activeTab === 'approved' ? ['approved', 'canceled'] : ['waiting'], 1)"
+      >
+        <AmOption
+          v-for="item in eventAttendeeCustomers"
+          :key="item.id"
+          :value="item.id"
+          :label="`${item.firstName} ${item.lastName}`"
+        >
+          <div class="am-cap__cust-option">
+            <div class="am-cap__cust-option__heading">
+              {{ item.firstName + ' ' + item.lastName }}
+            </div>
+            <div v-if="customerEmailVisibility" class="am-cap__cust-option__inner">
+              {{ item.email }}
+            </div>
+            <div v-if="customerPhoneVisibility" class="am-cap__cust-option__inner">
+              {{ item.phone }}
+            </div>
+          </div>
+        </AmOption>
+      </AmSelect>
 
       <AmButton
-        v-if="amSettings.roles.allowWriteEvents"
+        v-if="amSettings.roles.allowWriteCustomers"
         prefix="plus"
         icon="plus"
         :icon-only="props.pageWidth < 540"
@@ -146,7 +177,7 @@
                 <AmSelect
                   v-model="item.status"
                   :placeholder="amLabels.select"
-                  :disabled="!amSettings.roles.allowWriteEvents"
+                  :disabled="!amSettings.roles.allowWriteCustomers"
                   :prefix-icon="attendeeStatuses.find((i) => i.value === item.status).icon"
                   :prefix-icon-color="attendeeStatuses.find((i) => i.value === item.status).color"
                   popper-class="am-capei-att__popper"
@@ -205,7 +236,7 @@
               </div>
 
               <DotsPopup
-                v-if="amSettings.roles.allowWriteEvents"
+                v-if="amSettings.roles.allowWriteCustomers"
                 :index="index"
                 :reference-class="props.responsiveClass"
                 @edit="editEventAttendee(item)"
@@ -292,7 +323,7 @@
                 <AmSelect
                   v-model="item.status"
                   :placeholder="amLabels.select"
-                  :disabled="!amSettings.roles.allowWriteEvents"
+                  :disabled="!amSettings.roles.allowWriteCustomers"
                   :prefix-icon="attendeeStatuses.find((i) => i.value === item.status).icon"
                   :prefix-icon-color="attendeeStatuses.find((i) => i.value === item.status).color"
                   popper-class="am-capei-att__popper"
@@ -335,7 +366,7 @@
               </div>
 
               <DotsPopup
-                v-if="amSettings.roles.allowWriteEvents"
+                v-if="amSettings.roles.allowWriteCustomers"
                 :index="index"
                 :reference-class="props.responsiveClass"
                 @edit="editEventAttendee(item)"
@@ -404,7 +435,11 @@ import httpClient from '../../../../../../plugins/axios'
 // * Composables
 import { useUrlParams } from '../../../../../../assets/js/common/helper'
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
-import { useFocusCustomers, useSearchCustomers } from '../../../../../../assets/js/admin/customers'
+import {
+  useFocusCustomers,
+  useSearchCustomers,
+  useCanSearchAllCustomers,
+} from '../../../../../../assets/js/admin/customers'
 import { useScrollTo } from '../../../../../../assets/js/common/scrollElements'
 import {
   useAttendeeStatuses,
@@ -545,6 +580,8 @@ function savedAttendee() {
 
   getBookings(activeTab.value === 'approved' ? ['approved', 'canceled'] : ['waiting'])
 
+  loadEventAttendeeCustomers()
+
   closedAttendee()
 }
 
@@ -611,9 +648,87 @@ function tabClick() {
 
 let customerId = ref(null)
 
+let canSearchAllCustomers = computed(() => useCanSearchAllCustomers(amSettings))
+
 let searchingCustomers = computed(() => store.getters['customerInfo/getLoading'])
 
-let customers = computed(() => store.getters['customerInfo/getCustomers'])
+let eventAttendeeCustomers = ref([])
+
+function loadEventAttendeeCustomers() {
+  if (canSearchAllCustomers.value) {
+    return Promise.resolve()
+  }
+
+  const statuses = ['approved', 'canceled']
+
+  if (
+    amSettings.featuresIntegrations.waitingList.enabled &&
+    eventSettings.value !== null &&
+    'waitingList' in eventSettings.value &&
+    eventSettings.value.waitingList.enabled
+  ) {
+    statuses.push('waiting')
+  }
+
+  const limit = parseInt(amSettings.general.itemsPerPage)
+  const customersMap = new Map()
+
+  const collectCustomers = (bookings) => {
+    for (const booking of bookings) {
+      if (booking.customer?.id) {
+        customersMap.set(booking.customer.id, booking.customer)
+      }
+    }
+  }
+
+  const fetchPage = (page) =>
+    httpClient.get('/bookings/events', {
+      params: useUrlParams({
+        source: 'cabinet-provider',
+        statuses,
+        page,
+        limit,
+        events: [props.event.id],
+        customers: [],
+      }),
+    })
+
+  return fetchPage(1)
+    .then((response) => {
+      const filteredCount = response.data.data.filteredCount
+      const totalPages = Math.max(1, Math.ceil(filteredCount / limit))
+
+      collectCustomers(response.data.data.bookings)
+
+      if (totalPages <= 1) {
+        return
+      }
+
+      const pageRequests = []
+
+      for (let page = 2; page <= totalPages; page++) {
+        pageRequests.push(fetchPage(page))
+      }
+
+      return Promise.all(pageRequests).then((responses) => {
+        for (const pageResponse of responses) {
+          collectCustomers(pageResponse.data.data.bookings)
+        }
+      })
+    })
+    .then(() => {
+      eventAttendeeCustomers.value = Array.from(customersMap.values())
+    })
+    .catch((e) => {
+      console.log(e)
+    })
+}
+
+let customers = computed(() =>
+  canSearchAllCustomers.value
+    ? store.getters['customerInfo/getCustomers']
+    : eventAttendeeCustomers.value,
+)
 
 function getBookings(statuses, page = 1) {
   if (statuses[0] === 'approved') {
@@ -737,6 +852,8 @@ function removeEventAttendee() {
     })
     .then(() => {
       bookingsPageChange(approvedBookingsPage.value)
+
+      loadEventAttendeeCustomers()
     })
     .catch(() => {
       waitingBookingsLoading.value = false
@@ -839,7 +956,11 @@ function getQrCodesBooking(qrCodes) {
 onMounted(() => {
   getBookings(['approved', 'canceled'])
 
-  store.commit('customerInfo/setCustomers', store.getters['auth/getPreloadedCustomers'])
+  if (canSearchAllCustomers.value) {
+    store.commit('customerInfo/setCustomers', store.getters['auth/getPreloadedCustomers'])
+  } else {
+    loadEventAttendeeCustomers()
+  }
 })
 
 // * Colors

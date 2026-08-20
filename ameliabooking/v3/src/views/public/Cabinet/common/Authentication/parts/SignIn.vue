@@ -656,6 +656,17 @@ function useAuthenticate(tokenValue, isUrlToken, checkIfWpUser, changePass) {
         return
       }
 
+      if (
+        error?.response?.data?.data?.reauthorize !== undefined &&
+        error.response.data.data.reauthorize
+      ) {
+        if (!amSettings.roles[cabinetType.value + 'Cabinet']['loginEnabled']) {
+          pageKey.value = 'sendAccessLink'
+        }
+
+        return
+      }
+
       if ('invalid_credentials' in error.response.data.data) {
         authError.value = true
         authErrorMessage.value = amLabels.value.invalid_credentials

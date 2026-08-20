@@ -42,12 +42,9 @@
       >
         {{ props.backToCartLabel }}
       </AmButton>
-      <div
-        v-if="props.paymentGateway === 'payPal' && !isCongratzStep"
-        :id="'am-paypal-element-' + shortcodeData.counter"
-      ></div>
+      <div v-if="payPalButtonVisible" :id="'am-paypal-element-' + shortcodeData.counter"></div>
       <AmButton
-        v-if="props.paymentGateway !== 'payPal' || isCongratzStep"
+        v-if="!payPalButtonVisible"
         class="am-button-continue"
         :class="{ 'square-continue': props.paymentGateway === 'square' }"
         :disabled="isCongratzStep ? false : footerBtnDisabled"
@@ -102,6 +99,10 @@ let props = defineProps({
   paymentGateway: {
     type: String,
     default: '',
+  },
+  payPalButtonShow: {
+    type: Boolean,
+    default: false,
   },
   secondButtonShow: {
     type: Boolean,
@@ -173,6 +174,12 @@ watch(stepIndex, (value) => {
     labelValue.value = 'continue'
   }
 })
+
+// The PayPal button takes the place of the Continue button, so it may only be
+// shown on the payment step - otherwise other steps are left with no way forward.
+let payPalButtonVisible = computed(
+  () => props.payPalButtonShow && props.paymentGateway === 'payPal' && !isCongratzStep.value,
+)
 
 const shortcodeData = inject(
   'shortcodeData',

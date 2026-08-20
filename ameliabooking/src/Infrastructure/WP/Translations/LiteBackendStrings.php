@@ -2,6 +2,8 @@
 
 namespace AmeliaBooking\Infrastructure\WP\Translations;
 
+use AmeliaBooking\Infrastructure\WP\ShortcodeService\ShortcodeAliasService;
+
 /**
  * Class LiteBackendStrings
  *
@@ -23,7 +25,7 @@ class LiteBackendStrings
      *
      * @param string $key
      *
-     * @return string
+     * @return string|array
      */
     public static function get($key)
     {
@@ -31,7 +33,51 @@ class LiteBackendStrings
             self::$liteStrings = self::getAllStrings();
         }
 
-        return self::$liteStrings[$key] ?? '';
+        $value = self::$liteStrings[$key] ?? '';
+
+        return self::replacePluginNamePlaceholder($value);
+    }
+
+    /**
+     * Resolve the white-label plugin display name.
+     *
+     * - No white-label: Amelia
+     * - White-label + custom name: custom name
+     * - White-label without custom name: Amelia (default)
+     *
+     * @return string
+     */
+    public static function getPluginDisplayName()
+    {
+        try {
+            return ShortcodeAliasService::getBuilderBrandName();
+        } catch (\Throwable $e) {
+            return 'Amelia';
+        }
+    }
+
+    /**
+     * Replace {pluginName} placeholders in translated strings.
+     *
+     * @param string|array $value
+     *
+     * @return string|array
+     */
+    public static function replacePluginNamePlaceholder($value)
+    {
+        if (is_array($value)) {
+            foreach ($value as $key => $item) {
+                $value[$key] = self::replacePluginNamePlaceholder($item);
+            }
+
+            return $value;
+        }
+
+        if (!is_string($value) || strpos($value, '{pluginName}') === false) {
+            return $value;
+        }
+
+        return str_replace('{pluginName}', self::getPluginDisplayName(), $value);
     }
 
     /**
@@ -102,8 +148,8 @@ class LiteBackendStrings
             'error_occurred'                                   => __('Error occurred', 'ameliabooking'),
             'event'                                            => __('Event', 'ameliabooking'),
             'events'                                           => __('Events', 'ameliabooking'),
-            'wpa_events_cpt_name'                              => __('Amelia Event Pages', 'ameliabooking'),
-            'wpa_events_cpt_singular_name'                     => __('Amelia Event Page', 'ameliabooking'),
+            'wpa_events_cpt_name'                              => __('{pluginName} Event Pages', 'ameliabooking'),
+            'wpa_events_cpt_singular_name'                     => __('{pluginName} Event Page', 'ameliabooking'),
             'wpa_events_cpt_add_new'                           => __('Add New', 'ameliabooking'),
             'wpa_events_cpt_add_new_item'                      => __('Add New Event Page', 'ameliabooking'),
             'wpa_events_cpt_edit_item'                         => __('Edit Event Page', 'ameliabooking'),
@@ -113,9 +159,9 @@ class LiteBackendStrings
             'wpa_events_cpt_not_found'                         => __('No event pages found', 'ameliabooking'),
             'wpa_events_cpt_not_found_in_trash'                => __('No event pages found in Trash', 'ameliabooking'),
             'wpa_events_cpt_menu_name'                         => __('Event Pages', 'ameliabooking'),
-            'wpa_events_manage_in_amelia_notice'               => __('Manage this event in Amelia:', 'ameliabooking'),
-            'wpa_events_open_in_amelia_button'                 => __('Open Event in Amelia', 'ameliabooking'),
-            'wpa_events_default_post_title'                    => __('Amelia Event', 'ameliabooking'),
+            'wpa_events_manage_in_amelia_notice'               => __('Manage this event in {pluginName}:', 'ameliabooking'),
+            'wpa_events_open_in_amelia_button'                 => __('Open Event in {pluginName}', 'ameliabooking'),
+            'wpa_events_default_post_title'                    => __('{pluginName} Event', 'ameliabooking'),
             'export'                                           => __('Export', 'ameliabooking'),
             'extra'                                            => __('Extra', 'ameliabooking'),
             'extras'                                           => __('Extras', 'ameliabooking'),
@@ -134,8 +180,8 @@ class LiteBackendStrings
             'licence_pro_description'                          => __('Available from Pro license', 'ameliabooking'),
             'licence_dev_description'                          => __('Available in Elite licence', 'ameliabooking'),
             'licence_button_text'                              => __('Upgrade', 'ameliabooking'),
-            'delete_amelia_short'                              => __('Delete Amelia content', 'ameliabooking'),
-            'delete_amelia'                                    => __('Delete tables, roles, files and settings once the Amelia plugin is deleted.', 'ameliabooking'),
+            'delete_amelia_short'                              => __('Delete {pluginName} content', 'ameliabooking'),
+            'delete_amelia'                                    => __('Delete tables, roles, files and settings once the {pluginName} plugin is deleted.', 'ameliabooking'),
             'delete_amelia_tooltip'                            => __('Enable this option if you want to delete plugin tables, roles, files and settings<br>when deleting the plugin from plugins page', 'ameliabooking'),
             'appointment_space_name'                           => __('Appointment space name', 'ameliabooking'),
             'event_space_name'                                 => __('Event space name', 'ameliabooking'),
@@ -340,14 +386,14 @@ class LiteBackendStrings
             'show_waiting_list_booking_full'                   => __('Show waiting list after booking is full', 'ameliabooking'),
             'approve_appointment_success_url'                  => __('Redirect URL for successfully approved booking', 'ameliabooking'),
             'approve_appointment_error_url'                    => __('Redirect URL for unsuccessfully approved booking', 'ameliabooking'),
-            'automatically_create_customer'                    => __('Automatically create Amelia Customer user', 'ameliabooking'),
-            'automatically_create_customer_tooltip'            => __('If you enable this option every time a new customer schedules the appointment he will get Amelia Customer user role and automatic email with login details.', 'ameliabooking'),
-            'back_links'                                       => __('Support Amelia by displaying a backlink', 'ameliabooking'),
-            'back_links_tooltip'                               => __('Allow the short description below the booking form to support Amelia Booking Plugin and spread the word about it.', 'ameliabooking'),
-            'improve_amelia'                                   => __('Improve Amelia', 'ameliabooking'),
+            'automatically_create_customer'                    => __('Automatically create {pluginName} Customer user', 'ameliabooking'),
+            'automatically_create_customer_tooltip'            => __('If you enable this option every time a new customer schedules the appointment he will get {pluginName} Customer user role and automatic email with login details.', 'ameliabooking'),
+            'back_links'                                       => __('Support {pluginName} by displaying a backlink', 'ameliabooking'),
+            'back_links_tooltip'                               => __('Allow the short description below the booking form to support {pluginName} Booking Plugin and spread the word about it.', 'ameliabooking'),
+            'improve_amelia'                                   => __('Improve {pluginName}', 'ameliabooking'),
             'improve_plugin'                                   => __('Improve plugin', 'ameliabooking'),
             'enable_data_usage'                                => __('Enable data usage', 'ameliabooking'),
-            'usage_tracking_description'                       => __('Help us improve Amelia by sharing anonymous data about your plugin usage. No personal data is collected.', 'ameliabooking'),
+            'usage_tracking_description'                       => __('Help us improve {pluginName} by sharing anonymous data about your plugin usage. No personal data is collected.', 'ameliabooking'),
             'bcc_email'                                        => __('Send all notifications to additional addresses', 'ameliabooking'),
             'bcc_email_tooltip'                                => __('Here you can enter additional email addresses where all notifications will be sent. To add an address click Enter.', 'ameliabooking'),
             'bcc_sms'                                          => __('Send all SMS messages to additional numbers', 'ameliabooking'),
@@ -510,7 +556,7 @@ class LiteBackendStrings
             'stash_entities_tooltip'                           => __('When enabled, all entities (services, employees, locations, packages, and tags) load as soon as the page opens, instead of being loaded dynamically via AJAX.', 'ameliabooking'),
             'square'                                           => __('Square', 'ameliabooking'),
             'square_disconnected'                              => __('Square account successfully disconnected', 'ameliabooking'),
-            'square_currency_error'                            => __('The currency in Amelia does not match the currency of your chosen Square location', 'ameliabooking'),
+            'square_currency_error'                            => __('The currency in {pluginName} does not match the currency of your chosen Square location', 'ameliabooking'),
             'square_default_location'                          => __('Default Square location', 'ameliabooking'),
             'square_login_error'                               => __('Please log in to Square', 'ameliabooking'),
             'square_location_error'                            => __('Select your Square Location', 'ameliabooking'),
@@ -532,7 +578,7 @@ class LiteBackendStrings
             'stripe'                                           => __('Stripe', 'ameliabooking'),
             'razorpay'                                         => __('Razorpay', 'ameliabooking'),
             'barion'                                           => __('Barion', 'ameliabooking'),
-            'amelia_sms'                                       => __('Amelia SMS', 'ameliabooking'),
+            'amelia_sms'                                       => __('{pluginName} SMS', 'ameliabooking'),
             'balance_colon'                                    => __('Balance', 'ameliabooking'),
             'balance_recharged'                                => __('Your balance has been recharged.', 'ameliabooking'),
             'carrier'                                          => __('Carrier', 'ameliabooking'),
@@ -787,7 +833,7 @@ class LiteBackendStrings
             'male'                                             => __('Male', 'ameliabooking'),
             'notification_language'                            => __('Notification language', 'ameliabooking'),
             'wp_user'                                          => __('WordPress user', 'ameliabooking'),
-            'wp_user_customer_tooltip'                         => __('Link this customer to a WordPress user so they can log in and view their appointments in Amelia’s back end.', 'ameliabooking'),
+            'wp_user_customer_tooltip'                         => __('Link this customer to a WordPress user so they can log in and view their appointments in the {pluginName} back-end.', 'ameliabooking'),
             'wp_user_employee_tooltip'                         => __('Map a WordPress user to this employee to give them access to view their appointments in the plugin’s back-end.', 'ameliabooking'),
             'wp_customer_lang_tooltip'                         => __('Defines the language used for notifications sent to this customer for bookings created from the admin or employee panel. If a supported language was used in a previous booking, it will be automatically selected; otherwise, you can set it manually.', 'ameliabooking'),
             'edit_employee'                                    => __('Edit employee', 'ameliabooking'),
@@ -1236,7 +1282,7 @@ class LiteBackendStrings
             'choose_package'                                   => __('Choose Package', 'ameliabooking'),
             'filter'                                           => __('Preselect Booking Parameters', 'ameliabooking'),
             'skip_categories'                                  => __('Skip Categories step', 'ameliabooking'),
-            'insert_amelia_shortcode'                          => __('Insert Amelia Booking Shortcode', 'ameliabooking'),
+            'insert_amelia_shortcode'                          => __('Insert {pluginName} Booking Shortcode', 'ameliabooking'),
             'select_catalog_view'                              => __('Select Catalog View', 'ameliabooking'),
             'select_category'                                  => __('Select category', 'ameliabooking'),
             'select_employee'                                  => __('Select employee', 'ameliabooking'),
@@ -1250,7 +1296,7 @@ class LiteBackendStrings
             'show'                                             => __('Show', 'ameliabooking'),
             'show_all'                                         => __('Show All', 'ameliabooking'),
             'manually_loading'                                 => __('Load booking form manually', 'ameliabooking'),
-            'manually_loading_description'                     => __('Add element (button, link...) ID, that will manually load amelia shortcode content', 'ameliabooking'),
+            'manually_loading_description'                     => __('Add element (button, link...) ID, that will manually load shortcode content', 'ameliabooking'),
             'multiselect_note'                                 => __('For multiselect: hold CTRL / Command (⌘).', 'ameliabooking'),
             'show_all_categories'                              => __('Show all categories', 'ameliabooking'),
             'show_all_employees'                               => __('Show all employees', 'ameliabooking'),
@@ -1293,48 +1339,48 @@ class LiteBackendStrings
             'catalog_booking'                                  => __('Catalog Booking', 'ameliabooking'),
             'events_list_booking'                              => __('Events List Booking', 'ameliabooking'),
             'recurring_event'                                  => __('Show recurring events', 'ameliabooking'),
-            'in_dialog'                                        => __('Show in Amelia Popup', 'ameliabooking'),
-            'booking_divi'                                     => __('AM - Booking view', 'ameliabooking'),
-            'step_booking_divi'                                => __('AM - Step Booking', 'ameliabooking'),
-            'catalog_booking_divi'                             => __('AM - Catalog Booking', 'ameliabooking'),
-            'catalog_divi'                                     => __('AM - Catalog view', 'ameliabooking'),
-            'events_divi'                                      => __('AM - Events view', 'ameliabooking'),
-            'events_list_booking_divi'                         => __('AM - Events List Booking', 'ameliabooking'),
-            'events_calendar_booking_divi'                     => __('AM - Events Calendar Booking', 'ameliabooking'),
+            'in_dialog'                                        => __('Show in {pluginName} Popup', 'ameliabooking'),
+            'booking_divi'                                     => __('{pluginName} - Booking view', 'ameliabooking'),
+            'step_booking_divi'                                => __('{pluginName} - Step Booking', 'ameliabooking'),
+            'catalog_booking_divi'                             => __('{pluginName} - Catalog Booking', 'ameliabooking'),
+            'catalog_divi'                                     => __('{pluginName} - Catalog view', 'ameliabooking'),
+            'events_divi'                                      => __('{pluginName} - Events view', 'ameliabooking'),
+            'events_list_booking_divi'                         => __('{pluginName} - Events List Booking', 'ameliabooking'),
+            'events_calendar_booking_divi'                     => __('{pluginName} - Events Calendar Booking', 'ameliabooking'),
             'booking_gutenberg_block'                          => [
-                'title'       => __('Amelia - Booking view', 'ameliabooking'),
+                'title'       => __('{pluginName} - Booking view', 'ameliabooking'),
                 'description' => __('Step-By-Step Booking Wizard gives your customers the option to choose everything about the booking in a few steps', 'ameliabooking'),
             ],
             'step_booking_gutenberg_block'                     => [
-                'title'       => __('Amelia - Step-By-Step Booking', 'ameliabooking'),
+                'title'       => __('{pluginName} - Step-By-Step Booking', 'ameliabooking'),
                 'description' => __('Step-by-Step booking view guides the customers through several steps in order to make their bookings.', 'ameliabooking'),
             ],
             'step_booking_button_gutenberg_block'                     => [
-                'title'       => __('Amelia - Booking Button', 'ameliabooking'),
+                'title'       => __('{pluginName} - Booking Button', 'ameliabooking'),
                 'description' => __('Step-by-Step booking view guides the customers through several steps in order to make their bookings.', 'ameliabooking'),
             ],
             'events_list_booking_button_gutenberg_block'                     => [
-                'title'       => __('Amelia - Events List Button', 'ameliabooking'),
+                'title'       => __('{pluginName} - Events List Button', 'ameliabooking'),
                 'description' => __('Event Booking is shortcode that gives your customers the option to book one of the events that you\'ve created on the back-end in a simple event list view.', 'ameliabooking'),
             ],
             'catalog_booking_gutenberg_block'                  => [
-                'title'       => __('Amelia - Catalog Booking', 'ameliabooking'),
+                'title'       => __('{pluginName} - Catalog Booking', 'ameliabooking'),
                 'description' => __('Front-end Booking Catalog is shortcode when you want to show your service in a form of a catalog', 'ameliabooking'),
             ],
             'catalog_gutenberg_block'                          => [
-                'title'       => __('Amelia - Catalog view', 'ameliabooking'),
+                'title'       => __('{pluginName} - Catalog view', 'ameliabooking'),
                 'description' => __('Front-end Booking Catalog is shortcode when you want to show your service in a form of a cataloge', 'ameliabooking'),
             ],
             'events_gutenberg_block'                           => [
-                'title'       => __('Amelia - Events', 'ameliabooking'),
+                'title'       => __('{pluginName} - Events', 'ameliabooking'),
                 'description' => __('Event Booking is shortcode that gives your customers the option to book one of the events that you\'ve created on the back-end in a simple event list view.', 'ameliabooking'),
             ],
             'events_list_booking_gutenberg_block'              => [
-                'title'       => __('Amelia - Events List', 'ameliabooking'),
+                'title'       => __('{pluginName} - Events List', 'ameliabooking'),
                 'description' => __('Event Booking is shortcode that gives your customers the option to book one of the events that you\'ve created on the back-end in a simple event list view.', 'ameliabooking'),
             ],
             'events_calendar_booking_gutenberg_block'          => [
-                'title'       => __('Amelia - Events Calendar', 'ameliabooking'),
+                'title'       => __('{pluginName} - Events Calendar', 'ameliabooking'),
                 'description' => __('Event Booking is shortcode that gives your customers the option to book one of the events that you\'ve created on the back-end in a simple event calendar view.', 'ameliabooking'),
             ],
             'outdated_booking_gutenberg_block'                 => __('You are using a form that will be outdated soon!', 'ameliabooking'),
@@ -1345,6 +1391,10 @@ class LiteBackendStrings
             'red_add_work_hours'                               => __('Add work hours', 'ameliabooking'),
             'red_agencies'                                     => __('Agencies', 'ameliabooking'),
             'red_api'                                          => __('API', 'ameliabooking'),
+            'red_white_label'                                  => __('White label', 'ameliabooking'),
+            'red_white_label_plugin_name'                      => __('Plugin name', 'ameliabooking'),
+            'red_white_label_hide_external_links'              => __('Hide external links', 'ameliabooking'),
+            'red_white_label_hide_external_links_tooltip'      => __('Hide documentation links, video tutorials, update notifications, and tips from the admin interface.', 'ameliabooking'),
             'red_appointment_created_success'                  => __('Appointment has been created.', 'ameliabooking'),
             'red_appointment_status_updated'                   => __('Appointment status has been updated.'),
             'red_appointment_details'                          => __('Appointment details', 'ameliabooking'),
@@ -1434,9 +1484,10 @@ class LiteBackendStrings
             'red_facebook_social_login_description'            => __('Allow customers and employees to quickly sign in using their Facebook account, making the login process faster, simpler, and more secure.', 'ameliabooking'),
             'red_facebook_social_login'                        => __('Facebook social login', 'ameliabooking'),
             'red_feature_api_description'                      => __('Connect APIs effortlessly for smooth, integrated workflows.', 'ameliabooking'),
+            'red_feature_white_label_description'              => __('Customize the admin experience with your own branding and hide external {pluginName} links.', 'ameliabooking'),
             'red_feature_apple_calendar_description'           => __('Connect Apple Calendars to sync your personal and professional events, along with your employees’.', 'ameliabooking'),
             'red_feature_barion_description'                   => __('Simple, secure payments powered by Barion.', 'ameliabooking'),
-            'red_feature_buddyboss_description'                => __('Display Amelia booking forms and panels on BuddyBoss member profiles.', 'ameliabooking'),
+            'red_feature_buddyboss_description'                => __('Display {pluginName} booking forms and panels on BuddyBoss member profiles.', 'ameliabooking'),
             'red_feature_cart_description'                     => __('Allow customers to book multiple services in a single transaction for a streamlined experience.', 'ameliabooking'),
             'red_feature_coupons_description'                  => __('Offer discounts or free appointments with customizable coupons.', 'ameliabooking'),
             'red_feature_custom_duration_description'          => __('Offer services with multiple duration options for customers to choose from.', 'ameliabooking'),
@@ -1547,7 +1598,7 @@ class LiteBackendStrings
             'red_no_transactions_title'                        => __('No transactions yet', 'ameliabooking'),
             'red_no_upcoming_events_subtitle'                  => __('There are no future events scheduled. Please create a new event.', 'ameliabooking'),
             'red_no_upcoming_events'                           => __('No upcoming events', 'ameliabooking'),
-            'red_no_wp_users_with_amelia_customer_role'        => __('No WordPress users with the Amelia Customer role are available.', 'ameliabooking'),
+            'red_no_wp_users_with_amelia_customer_role'        => __('No WordPress users with the {pluginName} Customer role are available.', 'ameliabooking'),
             'red_notifications'                                => __('Notifications', 'ameliabooking'),
             'red_occupancy_rate_info'                          => __('This widget shows monthly data instead of using the global date range.', 'ameliabooking'),
             'red_occupancy_rate'                               => __('Occupancy rate', 'ameliabooking'),
@@ -1640,7 +1691,7 @@ class LiteBackendStrings
             'red_tip_importing_customers'                      => __('Importing customers', 'ameliabooking'),
             'red_tip_ivy_setup'                                => __('Ivy setup', 'ameliabooking'),
             'red_tip_notification_settings'                    => __('Notification settings', 'ameliabooking'),
-            'red_tip_notifications_in_amelia'                  => __('Notifications in Amelia', 'ameliabooking'),
+            'red_tip_notifications_in_amelia'                  => __('Notifications in {pluginName}', 'ameliabooking'),
             'red_tip_recurring_appointments_setup'             => __('Recurring appointments setup', 'ameliabooking'),
             'red_tip_recurring_events_description'             => __('Create and manage recurring events with customizable schedules for flexibility and convenience.', 'ameliabooking'),
             'red_tip_recurring_events'                         => __('Recurring events', 'ameliabooking'),
@@ -1832,7 +1883,7 @@ class LiteBackendStrings
             'red_configuration'                                => __('Configuration', 'ameliabooking'),
             'red_delete_user_effect_past'                      => __('This user has {count} appointment in the past. | This user has {count} appointments in the past.', 'ameliabooking'),
             'red_delete_user_event_effect_future'              => __('This user is an attendee in future event. Are you sure you want to delete this user? | This user is an attendee in future events. Are you sure you want to delete this user?', 'ameliabooking'),
-            'red_no_wp_users_with_amelia_employee_role'        => __('No WordPress users with the Amelia Employee role are available.', 'ameliabooking'),
+            'red_no_wp_users_with_amelia_employee_role'        => __('No WordPress users with the {pluginName} Employee role are available.', 'ameliabooking'),
             'red_set_up'                                       => __('Set up', 'ameliabooking'),
             'red_disable'                                      => __('Disable', 'ameliabooking'),
             'enter_email_then_press_enter_to_add'              => __('Enter email, then press Enter to add', 'ameliabooking'),
@@ -1909,7 +1960,7 @@ class LiteBackendStrings
             'red_maximum_spots'                                => __('Maximum spots', 'ameliabooking'),
             'red_continue_setup'                               => __('Continue setup', 'ameliabooking'),
             'red_skip_setup'                                   => __('Skip setup', 'ameliabooking'),
-            'red_welcome_amelia'                               => __('Welcome to Amelia!', 'ameliabooking'),
+            'red_welcome_amelia'                               => __('Welcome to {pluginName}!', 'ameliabooking'),
             'red_welcome_amelia_desc'                          => __('It looks like this is your first time here, so let’s walk through a few simple steps to help you get started.', 'ameliabooking'),
             'red_set_general_settings'                         => __('Set general settings', 'ameliabooking'),
             'red_set_general_settings_desc'                    =>__('Set your company working hours. This schedule will be used for all new employees, however you can customize schedule for each employee later.', 'ameliabooking'),
@@ -1917,20 +1968,20 @@ class LiteBackendStrings
             'red_currency_desc'                                => __('Choose a currency that will be used for all price based settings.', 'ameliabooking'),
             'red_next'                                         => __('Next', 'ameliabooking'),
             'red_create_employee'                              => __('Create employee', 'ameliabooking'),
-            'red_create_employee_desc'                         => __('In Amelia, an employee is a team member who provides services or hosts events, with their own schedule, working hours, and assigned offerings.', 'ameliabooking'),
+            'red_create_employee_desc'                         => __('In {pluginName}, an employee is a team member who provides services or hosts events, with their own schedule, working hours, and assigned offerings.', 'ameliabooking'),
             'red_skip_setup_confirmation_desc'                 => __('Are you sure you want to skip the setup? Once skipped, the guided setup will no longer be available. All settings will need to be configured later.', 'ameliabooking'),
             'red_step_1'                                       => __('Step 1', 'ameliabooking'),
             'red_step_2'                                       => __('Step 2', 'ameliabooking'),
             'red_step_3'                                       => __('Step 3', 'ameliabooking'),
             'red_step_4'                                       => __('Step 4', 'ameliabooking'),
-            'red_how_will_use_amelia'                          => __('How will you use Amelia?', 'ameliabooking'),
+            'red_how_will_use_amelia'                          => __('How will you use {pluginName}?', 'ameliabooking'),
             'red_how_will_use_amelia_desc'                     => __('Choose whether you want to manage services, events, or both.', 'ameliabooking'),
             'red_create_service'                               => __('Create service', 'ameliabooking'),
             'red_create_service_desc'                          => __('Book time-based appointments with configurable durations, prices, and availability.', 'ameliabooking'),
-            'red_create_service_page_desc'                     => __('In Amelia, a “service” is a specific appointment-type offering your business provides to clients - such as consultations, treatments, or classes - that can be fully customized with its own name, duration, price, capacity, availability, and extras, and booked online with assigned employees.', 'ameliabooking'),
+            'red_create_service_page_desc'                     => __('In {pluginName}, a “service” is a specific appointment-type offering your business provides to clients - such as consultations, treatments, or classes - that can be fully customized with its own name, duration, price, capacity, availability, and extras, and booked online with assigned employees.', 'ameliabooking'),
             'red_create_event'                                 => __('Create event', 'ameliabooking'),
             'red_create_event_desc'                            => __('Create scheduled events with fixed dates, prices and capacities.', 'ameliabooking'),
-            'red_create_event_page_desc'                       => __('In Amelia, an event is a booking-type offering designed for group activities or multi-day occasions - such as workshops, conferences, tours, or training series - that can be configured with its own schedule, capacity, pricing structure and assigned staff.', 'ameliabooking'),
+            'red_create_event_page_desc'                       => __('In {pluginName}, an event is a booking-type offering designed for group activities or multi-day occasions - such as workshops, conferences, tours, or training series - that can be configured with its own schedule, capacity, pricing structure and assigned staff.', 'ameliabooking'),
             'red_finish'                                       => __('Finish', 'ameliabooking'),
             'red_filter'                                       => __('Filter', 'ameliabooking'),
             'red_select_at_least_one_option'                   => __('Select at least one option.', 'ameliabooking'),
@@ -1941,7 +1992,9 @@ class LiteBackendStrings
             'red_feature_outlook_general_description'          => __('Sync your and your employee\'s personal and professional events by connection Outlook calendars.', 'ameliabooking'),
             'red_feature_outlook_sign_in_button'               => __('Sign in with Microsoft', 'ameliabooking'),
             'red_smtp_validation_failed'                       => __('SMTP credentials validation failed. Please check your settings.', 'ameliabooking'),
-            'red_stripe_keys_validation_error'                 => __('Invalid Stripe secret key.', 'ameliabooking'),
+            'red_stripe_keys_validation_error'                 => __('Invalid Stripe API keys.', 'ameliabooking'),
+            'red_stripe_publishable_key_validation_error'    => __('Invalid Stripe publishable key.', 'ameliabooking'),
+            'red_stripe_secret_key_validation_error'         => __('Invalid Stripe secret key.', 'ameliabooking'),
             'event_time_scope'                                 => __('Event time scope', 'ameliabooking'),
             'future_events'                                    => __('Future events', 'ameliabooking'),
             'past_events'                                      => __('Past events', 'ameliabooking'),
@@ -1958,7 +2011,7 @@ class LiteBackendStrings
             'red_edit_block_time'                              => __('Edit block time', 'ameliabooking'),
             'red_delete_this_appointment'                      => __('This email is linked to both a customer and an employee account. Please delete and rebook.', 'ameliabooking'),
             'red_event_tags'                                   => __('Event tags', 'ameliabooking'),
-            'red_feature_event_tags_description'               => __('Event tags allow you to label and organize events in Amelia based on criteria that matter most to your business.', 'ameliabooking'),
+            'red_feature_event_tags_description'               => __('Event tags allow you to label and organize events in {pluginName} based on criteria that matter most to your business.', 'ameliabooking'),
             'red_create_new_event_tag'                         => __('Create new tag', 'ameliabooking'),
             'red_tag_label'                                    => __('Tag label', 'ameliabooking'),
             'red_tag_name_required'                            => __('Tag label cannot be empty', 'ameliabooking'),
@@ -1966,14 +2019,15 @@ class LiteBackendStrings
             'red_manage_event_tags'                            => __('Manage event tags', 'ameliabooking'),
             'red_tip_event_tags_setup'                         => __('Event tags setup', 'ameliabooking'),
             'red_event_tags_has_been_saved'                    => __('Event tags have been saved.', 'ameliabooking'),
-            'step_booking_sidebar_select_block_help'           => __('Select Amelia Step-By-Step Booking Button block (or its inner button) to edit shortcode options.', 'ameliabooking'),
+            'step_booking_sidebar_select_block_help'           => __('Select {pluginName} Step-By-Step Booking Button block (or its inner button) to edit shortcode options.', 'ameliabooking'),
             'events_list_button_sidebar_select_block_help'     => __('Select Events List Booking Button block (or its inner button) to edit shortcode options.', 'ameliabooking'),
             'shortcode_options'                                => __('Shortcode options', 'ameliabooking'),
-            'step_booking_settings'                            => __('Amelia Step Booking Settings', 'ameliabooking'),
-            'events_list_button_settings'                      => __('Amelia Events List Booking Settings', 'ameliabooking'),
-            'step_booking_shortcode'                           => __('Amelia Step Booking Shortcode', 'ameliabooking'),
-            'events_list_button_shortcode'                     => __('Amelia Events List Booking Shortcode', 'ameliabooking'),
+            'step_booking_settings'                            => __('{pluginName} Step Booking Settings', 'ameliabooking'),
+            'events_list_button_settings'                      => __('{pluginName} Events List Booking Settings', 'ameliabooking'),
+            'step_booking_shortcode'                           => __('{pluginName} Step Booking Shortcode', 'ameliabooking'),
+            'events_list_button_shortcode'                     => __('{pluginName} Events List Booking Shortcode', 'ameliabooking'),
             'back'                                             => __('Back', 'ameliabooking'),
+            'multiple_prices'                                  => __('Multiple prices', 'ameliabooking'),
         ];
     }
 }

@@ -288,21 +288,19 @@ function appointmentEmployee(id) {
 }
 
 function appointmentCustomers(appointment) {
-  return appointment.bookings
-    .filter((b) => b.status !== 'rejected' && b.status !== 'canceled')
-    .map((b) => {
-      let customer
-      if ('info' in b && b.info) {
-        customer = 'customer' in b ? b.customer : {}
-        customer = Object.assign(customer, JSON.parse(b.info))
-      } else {
-        customer = b.customer
-      }
+  return appointment.bookings.map((b) => {
+    let customer
+    if ('info' in b && b.info) {
+      customer = 'customer' in b ? b.customer : {}
+      customer = Object.assign(customer, JSON.parse(b.info))
+    } else {
+      customer = b.customer
+    }
 
-      // Add booking status to customer data
-      customer.bookingStatus = b.status
-      return customer
-    })
+    // Add booking status to customer data
+    customer.bookingStatus = b.status
+    return customer
+  })
 }
 
 // * Customized form data

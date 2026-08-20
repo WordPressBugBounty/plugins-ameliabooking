@@ -7,7 +7,7 @@
       <div class="am-asi__text">
         {{ labelsDisplay('access_link_send_click') }}
       </div>
-      <div class="am-asi__email">support@wpamelia.com</div>
+      <div class="am-asi__email">{{ supportEmail }}</div>
     </div>
 
     <div class="am-asi__footer">
@@ -28,12 +28,17 @@ import { computed, inject } from 'vue'
 // * Composables
 import { useColorTransparency } from '../../../../../../../assets/js/common/colorManipulation.js'
 import { useReactiveCustomize } from '../../../../../../../assets/js/admin/useReactiveCustomize.js'
+import { getSupportEmail } from '../../../../../../../assets/js/common/whiteLabel.js'
 
 /*************
  * Customize *
  *************/
 // * Customize
 const { amCustomize } = useReactiveCustomize()
+
+// * Settings
+const amSettings = inject('settings')
+const supportEmail = computed(() => getSupportEmail(amSettings))
 
 // * Labels
 let langKey = inject('langKey')

@@ -681,7 +681,7 @@ function packageBookingApp() {
   data.runInstantPostBookingActions = true
 
   httpClient
-    .post('/bookings', data)
+    .post('/bookings', Object.assign(data, { payment: { gateway: 'onSite' } }))
     .then((response) => {
       calendarRef.value.calendarSlotsLoading = false
 

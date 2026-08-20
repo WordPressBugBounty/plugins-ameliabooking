@@ -27,12 +27,15 @@
       :tax-label-incl="amLabels.incl_tax"
       :tax-visible="props.taxVisible"
       :aria-label="amLabels.select_service"
+      :multiple-prices="multipleServicePricesOptions"
+      :multiple-prices-label="amLabels.from"
       @change="changeService"
     ></AmAdvancedSelect>
     <AmSelect
       v-else
       v-model="initFormData.onlyService"
       clearable
+      :fit-input-width="true"
       :filterable="props.filterable"
       :popper-class="'am-service-dropdown'"
       :placeholder="amLabels.select_service"
@@ -52,8 +55,19 @@
           <span class="am-select-service-name">
             {{ service.name }}
           </span>
-          <span v-if="service.price > 0" class="am-select-service-price">
-            {{ useFormattedPrice(service.price) }}
+          <span
+            v-if="
+              service.price > 0 ||
+              (hasMultipleServicePrices(service.id) && props.multiplePricesVisibility)
+            "
+            class="am-select-service-price"
+          >
+            <template v-if="hasMultipleServicePrices(service.id) && props.multiplePricesVisibility">
+              {{ amLabels.from }} {{ useFormattedPrice(serviceLowestPrice[service.id]) }}
+            </template>
+            <template v-else-if="service.price">
+              {{ useFormattedPrice(service.price) }}
+            </template>
             <span v-if="taxVisibility(service.id)" class="am-select-service-tax">
               <template v-if="taxServicesOptions.find((a) => a.id === service.id).excluded">
                 {{ `+${amLabels.total_tax_colon}` }}
@@ -78,6 +92,7 @@ import AmAdvancedSelect from '../../../_components/advanced-select/AmAdvancedSel
 import useAction from '../../../../assets/js/public/actions'
 import { useFormattedPrice } from '../../../../assets/js/common/formatting'
 import { useEntityTax } from '../../../../assets/js/common/pricing'
+import { getServicePrices } from '../../../../assets/js/public/catalog'
 
 let props = defineProps({
   filterable: {
@@ -87,6 +102,10 @@ let props = defineProps({
   taxVisible: {
     type: Boolean,
     default: true,
+  },
+  multiplePricesVisibility: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -136,6 +155,10 @@ let advSelectProps = reactive({
   leaf: 'leaf',
 })
 
+let serviceLowestPrice = ref({})
+
+const entitiesRelations = computed(() => store.getters['entities/getEntitiesRelations'])
+
 // * Set Category Options from entities
 let categoryOptions = computed(() =>
   store.getters['entities/filteredCategories'](
@@ -166,6 +189,21 @@ let taxServicesOptions = computed(() => {
   }
 
   return arr
+})
+
+let multipleServicePricesOptions = computed(() => {
+  if (!props.multiplePricesVisibility) {
+    return {}
+  }
+
+  let obj = {}
+  serviceOptions.value.forEach((service) => {
+    obj[service.id] = {
+      visible: hasMultipleServicePrices(service.id),
+      price: serviceLowestPrice.value[service.id],
+    }
+  })
+  return obj
 })
 
 // * Filter service
@@ -237,6 +275,63 @@ function changeOnlyService(val) {
 function taxVisibility(id) {
   return props.taxVisible && !!taxServicesOptions.value.filter((a) => a.id === id).length
 }
+
+function hasMultipleServicePrices(id) {
+  let arrPrice = []
+
+  let service = serviceOptions.value.find((service) => service.id === id)
+  // Service pricing
+  if (service) {
+    arrPrice.push(...getServicePrices(service))
+  }
+
+  let employees = store.getters['entities/filteredEmployees'](store.getters['booking/getSelection'])
+
+  let selectedEmployeeId = store.getters['booking/getSelection'].providerId
+
+  if (selectedEmployeeId) {
+    let employee = employees.find((employee) => employee.id === selectedEmployeeId)
+    if (
+      employee &&
+      selectedEmployeeId in entitiesRelations.value &&
+      id in entitiesRelations.value[selectedEmployeeId]
+    ) {
+      let employeeService = employee.serviceList.find((service) => service.id === id)
+
+      // Employee pricing
+      if (employeeService) {
+        arrPrice.push(...getServicePrices(employeeService))
+      }
+    }
+  } else {
+    employees.forEach((employee) => {
+      if (employee.id in entitiesRelations.value && id in entitiesRelations.value[employee.id]) {
+        let employeeService = employee.serviceList.find((service) => service.id === id)
+
+        // Employee pricing
+        if (employeeService) {
+          arrPrice.push(...getServicePrices(employeeService))
+        }
+      }
+    })
+  }
+
+  if (!arrPrice.length) {
+    return false
+  }
+
+  let serviceMinPrice = arrPrice.reduce((prev, curr) => {
+    return curr < prev ? curr : prev
+  }, arrPrice[0])
+
+  let serviceMaxPrice = arrPrice.reduce((prev, curr) => {
+    return curr > prev ? curr : prev
+  }, arrPrice[0])
+
+  serviceLowestPrice.value[id] = serviceMinPrice
+
+  return serviceMinPrice !== serviceMaxPrice
+}
 </script>
 
 <script>
@@ -253,6 +348,7 @@ export default {
 
     width: 100%;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
 
@@ -265,6 +361,7 @@ export default {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      width: 100%;
     }
 
     &-price {

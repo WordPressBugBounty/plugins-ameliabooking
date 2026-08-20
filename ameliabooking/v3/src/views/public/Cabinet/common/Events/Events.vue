@@ -695,20 +695,25 @@ function eventEmployees(evt) {
   let employees = store.getters['entities/getEmployees']
 
   if (evt.organizerId) {
-    if (employees.find((item) => item.id === evt.organizerId)) {
-      let organizer = {
-        ...employees.find((item) => item.id === evt.organizerId),
-        ...{ rank: 'organizer' },
-      }
+    const organizerEmployee = employees.find((item) => Number(item.id) === Number(evt.organizerId))
+    const organizerData = organizerEmployee || evt.organizer
+
+    if (organizerData) {
+      let organizer = { ...organizerData, rank: 'organizer' }
+
       if (!evt.providers.length) return organizer
+
       arr.push(organizer)
     }
   }
 
   if (evt.providers.length) {
     evt.providers.forEach((pro) => {
-      if (pro.id !== evt.organizerId && employees.find((item) => item.id === pro.id)) {
-        arr.push(employees.find((item) => item.id === pro.id))
+      if (
+        Number(pro.id) !== Number(evt.organizerId) &&
+        employees.find((item) => Number(item.id) === Number(pro.id))
+      ) {
+        arr.push(employees.find((item) => Number(item.id) === Number(pro.id)))
       }
     })
   }

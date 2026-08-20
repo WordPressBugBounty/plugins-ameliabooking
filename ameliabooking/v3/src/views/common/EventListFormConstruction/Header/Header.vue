@@ -249,5 +249,12 @@ export default {
 // Public
 #amelia-app-backend-new #amelia-container {
   @include am-dialog-event-list-header;
+
+  .am-el {
+    &__header-inner {
+      padding: 16px 24px;
+      box-shadow: 0 2px 3px var(--am-c-el-text-op15, rgba(26, 44, 55, 0.15));
+    }
+  }
 }
 </style>

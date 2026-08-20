@@ -35,6 +35,7 @@ import {
   useBookingData,
   useCreateBooking,
   useCreateBookingError,
+  getBookingErrorResponse,
   useCreateBookingSuccess,
 } from '../../../../../assets/js/public/booking.js'
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation.js'
@@ -150,9 +151,8 @@ async function getAmountToPay() {
     .then((response) => {
       checkoutPaymentData = response.data.data
     })
-    .catch((e) => {
-      const message = e?.response?.data?.message || e.message || 'Unknown error'
-      emits('payment-error', message)
+    .catch((response) => {
+      errorBooking(response)
     })
 
   const totalPriceParts = new Intl.NumberFormat('en-US', {
@@ -160,10 +160,13 @@ async function getAmountToPay() {
     currency: checkoutPaymentData.currency,
   }).formatToParts(checkoutPaymentData.amount)
 
-  const IntegerPart = totalPriceParts.find((part) => part.type === 'integer')?.value || ''
+  const integerPart = totalPriceParts
+    .filter((part) => part.type === 'integer')
+    .map((part) => part.value)
+    .join('')
   const fractionPart = totalPriceParts.find((part) => part.type === 'fraction')?.value || ''
   const decimalPart = totalPriceParts.find((part) => part.type === 'decimal')?.value || ''
-  const formattedAmount = `${IntegerPart}${decimalPart}${fractionPart}`
+  const formattedAmount = fractionPart ? `${integerPart}${decimalPart}${fractionPart}` : integerPart
   paymentTotalAmount.value = formattedAmount
 
   return {
@@ -352,26 +355,8 @@ function successBooking(response) {
   })
 }
 
-function getSquareBookingErrorResponse(error) {
-  if (error?.response?.data) {
-    return error.response.data
-  }
-
-  if (error?.data) {
-    return error
-  }
-
-  const labels = amLabels.value || amLabels
-
-  return {
-    data: {
-      message: error?.message || labels.payment_error,
-    },
-  }
-}
-
 function errorBooking(error) {
-  useCreateBookingError(store, getSquareBookingErrorResponse(error), () => {
+  useCreateBookingError(store, getBookingErrorResponse(error), () => {
     emits('payment-error', getErrorMessage())
   })
 }

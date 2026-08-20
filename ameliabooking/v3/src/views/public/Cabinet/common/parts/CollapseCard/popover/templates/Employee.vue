@@ -18,6 +18,9 @@
           >
             {{ props.data.badge.content }}
           </span>
+          <span v-if="props.data.rank === 'organizer'" class="am-cc__employee-rank">
+            {{ amLabels.event_organizer }}
+          </span>
         </div>
       </div>
       <div
@@ -46,6 +49,9 @@
             >
               {{ empl.badge.content }}
             </span>
+            <span v-if="empl.rank === 'organizer'" class="am-cc__employee-rank">
+              {{ amLabels.event_organizer }}
+            </span>
           </div>
         </div>
         <div
@@ -70,6 +76,8 @@ let props = defineProps({
     type: [Object, Array],
   },
 })
+
+const amLabels = inject('amLabels')
 
 let isObjType = computed(() => !Array.isArray(props.data))
 
@@ -202,6 +210,15 @@ export default {
       padding: 0 4px;
       font-size: 13px;
       line-height: 19px;
+    }
+
+    &-rank {
+      display: block;
+      width: 100%;
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--am-c-cc-text-op70);
     }
 
     &-desc {

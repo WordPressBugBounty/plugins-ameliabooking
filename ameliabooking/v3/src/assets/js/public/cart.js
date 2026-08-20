@@ -125,6 +125,7 @@ function useInitCartItem(store) {
     items[index].services[serviceId] = {
       fetched: false,
       slots: [],
+      busyness: {},
       providerId: store.getters['booking/getEmployeeId'],
       locationId: store.getters['booking/getLocationId'],
       list: [

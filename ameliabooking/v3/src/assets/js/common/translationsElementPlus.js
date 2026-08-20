@@ -117,6 +117,9 @@ function elementPlusTranslations(lang) {
     case 'fi':
       translation = fi
       break
+    case 'fo_FO':
+      translation = da
+      break
     case 'fr_FR':
     case 'fr_CA':
     case 'fr_BE':

@@ -5,11 +5,11 @@ namespace AmeliaBooking\Application\Commands;
 use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Commands\Booking\Appointment\AddBookingCommand;
 use AmeliaBooking\Application\Commands\Booking\Appointment\DeleteBookingRemotelyCommand;
-use AmeliaBooking\Application\Commands\Booking\Appointment\SuccessfulBookingCommand;
 use AmeliaBooking\Application\Commands\Notification\SendUndeliveredNotificationsCommand;
 use AmeliaBooking\Application\Commands\Notification\UpdateSMSNotificationHistoryCommand;
 use AmeliaBooking\Application\Commands\Outlook\FetchAccessTokenWithAuthCodeOutlookCommand;
 use AmeliaBooking\Application\Commands\Payment\CalculatePaymentAmountCommand;
+use AmeliaBooking\Application\Commands\PaymentGateway\RazorpayPaymentNotifyCommand;
 use AmeliaBooking\Application\Commands\Square\DisconnectFromSquareAccountCommand;
 use AmeliaBooking\Application\Commands\Square\SquareRefundWebhookCommand;
 use AmeliaBooking\Application\Services\User\UserApplicationService;
@@ -119,7 +119,7 @@ abstract class Command
      *
      * @param Request $request
      */
-    public function setToken($request)
+    public function setToken($request): void
     {
         $token = null;
 
@@ -132,6 +132,7 @@ abstract class Command
             $authorization !== '' &&
             ($values = explode(' ', $authorization)) &&
             sizeof($values) === 2 &&
+            strcasecmp($values[0], 'Bearer') === 0 &&
             $settingsService->getSetting('roles', 'enabledHttpAuthorization')
         ) {
             $token = $values[1];
@@ -179,9 +180,9 @@ abstract class Command
 
     /**
      * @param $request
-     * @return int|boolean
+     * @return bool
      */
-    public function validateNonce($request)
+    public function validateNonce($request): bool
     {
         if (
             $request->getMethod() === 'POST' &&
@@ -189,16 +190,19 @@ abstract class Command
             !($this instanceof CalculatePaymentAmountCommand) &&
             !($this instanceof AddBookingCommand) &&
             !($this instanceof DeleteBookingRemotelyCommand) &&
+            !($this instanceof RazorpayPaymentNotifyCommand) &&
             !($this instanceof SquareRefundWebhookCommand) &&
             !($this instanceof DisconnectFromSquareAccountCommand) &&
-            !($this instanceof SuccessfulBookingCommand) &&
             !($this instanceof FetchAccessTokenWithAuthCodeOutlookCommand) &&
             !($this instanceof UpdateSMSNotificationHistoryCommand)
         ) {
             $queryParams = $request->getQueryParams();
+            $nonce = !empty($queryParams['wpAmeliaNonce'])
+                ? $queryParams['wpAmeliaNonce']
+                : ($queryParams['ameliaNonce'] ?? '');
 
-            return wp_verify_nonce(
-                !empty($queryParams['wpAmeliaNonce']) ? $queryParams['wpAmeliaNonce'] : $queryParams['ameliaNonce'],
+            return (bool) wp_verify_nonce(
+                $nonce,
                 'ajax-nonce'
             );
         }

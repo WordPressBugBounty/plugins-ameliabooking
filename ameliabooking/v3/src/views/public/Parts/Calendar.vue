@@ -523,6 +523,8 @@ function getSlotsCallback(
   lastBookedProviderId,
   customCallback,
   waitingListSlots = {},
+  requestedServiceId,
+  requestedCartItemIndex,
 ) {
   calendarMinimumDate.value = minimumDateTime
   calendarMaximumDate.value = maximumDateTime
@@ -542,6 +544,8 @@ function getSlotsCallback(
     lastBookedProviderId,
     searchStart,
     searchEnd,
+    requestedServiceId,
+    requestedCartItemIndex,
   )
 
   if (props.serviceId) {
@@ -609,18 +613,43 @@ function getSlots(customCallback) {
 
   emits('loadingSlots', true)
 
+  const slotsParams = Object.assign(
+    {
+      startDateTime: searchStart.value,
+      endDateTime: searchEnd.value,
+    },
+    props.slotsParams,
+  )
+
+  const cartItemIndex = store.getters['booking/getCartItemIndex']
+
+  if (slotsParams.serviceId) {
+    store.commit('booking/setBusyness', {
+      serviceId: slotsParams.serviceId,
+      busyness: {},
+      cartItemIndex,
+    })
+  }
+
   useAppointmentSlots(
-    Object.assign(
-      {
-        startDateTime: searchStart.value,
-        endDateTime: searchEnd.value,
-      },
-      props.slotsParams,
-    ),
+    slotsParams,
     props.fetchedSlots,
     getSlotsCallback,
     customCallback,
     store.getters['appointmentWaitingListOptions/getOptions'],
+    // Resolve at response time from reactive sources so a service switch can
+    // discard stale requests. Fall back to the request snapshot only for
+    // packages, where booking.appointment.serviceId stays null.
+    () => {
+      const activeServiceId = props.serviceId || store.getters['booking/getServiceId']
+
+      if (activeServiceId) {
+        return activeServiceId
+      }
+
+      return props.isPackage ? slotsParams.serviceId : null
+    },
+    cartItemIndex,
   )
 }
 

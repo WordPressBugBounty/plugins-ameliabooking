@@ -47,9 +47,9 @@
 
     <div class="am-capei-atti__footer">
       <AmButton category="secondary" :size="'default'" :type="'plain'" @click="close">
-        {{ amSettings.roles.allowWriteEvents ? amLabels.cancel : amLabels.close }}
+        {{ amSettings.roles.allowWriteCustomers ? amLabels.cancel : amLabels.close }}
       </AmButton>
-      <AmButton v-if="amSettings.roles.allowWriteEvents" :size="'default'" @click="validateSave">
+      <AmButton v-if="amSettings.roles.allowWriteCustomers" :size="'default'" @click="validateSave">
         {{ amLabels.save }}
       </AmButton>
     </div>
@@ -232,6 +232,7 @@ function saveAttendee(createPaymentLinks) {
       Object.assign(useBackAttendee(store), {
         runInstantPostBookingActions: true,
         createPaymentLinks: createPaymentLinks,
+        payment: { gateway: 'onSite' },
       }),
       {
         params: {

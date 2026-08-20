@@ -548,6 +548,19 @@ function filterService(query) {
   queryService.value = query.toLowerCase()
 }
 let queryFilteredServices = computed(() => {
+  if (appointmentFormData.value.categoryId) {
+    return services.value.filter((service) => {
+      if (queryService.value) {
+        return (
+          service.name.toLowerCase().includes(queryService.value) &&
+          service.categoryId === appointmentFormData.value.categoryId
+        )
+      }
+
+      return service.categoryId === appointmentFormData.value.categoryId
+    })
+  }
+
   if (queryService.value) {
     return services.value.filter((service) => {
       return service.name.toLowerCase().includes(queryService.value)

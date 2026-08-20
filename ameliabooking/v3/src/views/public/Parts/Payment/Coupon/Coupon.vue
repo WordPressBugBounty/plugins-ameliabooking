@@ -274,6 +274,18 @@ export default {
         align-items: center;
         margin-bottom: 0;
         width: 100%;
+
+        &__label {
+          max-width: 50%;
+          flex-wrap: wrap;
+          height: auto;
+
+          span {
+            white-space: normal;
+            word-break: break-word;
+          }
+        }
+
         .el-form-item__error {
           width: 100%;
           text-align: center;

@@ -861,8 +861,6 @@ export default {
     },
 
     setPreselectedValues(state) {
-      state.originalPreselected = JSON.parse(JSON.stringify(state.preselected))
-
       state.employees = state.employees.filter(
         (e) => state.showHidden || (e.status === 'visible' && e.show),
       )
@@ -1043,6 +1041,9 @@ export default {
           s.price = services[0].price
         }
       })
+
+      // After derived preselected fields (show='packages' when packages are set) — AMR-2381
+      state.originalPreselected = JSON.parse(JSON.stringify(state.preselected))
     },
   },
 

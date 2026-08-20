@@ -161,24 +161,20 @@
                   ></AmButton>
                 </template>
                 <div
-                  v-if="
-                    (props.reservation.type === 'appointment' &&
-                      amSettings.roles.allowWriteAppointments) ||
-                    props.reservation.type === 'event'
-                  "
                   v-click-outside="closeEditItemPopup"
-                  class="am-cc__edit"
+                  class="am-cc__edit-menu"
                   role="menu"
                   @keydown="onMenuKeydown"
                 >
-                  <template
+                  <div
                     v-if="
                       (props.reservation.type === 'appointment' &&
                         amSettings.roles.allowWriteAppointments) ||
                       (props.reservation.type === 'event' && amSettings.roles.allowWriteEvents)
                     "
+                    class="am-cc__edit"
                   >
-                    <!-- Edit Appointment -->
+                    <!-- Edit Appointment / Event -->
                     <AmButton
                       class="am-cc__edit-item am-edit"
                       category="secondary"
@@ -192,42 +188,44 @@
                         {{ amLabels.edit }}
                       </span>
                     </AmButton>
-                    <!-- /Edit Appointment -->
-                  </template>
+                    <!-- /Edit Appointment / Event -->
+                  </div>
 
                   <template v-if="props.reservation.type === 'event'">
-                    <!-- Edit Attendee -->
-                    <AmButton
-                      v-if="amSettings.roles.allowWriteEvents"
-                      class="am-cc__edit-item am-edit"
-                      category="secondary"
-                      type="text"
-                      prefix="users-plus"
-                      role="menuitem"
-                      :aria-label="amLabels.event_add_attendee"
-                      @click="addEventAttendee(props.reservation)"
-                    >
-                      <span class="am-cc__edit-text">
-                        {{ amLabels.event_add_attendee }}
-                      </span>
-                    </AmButton>
-                    <!-- /Edit Attendee -->
-
-                    <!-- List Event Attendees -->
-                    <AmButton
-                      class="am-cc__edit-item am-edit"
-                      category="secondary"
-                      type="text"
-                      prefix="user"
-                      role="menuitem"
-                      :aria-label="amLabels.attendees"
-                      @click="listEventAttendees(props.reservation)"
-                    >
-                      <span class="am-cc__edit-text">
-                        {{ amLabels.attendees }}
-                      </span>
-                    </AmButton>
-                    <!-- /List Event Attendees -->
+                    <div v-if="amSettings.roles.allowWriteCustomers" class="am-cc__edit">
+                      <!-- Add Attendee -->
+                      <AmButton
+                        class="am-cc__edit-item am-edit"
+                        category="secondary"
+                        type="text"
+                        prefix="users-plus"
+                        role="menuitem"
+                        :aria-label="amLabels.event_add_attendee"
+                        @click="addEventAttendee(props.reservation)"
+                      >
+                        <span class="am-cc__edit-text">
+                          {{ amLabels.event_add_attendee }}
+                        </span>
+                      </AmButton>
+                      <!-- /Add Attendee -->
+                    </div>
+                    <div class="am-cc__edit">
+                      <!-- List Event Attendees -->
+                      <AmButton
+                        class="am-cc__edit-item am-edit"
+                        category="secondary"
+                        type="text"
+                        prefix="user"
+                        role="menuitem"
+                        :aria-label="amLabels.attendees"
+                        @click="listEventAttendees(props.reservation)"
+                      >
+                        <span class="am-cc__edit-text">
+                          {{ amLabels.attendees }}
+                        </span>
+                      </AmButton>
+                      <!-- /List Event Attendees -->
+                    </div>
                   </template>
                 </div>
               </el-popover>

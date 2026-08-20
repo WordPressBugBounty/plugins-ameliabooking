@@ -3,6 +3,7 @@
     v-if="props.ready && !props.loading && !props.loadingUpcoming"
     class="am-elf__footer"
     :class="{ 'am-congrats': isCongratzStep && props.secondButtonShow }"
+    :style="cssVars"
   >
     <AmButton
       v-if="props.secondButtonShow"
@@ -43,8 +44,8 @@
 
 <script setup>
 import AmButton from '../../../_components/button/AmButton.vue'
-
-import { inject, ref, computed } from 'vue'
+import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
+import { inject, ref, computed, unref } from 'vue'
 
 let props = defineProps({
   ready: {
@@ -161,6 +162,40 @@ function isWaitingListStep() {
     props.isWaitingList
   )
 }
+
+// * Colors
+let amColors = inject(
+  'amColors',
+  ref({
+    colorPrimary: '#1246D6',
+    colorSuccess: '#019719',
+    colorError: '#B4190F',
+    colorWarning: '#CCA20C',
+    colorMainBgr: '#FFFFFF',
+    colorMainHeadingText: '#33434C',
+    colorMainText: '#1A2C37',
+    colorSbBgr: '#17295A',
+    colorSbText: '#FFFFFF',
+    colorInpBgr: '#FFFFFF',
+    colorInpBorder: '#D1D5D7',
+    colorInpText: '#1A2C37',
+    colorInpPlaceHolder: '#1A2C37',
+    colorDropBgr: '#FFFFFF',
+    colorDropBorder: '#D1D5D7',
+    colorDropText: '#0E1920',
+    colorBtnPrim: '#265CF2',
+    colorBtnPrimText: '#FFFFFF',
+    colorBtnSec: '#1A2C37',
+    colorBtnSecText: '#FFFFFF',
+  }),
+)
+
+// * Css Vars
+let cssVars = computed(() => {
+  return {
+    '--am-c-el-text-op15': useColorTransparency(unref(amColors).colorMainText, 0.15),
+  }
+})
 </script>
 
 <script>
@@ -235,5 +270,12 @@ export default {
 // Admin
 #amelia-app-backend-new {
   @include main-content-footer;
+
+  .am-elf {
+    &__footer {
+      padding: 16px;
+      box-shadow: 0 -2px 3px var(--am-c-el-text-op15, rgba(26, 44, 55, 0.15));
+    }
+  }
 }
 </style>

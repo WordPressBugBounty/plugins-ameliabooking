@@ -4,9 +4,7 @@ namespace AmeliaBooking\Application\Commands\Booking\Appointment;
 
 use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Application\Commands\CommandResult;
-use AmeliaBooking\Application\Services\Booking\BookingApplicationService;
 use AmeliaBooking\Application\Services\Helper\HelperService;
-use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Application\Services\Reservation\AbstractReservationService;
 use AmeliaBooking\Application\Services\User\UserApplicationService;
 use AmeliaBooking\Domain\Common\Exceptions\AuthorizationException;
@@ -18,8 +16,6 @@ use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentType;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use Exception;
-use Interop\Container\Exception\ContainerException;
-use Slim\Exception\ContainerValueNotFoundException;
 
 /**
  * Class AddBookingCommandHandler
@@ -39,53 +35,31 @@ class AddBookingCommandHandler extends CommandHandler
      * @param AddBookingCommand $command
      *
      * @return CommandResult
-     * @throws ContainerValueNotFoundException
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
-     * @throws ContainerException
      * @throws Exception
      */
-    public function handle(AddBookingCommand $command)
+    public function handle(AddBookingCommand $command): CommandResult
     {
         $this->checkMandatoryFields($command);
+
+        $appointmentData = $this->getAppointmentData(
+            $command->getFields(),
+            empty($command->getFields()['bookings'][0]['packageCustomerService']['id'])
+                ? [
+                    PaymentType::ON_SITE,
+                    PaymentType::PAY_PAL,
+                    PaymentType::STRIPE,
+                    PaymentType::SQUARE,
+                    PaymentType::RAZORPAY,
+                ]
+                : null
+        );
 
         /** @var AbstractReservationService $reservationService */
         $reservationService = $this->container->get('application.reservation.service')->get(
             $command->getField('type') ?: Entities::APPOINTMENT
         );
-
-        /** @var BookingApplicationService $bookingAS */
-        $bookingAS = $this->container->get('application.booking.booking.service');
-
-        $appointmentData = $bookingAS->getAppointmentData($command->getFields());
-
-        /** @var PaymentApplicationService $paymentAS */
-        $paymentAS = $this->container->get('application.payment.service');
-
-        // WooCommerce, Mollie and Barion bookings are added through their own command handlers
-        $allowedGateways = array_values(
-            array_diff(
-                $paymentAS->getAvailablePaymentGateways(),
-                [PaymentType::WC, PaymentType::MOLLIE, PaymentType::BARION]
-            )
-        );
-
-        if (isset($appointmentData['payment'])) {
-            $paymentData = $paymentAS->getValidatedRequestPaymentData(
-                $appointmentData['payment'],
-                $allowedGateways
-            );
-
-            if ($paymentData === null) {
-                $result = new CommandResult();
-
-                $result->setResult(CommandResult::RESULT_ERROR);
-
-                return $result;
-            }
-
-            $appointmentData['payment'] = $paymentData;
-        }
 
         $appointmentData = apply_filters('amelia_before_booking_added_filter', $appointmentData);
 
@@ -151,7 +125,6 @@ class AddBookingCommandHandler extends CommandHandler
 
                 return $result;
             }
-
             $appointmentData['payment'] = null;
         }
 
@@ -165,6 +138,9 @@ class AddBookingCommandHandler extends CommandHandler
         }
 
         if ($result->getResult() === CommandResult::RESULT_SUCCESS && $reservation) {
+            $data = $result->getData();
+            $data['wpAmeliaNonce'] = wp_create_nonce('ajax-nonce');
+
             /** @var HelperService $helperService */
             $helperService = $this->container->get('application.helper.service');
 
@@ -172,8 +148,6 @@ class AddBookingCommandHandler extends CommandHandler
             $customer = $reservation->getCustomer();
 
             if ($customer && $customer->getEmail() && $customer->getEmail()->getValue()) {
-                $data = $result->getData();
-
                 $data['customerCabinetUrl'] = $helperService->getCustomerCabinetUrl(
                     $customer->getEmail()->getValue(),
                     $reservation->isNewUser()->getValue() ? 'email' : null,
@@ -186,9 +160,9 @@ class AddBookingCommandHandler extends CommandHandler
                 if (!empty($appointmentData['packageBookingFromBackend'])) {
                     $data['packageBookingFromBackend'] = $appointmentData['packageBookingFromBackend'];
                 }
-
-                $result->setData($data);
             }
+
+            $result->setData($data);
 
             do_action('amelia_after_booking_added', $result ? $result->getData() : null);
         }

@@ -100,13 +100,21 @@ function useServiceDuration(seconds) {
 function useServicePrice(entities, serviceId) {
   let arrPrice = []
 
+  let service = entities.services.find((service) => service.id === serviceId)
+
+  if (service) {
+    arrPrice.push(...getServicePrices(service))
+  }
+
   entities.employees.forEach((employee) => {
     if (
       employee.id in entities.entitiesRelations &&
       serviceId in entities.entitiesRelations[employee.id]
     ) {
       let employeeService = employee.serviceList.find((service) => service.id === serviceId)
-      arrPrice.push(employeeService.price)
+      if (employeeService) {
+        arrPrice.push(...getServicePrices(employeeService))
+      }
     }
   })
 
@@ -131,6 +139,48 @@ function useServicePrice(entities, serviceId) {
     min: serviceMinPrice,
     max: serviceMaxPrice,
   }
+}
+
+function getServicePrices(service) {
+  let arrPrice = []
+
+  // Base price
+  arrPrice.push(service.price)
+
+  // Custom Pricing enabled
+  if (service.customPricing.enabled) {
+    // Duration pricing
+    if (service.customPricing.enabled === 'duration') {
+      let durations = Object.keys(service.customPricing.durations)
+      durations.forEach((duration) => {
+        arrPrice.push(service.customPricing.durations[duration].price)
+      })
+    }
+
+    // Period pricing
+    if (service.customPricing.enabled === 'period') {
+      service.customPricing.periods.custom.forEach((period) => {
+        period.ranges.forEach((range) => {
+          arrPrice.push(range.price)
+        })
+      })
+
+      service.customPricing.periods.default.forEach((period) => {
+        period.ranges.forEach((range) => {
+          arrPrice.push(range.price)
+        })
+      })
+    }
+
+    // Person pricing
+    if (service.customPricing.enabled === 'person') {
+      Object.keys(service.customPricing.persons).forEach((person) => {
+        arrPrice.push(service.customPricing.persons[person].price)
+      })
+    }
+  }
+
+  return arrPrice
 }
 
 function useServiceLocation(entities, serviceId) {
@@ -424,4 +474,5 @@ export {
   usePackageEmployees,
   usePackageLocations,
   useAvailableCategories,
+  getServicePrices,
 }

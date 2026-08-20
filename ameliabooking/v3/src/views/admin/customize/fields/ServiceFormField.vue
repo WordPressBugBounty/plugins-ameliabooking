@@ -14,6 +14,12 @@
       :category-name="labelsDisplay('dropdown_category_heading')"
       :sub-category-name="labelsDisplay('dropdown_items_heading')"
       :empty-state-string="labelsDisplay('dropdown_empty')"
+      :multiple-prices="
+        (amCustomize?.[pageRenderKey]?.initStep?.options?.multiplePrices?.visibility ?? false)
+          ? multipleServicePricesOptions
+          : {}
+      "
+      :multiple-prices-label="labelsDisplay('from')"
       @change="changeService"
     ></AmAdvancedSelect>
   </el-form-item>
@@ -176,6 +182,17 @@ let categoryOptions = ref([
     ],
   },
 ])
+
+let multipleServicePricesOptions = computed(() => {
+  let obj = {}
+  categoryOptions.value.forEach((category) => {
+    category.serviceList.forEach((service) => {
+      obj[service.id] = true
+    })
+  })
+
+  return obj
+})
 
 /**
  * Change Service function

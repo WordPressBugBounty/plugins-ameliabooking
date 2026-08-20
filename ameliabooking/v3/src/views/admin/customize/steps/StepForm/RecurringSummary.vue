@@ -1,5 +1,5 @@
 <template>
-  <div class="am-fs__ro" :class="props.globalClass" :style="cssVars">
+  <div ref="recurringSummaryRef" class="am-fs__ro" :class="props.globalClass" :style="cssVars">
     <div class="am-fs__ro-warning">
       <AmAlert
         type="warning"
@@ -19,7 +19,8 @@
         :class="{ 'am-fs__ro-app-unavailable': appointment.isSubstitute }"
         :side="true"
         :delay="500"
-        :collapsable="false"
+        @collapse-open="selectCalendar(index)"
+        @collapse-clicked="collapseClicked(index)"
       >
         <template #heading>
           <div class="am-fs__ro-app-heading">
@@ -43,15 +44,19 @@
         <template #default>
           <div class="am-fs__ro-app-content">
             <AmAdvancedSlotCalendar
-              v-if="showCalendar"
-              :id="0"
-              :slots="calendarEvents"
-              :calendar-minimum-date="moment().format('YYYY-MM-DD hh:mm')"
-              :calendar-maximum-date="moment().add(1, 'year').format('YYYY-MM-DD hh:mm')"
+              v-if="showCalendar && index === parseInt(activeIndex)"
+              :id="index"
+              :date="appointment.date"
+              :calendar-minimum-date="moment().format('YYYY-MM-DD HH:mm')"
+              :calendar-maximum-date="moment().add(1, 'year').format('YYYY-MM-DD HH:mm')"
+              :end-time="
+                amCustomize[pageRenderKey].recurringSummary.options.endTimeVisibility.visibility
+              "
               :time-zone="
                 features.timeZones &&
                 amCustomize[pageRenderKey].recurringSummary.options.timeZoneVisibility.visibility
               "
+              :show-busy-slots="busyTimeSlotsVisibility"
               :show-estimated-pricing="
                 amCustomize[pageRenderKey].recurringSummary.options.estimatedPricingVisibility
                   .visibility
@@ -71,6 +76,10 @@
               :label-slots-selected="labelsDisplay('recurring_slots_selected')"
               :period-pricing="periodPricing"
               :busyness="previewCalendarBusyness"
+              :nested-item="{ inCollapse: true }"
+              @selected-date="setSelectedDate"
+              @selected-time="setSelectedTime"
+              @unselect-date="unselectDate"
             ></AmAdvancedSlotCalendar>
           </div>
         </template>
@@ -80,7 +89,7 @@
 </template>
 
 <script setup>
-import { computed, inject, provide, ref, onMounted } from 'vue'
+import { computed, inject, provide, ref, onMounted, nextTick, watchEffect } from 'vue'
 import moment from 'moment'
 import AmAlert from '../../../../_components/alert/AmAlert'
 import AmCollapse from '../../../../_components/collapse/AmCollapse'
@@ -88,6 +97,7 @@ import AmCollapseItem from '../../../../_components/collapse/AmCollapseItem'
 import SideMenu from '../../../../public/StepForm/RecurringStep/parts/SideMenu.vue'
 import AmAdvancedSlotCalendar from '../../../../_components/advanced-slot-calendar/AmAdvancedSlotCalendar.vue'
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
+import { useCalendarEvents } from '../../../../../assets/js/common/appointments.js'
 import { useReactiveCustomize } from '../../../../../assets/js/admin/useReactiveCustomize.js'
 
 let props = defineProps({
@@ -127,6 +137,11 @@ let previewCalendarBusyness = computed(() => {
   }
 })
 
+let busyTimeSlotsVisibility = computed(() => {
+  const opts = amCustomize.value[pageRenderKey.value].recurringSummary.options
+  return opts.busyTimeSlotsVisibility?.visibility ?? false
+})
+
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
@@ -160,9 +175,46 @@ let serviceSelection = ref({
 /*****************
  * Calendar Data *
  ****************/
+let recurringSummaryRef = ref(null)
+provide('formWrapper', recurringSummaryRef)
+
+let activeIndex = ref('0')
+
 let showCalendar = ref(false)
 
 let periodPricing = ref({})
+
+const previewSlots = getDummyPreviewSlots()
+
+function getDummyPreviewSlots() {
+  const slots = {}
+  const today = moment().startOf('day')
+
+  for (let i = 0; i <= 31; i++) {
+    const current = today.clone().add(i, 'days')
+    const date = current.format('YYYY-MM-DD')
+    const dayOfWeek = current.day()
+
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      continue
+    }
+
+    slots[date] = {}
+
+    for (let hour = 9; hour < 13; hour++) {
+      const hourStr = hour < 10 ? `0${hour}` : `${hour}`
+      slots[date][`${hourStr}:00`] = [{ e: 1, c: 3 }]
+      slots[date][`${hourStr}:30`] = [{ e: 1, c: 3 }]
+    }
+
+    if (i % 3 === 0) {
+      slots[date]['14:00'] = [{ e: 1, c: 2 }]
+      slots[date]['15:30'] = [{ e: 1, c: 2 }]
+    }
+  }
+
+  return slots
+}
 
 function getCustomPeriodsPricing() {
   let result = {}
@@ -232,29 +284,21 @@ function getCustomPeriodsPricing() {
   }
 }
 
-let calendarEvents = ref([])
+let calendarEvents = ref(useCalendarEvents(previewSlots))
 
 let calendarEventDate = ref('')
 
 let calendarServiceDuration = ref('0')
 
-let today = moment().format('YYYY-MM-DD')
-
-for (let i = 0; i <= 31; i++) {
-  let block = {
-    display: 'background',
-    extendedProps: {
-      slots: { '09:00': [7, 3] },
-      slotsAvailable: 1,
-      slotsTotal: 100,
-    },
-    start: moment(today).add(i, 'd').format('YYYY-MM-DD'),
-    title: 'e',
-  }
-  calendarEvents.value.push(block)
-}
-
 let calendarEventSlots = ref([])
+let calendarEventBusySlots = ref([])
+
+watchEffect(() => {
+  calendarEventBusySlots.value = busyTimeSlotsVisibility.value
+    ? ['08:00', '08:30', '09:30', '12:30', '14:00']
+    : []
+})
+
 let calendarEventSlot = ref('')
 let calendarStartDate = ref(moment().format('YYYY-MM-DD'))
 let calendarChangeSideBar = ref(true)
@@ -262,11 +306,40 @@ let calendarWaitingListSlots = ref([])
 provide('calendarEvents', calendarEvents)
 provide('calendarEventDate', calendarEventDate)
 provide('calendarEventSlots', calendarEventSlots)
+provide('calendarEventBusySlots', calendarEventBusySlots)
 provide('calendarEventSlot', calendarEventSlot)
 provide('calendarStartDate', calendarStartDate)
 provide('calendarChangeSideBar', calendarChangeSideBar)
 provide('calendarServiceDuration', calendarServiceDuration)
 provide('calendarWaitingListSlots', calendarWaitingListSlots)
+
+function setSelectedDate(value) {
+  unselectDate()
+
+  if (value in previewSlots) {
+    calendarEventSlots.value = Object.keys(previewSlots[value]).sort()
+  }
+
+  if (calendarEventSlots.value.length) {
+    setSelectedTime(calendarEventSlots.value[0])
+  }
+
+  calendarEventDate.value = value
+}
+
+function unselectDate() {
+  calendarEventBusySlots.value = busyTimeSlotsVisibility.value
+    ? ['08:00', '08:30', '09:30', '12:30', '14:00']
+    : []
+
+  calendarEventSlots.value = []
+  calendarEventSlot.value = ''
+  calendarEventDate.value = ''
+}
+
+function setSelectedTime(value) {
+  calendarEventSlot.value = value
+}
 
 /*********
  * Other *
@@ -277,13 +350,39 @@ provide('calendarSlotDuration', calendarSlotDuration)
 
 let recurringList = ref([])
 
+function collapseClicked(value) {
+  recurringList.value.forEach((item, index) => {
+    if (index !== value && item?.contentVisibility) {
+      item.closingFromParent()
+    }
+  })
+}
+
+function selectCalendar(value) {
+  if (value !== '') {
+    activeIndex.value = value.toString()
+
+    nextTick(() => {
+      const appointment = serviceSelection.value.list[value]
+
+      if (appointment?.date) {
+        setSelectedDate(appointment.date)
+
+        if (appointment.time) {
+          setSelectedTime(appointment.time)
+        }
+      } else {
+        unselectDate()
+      }
+    })
+  }
+}
+
 onMounted(() => {
   periodPricing.value =
     !licence.isBasic && !licence.isStarter && !licence.isLite ? getCustomPeriodsPricing() : {}
 
   showCalendar.value = true
-
-  recurringList.value[0].contentVisibility = true
 })
 
 let amColors = inject('amColors')

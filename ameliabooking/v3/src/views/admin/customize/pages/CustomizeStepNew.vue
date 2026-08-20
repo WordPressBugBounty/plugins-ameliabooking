@@ -140,7 +140,7 @@
               v-if="amCustomize[pageRenderKey].sidebar.options.companyEmail.visibility"
               class="am-fs-sb__support-email"
             >
-              <template v-if="!sidebarCollapsed"> support@wpamelia.com </template>
+              <template v-if="!sidebarCollapsed"> {{ supportEmail }} </template>
               <template v-else>
                 <span class="am-icon-email"></span>
               </template>
@@ -247,6 +247,7 @@ import { useElementSize } from '@vueuse/core'
 // * Import composables
 import { defaultCustomizeSettings } from '../../../../assets/js/common/defaultCustomize.js'
 import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
+import { getSupportEmail } from '../../../../assets/js/common/whiteLabel.js'
 
 let loading = ref(false)
 provide('loading', loading)
@@ -256,6 +257,10 @@ let licence = inject('licence')
 
 // * Base Urls
 const baseUrls = inject('baseUrls')
+
+// * Settings
+const amSettings = inject('settings')
+const supportEmail = computed(() => getSupportEmail(amSettings))
 
 // * Layout
 let flowLayout = useReactiveCustomize().flowLayout

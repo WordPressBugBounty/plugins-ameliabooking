@@ -67,8 +67,20 @@
           <span class="am-adv-select__item-label">
             {{ data[props.propsData.label] }}
           </span>
-          <span v-if="data.price" class="am-adv-select__item-price">
-            {{ ` ${useFormattedPrice(data.price)}` }}
+          <span
+            v-if="
+              data.price > 0 ||
+              (props.multiplePrices[data.id] && props.multiplePrices[data.id].visible)
+            "
+            class="am-adv-select__item-price"
+          >
+            <template v-if="props.multiplePrices[data.id] && props.multiplePrices[data.id].visible">
+              {{ props.multiplePricesLabel }}
+              {{ useFormattedPrice(props.multiplePrices[data.id].price) }}
+            </template>
+            <template v-else-if="data.price">
+              {{ ` ${useFormattedPrice(data.price)}` }}
+            </template>
             <span v-if="taxVisibility(data.id)" class="am-adv-select__item-tax">
               <template v-if="props.taxOptions.find((a) => a.id === data.id).excluded">
                 {{ props.taxLabel }}
@@ -303,6 +315,16 @@ const props = defineProps({
   ariaLabel: {
     type: String,
     default: 'dropdown',
+  },
+  multiplePrices: {
+    type: Object,
+    default: () => {
+      return {}
+    },
+  },
+  multiplePricesLabel: {
+    type: String,
+    default: '',
   },
 })
 
@@ -780,6 +802,10 @@ let cssTeleport = computed(() => {
       &:nth-child(2) {
         padding-top: 26px;
         flex-shrink: 1;
+
+        .am-adv-select__item-label {
+          width: 100%;
+        }
       }
 
       &:last-child {
@@ -837,6 +863,7 @@ let cssTeleport = computed(() => {
     &__item {
       width: 100%;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
 

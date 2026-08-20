@@ -19,6 +19,7 @@ use AmeliaBooking\Domain\ValueObjects\String\Password;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use AmeliaBooking\Infrastructure\Services\Apple\AbstractAppleCalendarService;
+use AmeliaBooking\Infrastructure\WP\UserRoles\SuperAdminRoleService;
 use Exception;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\String\Phone;
@@ -159,6 +160,14 @@ class UpdateProviderCommandHandler extends CommandHandler
 
             $result->setResult(CommandResult::RESULT_ERROR);
             $result->setMessage('Could not update user.');
+
+            return $result;
+        }
+
+        if ($newExternalId && SuperAdminRoleService::userHasRole((int)$newExternalId)) {
+            $result->setResult(CommandResult::RESULT_CONFLICT);
+            $result->setMessage('Superadmin users cannot be assigned Amelia roles.');
+            $result->setData([]);
 
             return $result;
         }

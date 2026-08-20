@@ -153,7 +153,7 @@
         identifier="id"
         name-identifier="name"
         :footer-string="labelsDisplay('get_in_touch')"
-        company-email="support@wpamelia.com"
+        :company-email="supportEmail"
         @click="selectCategory"
       ></SideMenu>
     </template>
@@ -533,6 +533,7 @@ import { useFormattedPrice } from '../../../../assets/js/common/formatting.js'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation.js'
 import { getFrontedFormattedDate } from '../../../../assets/js/common/date.js'
 import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
+import { getSupportEmail } from '../../../../assets/js/common/whiteLabel.js'
 
 // * Plugin Licence
 let licence = inject('licence')
@@ -542,6 +543,10 @@ let features = inject('features')
 
 // * Customize
 const { amCustomize } = useReactiveCustomize()
+
+// * Settings
+const amSettings = inject('settings')
+const supportEmail = computed(() => getSupportEmail(amSettings))
 
 // * Page Width and Reference
 let contentRef = ref()

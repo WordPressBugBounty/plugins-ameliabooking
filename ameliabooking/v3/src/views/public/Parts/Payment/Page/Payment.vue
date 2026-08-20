@@ -53,7 +53,9 @@
               { 'am-payments__method-button__selected': paymentGateway === gateway },
               responsiveClass,
               `am-payments__method-button-${paymentList.length}`,
+              { 'am-payments__method-button_disabled': stripeCleanupLoading },
             ]"
+            :aria-disabled="stripeCleanupLoading"
             :aria-label="`${getPaymentBtnString(gateway)} ${amLabels.payment_button || 'payment button'}`"
             @click="setPaymentGateway(gateway)"
             @keydown.enter.space.prevent="setPaymentGateway(gateway)"
@@ -127,6 +129,12 @@ import { useColorTransparency } from '../../../../../assets/js/common/colorManip
 import { usePrepaidPrice } from '../../../../../assets/js/common/appointments'
 import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
 import { settings } from '../../../../../plugins/settings'
+import { useBookingData } from '../../../../../assets/js/public/booking.js'
+import {
+  buildStripeIntentCacheKey,
+  prefetchStripePaymentIntent,
+  waitForStripeCleanup,
+} from '../../../../../assets/js/public/stripePaymentIntent.js'
 
 // * Properties
 let props = defineProps({
@@ -160,6 +168,8 @@ let amSettings = computed(() => store.getters['getSettings'])
 
 // * Amelia URLs
 let baseUrls = inject('baseUrls')
+const shortcodeData = inject('shortcodeData')
+const stepsArray = inject('stepsArray')
 
 // * labels
 const amLabels = inject('amLabels')
@@ -234,6 +244,7 @@ let paymentDeposit = computed({
 })
 
 let mandatoryOnSitePayment = ref(false)
+let stripeCleanupLoading = ref(false)
 
 let paymentSentence = computed(() => {
   let sentence = ''
@@ -392,9 +403,67 @@ let paymentList = computed(() => {
 
   return arr
 })
-function setPaymentGateway(gateway) {
-  store.commit('payment/setPaymentGateway', gateway)
 
+function getStripePrefetchFormData() {
+  return {
+    shortcode: shortcodeData?.value || shortcodeData,
+    steps: stepsArray?.value ? stepsArray.value.map((i) => i.name) : [],
+  }
+}
+
+function getStripeIntentCacheKey() {
+  const coupon = store.getters['coupon/getCoupon'] || {}
+  const shortcode = shortcodeData?.value || shortcodeData || {}
+
+  return buildStripeIntentCacheKey({
+    couponDiscount: coupon.discount,
+    couponDeduction: coupon.deduction,
+    deposit: store.getters['payment/getPaymentDeposit'],
+    counter: shortcode.counter,
+  })
+}
+
+function prefetchStripeIntent() {
+  if (!amSettings.value.payments.stripe.enabled || !availablePayments.value.stripe) {
+    return
+  }
+
+  const bookingData = useBookingData(store, getStripePrefetchFormData(), false, {}, null)
+  bookingData.data.returnUrl = window.location.href
+
+  const shortcode = shortcodeData?.value || shortcodeData || {}
+
+  prefetchStripePaymentIntent(
+    shortcode.counter,
+    getStripeIntentCacheKey(),
+    bookingData.data,
+    bookingData.options,
+  ).catch(() => {})
+}
+
+async function setPaymentGateway(gateway) {
+  if (stripeCleanupLoading.value || paymentGateway.value === gateway) {
+    return
+  }
+
+  if (paymentGateway.value === 'stripe' || gateway === 'stripe') {
+    stripeCleanupLoading.value = true
+
+    try {
+      const shortcode = shortcodeData?.value || shortcodeData || {}
+      await waitForStripeCleanup(shortcode.counter)
+      store.commit('payment/setError', '')
+      store.commit('payment/setPaymentGateway', gateway)
+      footerBtnDisabledUpdater(false)
+    } finally {
+      stripeCleanupLoading.value = false
+    }
+
+    return
+  }
+
+  store.commit('payment/setError', '')
+  store.commit('payment/setPaymentGateway', gateway)
   footerBtnDisabledUpdater(false)
 }
 
@@ -412,8 +481,24 @@ let paymentRef = ref(null)
 provide('paymentRef', paymentRef)
 
 onMounted(() => {
-  store.commit('payment/setError', '')
+  // Keep restored redirect payment errors (canceled/failed) visible until retry /
+  // gateway change. Clear customer-validation and other stale errors on re-entry.
+  const existingError = store.getters['payment/getError']
+  const isPaymentStatusError =
+    existingError &&
+    (existingError === amLabels.payment_canceled ||
+      existingError === amLabels.payment_error ||
+      existingError === amLabels.payment_error_default)
+
+  if (!isPaymentStatusError) {
+    store.commit('payment/setError', '')
+  }
+
   store.commit('setLoading', false)
+
+  if (paymentGateway.value === 'stripe') {
+    prefetchStripeIntent()
+  }
 
   let price = usePrepaidPrice(store)
 
@@ -608,11 +693,6 @@ export default {
         flex-direction: column;
         justify-items: center;
         height: fit-content;
-
-        &:focus {
-          border: 1px solid var(--am-c-ps-primary);
-          box-shadow: 0 1px 1px var(--am-c-ps-primary-op06);
-        }
 
         img {
           height: 24px;

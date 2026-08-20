@@ -21,6 +21,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use AmeliaBooking\Infrastructure\Services\Mailchimp\AbstractMailchimpService;
+use AmeliaBooking\Infrastructure\WP\UserRoles\SuperAdminRoleService;
 
 /**
  * Class UpdateCustomerCommandHandler
@@ -199,6 +200,14 @@ class UpdateCustomerCommandHandler extends CommandHandler
 
             $result->setResult(CommandResult::RESULT_ERROR);
             $result->setMessage('Could not update user.');
+
+            return $result;
+        }
+
+        if ($newExternalId && SuperAdminRoleService::userHasRole((int)$newExternalId)) {
+            $result->setResult(CommandResult::RESULT_CONFLICT);
+            $result->setMessage('Superadmin users cannot be assigned Amelia roles.');
+            $result->setData([]);
 
             return $result;
         }

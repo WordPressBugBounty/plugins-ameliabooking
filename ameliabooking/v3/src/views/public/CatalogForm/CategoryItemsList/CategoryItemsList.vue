@@ -486,7 +486,9 @@
                     <span
                       v-if="
                         (customizedOptions.tax?.visibility ?? true) &&
-                        useTaxVisibility(store, item.id, 'service')
+                        useTaxVisibility(store, item.id, 'service') &&
+                        (useServicePrice(amEntities, item.id).min ||
+                          useServicePrice(amEntities, item.id).max)
                       "
                       class="am-fcil__item-price"
                     >

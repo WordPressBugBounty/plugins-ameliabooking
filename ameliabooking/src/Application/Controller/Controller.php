@@ -3,19 +3,23 @@
 namespace AmeliaBooking\Application\Controller;
 
 use AmeliaBooking\Application\Commands\Command;
+use AmeliaBooking\Application\Commands\CommandResult;
+use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Services\User\UserApplicationService;
+use AmeliaBooking\Domain\Common\Exceptions\AuthorizationException;
+use AmeliaBooking\Domain\Common\Exceptions\CustomException;
+use AmeliaBooking\Domain\Common\Exceptions\PaymentValidationException;
+use AmeliaBooking\Domain\Events\DomainEventBus;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
+use AmeliaBooking\Domain\Services\Logger\LoggerInterface;
 use AmeliaBooking\Domain\Services\Permissions\PermissionsService;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
-use AmeliaBooking\Domain\Common\Exceptions\AuthorizationException;
 use AmeliaBooking\Infrastructure\Common\Container;
-use AmeliaBooking\Domain\Events\DomainEventBus;
-use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Infrastructure\WP\SettingsService\SettingsStorage;
-use AmeliaBooking\Domain\Common\Exceptions\CustomException;
-use League\Tactician\CommandBus;
-use AmeliaVendor\Psr\Http\Message\ServerRequestInterface as Request;
+use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
 use AmeliaVendor\Psr\Http\Message\ResponseInterface as Response;
+use AmeliaVendor\Psr\Http\Message\ServerRequestInterface as Request;
+use League\Tactician\CommandBus;
 
 /**
  * Class Controller
@@ -44,6 +48,11 @@ abstract class Controller
      * @var PermissionsService
      */
     protected $permissionsService;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
     protected $allowedFields = [
         'ameliaNonce',
         'wpAmeliaNonce',
@@ -67,6 +76,7 @@ abstract class Controller
         $this->eventBus           = $container->getEventBus();
         $this->permissionsService = $fromApi ? $container->getApiPermissionsService() : $container->getPermissionsService();
         $this->userApplicationService = $fromApi ? $container->getApiUserApplicationService() : $container->getUserApplicationService();
+        $this->logger             = $container->getLoggerService()->channel(LoggerInterface::CHANNEL_HTTP);
     }
 
     /**
@@ -135,7 +145,41 @@ abstract class Controller
         try {
             /** @var CommandResult $commandResult */
             $commandResult = $this->commandBus->handle($command);
+        } catch (PaymentValidationException $e) {
+            $commandResult = new CommandResult();
+
+            $commandResult->setResult(CommandResult::RESULT_ERROR);
+            $commandResult->setMessage(FrontendStrings::getCommonStrings()['payment_error']);
+            $commandResult->setData(
+                [
+                    'paymentSuccessful' => false,
+                ]
+            );
+        } catch (AccessDeniedException $e) {
+            $response = $response->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $response = $response->withStatus(self::STATUS_FORBIDDEN);
+
+            $response->getBody()->write(
+                json_encode(
+                    [
+                        'data' => [
+                            'message' => $e->getMessage()
+                        ]
+                    ]
+                )
+            );
+
+            return $response;
         } catch (CustomException $e) {
+            try {
+                $this->logger->error('Unhandled exception in controller', [
+                    'command'   => get_class($command),
+                    'exception' => $e,
+                ]);
+            } catch (\Throwable $loggingError) {
+                // Telemetry must not block the JSON 500 response.
+            }
+
             $response = $response->withHeader('Content-Type', 'application/json;charset=utf-8');
             $response = $response->withStatus(self::STATUS_INTERNAL_SERVER_ERROR);
 
@@ -159,6 +203,14 @@ abstract class Controller
                     'reauthorize' => true,
                 ]
             );
+        }
+
+        if (in_array($commandResult->getResult(), [CommandResult::RESULT_ERROR, CommandResult::RESULT_CONFLICT], true)) {
+            $this->logger->warning('Command returned non-success result', [
+                'command' => get_class($command),
+                'result'  => $commandResult->getResult(),
+                'message' => $commandResult->getMessage(),
+            ]);
         }
 
         if ($commandResult->getResult() === CommandResult::RESULT_ERROR) {

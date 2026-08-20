@@ -99,7 +99,7 @@
       </div>
 
       <el-form v-if="features.coupons" ref="couponFormRef" :rules="rules" :model="couponFormData">
-        <div class="am-fs__coupon">
+        <div class="am-fs__coupon" :class="{ 'am-fs__coupon-mobile-s': mobileS }">
           <el-form-item :prop="'coupon'" class="am-fs__coupon-form-item">
             <template #label>
               <span>{{ `${labelsDisplay('coupon')}:` }}</span>
@@ -206,6 +206,9 @@ let features = inject('features')
 
 // * Plugin Licence
 let licence = inject('licence')
+
+let cWidth = inject('containerWidth', 0)
+const mobileS = computed(() => cWidth.value < 340)
 
 // * Event Tickets
 let tickets = ref([
@@ -377,8 +380,29 @@ let cssVars = computed(() => {
           align-items: center;
           margin-bottom: 0;
           width: 100%;
+
+          &__label {
+            max-width: 50%;
+            flex-wrap: wrap;
+            height: auto;
+
+            span {
+              white-space: normal;
+              word-break: break-word;
+            }
+          }
+
           .el-form-item__error {
             display: none;
+          }
+        }
+
+        &-mobile-s {
+          display: flex;
+          flex-direction: column;
+
+          .am-button {
+            width: 100%;
           }
         }
       }

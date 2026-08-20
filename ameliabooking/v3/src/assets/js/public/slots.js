@@ -68,8 +68,20 @@ function useAppointmentSlots(
   callback,
   customCallback,
   waitingListOptions = null,
+  getActiveServiceId = null,
+  requestedCartItemIndex = null,
 ) {
+  const requestedServiceId = params.serviceId
+
   httpClient.get('/slots', { params: useUrlParams(params) }).then((response) => {
+    const activeServiceId = getActiveServiceId ? getActiveServiceId() : null
+
+    // Ignore only when the active service is known and differs (stale response).
+    // null/undefined active ids happen for packages and must not discard slots.
+    if (activeServiceId != null && activeServiceId !== requestedServiceId) {
+      return
+    }
+
     let resultSlots =
       'queryTimeZone' in params && params.queryTimeZone
         ? useLocalFromUtcSlots(response.data.data.slots)
@@ -163,6 +175,8 @@ function useAppointmentSlots(
       { providerId: response.data.data.lastProvider, fromBackend: true },
       customCallback,
       waitingListSlots,
+      requestedServiceId,
+      requestedCartItemIndex,
     )
   })
 }
@@ -215,11 +229,17 @@ function useSlotsCallback(
   lastBookedProviderId,
   searchStart,
   searchEnd,
+  requestedServiceId,
+  requestedCartItemIndex,
 ) {
   store.commit('booking/setMultipleAppointmentsSlots', slots)
   store.commit('booking/setMultipleAppointmentsOccupied', occupied)
   store.commit('booking/setMultipleAppointmentsLastDate', maximumDateTime)
-  store.commit('booking/setBusyness', busyness)
+  store.commit('booking/setBusyness', {
+    serviceId: requestedServiceId,
+    busyness,
+    cartItemIndex: requestedCartItemIndex,
+  })
   store.commit('booking/setLastBookedProviderId', lastBookedProviderId)
   store.commit('booking/setMultipleAppointmentsAppCount', appCount)
 

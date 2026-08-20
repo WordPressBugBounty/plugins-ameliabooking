@@ -244,6 +244,7 @@
           :booked="booked"
           :loading="loading"
           :payment-gateway="paymentGateway"
+          :pay-pal-button-show="stepsArray[stepIndex] === paymentStep"
           :customized-labels="footerLabels"
           :primary-footer-button-type="primFooterBtnType"
           :secondary-footer-button-type="secFooterBtnType"
@@ -349,7 +350,7 @@ import {
 // * import from Vuex
 import { useStore } from 'vuex'
 // * import composable
-import useRestore from '../../../assets/js/public/restore'
+import useRestore, { resolveRestoreStepIndex } from '../../../assets/js/public/restore'
 import { useBuildPackage } from '../../../assets/js/public/package.js'
 import { defaultCustomizeSettings } from '../../../assets/js/common/defaultCustomize.js'
 import useAction from '../../../assets/js/public/actions'
@@ -629,7 +630,7 @@ watch(ready, (current) => {
       if (restore.result === 'success') {
         index = stepsArray.value.length - 1
       } else if (restore.result === 'error' || restore.result === 'canceled') {
-        index = stepsArray.value.length - 2
+        index = resolveRestoreStepIndex(stepsArray.value, restore.targetStep, 'paymentStep')
       }
 
       for (let i = 0; i <= index; i++) {

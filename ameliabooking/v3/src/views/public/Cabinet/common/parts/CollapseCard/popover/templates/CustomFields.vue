@@ -4,7 +4,18 @@
       <div class="am-cc__cf-item">
         <span class="am-cc__cf-name" v-html="item.label"></span>
         <div v-if="'value' in item" class="am-cc__cf-value">
-          <span class="am-cc__cf-value__inner">
+          <template v-if="item.type === 'file' && Array.isArray(item.value) && item.value.length">
+            <a
+              v-for="(file, fileIndex) in item.value"
+              :key="fileIndex"
+              class="am-cc__cf-value__link"
+              :href="getFileDownloadUrl(item, fileIndex)"
+              target="_blank"
+            >
+              {{ file.name }}
+            </a>
+          </template>
+          <span v-else class="am-cc__cf-value__inner">
             {{ customFieldValueDisplay(item.value) }}
           </span>
         </div>
@@ -17,6 +28,9 @@
 // * Import from Vue
 import { computed, inject } from 'vue'
 
+// * Import from Vuex
+import { useStore } from 'vuex'
+
 // * Composables
 import { useResponsiveClass } from '../../../../../../../../assets/js/common/responsive.js'
 
@@ -26,11 +40,39 @@ let props = defineProps({
   },
 })
 
+const store = useStore()
+
 let cWidth = inject('containerWidth')
 
 let responsiveClass = computed(() => {
   return useResponsiveClass(cWidth.value)
 })
+
+let ajaxUrl = computed(() => store.getters['getBaseUrls'].wpAmeliaPluginAjaxURL)
+
+function getEntityId(item) {
+  const customField = store.getters['entities/getCustomField'](item.id)
+
+  if (customField?.saveType === 'customer' && item.customerId) {
+    return item.customerId
+  }
+
+  return item.entityId
+}
+
+function getFileDownloadUrl(item, fileIndex) {
+  return (
+    ajaxUrl.value +
+    '/fields/' +
+    item.id +
+    '/' +
+    getEntityId(item) +
+    '/' +
+    fileIndex +
+    '&source=' +
+    item.source
+  )
+}
 
 function customFieldValueDisplay(value) {
   if (!value) return '/'
@@ -95,6 +137,7 @@ export default {
     &-value {
       width: 100%;
       display: flex;
+      flex-direction: column;
       font-size: 14px;
       font-weight: 400;
       line-height: 1.6;
@@ -104,6 +147,17 @@ export default {
       &__inner {
         word-break: break-word;
         white-space: break-spaces;
+      }
+
+      &__link {
+        color: var(--am-c-cc-primary);
+        text-decoration: none;
+        word-break: break-word;
+        white-space: break-spaces;
+
+        &:hover {
+          text-decoration: underline;
+        }
       }
     }
   }

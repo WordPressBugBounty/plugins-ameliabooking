@@ -375,7 +375,7 @@ function useBookingData(
     }
   }
 
-  if (gateway === 'mollie' || gateway === 'wc' || gateway === 'barion') {
+  if (gateway === 'mollie' || gateway === 'wc' || gateway === 'barion' || gateway === 'razorpay') {
     sessionStorage.setItem(
       'ameliaCacheData',
       JSON.stringify({ request: cacheComponentProps, paymentMethod: gateway, type: bookableType }),
@@ -385,6 +385,8 @@ function useBookingData(
   return {
     data: bookingData,
     options: requestOptions,
+    // Kept separate from `data`, which becomes FormData once files are attached.
+    componentProps: cacheComponentProps,
   }
 }
 
@@ -519,11 +521,16 @@ function useBookingError(response, store) {
     : store.getters['booking/getBookableType']
   let message = globalLabels['payment_error_default']
 
-  if ('onSitePayment' in response.data && response.data.onSitePayment === true) {
-    store.commit('payment/setOnSitePayment', true)
-  }
+  if (
+    response &&
+    typeof response === 'object' &&
+    response.data &&
+    typeof response.data === 'object'
+  ) {
+    if ('onSitePayment' in response.data && response.data.onSitePayment === true) {
+      store.commit('payment/setOnSitePayment', true)
+    }
 
-  if ('data' in response) {
     if ('customerAlreadyBooked' in response.data && response.data.customerAlreadyBooked === true) {
       message =
         bookableType === 'event'
@@ -1120,6 +1127,22 @@ function useCreateBookingError(store, response, callback) {
   }
 }
 
+function getBookingErrorResponse(error) {
+  if (error?.response?.data) {
+    return error.response.data
+  }
+
+  if (error?.data) {
+    return error
+  }
+
+  return {
+    data: {
+      message: error?.message || globalLabels['payment_error'],
+    },
+  }
+}
+
 function getErrorMessage() {
   return errorMessage.value
 }
@@ -1130,6 +1153,7 @@ export {
   useCreateBooking,
   useCreateBookingSuccess,
   useCreateBookingError,
+  getBookingErrorResponse,
   useAppointmentCalendarData,
   usePackageCalendarData,
   useEventCalendarData,
