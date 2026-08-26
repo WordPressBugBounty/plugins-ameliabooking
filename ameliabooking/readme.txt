@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 6.5
 Tested up to: 7.0.2
 Requires PHP: 7.4
-Stable tag: 2.4.8
+Stable tag: 2.4.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -289,6 +289,13 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.4.9
+This update includes important security fixes. We strongly recommend updating to this version immediately.
+*BugFix: Strengthened post-booking authorization to prevent unauthorized or repeated triggering of booking actions.
+*BugFix: Prevented unauthorized changes to the email address or password of linked WordPress accounts. Reported by Karthik Ramakrishnan.
+*BugFix: Restored permission checks for appointment status changes, preventing customers from approving or otherwise modifying appointment statuses without authorization. Reported by Louise.
+*Additional minor security and stability improvements.
+
 v2.4.8
 *Feature: Booking Form Preview - Booking form shortcodes now show a visual preview directly in the Gutenberg, Elementor, and Divi 5 block editors instead of raw shortcode text.
 *Improvement: Added an optional "From" price prefix for services with variable pricing.

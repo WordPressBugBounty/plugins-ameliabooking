@@ -224,9 +224,24 @@ class UpdateProviderCommandHandler extends CommandHandler
             $providerRepository->getByEmail($newUser->getEmail()->getValue()) &&
             $oldUser->getEmail()->getValue() !== $newUser->getEmail()->getValue()
         ) {
+            $providerRepository->rollback();
+
             $result->setResult(CommandResult::RESULT_CONFLICT);
             $result->setMessage('Email already exist.');
             $result->setData('This email is already in use.');
+
+            return $result;
+        }
+
+        $canWriteWpCredentials = $userAS->canWriteLinkedWpCredentials($currentUser, $oldUser);
+        $emailChanged          = $oldUser->getEmail()->getValue() !== $newUser->getEmail()->getValue();
+        $linkedWpId            = $newUser->getExternalId() ? $newUser->getExternalId()->getValue() : null;
+
+        if ($linkedWpId && $emailChanged && !$canWriteWpCredentials) {
+            $providerRepository->rollback();
+
+            $result->setResult(CommandResult::RESULT_ERROR);
+            $result->setMessage('You are not allowed to change the linked WordPress account email.');
 
             return $result;
         }
@@ -236,21 +251,11 @@ class UpdateProviderCommandHandler extends CommandHandler
 
             $providerRepository->updateFieldById($command->getArg('id'), $newPassword->getValue(), 'password');
 
-            $isAdmin = $currentUser && $currentUser->getType() === AbstractUser::USER_ROLE_ADMIN;
-            // $currentUser is null in token-only cabinet sessions (get_current_user_id() returns 0).
-            // Fall back to $oldUser which was resolved from the cabinet token and always matches $userId.
-            $callerId     = $currentUser && $currentUser->getId() ? $currentUser->getId()->getValue() : null;
-            $isOwnProfile = $callerId === $userId || ($callerId === null && $oldUser->getId()->getValue() === $userId);
-
             // Propagate to the linked WP user only when the caller is an admin or the provider
             // updating their own profile. Blocks a Manager from resetting another provider's WP password.
-            if (
-                $newUser->getExternalId() &&
-                $newUser->getExternalId()->getValue() &&
-                ($isAdmin || $isOwnProfile)
-            ) {
+            if ($linkedWpId && $canWriteWpCredentials) {
                 add_filter('amelia_user_profile_updated', '__return_true');
-                wp_set_password($command->getField('password'), $newUser->getExternalId()->getValue());
+                wp_set_password($command->getField('password'), $linkedWpId);
                 remove_filter('amelia_user_profile_updated', '__return_true');
             }
         }
@@ -286,16 +291,19 @@ class UpdateProviderCommandHandler extends CommandHandler
                 $userAS = $this->getContainer()->get('application.user.service');
 
                 $userAS->setWpUserIdForNewUser($userId, $newUser, Entities::PROVIDER, $command->getField('password'));
-            } elseif ($newUser->getExternalId() && $newUser->getExternalId()->getValue()) {
+            } elseif ($linkedWpId) {
+                $wpUserData = [
+                    'ID'         => $linkedWpId,
+                    'first_name' => $newUser->getFirstName() ? $newUser->getFirstName()->getValue() : '',
+                    'last_name'  => $newUser->getLastName() ? $newUser->getLastName()->getValue() : '',
+                ];
+
+                if ($emailChanged && $canWriteWpCredentials) {
+                    $wpUserData['user_email'] = $newUser->getEmail() ? $newUser->getEmail()->getValue() : '';
+                }
+
                 add_filter('amelia_user_profile_updated', '__return_true');
-                wp_update_user(
-                    [
-                        'ID' => $newUser->getExternalId()->getValue(),
-                        'first_name' => $newUser->getFirstName() ? $newUser->getFirstName()->getValue() : '',
-                        'last_name'  => $newUser->getLastName() ? $newUser->getLastName()->getValue() : '',
-                        'user_email' => $newUser->getEmail() ? $newUser->getEmail()->getValue() : ''
-                    ]
-                );
+                wp_update_user($wpUserData);
 
                 if ($uid = get_current_user_id()) {
                     clean_user_cache($uid);

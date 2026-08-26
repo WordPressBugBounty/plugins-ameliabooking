@@ -61,6 +61,7 @@ use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
+use AmeliaBooking\Infrastructure\Repository\Bookable\Service\PackageCustomerRepository;
 use AmeliaBooking\Infrastructure\Repository\Payment\PaymentRepository;
 use AmeliaBooking\Infrastructure\Repository\User\CustomerRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
@@ -69,6 +70,8 @@ use AmeliaBooking\Infrastructure\Services\Recaptcha\AbstractRecaptchaService;
 use AmeliaBooking\Infrastructure\WP\EventListeners\Booking\Appointment\BookingAddedEventHandler;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
 use AmeliaBooking\Infrastructure\WP\Translations\LiteFrontendStrings;
+use AmeliaBooking\Infrastructure\WP\Integrations\IvyForms\IvyFormsService;
+use AmeliaBooking\Infrastructure\WP\Integrations\PluginInstaller;
 use DateTime;
 use Exception;
 use Throwable;
@@ -189,21 +192,29 @@ abstract class AbstractReservationService implements ReservationServiceInterface
      */
     protected function rollbackReservation($reservation, $save)
     {
-        // the customer cleanup runs in a finally, so that a failing reservation deletion does not leave
-        // the customer this request created behind as well - the original failure still propagates
         try {
             if ($save) {
                 $this->deleteReservation($reservation);
             }
-        } finally {
-            if (
-                $reservation->isNewUser() &&
-                $reservation->isNewUser()->getValue() &&
-                $reservation->getCustomer() &&
-                $reservation->getCustomer()->getId()
-            ) {
-                $this->deleteUserIfNew($reservation->getCustomer()->getId()->getValue());
-            }
+        } catch (Throwable $e) {
+            // a reservation that could not be removed is still (partly) there, so the customer it was booked
+            // for has to stay with it - deleting the customer now would leave those bookings pointing at a
+            // customer that no longer exists, which is worse than the customer record this request created
+            $this->container->getLoggerService()->channel(LoggerInterface::CHANNEL_BOOKING)->error(
+                'Amelia: new customer cleanup skipped, reservation rollback failed',
+                ['exception' => $e->getMessage()]
+            );
+
+            throw $e;
+        }
+
+        if (
+            $reservation->isNewUser() &&
+            $reservation->isNewUser()->getValue() &&
+            $reservation->getCustomer() &&
+            $reservation->getCustomer()->getId()
+        ) {
+            $this->deleteUserIfNew($reservation->getCustomer()->getId()->getValue());
         }
     }
 
@@ -245,6 +256,10 @@ abstract class AbstractReservationService implements ReservationServiceInterface
      * @param array       $data
      * @param Reservation $reservation
      * @param bool        $save
+     * @param bool        $paymentVerified Server-only: set by callers that already validated reCAPTCHA and
+     *                                     then confirmed the payment with the gateway, so re-checking a
+     *                                     single-use token could only fail a customer who already paid.
+     *                                     Never derive this from the request payload.
      *
      * @return CommandResult
      *
@@ -253,13 +268,13 @@ abstract class AbstractReservationService implements ReservationServiceInterface
      * @throws QueryExecutionException
      * @throws Exception
      */
-    public function processRequest($data, $reservation, $save)
+    public function processRequest($data, $reservation, $save, $paymentVerified = false)
     {
         $result = new CommandResult();
 
         $type = !empty($data['type']) ? $data['type'] : Entities::APPOINTMENT;
 
-        $recaptchaResult = $this->validateFrontEndRecaptcha($data);
+        $recaptchaResult = $paymentVerified === true ? null : $this->validateFrontEndRecaptcha($data);
 
         if ($recaptchaResult !== null) {
             return $recaptchaResult;
@@ -314,6 +329,66 @@ abstract class AbstractReservationService implements ReservationServiceInterface
 
         /** @var SettingsService $settingsService */
         $settingsService = $this->container->get('domain.settings.service');
+
+        if (
+            !empty($data['ivy'])
+            && $settingsService->isFeatureEnabled('ivy')
+            && PluginInstaller::isPluginActive('ivyforms')
+        ) {
+            $entryId = null;
+
+            try {
+                $ivyFormsData = IvyFormsService::addFormEntry($data['ivy']);
+
+                $entryId = $ivyFormsData['data']['data']['entry']['id'] ?? null;
+            } catch (Exception $e) {
+            }
+
+            if (!empty($entryId)) {
+                switch ($type) {
+                    case (Entities::APPOINTMENT):
+                    case (Entities::EVENT):
+                        /** @var CustomerBookingRepository $customerBookingRepository */
+                        $customerBookingRepository = $this->container->get('domain.booking.customerBooking.repository');
+
+                        $customerBookingRepository->updateFieldById(
+                            $reservation->getBooking()->getId()->getValue(),
+                            $entryId,
+                            'ivyEntryId'
+                        );
+
+                        /** @var Reservation $recurringReservation */
+                        foreach ($reservation->getRecurring()->getItems() as $recurringReservation) {
+                            $customerBookingRepository->updateFieldById(
+                                $recurringReservation->getBooking()->getId()->getValue(),
+                                $entryId,
+                                'ivyEntryId'
+                            );
+                        }
+
+                        break;
+
+                    case (Entities::PACKAGE):
+                        /** @var PackageCustomerRepository $packageCustomerRepository */
+                        $packageCustomerRepository = $this->container->get('domain.bookable.packageCustomer.repository');
+
+                        /** @var PackageCustomerService $packageCustomerService */
+                        foreach ($reservation->getPackageCustomerServices()->getItems() as $packageCustomerService) {
+                            $packageCustomerId = $packageCustomerService->getPackageCustomer()->getId()->getValue();
+
+                            $packageCustomerRepository->updateFieldById(
+                                $packageCustomerId,
+                                $entryId,
+                                'ivyEntryId'
+                            );
+
+                            break;
+                        }
+
+                        break;
+                }
+            }
+        }
 
         // Mollie and Barion only reserve the booking here, so their payment callback subscribes the customer instead
         if (
@@ -422,7 +497,7 @@ abstract class AbstractReservationService implements ReservationServiceInterface
     {
         if (
             !empty($data['payment']['gateway']) &&
-            ($data['payment']['gateway'] === 'onSite' || ($data['payment']['gateway'] === 'stripe' && empty($data['payment']['data']['paymentIntentId']))) &&
+            in_array($data['payment']['gateway'], ['onSite', 'stripe'], true) &&
             !$this->isBackendOrCabinetContext($data)
         ) {
             /** @var SettingsService $settingsService */
@@ -476,6 +551,25 @@ abstract class AbstractReservationService implements ReservationServiceInterface
      */
     public function processBooking($result, $appointmentData, $reservation, $save)
     {
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+
+        if (
+            !$save &&
+            !empty($appointmentData['ivy']) &&
+            $settingsService->isFeatureEnabled('ivy') &&
+            PluginInstaller::isPluginActive('ivyforms')
+        ) {
+            try {
+                IvyFormsService::validateBeforeSubmit($appointmentData['ivy']);
+            } catch (Exception $e) {
+                $result->setResult(CommandResult::RESULT_ERROR);
+                $result->setData(['message' => LiteFrontendStrings::getBookingStrings()['ivyforms_validation_failed']]);
+
+                return;
+            }
+        }
+
         $appointmentData['bookings'][0]['info'] = !empty($appointmentData['bookings'][0]['customer']) ? json_encode(
             [
                 'firstName' => $appointmentData['bookings'][0]['customer']['firstName'],

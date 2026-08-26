@@ -646,9 +646,6 @@ class AppointmentReservationService extends AbstractReservationService
                 $appointmentAS->calculateAndSetAppointmentEnd($appointment, $service);
             }
 
-            $originalAppointmentStatus = $existingAppointment ? $existingAppointment->getStatus() : null;
-            $originalBookingEnd = $existingAppointment ? $existingAppointment->getBookingEnd() : null;
-
             try {
                 if ($existingAppointment) {
                     $appointmentAS->update(
@@ -673,14 +670,17 @@ class AppointmentReservationService extends AbstractReservationService
                 // the committed appointment would keep holding the slot. Both entities already carry
                 // the ids of whatever was written, and the delete calls are id-guarded, so a partial
                 // save is cleaned up and a save that never started is a no-op.
-                if ($existingAppointment && $originalAppointmentStatus && $originalBookingEnd) {
+                if ($existingAppointment) {
                     try {
-                        $appointment->setStatus($originalAppointmentStatus);
-                        $appointment->setBookingEnd($originalBookingEnd);
-
+                        // written back as it was read, never as the request wanted it: update() commits the
+                        // appointment row before the booking and the payment, so a throwable raised after it
+                        // would otherwise leave the status, the end and the requested location behind
                         /** @var AppointmentRepository $appointmentRepository */
                         $appointmentRepository = $this->container->get('domain.booking.appointment.repository');
-                        $appointmentRepository->update($existingAppointment->getId()->getValue(), $appointment);
+                        $appointmentRepository->update(
+                            $existingAppointment->getId()->getValue(),
+                            $existingAppointment
+                        );
                     } catch (Throwable $restoreError) {
                         $this->container->getLoggerService()->channel(LoggerInterface::CHANNEL_BOOKING)->error(
                             'Amelia: appointment restore failed',
@@ -1738,6 +1738,8 @@ class AppointmentReservationService extends AbstractReservationService
             $nextBooking = $nextAppointment->getBookings()->getItem(
                 $nextPayment->getCustomerBookingId()->getValue()
             );
+
+            $this->setToken($nextBooking);
 
             /** @var Service $nextService */
             $nextService = $bookableAS->getAppointmentService(

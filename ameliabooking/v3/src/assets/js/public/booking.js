@@ -638,6 +638,7 @@ function getAppointmentNotifyData(store, response) {
       type: 'appointment',
       id: recurring.booking.id,
       appointmentStatusChanged: recurring.appointmentStatusChanged,
+      token: recurring.booking.token,
     })
   })
 
@@ -652,6 +653,7 @@ function getAppointmentNotifyData(store, response) {
       paymentId: 'paymentId' in response && response.paymentId ? response.paymentId : null,
       packageCustomerId: null,
       isPackageAppointment: response.isPackageAppointment,
+      token: response.booking.token,
     },
   }
 }
@@ -682,6 +684,7 @@ function getPackageNotifyData(response) {
       paymentId: 'paymentId' in response && response.paymentId ? response.paymentId : null,
       packageCustomerId: response.packageCustomerId,
       isPackageAppointment: true,
+      token: response.packageCustomerToken
     },
   }
 }
@@ -693,6 +696,7 @@ function getEventNotifyData(response) {
       type: 'event',
       appointmentStatusChanged: response.appointmentStatusChanged,
       paymentId: 'paymentId' in response && response.paymentId ? response.paymentId : null,
+      token: response.booking.token,
     },
   }
 }

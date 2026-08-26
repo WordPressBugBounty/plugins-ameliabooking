@@ -53,7 +53,7 @@ class UpdateAppointmentStatusCommandHandler extends CommandHandler
     public function handle(UpdateAppointmentStatusCommand $command)
     {
         /** @var AbstractUser $user */
-        $user = $command->authorize();
+        $user = $command->authorizeAppointmentStatusWrite();
 
         $result = new CommandResult();
 
@@ -82,18 +82,6 @@ class UpdateAppointmentStatusCommandHandler extends CommandHandler
 
         if ($userAS->isProvider($user) && $user->getId()->getValue() !== $appointment->getProviderId()->getValue()) {
             throw new AccessDeniedException('You are not allowed to update appointment');
-        }
-
-        if ($userAS->isCustomer($user)) {
-            /** @var CustomerBooking $booking */
-            foreach ($appointment->getBookings()->getItems() as $booking) {
-                if (
-                    $booking->getCustomerId()->getValue() !== $user->getId()->getValue() &&
-                    !$bookingAS->isBookingCanceledOrRejectedOrNoShow($booking->getStatus()->getValue())
-                ) {
-                    throw new AccessDeniedException('You are not allowed to update appointment');
-                }
-            }
         }
 
         $oldStatus = $appointment->getStatus()->getValue();

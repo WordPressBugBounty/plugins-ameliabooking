@@ -41,6 +41,7 @@ use AmeliaBooking\Domain\Factory\Payment\PaymentFactory;
 use AmeliaBooking\Domain\Factory\Stripe\StripeFactory;
 use AmeliaBooking\Domain\Factory\User\UserFactory;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
+use AmeliaBooking\Domain\Services\Logger\LoggerInterface;
 use AmeliaBooking\Domain\Services\Payment\PaymentServiceInterface;
 use AmeliaBooking\Domain\Services\Reservation\ReservationServiceInterface;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
@@ -455,7 +456,8 @@ class PaymentApplicationService
      * this method strips.
      *
      * @param array $data            Booking request data, payment object is replaced in place
-     * @param array $allowedGateways Gateways this endpoint accepts, defaults to all available ones
+     * @param array $allowedGateways Gateways this endpoint accepts; the request is refused unless it names
+     *                               one of them, so callers must pass the allow list explicitly
      *
      * @return void
      * @throws PaymentValidationException When the payment data from the request is not valid
@@ -479,13 +481,29 @@ class PaymentApplicationService
         // the entities in a cart can each allow different payment methods, so a cart is bound to the global
         // settings only - the same methods the booking form offers for it (see availablePayments in v3)
         /** @var AbstractBookable|null $bookable */
-        $bookable = !$this->isCartRequest($data) ? $reservationService->getBookableEntity(
-            [
-                'serviceId' => !empty($data['serviceId']) ? $data['serviceId'] : null,
-                'packageId' => !empty($data['packageId']) ? $data['packageId'] : null,
-                'eventId'   => !empty($data['eventId']) ? $data['eventId'] : null,
-            ]
-        ) : null;
+        $bookable = null;
+
+        if (!$this->isCartRequest($data)) {
+            try {
+                $bookable = $reservationService->getBookableEntity(
+                    [
+                        'serviceId' => !empty($data['serviceId']) ? $data['serviceId'] : null,
+                        'packageId' => !empty($data['packageId']) ? $data['packageId'] : null,
+                        'eventId'   => !empty($data['eventId']) ? $data['eventId'] : null,
+                    ]
+                );
+            } catch (Throwable $e) {
+                // every entity type throws a different exception when its id is missing or unknown, and none
+                // of them says which payment methods the request may use, so the request is refused here
+                // instead of being let through - the booking that follows fails on the very same data
+                $this->container->getLoggerService()->channel(LoggerInterface::CHANNEL_PAYMENT)->error(
+                    'Amelia: booked entity could not be looked up while validating payment data',
+                    ['exception' => $e->getMessage()]
+                );
+
+                throw new PaymentValidationException();
+            }
+        }
 
         $isAllowedPaymentMethod = in_array($paymentData['gateway'], $this->getAvailablePayments($bookable), true);
 
@@ -805,8 +823,15 @@ class PaymentApplicationService
      * The payment methods a reservation may be paid with, as a list of gateway names.
      *
      * A method is available for an entity only when it is enabled globally *and* for that entity, so
-     * an entity can never widen what the global settings offer. An entity that enables none of them
-     * has no payment settings of its own to honour and is bound to the global ones.
+     * an entity can never widen what the global settings offer, and an entity that disables every
+     * globally enabled method is left with none - it is not handed the global ones back.
+     *
+     * An entity records only the gateways it was asked about, so a gateway that is absent from its
+     * settings is not a disabled one - it inherits the global setting. An entity without payment
+     * settings of its own therefore ends up with exactly the globally enabled methods. This is the
+     * same reading the booking form applies when it decides which methods to offer (see
+     * availablePayments in v3), and the two have to agree: a method the form offers and this method
+     * rejects fails the booking with a payment error.
      *
      * @param AbstractBookable|null $bookable Null when the reservation books more than one entity at once (cart)
      *
@@ -837,25 +862,50 @@ class PaymentApplicationService
         if ($bookable !== null && $bookable->getSettings()) {
             $bookableSettings = json_decode($bookable->getSettings()->getValue(), true);
 
+            $bookablePayments = !empty($bookableSettings['payments']) && is_array($bookableSettings['payments'])
+                ? $bookableSettings['payments']
+                : [];
+
             $availableBookableMethods = [];
 
             if (
                 in_array(PaymentType::ON_SITE, $availableGeneralMethods, true) &&
-                !empty($bookableSettings['payments'][PaymentType::ON_SITE])
+                (
+                    !array_key_exists(PaymentType::ON_SITE, $bookablePayments) ||
+                    !empty($bookablePayments[PaymentType::ON_SITE])
+                )
             ) {
                 $availableBookableMethods[] = PaymentType::ON_SITE;
             }
 
             foreach ($gatewayPayments as $payment) {
-                if (
-                    in_array($payment, $availableGeneralMethods, true) &&
-                    !empty($bookableSettings['payments'][$payment]['enabled'])
-                ) {
+                if (!in_array($payment, $availableGeneralMethods, true)) {
+                    continue;
+                }
+
+                if (!array_key_exists($payment, $bookablePayments)) {
+                    $availableBookableMethods[] = $payment;
+
+                    continue;
+                }
+
+                $gatewaySettings = is_array($bookablePayments[$payment]) ? $bookablePayments[$payment] : [];
+
+                // WooCommerce keeps its product id next to the flag, and an entity that carries the id
+                // without the flag is read as enabled - again the reading the booking form applies
+                $isEnabled = $payment === PaymentType::WC && !array_key_exists('enabled', $gatewaySettings)
+                    ? true
+                    : !empty($gatewaySettings['enabled']);
+
+                if ($isEnabled) {
                     $availableBookableMethods[] = $payment;
                 }
             }
 
-            return $availableBookableMethods ?: $availableGeneralMethods;
+            // an entity that carries no payment settings has kept every globally enabled method above,
+            // so an empty list here means the entity really did disable them all - as the booking form
+            // reads it too, which then offers no payment method at all
+            return $availableBookableMethods;
         }
 
         return $availableGeneralMethods;
@@ -2589,6 +2639,12 @@ class PaymentApplicationService
                                 $nextPayment->getCustomerBookingId()->getValue()
                             );
 
+                            $nextToken = $bookingRepository->getToken($nextBooking->getId()->getValue());
+
+                            if (!empty($nextToken['token'])) {
+                                $nextBooking->setToken(new Token($nextToken['token']));
+                            }
+
                             /** @var Service $nextService */
                             $nextService = $bookableAS->getAppointmentService(
                                 $nextAppointment->getServiceId()->getValue(),
@@ -2868,6 +2924,19 @@ class PaymentApplicationService
                             );
                         }
 
+                        /** @var PackageCustomerRepository $packageCustomerRepository */
+                        $packageCustomerRepository = $this->container->get('domain.bookable.packageCustomer.repository');
+
+                        $packageCustomerToken = null;
+
+                        if ($payment->getPackageCustomerId()) {
+                            $packageToken = $packageCustomerRepository->getToken(
+                                $payment->getPackageCustomerId()->getValue()
+                            );
+
+                            $packageCustomerToken = !empty($packageToken['token']) ? $packageToken['token'] : null;
+                        }
+
                         $result->setData(
                             [
                             'type'                     => Entities::PACKAGE,
@@ -2881,6 +2950,7 @@ class PaymentApplicationService
                             'paymentId'                => $payment->getId()->getValue(),
                             'packageCustomerId'        => $payment->getPackageCustomerId() ?
                                 $payment->getPackageCustomerId()->getValue() : null,
+                            'packageCustomerToken'     => $packageCustomerToken,
                             'payment'                  => $payment ? $payment->toArray() : null,
                             'customerCabinetUrl'       => $customerCabinetUrl,
                             ]
@@ -2896,6 +2966,27 @@ class PaymentApplicationService
                 }
 
                 $cacheDataArray = json_decode($cache->getData()->getValue(), true);
+
+                $responseData = $result->getData();
+
+                $cachedResponse = !empty($cacheDataArray['response']) && is_array($cacheDataArray['response'])
+                    ? $cacheDataArray['response']
+                    : [];
+
+                foreach (['isCart', 'isPackageAppointment'] as $preservedField) {
+                    if (
+                        empty($responseData[$preservedField]) &&
+                        !empty($cachedResponse[$preservedField])
+                    ) {
+                        $responseData[$preservedField] = $cachedResponse[$preservedField];
+                    }
+                }
+
+                if (empty($responseData['packageCustomerToken']) && !empty($cachedResponse['packageCustomerToken'])) {
+                    $responseData['packageCustomerToken'] = $cachedResponse['packageCustomerToken'];
+                }
+
+                $result->setData($responseData);
 
                 $trigger = $cacheDataArray && isset($cacheDataArray['request']['trigger'])
                 ? $cacheDataArray['request']['trigger']

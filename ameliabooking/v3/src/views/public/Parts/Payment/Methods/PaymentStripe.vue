@@ -39,6 +39,7 @@
         :size="settingsValue.general.googleRecaptcha.invisible ? 'invisible' : null"
         :load-recaptcha-script="true"
         :sitekey="settingsValue.general.googleRecaptcha.siteKey"
+        @render="onRecaptchaRender"
         @verify="onRecaptchaVerify"
         @expired="onRecaptchaExpired"
       />
@@ -109,6 +110,12 @@ const emits = defineEmits(['payment-error'])
 let recaptchaRef = ref(null)
 let recaptchaValid = ref(false)
 let recaptchaResponse = ref(null)
+let recaptchaWidgetReady = ref(false)
+
+// Why the current token was requested, so onRecaptchaVerify knows whether to
+// create the payment intent or to confirm the payment: 'init' | 'pay' | 'express'
+let recaptchaPurpose = null
+let pendingRecaptchaPurpose = null
 
 let stripeClient = null
 let paymentElements = null
@@ -136,6 +143,66 @@ const settingsValue = computed(
 const labels = computed(() => injectedLabels?.value || injectedLabels || {})
 const shortcode = computed(() => shortcodeData?.value || shortcodeData || {})
 const stripeLocale = computed(() => (localLanguage?.value || localLanguage || '').replace('_', '-'))
+
+function recaptchaEnabled() {
+  return settingsValue.value.general.googleRecaptcha.enabled
+}
+
+function recaptchaInvisible() {
+  return settingsValue.value.general.googleRecaptcha.invisible
+}
+
+// The widget id only exists once the reCAPTCHA script has loaded and rendered,
+// which happens after this component mounts, so a request made before that is
+// queued and replayed from onRecaptchaRender.
+function requestRecaptchaToken(purpose) {
+  if (!recaptchaWidgetReady.value) {
+    pendingRecaptchaPurpose = purpose
+    return true
+  }
+
+  return executeRecaptcha(purpose)
+}
+
+function executeRecaptcha(purpose) {
+  if (!recaptchaRef.value || typeof recaptchaRef.value.execute !== 'function') {
+    return failRecaptchaRequest()
+  }
+
+  recaptchaPurpose = purpose
+
+  try {
+    // The previous token is single use, so it has to be cleared first.
+    recaptchaRef.value.reset()
+    recaptchaRef.value.execute()
+  } catch (e) {
+    recaptchaPurpose = null
+    return failRecaptchaRequest()
+  }
+
+  return true
+}
+
+// Without a token the intent cannot be created, so drop the loading skeleton
+// instead of leaving it up over an element that will never mount.
+function failRecaptchaRequest() {
+  recaptchaValid.value = false
+  stripeElementsLoading.value = false
+  emits('payment-error', labels.value.recaptcha_error)
+  store.commit('setLoading', false)
+
+  return false
+}
+
+function onRecaptchaRender() {
+  recaptchaWidgetReady.value = true
+
+  if (pendingRecaptchaPurpose) {
+    const purpose = pendingRecaptchaPurpose
+    pendingRecaptchaPurpose = null
+    executeRecaptcha(purpose)
+  }
+}
 
 function getFormData() {
   return {
@@ -234,8 +301,7 @@ async function handleStripePaymentFailure(message) {
 
   try {
     await cancelPendingStripePayment()
-    invalidateStripePaymentIntentRequest(getStripeInstanceId())
-    await initializeStripePayment()
+    await reinitializeStripePayment()
     emits('payment-error', message)
   } finally {
     store.commit('setLoading', false)
@@ -364,8 +430,8 @@ async function initializeStripePayment() {
       event.resolve()
     })
 
-    expressCheckoutElement.on('confirm', async function () {
-      await confirmStripePayment(true)
+    expressCheckoutElement.on('confirm', function () {
+      continueWithStripePayment(true)
     })
   } catch (e) {
     if (initVersion !== stripeInitVersion) {
@@ -376,6 +442,25 @@ async function initializeStripePayment() {
     resetStripeState()
     errorBooking(e)
   }
+}
+
+// Every path that re-creates the intent has to come through here: the token that
+// verified the previous intent is already consumed, so invisible mode needs a
+// fresh one before re-initializing.
+async function reinitializeStripePayment() {
+  invalidateStripePaymentIntentRequest(getStripeInstanceId())
+  // The old intent is gone from here on, so nothing may confirm against it while
+  // the replacement is being created.
+  stripeInitialized.value = false
+  await nextTick()
+
+  if (recaptchaEnabled() && recaptchaInvisible()) {
+    stripeElementsLoading.value = true
+    requestRecaptchaToken('init')
+    return
+  }
+
+  await initializeStripePayment()
 }
 
 async function completeStripePayment(paymentIntentId, cacheName) {
@@ -504,13 +589,37 @@ function onRecaptchaVerify(response) {
   recaptchaValid.value = true
   recaptchaResponse.value = response
 
-  if (!stripeInitialized.value) {
+  const purpose = recaptchaPurpose
+  recaptchaPurpose = null
+
+  // The intent is created with this token; there is nothing to confirm yet. A tick
+  // on the visible checkbox arrives without a purpose and has to start the
+  // initialization as well, as long as there is no usable intent yet.
+  if (purpose === 'init' || (!purpose && !stripeInitialized.value)) {
     initializeStripePayment()
+    return
   }
 
-  if (settingsValue.value.general.googleRecaptcha.invisible) {
-    confirmStripePayment(false)
+  if (purpose !== 'pay' && purpose !== 'express') {
+    return
   }
+
+  const isExpressCheckout = purpose === 'express'
+
+  // The intent has to exist before it can be confirmed: it either failed to
+  // initialize or was invalidated, so rebuild it with this token and only then
+  // continue with the payment the customer already asked for.
+  if (!stripeInitialized.value) {
+    initializeStripePayment().then(function () {
+      if (stripeInitialized.value) {
+        confirmStripePayment(isExpressCheckout)
+      }
+    })
+
+    return
+  }
+
+  confirmStripePayment(isExpressCheckout)
 }
 
 function successBooking(response) {
@@ -535,28 +644,37 @@ function errorBooking(error) {
 
 let paymentRef = inject('paymentRef')
 
+function continueWithStripePayment(isExpressCheckout = false) {
+  if (!recaptchaEnabled()) {
+    confirmStripePayment(isExpressCheckout)
+    return
+  }
+
+  if (recaptchaInvisible()) {
+    // The intent was verified when it was created and /complete does not
+    // re-check, so a second token here would be spent for nothing.
+    if (stripeInitialized.value) {
+      confirmStripePayment(isExpressCheckout)
+      return
+    }
+
+    // Initialization failed earlier: get a token and rebuild the intent.
+    requestRecaptchaToken(isExpressCheckout ? 'express' : 'pay')
+    return
+  }
+
+  if (!recaptchaValid.value) {
+    emits('payment-error', labels.value.recaptcha_error)
+    store.commit('setLoading', false)
+    return
+  }
+
+  confirmStripePayment(isExpressCheckout)
+}
+
 function continueWithBooking() {
   footerButtonReset()
-
-  if (settingsValue.value.general.googleRecaptcha.enabled) {
-    if (settingsValue.value.general.googleRecaptcha.invisible) {
-      if (!recaptchaRef.value || typeof recaptchaRef.value.execute !== 'function') {
-        recaptchaValid.value = false
-        emits('payment-error', labels.value.recaptcha_error)
-        store.commit('setLoading', false)
-        return
-      }
-
-      recaptchaRef.value.execute()
-    } else if (!recaptchaValid.value) {
-      emits('payment-error', labels.value.recaptcha_error)
-      store.commit('setLoading', false)
-    } else {
-      confirmStripePayment(false)
-    }
-  } else {
-    confirmStripePayment(false)
-  }
+  continueWithStripePayment(false)
 }
 
 watchEffect(
@@ -585,18 +703,22 @@ watch(
       return
     }
 
-    invalidateStripePaymentIntentRequest(getStripeInstanceId())
-    await nextTick()
-    initializeStripePayment()
+    await reinitializeStripePayment()
   },
 )
 
 onMounted(() => {
-  if (
-    !settingsValue.value.general.googleRecaptcha.enabled ||
-    settingsValue.value.general.googleRecaptcha.invisible
-  ) {
+  if (!recaptchaEnabled()) {
     initializeStripePayment()
+    return
+  }
+
+  // Invisible badge: the intent request is reCAPTCHA-gated, so get a token first
+  // and let onRecaptchaVerify start the initialization. The visible checkbox
+  // waits for the customer's tick, which lands in onRecaptchaVerify too.
+  if (recaptchaInvisible()) {
+    stripeElementsLoading.value = true
+    requestRecaptchaToken('init')
   }
 })
 

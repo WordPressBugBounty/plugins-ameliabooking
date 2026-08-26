@@ -436,7 +436,9 @@ export default {
             ? true
             : pack.bookable.filter((b) =>
                 b.providers.length
-                  ? b.providers.find((p) => preselected.employee.includes(p.id))
+                  ? b.providers.find((p) =>
+                      preselected.employee.map((e) => parseInt(e)).includes(p.id),
+                    )
                   : preselected.employee
                       .map((e) => parseInt(e))
                       .filter((provider) =>

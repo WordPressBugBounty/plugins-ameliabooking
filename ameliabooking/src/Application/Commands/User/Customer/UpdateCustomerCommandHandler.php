@@ -229,6 +229,21 @@ class UpdateCustomerCommandHandler extends CommandHandler
             return $result;
         }
 
+        // Provider cabinet sessions must use the provider as caller, not null (which would
+        // look like own-profile). Customer cabinet leaves $provider null so null = self.
+        $callerForWpCredentials = $provider !== null ? $provider : $currentUser;
+        $canWriteWpCredentials  = $userAS->canWriteLinkedWpCredentials($callerForWpCredentials, $oldUser);
+
+        $emailChanged = $oldUser->getEmail()->getValue() !== $newUser->getEmail()->getValue();
+        $linkedWpId   = $newUser->getExternalId() ? $newUser->getExternalId()->getValue() : null;
+
+        if ($linkedWpId && $emailChanged && !$canWriteWpCredentials) {
+            $result->setResult(CommandResult::RESULT_ERROR);
+            $result->setMessage('You are not allowed to change the linked WordPress account email.');
+
+            return $result;
+        }
+
         $userRepository->beginTransaction();
 
         if ($command->getField('password') && !$isProvider) {
@@ -236,9 +251,12 @@ class UpdateCustomerCommandHandler extends CommandHandler
 
             $userRepository->updateFieldById($command->getArg('id'), $newPassword->getValue(), 'password');
 
-            if ($newUser->getExternalId() && $newUser->getExternalId()->getValue()) {
+            // Propagate to the linked WP user only when the caller is an admin or the
+            // customer updating their own profile. Blocks a Manager from resetting another
+            // user's WordPress password.
+            if ($linkedWpId && $canWriteWpCredentials) {
                 add_filter('amelia_user_profile_updated', '__return_true');
-                wp_set_password($command->getField('password'), $newUser->getExternalId()->getValue());
+                wp_set_password($command->getField('password'), $linkedWpId);
                 remove_filter('amelia_user_profile_updated', '__return_true');
             }
         }
@@ -259,16 +277,19 @@ class UpdateCustomerCommandHandler extends CommandHandler
             $userAS = $this->getContainer()->get('application.user.service');
 
             $userAS->setWpUserIdForNewUser($command->getArg('id'), $newUser, Entities::CUSTOMER);
-        } elseif ($newUser->getExternalId() && $newUser->getExternalId()->getValue()) {
+        } elseif ($linkedWpId) {
+            $wpUserData = [
+                'ID'         => $linkedWpId,
+                'first_name' => $newUser->getFirstName() ? $newUser->getFirstName()->getValue() : '',
+                'last_name'  => $newUser->getLastName() ? $newUser->getLastName()->getValue() : '',
+            ];
+
+            if ($emailChanged && $canWriteWpCredentials) {
+                $wpUserData['user_email'] = $newUser->getEmail() ? $newUser->getEmail()->getValue() : '';
+            }
+
             add_filter('amelia_user_profile_updated', '__return_true');
-            wp_update_user(
-                [
-                    'ID' => $newUser->getExternalId()->getValue(),
-                    'first_name' => $newUser->getFirstName() ? $newUser->getFirstName()->getValue() : '',
-                    'last_name'  => $newUser->getLastName() ? $newUser->getLastName()->getValue() : '',
-                    'user_email' => $newUser->getEmail() ? $newUser->getEmail()->getValue() : ''
-                ]
-            );
+            wp_update_user($wpUserData);
 
             if ($uid = get_current_user_id()) {
                 clean_user_cache($uid);

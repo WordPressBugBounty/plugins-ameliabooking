@@ -9,11 +9,9 @@ namespace AmeliaBooking\Application\Commands\Payment;
 
 use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Application\Commands\CommandResult;
-use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Services\Reservation\ReservationServiceInterface;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
-use AmeliaBooking\Domain\ValueObjects\String\BookingType;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Services\Payment\SquareService;
 use Exception;
@@ -47,9 +45,6 @@ class CalculatePaymentAmountCommandHandler extends CommandHandler
         /** @var ReservationServiceInterface $reservationService */
         $reservationService = $this->container->get('application.reservation.service')->get($command->getField('type'));
 
-        /** @var PaymentApplicationService $paymentAS */
-        $paymentAS = $this->container->get('application.payment.service');
-
         $squareSettings = $settingsService->getCategorySettings('payments')['square'];
 
         $reservation = $reservationService->getNew(true, true, true);
@@ -64,16 +59,6 @@ class CalculatePaymentAmountCommandHandler extends CommandHandler
         if ($result->getResult() === CommandResult::RESULT_ERROR) {
             return $result;
         }
-
-        $transfers = [];
-
-        $paymentAS->setTransfers(
-            $requestData['payment'],
-            $reservation,
-            new BookingType($command->getField('type')),
-            $transfers,
-            false
-        );
 
         $paymentAmount = $reservationService->getReservationPaymentAmount($reservation);
 
@@ -90,7 +75,6 @@ class CalculatePaymentAmountCommandHandler extends CommandHandler
             [
                 'amount'      => $paymentAmount,
                 'currency'    => $settingsService->getCategorySettings('payments')['currency'],
-                'transfers'   => $transfers,
                 'countryCode' => $countryCode,
             ]
         );

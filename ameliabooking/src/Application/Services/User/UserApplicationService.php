@@ -329,6 +329,42 @@ class UserApplicationService
     }
 
     /**
+     * Whether the caller may write password/email onto the target user's linked WP account.
+     *
+     * Allowed when the caller is an Amelia admin, or when the caller is updating their own
+     * profile. A null $currentUser means a token-only cabinet session where the target was
+     * already authorized as the caller. A non-null caller without a matching Amelia ID
+     * (e.g. Manager) must not be treated as the account owner.
+     *
+     * @param AbstractUser|null $currentUser
+     * @param AbstractUser      $targetUser
+     *
+     * @return bool
+     */
+    public function canWriteLinkedWpCredentials(?AbstractUser $currentUser, AbstractUser $targetUser): bool
+    {
+        if ($currentUser && $currentUser->getType() === AbstractUser::USER_ROLE_ADMIN) {
+            return true;
+        }
+
+        $targetId = $targetUser->getId() ? $targetUser->getId()->getValue() : null;
+
+        if ($targetId === null) {
+            return false;
+        }
+
+        // Token-only cabinet session (get_current_user_id() returns 0): $currentUser is null
+        // and prior auth already ensured the token belongs to $targetUser.
+        if ($currentUser === null) {
+            return true;
+        }
+
+        $callerId = $currentUser->getId() ? $currentUser->getId()->getValue() : null;
+
+        return $callerId !== null && $callerId === $targetId;
+    }
+
+    /**
      * @param string $email
      * @param string $type
      *
@@ -338,6 +374,12 @@ class UserApplicationService
     private function isRoleForEmailAllowed($email, $type)
     {
         $user = get_user_by('email', $email);
+
+        // Network super admins may have no role on the current site; roles alone is not enough.
+        if ($user && is_super_admin($user->ID)) {
+            return false;
+        }
+
         $blockedCustomerRoles = ['administrator', 'wpamelia-manager', 'wpamelia-provider', SuperAdminRoleService::ROLE];
         $blockedProviderRoles = ['administrator', 'wpamelia-manager', 'wpamelia-customer', SuperAdminRoleService::ROLE];
 
@@ -367,7 +409,11 @@ class UserApplicationService
     {
         $user = get_user_by('ID', $externalId);
 
-        return $user && array_intersect(["wpamelia-$type"], (array)$user->roles);
+        if (!$user || is_super_admin($user->ID)) {
+            return false;
+        }
+
+        return (bool)array_intersect(["wpamelia-$type"], (array)$user->roles);
     }
 
     /**

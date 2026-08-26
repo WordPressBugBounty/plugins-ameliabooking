@@ -5,6 +5,7 @@ namespace AmeliaBooking\Application\Commands;
 use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Commands\Booking\Appointment\AddBookingCommand;
 use AmeliaBooking\Application\Commands\Booking\Appointment\DeleteBookingRemotelyCommand;
+use AmeliaBooking\Application\Commands\Booking\Appointment\SuccessfulBookingCommand;
 use AmeliaBooking\Application\Commands\Notification\SendUndeliveredNotificationsCommand;
 use AmeliaBooking\Application\Commands\Notification\UpdateSMSNotificationHistoryCommand;
 use AmeliaBooking\Application\Commands\Outlook\FetchAccessTokenWithAuthCodeOutlookCommand;
@@ -190,6 +191,7 @@ abstract class Command
             !($this instanceof CalculatePaymentAmountCommand) &&
             !($this instanceof AddBookingCommand) &&
             !($this instanceof DeleteBookingRemotelyCommand) &&
+            !($this instanceof SuccessfulBookingCommand) &&
             !($this instanceof RazorpayPaymentNotifyCommand) &&
             !($this instanceof SquareRefundWebhookCommand) &&
             !($this instanceof DisconnectFromSquareAccountCommand) &&
@@ -389,5 +391,26 @@ abstract class Command
         }
 
         return $this->getUserApplicationService()->authorization(null, null);
+    }
+
+    /**
+     * Authorize appointment status write: require write_status capability, or fall
+     * through to provider cabinet JWT auth (mobile/employee panel path).
+     *
+     * @return AbstractUser
+     *
+     * @throws AuthorizationException
+     * @throws AccessDeniedException
+     */
+    public function authorizeAppointmentStatusWrite(): AbstractUser
+    {
+        if ($this->getPermissionService()->currentUserCanWriteStatus(Entities::APPOINTMENTS)) {
+            return $this->getUserApplicationService()->authorization(
+                $this->getPage() === 'cabinet' ? $this->getToken() : null,
+                $this->getCabinetType()
+            );
+        }
+
+        return $this->authorize(Entities::PROVIDER);
     }
 }

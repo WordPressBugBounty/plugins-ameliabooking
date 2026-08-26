@@ -6,7 +6,7 @@ import {
   useBookingError,
   useNotify,
 } from './booking.js'
-import httpClient from '../../../plugins/axios'
+import httpClient, { useAmeliaNonce } from '../../../plugins/axios'
 import { settings } from '../../../plugins/settings'
 
 function fixType(item, key) {
@@ -126,6 +126,10 @@ function useRestore(store, shortcodeData) {
   }
 
   sessionStorage.removeItem('ameliaCacheData')
+
+  // The gateway redirect reloaded the page, so the nonce the booking request returned is gone.
+  // The cache is localized with a nonce minted for this page load - use it for the requests below.
+  useAmeliaNonce(data.wpAmeliaNonce)
 
   try {
     window.history.replaceState(
