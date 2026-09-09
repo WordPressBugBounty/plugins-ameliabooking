@@ -233,7 +233,7 @@ class UpdateProviderCommandHandler extends CommandHandler
             return $result;
         }
 
-        $canWriteWpCredentials = $userAS->canWriteLinkedWpCredentials($currentUser, $oldUser);
+        $canWriteWpCredentials = $userAS->canWriteWpCredentials($currentUser, $oldUser);
         $emailChanged          = $oldUser->getEmail()->getValue() !== $newUser->getEmail()->getValue();
         $linkedWpId            = $newUser->getExternalId() ? $newUser->getExternalId()->getValue() : null;
 

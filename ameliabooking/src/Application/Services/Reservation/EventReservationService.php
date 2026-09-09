@@ -9,6 +9,7 @@ use AmeliaBooking\Application\Services\Coupon\CouponApplicationService;
 use AmeliaBooking\Application\Services\Deposit\AbstractDepositApplicationService;
 use AmeliaBooking\Application\Services\QrCode\QrCodeApplicationService;
 use AmeliaBooking\Application\Services\Tax\TaxApplicationService;
+use AmeliaBooking\Application\Services\WaitingList\WaitingListService;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\BookingCancellationException;
 use AmeliaBooking\Domain\Common\Exceptions\BookingsLimitReachedException;
@@ -104,6 +105,9 @@ class EventReservationService extends AbstractReservationService
 
         /** @var AbstractDepositApplicationService $depositAS */
         $depositAS = $this->container->get('application.deposit.service');
+
+        /** @var WaitingListService $waitingListService */
+        $waitingListService = $this->container->get('application.waitingList.service');
 
         $this->manageTaxes($eventData);
 
@@ -229,10 +233,25 @@ class EventReservationService extends AbstractReservationService
 
         $isCustomer = (!$currentUser || ($currentUser->getType() === AbstractUser::USER_ROLE_CUSTOMER));
 
+        $isWaitingListBooking =
+            $booking->getStatus()->getValue() === BookingStatus::WAITING &&
+            $waitingListService->isAllowedWaitingForEventBooking($event, $booking);
+
+        $reservation->setAllowedWaiting(
+            new BooleanValueObject(
+                $isWaitingListBooking
+            )
+        );
+
+        $hasFreePlaces = $this->hasFreePlaces($event, $booking) || $isWaitingListBooking;
+
         if (
             $reservation->hasAvailabilityValidation()->getValue() &&
             $isCustomer &&
-            !$this->isBookable($event, $booking, DateTimeService::getNowDateTimeObject())
+            (
+                !$this->isBookable($event, DateTimeService::getNowDateTimeObject()) ||
+                !$hasFreePlaces
+            )
         ) {
             throw new BookingUnavailableException(
                 FrontendStrings::getCommonStrings()['time_slot_unavailable']
@@ -761,15 +780,37 @@ class EventReservationService extends AbstractReservationService
     }
 
     /**
-     * @param Event           $reservation
-     * @param CustomerBooking $newBooking
-     * @param DateTime        $dateTime
+     * @param Event    $reservation
+     * @param DateTime $dateTime
      *
      * @return boolean
      *
      * @throws InvalidArgumentException
      */
-    public function isBookable($reservation, $newBooking, $dateTime)
+    public function isBookable($reservation, $dateTime)
+    {
+        $bookingCloses = $reservation->getBookingCloses() ?
+            $reservation->getBookingCloses()->getValue() :
+            $reservation->getPeriods()->getItem(0)->getPeriodStart()->getValue();
+
+        $bookingOpens = $reservation->getBookingOpens() ?
+            $reservation->getBookingOpens()->getValue() :
+            $reservation->getCreated()->getValue();
+
+        return $dateTime > $bookingOpens &&
+            $dateTime < $bookingCloses &&
+            in_array($reservation->getStatus()->getValue(), [BookingStatus::APPROVED, BookingStatus::PENDING], true);
+    }
+
+    /**
+     * @param Event           $reservation
+     * @param CustomerBooking $newBooking
+     *
+     * @return boolean
+     *
+     * @throws InvalidArgumentException
+     */
+    public function hasFreePlaces($reservation, $newBooking)
     {
         if ($reservation->getCustomPricing() && $reservation->getCustomPricing()->getValue() && !$reservation->getMaxCustomCapacity()) {
             $availableTicketsSpots = [];
@@ -901,80 +942,7 @@ class EventReservationService extends AbstractReservationService
             }
         }
 
-        $bookingCloses = $reservation->getBookingCloses() ?
-            $reservation->getBookingCloses()->getValue() :
-            $reservation->getPeriods()->getItem(0)->getPeriodStart()->getValue();
-
-        $bookingOpens = $reservation->getBookingOpens() ?
-            $reservation->getBookingOpens()->getValue() :
-            $reservation->getCreated()->getValue();
-
-        $hasWaitingList = false;
-        $eventSettings  = $reservation->getSettings() ? json_decode($reservation->getSettings()->getValue(), true) : null;
-
-        /** @var SettingsService $settingsDS */
-        $settingsDS          = $this->container->get('domain.settings.service');
-
-        if (
-            $settingsDS->isFeatureEnabled('waitingList') && $eventSettings && !empty($eventSettings['waitingList']) &&
-            $eventSettings['waitingList']['enabled']
-        ) {
-            $waitingCustomers = 0;
-
-            if (!$reservation->getBookings()->length()) {
-                if ($reservation->getCustomPricing()->getValue()) {
-                    /** @var EventTicket $ticket */
-                    foreach ($reservation->getCustomTickets()->getItems() as $ticket) {
-                        $waitingCustomers += $ticket->getWaiting() ? $ticket->getWaiting()->getValue() : 0;
-                    }
-                } else {
-                    $waitingCustomers += $reservation->getSpotsWaiting() ? $reservation->getSpotsWaiting()->getValue() : 0;
-                }
-            }
-
-            /** @var CustomerBooking $booking */
-            foreach ($reservation->getBookings()->getItems() as $booking) {
-                if ($booking->getStatus()->getValue() === BookingStatus::WAITING) {
-                    if ($reservation->getCustomPricing()->getValue()) {
-                        foreach ($booking->getTicketsBooking()->getItems() as $item) {
-                            $waitingCustomers += $item->getPersons()->getValue();
-                        }
-                    } else {
-                        $waitingCustomers += $booking->getPersons()->getValue();
-                    }
-                }
-            }
-
-            if ($newBooking && $reservation->getCustomPricing() && $reservation->getCustomPricing()->getValue()) {
-                foreach ($newBooking->getTicketsBooking()->getItems() as $item) {
-                    if (!$reservation->getMaxCustomCapacity()) {
-                        $ticketData = $reservation->getCustomTickets()->getItem($item->getId()->getValue());
-
-                        $waitingListSpots = $ticketData->getWaitingListSpots() ? $ticketData->getWaitingListSpots()->getValue() : 0;
-
-                        $personsValue = $item->getPersons() ? $item->getPersons()->getValue() : 0;
-                        $waitingValue = $ticketData->getWaiting() ? $ticketData->getWaiting()->getValue() : 0;
-
-                        $hasWaitingList = $waitingListSpots >= ($personsValue + $waitingValue);
-                    }
-                }
-
-                if ($reservation->getMaxCustomCapacity()) {
-                    $hasWaitingList = $eventSettings['waitingList']['maxCapacity'] > $waitingCustomers;
-                }
-            } else {
-                $hasWaitingList = $eventSettings['waitingList']['maxCapacity'] > $waitingCustomers;
-            }
-
-            $eventSettings['waitingList']['peopleWaiting'] = $waitingCustomers;
-
-            $reservation->setSettings(new Json(json_encode($eventSettings)));
-        }
-
-        return $dateTime > $bookingOpens &&
-            $dateTime < $bookingCloses &&
-            ($hasCapacity || ($hasWaitingList && $newBooking && $newBooking->getStatus()->getValue() === BookingStatus::WAITING)) &&
-            in_array($reservation->getStatus()->getValue(), [BookingStatus::APPROVED, BookingStatus::PENDING], true);
+        return $hasCapacity;
     }
 
     /**

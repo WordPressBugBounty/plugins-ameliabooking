@@ -9,6 +9,7 @@ namespace AmeliaBooking\Infrastructure\Repository\Payment;
 
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
+use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\Payment\Payment;
 use AmeliaBooking\Domain\Factory\Payment\PaymentFactory;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
@@ -334,7 +335,7 @@ class PaymentRepository extends AbstractRepository
      * @return array
      * @throws QueryExecutionException
      */
-    public function getFilteredIds($criteria, $itemsPerPage = null, $invoice = false)
+    public function getFilteredIds($criteria, $itemsPerPage = null, $invoice = false): array
     {
         $params = [];
         $appointmentParams1 = [];
@@ -607,10 +608,7 @@ class PaymentRepository extends AbstractRepository
             $itemsPerPage ?: (!empty($criteria['limit']) ? (int)$criteria['limit'] : 0)
         );
 
-        $bookingTypeCondition = '';
-        if (!empty($criteria['bookingTypes'])) {
-            $bookingTypeCondition = 'WHERE type IN ("' . implode('", "', $criteria['bookingTypes']) . '")';
-        }
+        $bookingTypeCondition = $this->buildBookingTypeCondition($criteria, $params);
 
         try {
             $order = "ORDER BY id, {$basedOnDate}";
@@ -647,7 +645,7 @@ class PaymentRepository extends AbstractRepository
      * @return int
      * @throws QueryExecutionException
      */
-    public function getFilteredIdsCount($criteria, $invoice = false)
+    public function getFilteredIdsCount($criteria, $invoice = false): int
     {
         $params = [];
         $appointmentParams1 = [];
@@ -907,10 +905,7 @@ class PaymentRepository extends AbstractRepository
             $params           = array_merge($params, $appointmentParams1, $appointmentParams2, $eventParams);
         }
 
-        $bookingTypeCondition = '';
-        if (!empty($criteria['bookingTypes'])) {
-            $bookingTypeCondition = 'WHERE type IN ("' . implode('", "', $criteria['bookingTypes']) . '")';
-        }
+        $bookingTypeCondition = $this->buildBookingTypeCondition($criteria, $params);
 
         // Invoice page: count distinct invoices across the union to mirror list grouping
         if ($invoice) {
@@ -1122,6 +1117,26 @@ class PaymentRepository extends AbstractRepository
         }
 
         return true;
+    }
+
+    private function buildBookingTypeCondition(array $criteria, array &$params): string
+    {
+        $types = array_intersect(
+            [Entities::APPOINTMENT, Entities::PACKAGE, Entities::EVENT],
+            (array) ($criteria['bookingTypes'] ?? [])
+        );
+
+        $placeholders = [];
+        foreach ($types as $index => $type) {
+            $placeholders[] = ':bookingType' . $index;
+            $params[':bookingType' . $index] = $type;
+        }
+
+        if ($placeholders === []) {
+            return '';
+        }
+
+        return 'WHERE type IN (' . implode(', ', $placeholders) . ')';
     }
 
     /**

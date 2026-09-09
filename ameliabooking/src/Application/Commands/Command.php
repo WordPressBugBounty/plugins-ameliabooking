@@ -45,6 +45,8 @@ abstract class Command
 
     private $userApplicationService;
 
+    private $validApiCall = false;
+
     /**
      * Command constructor.
      *
@@ -155,6 +157,24 @@ abstract class Command
     public function getToken()
     {
         return $this->token;
+    }
+
+    /**
+     * Whether the request that created this command was authenticated with an Amelia API key.
+     *
+     * @param bool $validApiCall
+     */
+    public function setValidApiCall($validApiCall): void
+    {
+        $this->validApiCall = (bool)$validApiCall;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isValidApiCall(): bool
+    {
+        return $this->validApiCall;
     }
 
     /**

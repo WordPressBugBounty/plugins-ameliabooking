@@ -141,6 +141,7 @@ abstract class Controller
 
         $command->setPermissionService($this->permissionsService);
         $command->setUserApplicationService($this->userApplicationService);
+        $command->setValidApiCall($validApiCall);
 
         try {
             /** @var CommandResult $commandResult */

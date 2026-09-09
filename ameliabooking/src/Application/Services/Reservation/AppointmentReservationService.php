@@ -537,6 +537,13 @@ class AppointmentReservationService extends AbstractReservationService
             )
         );
 
+        $isWaitingListBooking =
+            $booking->getStatus()->getValue() === BookingStatus::WAITING &&
+            $existingAppointment &&
+            $waitingListService->isAllowedWaitingForAppointmentBooking($service, $existingAppointment, $booking);
+
+        $reservation->setAllowedWaiting(new BooleanValueObject($isWaitingListBooking));
+
         if ($inspectTimeSlot) {
             /** @var ApplicationTimeSlotService $applicationTimeSlotService */
             $applicationTimeSlotService = $this->container->get('application.timeSlot.service');
@@ -570,8 +577,6 @@ class AppointmentReservationService extends AbstractReservationService
                     'quantity' => $booking->getExtras()->getItem($extraKey)->getQuantity()->getValue(),
                 ];
             }
-
-            $isWaitingListBooking = $waitingListService->isWaitingListBooking($service, $appointmentData, $booking);
 
             if (
                 !$isWaitingListBooking &&

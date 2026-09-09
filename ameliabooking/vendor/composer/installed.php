@@ -218,9 +218,9 @@
             'dev_requirement' => false,
         ),
         'melograno/usage-tracker' => array(
-            'pretty_version' => '1.1.0',
-            'version' => '1.1.0.0',
-            'reference' => '5c848326d3bb63c5d54d97d424020d3543d124dd',
+            'pretty_version' => '1.3.13',
+            'version' => '1.3.13.0',
+            'reference' => 'd6a47ba241e78ecbd3f646805cc617b546cdf8d8',
             'type' => 'library',
             'install_path' => __DIR__ . '/../melograno/usage-tracker',
             'aliases' => array(),

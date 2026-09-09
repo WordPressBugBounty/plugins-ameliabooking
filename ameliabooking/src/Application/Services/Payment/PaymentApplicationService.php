@@ -540,8 +540,12 @@ class PaymentApplicationService
                     throw new PaymentValidationException();
                 }
 
+                $isWaitingListBooking =
+                    $reservation->getBooking()->getStatus()->getValue() === BookingStatus::WAITING &&
+                    $reservation->isAllowedWaiting()->getValue();
+
                 // on site is disabled, so only a reservation that has nothing to pay may be recorded with it
-                if ($paymentAmount > 0) {
+                if ($paymentAmount > 0 && !$isWaitingListBooking) {
                     throw new PaymentValidationException();
                 }
             }

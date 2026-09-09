@@ -55,6 +55,9 @@ class Reservation
     private $isCart;
 
     /** @var BooleanValueObject */
+    private $allowedWaiting;
+
+    /** @var BooleanValueObject */
     private $applyDeposit;
 
     /** @var array */
@@ -405,5 +408,21 @@ class Reservation
     public function setApplyDeposit(BooleanValueObject $applyDeposit)
     {
         $this->applyDeposit = $applyDeposit;
+    }
+
+    /**
+     * @return BooleanValueObject
+     */
+    public function isAllowedWaiting()
+    {
+        return $this->allowedWaiting;
+    }
+
+    /**
+     * @param BooleanValueObject $allowedWaiting
+     */
+    public function setAllowedWaiting(BooleanValueObject $allowedWaiting)
+    {
+        $this->allowedWaiting = $allowedWaiting;
     }
 }

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit8546b6d03bbd4f35ccdfebf12571e0ca
+class ComposerStaticInit49ee5c1c9ff515cd9544acb6a584fcf0
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c_am' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -2383,8 +2383,10 @@ class ComposerStaticInit8546b6d03bbd4f35ccdfebf12571e0ca
         'AmeliaVendor\\Melograno\\UsageTracker\\Collectors\\ConsentNoticeCollectorInterface' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/ConsentNoticeCollectorInterface.php',
         'AmeliaVendor\\Melograno\\UsageTracker\\Collectors\\PluginCollectorInterface' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/PluginCollectorInterface.php',
         'AmeliaVendor\\Melograno\\UsageTracker\\Collectors\\Plugin\\AmeliaCollector' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/Plugin/AmeliaCollector.php',
+        'AmeliaVendor\\Melograno\\UsageTracker\\Collectors\\Plugin\\AmeliaFeatureTelemetry' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/Plugin/AmeliaFeatureTelemetry.php',
         'AmeliaVendor\\Melograno\\UsageTracker\\Collectors\\Plugin\\IvyFormsCollector' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/Plugin/IvyFormsCollector.php',
         'AmeliaVendor\\Melograno\\UsageTracker\\Collectors\\Plugin\\WpDataTablesCollector' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/Plugin/WpDataTablesCollector.php',
+        'AmeliaVendor\\Melograno\\UsageTracker\\Collectors\\Plugin\\WpDataTablesFeatureTelemetry' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Collectors/Plugin/WpDataTablesFeatureTelemetry.php',
         'AmeliaVendor\\Melograno\\UsageTracker\\Core\\Anonymizer' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Core/Anonymizer.php',
         'AmeliaVendor\\Melograno\\UsageTracker\\Core\\ConsentManager' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Core/ConsentManager.php',
         'AmeliaVendor\\Melograno\\UsageTracker\\Core\\ConsentNoticeService' => __DIR__ . '/..' . '/melograno/usage-tracker/src/Core/ConsentNoticeService.php',
@@ -11928,10 +11930,10 @@ class ComposerStaticInit8546b6d03bbd4f35ccdfebf12571e0ca
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit8546b6d03bbd4f35ccdfebf12571e0ca::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit8546b6d03bbd4f35ccdfebf12571e0ca::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit8546b6d03bbd4f35ccdfebf12571e0ca::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit8546b6d03bbd4f35ccdfebf12571e0ca::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit49ee5c1c9ff515cd9544acb6a584fcf0::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit49ee5c1c9ff515cd9544acb6a584fcf0::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit49ee5c1c9ff515cd9544acb6a584fcf0::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit49ee5c1c9ff515cd9544acb6a584fcf0::$classMap;
 
         }, null, ClassLoader::class);
     }

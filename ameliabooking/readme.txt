@@ -4,9 +4,9 @@ Author URI: https://melograno.io/
 Tags: appointments, booking, event booking system, wpamelia, booking system, scheduling
 Donate link: https://wpamelia.com/
 Requires at least: 6.5
-Tested up to: 7.0.2
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.4.9
+Stable tag: 2.4.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,7 +75,7 @@ You can also try out Amelia before committing [Amelia Demo](https://wpamelia.com
 
 ## USEFUL LINKS 🔗
 
-**[Official Page](https://wpamelia.com/?utm_source=wp_org&utm_medium=wp_org&utm_content=link&utm_campaign=wp_org) || [Amelia Demos](https://wpamelia.com/demos/?utm_source=wp_org&utm_medium=wp_org&utm_content=link&utm_campaign=wp_org) || [Documentation](https://wpamelia.com/documentation/?utm_source=wp_org&utm_medium=wp_org&utm_content=link&utm_campaign=wp_org) || [Youtube](https://www.youtube.com/c/AmeliaWordPressBookingPlugin) || [Instagram](https://www.instagram.com/wpamelia_plugin/) || [Twitter](https://twitter.com/wpameliabooking) || [Facebook](https://www.facebook.com/AmeliaBooking) || [Discord Community](https://discord.com/invite/9xYWJqbXeM) || [Premium Versions](https://wpamelia.com/pricing/?utm_source=wp_org&utm_medium=wp_org&utm_content=link&utm_campaign=wp_org)**
+**[Official Page](https://wpamelia.com/?utm_source=wp_org&utm_medium=wp_org&utm_content=link&utm_campaign=wp_org) || [Amelia Demos](https://wpamelia.com/demos/?utm_source=wp_org&utm_medium=wp_org&utm_content=link&utm_campaign=wp_org) || [Documentation](https://wpamelia.com/documentation/?utm_source=wp_org&utm_medium=wp_org&utm_content=link&utm_campaign=wp_org) || [Youtube](https://www.youtube.com/c/AmeliaWordPressBookingPlugin) || [Instagram](https://www.instagram.com/wpamelia_plugin/) || [Twitter](https://twitter.com/wpameliabooking) || [Facebook](https://www.facebook.com/AmeliaBooking) || [Discord Community](https://discord.com/invite/9xYWJqbXeM) || [Premium Versions](https://wpamelia.com/pricing/?utm_source=wp_org&utm_medium=wp_org&utm_content=link&utm_campaign=wp_org) || [Create AI booking site](https://wpamelia.com/wordpress-ai-website-builder/)**
 
 ## Amelia Lite Booking Plugin Features
 
@@ -135,6 +135,9 @@ By integrating Amelia with Square, you can effortlessly accept online payments, 
 Collect payments online, request deposit payments to reduce no-shows, offer refunds, and maintain full control over your bookings and payments at all times.
 This powerful integration improves your business operations, ensures smooth transactions, and improves client satisfaction.
 
+## Want to get started faster?
+
+Generate a booking-ready website with your Amelia setup already configured using our [AI-powered Amelia theme generator](https://wpamelia.com/wordpress-ai-website-builder/).
 
 ## Premium Appointment and Event Booking Features
 
@@ -289,6 +292,11 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.4.10
+This update includes security fixes. We strongly recommend updating to this version immediately.
+*BugFix: Security vulnerability patch and improvements.
+*Additional minor security and stability improvements.
+
 v2.4.9
 This update includes important security fixes. We strongly recommend updating to this version immediately.
 *BugFix: Strengthened post-booking authorization to prevent unauthorized or repeated triggering of booking actions.

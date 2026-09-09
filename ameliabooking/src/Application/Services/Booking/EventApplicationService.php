@@ -5,6 +5,7 @@ namespace AmeliaBooking\Application\Services\Booking;
 use AmeliaBooking\Application\Services\Gallery\GalleryApplicationService;
 use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Application\Services\Reservation\EventReservationService;
+use AmeliaBooking\Application\Services\WaitingList\WaitingListService;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
@@ -1852,6 +1853,8 @@ class EventApplicationService
         $reservationService = $this->container->get('application.reservation.service')->get(Entities::EVENT);
         /** @var SettingsService $settingsDS */
         $settingsDS = $this->container->get('domain.settings.service');
+        /** @var WaitingListService $waitingListService */
+        $waitingListService = $this->container->get('application.waitingList.service');
 
         $persons = $this->getEventPersonsAndSetCapacity($event);
 
@@ -1908,7 +1911,10 @@ class EventApplicationService
         }
 
         $info = [
-            'bookable'   => $reservationService->isBookable($event, null, $currentDateTime) && !$minimumReached,
+            'bookable'   =>
+                $reservationService->isBookable($event, $currentDateTime) &&
+                ($reservationService->hasFreePlaces($event, null) || $waitingListService->isAllowedWaitingForEventBooking($event, null)) &&
+                !$minimumReached,
             'upcoming'   => $currentDateTime < $bookingOpens,
             'full'       => ($event->getMaxCapacity()->getValue() <= $persons['booked']
                     && $currentDateTime < $event->getPeriods()->getItem(0)->getPeriodStart()->getValue())

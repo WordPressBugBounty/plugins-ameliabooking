@@ -3301,6 +3301,17 @@ namespace AmeliaVendor {
       0 => 'Melograno\\UsageTracker\\Collectors\\ConsentNoticeCollectorInterface',
     ),
   ),
+  'Melograno\\UsageTracker\\Collectors\\Plugin\\AmeliaFeatureTelemetry' => 
+  array (
+    'type' => 'class',
+    'classname' => 'AmeliaFeatureTelemetry',
+    'isabstract' => false,
+    'namespace' => 'Melograno\\UsageTracker\\Collectors\\Plugin',
+    'extends' => 'AmeliaVendor\\Melograno\\UsageTracker\\Collectors\\Plugin\\AmeliaFeatureTelemetry',
+    'implements' => 
+    array (
+    ),
+  ),
   'Melograno\\UsageTracker\\Collectors\\Plugin\\IvyFormsCollector' => 
   array (
     'type' => 'class',
@@ -3310,6 +3321,7 @@ namespace AmeliaVendor {
     'extends' => 'AmeliaVendor\\Melograno\\UsageTracker\\Collectors\\Plugin\\IvyFormsCollector',
     'implements' => 
     array (
+      0 => 'Melograno\\UsageTracker\\Collectors\\ConsentNoticeCollectorInterface',
     ),
   ),
   'Melograno\\UsageTracker\\Collectors\\Plugin\\WpDataTablesCollector' => 
@@ -3319,6 +3331,18 @@ namespace AmeliaVendor {
     'isabstract' => false,
     'namespace' => 'Melograno\\UsageTracker\\Collectors\\Plugin',
     'extends' => 'AmeliaVendor\\Melograno\\UsageTracker\\Collectors\\Plugin\\WpDataTablesCollector',
+    'implements' => 
+    array (
+      0 => 'Melograno\\UsageTracker\\Collectors\\ConsentNoticeCollectorInterface',
+    ),
+  ),
+  'Melograno\\UsageTracker\\Collectors\\Plugin\\WpDataTablesFeatureTelemetry' => 
+  array (
+    'type' => 'class',
+    'classname' => 'WpDataTablesFeatureTelemetry',
+    'isabstract' => false,
+    'namespace' => 'Melograno\\UsageTracker\\Collectors\\Plugin',
+    'extends' => 'AmeliaVendor\\Melograno\\UsageTracker\\Collectors\\Plugin\\WpDataTablesFeatureTelemetry',
     'implements' => 
     array (
     ),

@@ -45,7 +45,7 @@ class AddBookingCommandHandler extends CommandHandler
 
         $appointmentData = $this->getAppointmentData(
             $command->getFields(),
-            empty($command->getFields()['bookings'][0]['packageCustomerService']['id'])
+            empty($command->getFields()['bookings'][0]['packageCustomerService']['id']) && !$command->isValidApiCall()
                 ? [
                     PaymentType::ON_SITE,
                     PaymentType::PAY_PAL,
