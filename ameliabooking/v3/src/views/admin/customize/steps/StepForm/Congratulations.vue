@@ -26,22 +26,28 @@
     <div class="am-fs__congrats-info" :class="{ 'am-fs__congrats-info-mobile': checkScreen }">
       <div class="am-fs__congrats-info-customer">
         <component :is="componentTypes[bookableType]"></component>
-        <div>
-          <span> {{ labelsDisplay('congrats_total_amount') }}: </span>
-          <span> 1081.00$ - On-site </span>
-        </div>
-        <div class="am-fs__congrats-info-customer-border">
-          <span>{{ labelsDisplay('your_name_colon') }}:</span>
-          <span>Jon Doe</span>
-        </div>
-        <div>
-          <span>{{ labelsDisplay('email_address_colon') }}:</span>
-          <span>{{ supportEmail }}</span>
-        </div>
-        <div>
-          <span>{{ labelsDisplay('phone_number_colon') }}:</span>
-          <span>0000000000</span>
-        </div>
+
+        <!-- Payment -->
+        <div class="am-fs__ci-label">{{ labelsDisplay('congrats_total_amount') }}:</div>
+        <div class="am-fs__ci-value">1081.00$ - On-site</div>
+        <!-- /Payment -->
+
+        <hr class="am-fs__ci-border" />
+
+        <!-- Customer -->
+        <div class="am-fs__ci-label">{{ labelsDisplay('your_name_colon') }}:</div>
+        <div class="am-fs__ci-value">Jon Doe</div>
+        <!-- /Customer -->
+
+        <!-- Email -->
+        <div class="am-fs__ci-label">{{ labelsDisplay('email_address_colon') }}:</div>
+        <div class="am-fs__ci-value">{{ supportEmail }}</div>
+        <!-- /Email -->
+
+        <!-- Phone -->
+        <div class="am-fs__ci-label">{{ labelsDisplay('phone_number_colon') }}:</div>
+        <div class="am-fs__ci-value">0000000000</div>
+        <!-- /Phone -->
       </div>
     </div>
   </div>
@@ -171,6 +177,7 @@ export default {
         width: 54px;
         margin-bottom: 8px;
       }
+
       &-heading {
         margin-bottom: 2px;
         font-weight: 500;
@@ -178,9 +185,11 @@ export default {
         line-height: 28px;
         color: var(--am-c-atc-heading-text);
       }
+
       &-atc {
         margin-top: 16px;
       }
+
       & span {
         color: var(--am-c-atc-heading-text-op40);
         font-weight: 400;
@@ -188,22 +197,30 @@ export default {
         line-height: 18px;
       }
     }
+
     &-info-mobile {
       padding: 16px;
       margin-top: 24px;
       border-radius: 6px;
       box-shadow: 0 2px 3px 2px rgba(26, 44, 55, 0.1);
+
+      .am-fs__congrats-info-customer {
+        grid-template-columns: 1fr;
+      }
     }
+
     &-info {
       --am-c-atc-main-bgr: var(--am-c-main-bgr);
       background-color: var(--am-c-atc-main-bgr);
-      &-customer {
-        &-border {
-          border-top: 1px solid var(--am-c-atc-text-op30);
-          padding-top: 16px;
-        }
 
-        & > div {
+      &-customer {
+        display: grid;
+        grid-template-columns: max-content minmax(0, 1fr);
+        column-gap: 12px;
+        row-gap: 12px;
+        align-items: start;
+
+        & > * {
           $count: 20;
           @for $i from 0 through $count {
             &:nth-child(#{$i + 1}) {
@@ -213,18 +230,33 @@ export default {
           }
         }
 
-        & div {
-          display: flex;
-          justify-content: space-between;
-          font-weight: 400;
-          font-size: 14px;
-          margin-bottom: 12px;
-          line-height: 20px;
-          & span {
+        & .am-fs__ci {
+          &-label {
+            text-align: left;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
             color: var(--am-c-atc-text-op40);
           }
-          & span:nth-child(2) {
+
+          &-value {
+            text-align: left;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
             color: var(--am-c-atc-text);
+            word-break: break-word;
+          }
+
+          &-border {
+            grid-column: 1 / -1; // spans label + value columns
+            width: 100%;
+            height: 0;
+            margin: 4px 0; // row-gap already adds 12px; tune if needed
+            padding: 0;
+            border: none;
+            border-top: 1px solid var(--am-c-atc-text-op30);
+            background: transparent;
           }
         }
       }

@@ -226,15 +226,19 @@ function useRestore(store, shortcodeData) {
 
     bookings.forEach((booking) => {
       httpClient
-        .get(
-          '/bookings/cancel/' +
-            booking.id +
-            '&token=' +
-            booking.token +
-            '&type=' +
-            data.response.type +
-            '&fromForm=' +
-            true,
+        .post(
+          '/bookings/cancel/remotely/' + booking.id,
+          {
+            confirmed: 1,
+            type: data.response.type,
+            fromForm: true,
+          },
+          {
+            params: {
+              token: booking.token,
+              type: data.response.type,
+            },
+          },
         )
         .catch((e) => {
           console.log(e.message)

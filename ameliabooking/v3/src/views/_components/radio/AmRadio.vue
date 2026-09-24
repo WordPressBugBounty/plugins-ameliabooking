@@ -220,7 +220,7 @@ const cssVars = computed(() => {
       &:focus:is(.is-focus) {
         // Inner
         .el-radio__inner {
-          border: 2px solid var(--am-c-radio-border-lighten80);
+          border: 2px solid var(--am-c-radio-border);
         }
       }
 
@@ -239,7 +239,7 @@ const cssVars = computed(() => {
         &.is-checked {
           .el-radio__inner {
             border: 1px solid var(--am-c-radio-border);
-            background-color: var(--am-c-radio-border-lighten80);
+            background-color: var(--am-c-radio-border-op60);
           }
         }
       }

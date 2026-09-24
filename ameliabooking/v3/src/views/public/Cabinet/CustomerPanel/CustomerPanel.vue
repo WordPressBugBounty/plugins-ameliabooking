@@ -1,14 +1,4 @@
 <template>
-  <template v-if="!amFonts.customFontSelected">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      :href="`${baseUrls.wpAmeliaPluginURL}v3/src/assets/scss/common/fonts/font.css`"
-      media="all"
-    />
-  </template>
   <div
     id="amelia-container"
     ref="ameliaContainer"
@@ -480,9 +470,6 @@ watch(entitiesReady, (ready) => {
   }
 })
 
-// * Root Urls
-const baseUrls = inject('baseUrls')
-
 let entities = [
   'employees',
   'categories',
@@ -527,6 +514,22 @@ if (
 ) {
   pagesObj.value.packages = markRaw(Packages)
 }
+
+const getFallbackPageKey = () =>
+  shortcodeData.value.appointments || !shortcodeData.value.events ? 'appointments' : 'events'
+
+const resolveInitialPageKey = () => {
+  const configuredTab =
+    amCustomize.value?.sidebar?.options?.defaultLandingTab?.value || 'appointments'
+
+  if (configuredTab && pagesObj.value[configuredTab]) {
+    return configuredTab
+  }
+
+  return getFallbackPageKey()
+}
+
+pageKey.value = resolveInitialPageKey()
 
 // * Logged in user Amelia role (provider, admin or manager)
 let loggedInUserRole = computed(() => store.getters['auth/getProfile']?.type)
@@ -742,6 +745,37 @@ provide('bookingsCounterChanger', {
   bookingsCounterChanger,
 })
 
+// * No Show Function
+function noShowData(noShowCount) {
+  if (noShowCount) {
+    if (noShowCount === 1) {
+      return {
+        class: 'am-no-show-1',
+        icon: 'no-show-1',
+      }
+    }
+    if (noShowCount === 2) {
+      return {
+        class: 'am-no-show-2',
+        icon: 'no-show-2',
+      }
+    }
+
+    if (noShowCount > 2) {
+      return {
+        class: 'am-no-show-3',
+        icon: 'no-show-3',
+      }
+    }
+  }
+
+  return {
+    class: '',
+    icon: '',
+  }
+}
+provide('noShowData', { noShowData })
+
 const adminTimeZone = inject('timeZone')
 
 onBeforeMount(() => {
@@ -796,6 +830,15 @@ let cssVars = computed(() => {
     '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
     '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
     '--am-font-family': amFonts.value.fontFamily,
+
+    '--am-c-cust-no1': amColors.value.colorMainText,
+    '--am-c-cust-no1-bgr': useColorTransparency(amColors.value.colorMainText, 0.1),
+    '--am-c-cust-no2': amColors.value.colorWarning,
+    '--am-c-cust-no2-bgr': useColorTransparency(amColors.value.colorWarning, 0.1),
+    '--am-c-cust-no3': amColors.value.colorError,
+    '--am-c-cust-no3-bgr': useColorTransparency(amColors.value.colorError, 0.1),
+    '--am-c-cust-link': useColorTransparency(amColors.value.colorMainText, 0.5),
+    '--am-c-cust-text': amColors.value.colorMainText,
 
     // css properties
     '--am-rad-inp': '6px',
@@ -997,6 +1040,7 @@ export default {
         .el-collapse-item {
           &__wrap {
             overflow: visible;
+            background-color: transparent;
           }
 
           &__header {

@@ -15,6 +15,7 @@ use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\CustomField\CustomFieldRepository;
+use AmeliaBooking\Infrastructure\WP\Fonts\AmeliaFontsService;
 use AmeliaBooking\Infrastructure\WP\SettingsService\SettingsStorage;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
 use AmeliaBooking\Infrastructure\WP\Integrations\IvyForms\IvyFormsService;
@@ -126,6 +127,8 @@ class AmeliaBookingShortcodeService
                 AMELIA_VERSION
             );
         }
+
+        AmeliaFontsService::enqueueDefaultFonts($settingsService);
 
         $ameliaLocale = apply_filters('amelia_modify_locale_filter', AMELIA_LOCALE) ?: AMELIA_LOCALE;
 

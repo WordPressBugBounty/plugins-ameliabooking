@@ -253,7 +253,6 @@ let cssVars = computed(() => {
     @extend .am-slide-popup;
     height: 100%;
     padding: 0;
-    //background: rgba(4, 8, 11, 0.3);
     background-color: var(--am-c-spb-text-op10);
     z-index: 1000;
 
@@ -376,43 +375,7 @@ let cssVars = computed(() => {
     &.nested-leave-to {
       opacity: 0;
 
-      &.am-position-top {
-        transform: translateY(-30px);
-      }
-
-      &.am-position-right {
-        transform: translateX(30px);
-      }
-
-      &.am-position-left {
-        transform: translateX(-30px);
-      }
-
-      &.am-position-bottom,
-      &.am-position-center {
-        transform: translateY(30px);
-      }
-
       #{$classP}-inner {
-        &.am-position-top {
-          transform: translateY(-30px);
-        }
-
-        &.am-position-right {
-          transform: translateX(30px);
-        }
-
-        &.am-position-left {
-          transform: translateX(-30px);
-        }
-
-        &.am-position-bottom {
-          transform: translateY(30px);
-        }
-
-        &.am-position-center {
-          transform: translate(-50%, 50%);
-        }
         /*
           Hack around a Chrome 96 bug in handling nested opacity transitions.
           This is not needed in other browsers or Chrome 99+ where the bug

@@ -8,6 +8,7 @@
 namespace AmeliaBooking\Infrastructure\Routes\Google;
 
 use AmeliaBooking\Application\Controller\Google\VerifyRecaptchaController;
+use AmeliaBooking\Application\Controller\Google\WatchGoogleEventController;
 use Slim\App;
 
 /**
@@ -27,6 +28,8 @@ class Google
 
 
         $app->post('/google/recaptcha/verify', VerifyRecaptchaController::class);
+
+        $app->post('/google/watch', WatchGoogleEventController::class);
 
         // Middleware routes for Google Calendar integration
 

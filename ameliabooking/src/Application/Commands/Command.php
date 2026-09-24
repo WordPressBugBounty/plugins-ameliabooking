@@ -4,6 +4,7 @@ namespace AmeliaBooking\Application\Commands;
 
 use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Commands\Booking\Appointment\AddBookingCommand;
+use AmeliaBooking\Application\Commands\Booking\Appointment\CancelBookingRemotelyCommand;
 use AmeliaBooking\Application\Commands\Booking\Appointment\DeleteBookingRemotelyCommand;
 use AmeliaBooking\Application\Commands\Booking\Appointment\SuccessfulBookingCommand;
 use AmeliaBooking\Application\Commands\Notification\SendUndeliveredNotificationsCommand;
@@ -13,6 +14,7 @@ use AmeliaBooking\Application\Commands\Payment\CalculatePaymentAmountCommand;
 use AmeliaBooking\Application\Commands\PaymentGateway\RazorpayPaymentNotifyCommand;
 use AmeliaBooking\Application\Commands\Square\DisconnectFromSquareAccountCommand;
 use AmeliaBooking\Application\Commands\Square\SquareRefundWebhookCommand;
+use AmeliaBooking\Application\Commands\Stripe\StripePaymentWebhookCommand;
 use AmeliaBooking\Application\Services\User\UserApplicationService;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
@@ -124,29 +126,40 @@ abstract class Command
      */
     public function setToken($request): void
     {
-        $token = null;
+        $this->token = self::getCabinetToken(
+            $request->getHeaderLine('Authorization'),
+            $request->getCookieParams()
+        );
+    }
 
+    /**
+     * Cabinet/mobile JWT from a Bearer header or the ameliaToken cookie.
+     *
+     * @param string $authorization
+     * @param array  $cookies
+     *
+     * @return string|null
+     */
+    public static function getCabinetToken($authorization = '', $cookies = []): ?string
+    {
         /** @var SettingsService $settingsService */
         $settingsService = new SettingsService(new SettingsStorage());
-
-        $authorization = $request->getHeaderLine('Authorization');
 
         if (
             $authorization !== '' &&
             ($values = explode(' ', $authorization)) &&
-            sizeof($values) === 2 &&
+            count($values) === 2 &&
             strcasecmp($values[0], 'Bearer') === 0 &&
             $settingsService->getSetting('roles', 'enabledHttpAuthorization')
         ) {
-            $token = $values[1];
-        } else {
-            $cookies = $request->getCookieParams();
-            if (!empty($cookies['ameliaToken'])) {
-                $token = $cookies['ameliaToken'];
-            }
+            return $values[1];
         }
 
-        $this->token = $token;
+        if (!empty($cookies['ameliaToken']) && is_string($cookies['ameliaToken'])) {
+            return $cookies['ameliaToken'];
+        }
+
+        return null;
     }
 
     /**
@@ -210,12 +223,14 @@ abstract class Command
             !self::getToken() &&
             !($this instanceof CalculatePaymentAmountCommand) &&
             !($this instanceof AddBookingCommand) &&
+            !($this instanceof CancelBookingRemotelyCommand) &&
             !($this instanceof DeleteBookingRemotelyCommand) &&
             !($this instanceof SuccessfulBookingCommand) &&
             !($this instanceof RazorpayPaymentNotifyCommand) &&
             !($this instanceof SquareRefundWebhookCommand) &&
             !($this instanceof DisconnectFromSquareAccountCommand) &&
             !($this instanceof FetchAccessTokenWithAuthCodeOutlookCommand) &&
+            !($this instanceof StripePaymentWebhookCommand) &&
             !($this instanceof UpdateSMSNotificationHistoryCommand)
         ) {
             $queryParams = $request->getQueryParams();

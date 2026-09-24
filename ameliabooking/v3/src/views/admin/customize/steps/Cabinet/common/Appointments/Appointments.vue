@@ -26,7 +26,10 @@
 import moment from 'moment'
 
 // * Import from Vue
-import { ref, computed, watch, inject, onMounted, nextTick } from 'vue'
+import { ref, computed, inject } from 'vue'
+
+// * Components Width and Height
+import { useElementSize } from '@vueuse/core'
 
 // * Import composables
 import { useReactiveCustomize } from '../../../../../../../assets/js/admin/useReactiveCustomize.js'
@@ -45,47 +48,13 @@ let licence = inject('licence')
 
 // * Page Content width
 let pageContainer = ref(null)
-let pageWidth = ref(0)
+const { width: pageWidth } = useElementSize(pageContainer)
 
 // * Global labels
 let amLabels = inject('labels')
 
 // * Customize
 const { amCustomize } = useReactiveCustomize()
-
-// * Sidebar collapsed var
-let sidebarCollapsed = inject('sidebarCollapsed')
-
-// * window resize listener
-window.addEventListener('resize', resize)
-// * resize function
-function resize() {
-  if (pageContainer.value) {
-    pageWidth.value = pageContainer.value.offsetWidth
-  }
-}
-
-watch(sidebarCollapsed, (current) => {
-  if (current) {
-    setTimeout(() => {
-      collapseTriggered()
-    }, 1500)
-  } else {
-    setTimeout(() => {
-      collapseTriggered()
-    }, 500)
-  }
-})
-
-function collapseTriggered() {
-  pageWidth.value = pageContainer.value.offsetWidth
-}
-
-onMounted(() => {
-  nextTick(() => {
-    pageWidth.value = pageContainer.value.offsetWidth
-  })
-})
 
 let responsiveClass = computed(() => {
   return useResponsiveClass(pageWidth.value)
@@ -192,9 +161,31 @@ arrApp.forEach((item, index) => {
         couponId: null,
         created: '2023-10-02 13:46:48',
         customFields: [
-          { label: 'Custom field 1', value: '' },
-          { label: 'Custom field 2', value: '' },
-          { label: 'Custom field 3', value: '' },
+          { id: 1, type: 'text', label: 'Custom field 1', value: 'Text value', width: 50 },
+          {
+            id: 2,
+            type: 'select',
+            label: 'Custom field 2',
+            value: 'Option 1',
+            width: 50,
+            options: [{ label: 'Option 1' }, { label: 'Option 2' }],
+          },
+          {
+            id: 3,
+            type: 'checkbox',
+            label: 'Custom field 3',
+            value: ['Option 1'],
+            width: 50,
+            options: [{ label: 'Option 1' }, { label: 'Option 2' }],
+          },
+          { id: 4, type: 'datepicker', label: 'Custom field 4', value: moment().toDate(), width: 50 },
+          {
+            id: 5,
+            type: 'text-area',
+            label: 'Custom field 5',
+            value: 'Longer text value',
+            width: 100,
+          },
         ],
         customer: {
           birthday: null,

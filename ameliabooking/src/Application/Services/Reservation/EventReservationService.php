@@ -45,7 +45,7 @@ use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
 use AmeliaBooking\Domain\ValueObjects\Number\Float\Price;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
-use AmeliaBooking\Domain\ValueObjects\Number\Integer\IntegerValue;
+use AmeliaBooking\Domain\ValueObjects\Number\Integer\WholeNumber;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentType;
 use AmeliaBooking\Domain\ValueObjects\String\Token;
@@ -92,7 +92,7 @@ class EventReservationService extends AbstractReservationService
      * @throws QueryExecutionException
      * @throws Exception
      */
-    public function book($eventData, $reservation, $save)
+    public function book($eventData, $reservation, $save): void
     {
         /** @var LocationRepository $locationRepository */
         $locationRepository = $this->container->get('domain.locations.repository');
@@ -156,7 +156,7 @@ class EventReservationService extends AbstractReservationService
         $booking = CustomerBookingFactory::create($bookingArray);
 
         if ($event->getCustomPricing()->getValue()) {
-            $booking->setPersons(new IntegerValue(0));
+            $booking->setPersons(new WholeNumber(0));
         }
 
         $bookingStatus = empty($eventData['bookings'][0]['status']) ? BookingStatus::APPROVED : $eventData['bookings'][0]['status'];
@@ -264,7 +264,8 @@ class EventReservationService extends AbstractReservationService
         $paymentAmount = $this->getPaymentAmount($booking, $event)['price'];
 
         $applyDeposit =
-            !empty($eventData['bookings'][0]['deposit']) && $eventData['payment']['gateway'] !== PaymentType::ON_SITE;
+            AbstractReservationService::parseDepositFlag($eventData['bookings'][0]['deposit'] ?? false) &&
+            $eventData['payment']['gateway'] !== PaymentType::ON_SITE;
 
         if ($applyDeposit) {
             $personsCount = $booking->getPersons()->getValue();
@@ -1072,9 +1073,7 @@ class EventReservationService extends AbstractReservationService
             'tax_type'     => $eventTax ? $eventTax->getType()->getValue() : '',
             'tax_excluded' => $eventTax ? $eventTax->getExcluded()->getValue() : false,
             'tickets_tax'  => $ticketsTax,
-            'full_discount' =>
-                $this->getCouponDiscountAmount($booking->getCoupon(), $priceWithoutCoupon) +
-                ($booking->getCoupon() && $booking->getCoupon()->getDeduction() ? (float)$booking->getCoupon()->getDeduction()->getValue() : 0)
+            'full_discount' => $reductionAmount['discount'] + $reductionAmount['deduction'],
         ];
     }
 

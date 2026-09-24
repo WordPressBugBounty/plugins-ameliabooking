@@ -35,7 +35,10 @@
 import moment from 'moment'
 
 // * import from Vue
-import { ref, computed, inject, onMounted, watch, provide, markRaw, nextTick } from 'vue'
+import { ref, computed, inject, onMounted, watch, provide, markRaw } from 'vue'
+
+// * Components Width and Height
+import { useElementSize } from '@vueuse/core'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -71,41 +74,7 @@ let props = defineProps({
 
 // * Page Content width
 let pageContainer = ref(null)
-let pageWidth = ref(0)
-
-// * Sidebar collapsed var
-let sidebarCollapsed = inject('sidebarCollapsed')
-
-// * window resize listener
-window.addEventListener('resize', resize)
-// * resize function
-function resize() {
-  if (pageContainer.value) {
-    pageWidth.value = pageContainer.value.offsetWidth
-  }
-}
-
-watch(sidebarCollapsed, (current) => {
-  if (current) {
-    setTimeout(() => {
-      collapseTriggered()
-    }, 1500)
-  } else {
-    setTimeout(() => {
-      collapseTriggered()
-    }, 500)
-  }
-})
-
-function collapseTriggered() {
-  pageWidth.value = pageContainer.value.offsetWidth
-}
-
-onMounted(() => {
-  nextTick(() => {
-    pageWidth.value = pageContainer.value.offsetWidth
-  })
-})
+const { width: pageWidth } = useElementSize(pageContainer)
 
 let responsiveClass = computed(() => {
   return useResponsiveClass(pageWidth.value)

@@ -3,374 +3,375 @@
     <AmCollapse>
       <AmCollapseItem heading-class="am-cc__heading-wrapper" :side="props.parentWidth > 500">
         <template #heading>
-          <div class="am-cc__heading" :class="props.responsiveClass">
-            <div class="am-cc__heading-info" :class="props.responsiveClass">
-              <div class="am-cc__heading-info__part" :class="props.responsiveClass">
-                <div class="am-cc__time">
-                  {{ props.start }}
-                </div>
-
-                <div v-if="props.parentWidth > 650" class="am-cc__name">
-                  {{ props.name }}
-                </div>
-
-                <div
-                  v-if="
-                    props.reservation.type === 'event' &&
-                    shortcodeData.cabinetType === 'employee' &&
-                    props.parentWidth <= 650
-                  "
-                  class="am-cc__places"
-                  :class="props.responsiveClass"
-                >
-                  {{ places }}
-                </div>
-
-                <div
-                  v-if="
-                    props.reservation.type === 'appointment' &&
-                    shortcodeData.cabinetType === 'employee' &&
-                    props.customers.length === 1 &&
-                    props.customizedOptions.customer.visibility &&
-                    props.parentWidth <= 650
-                  "
-                  class="am-cc__customer"
-                  :class="props.responsiveClass"
-                >
-                  <span
-                    v-if="props.customers[0].bookingStatus === 'waiting'"
-                    class="am-icon-clock am-cc__customer-waiting"
-                  ></span>
-                  {{ `${props.customers[0].firstName} ${props.customers[0].lastName}` }}
-                </div>
-
-                <AppointmentStatus
-                  v-if="
-                    props.reservation &&
-                    props.reservation.type === 'appointment' &&
-                    shortcodeData.cabinetType === 'employee' &&
-                    amSettings.roles.allowWriteAppointments &&
-                    props.parentWidth <= 650
-                  "
-                  :id="props.reservation.id"
-                  :status="props.reservation.status"
-                  class="am-cc__status am-cc__status--dropdown"
-                  @status-change="(message, type) => emits('statusChange', message, type)"
-                />
-                <div
-                  v-else-if="props.booking && props.parentWidth <= 650"
-                  class="am-cc__status"
-                  :class="`am-cc__status-${status.class}`"
-                  :aria-label="status.label"
-                >
-                  {{ status.label }}
-                </div>
-              </div>
-              <div class="am-cc__heading-info__part" :class="props.responsiveClass">
-                <div v-if="props.parentWidth <= 650" class="am-cc__name">
-                  {{ props.name }}
-                </div>
-
-                <div
-                  v-if="
-                    props.reservation.type === 'event' &&
-                    shortcodeData.cabinetType === 'employee' &&
-                    props.parentWidth > 650
-                  "
-                  class="am-cc__places"
-                >
-                  {{ places }}
-                </div>
-
-                <div
-                  v-if="
-                    props.reservation.type === 'appointment' &&
-                    shortcodeData.cabinetType === 'employee' &&
-                    props.customers.length === 1 &&
-                    props.customizedOptions.customer.visibility &&
-                    props.parentWidth > 650
-                  "
-                  class="am-cc__customer"
-                >
-                  <span
-                    v-if="props.customers[0].bookingStatus === 'waiting'"
-                    class="am-icon-clock am-cc__customer-waiting"
-                  ></span>
-                  {{ `${props.customers[0].firstName} ${props.customers[0].lastName}` }}
-                </div>
-
-                <AppointmentStatus
-                  v-if="
-                    props.reservation &&
-                    props.reservation.type === 'appointment' &&
-                    shortcodeData.cabinetType === 'employee' &&
-                    amSettings.roles.allowWriteAppointments &&
-                    props.parentWidth > 650
-                  "
-                  :id="props.reservation.id"
-                  :status="props.reservation.status"
-                  class="am-cc__status am-cc__status--dropdown"
-                  @status-change="(message, type) => emits('statusChange', message, type)"
-                />
-                <div
-                  v-else-if="props.booking && props.parentWidth > 650"
-                  class="am-cc__status"
-                  :class="`am-cc__status-${status.class}`"
-                  :aria-label="status.label"
-                >
-                  {{ status.label }}
-                </div>
-              </div>
+          <div class="am-cc__heading-info__part" :class="props.responsiveClass">
+            <div class="am-cc__time">
+              {{ props.start }}
             </div>
-            <div
-              v-if="shortcodeData.cabinetType === 'employee'"
-              class="am-cc__heading-actions"
-              :class="props.responsiveClass"
-            >
-              <el-popover
-                v-if="
-                  props.reservation.type === 'appointment'
-                    ? amSettings.roles.allowWriteAppointments
-                    : true
-                "
-                :id="editPopperId"
-                ref="editRef"
-                :visible="editPopVisible"
-                :persistent="false"
-                :show-arrow="false"
-                :width="'auto'"
-                :popper-class="'am-cc__popper'"
-                :popper-style="cssVars"
-                trigger="click"
-              >
-                <template #reference>
-                  <AmButton
-                    v-if="props.reservation"
-                    ref="menuTriggerRef"
-                    class="am-cc__edit-btn"
-                    category="secondary"
-                    type="text"
-                    size="mini"
-                    icon="dots-vertical"
-                    :icon-only="true"
-                    :aria-label="amLabels.edit"
-                    aria-haspopup="menu"
-                    :aria-expanded="editPopVisible ? 'true' : 'false'"
-                    @click="editItem"
-                    @keydown="onMenuTriggerKeydown"
-                  ></AmButton>
-                </template>
-                <div
-                  v-click-outside="closeEditItemPopup"
-                  class="am-cc__edit-menu"
-                  role="menu"
-                  @keydown="onMenuKeydown"
-                >
-                  <div
-                    v-if="
-                      (props.reservation.type === 'appointment' &&
-                        amSettings.roles.allowWriteAppointments) ||
-                      (props.reservation.type === 'event' && amSettings.roles.allowWriteEvents)
-                    "
-                    class="am-cc__edit"
-                  >
-                    <!-- Edit Appointment / Event -->
-                    <AmButton
-                      class="am-cc__edit-item am-edit"
-                      category="secondary"
-                      type="text"
-                      prefix="edit"
-                      role="menuitem"
-                      :aria-label="amLabels.edit"
-                      @click="editReservation(props.reservation.type)"
-                    >
-                      <span class="am-cc__edit-text">
-                        {{ amLabels.edit }}
-                      </span>
-                    </AmButton>
-                    <!-- /Edit Appointment / Event -->
-                  </div>
 
-                  <template v-if="props.reservation.type === 'event'">
-                    <div v-if="amSettings.roles.allowWriteCustomers" class="am-cc__edit">
-                      <!-- Add Attendee -->
-                      <AmButton
-                        class="am-cc__edit-item am-edit"
-                        category="secondary"
-                        type="text"
-                        prefix="users-plus"
-                        role="menuitem"
-                        :aria-label="amLabels.event_add_attendee"
-                        @click="addEventAttendee(props.reservation)"
-                      >
-                        <span class="am-cc__edit-text">
-                          {{ amLabels.event_add_attendee }}
-                        </span>
-                      </AmButton>
-                      <!-- /Add Attendee -->
-                    </div>
-                    <div class="am-cc__edit">
-                      <!-- List Event Attendees -->
-                      <AmButton
-                        class="am-cc__edit-item am-edit"
-                        category="secondary"
-                        type="text"
-                        prefix="user"
-                        role="menuitem"
-                        :aria-label="amLabels.attendees"
-                        @click="listEventAttendees(props.reservation)"
-                      >
-                        <span class="am-cc__edit-text">
-                          {{ amLabels.attendees }}
-                        </span>
-                      </AmButton>
-                      <!-- /List Event Attendees -->
-                    </div>
-                  </template>
-                </div>
-              </el-popover>
+            <template v-if="props.parentWidth > 500">
+              <AppointmentStatus
+                v-if="
+                  props.reservation &&
+                  props.reservation.type === 'appointment' &&
+                  shortcodeData.cabinetType === 'employee' &&
+                  amSettings.roles.allowWriteAppointments
+                "
+                :id="props.reservation.id"
+                :status="props.reservation.status"
+                class="am-cc__status am-cc__status--dropdown"
+                @status-change="(message, type) => emits('statusChange', message, type)"
+              />
+              <div
+                v-else-if="props.booking"
+                class="am-cc__status"
+                :class="`am-cc__status-${status.class}`"
+                :aria-label="status.label"
+              >
+                {{ status.label }}
+              </div>
+            </template>
+          </div>
+
+          <div class="am-cc__heading-info__part am-flex-wrap" :class="props.responsiveClass">
+            <div class="am-cc__name">
+              {{ props.name }}
             </div>
+
             <div
-              v-else-if="!licence.isStarter || menuVisible()"
-              class="am-cc__heading-actions"
-              :class="props.responsiveClass"
+              v-if="props.reservation.type === 'event' && shortcodeData.cabinetType === 'employee'"
+              class="am-cc__places"
             >
-              <PaymentButton
-                v-if="
-                  bookingPositiveStatus() &&
-                  props.booking.status !== 'waiting' &&
-                  !props.isPackageBooking &&
-                  !props.booking.packageCustomerService &&
-                  props.booking.price > 0 &&
-                  usePaymentFromCustomerPanel(props.reservation, props.bookable.settings)
-                "
-                :reservation="props.reservation"
-                :bookable="props.bookable"
-              >
-              </PaymentButton>
-              <el-popover
-                v-if="
-                  !licence.isStarter ||
-                  (bookingPositiveStatus() &&
-                    (props.reservation.cancelable ||
-                      (amSettings.roles.allowCustomerReschedule &&
-                        props.reservation.reschedulable)))
-                "
-                :id="editPopperId"
-                ref="editRef"
-                :visible="editPopVisible"
-                :persistent="false"
-                :show-arrow="false"
-                :width="'auto'"
-                :popper-class="'am-cc__popper'"
-                :popper-style="cssVars"
-                trigger="click"
-              >
-                <template #reference>
-                  <AmButton
-                    v-if="props.booking"
-                    ref="menuTriggerRef"
-                    class="am-cc__edit-btn"
-                    category="secondary"
-                    type="text"
-                    size="mini"
-                    icon="dots-vertical"
-                    :icon-only="true"
-                    :aria-label="amLabels.edit"
-                    aria-haspopup="menu"
-                    :aria-expanded="editPopVisible ? 'true' : 'false'"
-                    @click="editItem"
-                    @keydown="onMenuTriggerKeydown"
-                  ></AmButton>
-                </template>
-                <div
-                  v-click-outside="closeEditItemPopup"
-                  class="am-cc__edit"
-                  role="menu"
-                  @keydown="onMenuKeydown"
-                >
-                  <!-- Reschedule -->
-                  <AmButton
-                    v-if="
-                      props.reservation.type === 'appointment' &&
-                      bookingPositiveStatus() &&
-                      amSettings.roles.allowCustomerReschedule &&
-                      props.reservation.reschedulable
-                    "
-                    class="am-cc__edit-item"
-                    category="secondary"
-                    type="text"
-                    prefix="date-time"
-                    role="menuitem"
-                    :aria-label="amLabels.reschedule"
-                    @click="rescheduleItem"
-                  >
-                    <span class="am-cc__edit-text">
-                      {{ amLabels.reschedule }}
-                    </span>
-                  </AmButton>
-                  <!-- /Reschedule -->
+              {{ places }}
+            </div>
 
-                  <!-- Invoice -->
-                  <AmButton
-                    v-if="
-                      !licence.isStarter &&
-                      props.booking.status !== 'waiting' &&
-                      amSettings.featuresIntegrations.invoices.enabled
-                    "
-                    class="am-cc__edit-item"
-                    category="secondary"
-                    type="text"
-                    prefix="eye"
-                    role="menuitem"
-                    :aria-label="amLabels['preview_invoice']"
-                    @click="previewInvoice"
-                  >
-                    <span class="am-cc__edit-text">
-                      {{ amLabels['preview_invoice'] }}
-                    </span>
-                  </AmButton>
-                  <AmButton
-                    v-if="
-                      !licence.isStarter &&
-                      props.booking.status !== 'waiting' &&
-                      amSettings.featuresIntegrations.invoices.enabled
-                    "
-                    class="am-cc__edit-item"
-                    category="secondary"
-                    type="text"
-                    prefix="download"
-                    role="menuitem"
-                    :aria-label="amLabels['download_invoice']"
-                    @click="downloadInvoice"
-                  >
-                    <span class="am-cc__edit-text">
-                      {{ amLabels['download_invoice'] }}
-                    </span>
-                  </AmButton>
-                  <!-- /Invoice -->
-
-                  <!-- Cancel item -->
-                  <AmButton
-                    v-if="props.reservation.cancelable && bookingPositiveStatus()"
-                    class="am-cc__edit-item am-delete"
-                    category="secondary"
-                    type="text"
-                    prefix="clearable"
-                    role="menuitem"
-                    :aria-label="amLabels.cancel"
-                    @click="cancelItem"
-                  >
-                    <span class="am-cc__edit-text">
-                      {{ amLabels.cancel }}
-                    </span>
-                  </AmButton>
-                  <!-- /Cancel item -->
-                </div>
-              </el-popover>
+            <div
+              v-if="
+                props.reservation.type === 'appointment' &&
+                shortcodeData.cabinetType === 'employee' &&
+                props.customers.length === 1 &&
+                props.customizedOptions.customer.visibility
+              "
+              class="am-cc__customer"
+            >
+              <span
+                v-if="props.customers[0].bookingStatus === 'waiting'"
+                class="am-icon-clock am-cc__customer-waiting"
+              ></span>
+              {{ `${props.customers[0].firstName} ${props.customers[0].lastName}` }}
             </div>
           </div>
+
+          <div
+            v-if="
+              props.parentWidth <= 500 &&
+              (((!licence.isStarter || menuVisible()) &&
+                shortcodeData.cabinetType !== 'employee' &&
+                bookingPositiveStatus() &&
+                props.booking.status !== 'waiting' &&
+                !props.isPackageBooking &&
+                !props.booking.packageCustomerService &&
+                props.booking.price > 0 &&
+                usePaymentFromCustomerPanel(props.reservation, props.bookable.settings)) ||
+                (props.reservation &&
+                  props.reservation.type === 'appointment' &&
+                  shortcodeData.cabinetType === 'employee' &&
+                  amSettings.roles.allowWriteAppointments) ||
+                props.booking)
+            "
+            class="am-cc__heading-info__part"
+            :class="props.responsiveClass"
+          >
+            <PaymentButton
+              v-if="
+                (!licence.isStarter || menuVisible()) &&
+                shortcodeData.cabinetType !== 'employee' &&
+                bookingPositiveStatus() &&
+                props.booking.status !== 'waiting' &&
+                !props.isPackageBooking &&
+                !props.booking.packageCustomerService &&
+                props.booking.price > 0 &&
+                usePaymentFromCustomerPanel(props.reservation, props.bookable.settings)
+              "
+              :btn-size="props.parentWidth > 500 ? 'micro' : 'small'"
+              :reservation="props.reservation"
+              :bookable="props.bookable"
+            />
+
+            <AppointmentStatus
+              v-if="
+                props.reservation &&
+                props.reservation.type === 'appointment' &&
+                shortcodeData.cabinetType === 'employee' &&
+                amSettings.roles.allowWriteAppointments
+              "
+              :id="props.reservation.id"
+              :status="props.reservation.status"
+              class="am-cc__status am-cc__status--dropdown"
+              @status-change="(message, type) => emits('statusChange', message, type)"
+            />
+            <div
+              v-else-if="props.booking"
+              class="am-cc__status"
+              :class="`am-cc__status-${status.class}`"
+              :aria-label="status.label"
+            >
+              {{ status.label }}
+            </div>
+          </div>
+
+          <div
+            v-if="shortcodeData.cabinetType === 'employee'"
+            ref="actionsRef"
+            class="am-cc__heading-actions"
+            :class="props.responsiveClass"
+          >
+            <el-popover
+              v-if="
+                props.reservation.type === 'appointment'
+                  ? amSettings.roles.allowWriteAppointments
+                  : true
+              "
+              ref="editRef"
+              :id="editPopperId"
+              :visible="editPopVisible"
+              :persistent="false"
+              :show-arrow="false"
+              :width="'auto'"
+              :popper-class="'am-cc__popper'"
+              :popper-style="cssVars"
+              trigger="click"
+            >
+              <template #reference>
+                <AmButton
+                  v-if="props.reservation"
+                  ref="menuTriggerRef"
+                  class="am-cc__edit-btn"
+                  category="secondary"
+                  type="text"
+                  size="micro"
+                  icon="dots-vertical"
+                  :icon-only="true"
+                  :aria-label="amLabels.edit"
+                  aria-haspopup="menu"
+                  :aria-expanded="editPopVisible ? 'true' : 'false'"
+                  @click="editItem"
+                  @keydown="onMenuTriggerKeydown"
+                ></AmButton>
+              </template>
+              <div
+                v-if="
+                  (props.reservation.type === 'appointment' &&
+                    amSettings.roles.allowWriteAppointments) ||
+                  props.reservation.type === 'event'
+                "
+                v-click-outside="closeEditItemPopup"
+                class="am-cc__edit"
+                role="menu"
+                @keydown="onMenuKeydown"
+              >
+                <template
+                  v-if="
+                    (props.reservation.type === 'appointment' &&
+                      amSettings.roles.allowWriteAppointments) ||
+                    (props.reservation.type === 'event' && amSettings.roles.allowWriteEvents)
+                  "
+                >
+                  <!-- Edit Appointment -->
+                  <AmButton
+                    class="am-cc__edit-item am-edit"
+                    category="secondary"
+                    type="text"
+                    prefix="edit"
+                    role="menuitem"
+                    :aria-label="amLabels.edit"
+                    @click="editReservation(props.reservation.type)"
+                  >
+                    <span class="am-cc__edit-text">
+                      {{ amLabels.edit }}
+                    </span>
+                  </AmButton>
+                  <!-- /Edit Appointment -->
+                </template>
+
+                <template v-if="props.reservation.type === 'event'">
+                  <!-- Add Attendee -->
+                  <AmButton
+                    v-if="amSettings.roles.allowWriteEvents && amSettings.roles.allowWriteCustomers"
+                    class="am-cc__edit-item am-edit"
+                    category="secondary"
+                    type="text"
+                    prefix="users-plus"
+                    role="menuitem"
+                    :aria-label="amLabels.event_add_attendee"
+                    @click="addEventAttendee(props.reservation)"
+                  >
+                    <span class="am-cc__edit-text">
+                      {{ amLabels.event_add_attendee }}
+                    </span>
+                  </AmButton>
+                  <!-- /Add Attendee -->
+
+                  <!-- List Event Attendees -->
+                  <AmButton
+                    class="am-cc__edit-item am-edit"
+                    category="secondary"
+                    type="text"
+                    prefix="user"
+                    role="menuitem"
+                    :aria-label="amLabels.attendees"
+                    @click="listEventAttendees(props.reservation)"
+                  >
+                    <span class="am-cc__edit-text">
+                      {{ amLabels.attendees }}
+                    </span>
+                  </AmButton>
+                  <!-- /List Event Attendees -->
+                </template>
+              </div>
+            </el-popover>
+          </div>
+          <div
+            v-else-if="!licence.isStarter || menuVisible()"
+            ref="actionsRef"
+            class="am-cc__heading-actions"
+            :class="props.responsiveClass"
+          >
+            <PaymentButton
+              v-if="
+                props.parentWidth > 500 &&
+                bookingPositiveStatus() &&
+                props.booking.status !== 'waiting' &&
+                !props.isPackageBooking &&
+                !props.booking.packageCustomerService &&
+                props.booking.price > 0 &&
+                usePaymentFromCustomerPanel(props.reservation, props.bookable.settings)
+              "
+              :reservation="props.reservation"
+              :bookable="props.bookable"
+            >
+            </PaymentButton>
+            <el-popover
+              v-if="
+                !licence.isStarter ||
+                (bookingPositiveStatus() &&
+                  (props.reservation.cancelable ||
+                    (amSettings.roles.allowCustomerReschedule && props.reservation.reschedulable)))
+              "
+              ref="editRef"
+              :id="editPopperId"
+              :visible="editPopVisible"
+              :persistent="false"
+              :show-arrow="false"
+              :width="'auto'"
+              :popper-class="'am-cc__popper'"
+              :popper-style="cssVars"
+              trigger="click"
+            >
+              <template #reference>
+                <AmButton
+                  v-if="props.booking"
+                  ref="menuTriggerRef"
+                  class="am-cc__edit-btn"
+                  category="secondary"
+                  type="text"
+                  size="micro"
+                  icon="dots-vertical"
+                  :icon-only="true"
+                  :aria-label="amLabels.edit"
+                  aria-haspopup="menu"
+                  :aria-expanded="editPopVisible ? 'true' : 'false'"
+                  @click="editItem"
+                  @keydown="onMenuTriggerKeydown"
+                ></AmButton>
+              </template>
+              <div
+                v-click-outside="closeEditItemPopup"
+                class="am-cc__edit"
+                role="menu"
+                @keydown="onMenuKeydown"
+              >
+                <!-- Reschedule -->
+                <AmButton
+                  v-if="
+                    props.reservation.type === 'appointment' &&
+                    bookingPositiveStatus() &&
+                    amSettings.roles.allowCustomerReschedule &&
+                    props.reservation.reschedulable
+                  "
+                  class="am-cc__edit-item"
+                  category="secondary"
+                  type="text"
+                  prefix="date-time"
+                  role="menuitem"
+                  :aria-label="amLabels.reschedule"
+                  @click="rescheduleItem"
+                >
+                  <span class="am-cc__edit-text">
+                    {{ amLabels.reschedule }}
+                  </span>
+                </AmButton>
+                <!-- /Reschedule -->
+
+                <!-- Invoice -->
+                <AmButton
+                  v-if="
+                    !licence.isStarter &&
+                    props.booking.status !== 'waiting' &&
+                    amSettings.featuresIntegrations.invoices.enabled
+                  "
+                  class="am-cc__edit-item"
+                  category="secondary"
+                  type="text"
+                  prefix="eye"
+                  role="menuitem"
+                  :aria-label="amLabels['preview_invoice']"
+                  @click="previewInvoice"
+                >
+                  <span class="am-cc__edit-text">
+                    {{ amLabels['preview_invoice'] }}
+                  </span>
+                </AmButton>
+                <AmButton
+                  v-if="
+                    !licence.isStarter &&
+                    props.booking.status !== 'waiting' &&
+                    amSettings.featuresIntegrations.invoices.enabled
+                  "
+                  class="am-cc__edit-item"
+                  category="secondary"
+                  type="text"
+                  prefix="download"
+                  role="menuitem"
+                  :aria-label="amLabels['download_invoice']"
+                  @click="downloadInvoice"
+                >
+                  <span class="am-cc__edit-text">
+                    {{ amLabels['download_invoice'] }}
+                  </span>
+                </AmButton>
+                <!-- /Invoice -->
+
+                <!-- Cancel item -->
+                <AmButton
+                  v-if="props.reservation.cancelable && bookingPositiveStatus()"
+                  class="am-cc__edit-item am-delete"
+                  category="secondary"
+                  type="text"
+                  prefix="clearable"
+                  role="menuitem"
+                  :aria-label="amLabels.cancel"
+                  @click="cancelItem"
+                >
+                  <span class="am-cc__edit-text">
+                    {{ amLabels.cancel }}
+                  </span>
+                </AmButton>
+                <!-- /Cancel item -->
+              </div>
+            </el-popover>
+          </div>
         </template>
+
         <template #default>
           <div class="am-cc__content" :class="props.responsiveClass">
             <div class="am-cc__content-inner">
@@ -557,23 +558,22 @@
               <!-- /Extras -->
 
               <!-- Custom Fields -->
-              <CollapseCardPopover
-                v-if="
-                  props.customFields.length && amSettings.featuresIntegrations.customFields.enabled
-                "
-                :header-text="amLabels.custom_fields"
-                type="customField"
+              <CollapseCardDialog
+                v-if="props.customFields.length && amSettings.featuresIntegrations.customFields.enabled"
+                append-dialog-to=".am-fs__main-inner"
+                component-name="customField"
                 :content-data="props.customFields"
+                :customized-options="props.customizedOptions"
               >
-                <template #default>
-                  <div class="am-cc__data" tabindex="0">
+                <template #trigger>
+                  <div class="am-cc__data link">
                     <span class="am-icon-file-text"></span>
                     <span class="am-cc__data-text">
                       {{ amLabels.custom_fields }}
                     </span>
                   </div>
                 </template>
-              </CollapseCardPopover>
+              </CollapseCardDialog>
               <!-- /Custom Fields -->
 
               <!-- Tickets -->
@@ -664,6 +664,8 @@ import httpClient from '../../../../../../plugins/axios'
 import { useStore } from 'vuex'
 import { createFileUrlFromResponse } from '../../../../../../assets/js/common/helper'
 import AmButton from '@/views/_components/button/AmButton.vue'
+import { useElementSize } from '@vueuse/core'
+import CollapseCardDialog from './dialog/CollapseCardDialog.vue'
 
 // * Vars
 let store = useStore()
@@ -778,6 +780,7 @@ let emits = defineEmits([
   'listEventAttendees',
   'statusChange',
   'showQrCodes',
+  'openCollapseCardDialog',
 ])
 
 // * Data in shortcode
@@ -793,6 +796,10 @@ const amLabels = inject('amLabels')
 
 // * Plugin Licence
 let licence = inject('licence')
+
+// * Actions Ref
+let actionsRef = ref(null)
+let { width: actionsWidth } = useElementSize(actionsRef)
 
 let editPopVisible = ref(false)
 let editRef = ref(null)
@@ -1143,7 +1150,7 @@ let dropdownStatusWidth = computed(() => {
     amSettings.roles.allowWriteAppointments
   ) {
     if (props.parentWidth <= 440) return '70px'
-    if (props.parentWidth <= 690) return '130px'
+    if (props.parentWidth <= 690) return '150px'
     return '160px'
   }
 
@@ -1179,6 +1186,7 @@ let cssVars = computed(() => {
     '--am-c-cc-text-op90': useColorTransparency(amColors.value.colorMainText, 0.9),
     '--am-font-family': amFonts.value.fontFamily,
     '--am-status-width': dropdownStatusWidth.value,
+    '--am-actions-width': actionsWidth.value + 'px',
 
     // css properties
     '--am-rad-inp': '6px',
@@ -1203,39 +1211,55 @@ export default {
     }
 
     &__heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      width: 100%;
-
-      &.am-rw-500 {
-        flex-wrap: wrap;
-      }
-
       &-wrapper {
         padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 8px 0;
+
+        .am-collapse-item__trigger-side {
+          padding: 5px 6px;
+          order: 2;
+        }
       }
 
       &-info {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        gap: 8px 0;
-
-        &.am-rw-650 {
-          flex-wrap: wrap;
-        }
-
         &__part {
           display: flex;
           align-items: center;
           gap: 8px;
+          width: 100%;
+          justify-content: space-between;
+          min-height: 32px;
 
-          &.am-rw-650 {
-            width: 100%;
-            justify-content: space-between;
+          &:nth-child(1) {
+            order: 0;
+            width: calc(100% - var(--am-actions-width) - 44px);
+
+            &.am-rw-500 {
+              width: calc(100% - 44px);
+            }
+          }
+
+          &:nth-child(2) {
+            order: 3;
+
+            &.am-rw-500 {
+              order: 2;
+            }
+          }
+
+          &:nth-child(3) {
+            &.am-rw-500 {
+              order: 3;
+
+              .am-cc__status {
+                margin-left: auto;
+              }
+            }
+          }
+
+          &.am-flex-wrap {
+            flex-wrap: wrap;
           }
 
           &.am-rw-420 {
@@ -1248,9 +1272,11 @@ export default {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        align-self: flex-start;
+        order: 2;
 
         &.am-rw-500 {
-          width: 100%;
+          order: 1;
 
           .am-cc__edit-btn {
             margin-left: auto;
@@ -1287,7 +1313,6 @@ export default {
       font-weight: 500;
       line-height: 1.6;
       color: var(--am-c-cc-text);
-      width: 100%;
     }
 
     &__employee {

@@ -34,6 +34,7 @@
           size="medium"
           icon-only
           :icon="AmIconArrowLeft"
+          :disabled="isPrevMonthDisabled"
           @click="prevMonth"
         />
         <AmButton
@@ -43,6 +44,7 @@
           size="medium"
           icon-only
           :icon="AmIconArrowRight"
+          :disabled="isNextMonthDisabled"
           @click="nextMonth"
         />
       </AmButtonGroup>
@@ -445,6 +447,8 @@ function changeYear() {
     .getApi()
     .gotoDate(calYear.value + '-' + availableMonths.filter((i) => i.available)[0].value + '-01')
 
+  syncHeaderFromCalendar()
+
   emits('changedMonth', getYearMonthString())
 }
 
@@ -454,14 +458,56 @@ function changeMonth() {
   emits('changedMonth', getYearMonthString())
 }
 
+const isPrevMonthDisabled = computed(() => {
+  if (!props.calendarMinimumDate || !calYear.value || !calMonth.value) {
+    return false
+  }
+
+  let currentMonthStart = moment(calYear.value + '-' + calMonth.value + '-01', 'YYYY-MM-DD')
+  let minimumMonthStart = moment(props.calendarMinimumDate, 'YYYY-MM-DD HH:mm').startOf('month')
+
+  return currentMonthStart.isValid() && currentMonthStart.isSameOrBefore(minimumMonthStart)
+})
+
+const isNextMonthDisabled = computed(() => {
+  if (!props.calendarMaximumDate || !calYear.value || !calMonth.value) {
+    return false
+  }
+
+  let currentMonthStart = moment(calYear.value + '-' + calMonth.value + '-01', 'YYYY-MM-DD')
+  let maximumMonthStart = moment(props.calendarMaximumDate, 'YYYY-MM-DD HH:mm').startOf('month')
+
+  return currentMonthStart.isValid() && currentMonthStart.isSameOrAfter(maximumMonthStart)
+})
+
+function syncHeaderFromCalendar() {
+  let yearMonth = getYearMonthString().split('-')
+
+  calYear.value = parseInt(yearMonth[0])
+  calMonth.value = yearMonth[1]
+  headerMonthOptions.value = getHeaderMonths(calYear.value)
+}
+
 function prevMonth() {
+  if (isPrevMonthDisabled.value) {
+    return
+  }
+
   advCalendarRef.value.getApi().prev()
+
+  syncHeaderFromCalendar()
 
   emits('changedMonth', getYearMonthString())
 }
 
 function nextMonth() {
+  if (isNextMonthDisabled.value) {
+    return
+  }
+
   advCalendarRef.value.getApi().next()
+
+  syncHeaderFromCalendar()
 
   emits('changedMonth', getYearMonthString())
 }
@@ -731,6 +777,8 @@ watch(calendarStartDate, () => {
   const advCalendar = advCalendarRef.value.getApi()
 
   advCalendar.gotoDate(calendarStartDate.value)
+
+  syncHeaderFromCalendar()
 })
 
 // iOS: ensure first available slot auto-selects once slots load, and keep heading in sync

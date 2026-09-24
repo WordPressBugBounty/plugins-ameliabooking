@@ -13,7 +13,7 @@
       </span>
       <span class="am-oit__content">
         <span class="am-oit__data">
-          <span :class="`am-oit__data-label ${badge ? 'am-oit__data-label-wrap' : ''}`">
+          <span class="am-oit__data-label am-oit__data-label-wrap">
             <span class="am-oit__data-label-name">
               {{ label }}
             </span>
@@ -48,7 +48,7 @@
     <AmDialog
       v-if="useDescriptionVisibility(description)"
       v-model="infoVisible"
-      :custom-class="'am-option-template-dialog am-dialog ql-description'"
+      :custom-class="'am-option-template-dialog am-dialog'"
       :append-to-body="true"
       :custom-styles="cssVars"
       :destroy-on-close="true"
@@ -85,7 +85,7 @@
             </span>
           </div>
         </div>
-        <div class="am-dialog__body-content" v-html="description"></div>
+        <div class="am-dialog__body-content am-tap-description" v-html="description"></div>
       </div>
       <template #footer>
         <AmButton :type="primFooterBtnType" category="primary" @click="handleClick">
@@ -189,7 +189,11 @@ function imagePlaceholder() {
       shortLabel += item.charAt(0).toUpperCase()
     })
 
-    return shortLabel
+    if (shortLabel.length > 3) {
+      shortLabel = shortLabel.slice(0, 3)
+    }
+
+    return shortLabel.toUpperCase()
   }
 }
 
@@ -199,6 +203,9 @@ let primFooterBtnType = inject('primDescBtnType', 'filled')
 let amColors = inject('amColors')
 let cssVars = computed(() => {
   return {
+    '--am-c-primary': amColors.value.colorPrimary,
+    '--am-c-main-text': amColors.value.colorMainText,
+    '--am-c-main-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
     '--am-oit-c-main-bgr': amColors.value.colorMainBgr,
     '--am-oit-c-main-btn-color': amColors.value.colorBtnPrim,
     '--am-oit-c-main-btn-color-text': amColors.value.colorBtnPrimText,
@@ -225,6 +232,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import '../../../../assets/scss/common/tiptap/_tiptap-mixin.scss';
+
 // am - Amelia
 // oit - option inner template
 .am-select-popper {
@@ -309,6 +318,10 @@ export default {
         }
 
         &-badge {
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
           color: #fff;
           border-radius: 4px;
           padding: 0 4px;
@@ -407,6 +420,69 @@ export default {
     max-width: 520px;
   }
 
+  .am-oit {
+    &__img {
+      display: flex;
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      margin-right: 8px;
+
+      &-placeholder {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100%;
+        background-color: #00a32a;
+        border-radius: 50%;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+
+        span {
+          display: block;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 14px;
+          font-weight: 500;
+          line-height: 1;
+          color: var(--am-c-option-img-text);
+        }
+      }
+    }
+  }
+
+  .am-tap-description {
+    @include tiptap-styles;
+  }
+
+  .el-dialog {
+    &__header {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.5;
+      color: #808a90;
+      padding: 16px;
+    }
+
+    &__headerbtn {
+      font-size: 10px;
+    }
+
+    &__body {
+      padding: 16px 16px 48px;
+    }
+  }
+
+  .el-dialog__close {
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    color: var(--am-oit-c-main-heading-text);
+  }
+
   .am-dialog {
     &__title {
       color: var(--am-oit-c-main-heading-text-op90);
@@ -453,9 +529,11 @@ export default {
         line-height: 1.5;
         word-break: break-word;
         color: var(--am-oit-c-main-text);
+
         * {
           color: var(--am-oit-c-main-text);
         }
+
         & p > * {
           color: var(--am-oit-c-main-text);
         }

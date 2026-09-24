@@ -99,6 +99,8 @@ export default {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
       width: 100%;
 
       &.am-rw-360 {
@@ -113,13 +115,13 @@ export default {
         width: 40px;
         height: 40px;
         border-radius: 4px;
-        margin: 0 12px 0 0;
       }
 
       &-heading {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
+        gap: 0 12px;
 
         &.am-rw-360 {
           width: 100%;
@@ -136,11 +138,13 @@ export default {
           justify-content: center;
           flex: 0 0 auto;
           color: var(--am-c-main-bgr);
-          margin-right: 12px;
         }
       }
 
       &-name {
+        min-height: 40px;
+        display: flex;
+        align-items: center;
         font-size: 15px;
         font-weight: 500;
         line-height: 1.6;

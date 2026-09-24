@@ -345,6 +345,7 @@ abstract class Controller
             'statuses',
             'stats',
             'bookingTypes',
+            'bookings',
         ], $keys);
 
         foreach ($names as $name) {

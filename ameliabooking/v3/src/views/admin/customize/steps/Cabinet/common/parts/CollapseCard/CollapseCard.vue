@@ -3,159 +3,171 @@
     <AmCollapse>
       <AmCollapseItem heading-class="am-cc__heading-wrapper" :side="props.parentWidth > 500">
         <template #heading>
-          <div class="am-cc__heading" :class="props.responsiveClass">
-            <div class="am-cc__heading-info" :class="props.responsiveClass">
-              <div class="am-cc__heading-info__part" :class="props.responsiveClass">
-                <div class="am-cc__time">
-                  {{ props.start }}
-                </div>
-                <div v-if="props.parentWidth > 650" class="am-cc__name">
-                  {{ props.name }}
-                </div>
-                <div
-                  v-if="props.parentWidth <= 650"
-                  class="am-cc__status"
-                  :class="`am-cc__status-${props.booking.status}`"
-                >
-                  {{ labelsDisplay(props.booking.status) }}
-                </div>
-              </div>
-              <div class="am-cc__heading-info__part" :class="props.responsiveClass">
-                <div v-if="props.parentWidth <= 650" class="am-cc__name">
-                  {{ props.name }}
-                </div>
-                <div
-                  v-if="props.parentWidth > 650"
-                  class="am-cc__status"
-                  :class="`am-cc__status-${props.booking.status}`"
-                >
-                  {{ labelsDisplay(props.booking.status) }}
-                </div>
-              </div>
+          <div class="am-cc__heading-info__part" :class="props.responsiveClass">
+            <div class="am-cc__time">
+              {{ props.start }}
             </div>
+
             <div
+              v-if="props.parentWidth > 500"
+              class="am-cc__status"
+              :class="`am-cc__status-${props.booking.status}`"
+            >
+              {{ labelsDisplay(props.booking.status) }}
+            </div>
+          </div>
+
+          <div class="am-cc__heading-info__part" :class="props.responsiveClass">
+            <div class="am-cc__name">
+              {{ props.name }}
+            </div>
+          </div>
+
+          <div
+            v-if="props.parentWidth <= 500"
+            class="am-cc__heading-info__part"
+            :class="props.responsiveClass"
+          >
+            <PaymentButton
               v-if="
                 (props.booking.status === 'approved' || props.booking.status === 'pending') &&
-                (!props.isPackageBooking ||
-                  props.reservation.cancelable ||
-                  props.reservation.reschedulable ||
-                  !licence.isStarter)
+                !props.isPackageBooking &&
+                !licence.isStarter &&
+                pageRenderKey !== 'cape'
               "
-              class="am-cc__heading-actions"
-              :class="props.responsiveClass"
+            />
+
+            <div class="am-cc__status" :class="`am-cc__status-${props.booking.status}`">
+              {{ labelsDisplay(props.booking.status) }}
+            </div>
+          </div>
+
+          <div
+            v-if="
+              (props.booking.status === 'approved' || props.booking.status === 'pending') &&
+              (!props.isPackageBooking ||
+                props.reservation.cancelable ||
+                props.reservation.reschedulable ||
+                !licence.isStarter)
+            "
+            ref="actionsRef"
+            class="am-cc__heading-actions"
+            :class="props.responsiveClass"
+          >
+            <PaymentButton
+              v-if="
+                props.parentWidth > 500 &&
+                !props.isPackageBooking &&
+                !licence.isStarter &&
+                pageRenderKey !== 'cape'
+              "
+            />
+            <el-popover
+              v-if="
+                props.reservation.cancelable ||
+                props.reservation.reschedulable ||
+                !licence.isStarter
+              "
+              ref="editRef"
+              :visible="editPopVisible"
+              :persistent="false"
+              :show-arrow="false"
+              :width="'auto'"
+              :popper-class="'am-cc__popper'"
+              :popper-style="cssVars"
+              trigger="click"
             >
-              <PaymentButton
-                v-if="!props.isPackageBooking && !licence.isStarter && pageRenderKey !== 'cape'"
-              />
-              <el-popover
-                v-if="
-                  props.reservation.cancelable ||
-                  props.reservation.reschedulable ||
-                  !licence.isStarter
-                "
-                ref="editRef"
-                :visible="editPopVisible"
-                :persistent="false"
-                :show-arrow="false"
-                :width="'auto'"
-                :popper-class="'am-cc__popper'"
-                :popper-style="cssVars"
-                trigger="click"
+              <template #reference>
+                <span
+                  v-if="props.booking"
+                  class="am-cc__edit-btn am-icon-dots-vertical"
+                  @click="editItem"
+                ></span>
+              </template>
+              <div
+                v-if="pageRenderKey === 'capc'"
+                v-click-outside="closeEditItemPopup"
+                class="am-cc__edit"
               >
-                <template #reference>
-                  <span
-                    v-if="props.booking"
-                    class="am-cc__edit-btn am-icon-dots-vertical"
-                    @click="editItem"
-                  ></span>
-                </template>
+                <!-- Reschedule -->
                 <div
-                  v-if="pageRenderKey === 'capc'"
-                  v-click-outside="closeEditItemPopup"
-                  class="am-cc__edit"
+                  v-if="props.reservation.type === 'appointment' && props.reservation.reschedulable"
+                  class="am-cc__edit-item"
+                  @click="rescheduleItem"
                 >
-                  <!-- Reschedule -->
-                  <div
-                    v-if="
-                      props.reservation.type === 'appointment' && props.reservation.reschedulable
-                    "
-                    class="am-cc__edit-item"
-                    @click="rescheduleItem"
-                  >
-                    <span class="am-icon-date-time"></span>
-                    <span class="am-cc__edit-text">
-                      {{ labelsDisplay('reschedule') }}
-                    </span>
-                  </div>
-                  <!-- /Reschedule -->
+                  <span class="am-icon-date-time"></span>
+                  <span class="am-cc__edit-text">
+                    {{ labelsDisplay('reschedule') }}
+                  </span>
+                </div>
+                <!-- /Reschedule -->
 
-                  <!-- Invoice -->
-                  <div v-if="features.invoices" class="am-cc__edit-item">
-                    <span class="am-icon-eye"></span>
-                    <span class="am-cc__edit-text">
-                      {{ labelsDisplay('preview_invoice') }}
-                    </span>
-                  </div>
-
-                  <div v-if="features.invoices" class="am-cc__edit-item">
-                    <span class="am-icon-download"></span>
-                    <span class="am-cc__edit-text">
-                      {{ labelsDisplay('download_invoice') }}
-                    </span>
-                  </div>
-                  <!-- /Invoice -->
-
-                  <!-- Cancel item -->
-                  <div
-                    v-if="props.reservation.cancelable"
-                    class="am-cc__edit-item am-delete"
-                    @click="cancelItem"
-                  >
-                    <span class="am-icon-clearable"></span>
-                    <span class="am-cc__edit-text">
-                      {{ labelsDisplay('cancel') }}
-                    </span>
-                  </div>
-                  <!-- /Cancel item -->
+                <!-- Invoice -->
+                <div v-if="features.invoices" class="am-cc__edit-item">
+                  <span class="am-icon-eye"></span>
+                  <span class="am-cc__edit-text">
+                    {{ labelsDisplay('preview_invoice') }}
+                  </span>
                 </div>
 
-                <template v-if="pageRenderKey === 'cape'">
+                <div v-if="features.invoices" class="am-cc__edit-item">
+                  <span class="am-icon-download"></span>
+                  <span class="am-cc__edit-text">
+                    {{ labelsDisplay('download_invoice') }}
+                  </span>
+                </div>
+                <!-- /Invoice -->
+
+                <!-- Cancel item -->
+                <div
+                  v-if="props.reservation.cancelable"
+                  class="am-cc__edit-item am-delete"
+                  @click="cancelItem"
+                >
+                  <span class="am-icon-clearable"></span>
+                  <span class="am-cc__edit-text">
+                    {{ labelsDisplay('cancel') }}
+                  </span>
+                </div>
+                <!-- /Cancel item -->
+              </div>
+
+              <template v-if="pageRenderKey === 'cape'">
+                <div v-click-outside="closeEditItemPopup" class="am-cc__edit">
+                  <!-- Edit Appointment -->
+                  <div class="am-cc__edit-item am-edit">
+                    <span class="am-icon-edit" />
+                    <span class="am-cc__edit-text">
+                      {{ amLabels.edit }}
+                    </span>
+                  </div>
+                  <!-- /Edit Appointment -->
+                </div>
+
+                <template v-if="props.reservation.type === 'event'">
                   <div v-click-outside="closeEditItemPopup" class="am-cc__edit">
-                    <!-- Edit Appointment -->
+                    <!-- Edit Attendee -->
                     <div class="am-cc__edit-item am-edit">
-                      <span class="am-icon-edit" />
+                      <span class="am-icon-users-plus"></span>
                       <span class="am-cc__edit-text">
-                        {{ amLabels.edit }}
+                        {{ amLabels.event_add_attendee }}
                       </span>
                     </div>
-                    <!-- /Edit Appointment -->
+                    <!-- /Edit Attendee -->
                   </div>
-
-                  <template v-if="props.reservation.type === 'event'">
-                    <div v-click-outside="closeEditItemPopup" class="am-cc__edit">
-                      <!-- Edit Attendee -->
-                      <div class="am-cc__edit-item am-edit">
-                        <span class="am-icon-users-plus"></span>
-                        <span class="am-cc__edit-text">
-                          {{ amLabels.event_add_attendee }}
-                        </span>
-                      </div>
-                      <!-- /Edit Attendee -->
+                  <div v-click-outside="closeEditItemPopup" class="am-cc__edit">
+                    <!-- List Event Attendees -->
+                    <div class="am-cc__edit-item am-edit">
+                      <span class="am-icon-user"></span>
+                      <span class="am-cc__edit-text">
+                        {{ amLabels.attendees }}
+                      </span>
                     </div>
-                    <div v-click-outside="closeEditItemPopup" class="am-cc__edit">
-                      <!-- List Event Attendees -->
-                      <div class="am-cc__edit-item am-edit">
-                        <span class="am-icon-user"></span>
-                        <span class="am-cc__edit-text">
-                          {{ amLabels.attendees }}
-                        </span>
-                      </div>
-                      <!-- /List Event Attendees -->
-                    </div>
-                  </template>
+                    <!-- /List Event Attendees -->
+                  </div>
                 </template>
-              </el-popover>
-            </div>
+              </template>
+            </el-popover>
           </div>
         </template>
         <template #default>
@@ -321,21 +333,23 @@
               <!-- /Extras -->
 
               <!-- Custom Fields -->
-              <CollapseCardPopover
+              <CollapseCardDialog
                 v-if="props.customFields.length && features.customFields"
+                append-dialog-to=".am-fs__main-inner"
                 :header-text="labelsDisplay('custom_fields')"
                 type="customField"
                 :content-data="props.customFields"
+                :customized-options="props.customizedOptions"
               >
-                <template #default>
-                  <div class="am-cc__data">
+                <template #trigger>
+                  <div class="am-cc__data link">
                     <span class="am-icon-file-text"></span>
                     <span class="am-cc__data-text">
                       {{ labelsDisplay('custom_fields') }}
                     </span>
                   </div>
                 </template>
-              </CollapseCardPopover>
+              </CollapseCardDialog>
               <!-- /Custom Fields -->
 
               <!-- Tickets -->
@@ -397,10 +411,13 @@ import { ref, computed, inject } from 'vue'
 // * Import from Libraries
 import { ClickOutside as vClickOutside } from 'element-plus'
 
+import { useElementSize } from '@vueuse/core'
+
 // * Components
 import AmCollapse from '../../../../../../../_components/collapse/AmCollapse.vue'
 import AmCollapseItem from '../../../../../../../_components/collapse/AmCollapseItem.vue'
 import CollapseCardPopover from './popover/CollapseCardPopover.vue'
+import CollapseCardDialog from './dialog/CollapseCardDialog.vue'
 import PaymentButton from '../PaymentButton.vue'
 
 // * Composables
@@ -524,6 +541,10 @@ let amLabels = inject('labels')
 let pageRenderKey = inject('pageRenderKey')
 let stepName = inject('stepName')
 
+// * Actions Ref
+let actionsRef = ref(null)
+let { width: actionsWidth } = useElementSize(actionsRef)
+
 // * Label computed function
 function labelsDisplay(label) {
   let computedLabel = computed(() => {
@@ -595,6 +616,7 @@ let cssVars = computed(() => {
     '--am-c-cc-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
     '--am-c-cc-text-op90': useColorTransparency(amColors.value.colorMainText, 0.9),
     '--am-font-family': amFonts.value.fontFamily,
+    '--am-actions-width': actionsWidth.value + 'px',
 
     // css properties
     '--am-rad-inp': '6px',
@@ -619,39 +641,55 @@ export default {
     }
 
     &__heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-
-      &.am-rw-500 {
-        flex-wrap: wrap;
-      }
-
       &-wrapper {
         padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 8px 0;
+
+        .am-collapse-item__trigger-side {
+          padding: 5px 6px;
+          order: 2;
+        }
       }
 
       &-info {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-
-        &.am-rw-650 {
-          flex-wrap: wrap;
-        }
-
         &__part {
           display: flex;
           align-items: center;
+          gap: 8px;
+          width: 100%;
+          justify-content: space-between;
+          min-height: 32px;
 
-          &.am-rw-650 {
-            width: 100%;
+          &:nth-child(1) {
+            order: 0;
+            width: calc(100% - var(--am-actions-width) - 44px);
+
+            &.am-rw-500 {
+              width: calc(100% - 44px);
+            }
           }
 
-          &.am-rw-500 {
-            justify-content: space-between;
+          &:nth-child(2) {
+            order: 3;
+
+            &.am-rw-500 {
+              order: 2;
+            }
+          }
+
+          &:nth-child(3) {
+            &.am-rw-500 {
+              order: 3;
+
+              .am-cc__status {
+                margin-left: auto;
+              }
+            }
+          }
+
+          &.am-flex-wrap {
+            flex-wrap: wrap;
           }
 
           &.am-rw-420 {
@@ -664,10 +702,11 @@ export default {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin: 0 0 0 8px;
+        align-self: flex-start;
+        order: 2;
 
         &.am-rw-500 {
-          width: 100%;
+          order: 1;
 
           .am-cc__edit-btn {
             margin-left: auto;
@@ -773,9 +812,6 @@ export default {
           background-color: var(--am-c-cc-success);
         }
       }
-    }
-
-    &__actions {
     }
 
     &__edit {

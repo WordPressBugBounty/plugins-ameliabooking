@@ -505,7 +505,14 @@ class PaymentApplicationService
             }
         }
 
-        $isAllowedPaymentMethod = in_array($paymentData['gateway'], $this->getAvailablePayments($bookable), true);
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+
+        $isAllowedPaymentMethod = in_array(
+            $paymentData['gateway'],
+            $this->getAvailablePayments($bookable, $settingsService->getCategorySettings('payments')),
+            true
+        );
 
         // if the payment method is not onSite, and this method is disabled, throw an exception
         if (
@@ -570,9 +577,7 @@ class PaymentApplicationService
             return false;
         }
 
-        return isset($data['isCart']) && is_string($data['isCart'])
-            ? filter_var($data['isCart'], FILTER_VALIDATE_BOOLEAN)
-            : !empty($data['isCart']);
+        return !empty($data['isCart']);
     }
 
     /** @noinspection MoreThanThreeArgumentsInspection */
@@ -588,7 +593,7 @@ class PaymentApplicationService
      *
      * @throws Exception
      */
-    public function processPayment($result, $paymentData, $reservation, $bookingType, &$paymentTransactionId, &$transfers)
+    public function processPayment($result, $paymentData, $reservation, $bookingType, &$paymentTransactionId, &$transfers): bool
     {
         /** @var ReservationServiceInterface $reservationService */
         $reservationService = $this->container->get('application.reservation.service')->get($bookingType->getValue());
@@ -791,11 +796,27 @@ class PaymentApplicationService
 
                             return false;
                         }
-                        if ($paymentResponse && $paymentResponse->getResult()->getPayment() !== null) {
-                            $paymentTransactionId = $paymentResponse->getResult()->getPayment()->getId();
+
+                        $squarePayment = $paymentResponse && $paymentResponse->getResult()
+                            ? $paymentResponse->getResult()->getPayment()
+                            : null;
+
+                        if ($squareService->isAcceptablePayment($squarePayment)) {
+                            $paymentTransactionId = $squarePayment->getId();
+                            $this->markSquarePaymentAsPaid($reservation, $reservationService);
 
                             return true;
                         }
+
+                        $result->setResult(CommandResult::RESULT_ERROR);
+                        $result->setMessage(FrontendStrings::getCommonStrings()['payment_error']);
+                        $result->setData(
+                            [
+                                'paymentSuccessful' => false,
+                            ]
+                        );
+
+                        return false;
                     } catch (Exception $e) {
                         $result->setResult(CommandResult::RESULT_ERROR);
                         $result->setMessage(FrontendStrings::getCommonStrings()['payment_error']);
@@ -827,27 +848,23 @@ class PaymentApplicationService
      * The payment methods a reservation may be paid with, as a list of gateway names.
      *
      * A method is available for an entity only when it is enabled globally *and* for that entity, so
-     * an entity can never widen what the global settings offer, and an entity that disables every
-     * globally enabled method is left with none - it is not handed the global ones back.
+     * an entity can never widen what the global settings offer.
      *
-     * An entity records only the gateways it was asked about, so a gateway that is absent from its
-     * settings is not a disabled one - it inherits the global setting. An entity without payment
-     * settings of its own therefore ends up with exactly the globally enabled methods. This is the
-     * same reading the booking form applies when it decides which methods to offer (see
+     * An entity records only the gateways that differ from the global defaults, so a gateway that
+     * is absent from its settings inherits the global setting. A stored method that is turned off
+     * stays off even when other gateways are missing. An entity without payment settings, or one
+     * whose stored and inherited methods are all off, uses the globally enabled methods.
+     * That is the same reading the booking form applies when it decides which methods to offer (see
      * availablePayments in v3), and the two have to agree: a method the form offers and this method
      * rejects fails the booking with a payment error.
      *
-     * @param AbstractBookable|null $bookable Null when the reservation books more than one entity at once (cart)
+     * @param AbstractBookable|null $bookable        Null when the reservation books more than one entity at once (cart)
+     * @param array                 $generalPayments Global payments category settings
      *
      * @return array   Gateway names, numerically indexed
      */
-    public function getAvailablePayments($bookable = null)
+    public function getAvailablePayments($bookable, array $generalPayments): array
     {
-        /** @var SettingsService $settingsService */
-        $settingsService = $this->container->get('domain.settings.service');
-
-        $generalPayments = $settingsService->getCategorySettings('payments');
-
         // on site is configured as a plain boolean, every other gateway as ['enabled' => bool]
         $gatewayPayments = array_diff($this->getAvailablePaymentGateways(), [PaymentType::ON_SITE]);
 
@@ -906,10 +923,8 @@ class PaymentApplicationService
                 }
             }
 
-            // an entity that carries no payment settings has kept every globally enabled method above,
-            // so an empty list here means the entity really did disable them all - as the booking form
-            // reads it too, which then offers no payment method at all
-            return $availableBookableMethods;
+            // the booking form falls back to global methods when the intersection is empty
+            return $availableBookableMethods ?: $availableGeneralMethods;
         }
 
         return $availableGeneralMethods;
@@ -1143,6 +1158,41 @@ class PaymentApplicationService
         $linkPaymentId = $paymentRepository->add($linkPayment);
         $linkPayment->setId(new Id($linkPaymentId));
         return $linkPayment;
+    }
+
+    /**
+     * Persist the Square order id created for a payment link on the Amelia payment row,
+     * so the callback can bind to that order instead of trusting the redirect query string.
+     *
+     * @param int    $paymentId
+     * @param string $orderId
+     *
+     * @return void
+     *
+     * @throws QueryExecutionException
+     * @throws InvalidArgumentException
+     */
+    public function storeSquareOrderIdOnPayment($paymentId, $orderId): void
+    {
+        /** @var PaymentRepository $paymentRepository */
+        $paymentRepository = $this->container->get('domain.payment.repository');
+
+        /** @var Payment $payment */
+        $payment = $paymentRepository->getById($paymentId);
+
+        $paymentData = [];
+
+        if ($payment->getData() && $payment->getData()->getValue()) {
+            $decoded = json_decode($payment->getData()->getValue(), true);
+
+            if (is_array($decoded)) {
+                $paymentData = $decoded;
+            }
+        }
+
+        $paymentData['squareOrderId'] = $orderId;
+
+        $paymentRepository->updateFieldById($paymentId, json_encode($paymentData), 'data');
     }
 
     /**
@@ -1598,7 +1648,7 @@ class PaymentApplicationService
                         ],
                         'description' => $additionalInformation['description'] ?: $data['bookable']['name'],
                         'redirectUrl' => $redirectUrl,
-                        'webhookUrl'  => (AMELIA_DEV ? str_replace('localhost', AMELIA_NGROK_URL, $callbackLink) : $callbackLink) . '&paymentMethod=mollie',
+                        'webhookUrl'  => HelperService::getPublicCallbackUrl($callbackLink) . '&paymentMethod=mollie',
                     ];
 
                 $paymentLink = $paymentService->getPaymentLink($paymentData);
@@ -1649,6 +1699,10 @@ class PaymentApplicationService
 
                 if ($paymentLink['status'] === 200 && !empty($paymentLink['link'])) {
                     $paymentLinks['payment_link_square'] = $paymentLink['link'];
+
+                    if (!empty($paymentLink['orderId']) && !empty($ameliaPaymentId)) {
+                        $paymentAS->storeSquareOrderIdOnPayment($ameliaPaymentId, $paymentLink['orderId']);
+                    }
                 } else {
                     $paymentLinks['payment_link_error_code']    = $paymentLink['status'];
                     $paymentLinks['payment_link_error_message'] = $paymentLink['message'];
@@ -1912,6 +1966,61 @@ class PaymentApplicationService
                 $paymentId,
                 $transactionId
             );
+        }
+    }
+
+    /**
+     * Promote Square CreatePayment bookings from pending to paid after COMPLETED is confirmed.
+     * Leaves partiallyPaid (deposit) and other non-pending statuses unchanged.
+     *
+     * Only the payments the Square charge covers are promoted - the ones the charge left out, such
+     * as a recurring appointment that is paid on site, keep their status even though parentId links
+     * them to a charged payment.
+     *
+     * @param Reservation                 $reservation
+     * @param ReservationServiceInterface $reservationService
+     *
+     * @return void
+     *
+     * @throws QueryExecutionException
+     */
+    private function markSquarePaymentAsPaid($reservation, $reservationService): void
+    {
+        /** @var Payment[] $chargedPayments */
+        $chargedPayments = [];
+
+        /** @var Payment $payment */
+        foreach ($reservationService->getChargedPayments($reservation) as $payment) {
+            if (
+                $payment->getStatus()->getValue() === PaymentStatus::PENDING &&
+                $payment->getGateway() &&
+                $payment->getGateway()->getName()->getValue() === PaymentType::SQUARE
+            ) {
+                $chargedPayments[] = $payment;
+            }
+        }
+
+        if (empty($chargedPayments)) {
+            return;
+        }
+
+        /** @var PaymentRepository $paymentRepository */
+        $paymentRepository = $this->container->get('domain.payment.repository');
+
+        $paymentRepository->updateStatusByIds(
+            array_map(
+                function ($payment) {
+                    return $payment->getId()->getValue();
+                },
+                $chargedPayments
+            ),
+            PaymentStatus::PAID,
+            PaymentType::SQUARE,
+            PaymentStatus::PENDING
+        );
+
+        foreach ($chargedPayments as $payment) {
+            $payment->setStatus(new PaymentStatus(PaymentStatus::PAID));
         }
     }
 
@@ -3103,6 +3212,12 @@ class PaymentApplicationService
                                         'status'
                                     );
 
+                                    $paymentRepository->updateFieldById(
+                                        $nextPayment->getId()->getValue(),
+                                        0,
+                                        'amount'
+                                    );
+
                                     if ($nextAppointment->getBookings()->length() === 1) {
                                             $nextAppointment->setStatus(new BookingStatus(BookingStatus::CANCELED));
 
@@ -3138,6 +3253,12 @@ class PaymentApplicationService
                                     $booking->getId()->getValue(),
                                     BookingStatus::CANCELED,
                                     'status'
+                                );
+
+                                $paymentRepository->updateFieldById(
+                                    $payment->getId()->getValue(),
+                                    0,
+                                    'amount'
                                 );
 
                                 if ($appointment->getBookings()->length() === 1) {
@@ -3182,6 +3303,12 @@ class PaymentApplicationService
                                     $booking->getId()->getValue(),
                                     BookingStatus::CANCELED,
                                     'status'
+                                );
+
+                                $paymentRepository->updateFieldById(
+                                    $payment->getId()->getValue(),
+                                    0,
+                                    'amount'
                                 );
 
                                 break;
@@ -3274,6 +3401,12 @@ class PaymentApplicationService
 
                         switch ($status) {
                             case ('expired'):
+                                $paymentRepository->updateFieldById(
+                                    $payment->getId()->getValue(),
+                                    0,
+                                    'amount'
+                                );
+
                                 break;
 
                             case ('failed'):

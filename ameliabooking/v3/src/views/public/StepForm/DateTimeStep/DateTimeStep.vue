@@ -2,7 +2,7 @@
   <div
     ref="dateTimeRef"
     class="am-fs-dt__calendar"
-    :class="[props.globalClass, { 'am-oxvisible': packagesVisibility }]"
+    :class="[props.globalClass, { 'am-oxvisible': packagesVisibility || recurringPopupVisibility}]"
   >
     <div v-if="limitPerEmployeeError" ref="limitError" class="am-fs__payments-error">
       <AmAlert type="error" :title="limitPerEmployeeError" :show-icon="true" :closable="false">

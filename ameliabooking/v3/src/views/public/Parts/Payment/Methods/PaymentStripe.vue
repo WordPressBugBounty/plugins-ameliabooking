@@ -71,14 +71,15 @@ import {
 } from '../../../../../assets/js/public/booking.js'
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation.js'
 import { useScrollTo } from '../../../../../assets/js/common/scrollElements'
-import httpClient from '../../../../../plugins/axios'
 import {
   bindStripePaymentElementChange,
   buildStripeIntentCacheKey,
   cancelActiveStripePaymentIntent,
   clearStripePendingPayment,
   createStripePaymentElementOptions,
+  getActiveStripeCacheName,
   invalidateStripePaymentIntentRequest,
+  handleStripeCompletionError,
   persistStripePendingPayment,
   pollStripePaymentCompletion,
   requestStripePaymentIntent,
@@ -300,8 +301,10 @@ async function handleStripePaymentFailure(message) {
   clearStripePendingPayment()
 
   try {
-    await cancelPendingStripePayment()
-    await reinitializeStripePayment()
+    // The reservation stays: re-initializing reuses the PaymentIntent while Stripe still accepts a
+    // confirmation for it, so a declined card does not cost the customer their slot.
+    invalidateStripePaymentIntentRequest(getStripeInstanceId())
+    await initializeStripePayment()
     emits('payment-error', message)
   } finally {
     store.commit('setLoading', false)
@@ -313,7 +316,9 @@ async function initializeStripePayment() {
     return
   }
 
-  await waitForStripeCleanup(getStripeInstanceId())
+  // Keeps the reservation this step already holds; the intent request below tells the server which
+  // one, and it either hands the same PaymentIntent back or replaces the reservation itself.
+  await waitForStripeCleanup(getStripeInstanceId(), { keepReservation: true })
   const initVersion = ++stripeInitVersion
   stripeElementsLoading.value = true
   resetStripeState()
@@ -321,6 +326,7 @@ async function initializeStripePayment() {
   try {
     const bookingData = buildBookingData({}, recaptchaResponse.value)
     bookingData.data.returnUrl = window.location.href
+    bookingData.data.cacheName = getActiveStripeCacheName(getStripeInstanceId())
 
     const intentRequest = requestStripePaymentIntent(
       getStripeInstanceId(),
@@ -465,15 +471,21 @@ async function reinitializeStripePayment() {
 
 async function completeStripePayment(paymentIntentId, cacheName) {
   try {
-    const response = await httpClient.post('/payment/stripe/complete', {
-      name: cacheName,
+    const response = await pollStripePaymentCompletion({
+      cacheName,
       paymentIntentId,
-      recaptcha: recaptchaResponse.value,
     })
 
     successBooking(response)
   } catch (error) {
-    errorBooking(error)
+    handleStripeCompletionError(
+      error,
+      () => {
+        store.commit('setLoading', false)
+        emits('payment-error', labels.value.payment_still_processing)
+      },
+      errorBooking,
+    )
   }
 }
 
@@ -563,12 +575,15 @@ async function confirmStripePayment(isExpressCheckout = false) {
         const response = await pollStripePaymentCompletion({
           cacheName: completionCacheName,
           paymentIntentId: paymentIntent.id,
-          recaptcha: recaptchaResponse.value,
         })
 
         successBooking(response)
       } catch (error) {
-        errorBooking(error)
+        handleStripeCompletionError(
+          error,
+          () => emits('payment-error', labels.value.payment_still_processing),
+          errorBooking,
+        )
       }
 
       return
@@ -582,6 +597,18 @@ async function confirmStripePayment(isExpressCheckout = false) {
 
 function onRecaptchaExpired() {
   recaptchaValid.value = false
+  // The expired token is single use and now dead, so it must not be sent on with
+  // a later request.
+  recaptchaResponse.value = null
+
+  // The intent was verified when it was created and /complete does not re-check,
+  // so an expiry after that (or mid-confirm / mid-poll) is not a payment error.
+  // paymentInProgress can only be set once an intent exists, so stripeInitialized alone
+  // already covers every point after the intent was created.
+  if (stripeInitialized.value) {
+    return
+  }
+
   emits('payment-error', labels.value.recaptcha_error)
 }
 

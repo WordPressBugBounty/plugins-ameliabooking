@@ -32,11 +32,10 @@
                 </div>
                 <div>
                   <p>1</p>
-                  <p>{{ `${moment().add(5, 'days').format('HH')}:45` }}</p>
                   <p>{{ moment().add(5, 'days').format('DD. MM YYYY.') }}</p>
+                  <p>{{ `${moment().add(5, 'days').format('HH')}:45` }}</p>
                   <p>John Doe</p>
                   <p>Location 1</p>
-                  <p></p>
                 </div>
               </div>
             </template>
@@ -354,15 +353,16 @@ export default {
         }
 
         &-booked {
-          display: table;
+          display: flex;
+          flex-direction: column;
           width: 100%;
           padding: 0;
 
           & > div:first-child {
-            display: table-header-group;
+            display: flex;
 
             & > p {
-              display: table-cell;
+              display: flex;
               width: 23%;
               font-size: 13px;
               font-weight: 400;
@@ -385,7 +385,8 @@ export default {
           & > div:not(:first-child) {
             /* $shade-900 */
             color: var(--am-c-pso-text);
-            display: table-row;
+            display: flex;
+            padding-bottom: 4px;
 
             &:nth-child(even) {
               /* $blue-300 */
@@ -397,10 +398,17 @@ export default {
             }
 
             & > p {
-              display: table-cell;
-              width: 23%;
-              vertical-align: middle;
-              padding: 4px;
+              // -webkit-box is required for the line clamp to take effect
+              display: -webkit-box;
+              -webkit-box-orient: vertical;
+              -webkit-line-clamp: 3;
+              line-clamp: 3;
+              width: 100%;
+              max-width: 23%;
+              padding: 4px 4px 0 4px;
+              overflow: hidden;
+              overflow-wrap: break-word;
+
               &:first-child {
                 width: 8%;
                 padding-left: 16px;

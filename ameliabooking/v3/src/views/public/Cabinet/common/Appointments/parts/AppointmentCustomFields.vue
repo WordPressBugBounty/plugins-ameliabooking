@@ -4,7 +4,7 @@
     :model="customFieldsForm"
     :rules="customFieldsFormRules"
     label-position="top"
-    class="am-capai-cfields am-capai-cfields__form"
+    class="am-capai-cfields am-capai-cfields__form am-capai"
     :class="props.responsiveClass"
   >
     <el-collapse v-model="activeBookingIndex" class="am-capai-collapse" accordion>
@@ -104,7 +104,7 @@ const props = defineProps({
   responsiveClass: {
     type: String,
     default: '',
-  },
+  }
 })
 
 // * Store

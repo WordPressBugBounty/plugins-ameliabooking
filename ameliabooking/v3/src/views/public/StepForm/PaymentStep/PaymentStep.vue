@@ -114,6 +114,7 @@ import useAction from '../../../../assets/js/public/actions'
 import { useBookingData } from '../../../../assets/js/public/booking.js'
 import {
   buildStripeIntentCacheKey,
+  getActiveStripeCacheName,
   prefetchStripePaymentIntent,
   waitForStripeCleanup,
 } from '../../../../assets/js/public/stripePaymentIntent.js'
@@ -207,12 +208,7 @@ let formType = computed(() =>
   cart.value.length > 1 ? 'cart' : store.getters['booking/getBookableType'],
 )
 
-let paymentGateway = computed(() => {
-  if (!store.getters['booking/getPaymentGateway']) {
-    store.commit('booking/setPaymentGateway', settings.defaultPaymentMethod)
-  }
-  return store.getters['booking/getPaymentGateway']
-})
+let paymentGateway = computed(() => store.getters['booking/getPaymentGateway'])
 
 let hasDeposit = computed(() => {
   switch (store.getters['booking/getBookableType']) {
@@ -420,30 +416,38 @@ let availablePayments = computed(() => {
       }
     }
 
-    if (
-      settings.payments.defaultPaymentMethod &&
-      payments[settings.payments.defaultPaymentMethod]
-    ) {
-      store.commit('booking/setPaymentGateway', settings.payments.defaultPaymentMethod)
-
-      footerBtnDisabledUpdater(false)
-    } else {
-      if (Object.keys(payments).filter((item) => payments[item]).length === 1) {
-        for (let key in payments) {
-          if (payments[key]) {
-            store.commit('booking/setPaymentGateway', key)
-
-            footerBtnDisabledUpdater(false)
-          }
-        }
-      }
-    }
-
     return payments
   }
 
   return {}
 })
+
+watch(
+  availablePayments,
+  async (payments) => {
+    if (!ready.value) {
+      return
+    }
+
+    const selectedGateway = store.getters['booking/getPaymentGateway']
+    const defaultPaymentMethod = settings.payments.defaultPaymentMethod
+    const firstAvailable = Object.keys(payments).find((key) => payments[key])
+
+    if (selectedGateway && payments[selectedGateway]) {
+      footerBtnDisabledUpdater(false)
+
+      return
+    }
+
+    const nextGateway =
+      defaultPaymentMethod && payments[defaultPaymentMethod]
+        ? defaultPaymentMethod
+        : firstAvailable || ''
+
+    await setPaymentGateway(nextGateway)
+  },
+  { immediate: true },
+)
 
 function getStripePrefetchFormData() {
   return {
@@ -471,6 +475,10 @@ function prefetchStripeIntent() {
 
   const bookingData = useBookingData(store, getStripePrefetchFormData(), false, {}, null)
   bookingData.data.returnUrl = window.location.href
+  // Carries the hold this browser already took, exactly as initializeStripePayment() does. Both requests
+  // share an instance and a cache key, so whichever starts first is the one the other is deduped into -
+  // and a prefetch that left this out would reserve the slot a second time and strand the first hold.
+  bookingData.data.cacheName = getActiveStripeCacheName(shortcodeData.value.counter)
 
   prefetchStripePaymentIntent(
     shortcodeData.value.counter,
@@ -489,10 +497,20 @@ async function setPaymentGateway(gateway) {
     stripeCleanupLoading.value = true
 
     try {
-      await waitForStripeCleanup(shortcodeData.value.counter)
+      // Leaving Stripe has to give the reservation back so another gateway can book the slot. Arriving
+      // keeps it: the only hold that can still exist here is one this browser took before a reload, and
+      // the intent request below sends its name so the server reuses it instead of taking a second one.
+      await waitForStripeCleanup(shortcodeData.value.counter, {
+        keepReservation: gateway === 'stripe',
+      })
       usePaymentError(store, '')
       store.commit('booking/setPaymentGateway', gateway)
       footerBtnDisabledUpdater(false)
+    } catch (e) {
+      // The hold could not be settled, so the gateway is deliberately left as it was: switching
+      // anyway would let another gateway book a slot this browser is still holding. Without this
+      // the rejection escaped an event handler and the button just went dead with no explanation.
+      usePaymentError(store, globalLabels.payment_error)
     } finally {
       stripeCleanupLoading.value = false
     }

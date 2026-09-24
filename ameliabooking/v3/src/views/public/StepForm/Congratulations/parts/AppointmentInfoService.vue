@@ -1,28 +1,39 @@
 <template>
-  <div class="am-fs__congrats-info-app-date">
-    <span>{{ amLabels.congrats_date }}:</span>
-    <span>{{ getFrontedFormattedDate(date) }}</span>
+  <!-- Date -->
+  <div class="am-fs__ci-label">{{ amLabels.congrats_date }}:</div>
+  <div class="am-fs__ci-value">{{ getFrontedFormattedDate(date) }}</div>
+  <!-- /Date -->
+
+  <!-- Time -->
+  <div class="am-fs__ci-label">{{ amLabels.congrats_time }}:</div>
+  <div class="am-fs__ci-value">{{ getFrontedFormattedTime(useFormatTime(time)) }}</div>
+  <!-- /Time -->
+
+  <!-- Service -->
+  <div class="am-fs__ci-label">{{ amLabels.congrats_service }}:</div>
+  <div class="am-fs__ci-value">{{ bookable ? bookable.name : '' }}</div>
+  <!-- /Service -->
+
+  <!-- Employee -->
+  <div class="am-fs__ci-label">{{ amLabels.congrats_employee }}:</div>
+  <div class="am-fs__ci-value">
+    {{ employee ? employee.firstName + ' ' + employee.lastName : '' }}
   </div>
-  <div class="am-fs__congrats-info-app-time">
-    <span>{{ amLabels.congrats_time }}:</span>
-    <span>{{ getFrontedFormattedTime(useFormatTime(time)) }}</span>
-  </div>
-  <div class="am-fs__congrats-info-app-service">
-    <span>{{ amLabels.congrats_service }}:</span>
-    <span>{{ bookable ? bookable.name : '' }}</span>
-  </div>
-  <div class="am-fs__congrats-info-app-employee">
-    <span>{{ amLabels.congrats_employee }}:</span>
-    <span>{{ employee ? employee.firstName + ' ' + employee.lastName : '' }}</span>
-  </div>
-  <div v-if="location" class="am-fs__congrats-info-app-location">
-    <span>{{ amLabels.congrats_location }}:</span>
-    <span>{{ location.address ? location.address : location.name }}</span>
-  </div>
-  <div v-if="booked.data.length > 1" class="am-fs__congrats-info-app-recurring">
-    <span>{{ amLabels.recurring }}:</span>
-    <span>{{ amLabels.appointment_repeats }} x{{ booked.data.length }}</span>
-  </div>
+  <!-- /Employee -->
+
+  <!-- Location -->
+  <template v-if="location">
+    <div class="am-fs__ci-label">{{ amLabels.congrats_location }}:</div>
+    <div class="am-fs__ci-value">{{ location.address ? location.address : location.name }}</div>
+  </template>
+  <!-- /Location -->
+
+  <!-- Recurring -->
+  <template v-if="booked.data.length > 1">
+    <div class="am-fs__ci-label">{{ amLabels.recurring }}:</div>
+    <div class="am-fs__ci-value">{{ amLabels.appointment_repeats }} x{{ booked.data.length }}</div>
+  </template>
+  <!-- /Recurring -->
 </template>
 
 <script setup>
@@ -68,5 +79,3 @@ export default {
   name: 'AppointmentInfoService',
 }
 </script>
-
-<style lang="scss"></style>

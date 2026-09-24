@@ -166,17 +166,10 @@ import { useCookies } from 'vue3-cookies'
 import httpClient from '../../../../../plugins/axios'
 
 // * Import from Vue
-import {
-  ref,
-  reactive,
-  computed,
-  inject,
-  provide,
-  onMounted,
-  onBeforeUnmount,
-  nextTick,
-  watch,
-} from 'vue'
+import { ref, reactive, computed, inject, provide, onMounted } from 'vue'
+
+// * Components Width and Height
+import { useElementSize } from '@vueuse/core'
 
 // * Composables
 import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
@@ -197,43 +190,10 @@ let loading = computed(() => store.getters['getLoading'])
 
 // * Page Content width
 let pageContainer = ref(null)
-let pageWidth = ref(0)
-
-// * Sidebar collapsed var
-let sidebarCollapsed = inject('sidebarCollapsed')
-
-// * window resize listener
-function resize() {
-  if (pageContainer.value) {
-    pageWidth.value = pageContainer.value.offsetWidth
-  }
-}
-watch(sidebarCollapsed, (current) => {
-  if (current) {
-    setTimeout(() => {
-      collapseTriggered()
-    }, 1500)
-  } else {
-    setTimeout(() => {
-      collapseTriggered()
-    }, 500)
-  }
-})
-
-function collapseTriggered() {
-  pageWidth.value = pageContainer.value.offsetWidth
-}
+const { width: pageWidth } = useElementSize(pageContainer)
 
 onMounted(() => {
-  window.addEventListener('resize', resize)
-  nextTick(() => {
-    pageWidth.value = pageContainer.value.offsetWidth
-  })
   setInitCustomerCustomFields()
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', resize)
 })
 
 let responsiveClass = computed(() => {

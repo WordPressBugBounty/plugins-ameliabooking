@@ -1,6 +1,7 @@
 <template>
-  <!-- Periods -->
+  <!-- popover -->
   <el-popover
+    v-if="!props.isDialog"
     :show-arrow="false"
     :persistent="false"
     :width="'auto'"
@@ -24,7 +25,11 @@
       ></component>
     </div>
   </el-popover>
-  <!-- /Periods -->
+  <!-- /popover -->
+
+  <!-- dialog trigger-->
+  <slot v-else></slot>
+  <!-- /dialog trigger-->
 </template>
 
 <script setup>
@@ -32,7 +37,6 @@
 import Periods from './templates/Periods.vue'
 import Extras from './templates/Extras.vue'
 import Tickets from './templates/Tickets.vue'
-import CustomFields from './templates/CustomFields.vue'
 import Employee from './templates/Employee.vue'
 import Customers from './templates/Customers.vue'
 import QrCode from './templates/QrCode.vue'
@@ -56,6 +60,10 @@ let props = defineProps({
     type: [Array, Object, String],
     default: '',
   },
+  isDialog: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 let amCustomize = inject('amCustomize')
@@ -64,7 +72,6 @@ let templates = ref({
   period: markRaw(Periods),
   extras: markRaw(Extras),
   ticket: markRaw(Tickets),
-  customField: markRaw(CustomFields),
   employee: markRaw(Employee),
   customers: markRaw(Customers),
   qrCode: markRaw(QrCode),

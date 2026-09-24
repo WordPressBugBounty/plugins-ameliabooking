@@ -8,7 +8,7 @@
     <template #label>
       <span class="am-ff__item-label" v-html="props.label" />
     </template>
-    <AmRadioGroup v-model="model">
+    <AmRadioGroup v-model="model" :disabled="props.disabled">
       <AmRadio
         v-for="(option, i) in props.options"
         :key="i"
@@ -46,6 +46,10 @@ let props = defineProps({
   },
   options: {
     type: Array,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
   },
 })
 

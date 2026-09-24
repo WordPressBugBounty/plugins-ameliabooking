@@ -195,7 +195,10 @@
 
 <script setup>
 // * import from Vue
-import { ref, computed, inject, watch, provide, onMounted, nextTick } from 'vue'
+import { ref, computed, inject, watch, provide } from 'vue'
+
+// * Components Width and Height
+import { useElementSize } from '@vueuse/core'
 
 // * Import from Vuex
 import { useStore } from 'vuex'
@@ -322,53 +325,11 @@ watch(
   },
 )
 
-// * Popup contnte width
+// * Popup content width
 let popupInnerRef = ref(null)
-let popupInnerWidth = ref(0)
-
-// * Sidebar collapsed var
-let sidebarCollapsed = inject('sidebarCollapsed')
-
-// * window resize listener
-window.addEventListener('resize', resize)
-
-// * resize function
-function resize() {
-  if (popupInnerRef.value) {
-    popupInnerWidth.value = popupInnerRef.value.offsetWidth
-  }
-}
-
-watch(sidebarCollapsed, (current) => {
-  if (current) {
-    setTimeout(() => {
-      collapseTriggered()
-    }, 1500)
-  } else {
-    setTimeout(() => {
-      collapseTriggered()
-    }, 500)
-  }
-})
-
-function collapseTriggered() {
-  popupInnerWidth.value = popupInnerRef.value.offsetWidth
-}
-
-onMounted(() => {
-  nextTick(() => {
-    popupInnerWidth.value = popupInnerRef.value.offsetWidth
-  })
-})
+const { width: popupInnerWidth } = useElementSize(popupInnerRef)
 
 let popupReady = computed(() => props.visibility)
-watch(popupReady, (newVal) => {
-  if (newVal) {
-    setTimeout(() => {
-      popupInnerWidth.value = popupInnerRef.value.offsetWidth
-    }, 300)
-  }
-})
 
 let responsiveClass = computed(() => {
   return useResponsiveClass(popupInnerWidth.value)

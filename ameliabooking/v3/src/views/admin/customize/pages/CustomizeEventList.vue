@@ -52,6 +52,10 @@ import { useElementSize } from '@vueuse/core'
 
 // * Import composables
 import { defaultCustomizeSettings } from '../../../../assets/js/common/defaultCustomize.js'
+import {
+  importDefaultFonts,
+  removeDefaultFonts,
+} from '../../../../assets/js/common/defaultFonts.js'
 import { useColorTransparency } from '../../../../assets/js/common/colorManipulation'
 import { useReactiveCustomize } from '../../../../assets/js/admin/useReactiveCustomize.js'
 
@@ -217,7 +221,7 @@ watchEffect(() => {
   if (amCustomize.value.fonts.customFontSelected) {
     activateCustomFontStyles()
   } else {
-    importDefaultFonts()
+    importDefaultFonts(baseUrls.value.wpAmeliaPluginURL, amCustomize.value.fonts.fontFamily)
   }
 })
 
@@ -227,9 +231,7 @@ function activateCustomFontStyles() {
     head.querySelector('#amCustomFont').remove()
   }
 
-  if (head.querySelector('#amDefaultFontImport')) {
-    head.querySelector('#amDefaultFontImport').remove()
-  }
+  removeDefaultFonts()
 
   let css = `@font-face {font-family: '${amCustomize.value.fonts.fontFamily}'; src: url(${amCustomize.value.fonts.fontUrl});}`
   let style = document.createElement('style')
@@ -237,20 +239,6 @@ function activateCustomFontStyles() {
   style.setAttribute('type', 'text/css')
   style.setAttribute('id', 'amCustomFont')
   style.appendChild(document.createTextNode(css))
-}
-
-function importDefaultFonts() {
-  const head = document.head || document.getElementsByTagName('head')[0]
-  if (head.querySelector('#amDefaultFontImport')) {
-    return
-  }
-
-  const base = baseUrls.value.wpAmeliaPluginURL
-  const style = document.createElement('style')
-  style.setAttribute('type', 'text/css')
-  style.setAttribute('id', 'amDefaultFontImport')
-  style.textContent = `@import url("${base}v3/src/assets/scss/common/fonts/font.css");`
-  head.appendChild(style)
 }
 
 /**

@@ -6,78 +6,103 @@
     :class="[{ 'am-fs-sb-atc': checkScreen }, props.globalClass]"
   >
     <div class="am-fs__congrats-main">
+      <!-- Congratulations Icon -->
       <img
         :src="baseUrls.wpAmeliaPluginURL + '/v3/src/assets/img/congratulations/congratulations.svg'"
         :alt="amLabels.congratulations"
       />
+      <!-- /Congratulations Icon -->
+
+      <!-- Waiting List -->
       <div
         v-if="waitingListOptions.enabled && waitingListOptions.isWaitingListSlot"
         class="am-fs__congrats-main-waiting-list-block"
       >
-        <p class="am-fs__congrats-main-heading">
-          {{ amLabels.your_position_on_waiting_list }}
-          {{ '#' + (waitingListOptions.peopleWaiting + 1) }}
-        </p>
-        <span>{{ amLabels.appointment_waiting_list_notify_message }}</span>
+        <div
+          v-if="waitingListOptions.enabled && waitingListOptions.isWaitingListSlot"
+          class="am-fs__congrats-main-waiting-list-block"
+        >
+          <p class="am-fs__congrats-main-heading">
+            {{ amLabels.your_position_on_waiting_list }}
+            {{ '#' + (waitingListOptions.peopleWaiting + 1) }}
+          </p>
+          <span>{{ amLabels.appointment_waiting_list_notify_message }}</span>
+        </div>
       </div>
+      <!-- /Waiting List -->
+
+      <!-- Congratulations -->
       <p v-else class="am-fs__congrats-main-heading">
         {{ amLabels.congratulations }}
       </p>
+      <!-- /Congratulations -->
+
+      <!-- Appointment ID -->
       <span v-if="booked && booked.data.length && bookedType === 'appointment'"
         >{{ amLabels.appointment_id }} #{{ booked.data[0].appointmentId }}</span
       >
+      <!-- /Appointment ID -->
 
+      <!-- Add to Calendar -->
       <AddToCalendar v-if="checkScreen" class="am-fs__congrats-main-atc"></AddToCalendar>
+      <!-- /Add to Calendar -->
     </div>
 
-    <div
-      class="am-fs__congrats-info"
-      :class="[
-        { 'am-fs__congrats-info-mobile': checkScreen },
-        { 'am-fs__congrats-info-mobile-s': mobileS },
-      ]"
-    >
+    <div class="am-fs__congrats-info" :class="[{ 'am-fs__congrats-info-mobile': checkScreen }]">
       <div class="am-fs__congrats-info-customer">
         <component :is="componentTypes[bookedType]"></component>
-        <div
-          v-if="booked.price > 0 || (booked.price <= 0 && coupon.code)"
-          class="am-fs__congrats-info-payment"
-        >
-          <span
+
+        <!-- Payment -->
+        <template v-if="booked.price > 0 || (booked.price <= 0 && coupon.code)">
+          <div
             v-if="
               booked && booked.paymentAmount && getPayment(booked.payments).gateway === 'onSite'
             "
+            class="am-fs__ci-label"
           >
             {{ amLabels.congrats_total_amount }}:
-          </span>
-          <span v-else>{{ amLabels.congrats_payment }}:</span>
-          <span v-if="booked && booked.paymentAmount && getPayment(booked.payments).gateway">
+          </div>
+          <div v-else class="am-fs__ci-label">{{ amLabels.congrats_payment }}:</div>
+          <div
+            v-if="booked && booked.paymentAmount && getPayment(booked.payments).gateway"
+            class="am-fs__ci-value"
+          >
             {{
               `${useFormattedPrice(booked.paymentAmount)} - ${getPayment(booked.payments).gatewayTitle ? getPayment(booked.payments).gatewayTitle : getPaymentGatewayNiceName(getPayment(booked.payments))}`
             }}
-          </span>
-          <span v-else-if="booked">
+          </div>
+          <div v-else-if="booked" class="am-fs__ci-value">
             {{
               (getPayment(booked.payments).gateway !== 'onSite'
                 ? useFormattedPrice(booked.paymentAmount)
                 : useFormattedPrice(booked.price < 0 ? 0 : booked.price)) +
               (getPayment(booked.payments).status !== 'paid' ? ' - ' + amLabels.on_site : '')
             }}
-          </span>
-          <span v-else></span>
-        </div>
-        <div class="am-fs__congrats-info-customer-border am-fs__congrats-info-customer-name">
-          <span>{{ amLabels.your_name_colon }}:</span>
-          <span>{{ customer.firstName + ' ' + customer.lastName }}</span>
-        </div>
-        <div v-if="customer.email" class="am-fs__congrats-info-customer-email">
-          <span>{{ amLabels.email_address_colon }}:</span>
-          <span>{{ customer.email }}</span>
-        </div>
-        <div v-if="customer.phone" class="am-fs__congrats-info-customer-phone">
-          <span>{{ amLabels.phone_number_colon }}:</span>
-          <span>{{ customer.phone }}</span>
-        </div>
+          </div>
+          <div v-else class="am-fs__ci-value"></div>
+        </template>
+        <!-- /Payment -->
+
+        <hr class="am-fs__ci-border" />
+
+        <!-- Customer -->
+        <div class="am-fs__ci-label">{{ amLabels.your_name_colon }}:</div>
+        <div class="am-fs__ci-value">{{ customer.firstName + ' ' + customer.lastName }}</div>
+        <!-- /Customer -->
+
+        <!-- Email -->
+        <template v-if="customer.email">
+          <div class="am-fs__ci-label">{{ amLabels.email_address_colon }}:</div>
+          <div class="am-fs__ci-value">{{ customer.email }}</div>
+        </template>
+        <!-- /Email -->
+
+        <!-- Phone -->
+        <template v-if="customer.phone">
+          <div class="am-fs__ci-label">{{ amLabels.phone_number_colon }}:</div>
+          <div class="am-fs__ci-value">{{ customer.phone }}</div>
+        </template>
+        <!-- /Phone -->
       </div>
     </div>
   </div>
@@ -330,6 +355,7 @@ export default {
         width: 54px;
         margin-bottom: 8px;
       }
+
       &-heading {
         margin-bottom: 2px;
         font-weight: 500;
@@ -337,9 +363,11 @@ export default {
         line-height: 28px;
         color: var(--am-c-atc-heading-text);
       }
+
       &-atc {
         margin-top: 16px;
       }
+
       & span {
         color: var(--am-c-atc-heading-text-op40);
         font-weight: 400;
@@ -353,22 +381,30 @@ export default {
         align-items: center;
       }
     }
+
     &-info-mobile {
       padding: 16px;
       margin-top: 24px;
       border-radius: 6px;
       box-shadow: 0 2px 3px 2px rgba(26, 44, 55, 0.1);
+
+      .am-fs__congrats-info-customer {
+        grid-template-columns: 1fr;
+      }
     }
+
     &-info {
       --am-c-atc-main-bgr: var(--am-c-main-bgr);
       background-color: var(--am-c-atc-main-bgr);
-      &-customer {
-        &-border {
-          border-top: 1px solid var(--am-c-atc-text-op30);
-          padding-top: 16px;
-        }
 
-        & > div {
+      &-customer {
+        display: grid;
+        grid-template-columns: max-content minmax(0, 1fr);
+        column-gap: 12px;
+        row-gap: 12px;
+        align-items: start;
+
+        & > * {
           $count: 20;
           @for $i from 0 through $count {
             &:nth-child(#{$i + 1}) {
@@ -378,26 +414,35 @@ export default {
           }
         }
 
-        & div {
-          display: flex;
-          justify-content: space-between;
-          font-weight: 400;
-          font-size: 14px;
-          margin-bottom: 12px;
-          line-height: 20px;
-          & span {
+        & .am-fs__ci {
+          &-label {
+            text-align: left;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
             color: var(--am-c-atc-text-op40);
           }
-          & span:nth-child(2) {
+
+          &-value {
+            text-align: left;
+            font-weight: 400;
+            font-size: 14px;
+            line-height: 20px;
             color: var(--am-c-atc-text);
+            word-break: break-word;
+          }
+
+          &-border {
+            grid-column: 1 / -1; // spans label + value columns
+            width: 100%;
+            height: 0;
+            margin: 4px 0; // row-gap already adds 12px; tune if needed
+            padding: 0;
+            border: none;
+            border-top: 1px solid var(--am-c-atc-text-op30);
+            background: transparent;
           }
         }
-      }
-    }
-
-    &-info-mobile-s {
-      .am-fs__congrats-info-customer > div {
-        flex-direction: column;
       }
     }
   }

@@ -8,7 +8,7 @@
           v-for="(item, index) in cart"
           :ref="(el) => setCollapseItem(el, index)"
           :key="index"
-          :side="true"
+          :side="wrapperWidth > 360"
         >
           <template #heading>
             <CartItemHead :data="item"></CartItemHead>

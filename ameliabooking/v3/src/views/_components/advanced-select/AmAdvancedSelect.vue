@@ -759,6 +759,10 @@ let cssTeleport = computed(() => {
     box-sizing: border-box;
   }
 
+  .el-cascader__suggestion-panel {
+    background-color: var(--am-c-advs-item-bgr);
+  }
+
   // Adv Select Dropdown Category Name
   &-heading {
     position: absolute;
@@ -853,9 +857,30 @@ let cssTeleport = computed(() => {
       }
     }
 
-    &__suggestion-list {
-      background-color: var(--am-c-advs-item-bgr);
+    &__suggestion-list,
+    &-menu__empty-text {
+      & > span {
+        color: var(--am-c-advs-item-label-op65);
+      }
+    }
+
+    &__suggestion-item {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.43;
+      color: var(--am-c-advs-item-label);
+      padding: 4px 8px;
+      height: auto;
+      min-height: 34px;
       color: var(--am-c-advs-item-label-op65);
+
+      &.is-checked {
+        color: var(--am-c-advs-item-selected);
+      }
+
+      &:hover {
+        background-color: var(--am-c-advs-item-bgr-op10);
+      }
     }
   }
 

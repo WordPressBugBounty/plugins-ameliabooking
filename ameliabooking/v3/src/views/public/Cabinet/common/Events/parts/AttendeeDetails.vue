@@ -78,7 +78,7 @@
       </div>
 
       <div v-if="customer" class="am-cap-attendee" :class="responsiveClass">
-        <div class="am-cap-cust" :class="responsiveClass" :style="cssVars">
+        <div class="am-cap-cust" :class="responsiveClass">
           <!-- Customer Name -->
           <div class="am-cap-cust__name" :class="noShowData(0).class">
             <span v-if="noShowData(0).icon" :class="`am-icon-${noShowData(0).icon}`" />
@@ -224,7 +224,6 @@ import httpClient from '../../../../../../plugins/axios'
 
 // * Import Store
 import { useStore } from 'vuex'
-import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 import { useFrontendCustomer } from '../../../../../../assets/js/common/customer'
 
 // * Component Props
@@ -242,6 +241,9 @@ const props = defineProps({
     required: true,
   },
 })
+
+// * No Show Data
+const { noShowData } = inject('noShowData')
 
 let responsiveClass = computed(() => {
   return useResponsiveClass(props.pageWidth)
@@ -384,51 +386,6 @@ onMounted(() => {
 // * Expose
 defineExpose({
   detailsFormRef,
-})
-
-function noShowData(noShowCount) {
-  if (noShowCount) {
-    if (noShowCount === 1) {
-      return {
-        class: 'am-no-show-1',
-        icon: 'no-show-1',
-      }
-    }
-    if (noShowCount === 2) {
-      return {
-        class: 'am-no-show-2',
-        icon: 'no-show-2',
-      }
-    }
-
-    if (noShowCount > 2) {
-      return {
-        class: 'am-no-show-3',
-        icon: 'no-show-3',
-      }
-    }
-  }
-
-  return {
-    class: '',
-    icon: '',
-  }
-}
-
-// * Colors
-let amColors = inject('amColors')
-
-let cssVars = computed(() => {
-  return {
-    '--am-c-cust-no1': amColors.value.colorMainText,
-    '--am-c-cust-no1-bgr': useColorTransparency(amColors.value.colorMainText, 0.1),
-    '--am-c-cust-no2': amColors.value.colorWarning,
-    '--am-c-cust-no2-bgr': useColorTransparency(amColors.value.colorWarning, 0.1),
-    '--am-c-cust-no3': amColors.value.colorError,
-    '--am-c-cust-no3-bgr': useColorTransparency(amColors.value.colorError, 0.1),
-    '--am-c-cust-text': amColors.value.colorMainText,
-    '--am-c-cust-link': useColorTransparency(amColors.value.colorMainText, 0.5),
-  }
 })
 </script>
 

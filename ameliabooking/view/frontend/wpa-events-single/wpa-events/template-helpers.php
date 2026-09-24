@@ -48,7 +48,7 @@ if (!function_exists('amelia_wpa_events_container')) {
 }
 
 if (!function_exists('amelia_wpa_events_format_datetime')) {
-    function amelia_wpa_events_format_datetime(string|null $mysqlDatetime): string
+    function amelia_wpa_events_format_datetime(?string $mysqlDatetime): string
     {
         if (empty($mysqlDatetime) || !is_string($mysqlDatetime)) {
             return '';
@@ -73,7 +73,7 @@ if (!function_exists('amelia_wpa_events_format_datetime')) {
 }
 
 if (!function_exists('amelia_wpa_events_parse_period_mysql')) {
-    function amelia_wpa_events_parse_period_mysql(string|null $mysqlDatetime): ?DateTimeImmutable
+    function amelia_wpa_events_parse_period_mysql(?string $mysqlDatetime): ?DateTimeImmutable
     {
         if (empty($mysqlDatetime) || !is_string($mysqlDatetime)) {
             return null;
@@ -90,7 +90,7 @@ if (!function_exists('amelia_wpa_events_parse_period_mysql')) {
 }
 
 if (!function_exists('amelia_wpa_events_timetable_rows')) {
-    function amelia_wpa_events_timetable_rows(string|null $periodStart, string|null $periodEnd): array
+    function amelia_wpa_events_timetable_rows(?string $periodStart, ?string $periodEnd): array
     {
         $s = amelia_wpa_events_parse_period_mysql($periodStart);
         $e = amelia_wpa_events_parse_period_mysql($periodEnd);

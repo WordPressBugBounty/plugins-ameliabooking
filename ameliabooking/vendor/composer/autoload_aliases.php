@@ -14283,6 +14283,29 @@ namespace AmeliaVendor {
     array (
     ),
   ),
+  'Symfony\\Polyfill\\Php80\\Php80' => 
+  array (
+    'type' => 'class',
+    'classname' => 'Php80',
+    'isabstract' => false,
+    'namespace' => 'Symfony\\Polyfill\\Php80',
+    'extends' => 'AmeliaVendor\\Symfony\\Polyfill\\Php80\\Php80',
+    'implements' => 
+    array (
+    ),
+  ),
+  'Symfony\\Polyfill\\Php80\\PhpToken' => 
+  array (
+    'type' => 'class',
+    'classname' => 'PhpToken',
+    'isabstract' => false,
+    'namespace' => 'Symfony\\Polyfill\\Php80',
+    'extends' => 'AmeliaVendor\\Symfony\\Polyfill\\Php80\\PhpToken',
+    'implements' => 
+    array (
+      0 => 'Stringable',
+    ),
+  ),
   'WpOrg\\Requests\\Auth' => 
   array (
     'type' => 'interface',
@@ -15191,6 +15214,16 @@ namespace AmeliaVendor {
     'extends' => 
     array (
       0 => 'AmeliaVendor\\Stripe\\Util\\LoggerInterface',
+    ),
+  ),
+  'Stringable' => 
+  array (
+    'type' => 'interface',
+    'interfacename' => 'Stringable',
+    'namespace' => '\\',
+    'extends' => 
+    array (
+      0 => 'AmeliaVendor_Stringable',
     ),
   ),
 );

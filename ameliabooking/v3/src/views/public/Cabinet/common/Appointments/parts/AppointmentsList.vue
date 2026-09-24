@@ -45,7 +45,7 @@
             )
           "
           :tickets="[]"
-          :custom-fields="useCustomFieldsData(appointment.bookings, cabinetType)"
+          :custom-fields="appointmentCustomFields(appointment)"
           :location="
             appointment.locationId
               ? store.getters['entities/getLocation'](appointment.locationId)
@@ -74,7 +74,7 @@
             }
           "
           @status-change="(message, type) => emits('statusChange', message, type)"
-        ></CollapseCard>
+        />
       </template>
     </div>
   </div>
@@ -128,7 +128,7 @@ import {
 } from '../../../../../../assets/js/common/date'
 import { useAppointmentDuration } from '../../../../../../assets/js/admin/appointment'
 import { useAppointmentBookingAmountData } from '../../../../../../assets/js/common/appointments'
-import { useCustomFieldsData, useExtrasData } from '../../../../../../assets/js/admin/booking'
+import { useExtrasData } from '../../../../../../assets/js/admin/booking'
 import { useColorTransparency } from '../../../../../../assets/js/common/colorManipulation'
 
 // * Dedicated components
@@ -162,7 +162,13 @@ let props = defineProps({
 let store = useStore()
 
 // * Components emits
-let emits = defineEmits(['booked', 'canceled', 'editAppointment', 'statusChange'])
+let emits = defineEmits([
+  'booked',
+  'canceled',
+  'editAppointment',
+  'statusChange',
+  'openCollapseCardDialog',
+])
 
 let originKey = inject('originKey')
 
@@ -287,20 +293,79 @@ function appointmentEmployee(id) {
   return store.getters['entities/getEmployee'](id)
 }
 
+function appointmentBookingCustomer(booking) {
+  let customer
+  if ('info' in booking && booking.info) {
+    customer = 'customer' in booking && booking.customer ? booking.customer : {}
+    customer = Object.assign(customer, JSON.parse(booking.info))
+  } else {
+    customer = booking.customer
+  }
+
+  return customer || {}
+}
+
 function appointmentCustomers(appointment) {
   return appointment.bookings.map((b) => {
-    let customer
-    if ('info' in b && b.info) {
-      customer = 'customer' in b ? b.customer : {}
-      customer = Object.assign(customer, JSON.parse(b.info))
-    } else {
-      customer = b.customer
-    }
+    let customer = appointmentBookingCustomer(b)
 
     // Add booking status to customer data
     customer.bookingStatus = b.status
     return customer
   })
+}
+
+// * Appointment custom fields
+function appointmentCustomFields(appointment) {
+  let customFieldsData = []
+
+  // Appointment service id
+  const serviceId = appointment.serviceId
+
+  // Entities custom fields
+  const entitiesCustomFields = store.getters['entities/getCustomFields']
+
+  const currentCustomerId =
+    cabinetType.value === 'customer' ? store.getters['auth/getProfile']?.id : null
+
+  // Appointment bookings
+  appointment.bookings.forEach((booking) => {
+    if (
+      currentCustomerId &&
+      (booking.customerId ?? booking.customer?.id) !== currentCustomerId
+    ) {
+      return
+    }
+
+     // Booking custom fields
+    let bookingCustomFields = {}
+
+    try {
+      bookingCustomFields = booking.customFields ? JSON.parse(booking.customFields) : {}
+    } catch (e) {
+      bookingCustomFields = {}
+    }
+
+    let mergedCustomFields = {}
+
+    entitiesCustomFields.forEach((customField) => {
+      if ((customField.allServices || customField.services.some((e) => e.id === serviceId)) && bookingCustomFields[customField.id]) {
+        mergedCustomFields[customField.id] = Object.assign({}, customField, {
+          value: bookingCustomFields[customField.id].value,
+          bookingId: booking.id,
+        })
+      }
+    })
+
+    if (Object.keys(mergedCustomFields).length > 0) {
+      customFieldsData.push({
+          customer: appointmentBookingCustomer(booking),
+          customFields: mergedCustomFields,
+      })
+    }
+  })
+
+  return customFieldsData
 }
 
 // * Customized form data

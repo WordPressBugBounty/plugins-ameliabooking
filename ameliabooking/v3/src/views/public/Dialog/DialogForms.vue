@@ -6,6 +6,8 @@ import CbfForm from '../CatalogForm/CatalogForm.vue'
 import ElfForm from '../EventForm/EventListForm/EventsListForm.vue'
 import EcfForm from '../EventForm/EventCalendarForm/EvensCalendarForm.vue'
 
+import { useColorTransparency } from '../../../assets/js/common/colorManipulation'
+
 // * Import from Vue
 import { markRaw, reactive, ref, inject, computed, onMounted, watchEffect, provide } from 'vue'
 
@@ -120,6 +122,8 @@ let cssVars = computed(() => {
     '--am-c-main-heading-text': amColors.value.colorMainHeadingText,
     '--am-c-main-text': amColors.value.colorMainText,
     '--am-dvh': dynamicVh.value ? `${dynamicVh.value}px` : '100dvh',
+    '--am-c-scroll-op30': useColorTransparency(amColors.value.colorPrimary, 0.3),
+    '--am-c-scroll-op10': useColorTransparency(amColors.value.colorPrimary, 0.1),
   }
 })
 
@@ -186,6 +190,23 @@ export default {
     &.am-cbf {
       .el-dialog {
         margin-top: 32px;
+        overflow: visible;
+
+        @media only screen and (max-width: 768px) {
+          overflow: hidden;
+        }
+
+        .el-dialog__headerbtn {
+          top: -28px;
+          right: 0;
+          background-color: var(--am-c-main-bgr) !important;
+          border-radius: 50%;
+
+          @media only screen and (max-width: 768px) {
+            top: 16px;
+            right: 16px;
+          }
+        }
       }
     }
 
@@ -235,6 +256,35 @@ export default {
               }
             }
           }
+        }
+      }
+
+      // * Dialog Header
+      &.am-dialog--with-header {
+        .el-dialog__header {
+          height: 0;
+          min-height: 0;
+        }
+      }
+
+      // * Dialog Body
+      .el-dialog__body {
+        padding: 0;
+
+        // Main Scroll styles
+        &::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          border-radius: 6px;
+          background: var(--am-c-scroll-op30);
+        }
+
+        &::-webkit-scrollbar-track {
+          border-radius: 6px;
+          background: var(--am-c-scroll-op10);
         }
       }
 

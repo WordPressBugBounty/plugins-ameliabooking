@@ -200,7 +200,7 @@
                 </AmSelect>
               </div>
 
-              <div v-if="item.ticketsData.length" class="am-capei-att__card-tickets">
+              <div class="am-capei-att__card-tickets">
                 <div class="am-capei-att__card-label">{{ amLabels.event_book_tickets }}:</div>
                 <div class="am-capei-att__card-tickets__inner">
                   <div
@@ -213,12 +213,12 @@
                   </div>
                 </div>
               </div>
-              <div v-else class="am-capei-att__card-persons">
+              <!-- <div v-else class="am-capei-att__card-persons">
                 <div class="am-capei-att__card-label">{{ amLabels.event_book_persons }}:</div>
                 <div class="am-capei-att__card-person">
                   {{ item.persons }}
                 </div>
-              </div>
+              </div> -->
 
               <div
                 v-if="amSettings.featuresIntegrations.eTickets.enabled && item.qrCodes"
@@ -1043,7 +1043,7 @@ export default {
 
       &.am-rw {
         &-520 {
-          width: calc(100% - 24px);
+          width: 100%;
           order: 0;
         }
       }
@@ -1078,7 +1078,7 @@ export default {
       }
 
       &-inner {
-        width: calc(100% - 24px);
+        width: calc(100% - 32px);
         display: flex;
         align-items: center;
 
@@ -1096,7 +1096,7 @@ export default {
         flex-wrap: wrap;
         align-items: center;
         gap: 8px;
-        width: calc(100% - 24px);
+        width: 100%;
 
         &__inner {
           display: flex;
@@ -1121,7 +1121,7 @@ export default {
         display: flex;
         align-items: center;
         gap: 8px;
-        width: calc(100% - 24px);
+        width: 100%;
       }
 
       &-person {
@@ -1143,7 +1143,7 @@ export default {
         display: flex;
         flex-direction: column;
         gap: 4px 0;
-        width: calc(100% - 24px);
+        width: 100%;
 
         &__label {
           font-size: 14px;

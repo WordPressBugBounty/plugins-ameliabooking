@@ -1,14 +1,4 @@
 <template>
-  <template v-if="!amFonts.customFontSelected">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      :href="`${baseUrls.wpAmeliaPluginURL}v3/src/assets/scss/common/fonts/font.css`"
-      media="all"
-    />
-  </template>
   <div
     id="amelia-container"
     ref="ameliaContainer"
@@ -55,7 +45,6 @@ const popupVisible = ref(false)
 provide('popupVisible', popupVisible)
 
 const amSettings = inject('settings')
-const baseUrls = inject('baseUrls')
 const shortcodeData = inject('shortcodeData')
 
 const customizedDataForm = computed(() => {

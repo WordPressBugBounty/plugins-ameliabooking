@@ -11,8 +11,9 @@
     </template>
     <!-- Address Field -->
     <AmAddressInput
-      :id="props.itemName"
       v-model="model"
+      :id="props.itemName"
+      :disabled="props.disabled"
       @address-selected="(address) => emits('address-selected', address)"
     />
     <!-- /Address Field -->
@@ -45,6 +46,10 @@ let props = defineProps({
   labelPosition: {
     type: String,
     default: 'top',
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
   },
   options: {
     type: Array,

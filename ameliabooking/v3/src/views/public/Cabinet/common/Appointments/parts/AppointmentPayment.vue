@@ -419,7 +419,7 @@ onMounted(() => {
     &__heading {
       width: 100%;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       padding: 0 16px 0 0;
 
@@ -429,6 +429,7 @@ onMounted(() => {
 
       &-status {
         display: flex;
+        flex: 0 0 auto;
         align-items: center;
         gap: 4px;
 

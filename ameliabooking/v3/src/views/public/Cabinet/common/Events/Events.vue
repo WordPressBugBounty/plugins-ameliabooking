@@ -126,7 +126,7 @@
               :periods="(periods = usePeriodsData(event.periods)) ? periods : []"
               :extras="[]"
               :tickets="useTicketsData(event)"
-              :custom-fields="useCustomFieldsData(event.bookings, shortcodeData.cabinetType)"
+              :custom-fields="eventCustomFields(event)"
               :location="useEventLocation(store, event)"
               :qr-codes="qrCodeTicketsVisibility ? useEventQrCodes(event) : []"
               :google-meet-link="
@@ -163,7 +163,7 @@
                   targetBooking = data
                 }
               "
-            ></CollapseCard>
+            />
           </div>
         </div>
 
@@ -287,7 +287,6 @@ import {
 } from '../../../../../assets/js/admin/event'
 import { useFrontEvent } from '../../../../../assets/js/common/events'
 import { useInitAttendee } from '../../../../../assets/js/common/attendees'
-import { useCustomFieldsData } from '../../../../../assets/js/admin/booking'
 import { useResponsiveClass } from '../../../../../assets/js/common/responsive'
 import { useColorTransparency } from '../../../../../assets/js/common/colorManipulation'
 import { useUrlParams } from '../../../../../assets/js/common/helper'
@@ -502,6 +501,56 @@ function getEvents(page = 1) {
 
       store.commit('cabinet/setEventsLoading', false)
     })
+}
+
+// * Event custom fields
+function eventCustomFields(event) {
+  let customFieldsData = []
+
+  // Entities custom fields
+  const entitiesCustomFields = store.getters['entities/getCustomFields']
+
+  const currentCustomerId =
+    cabinetType.value === 'customer' ? store.getters['auth/getProfile']?.id : null
+
+  // Event bookings
+  event.bookings.forEach((booking) => {
+    if (
+      currentCustomerId &&
+      (booking.customerId ?? booking.customer?.id) !== currentCustomerId
+    ) {
+      return
+    }
+
+    // Booking custom fields
+    let bookingCustomFields = {}
+
+    try {
+      bookingCustomFields = booking.customFields ? JSON.parse(booking.customFields) : {}
+    } catch (e) {
+      bookingCustomFields = {}
+    }
+
+    let mergedCustomFields = {}
+
+    entitiesCustomFields.forEach((customField) => {
+      if ((customField.allEvents || customField.events.some((e) => e.id === event.id)) && bookingCustomFields[customField.id]) {
+        mergedCustomFields[customField.id] = Object.assign({}, customField, {
+          value: bookingCustomFields[customField.id].value,
+          bookingId: booking.id,
+        })
+      }
+    })
+
+    if (Object.keys(mergedCustomFields).length > 0) {
+      customFieldsData.push({
+        customer: booking.customer,
+        customFields: mergedCustomFields,
+      })
+    }
+  })
+
+  return customFieldsData
 }
 
 /*********
@@ -721,37 +770,6 @@ function eventEmployees(evt) {
   return arr
 }
 
-// * No Show Function
-function noShowData(noShowCount) {
-  if (noShowCount) {
-    if (noShowCount === 1) {
-      return {
-        class: 'am-no-show-1',
-        icon: 'no-show-1',
-      }
-    }
-    if (noShowCount === 2) {
-      return {
-        class: 'am-no-show-2',
-        icon: 'no-show-2',
-      }
-    }
-
-    if (noShowCount > 2) {
-      return {
-        class: 'am-no-show-3',
-        icon: 'no-show-3',
-      }
-    }
-  }
-
-  return {
-    class: '',
-    icon: '',
-  }
-}
-provide('noShowData', { noShowData })
-
 // * Qr Scanner
 let qrScannerVisibility = ref(false)
 
@@ -765,15 +783,6 @@ let cssVars = computed(() => {
     '--am-c-cape-text-op70': useColorTransparency(amColors.value.colorMainText, 0.7),
     '--am-c-cape-text-op25': useColorTransparency(amColors.value.colorMainText, 0.25),
     '--am-c-cape-primary': amColors.value.colorPrimary,
-
-    '--am-c-cust-no1': amColors.value.colorMainText,
-    '--am-c-cust-no1-bgr': useColorTransparency(amColors.value.colorMainText, 0.1),
-    '--am-c-cust-no2': amColors.value.colorWarning,
-    '--am-c-cust-no2-bgr': useColorTransparency(amColors.value.colorWarning, 0.1),
-    '--am-c-cust-no3': amColors.value.colorError,
-    '--am-c-cust-no3-bgr': useColorTransparency(amColors.value.colorError, 0.1),
-    '--am-c-cust-text': amColors.value.colorMainText,
-    '--am-c-cust-link': useColorTransparency(amColors.value.colorMainText, 0.5),
   }
 })
 </script>

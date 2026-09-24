@@ -95,7 +95,10 @@ import DeleteProfile from '../parts/DeleteProfile.vue'
 import MainProfileFooter from '../../../../../../common/SbsFormConstruction/MainContent/parts/MainProfileFooter.vue'
 
 // * Import from Vue
-import { ref, computed, inject, provide, onMounted, nextTick, watch } from 'vue'
+import { ref, computed, inject, provide } from 'vue'
+
+// * Components Width and Height
+import { useElementSize } from '@vueuse/core'
 
 // * Composables
 import { useResponsiveClass } from '../../../../../../../assets/js/common/responsive'
@@ -111,40 +114,7 @@ const { amCustomize } = useReactiveCustomize()
 
 // * Page Content width
 let pageContainer = ref(null)
-let pageWidth = ref(0)
-
-// * Sidebar collapsed var
-let sidebarCollapsed = inject('sidebarCollapsed')
-
-// * window resize listener
-window.addEventListener('resize', resize)
-// * resize function
-function resize() {
-  if (pageContainer.value) {
-    pageWidth.value = pageContainer.value.offsetWidth
-  }
-}
-watch(sidebarCollapsed, (current) => {
-  if (current) {
-    setTimeout(() => {
-      collapseTriggered()
-    }, 1500)
-  } else {
-    setTimeout(() => {
-      collapseTriggered()
-    }, 500)
-  }
-})
-
-function collapseTriggered() {
-  pageWidth.value = pageContainer.value.offsetWidth
-}
-
-onMounted(() => {
-  nextTick(() => {
-    pageWidth.value = pageContainer.value.offsetWidth
-  })
-})
+const { width: pageWidth } = useElementSize(pageContainer)
 
 let responsiveClass = computed(() => {
   return useResponsiveClass(pageWidth.value)

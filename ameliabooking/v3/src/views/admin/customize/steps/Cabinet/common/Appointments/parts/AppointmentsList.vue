@@ -40,7 +40,7 @@
         :periods="[]"
         :extras="appointment.bookings[0].extras"
         :tickets="[]"
-        :custom-fields="appointment.bookings[0].customFields"
+        :custom-fields="customFieldsData(appointment.bookings)"
         :location="appointment.location"
         :google-meet-link="appointment.googleMeetUrl"
         :microsoft-teams-link="appointment.microsoftTeamsUrl"
@@ -113,6 +113,14 @@ const { amCustomize } = useReactiveCustomize()
 let pageRenderKey = inject('pageRenderKey')
 let stepName = inject('stepName')
 let subStepName = inject('subStepName')
+
+// * Custom fields grouped per customer
+function customFieldsData(bookings) {
+  return bookings.map((booking) => ({
+    customer: booking.customer,
+    customFields: booking.customFields,
+  }))
+}
 
 // * Reschedule appointment
 let rescheduleVisibility = computed(() => {

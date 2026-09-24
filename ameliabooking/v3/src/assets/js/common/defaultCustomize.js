@@ -1204,6 +1204,10 @@ let defaultCustomizeSettings = {
           name: globalLabels.toggled_sidebar,
           visibility: false,
         },
+        defaultLandingTab: {
+          name: globalLabels.default_landing_tab,
+          value: 'appointments',
+        },
       },
       translations: null,
     },
@@ -1594,6 +1598,10 @@ let defaultCustomizeSettings = {
         toggle: {
           name: globalLabels.toggled_sidebar,
           visibility: false,
+        },
+        defaultLandingTab: {
+          name: globalLabels.default_landing_tab,
+          value: 'appointments',
         },
       },
       translations: null,

@@ -277,15 +277,6 @@ let cssVars = computed(() => {
     '--am-c-capai-text': amColors.value.colorMainText,
     '--am-c-capai-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
     '--am-c-capai-primary': amColors.value.colorPrimary,
-
-    '--am-c-cust-no1': amColors.value.colorMainText,
-    '--am-c-cust-no1-bgr': useColorTransparency(amColors.value.colorMainText, 0.1),
-    '--am-c-cust-no2': amColors.value.colorWarning,
-    '--am-c-cust-no2-bgr': useColorTransparency(amColors.value.colorWarning, 0.1),
-    '--am-c-cust-no3': amColors.value.colorError,
-    '--am-c-cust-no3-bgr': useColorTransparency(amColors.value.colorError, 0.1),
-    '--am-c-cust-link': useColorTransparency(amColors.value.colorMainText, 0.5),
-    '--am-c-cust-text': amColors.value.colorMainText,
   }
 })
 </script>

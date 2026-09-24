@@ -1,14 +1,4 @@
 <template>
-  <template v-if="!amFonts.customFontSelected">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      :href="`${baseUrls.wpAmeliaPluginURL}v3/src/assets/scss/common/fonts/font.css`"
-      media="all"
-    />
-  </template>
   <div
     v-if="!empty"
     id="amelia-container"

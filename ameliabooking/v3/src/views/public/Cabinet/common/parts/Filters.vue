@@ -69,6 +69,7 @@
               :filterable="name === 'customers' || name === 'events'"
               :placeholder="amLabels[name + '' + (name === 'customers' ? '' : '_dropdown')]"
               :prefix-icon="inputIcon(name)"
+              :fit-input-width="true"
               :collapse-tags="true"
               size="small"
               :popper-class="'am-filter-select-popper'"

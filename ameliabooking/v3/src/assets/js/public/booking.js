@@ -44,7 +44,11 @@ function buildFormData(formData, data, parentKey) {
       buildFormData(formData, data[key], parentKey ? `${parentKey}[${key}]` : key)
     })
   } else {
-    formData.append(parentKey, data !== null ? data : '')
+    // FormData stringifies everything, and PHP reads the resulting "false" as a non-empty
+    // (truthy) string - so booleans go over as "1"/"0" to survive the multipart trip.
+    const value = typeof data === 'boolean' ? (data ? '1' : '0') : data
+
+    formData.append(parentKey, value !== null ? value : '')
   }
 }
 

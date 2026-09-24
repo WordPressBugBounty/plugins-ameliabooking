@@ -54,7 +54,10 @@
       {{ amLabels.send }}
     </AmButton>
 
-    <div v-if="amSettings.roles[cabinetType + 'Cabinet']['loginEnabled']" class="am-asi__footer">
+    <div
+      v-if="amSettings.roles[cabinetType + 'Cabinet']['loginEnabled'] && !hideAccessLinkSignIn"
+      class="am-asi__footer"
+    >
       <AmButton class="am-asi__footer-signin__btn" type="text" @click="goToSignIn">
         {{ amLabels.sign_in }}
       </AmButton>
@@ -160,6 +163,7 @@ function focusFirstInput() {
 }
 
 function goToSignIn() {
+  hideAccessLinkSignIn.value = false
   pageKey.value = 'signIn'
 }
 
@@ -242,6 +246,9 @@ let signInFormConstruction = ref({
 
 // * Page key
 let pageKey = inject('pageKey')
+
+// * Hide Sign In link when redirected from send_access_link error
+let hideAccessLinkSignIn = inject('hideAccessLinkSignIn')
 
 // * Cabinet type
 let cabinetType = inject('cabinetType')

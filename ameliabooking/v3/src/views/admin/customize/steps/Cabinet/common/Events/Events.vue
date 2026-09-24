@@ -59,7 +59,7 @@
           :periods="(periods = usePeriodsData(event.periods)) ? periods : []"
           :extras="[]"
           :tickets="event.customTickets"
-          :custom-fields="event.bookings[0].customFields"
+          :custom-fields="customFieldsData(event.bookings)"
           :location="event.location"
           :google-meet-link="event.periods[0].googleMeetUrl"
           :microsoft-teams-link="event.periods[0].microsoftTeamsUrl"
@@ -91,7 +91,10 @@
 import moment from 'moment'
 
 // * import from Vue
-import { ref, computed, inject, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, inject } from 'vue'
+
+// * Components Width and Height
+import { useElementSize } from '@vueuse/core'
 
 // * Templates
 import CancelPopup from '../parts/CancelPopup.vue'
@@ -124,44 +127,18 @@ let features = inject('features')
 
 // * Page Content width
 let pageContainer = ref(null)
-let pageWidth = ref(0)
+const { width: pageWidth } = useElementSize(pageContainer)
 
 // * Global labels
 let amLabels = inject('labels')
 
-// * Sidebar collapsed var
-let sidebarCollapsed = inject('sidebarCollapsed')
-
-// * window resize listener
-window.addEventListener('resize', resize)
-// * resize function
-function resize() {
-  if (pageContainer.value) {
-    pageWidth.value = pageContainer.value.offsetWidth
-  }
+// * Custom fields grouped per customer
+function customFieldsData(bookings) {
+  return bookings.map((booking) => ({
+    customer: booking.customer,
+    customFields: booking.customFields,
+  }))
 }
-
-watch(sidebarCollapsed, (current) => {
-  if (current) {
-    setTimeout(() => {
-      collapseTriggered()
-    }, 1500)
-  } else {
-    setTimeout(() => {
-      collapseTriggered()
-    }, 500)
-  }
-})
-
-function collapseTriggered() {
-  pageWidth.value = pageContainer.value.offsetWidth
-}
-
-onMounted(() => {
-  nextTick(() => {
-    pageWidth.value = pageContainer.value.offsetWidth
-  })
-})
 
 let responsiveClass = computed(() => {
   return useResponsiveClass(pageWidth.value)
@@ -274,9 +251,31 @@ arrApp.forEach((item, index) => {
         couponId: null,
         created: null,
         customFields: [
-          { label: 'Custom field 1', value: '' },
-          { label: 'Custom field 2', value: '' },
-          { label: 'Custom field 3', value: '' },
+          { id: 1, type: 'text', label: 'Custom field 1', value: 'Text value', width: 50 },
+          {
+            id: 2,
+            type: 'select',
+            label: 'Custom field 2',
+            value: 'Option 1',
+            width: 50,
+            options: [{ label: 'Option 1' }, { label: 'Option 2' }],
+          },
+          {
+            id: 3,
+            type: 'checkbox',
+            label: 'Custom field 3',
+            value: ['Option 1'],
+            width: 50,
+            options: [{ label: 'Option 1' }, { label: 'Option 2' }],
+          },
+          { id: 4, type: 'datepicker', label: 'Custom field 4', value: moment().toDate(), width: 50 },
+          {
+            id: 5,
+            type: 'text-area',
+            label: 'Custom field 5',
+            value: 'Longer text value',
+            width: 100,
+          },
         ],
         customer: {
           birthday: null,

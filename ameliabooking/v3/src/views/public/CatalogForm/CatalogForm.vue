@@ -1,14 +1,4 @@
 <template>
-  <template v-if="!amFonts.customFontSelected">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      :href="`${baseUrls.wpAmeliaPluginURL}v3/src/assets/scss/common/fonts/font.css`"
-      media="all"
-    />
-  </template>
   <div id="amelia-container" ref="ameliaContainer" class="am-fc__wrapper" :style="cssVars">
     <template v-if="ready && pagesArray.length">
       <component :is="pagesArray[pageIndex]"></component>
@@ -62,9 +52,6 @@ let ameliaContainer = ref(null)
 
 // * Component offset scroll
 let offsetFromTop = ref(20)
-
-// * Root Urls
-const baseUrls = inject('baseUrls')
 
 // * Plugin wrapper width
 let containerWidth = ref(0)

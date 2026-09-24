@@ -53,9 +53,7 @@
               { 'am-payments__method-button__selected': paymentGateway === gateway },
               responsiveClass,
               `am-payments__method-button-${paymentList.length}`,
-              { 'am-payments__method-button_disabled': stripeCleanupLoading },
             ]"
-            :aria-disabled="stripeCleanupLoading"
             :aria-label="`${getPaymentBtnString(gateway)} ${amLabels.payment_button || 'payment button'}`"
             @click="setPaymentGateway(gateway)"
             @keydown.enter.space.prevent="setPaymentGateway(gateway)"
@@ -132,6 +130,7 @@ import { settings } from '../../../../../plugins/settings'
 import { useBookingData } from '../../../../../assets/js/public/booking.js'
 import {
   buildStripeIntentCacheKey,
+  getActiveStripeCacheName,
   prefetchStripePaymentIntent,
   waitForStripeCleanup,
 } from '../../../../../assets/js/public/stripePaymentIntent.js'
@@ -220,12 +219,7 @@ let loading = computed(() => store.getters['getLoading'])
 
 let bookableType = computed(() => store.getters['bookableType/getType'])
 
-let paymentGateway = computed(() => {
-  if (!store.getters['payment/getPaymentGateway']) {
-    store.commit('payment/setPaymentGateway', amSettings.value.payments.defaultPaymentMethod)
-  }
-  return store.getters['payment/getPaymentGateway']
-})
+let paymentGateway = computed(() => store.getters['payment/getPaymentGateway'])
 
 let hasDeposit = computed(() => {
   return ready.value ? props.selectedItem.depositPayment !== 'disabled' : false
@@ -244,22 +238,6 @@ let paymentDeposit = computed({
 })
 
 let mandatoryOnSitePayment = ref(false)
-let stripeCleanupLoading = ref(false)
-
-let paymentSentence = computed(() => {
-  let sentence = ''
-  if (paymentGateway.value === 'onSite' && !mandatoryOnSitePayment.value) {
-    sentence = amLabels.payment_onsite_sentence
-  } else if (
-    paymentGateway.value === 'mollie' ||
-    paymentGateway.value === 'wc' ||
-    paymentGateway.value === 'barion'
-  ) {
-    sentence = amLabels.payment_wc_mollie_sentence
-  }
-
-  return sentence
-})
 
 let refOnSitePayment = ref(null)
 
@@ -368,29 +346,29 @@ let availablePayments = computed(() => {
       }
     }
 
-    if (
-      amSettings.value.payments.defaultPaymentMethod &&
-      payments[amSettings.value.payments.defaultPaymentMethod]
-    ) {
-      store.commit('payment/setPaymentGateway', amSettings.value.payments.defaultPaymentMethod)
-
-      footerBtnDisabledUpdater(false)
-    } else {
-      if (Object.keys(payments).filter((item) => payments[item]).length === 1) {
-        for (let key in payments) {
-          if (payments[key]) {
-            store.commit('payment/setPaymentGateway', key)
-
-            footerBtnDisabledUpdater(false)
-          }
-        }
-      }
-    }
-
     return payments
   }
 
   return {}
+})
+
+let paymentSentence = computed(() => {
+  let sentence = ''
+  if (
+    paymentGateway.value === 'onSite' &&
+    !mandatoryOnSitePayment.value &&
+    availablePayments.value.onSite
+  ) {
+    sentence = amLabels.payment_onsite_sentence
+  } else if (
+    paymentGateway.value === 'mollie' ||
+    paymentGateway.value === 'wc' ||
+    paymentGateway.value === 'barion'
+  ) {
+    sentence = amLabels.payment_wc_mollie_sentence
+  }
+
+  return sentence
 })
 
 let paymentList = computed(() => {
@@ -403,6 +381,33 @@ let paymentList = computed(() => {
 
   return arr
 })
+
+watch(
+  availablePayments,
+  async (payments) => {
+    if (!ready.value) {
+      return
+    }
+
+    const selectedGateway = store.getters['payment/getPaymentGateway']
+    const defaultPaymentMethod = amSettings.value.payments.defaultPaymentMethod
+    const firstAvailable = Object.keys(payments).find((key) => payments[key])
+
+    if (selectedGateway && payments[selectedGateway]) {
+      footerBtnDisabledUpdater(false)
+
+      return
+    }
+
+    const nextGateway =
+      defaultPaymentMethod && payments[defaultPaymentMethod]
+        ? defaultPaymentMethod
+        : firstAvailable || ''
+
+    await setPaymentGateway(nextGateway)
+  },
+  { immediate: true },
+)
 
 function getStripePrefetchFormData() {
   return {
@@ -428,10 +433,14 @@ function prefetchStripeIntent() {
     return
   }
 
+  const shortcode = shortcodeData?.value || shortcodeData || {}
+
   const bookingData = useBookingData(store, getStripePrefetchFormData(), false, {}, null)
   bookingData.data.returnUrl = window.location.href
-
-  const shortcode = shortcodeData?.value || shortcodeData || {}
+  // Carries the hold this browser already took, exactly as initializeStripePayment() does. Both requests
+  // share an instance and a cache key, so whichever starts first is the one the other is deduped into -
+  // and a prefetch that left this out would reserve the slot a second time and strand the first hold.
+  bookingData.data.cacheName = getActiveStripeCacheName(shortcode.counter)
 
   prefetchStripePaymentIntent(
     shortcode.counter,
@@ -441,30 +450,21 @@ function prefetchStripeIntent() {
   ).catch(() => {})
 }
 
-async function setPaymentGateway(gateway) {
-  if (stripeCleanupLoading.value || paymentGateway.value === gateway) {
+function setPaymentGateway(gateway) {
+  if (paymentGateway.value === gateway) {
     return
   }
 
-  if (paymentGateway.value === 'stripe' || gateway === 'stripe') {
-    stripeCleanupLoading.value = true
-
-    try {
-      const shortcode = shortcodeData?.value || shortcodeData || {}
-      await waitForStripeCleanup(shortcode.counter)
-      store.commit('payment/setError', '')
-      store.commit('payment/setPaymentGateway', gateway)
-      footerBtnDisabledUpdater(false)
-    } finally {
-      stripeCleanupLoading.value = false
-    }
-
-    return
-  }
+  const releaseStripeIntent = paymentGateway.value === 'stripe' || gateway === 'stripe'
 
   store.commit('payment/setError', '')
   store.commit('payment/setPaymentGateway', gateway)
   footerBtnDisabledUpdater(false)
+
+  if (releaseStripeIntent) {
+    const shortcode = shortcodeData?.value || shortcodeData || {}
+    waitForStripeCleanup(shortcode.counter)
+  }
 }
 
 function setOnSitePayment(isMandatory) {

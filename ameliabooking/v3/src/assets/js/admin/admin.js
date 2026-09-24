@@ -60,11 +60,15 @@ function getVueStyleElements() {
       styleElements = document.querySelectorAll('#vite-dev-vue3')
     }
   } else {
-    // Collect stylesheet link elements injected by Vue in production mode
+    // Collect stylesheet link elements injected by Vue in production mode.
+    // Matched on the asset path alone: the plugin directory is not always named `ameliabooking`
+    // (a git checkout symlinked into wp-content/plugins is the usual case), and since
+    // CustomizeStepNew only reveals itself once stylesInjectedV3() runs at the end of
+    // injectVueStyles, a missed match left the Customize preview permanently blank there.
     const linkElements = Array.from(document.getElementsByTagName('link')).filter(
       (el) =>
         el.getAttribute('rel') === 'stylesheet' &&
-        el.getAttribute('href')?.includes('ameliabooking/v3/public/assets'),
+        el.getAttribute('href')?.includes('v3/public/assets'),
     )
 
     // Collect inline style elements that contain /* purgecss start ignore */

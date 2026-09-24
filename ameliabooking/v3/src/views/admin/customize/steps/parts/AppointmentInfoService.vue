@@ -1,24 +1,30 @@
 <template>
-  <div>
-    <span>{{ labelsDisplay('congrats_date') }}:</span>
-    <span>{{ moment().format('YYYY-MM-DD') }}</span>
-  </div>
-  <div>
-    <span>{{ labelsDisplay('congrats_time') }}:</span>
-    <span>{{ moment().format('hh:mm') }}</span>
-  </div>
-  <div>
-    <span>{{ labelsDisplay('congrats_service') }}:</span>
-    <span>Service 1</span>
-  </div>
-  <div>
-    <span>{{ labelsDisplay('congrats_employee') }}:</span>
-    <span>Jane Doe</span>
-  </div>
-  <div v-if="!licence.isLite && !licence.isStarter">
-    <span>{{ labelsDisplay('congrats_location') }}:</span>
-    <span>Lorem Ipsum, 18</span>
-  </div>
+  <!-- Date -->
+  <div class="am-fs__ci-label">{{ labelsDisplay('congrats_date') }}:</div>
+  <div class="am-fs__ci-value">{{ moment().format('YYYY-MM-DD') }}</div>
+  <!-- /Date -->
+
+  <!-- Time -->
+  <div class="am-fs__ci-label">{{ labelsDisplay('congrats_time') }}:</div>
+  <div class="am-fs__ci-value">{{ moment().format('hh:mm') }}</div>
+  <!-- /Time -->
+
+  <!-- Service -->
+  <div class="am-fs__ci-label">{{ labelsDisplay('congrats_service') }}:</div>
+  <div class="am-fs__ci-value">Service 1</div>
+  <!-- /Service -->
+
+  <!-- Employee -->
+  <div class="am-fs__ci-label">{{ labelsDisplay('congrats_employee') }}:</div>
+  <div class="am-fs__ci-value">Jane Doe</div>
+  <!-- /Employee -->
+
+  <!-- Location -->
+  <template v-if="!licence.isLite && !licence.isStarter">
+    <div class="am-fs__ci-label">{{ labelsDisplay('congrats_location') }}:</div>
+    <div class="am-fs__ci-value">Lorem Ipsum, 18</div>
+  </template>
+  <!-- /Location -->
 </template>
 
 <script setup>

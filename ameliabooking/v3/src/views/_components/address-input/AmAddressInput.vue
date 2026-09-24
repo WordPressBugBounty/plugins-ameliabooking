@@ -1,12 +1,12 @@
 <template>
   <!-- Address Field -->
   <div v-if="googleMapsLoaded()" ref="wrapperElement" class="am-input-wrapper" :style="cssVars">
-    <div class="el-input am-input am-input--default">
+    <div class="el-input am-input am-input--default" :class="{ 'is-disabled': props.disabled }">
       <div
         v-click-outside="handleClickOutside"
         class="el-input__wrapper"
         :class="{ 'is-focus': isFocus }"
-        @click="() => (isFocus = true)"
+        @click="handleFocus"
       >
         <input
           :id="`amelia-address-autocomplete-${props.id}`"
@@ -16,6 +16,7 @@
           class="el-input__inner"
           :placeholder="props.placeholder"
           :aria-label="props.ariaLabel"
+          :disabled="props.disabled"
           @input="handleInputChange"
           @focus="handleFocus"
           @keydown="handleKeydown"
@@ -23,13 +24,13 @@
       </div>
     </div>
   </div>
-  <AmInput v-else v-model="model" :placeholder="props.placeholder" />
+  <AmInput v-else v-model="model" :disabled="props.disabled" :placeholder="props.placeholder" />
   <!-- /Address Field -->
 
   <!-- Autocomplete dropdown (Teleported to body) -->
   <Teleport to="body">
     <div
-      v-if="showDropdown && predictions.length > 0"
+      v-if="!props.disabled && showDropdown && predictions.length > 0"
       class="am-address-dropdown"
       :style="[cssVars, dropdownStyle]"
     >
@@ -87,6 +88,10 @@ const props = defineProps({
     type: String,
     default: 'address input',
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 // * Define Emits
@@ -119,6 +124,7 @@ let debounceTimer = null
 let hasPermanentError = ref(false)
 let originalConsoleError = null
 let errorSuppressionActive = false
+let autocompleteGeneration = 0
 
 const DEBOUNCE_MS = 300
 
@@ -150,6 +156,10 @@ function initializeSessionToken() {
  * Fetch predictions using the new Place Autocomplete Data API only
  */
 async function fetchPredictions(input) {
+  if (props.disabled) {
+    return
+  }
+
   if (!input.trim()) {
     predictions.value = []
     showDropdown.value = false
@@ -167,6 +177,8 @@ async function fetchPredictions(input) {
     return
   }
 
+  const requestGeneration = autocompleteGeneration
+
   try {
     const { AutocompleteSuggestion } = window.google.maps.places
 
@@ -174,6 +186,10 @@ async function fetchPredictions(input) {
       input,
       sessionToken,
     })
+
+    if (requestGeneration !== autocompleteGeneration) {
+      return
+    }
 
     if (suggestions && suggestions.length > 0) {
       predictions.value = suggestions
@@ -211,6 +227,10 @@ async function fetchPredictions(input) {
       showDropdown.value = false
     }
   } catch (err) {
+    if (requestGeneration !== autocompleteGeneration) {
+      return
+    }
+
     const errorMessage = err?.message || err?.toString() || ''
     // Mark as permanent error for 403 or API errors and suppress future errors
     if (
@@ -234,11 +254,22 @@ async function fetchPredictions(input) {
  * Handle input changes with debouncing
  */
 function handleInputChange() {
+  if (props.disabled) {
+    return
+  }
+
+  // Invalidate in-flight prediction / place-detail responses before debounce
+  autocompleteGeneration += 1
+
   if (debounceTimer) {
     clearTimeout(debounceTimer)
   }
 
   debounceTimer = setTimeout(() => {
+    if (props.disabled) {
+      return
+    }
+
     fetchPredictions(inputValue.value)
   }, DEBOUNCE_MS)
 }
@@ -247,6 +278,14 @@ function handleInputChange() {
  * Get place details when a prediction is selected (new API only)
  */
 async function selectPrediction(prediction) {
+  if (props.disabled) {
+    return
+  }
+
+  // Bump generation before capture so rapid selections get distinct ids
+  autocompleteGeneration += 1
+  const requestGeneration = autocompleteGeneration
+
   try {
     if (!prediction._prediction) {
       return
@@ -258,6 +297,10 @@ async function selectPrediction(prediction) {
     await place.fetchFields({
       fields: ['formattedAddress', 'addressComponents'],
     })
+
+    if (requestGeneration !== autocompleteGeneration) {
+      return
+    }
 
     if (place.formattedAddress) {
       inputValue.value = place.formattedAddress
@@ -282,6 +325,10 @@ async function selectPrediction(prediction) {
     predictions.value = []
     selectedIndex.value = -1
   } catch (err) {
+    if (requestGeneration !== autocompleteGeneration) {
+      return
+    }
+
     console.error('Error fetching place details:', err)
 
     const fallbackAddress = prediction.secondary_text
@@ -345,6 +392,10 @@ function updateDropdownPosition() {
  * Handle focus
  */
 function handleFocus() {
+  if (props.disabled) {
+    return
+  }
+
   isFocus.value = true
   if (showDropdown.value && predictions.value.length > 0) {
     updateDropdownPosition()
@@ -360,12 +411,34 @@ function handleClickOutside() {
   selectedIndex.value = -1
 }
 
+function clearAutocompleteState() {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+    debounceTimer = null
+  }
+
+  predictions.value = []
+  showDropdown.value = false
+  selectedIndex.value = -1
+}
+
 // Watch for external changes to modelValue
 watch(modelValue, (newValue) => {
   if (newValue !== inputValue.value) {
     inputValue.value = newValue || ''
   }
 })
+
+watch(
+  () => props.disabled,
+  (disabled) => {
+    if (disabled) {
+      autocompleteGeneration += 1
+      clearAutocompleteState()
+      isFocus.value = false
+    }
+  },
+)
 
 onMounted(() => {
   // Listen for scroll/resize to update dropdown position

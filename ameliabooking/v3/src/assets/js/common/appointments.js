@@ -738,6 +738,18 @@ function isSlotOccupiedBySelection(inspectedStart, inspectedEnd, occupiedStart, 
   return !(inspectedEnd <= occupiedStart || inspectedStart >= occupiedEnd)
 }
 
+// Appointments booked within a package have no duration of their own, so the service duration
+// is the one that gets booked - without it, they would occupy no time at all
+function useSelectionDuration(booking, service) {
+  return (
+    (booking.duration ? booking.duration : service.duration) +
+    booking.extras
+      .filter((e) => e.quantity && e.duration)
+      .map((e) => e.duration)
+      .reduce((fullDuration, duration) => fullDuration + duration, 0)
+  )
+}
+
 function useAvailableSlots(store) {
   let cart = store.getters['booking/getAllMultipleAppointments']
 
@@ -765,12 +777,7 @@ function useAvailableSlots(store) {
             selectedSlots.push({
               providerId: i.providerId,
               time: i.time,
-              duration:
-                i.duration +
-                i.extras
-                  .filter((e) => e.quantity && e.duration)
-                  .map((e) => e.duration)
-                  .reduce((fullDuration, duration) => fullDuration + duration, 0),
+              duration: useSelectionDuration(i, service),
               timeAfter: service.timeAfter,
               timeBefore: service.timeBefore,
             })
@@ -781,12 +788,7 @@ function useAvailableSlots(store) {
 
     let targetService = services.find((i) => i.id === cart[cartIndex].serviceId)
 
-    let targetDuration =
-      activeAppointment.duration +
-      activeAppointment.extras
-        .filter((e) => e.quantity && e.duration)
-        .map((e) => e.duration)
-        .reduce((fullDuration, duration) => fullDuration + duration, 0)
+    let targetDuration = useSelectionDuration(activeAppointment, targetService)
 
     // Date may only exist in waiting list slots (not in regular slots) — guard against undefined
     if (!(activeAppointment.date in cart[cartIndex].services[cart[cartIndex].serviceId].slots)) {
@@ -1052,12 +1054,7 @@ function getOccupiedSlotEmployeesIds(store, serviceId, booking) {
 
   let targetSlotSeconds = useTimeInSeconds(booking.time)
 
-  let targetDuration =
-    booking.duration +
-    booking.extras
-      .filter((e) => e.quantity && e.duration)
-      .map((e) => e.duration)
-      .reduce((fullDuration, duration) => fullDuration + duration, 0)
+  let targetDuration = useSelectionDuration(booking, targetService)
 
   let occupiedSlotEmployeesIds = []
 
@@ -1068,12 +1065,7 @@ function getOccupiedSlotEmployeesIds(store, serviceId, booking) {
 
         let selectedSlotSeconds = useTimeInSeconds(slot.time)
 
-        let selectedDuration =
-          slot.duration +
-          slot.extras
-            .filter((e) => e.quantity && e.duration)
-            .map((e) => e.duration)
-            .reduce((fullDuration, duration) => fullDuration + duration, 0)
+        let selectedDuration = useSelectionDuration(slot, selectedService)
 
         if (
           isSlotOccupiedBySelection(

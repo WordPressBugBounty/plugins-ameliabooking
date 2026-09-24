@@ -281,6 +281,18 @@ function onSignupSocial({ provider, credentials }) {
           authError.value = true
           authErrorMessage.value = amLabels.value.invalid_credentials
         }
+
+        if ('logout_login' in error.response.data.data) {
+          authError.value = true
+          authErrorMessage.value = amLabels.value.logout_login
+        }
+
+        if ('send_access_link' in error.response.data.data && error.response.data.data.send_access_link) {
+          authError.value = true
+          authErrorMessage.value = ''
+          hideAccessLinkSignIn.value = true
+          pageKey.value = 'sendAccessLink'
+        }
       })
       .finally(() => {
         store.commit('setLoading', false)
@@ -423,6 +435,9 @@ let signInFormConstruction = ref({
 // * Page key
 let pageKey = inject('pageKey')
 
+// * Hide Sign In link on Send Access Link when redirected from send_access_link error
+let hideAccessLinkSignIn = inject('hideAccessLinkSignIn')
+
 // * Cabinet type
 let cabinetType = inject('cabinetType')
 
@@ -456,6 +471,7 @@ function focusFirstInput() {
 }
 
 function goToResetPassword() {
+  hideAccessLinkSignIn.value = false
   pageKey.value = 'sendAccessLink'
 }
 
@@ -670,6 +686,18 @@ function useAuthenticate(tokenValue, isUrlToken, checkIfWpUser, changePass) {
       if ('invalid_credentials' in error.response.data.data) {
         authError.value = true
         authErrorMessage.value = amLabels.value.invalid_credentials
+      }
+
+      if ('logout_login' in error.response.data.data) {
+        authError.value = true
+        authErrorMessage.value = amLabels.value.logout_login
+      }
+
+      if ('send_access_link' in error.response.data.data && error.response.data.data.send_access_link) {
+        authError.value = true
+        authErrorMessage.value = ''
+        hideAccessLinkSignIn.value = true
+        pageKey.value = 'sendAccessLink'
       }
 
       if ('recaptcha_error' in error.response.data.data) {

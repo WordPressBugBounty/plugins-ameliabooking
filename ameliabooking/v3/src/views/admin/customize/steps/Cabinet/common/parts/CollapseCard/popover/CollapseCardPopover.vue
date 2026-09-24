@@ -32,7 +32,6 @@
 import Periods from './templates/Periods.vue'
 import Extras from './templates/Extras.vue'
 import Tickets from './templates/Tickets.vue'
-import CustomFields from './templates/CustomFields.vue'
 import Employee from './templates/Employee.vue'
 import Customers from '../../../../../../../../public/Cabinet/common/parts/CollapseCard/popover/templates/Customers.vue'
 import QrCode from './templates/QrCode.vue'
@@ -62,7 +61,6 @@ let templates = ref({
   period: markRaw(Periods),
   extras: markRaw(Extras),
   ticket: markRaw(Tickets),
-  customField: markRaw(CustomFields),
   employee: markRaw(Employee),
   customers: markRaw(Customers),
   qrCode: markRaw(QrCode),

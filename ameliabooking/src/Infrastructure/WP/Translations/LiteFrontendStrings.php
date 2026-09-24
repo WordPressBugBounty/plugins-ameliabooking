@@ -304,6 +304,7 @@ class LiteFrontendStrings
         return [
             'available'                              => __('Available', 'ameliabooking'),
             'booking_cancel_exception'               => __('Booking can\'t be canceled', 'ameliabooking'),
+            'download'                               => __('Download', 'ameliabooking'),
             'generate_payment_links'                 => __('Generate payment links', 'ameliabooking'),
             'generate_payment_links_tooltip'         => __('Check this box to generate a payment link.<br> To include it in the notification, add the payment link placeholder.', 'ameliabooking'),
             'no_results'                             => __('There are no results...', 'ameliabooking'),

@@ -1,8 +1,6 @@
 <template>
-  <div class="am-fs__congrats-info-cart">
-    <span>{{ amLabels.congrats_cart }}:</span>
-    <span>{{ cart.length }}</span>
-  </div>
+  <div class="am-fs__ci-label">{{ amLabels.congrats_cart }}:</div>
+  <div class="am-fs__ci-value">{{ cart.length }}</div>
 </template>
 
 <script setup>

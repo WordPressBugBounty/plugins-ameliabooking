@@ -867,6 +867,11 @@ defineExpose({
           font-size: 24px;
         }
       }
+
+      // customer multiselect fix
+      .el-select__selection {
+        flex-wrap: nowrap;
+      }
     }
 
     // Content
@@ -943,7 +948,7 @@ defineExpose({
 
         &.am-rw- {
           &480 {
-            width: calc(100% - 24px);
+            width: calc(100% - 32px);
             margin-bottom: 8px;
           }
         }

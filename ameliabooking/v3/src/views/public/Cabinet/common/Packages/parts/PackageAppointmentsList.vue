@@ -114,6 +114,7 @@
     <AmTabs
       v-model="selectedServiceId"
       class="am-cappa__service"
+      :class="{ 'am-single': servicesOrderInPackage.length === 1 }"
       :aria-label="servicesTabsAriaLabel"
       @tab-click="selectService"
     >
@@ -883,6 +884,25 @@ export default {
         &.am-rw-500 {
           width: 100%;
           margin-top: 16px;
+        }
+      }
+
+      &.am-single {
+        .el-tabs {
+          &__nav {
+            width: 100% !important;
+          }
+
+          &__item {
+            width: 100% !important;
+
+            .am-cappa__service-heading {
+              width: 100% !important;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+          }
         }
       }
     }

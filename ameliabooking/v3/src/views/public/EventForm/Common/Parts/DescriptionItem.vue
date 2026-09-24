@@ -7,18 +7,18 @@
     <p v-if="props.title" :id="titleId" class="am-eli__description-title">
       {{ props.title }}
     </p>
-    <p
+    <div
       v-if="showMore && props.description.replace(/<[^>]*>?/gm, '').length > props.limit"
       :id="descriptionId"
-      class="am-eli__description-text ql-description"
+      class="am-eli__description-text am-tap-description"
       v-html="props.description.slice(0, props.limit) + '...'"
-    ></p>
-    <p
+    ></div>
+    <div
       v-else
       :id="descriptionId"
-      class="am-eli__description-text ql-description"
+      class="am-eli__description-text am-tap-description"
       v-html="props.description"
-    ></p>
+    ></div>
     <button
       v-if="props.description.replace(/<[^>]*>?/gm, '').length > props.limit"
       type="button"
@@ -92,7 +92,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../../../../assets/scss/common/quill/_quill-mixin.scss';
+@import '../../../../../assets/scss/common/tiptap/_tiptap-mixin.scss';
 
 @mixin event-description {
   .am-eli {
@@ -112,8 +112,8 @@ export default {
         color: var(--am-c-eli-text-op80);
         margin: 0;
 
-        &.ql-description {
-          @include quill-styles;
+        &.am-tap-description {
+          @include tiptap-styles;
         }
       }
 

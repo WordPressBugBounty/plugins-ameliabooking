@@ -650,11 +650,14 @@ export default {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
       border-top: 1px solid var(--am-c-els-text-op25);
       margin: 48px 0 0;
       padding: 16px 0 0;
+      gap: 8px 0;
 
       &-info {
+        flex: 0 0 auto;
         font-size: 13px;
         font-weight: 400;
         line-height: 1.3;

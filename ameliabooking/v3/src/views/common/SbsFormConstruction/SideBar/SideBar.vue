@@ -290,6 +290,8 @@ export default {
           margin: 0;
           border-bottom: 1px dashed var(--am-c-sb-text-op10);
           white-space: pre;
+          overflow: hidden;
+          text-overflow: ellipsis;
 
           &.fade-enter-active {
             animation: sidebar-step-selection 1s;

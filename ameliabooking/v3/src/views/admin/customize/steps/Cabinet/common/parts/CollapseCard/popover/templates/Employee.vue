@@ -151,10 +151,13 @@ export default {
       display: flex;
       align-items: center;
       justify-content: flex-start;
+      gap: 8px;
+      margin: 0 0 16px;
 
       &__inner {
         display: flex;
         flex-wrap: wrap;
+        width: calc(100% - 44px);
       }
     }
 
@@ -170,7 +173,6 @@ export default {
       background-size: cover;
       background-repeat: no-repeat;
       background-position: center;
-      margin-right: 8px;
     }
 
     &-name {
@@ -185,14 +187,18 @@ export default {
     }
 
     &-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
       color: #ffffff;
       border-radius: 4px;
       padding: 0 4px;
       font-size: 13px;
-      line-height: 19px;
+      line-height: 24px;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     &-desc {

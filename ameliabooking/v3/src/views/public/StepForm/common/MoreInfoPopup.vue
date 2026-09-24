@@ -87,7 +87,7 @@
       <!-- DESCRIPTION -->
       <div
         v-if="useDescriptionVisibility(props.item.description)"
-        class="am-fs-iipu__description ql-description"
+        class="am-fs-iipu__description am-tap-description"
         :style="props.plainText ? 'white-space: pre-wrap' : ''"
         v-html="props.item.description"
       />
@@ -191,12 +191,13 @@ const amColors = inject(
 let cssVars = computed(() => {
   return {
     '--am-c-primary-op05': useColorTransparency(amColors.value.colorPrimary, 0.05),
+    '--am-c-main-text-op10': useColorTransparency(amColors.value.colorMainText, 0.1),
   }
 })
 </script>
 
 <style lang="scss">
-@import '../../../../../src/assets/scss/common/quill/_quill-mixin.scss';
+@import '../../../../../src/assets/scss/common/tiptap/_tiptap-mixin.scss';
 
 @mixin init-info-popup {
   // iipu - init info popup
@@ -382,8 +383,8 @@ let cssVars = computed(() => {
     &__description {
       color: var(--am-c-main-text);
 
-      &.ql-description {
-        @include quill-styles;
+      &.am-tap-description {
+        @include tiptap-styles;
       }
     }
   }

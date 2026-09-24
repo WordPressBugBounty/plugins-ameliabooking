@@ -34,6 +34,10 @@ let originKey = inject('originKey')
 let pageKey = ref('signIn')
 provide('pageKey', pageKey)
 
+// * Hide Sign In link on Send Access Link when redirected from send_access_link error
+let hideAccessLinkSignIn = ref(false)
+provide('hideAccessLinkSignIn', hideAccessLinkSignIn)
+
 // * Fonts
 const amFonts = ref(
   amSettings.customizedData ? amSettings.customizedData.fonts : defaultCustomizeSettings.fonts,

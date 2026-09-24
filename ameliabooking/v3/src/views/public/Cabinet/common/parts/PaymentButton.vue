@@ -96,7 +96,7 @@ let props = defineProps({
   },
   btnSize: {
     type: String,
-    default: 'mini',
+    default: 'micro',
   },
   class: {
     type: String,

@@ -686,6 +686,11 @@ let cssVars = computed(() => {
         background-color: transparent;
       }
     }
+
+    // form item label fix
+    .el-form-item__label {
+      height: unset;
+    }
   }
 }
 

@@ -11,7 +11,7 @@
     <AmDatePickerFull
       :existing-date="model"
       :persistent="false"
-      :disabled="false"
+      :disabled="props.disabled"
       :clearable="props.clearable"
       :readonly="props.readonly"
       :week-starts-from-day="props.weekStartsFromDay"
@@ -71,6 +71,10 @@ let props = defineProps({
     default: true,
   },
   refreshValue: {
+    type: Boolean,
+    default: false,
+  },
+  disabled: {
     type: Boolean,
     default: false,
   },

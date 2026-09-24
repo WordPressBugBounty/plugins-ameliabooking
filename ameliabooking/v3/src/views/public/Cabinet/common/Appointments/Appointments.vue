@@ -66,12 +66,12 @@
           @booked="getAppointments"
           @edit-appointment="editAppointment"
           @status-change="appointmentStatusChange"
-        ></AppointmentsList>
+        />
         <EmptyState
           v-else-if="!appointmentVisibility"
           :heading="amLabels.no_app_found"
           :text="amLabels.have_no_app"
-        ></EmptyState>
+        />
         <AmPagination
           v-if="
             !appointmentVisibility &&
@@ -94,9 +94,9 @@
           @edit-linked-appointment="editAppointment"
           @close="closeAppointment"
           @save="saveAppointmentCallback"
-        ></Appointment>
+        />
       </template>
-      <Skeleton v-else></Skeleton>
+      <Skeleton v-else />
     </div>
   </div>
 </template>
@@ -305,7 +305,17 @@ function getAppointments(passedData = null, page = 1) {
  ***************/
 let linkedAppointments = ref([])
 
+let appointmentVisibility = ref(false)
+
 function editAppointment(appointment) {
+  getAppointment(appointment, {
+    onSuccess: () => {
+      appointmentVisibility.value = true
+    },
+  })
+}
+
+function getAppointment(appointment, { onSuccess, onFinally } = {}) {
   store.commit('cabinet/setAppointmentsLoading', true)
 
   httpClient
@@ -400,17 +410,16 @@ function editAppointment(appointment) {
 
       linkedAppointments.value = response.data.data.recurring
 
-      appointmentVisibility.value = true
+      onSuccess?.()
     })
     .catch((error) => {
       console.log(error)
     })
     .finally(() => {
       store.commit('cabinet/setAppointmentsLoading', false)
+      onFinally?.()
     })
 }
-
-let appointmentVisibility = ref(false)
 
 function saveAppointmentCallback() {
   alertVisibility.value = true

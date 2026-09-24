@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.4.10
+Stable tag: 2.4.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -292,6 +292,21 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.4.11
+This update includes a couple of improvements, bug fixes and a security fix. We strongly recommend updating to this version immediately.
+Improvement: General Settings - Refreshed the look of the Import/Export section.
+BugFix: Fixed an issue with the Employee Services tab hanging in Chrome on large service catalogs.
+BugFix: Fixed a white screen and lost settings issue in the Divi 5 Visual Builder for the Amelia Catalog (Legacy) with Accessibility Attributes.
+BugFix: Fixed an issue where ManageWP displayed the wrong changelog version.
+BugFix: Fixed a time offset issue in the Event bookings export caused by daylight saving time.
+BugFix: Fixed an issue with the month navigation arrow allowing users to browse past the maximum advance booking limit.
+BugFix: Fixed an incorrect first available time slot caused by a legacy event created with a 30-minute step.
+BugFix: Fixed UI and formatting issues in the Employee Information Modal.
+BugFix: Fixed an issue with booking form dropdowns and the calendar rendering without CSS when the v3 style.css is enqueued late.
+BugFix: Fixed an issue with opening the New Appointment Modal from the Monthly Calendar on mobile.
+BugFix: Security vulnerability patch and improvements.
+Other small bug fixes and stability improvements.
+
 v2.4.10
 This update includes security fixes. We strongly recommend updating to this version immediately.
 *BugFix: Security vulnerability patch and improvements.

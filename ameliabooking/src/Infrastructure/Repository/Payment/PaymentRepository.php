@@ -1081,7 +1081,107 @@ class PaymentRepository extends AbstractRepository
         return true;
     }
 
+    /**
+     * Sets the status of the given payments, and of no others.
+     *
+     * Payments that a single gateway charge covers are written one by one instead of by their
+     * parentId relation: that relation also holds payments the charge left out, which must keep
+     * the status they have.
+     *
+     * @param int[]       $paymentIds
+     * @param string      $status
+     * @param string|null $gateway       Only payments made with this gateway are updated
+     * @param string|null $currentStatus Only payments that have this status are updated
+     *
+     * @return bool
+     *
+     * @throws QueryExecutionException
+     */
+    public function updateStatusByIds(array $paymentIds, $status, $gateway = null, $currentStatus = null): bool
+    {
+        $paymentIds = array_values(array_unique(array_map('intval', $paymentIds)));
 
+        if (empty($paymentIds)) {
+            return false;
+        }
+
+        $params = [':status' => $status];
+
+        $idParams = [];
+
+        foreach ($paymentIds as $index => $paymentId) {
+            $idParam = ':paymentId' . $index;
+
+            $idParams[]       = $idParam;
+            $params[$idParam] = $paymentId;
+        }
+
+        $where = 'id IN (' . implode(', ', $idParams) . ')';
+
+        if ($gateway !== null && $gateway !== '') {
+            $params[':gateway'] = $gateway;
+
+            $where .= ' AND gateway = :gateway';
+        }
+
+        if ($currentStatus !== null && $currentStatus !== '') {
+            $params[':currentStatus'] = $currentStatus;
+
+            $where .= ' AND status = :currentStatus';
+        }
+
+        try {
+            $statement = $this->connection->prepare(
+                "UPDATE {$this->table} SET `status` = :status WHERE {$where}"
+            );
+
+            $statement->execute($params);
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to update data in ' . __CLASS__ . '. ' . $e->getMessage(), $e->getCode(), $e);
+        }
+
+        return true;
+    }
+
+    /**
+     * Takes the right to run a booking's post-booking actions, for one caller only.
+     *
+     * Notifications, integrations and webhooks must fire exactly once per payment, and for a
+     * Stripe checkout several parties race to fire them: the browser after the Congrats page,
+     * the PaymentIntent webhook, and the reconciliation cron. Reading `triggeredActions` and
+     * then writing it leaves a window where two of them both read 0, so the flag is claimed
+     * in a single conditional UPDATE instead - only the caller that actually flipped it, and
+     * therefore only one of them, gets true back.
+     *
+     * A payment whose actions were already completed is never re-claimed.
+     *
+     * @param int $paymentId
+     *
+     * @return bool
+     * @throws QueryExecutionException
+     */
+    public function claimTriggeredActions($paymentId): bool
+    {
+        try {
+            $statement = $this->connection->prepare(
+                "UPDATE {$this->table}
+                SET `triggeredActions` = 1
+                WHERE id = :paymentId
+                  AND COALESCE(`triggeredActions`, 0) = 0
+                  AND COALESCE(`actionsCompleted`, 0) = 0"
+            );
+
+            $statement->execute([':paymentId' => (int)$paymentId]);
+
+            return $statement->rowCount() > 0;
+        } catch (\Exception $e) {
+            throw new QueryExecutionException(
+                'Unable to claim post-booking actions in ' . __CLASS__ . '. ' . $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
+    }
 
     /**
      * @param array $data

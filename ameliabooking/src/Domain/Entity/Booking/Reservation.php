@@ -15,7 +15,6 @@ use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\CustomerBooking;
 use AmeliaBooking\Domain\Entity\Booking\Event\Event;
-use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Entity\User\Customer;
 use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
 use AmeliaBooking\Domain\ValueObjects\String\Label;
@@ -90,6 +89,12 @@ class Reservation
     /** @var BooleanValueObject  */
     private $availabilityValidation;
 
+    /** @var BooleanValueObject  */
+    private $calendarValidation;
+
+    /** @var BooleanValueObject  */
+    private $isPackageAppointment;
+
     /**
      * @return BooleanValueObject
      */
@@ -136,6 +141,41 @@ class Reservation
     public function setAvailabilityValidation(BooleanValueObject $availabilityValidation)
     {
         $this->availabilityValidation = $availabilityValidation;
+    }
+
+    /**
+     * @return BooleanValueObject|null
+     */
+    public function hasCalendarValidation(): ?BooleanValueObject
+    {
+        return $this->calendarValidation;
+    }
+
+    /**
+     * @param BooleanValueObject $calendarValidation
+     */
+    public function setCalendarValidation(BooleanValueObject $calendarValidation): void
+    {
+        $this->calendarValidation = $calendarValidation;
+    }
+
+    /**
+     * Set only after a purchased package service was found for the booking customer, so that a payment is
+     * never skipped on the strength of package data that came in with the request.
+     *
+     * @return BooleanValueObject|null
+     */
+    public function isPackageAppointment(): ?BooleanValueObject
+    {
+        return $this->isPackageAppointment;
+    }
+
+    /**
+     * @param BooleanValueObject $isPackageAppointment
+     */
+    public function setIsPackageAppointment(BooleanValueObject $isPackageAppointment): void
+    {
+        $this->isPackageAppointment = $isPackageAppointment;
     }
 
     /**

@@ -214,7 +214,10 @@
             v-show="tabsActive === 'description'"
             class="am-fcip__info-content"
           >
-            <div class="am-fcip__info-service__desc" v-html="pack.description"></div>
+            <div
+              class="am-fcip__info-service__desc am-tap-description"
+              v-html="pack.description"
+            ></div>
           </div>
           <!-- /Description -->
 
@@ -281,7 +284,10 @@
                   + {{ packageEmployees.length - 6 }}
                 </span>
                 <template v-if="book.description">
-                  <p v-html="book.description"></p>
+                  <div
+                    class="am-fcip__include-service__info-description am-tap-description"
+                    v-html="book.description"
+                  ></div>
                 </template>
               </div>
             </template>
@@ -586,7 +592,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../../../../src/assets/scss/common/quill/_quill-mixin.scss';
+@import '../../../../../src/assets/scss/common/tiptap/_tiptap-mixin.scss';
 
 #amelia-app-backend-new {
   // am-    amelia
@@ -987,8 +993,8 @@ export default {
               color: var(--am-c-fcip-primary);
             }
 
-            &.ql-description {
-              @include quill-styles;
+            &.am-tap-description {
+              @include tiptap-styles;
             }
           }
         }
@@ -1056,8 +1062,8 @@ export default {
           &__description {
             color: var(--am-c-fcis-text);
 
-            &.ql-description {
-              @include quill-styles;
+            &.am-tap-description {
+              @include tiptap-styles;
             }
           }
         }
@@ -1190,7 +1196,7 @@ export default {
               background-repeat: no-repeat;
             }
 
-            & > p {
+            & .am-fcip__include-service__info-description {
               font-size: 15px;
               font-weight: 400;
               line-height: 1.6;
@@ -1201,11 +1207,9 @@ export default {
               & * {
                 color: var(--am-c-fcip-text-op80);
               }
-            }
 
-            & .am-fcip__include-service__info-description {
-              &.ql-description {
-                @include quill-styles;
+              &.am-tap-description {
+                @include tiptap-styles;
               }
             }
           }

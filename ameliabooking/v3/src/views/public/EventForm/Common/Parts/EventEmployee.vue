@@ -66,6 +66,11 @@ let employeeInitials = computed(() => {
       initials += item.charAt(0).toUpperCase()
     })
   }
+
+  if (initials.length > 3) {
+    initials = initials.slice(0, 3)
+  }
+
   return initials
 })
 </script>
@@ -86,15 +91,22 @@ export default {
         border-top: 1px solid var(--am-c-card-border);
       }
 
+      &-inner {
+        width: calc(100% - 64px);
+        min-width: 0;
+      }
+
       &-item {
         display: flex;
         flex-direction: row;
         align-items: center;
+        gap: 16px;
         margin-bottom: 16px;
       }
 
       &-img {
         display: inline-flex;
+        flex-shrink: 0;
         align-items: center;
         justify-content: center;
         background-color: var(--am-c-eli-primary);
@@ -102,7 +114,6 @@ export default {
         width: 48px;
         height: 48px;
         border-radius: 50%;
-        margin-right: 16px;
         font-size: 14px;
         font-weight: 500;
         overflow: hidden;
@@ -112,6 +123,8 @@ export default {
       }
 
       &-name {
+        max-width: 100%;
+        overflow-wrap: break-word;
         font-size: 15px;
         font-weight: 500;
         line-height: 1.6;
@@ -120,11 +133,18 @@ export default {
       }
 
       &-badge {
+        display: inline-block;
+        vertical-align: middle;
+        text-align: center;
         color: #fff;
         border-radius: 4px;
         padding: 0 4px;
         font-size: 13px;
         line-height: 19px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
       }
 
       &-rank {
