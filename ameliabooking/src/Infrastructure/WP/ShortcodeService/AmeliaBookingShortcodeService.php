@@ -91,9 +91,15 @@ class AmeliaBookingShortcodeService
             }
         }
 
-        $scriptId = AMELIA_DEV ? 'amelia_booking_scripts_dev_vite' : 'amelia_booking_script_index';
+        if (!defined('AMELIA_TEST')) {
+            define('AMELIA_TEST', file_exists(AMELIA_PATH . '/test_mode.flag'));
+        }
 
-        if (AMELIA_DEV) {
+        $isTestEnv = defined('AMELIA_TEST') && AMELIA_TEST;
+        $isDev     = defined('AMELIA_DEV') && AMELIA_DEV && !$isTestEnv;
+        $scriptId  = $isDev ? 'amelia_booking_scripts_dev_vite' : 'amelia_booking_script_index';
+
+        if ($isDev) {
             wp_enqueue_script(
                 $scriptId,
                 'http://localhost:3000/@vite/client',
@@ -182,7 +188,7 @@ class AmeliaBookingShortcodeService
         );
 
         wp_add_inline_script(
-            AMELIA_DEV ? 'amelia_booking_scripts_dev_main' : $scriptId,
+            $isDev ? 'amelia_booking_scripts_dev_main' : $scriptId,
             'window.wpAmeliaNonce = ' . wp_json_encode(wp_create_nonce('ajax-nonce')) . ';',
             'before'
         );

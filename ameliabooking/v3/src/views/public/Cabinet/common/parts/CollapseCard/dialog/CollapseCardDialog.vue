@@ -212,10 +212,9 @@ export default {
 
 <style lang="scss">
 @mixin am-collapse-card-dialog {
-
   .am-collapse-card-dialog__trigger {
     &:focus-visible {
-      outline: 2px solid var(--am-c-primary, #1246D6);
+      outline: 2px solid var(--am-c-primary, #1246d6);
       outline-offset: 2px;
       border-radius: 4px;
     }

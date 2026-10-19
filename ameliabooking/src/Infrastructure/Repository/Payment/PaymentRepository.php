@@ -1184,6 +1184,32 @@ class PaymentRepository extends AbstractRepository
     }
 
     /**
+     * Locks a payment row for the rest of the current transaction, so that a second request
+     * recording the same charge waits here until the first one has committed.
+     *
+     * @param int $id
+     *
+     * @return void
+     * @throws QueryExecutionException
+     */
+    public function lockById(int $id): void
+    {
+        try {
+            $statement = $this->connection->prepare(
+                "SELECT id FROM {$this->table} WHERE id = :id FOR UPDATE"
+            );
+
+            $statement->execute([':id' => $id]);
+        } catch (\Exception $e) {
+            throw new QueryExecutionException(
+                'Unable to lock payment by id in ' . __CLASS__ . '. ' . $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
+    }
+
+    /**
      * @param array $data
      *
      * @return bool

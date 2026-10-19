@@ -1,25 +1,42 @@
 <template>
   <div class="am-cc-cft">
     <el-collapse v-model="activeCollapse" class="am-cc-cft__collapse" accordion>
-      <el-collapse-item v-for="(item, index) in props.data":key="index" :name="index" class="am-cc-cft__collapse-item">
+      <el-collapse-item
+        v-for="(item, index) in props.data"
+        :key="index"
+        :name="index"
+        class="am-cc-cft__collapse-item"
+      >
         <template #title>
           <!-- Customer Name -->
-          <div class="am-cc-cft__customer-name" :class="noShowData(item.customer.noShowCount).class">
-            <span v-if="noShowData(item.customer.noShowCount).icon"
-              :class="`am-icon-${noShowData(item.customer.noShowCount).icon}`" />
+          <div
+            class="am-cc-cft__customer-name"
+            :class="noShowData(item.customer.noShowCount).class"
+          >
+            <span
+              v-if="noShowData(item.customer.noShowCount).icon"
+              :class="`am-icon-${noShowData(item.customer.noShowCount).icon}`"
+            />
             {{ item.customer.firstName + ' ' + item.customer.lastName }}
           </div>
           <!-- /Customer Name -->
         </template>
 
         <!-- Customer Info -->
-        <div v-if="
-          (item.customer.email && customerEmailVisibility) ||
-          (item.customer.phone && customerPhoneVisibility)
-        " class="am-cc-cft__customer-data__wrapper" :class="props.responsiveClass">
+        <div
+          v-if="
+            (item.customer.email && customerEmailVisibility) ||
+            (item.customer.phone && customerPhoneVisibility)
+          "
+          class="am-cc-cft__customer-data__wrapper"
+          :class="props.responsiveClass"
+        >
           <!-- Customer Email -->
-          <div v-if="item.customer.email && customerEmailVisibility" class="am-cc-cft__customer-data"
-            :class="props.responsiveClass">
+          <div
+            v-if="item.customer.email && customerEmailVisibility"
+            class="am-cc-cft__customer-data"
+            :class="props.responsiveClass"
+          >
             <span class="am-icon-email"></span>
             <a :href="`mailto:${item.customer.email}`">
               {{ item.customer.email }}
@@ -28,8 +45,11 @@
           <!-- /Customer Email -->
 
           <!-- Customer Phone -->
-          <div v-if="item.customer.phone && customerPhoneVisibility" class="am-cc-cft__customer-data"
-            :class="props.responsiveClass">
+          <div
+            v-if="item.customer.phone && customerPhoneVisibility"
+            class="am-cc-cft__customer-data"
+            :class="props.responsiveClass"
+          >
             <span class="am-icon-phone"></span>
             <a :href="`tel:${item.customer.phone}`">
               {{ item.customer.phone }}
@@ -42,10 +62,7 @@
         <!-- Custom Fields -->
         <div class="am-cc-cft__fields" :class="props.responsiveClass">
           <template v-for="cf in item.customFields" :key="index + '_' + cf.id">
-            <component :is="setTemplate(cf.type)"
-              v-model="cf.value"
-              v-bind="setProps(cf, index)"
-            >
+            <component :is="setTemplate(cf.type)" v-model="cf.value" v-bind="setProps(cf, index)">
             </component>
           </template>
         </div>
@@ -150,7 +167,6 @@ function setProps(cf, index) {
 // * cft - custom fields template
 @mixin am-cc-cft {
   .am-cc-cft {
-
     // Collapse
     &__collapse {
       display: flex;

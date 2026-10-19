@@ -287,7 +287,10 @@ function onSignupSocial({ provider, credentials }) {
           authErrorMessage.value = amLabels.value.logout_login
         }
 
-        if ('send_access_link' in error.response.data.data && error.response.data.data.send_access_link) {
+        if (
+          'send_access_link' in error.response.data.data &&
+          error.response.data.data.send_access_link
+        ) {
           authError.value = true
           authErrorMessage.value = ''
           hideAccessLinkSignIn.value = true
@@ -693,7 +696,10 @@ function useAuthenticate(tokenValue, isUrlToken, checkIfWpUser, changePass) {
         authErrorMessage.value = amLabels.value.logout_login
       }
 
-      if ('send_access_link' in error.response.data.data && error.response.data.data.send_access_link) {
+      if (
+        'send_access_link' in error.response.data.data &&
+        error.response.data.data.send_access_link
+      ) {
         authError.value = true
         authErrorMessage.value = ''
         hideAccessLinkSignIn.value = true

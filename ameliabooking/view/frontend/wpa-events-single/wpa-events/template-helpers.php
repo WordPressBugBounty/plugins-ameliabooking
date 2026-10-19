@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Helpers for wpa-events single template (scoped; loaded once per request).
  *
@@ -463,7 +464,8 @@ if (!function_exists('amelia_wpa_events_staff_cards')) {
 if (!function_exists('amelia_wpa_events_sidebar_tickets_payload')) {
     function amelia_wpa_events_sidebar_tickets_payload(array $eventData, bool $useWaitingList = false): array
     {
-        if (empty($eventData['customPricing'])
+        if (
+            empty($eventData['customPricing'])
             || empty($eventData['customTickets'])
             || !is_array($eventData['customTickets'])
         ) {
@@ -586,7 +588,8 @@ if (!function_exists('amelia_wpa_events_attendees_payload')) {
                 ? max(0, (int) $waitingListAvailability['spotsLeft'])
                 : 0;
 
-            if (array_key_exists('maxExtraPeople', $waitingListAvailability)
+            if (
+                array_key_exists('maxExtraPeople', $waitingListAvailability)
                 && $waitingListAvailability['maxExtraPeople'] !== null
             ) {
                 $maxExtraPeople = (int) $waitingListAvailability['maxExtraPeople'];

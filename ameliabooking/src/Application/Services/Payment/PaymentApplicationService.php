@@ -1214,7 +1214,7 @@ class PaymentApplicationService
         $paymentMethod = null,
         $customRedirectUrl = null,
         $directLink = false
-    ) {
+    ): ?array {
         try {
             /** @var PaymentApplicationService $paymentAS */
             $paymentAS = $this->container->get('application.payment.service');
@@ -1528,6 +1528,8 @@ class PaymentApplicationService
                     'metaData'    => $additionalInformation['metaData'] ?: [],
                     'currency'    => $settingsService->getCategorySettings('payments')['currency'],
                     'fromPanel'   => !empty($data['fromPanel']),
+                    'paymentAmeliaId' => $oldPaymentId,
+                    'chargedAmount'   => $amount,
                     'customerId'  => !empty($customer['stripeConnect']['id']) ? $customer['stripeConnect']['id'] : null,
                     'customerData' => [
                         'name' => $customer['firstName'] . (!empty($customer['lastName']) ? (' ' . $customer['lastName']) : ''),

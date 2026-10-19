@@ -515,10 +515,7 @@ function eventCustomFields(event) {
 
   // Event bookings
   event.bookings.forEach((booking) => {
-    if (
-      currentCustomerId &&
-      (booking.customerId ?? booking.customer?.id) !== currentCustomerId
-    ) {
+    if (currentCustomerId && (booking.customerId ?? booking.customer?.id) !== currentCustomerId) {
       return
     }
 
@@ -534,7 +531,10 @@ function eventCustomFields(event) {
     let mergedCustomFields = {}
 
     entitiesCustomFields.forEach((customField) => {
-      if ((customField.allEvents || customField.events.some((e) => e.id === event.id)) && bookingCustomFields[customField.id]) {
+      if (
+        (customField.allEvents || customField.events.some((e) => e.id === event.id)) &&
+        bookingCustomFields[customField.id]
+      ) {
         mergedCustomFields[customField.id] = Object.assign({}, customField, {
           value: bookingCustomFields[customField.id].value,
           bookingId: booking.id,

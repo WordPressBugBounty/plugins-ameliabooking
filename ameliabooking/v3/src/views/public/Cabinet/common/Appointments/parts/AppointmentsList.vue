@@ -330,14 +330,11 @@ function appointmentCustomFields(appointment) {
 
   // Appointment bookings
   appointment.bookings.forEach((booking) => {
-    if (
-      currentCustomerId &&
-      (booking.customerId ?? booking.customer?.id) !== currentCustomerId
-    ) {
+    if (currentCustomerId && (booking.customerId ?? booking.customer?.id) !== currentCustomerId) {
       return
     }
 
-     // Booking custom fields
+    // Booking custom fields
     let bookingCustomFields = {}
 
     try {
@@ -349,7 +346,10 @@ function appointmentCustomFields(appointment) {
     let mergedCustomFields = {}
 
     entitiesCustomFields.forEach((customField) => {
-      if ((customField.allServices || customField.services.some((e) => e.id === serviceId)) && bookingCustomFields[customField.id]) {
+      if (
+        (customField.allServices || customField.services.some((e) => e.id === serviceId)) &&
+        bookingCustomFields[customField.id]
+      ) {
         mergedCustomFields[customField.id] = Object.assign({}, customField, {
           value: bookingCustomFields[customField.id].value,
           bookingId: booking.id,
@@ -359,8 +359,8 @@ function appointmentCustomFields(appointment) {
 
     if (Object.keys(mergedCustomFields).length > 0) {
       customFieldsData.push({
-          customer: appointmentBookingCustomer(booking),
-          customFields: mergedCustomFields,
+        customer: appointmentBookingCustomer(booking),
+        customFields: mergedCustomFields,
       })
     }
   })

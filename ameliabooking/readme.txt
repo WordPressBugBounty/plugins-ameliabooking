@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.4.11
+Stable tag: 2.4.12
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -292,6 +292,11 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.4.12
+This update includes a couple of bug fixes and stability improvements:
+*BugFix: Fixed issues and improved stability of the Outlook Calendar integration.
+*Additional minor bug fixes and stability improvements.
+
 v2.4.11
 This update includes a couple of improvements, bug fixes and a security fix. We strongly recommend updating to this version immediately.
 Improvement: General Settings - Refreshed the look of the Import/Export section.

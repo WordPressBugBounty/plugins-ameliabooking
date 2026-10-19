@@ -145,7 +145,8 @@ function useAppointmentSlots(
               // Filter providers that have waiting list capacity
               const waitingListProviders = selectedProviderRows.filter((p) => {
                 return (
-                  !waitingListOptions.maxCapacity || ((p.w + params.persons) || 0) <= waitingListOptions.maxCapacity
+                  !waitingListOptions.maxCapacity ||
+                  (p.w + params.persons || 0) <= waitingListOptions.maxCapacity
                 )
               })
 

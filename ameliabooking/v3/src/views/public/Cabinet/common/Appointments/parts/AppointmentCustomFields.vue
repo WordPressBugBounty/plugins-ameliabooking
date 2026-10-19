@@ -104,7 +104,7 @@ const props = defineProps({
   responsiveClass: {
     type: String,
     default: '',
-  }
+  },
 })
 
 // * Store

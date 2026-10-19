@@ -559,7 +559,9 @@
 
               <!-- Custom Fields -->
               <CollapseCardDialog
-                v-if="props.customFields.length && amSettings.featuresIntegrations.customFields.enabled"
+                v-if="
+                  props.customFields.length && amSettings.featuresIntegrations.customFields.enabled
+                "
                 append-dialog-to=".am-fs__main-inner"
                 component-name="customField"
                 :content-data="props.customFields"

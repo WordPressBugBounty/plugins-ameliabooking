@@ -688,7 +688,7 @@ function getPackageNotifyData(response) {
       paymentId: 'paymentId' in response && response.paymentId ? response.paymentId : null,
       packageCustomerId: response.packageCustomerId,
       isPackageAppointment: true,
-      token: response.packageCustomerToken
+      token: response.packageCustomerToken,
     },
   }
 }

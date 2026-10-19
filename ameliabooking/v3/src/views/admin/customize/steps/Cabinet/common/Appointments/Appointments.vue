@@ -178,7 +178,13 @@ arrApp.forEach((item, index) => {
             width: 50,
             options: [{ label: 'Option 1' }, { label: 'Option 2' }],
           },
-          { id: 4, type: 'datepicker', label: 'Custom field 4', value: moment().toDate(), width: 50 },
+          {
+            id: 4,
+            type: 'datepicker',
+            label: 'Custom field 4',
+            value: moment().toDate(),
+            width: 50,
+          },
           {
             id: 5,
             type: 'text-area',
