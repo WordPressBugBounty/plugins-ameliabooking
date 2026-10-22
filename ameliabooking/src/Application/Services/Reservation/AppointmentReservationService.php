@@ -142,6 +142,10 @@ class AppointmentReservationService extends AbstractReservationService
             $appointmentData['bookings'][0]['customerId']
         ) : 0;
 
+        $appointmentData['bookings'][0]['coupon'] = null;
+
+        $appointmentData['bookings'][0]['couponId'] = null;
+
         if ($allowedCouponLimit > 0 && $coupon->getServiceList()->keyExists($appointmentData['serviceId'])) {
             $appointmentData['bookings'][0]['coupon'] = $coupon->toArray();
 
@@ -1434,13 +1438,15 @@ class AppointmentReservationService extends AbstractReservationService
      *
      * @throws InvalidArgumentException
      */
-    public function getPaymentAmount($booking, $bookable, $invoice = false)
+    public function getPaymentAmount($booking, $bookable, $invoice = false): array
     {
         /** @var TaxApplicationService $taxApplicationService */
         $taxApplicationService = $this->container->get('application.tax.service');
 
         /** @var Tax $serviceTax */
         $serviceTax = $this->getTax($booking->getTax());
+
+        $coupon = $this->getPersistedCoupon($booking->getCoupon());
 
         $persons = $booking->getPersons() ? $booking->getPersons()->getValue() : null;
 
@@ -1454,22 +1460,22 @@ class AppointmentReservationService extends AbstractReservationService
 
         $serviceBookingAmount = $serviceAmount;
 
-        if ($serviceTax && !$serviceTax->getExcluded()->getValue() && ($booking->getCoupon() || $invoice)) {
+        if ($serviceTax && !$serviceTax->getExcluded()->getValue() && ($coupon || $invoice)) {
             $serviceAmount = $taxApplicationService->getBasePrice($serviceBookingAmount, $serviceTax);
         }
 
         $serviceAmountWithoutDiscount = $serviceAmount;
 
-        $fullDiscount = $this->getCouponDiscountAmount($booking->getCoupon(), $serviceBookingAmount);
+        $fullDiscount = $this->getCouponDiscountAmount($coupon, $serviceBookingAmount);
 
-        $serviceDiscountAmount = $this->getCouponDiscountAmount($booking->getCoupon(), $serviceAmount);
+        $serviceDiscountAmount = $this->getCouponDiscountAmount($coupon, $serviceAmount);
 
         $serviceDiscountedAmount = $serviceAmount - $serviceDiscountAmount;
 
         $serviceAmount = $serviceDiscountedAmount;
 
-        $deduction = $booking->getCoupon() && $booking->getCoupon()->getDeduction()
-            ? (float)$booking->getCoupon()->getDeduction()->getValue()
+        $deduction = $coupon && $coupon->getDeduction()
+            ? (float)$coupon->getDeduction()->getValue()
             : 0;
 
         $serviceDeductionAmount = 0;
@@ -1493,7 +1499,7 @@ class AppointmentReservationService extends AbstractReservationService
 
         $serviceTaxAmount = 0;
 
-        if ($serviceTax && !$serviceTax->getExcluded()->getValue() && ($booking->getCoupon() || $invoice)) {
+        if ($serviceTax && !$serviceTax->getExcluded()->getValue() && ($coupon || $invoice)) {
             $serviceAmount    = $taxApplicationService->getBasePrice($serviceBookingAmount, $serviceTax);
             $serviceTaxAmount = $this->getTaxAmount(
                 $serviceTax,
@@ -1528,15 +1534,15 @@ class AppointmentReservationService extends AbstractReservationService
 
             $extraBookingAmount = $extraAmount;
 
-            if ($extraTax && !$extraTax->getExcluded()->getValue() && ($booking->getCoupon() || $invoice)) {
+            if ($extraTax && !$extraTax->getExcluded()->getValue() && ($coupon || $invoice)) {
                 $extraAmount = $taxApplicationService->getBasePrice($extraBookingAmount, $extraTax);
             }
 
             $extraAmountWithoutDiscount = $extraAmount;
 
-            $fullDiscount += $this->getCouponDiscountAmount($booking->getCoupon(), $extraBookingAmount);
+            $fullDiscount += $this->getCouponDiscountAmount($coupon, $extraBookingAmount);
 
-            $extraDiscountAmount = $this->getCouponDiscountAmount($booking->getCoupon(), $extraAmount);
+            $extraDiscountAmount = $this->getCouponDiscountAmount($coupon, $extraAmount);
 
             $extraDiscountedAmount = $extraAmount - $extraDiscountAmount;
 
@@ -1559,7 +1565,7 @@ class AppointmentReservationService extends AbstractReservationService
             $reductionAmount['discount'] += $extraDiscountAmount;
 
             $extraTaxAmount = 0;
-            if ($extraTax && !$extraTax->getExcluded()->getValue() && ($booking->getCoupon() || $invoice)) {
+            if ($extraTax && !$extraTax->getExcluded()->getValue() && ($coupon || $invoice)) {
                 $extraAmount = $taxApplicationService->getBasePrice($extraBookingAmount, $extraTax);
 
                 $extraTaxAmount = $this->getTaxAmount(
@@ -2105,7 +2111,7 @@ class AppointmentReservationService extends AbstractReservationService
      * @return void
      * @throws QueryExecutionException
      */
-    public function manageTaxes(&$data)
+    public function manageTaxes(&$data): void
     {
         /** @var TaxApplicationService $taxAS */
         $taxAS = $this->container->get('application.tax.service');
@@ -2113,59 +2119,90 @@ class AppointmentReservationService extends AbstractReservationService
         /** @var SettingsService $settingsService */
         $settingsService = $this->container->get('domain.settings.service');
 
-        if ($settingsService->isFeatureEnabled('tax')) {
-            /** @var Collection $taxes */
-            $taxes = $taxAS->getAll();
+        $taxesEnabled = $settingsService->isFeatureEnabled('tax');
 
+        /** @var Collection $taxes */
+        $taxes = $taxesEnabled ? $taxAS->getAll() : new Collection();
+
+        if (!empty($data['bookings']) && is_array($data['bookings'])) {
             foreach ($data['bookings'] as $bookingKey => $booking) {
-                if (empty($data['bookings'][$bookingKey]['packageCustomerService'])) {
-                    $data['bookings'][$bookingKey]['tax'] = $taxAS->getTaxData(
-                        $data['serviceId'],
-                        Entities::SERVICE,
-                        $taxes
-                    );
-
-                    if (!empty($data['bookings'][$bookingKey]['extras'])) {
-                        foreach ($data['bookings'][$bookingKey]['extras'] as $extraKey => $bookingData) {
-                            $data['bookings'][$bookingKey]['extras'][$extraKey]['tax'] = $taxAS->getTaxData(
-                                $bookingData['extraId'],
-                                Entities::EXTRA,
-                                $taxes
-                            );
-                        }
-                    }
+                if (!is_array($booking)) {
+                    continue;
                 }
+
+                $this->assignBookingTax($data['bookings'][$bookingKey], $data['serviceId'], $taxes, $taxesEnabled);
+            }
+        }
+
+        foreach (!empty($data['recurring']) && is_array($data['recurring']) ? $data['recurring'] : [] as $key => $recurringData) {
+            if (!is_array($recurringData)) {
+                continue;
             }
 
-            foreach (!empty($data['recurring']) ? $data['recurring'] : [] as $key => $recurringData) {
-                if (empty($recurringData['bookings'][0]['packageCustomerService'])) {
-                    $data['recurring'][$key]['bookings'][0]['tax'] = $taxAS->getTaxData(
-                        !empty($recurringData['serviceId']) ? $recurringData['serviceId'] : $data['serviceId'],
-                        Entities::SERVICE,
-                        $taxes
-                    );
+            // Cart items arrive without a nested booking, but book() reads their tax from bookings[0].
+            if (empty($recurringData['bookings'][0]) || !is_array($recurringData['bookings'][0])) {
+                $data['recurring'][$key]['bookings'][0] = [];
+            }
 
-                    if (!empty($recurringData['bookings'][0]['extras'])) {
-                        foreach ($recurringData['bookings'][0]['extras'] as $extraKey => $bookingData) {
-                            $data['recurring'][$key]['bookings'][0]['extras'][$extraKey]['tax'] = $taxAS->getTaxData(
-                                $bookingData['extraId'],
-                                Entities::EXTRA,
-                                $taxes
-                            );
-                        }
+            $serviceId = !empty($recurringData['serviceId']) ? $recurringData['serviceId'] : $data['serviceId'];
+
+            $this->assignBookingTax(
+                $data['recurring'][$key]['bookings'][0],
+                $serviceId,
+                $taxes,
+                $taxesEnabled
+            );
+
+            if (!empty($recurringData['extras']) && is_array($recurringData['extras'])) {
+                $applyExtraTax = $taxesEnabled && empty($recurringData['bookings'][0]['packageCustomerService']);
+
+                foreach ($recurringData['extras'] as $extraKey => $bookingData) {
+                    if (!is_array($bookingData)) {
+                        continue;
                     }
 
-                    if (!empty($recurringData['extras'])) {
-                        foreach ($recurringData['extras'] as $extraKey => $bookingData) {
-                            $data['recurring'][$key]['extras'][$extraKey]['tax'] = $taxAS->getTaxData(
-                                $bookingData['extraId'],
-                                Entities::EXTRA,
-                                $taxes
-                            );
-                        }
-                    }
+                    $data['recurring'][$key]['extras'][$extraKey]['tax'] = $applyExtraTax
+                        ? $taxAS->getTaxData($bookingData['extraId'], Entities::EXTRA, $taxes)
+                        : null;
                 }
             }
+        }
+    }
+
+    /**
+     * Replaces any request-supplied tax with the tax configured for the service, or null when taxes are off.
+     * Package appointments are not taxed here; a client tax on those is discarded.
+     *
+     * @param array      $booking
+     * @param int|string $serviceId
+     * @param Collection $taxes
+     * @param bool       $taxesEnabled
+     *
+     * @return void
+     */
+    private function assignBookingTax(&$booking, $serviceId, $taxes, $taxesEnabled): void
+    {
+        /** @var TaxApplicationService $taxAS */
+        $taxAS = $this->container->get('application.tax.service');
+
+        $applyTax = $taxesEnabled && empty($booking['packageCustomerService']);
+
+        $booking['tax'] = $applyTax
+            ? $taxAS->getTaxData($serviceId, Entities::SERVICE, $taxes)
+            : null;
+
+        if (empty($booking['extras']) || !is_array($booking['extras'])) {
+            return;
+        }
+
+        foreach ($booking['extras'] as $extraKey => $bookingData) {
+            if (!is_array($bookingData)) {
+                continue;
+            }
+
+            $booking['extras'][$extraKey]['tax'] = $applyTax
+                ? $taxAS->getTaxData($bookingData['extraId'], Entities::EXTRA, $taxes)
+                : null;
         }
     }
 

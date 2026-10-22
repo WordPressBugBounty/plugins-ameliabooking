@@ -75,16 +75,13 @@ class Statement
         $query = $this->statement;
 
         if ($this->bindings) {
-            // Sort bindings by key length, descending, to avoid matching ":p1" inside ":p10"
-            uksort($this->bindings, function ($a, $b) {
-                return strlen($b) - strlen($a);
-            });
-
             $replacements = [];
 
             foreach ($this->bindings as $placeholder => $value) {
-                if (strpos($this->statement, $placeholder) === false) {
-                    continue;
+                // Only accept well-formed placeholder names (":" + word chars). Anything else is
+                // attacker-controlled text that must never reach the SQL string.
+                if (!is_string($placeholder) || !preg_match('/^:[A-Za-z_][A-Za-z0-9_]*$/', $placeholder)) {
+                    throw new \RuntimeException('Invalid SQL parameter name.');
                 }
 
                 $replacement = 'NULL';
@@ -98,7 +95,18 @@ class Statement
             }
 
             if ($replacements) {
-                $query = strtr($this->statement, $replacements);
+                // Tokenize the statement and replace whole placeholder tokens only. This avoids
+                // strtr()'s longest-match behaviour, where overlapping names could advance the
+                // cursor past a token boundary and strand attacker text as raw SQL.
+                $query = preg_replace_callback(
+                    '/:[A-Za-z_][A-Za-z0-9_]*/',
+                    function ($matches) use ($replacements) {
+                        $token = $matches[0];
+
+                        return array_key_exists($token, $replacements) ? $replacements[$token] : $token;
+                    },
+                    $this->statement
+                );
             }
         }
 
@@ -111,7 +119,9 @@ class Statement
         if ($result === false) {
             $this->results = [];
             $this->affectedRows = 0;
-            throw new \RuntimeException($this->wpdb->last_error ?: 'Database query failed.');
+            $lastError = $this->wpdb->last_error ?: 'Database query failed.';
+            error_log('Amelia database query failed: ' . $lastError);
+            throw new \RuntimeException('Database query failed.');
         }
 
         // Capture affected rows immediately so it's stable even if other WP queries run later

@@ -373,10 +373,11 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             if (!empty($criteria['providers'])) {
                 $queryProviders = [];
 
-                foreach ((array)$criteria['providers'] as $index => $value) {
-                    $param            = ':provider' . $index;
+                $index = 0;
+                foreach ((array)$criteria['providers'] as $value) {
+                    $param            = ':provider' . $index++;
                     $queryProviders[] = $param;
-                    $params[$param]   = $value;
+                    $params[$param]   = (int)$value;
                 }
 
                 $where[] = 'u.id IN (' . implode(', ', $queryProviders) . ')';
@@ -478,12 +479,13 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         }
 
         if (!empty($criteria['providers'])) {
-            foreach ($criteria['providers'] as $index => $value) {
-                $param = ':provider' . $index;
+            $index = 0;
+            foreach ((array)$criteria['providers'] as $value) {
+                $param = ':provider' . $index++;
 
                 $queryProviders[] = $param;
 
-                $userParams[$param] = $value;
+                $userParams[$param] = (int)$value;
             }
         }
 

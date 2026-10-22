@@ -35,7 +35,7 @@ class TaxFactory
      * @return Tax
      * @throws InvalidArgumentException
      */
-    public static function create($data)
+    public static function create($data): Tax
     {
         $tax = new Tax();
 

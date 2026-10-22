@@ -421,24 +421,26 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
         }
 
         if (!empty($criteria['events'])) {
-            $queryExcludeIds = [];
+            $queryEventIds = [];
 
-            foreach ($criteria['events'] as $index => $value) {
-                $param = ':id' . $index;
+            $index = 0;
+            foreach ((array)$criteria['events'] as $value) {
+                $param = ':id' . $index++;
 
-                $queryExcludeIds[] = $param;
+                $queryEventIds[] = $param;
 
                 $params[$param] = (int)$value;
             }
 
-            $where[] = 'e.id IN (' . implode(', ', $queryExcludeIds) . ')';
+            $where[] = 'e.id IN (' . implode(', ', $queryEventIds) . ')';
         }
 
         if (!empty($criteria['excludeIds'])) {
             $queryExcludeIds = [];
 
-            foreach ($criteria['excludeIds'] as $index => $value) {
-                $param = ':excludeId' . $index;
+            $index = 0;
+            foreach ((array)$criteria['excludeIds'] as $value) {
+                $param = ':excludeId' . $index++;
 
                 $queryExcludeIds[] = $param;
 
@@ -515,8 +517,8 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
         if (!empty($criteria['tag'])) {
             $queryTags = [];
 
-            $tags = $criteria['tag'];
-            foreach ((array)$tags as $index => $value) {
+            $tags = array_values((array)$criteria['tag']);
+            foreach ($tags as $index => $value) {
                 $param = ':tag' . $index;
 
                 $queryTags[] = $param;
@@ -554,7 +556,8 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
         if (!empty($criteria['id'])) {
             if (!empty($criteria['recurring'])) {
                 $whereOr = [];
-                foreach ((array)$criteria['id'] as $index => $value) {
+                $index = 0;
+                foreach ((array)$criteria['id'] as $value) {
                     $param = 'id' . $index;
 
                     $params[':rec1' . $param] = (int)$value;
@@ -565,13 +568,15 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                     $whereOr[] = "((e.id = :rec1id" . $index . " AND e.parentId IS NULL) OR 
                     (e.parentId IN (SELECT parentId FROM {$this->table} WHERE parentId IS NOT NULL AND parentId = :rec2id" . $index . ")) OR
                     (e.id >= :rec3id" . $index . "  AND e.parentId IN (SELECT parentId FROM {$this->table} WHERE id = :rec4id" . $index . ")))";
+                    $index++;
                 }
                 $where[] = '(' . implode(' OR ', $whereOr) . ')';
             } else {
                 $queryIds = [];
 
-                foreach ((array)$criteria['id'] as $index => $value) {
-                    $param = ':id' . $index;
+                $index = 0;
+                foreach ((array)$criteria['id'] as $value) {
+                    $param = ':filterId' . $index++;
 
                     $queryIds[] = $param;
 
@@ -597,12 +602,13 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
             if (!empty($criteria['customers'])) {
                 $queryCustomerIds = [];
 
-                foreach ($criteria['customers'] as $index => $value) {
-                    $param = ':customerId' . $index;
+                $index = 0;
+                foreach ((array)$criteria['customers'] as $value) {
+                    $param = ':customerId' . $index++;
 
                     $queryCustomerIds[] = $param;
 
-                    $params[$param] = $value;
+                    $params[$param] = (int)$value;
                 }
 
                 $where[] = 'cb.customerId IN (' . implode(', ', $queryCustomerIds) . ')';
@@ -611,12 +617,13 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
             if (!empty($criteria['customerBookingsIds'])) {
                 $queryBookingsIds = [];
 
-                foreach ($criteria['customerBookingsIds'] as $index => $value) {
-                    $param = ':customerBookingId' . $index;
+                $index = 0;
+                foreach ((array)$criteria['customerBookingsIds'] as $value) {
+                    $param = ':customerBookingId' . $index++;
 
                     $queryBookingsIds[] = $param;
 
-                    $params[$param] = $value;
+                    $params[$param] = (int)$value;
                 }
 
                 $where[] = 'cb.id IN (' . implode(', ', $queryBookingsIds) . ')';
@@ -644,10 +651,11 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
         if (!empty($criteria['locations'])) {
             $queryLocations = [];
 
-            foreach ((array)$criteria['locations'] as $index => $value) {
-                $param            = ':location' . $index;
+            $index = 0;
+            foreach ((array)$criteria['locations'] as $value) {
+                $param            = ':location' . $index++;
                 $queryLocations[] = $param;
-                $params[$param]   = $value;
+                $params[$param]   = (int)$value;
             }
 
             $where3 = 'e.locationId IN (' . implode(', ', $queryLocations) . ')';
@@ -662,19 +670,21 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
             $queryProviders = [];
 
-            foreach ((array)$criteria['providers'] as $index => $value) {
-                $param            = ':provider' . $index;
+            $index = 0;
+            foreach ((array)$criteria['providers'] as $value) {
+                $param            = ':provider' . $index++;
                 $queryProviders[] = $param;
-                $params[$param]   = $value;
+                $params[$param]   = (int)$value;
             }
 
             $where1 = 'epr.userId IN (' . implode(', ', $queryProviders) . ')';
 
             $queryProviders = [];
-            foreach ((array)$criteria['providers'] as $index => $value) {
-                $param            = ':organizer' . $index;
+            $index = 0;
+            foreach ((array)$criteria['providers'] as $value) {
+                $param            = ':organizer' . $index++;
                 $queryProviders[] = $param;
-                $params[$param]   = $value;
+                $params[$param]   = (int)$value;
             }
 
             $where2 = 'e.organizerId IN (' . implode(', ', $queryProviders) . ')';

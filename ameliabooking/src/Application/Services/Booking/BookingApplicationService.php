@@ -266,10 +266,10 @@ class BookingApplicationService
     /**
      * @param array $data
      *
-     * @return array|null
+     * @return array
      * @throws \Exception
      */
-    public function getAppointmentData($data)
+    public function getAppointmentData($data): array
     {
         /** @var SettingsService $settingsService */
         $settingsService = $this->container->get('domain.settings.service');
@@ -418,6 +418,17 @@ class BookingApplicationService
 
         if (isset($data['bookings'][0]['couponCode']) && $data['bookings'][0]['couponCode'] === '') {
             $data['bookings'][0]['couponCode'] = null;
+        }
+
+        // Discount is applied only after couponCode is resolved on the server.
+        if (!empty($data['bookings']) && is_array($data['bookings'])) {
+            foreach ($data['bookings'] as $index => $booking) {
+                if (!is_array($booking)) {
+                    continue;
+                }
+
+                unset($data['bookings'][$index]['coupon'], $data['bookings'][$index]['couponId']);
+            }
         }
 
         if (isset($data['locationId']) && $data['locationId'] === '') {

@@ -21,6 +21,8 @@ class AmeliaErrorHandler extends ErrorHandler
         $exception = $this->exception;
         $request = $this->request;
 
+        $isInternalError = false;
+
         if ($exception instanceof AccessDeniedException) {
             $status = Controller::STATUS_FORBIDDEN;
         } elseif ($exception instanceof NotFoundException) {
@@ -29,6 +31,7 @@ class AmeliaErrorHandler extends ErrorHandler
             $status = $exception->getCode();
         } else {
             $status = Controller::STATUS_INTERNAL_SERVER_ERROR;
+            $isInternalError = true;
 
             // Only the unexpected-error branch — AccessDenied/NotFound/HttpException above are
             // expected control flow, not plugin failures, and would just be noise in Sentry.
@@ -38,7 +41,12 @@ class AmeliaErrorHandler extends ErrorHandler
             );
         }
 
-        $responseMessage = ['message' => $exception->getMessage()];
+        // Never leak internal error text (e.g. raw database errors) to the client. Details are
+        // captured server-side via Sentry above; the client gets a generic message. Expected
+        // control-flow exceptions (AccessDenied/NotFound/Http) keep their user-facing message.
+        $responseMessage = [
+            'message' => $isInternalError ? 'Internal server error.' : $exception->getMessage(),
+        ];
 
         $queryParams = $request->getQueryParams();
         if (!empty($queryParams['showAmeliaSqlExceptions'])) {

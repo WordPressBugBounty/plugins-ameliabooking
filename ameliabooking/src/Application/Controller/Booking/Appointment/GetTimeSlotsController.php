@@ -81,7 +81,10 @@ class GetTimeSlotsController extends Controller
         $command->setField('weekDays', (array)self::getParam($request, 'weekDays', [1, 2, 3, 4, 5, 6, 7]));
         $command->setField('startDateTime', (string)self::getParam($request, 'startDateTime', ''));
         $command->setField('endDateTime', (string)self::getParam($request, 'endDateTime', ''));
-        $command->setField('providerIds', !empty($params['providerIds']) ? $params['providerIds'] : []);
+        $command->setField(
+            'providerIds',
+            !empty($params['providerIds']) ? array_values(array_map('intval', (array)$params['providerIds'])) : []
+        );
         $command->setField('extras', !empty($params['extras']) ? $params['extras'] : []);
         $command->setField('excludeAppointmentId', (int)self::getParam($request, 'excludeAppointmentId', []));
         $command->setField('persons', (int)self::getParam($request, 'persons', 1));

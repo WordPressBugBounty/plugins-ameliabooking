@@ -35,12 +35,14 @@ class GetEventsController extends Controller
 
         $this->setArrayParams($params);
 
-        if (isset($params['events'])) {
-            $params['events'] = array_map('intval', $params['events']);
+        foreach (['events', 'excludeIds', 'id', 'customers', 'customerBookingsIds', 'locations', 'providers'] as $intList) {
+            if (isset($params[$intList])) {
+                $params[$intList] = array_values(array_map('intval', (array)$params[$intList]));
+            }
         }
 
-        if (isset($params['excludeIds'])) {
-            $params['excludeIds'] = array_map('intval', $params['excludeIds']);
+        if (isset($params['tag'])) {
+            $params['tag'] = array_values((array)$params['tag']);
         }
 
         $command->setField('params', $params);

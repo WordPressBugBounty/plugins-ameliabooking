@@ -120,6 +120,10 @@ class EventReservationService extends AbstractReservationService
             $reservation->hasCouponValidation()->getValue()
         ) : null;
 
+        $eventData['bookings'][0]['coupon'] = null;
+
+        $eventData['bookings'][0]['couponId'] = null;
+
         if ($coupon) {
             $eventData['bookings'][0]['coupon'] = $coupon->toArray();
 
@@ -143,11 +147,19 @@ class EventReservationService extends AbstractReservationService
             $event->setCustomTickets($eventApplicationService->getTicketsPriceByDateRange($event->getCustomTickets()));
         }
 
-        $bookingArray =  array_merge(
-            $eventData['bookings'][0],
-            empty($eventData['bookings'][0]['status']) ?
-            ['status' => BookingStatus::APPROVED] : ['status' => $eventData['bookings'][0]['status']]
-        );
+        // Price, tax, coupon and payment fields are not taken from the request. Tax was set by manageTaxes().
+        $bookingArray = $this->clientEventBooking($eventData['bookings'][0]);
+
+        $bookingArray['status'] = empty($eventData['bookings'][0]['status']) ?
+            BookingStatus::APPROVED : $eventData['bookings'][0]['status'];
+
+        $bookingArray['tax'] = $eventData['bookings'][0]['tax'];
+
+        if ($coupon) {
+            $bookingArray['coupon'] = $coupon->toArray();
+
+            $bookingArray['couponId'] = $coupon->getId()->getValue();
+        }
 
         $bookingArray = apply_filters('amelia_before_event_booking_saved_filter', $bookingArray, $event ? $event->toArray() : null);
 
@@ -955,13 +967,15 @@ class EventReservationService extends AbstractReservationService
      *
      * @throws InvalidArgumentException
      */
-    public function getPaymentAmount($booking, $bookable, $invoice = false)
+    public function getPaymentAmount($booking, $bookable, $invoice = false): array
     {
         /** @var TaxApplicationService $taxApplicationService */
         $taxApplicationService = $this->container->get('application.tax.service');
 
         /** @var Tax $eventTax */
         $eventTax = $this->getTax($booking->getTax());
+
+        $coupon = $this->getPersistedCoupon($booking->getCoupon());
 
         $persons = $booking->getPersons()->getValue();
 
@@ -1019,7 +1033,7 @@ class EventReservationService extends AbstractReservationService
             $price = $ticketSumPrice;
         }
 
-        if ($eventTax && !$eventTax->getExcluded()->getValue() && ($booking->getCoupon() || $invoice)) {
+        if ($eventTax && !$eventTax->getExcluded()->getValue() && ($coupon || $invoice)) {
             $price = $taxApplicationService->getBasePrice($price, $eventTax);
         }
 
@@ -1034,10 +1048,10 @@ class EventReservationService extends AbstractReservationService
             'discount'  => 0,
         ];
 
-        if ($booking->getCoupon()) {
-            $reductionAmount['discount'] = $price / 100 * ($booking->getCoupon()->getDiscount()->getValue() ?: 0);
+        if ($coupon) {
+            $reductionAmount['discount'] = $price / 100 * ($coupon->getDiscount()->getValue() ?: 0);
 
-            $reductionAmount['deduction'] = $booking->getCoupon()->getDeduction()->getValue();
+            $reductionAmount['deduction'] = $coupon->getDeduction()->getValue();
 
             $subtraction = $reductionAmount['discount'] + $reductionAmount['deduction'];
 
@@ -1288,12 +1302,73 @@ class EventReservationService extends AbstractReservationService
     }
 
     /**
+     * Fields a public event booking may carry. Anything that changes the charged amount is left out.
+     *
+     * @param array $booking
+     *
+     * @return array
+     */
+    private function clientEventBooking(array $booking): array
+    {
+        $allowed = [];
+
+        if (isset($booking['customer'])) {
+            $allowed['customer'] = $booking['customer'];
+        }
+
+        // Resolved in processBooking() before book() runs.
+        if (isset($booking['customerId'])) {
+            $allowed['customerId'] = $booking['customerId'];
+        }
+
+        if (isset($booking['persons'])) {
+            $allowed['persons'] = $booking['persons'];
+        }
+
+        if (isset($booking['ticketsData']) && is_array($booking['ticketsData'])) {
+            $tickets = [];
+
+            foreach ($booking['ticketsData'] as $key => $ticket) {
+                if (!is_array($ticket)) {
+                    continue;
+                }
+
+                $tickets[$key] = [
+                    'eventTicketId' => isset($ticket['eventTicketId']) ? $ticket['eventTicketId'] : null,
+                    'persons'       => isset($ticket['persons']) ? $ticket['persons'] : null,
+                ];
+            }
+
+            $allowed['ticketsData'] = $tickets;
+        }
+
+        if (isset($booking['customFields'])) {
+            $allowed['customFields'] = $booking['customFields'];
+        }
+
+        if (isset($booking['utcOffset']) && $booking['utcOffset'] !== '') {
+            $allowed['utcOffset'] = $booking['utcOffset'];
+        }
+
+        if (array_key_exists('deposit', $booking)) {
+            $allowed['deposit'] = self::parseDepositFlag($booking['deposit']);
+        }
+
+        // Snapshot of the customer, built in processBooking().
+        if (isset($booking['info'])) {
+            $allowed['info'] = $booking['info'];
+        }
+
+        return $allowed;
+    }
+
+    /**
      * @param array $data
      *
      * @return void
      * @throws QueryExecutionException
      */
-    public function manageTaxes(&$data)
+    public function manageTaxes(&$data): void
     {
         /** @var TaxApplicationService $taxAS */
         $taxAS = $this->container->get('application.tax.service');
@@ -1301,16 +1376,17 @@ class EventReservationService extends AbstractReservationService
         /** @var SettingsService $settingsService */
         $settingsService = $this->container->get('domain.settings.service');
 
-        if ($settingsService->isFeatureEnabled('tax')) {
-            /** @var Collection $taxes */
-            $taxes = $taxAS->getAll();
+        $data['bookings'][0]['tax'] = null;
 
-            $data['bookings'][0]['tax'] = $taxAS->getTaxData(
-                $data['eventId'],
-                Entities::EVENT,
-                $taxes
-            );
+        if (!$settingsService->isFeatureEnabled('tax')) {
+            return;
         }
+
+        $data['bookings'][0]['tax'] = $taxAS->getTaxData(
+            $data['eventId'],
+            Entities::EVENT,
+            $taxAS->getAll()
+        );
     }
 
     /**

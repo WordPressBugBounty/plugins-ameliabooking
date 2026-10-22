@@ -47,7 +47,7 @@ class GetEventBookingsCommandHandler extends CommandHandler
      * @throws QueryExecutionException
      * @throws Exception
      */
-    public function handle(GetEventBookingsCommand $command)
+    public function handle(GetEventBookingsCommand $command): CommandResult
     {
         /** @var AbstractUser $user */
         $user = $command->authorize();
@@ -79,15 +79,21 @@ class GetEventBookingsCommandHandler extends CommandHandler
 
         $isCabinetPage = $command->getPage() === 'cabinet';
 
+        $visibleCriteria = [];
+
         if ($user && $userAS->isAmeliaUser($user) && $userAS->isCustomer($user)) {
             $params['customers'] = [$user->getId()->getValue()];
+            $visibleCriteria['customers'] = $params['customers'];
         }
 
         if ($user && $user->getType() === AbstractUser::USER_ROLE_PROVIDER) {
             $params['providers'] = [$user->getId()->getValue()];
+            $visibleCriteria['providers'] = $params['providers'];
         }
 
-        $providerTimeZoneSet = ($user instanceof Provider) && $user->getTimeZone() && $user->getTimeZone()->getValue();
+        $providerTimeZoneSet = ($user instanceof Provider) && $user->getTimeZone() && $user->getTimeZone()->getValue()
+            ? $user->getTimeZone()->getValue()
+            : null;
 
         if (!empty($params['dates'])) {
             if (!empty($params['dates'][0])) {
@@ -181,6 +187,8 @@ class GetEventBookingsCommandHandler extends CommandHandler
             }
         }
 
+        $totalCount = sizeof($bookingRepository->getEventBookingIdsByCriteria($visibleCriteria));
+
         $bookingIds = $bookingRepository->getEventBookingIdsByCriteria($params, !empty($params['limit']) ? $params['limit'] : 10);
 
         if (!$bookingIds && $params['page'] && (int)$params['page'] > 1) {
@@ -195,7 +203,7 @@ class GetEventBookingsCommandHandler extends CommandHandler
             $result->setData(
                 [
                     Entities::BOOKINGS => [],
-                    'totalCount'       => sizeof($bookingRepository->getEventBookingIdsByCriteria()),
+                    'totalCount'       => $totalCount,
                     'filteredCount'    => 0,
                     'attendeeCount'    => 0,
                     'waitingCount'     => 0,
@@ -246,15 +254,14 @@ class GetEventBookingsCommandHandler extends CommandHandler
                 $period['periodEnd']   = DateTimeService::getCustomDateTimeFromUtc($period['periodEnd']);
                 if ($providerTimeZoneSet) {
                     $period['periodStart'] =
-                        DateTimeService::getCustomDateTimeObjectInTimeZone($period['periodStart'], $user->getTimeZone()->getValue())->format('Y-m-d H:i:s');
+                        DateTimeService::getCustomDateTimeObjectInTimeZone($period['periodStart'], $providerTimeZoneSet)->format('Y-m-d H:i:s');
                     $period['periodEnd']   =
-                        DateTimeService::getCustomDateTimeObjectInTimeZone($period['periodEnd'], $user->getTimeZone()->getValue())->format('Y-m-d H:i:s');
+                        DateTimeService::getCustomDateTimeObjectInTimeZone($period['periodEnd'], $providerTimeZoneSet)->format('Y-m-d H:i:s');
                 }
             }
 
             $persons = $booking['persons'];
             if (!empty($booking['event']['customPricing']) && !empty($booking['ticketsData'])) {
-                /** @var CustomerBookingEventTicket $bookedTicket */
                 foreach ($booking['ticketsData'] as $bookedTicket) {
                     $persons += $bookedTicket['persons'];
                 }
@@ -376,7 +383,7 @@ class GetEventBookingsCommandHandler extends CommandHandler
         $result->setData(
             [
                 Entities::BOOKINGS => $eventBookings,
-                'totalCount'       => sizeof($bookingRepository->getEventBookingIdsByCriteria()),
+                'totalCount'       => $totalCount,
                 'filteredCount'    => sizeof(
                     $bookingRepository->getEventBookingIdsByCriteria($params)
                 ),

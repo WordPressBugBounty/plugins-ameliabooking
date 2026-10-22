@@ -1091,6 +1091,18 @@ abstract class AbstractReservationService implements ReservationServiceInterface
     }
 
     /**
+     * Coupons loaded from the database have an id. One built from request data does not and must not discount the price.
+     */
+    protected function getPersistedCoupon(?Coupon $coupon): ?Coupon
+    {
+        if (!$coupon || !$coupon->getId()) {
+            return null;
+        }
+
+        return $coupon;
+    }
+
+    /**
      * @param Coupon $coupon
      * @param float  $amount
      *
@@ -1109,7 +1121,7 @@ abstract class AbstractReservationService implements ReservationServiceInterface
      *
      * @return array
      */
-    abstract public function getPaymentAmount($booking, $bookable, $invoice = false);
+    abstract public function getPaymentAmount($booking, $bookable, $invoice = false): array;
 
     /** @noinspection MoreThanThreeArgumentsInspection */
     /**
@@ -1724,7 +1736,7 @@ abstract class AbstractReservationService implements ReservationServiceInterface
      * @return void
      * @throws QueryExecutionException
      */
-    abstract public function manageTaxes(&$data);
+    abstract public function manageTaxes(&$data): void;
 
     /**
      * @param int $bookingId

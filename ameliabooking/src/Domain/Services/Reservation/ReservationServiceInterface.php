@@ -166,7 +166,7 @@ interface ReservationServiceInterface
      *
      * @throws InvalidArgumentException
      */
-    public function getPaymentAmount($booking, $bookable, $invoice = false);
+    public function getPaymentAmount($booking, $bookable, $invoice = false): array;
 
     /**
      * @param Appointment|Event  $reservation
@@ -331,7 +331,7 @@ interface ReservationServiceInterface
      * @return void
      * @throws QueryExecutionException
      */
-    public function manageTaxes(&$data);
+    public function manageTaxes(&$data): void;
 
     /**
      * @param array $data
