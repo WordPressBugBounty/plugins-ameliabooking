@@ -36,12 +36,12 @@ class AppointmentFactory
      * @return Appointment
      * @throws InvalidArgumentException
      */
-    public static function create($data)
+    public static function create($data): Appointment
     {
         $appointment = new Appointment(
             new DateTimeValue(DateTimeService::getCustomDateTimeObject($data['bookingStart'])),
             new DateTimeValue(DateTimeService::getCustomDateTimeObject($data['bookingEnd'])),
-            $data['notifyParticipants'],
+            isset($data['notifyParticipants']) ? $data['notifyParticipants'] : 1,
             new Id($data['serviceId']),
             new Id($data['providerId'])
         );

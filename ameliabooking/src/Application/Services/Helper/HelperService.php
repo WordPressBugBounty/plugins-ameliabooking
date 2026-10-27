@@ -17,6 +17,7 @@ use Exception;
  */
 class HelperService
 {
+    /** @var Container $container */
     private $container;
 
     /**
@@ -148,6 +149,57 @@ class HelperService
     }
 
     /**
+     * Short signature for employee approve links. The booking id is already in the URL,
+     * so the token only proves the link was issued with the provider panel secret.
+     *
+     * @param int $bookingId
+     *
+     * @return string
+     */
+    public function getEmployeeApproveToken(int $bookingId): string
+    {
+        $secret = $this->getProviderUrlJwtSecret();
+
+        if ($secret === '') {
+            return '';
+        }
+
+        $mac = hash_hmac('sha256', 'approve|' . $bookingId, $secret, true);
+
+        return substr(rtrim(strtr(base64_encode($mac), '+/', '-_'), '='), 0, 10);
+    }
+
+    /**
+     * @param int    $bookingId
+     * @param string $token
+     *
+     * @return bool
+     */
+    public function isEmployeeApproveToken(int $bookingId, string $token): bool
+    {
+        $expected = $this->getEmployeeApproveToken($bookingId);
+
+        if ($expected === '' || strlen($token) !== strlen($expected)) {
+            return false;
+        }
+
+        return hash_equals($expected, $token);
+    }
+
+    /**
+     * @return string
+     */
+    private function getProviderUrlJwtSecret(): string
+    {
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+
+        $cabinetSettings = $settingsService->getSetting('roles', 'providerCabinet');
+
+        return !empty($cabinetSettings['urlJwtSecret']) ? (string)$cabinetSettings['urlJwtSecret'] : '';
+    }
+
+    /**
      * @param string $email
      * @param string $type
      * @param string $dateStartString
@@ -158,9 +210,8 @@ class HelperService
      *
      * @throws Exception
      */
-    public function getCustomerCabinetUrl($email, $type, $dateStartString, $dateEndString, $locale, $changePass = false)
+    public function getCustomerCabinetUrl($email, $type, $dateStartString, $dateEndString, $locale, $changePass = false): string
     {
-        /** @var SettingsService $cabinetSettings */
         $cabinetSettings = $this->container->get('domain.settings.service')->getSetting('roles', 'customerCabinet');
 
         $cabinetPlaceholder = '';
@@ -213,9 +264,8 @@ class HelperService
      *
      * @throws Exception
      */
-    public function getProviderCabinetUrl($email, $type, $dateStartString, $dateEndString, $changePass = false)
+    public function getProviderCabinetUrl($email, $type, $dateStartString, $dateEndString, $changePass = false): string
     {
-        /** @var SettingsService $cabinetSettings */
         $cabinetSettings = $this->container->get('domain.settings.service')->getSetting('roles', 'providerCabinet');
 
         $cabinetPlaceholder = '';

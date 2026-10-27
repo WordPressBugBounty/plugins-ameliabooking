@@ -15,6 +15,7 @@ use AmeliaBooking\Domain\Entity\Booking\Event\CustomerBookingEventTicket;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\Json;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
+use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 
@@ -40,19 +41,23 @@ class WaitingListService
     /**
      * Notify waiting-list customers that a spot is available for the given appointment.
      *
-     * Builds the waiting bookings collection from the appointment entity and
-     * dispatches notifications through all enabled channels.
+     * Notifies a waiting customer only when their party fits the seats that are still open.
      *
      * @param Appointment $appointment
      *
      * @throws QueryExecutionException
      */
-    public function sendAvailableSpotNotifications($appointment)
+    public function sendAvailableSpotNotifications($appointment): void
     {
+        /** @var Collection $waitingBookings */
         $waitingBookings = new Collection();
 
+        /** @var CustomerBooking $booking */
         foreach ($appointment->getBookings()->getItems() as $booking) {
-            if ($booking->getStatus()->getValue() === BookingStatus::WAITING) {
+            if (
+                $booking->getStatus()->getValue() === BookingStatus::WAITING &&
+                $this->canApproveWaitingBooking($appointment, $booking)
+            ) {
                 $waitingBookings->addItem($booking);
             }
         }
@@ -66,6 +71,47 @@ class WaitingListService
                 $waitingBookings
             );
         }
+    }
+
+    /**
+     * Whether a waiting booking fits the seats still open on the appointment.
+     *
+     * Approved and pending persons already occupy the service capacity. A waiting
+     * customer can be approved only when their party is no larger than what remains.
+     *
+     * @param Appointment     $appointment
+     * @param CustomerBooking $booking
+     *
+     * @return bool
+     *
+     * @throws QueryExecutionException
+     */
+    public function canApproveWaitingBooking(Appointment $appointment, CustomerBooking $booking): bool
+    {
+        /** @var ProviderRepository $providerRepository */
+        $providerRepository = $this->container->get('domain.users.providers.repository');
+
+        $capacity = $providerRepository->getMaxCapacityByServiceId(
+            $appointment->getProviderId()->getValue(),
+            $appointment->getServiceId()->getValue()
+        );
+
+        $bookedPersons = 0;
+
+        /** @var CustomerBooking $existingBooking */
+        foreach ($appointment->getBookings()->getItems() as $existingBooking) {
+            if (
+                in_array(
+                    $existingBooking->getStatus()->getValue(),
+                    [BookingStatus::APPROVED, BookingStatus::PENDING],
+                    true
+                )
+            ) {
+                $bookedPersons += $existingBooking->getPersons()->getValue();
+            }
+        }
+
+        return ($capacity - $bookedPersons) >= $booking->getPersons()->getValue();
     }
 
     /**

@@ -15,7 +15,6 @@ use AmeliaBooking\Application\Services\Notification\ApplicationNotificationServi
 use AmeliaBooking\Application\Services\WebHook\AbstractWebHookApplicationService;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
-use AmeliaBooking\Domain\Entity\Booking\Event\Event;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Factory\Booking\Appointment\AppointmentFactory;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
@@ -46,7 +45,7 @@ class AppointmentStatusUpdatedEventHandler
      * @throws QueryExecutionException
      * @throws Exception
      */
-    public static function handle($commandResult, $container)
+    public static function handle($commandResult, $container): void
     {
         /** @var ApplicationNotificationService $applicationNotificationService */
         $applicationNotificationService = $container->get('application.notification.service');
@@ -61,7 +60,7 @@ class AppointmentStatusUpdatedEventHandler
 
         $appointment = $data[Entities::APPOINTMENT];
 
-        /** @var Appointment|Event $reservationObject */
+        /** @var Appointment $reservationObject */
         $reservationObject = AppointmentFactory::create($appointment);
 
         $bookingApplicationService->setReservationEntities($reservationObject);

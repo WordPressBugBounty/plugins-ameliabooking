@@ -6,7 +6,7 @@ Donate link: https://wpamelia.com/
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.4.13
+Stable tag: 2.4.14
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -292,6 +292,12 @@ Installing Amelia Lite WordPress Booking Plugin is as easy as 1-2-3!
 
 
 == Changelog ==
+v2.4.14
+This update includes important security fixes. We strongly recommend updating to this version immediately:
+*BugFix: Security vulnerability patches and improvements.
+*Additional minor bug fixes and stability improvements.
+*Note: If you use a page caching plugin, please clear the cache after updating so booking forms display correctly.
+
 v2.4.13
 This update includes important security fixes. We strongly recommend updating to this version immediately:
 *BugFix: Security vulnerability patches and improvements.

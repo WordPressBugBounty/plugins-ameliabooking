@@ -17,7 +17,6 @@ use AmeliaBooking\Application\Services\Notification\AbstractWhatsAppNotification
 use AmeliaBooking\Application\Services\WebHook\AbstractWebHookApplicationService;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
-use AmeliaBooking\Domain\Entity\Booking\Event\Event;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Factory\Booking\Appointment\AppointmentFactory;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
@@ -69,7 +68,7 @@ class AppointmentDeletedEventHandler
 
         $bookings = $commandResult->getData()['bookingsWithChangedStatus'];
 
-        /** @var Appointment|Event $reservationObject */
+        /** @var Appointment $reservationObject */
         $reservationObject = AppointmentFactory::create($appointment);
 
         $bookingApplicationService->setReservationEntities($reservationObject);

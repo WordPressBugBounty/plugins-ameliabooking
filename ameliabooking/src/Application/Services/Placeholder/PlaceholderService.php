@@ -236,7 +236,7 @@ abstract class PlaceholderService implements PlaceholderServiceInterface
      *
      * @throws ContainerException
      */
-    protected function getBookingData($appointment, $type, $bookingKey = null, $token = null, $depositEnabled = null, $isGroup = null, $invoice = false)
+    protected function getBookingData($appointment, $type, $bookingKey = null, $token = null, $depositEnabled = null, $isGroup = null, $invoice = false): array
     {
         /** @var HelperService $helperService */
         $helperService = $this->container->get('application.helper.service');
@@ -454,7 +454,22 @@ abstract class PlaceholderService implements PlaceholderServiceInterface
 
         $dateFormat = $settingsService->getSetting('wordpress', 'dateFormat');
 
-        $customerWaiting = $bookingKey !== null && $appointment['bookings'][$bookingKey]['status'] === BookingStatus::WAITING;
+        // Waiting customers keep the stored booking token. Employee links (including grouped
+        // booking details inside an employee notification) use a signature over the booking id.
+        $customerWaiting = $bookingKey !== null
+            && !$isGroup
+            && $appointment['bookings'][$bookingKey]['status'] === BookingStatus::WAITING;
+
+        $approveBookingId = null;
+        $approveToken = '';
+
+        if ($customerWaiting) {
+            $approveBookingId = $appointment['bookings'][$bookingKey]['id'];
+            $approveToken = $token;
+        } elseif ($bookingKeyForEmployee !== null) {
+            $approveBookingId = $bookingKeyForEmployee;
+            $approveToken = $helperService->getEmployeeApproveToken((int)$approveBookingId);
+        }
 
         return array_merge(
             $paymentLinks,
@@ -465,10 +480,9 @@ abstract class PlaceholderService implements PlaceholderServiceInterface
                     $bookingKey !== null && isset($appointment['bookings'][$bookingKey]['id']) ?
                         AMELIA_ACTION_URL . '/bookings/cancel/' . $appointment['bookings'][$bookingKey]['id'] .
                         ($token ? '&token=' . $token : '') . "&type={$appointment['type']}" : '',
-                'appointment_approve_url' =>
-                    ($bookingKeyForEmployee !== null || $customerWaiting) ? (AMELIA_ACTION_URL . '/bookings/success/' .
-                        ($customerWaiting ? $appointment['bookings'][$bookingKey]['id'] : $bookingKeyForEmployee) .
-                        '&token=' . $token) : '',
+                'appointment_approve_url' => $approveBookingId !== null && $approveToken
+                    ? AMELIA_ACTION_URL . '/bookings/success/' . $approveBookingId . '&token=' . $approveToken
+                    : '',
                 'appointment_reject_url' =>
                     $bookingKeyForEmployee !== null ? (AMELIA_ACTION_URL . '/bookings/reject/' . $bookingKeyForEmployee .
                         '&token=' . $token) : '',

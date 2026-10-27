@@ -312,6 +312,14 @@ class BookingApplicationService
             $data['utc'] = null;
         }
 
+        if (isset($data['bookings'][0]) && !isset($data['bookings'][0]['customerId'])) {
+            $data['bookings'][0]['customerId'] = null;
+        }
+
+        if (isset($data['bookings'][0]['customer']) && !isset($data['bookings'][0]['customer']['id'])) {
+            $data['bookings'][0]['customer']['id'] = null;
+        }
+
         if (isset($data['bookings'][0]['customer']) && array_key_exists('type', $data['bookings'][0]['customer'])) {
             $data['bookings'][0]['customer']['type'] = AbstractUser::USER_ROLE_CUSTOMER;
         }

@@ -6,8 +6,10 @@ use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Services\Booking\BookingFallbackService;
+use AmeliaBooking\Application\Services\Helper\HelperService;
 use AmeliaBooking\Application\Services\User\CustomerApplicationService;
 use AmeliaBooking\Application\Services\Reservation\AppointmentReservationService;
+use AmeliaBooking\Application\Services\WaitingList\WaitingListService;
 use AmeliaBooking\Domain\Common\Exceptions\BookingCancellationException;
 use AmeliaBooking\Domain\Common\Exceptions\BookingUnavailableException;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
@@ -23,10 +25,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
-use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use AmeliaBooking\Infrastructure\WP\Translations\BackendStrings;
-use Slim\Exception\ContainerException;
-use Slim\Exception\ContainerValueNotFoundException;
 use UnexpectedValueException;
 
 /**
@@ -45,9 +44,6 @@ class ApproveBookingRemotelyCommandHandler extends CommandHandler
 
     /**
      * @throws UnexpectedValueException
-     * @throws ContainerException
-     * @throws \InvalidArgumentException
-     * @throws ContainerValueNotFoundException
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      * @throws AccessDeniedException
@@ -91,14 +87,29 @@ class ApproveBookingRemotelyCommandHandler extends CommandHandler
 
         $token = $bookingRepository->getToken((int)$command->getArg('id'));
 
-        if (empty($token['token'])) {
+        if (!empty($token['token'])) {
+            $booking->setToken(new Token($token['token']));
+        }
+
+        /** @var HelperService $helperService */
+        $helperService = $this->container->get('application.helper.service');
+
+        $requestToken = (string)$command->getField('token');
+
+        // Stored booking token authorizes the booking's customer. Employees use the panel-secret signature.
+        $isCustomer = !empty($token['token'])
+            && $customerAS->isCustomerBooking($booking, $user, $requestToken);
+
+        $isEmployee = $helperService->isEmployeeApproveToken((int)$command->getArg('id'), $requestToken);
+
+        if (!$isCustomer && !$isEmployee) {
             throw new AccessDeniedException('You are not allowed to update booking status');
         }
 
-        $booking->setToken(new Token($token['token']));
-
-        if (!$customerAS->isCustomerBooking($booking, $user, $command->getField('token'))) {
-            throw new AccessDeniedException('You are not allowed to update booking status');
+        // A customer's link approves only while the booking is still on the waiting list. Once it has
+        // left the list (canceled, or already promoted) the link is valid but the spot is gone for it.
+        if (!$isEmployee && $booking->getStatus()->getValue() !== BookingStatus::WAITING) {
+            return $this->buildWaitingListDeniedResult($result, $settingsService, $notificationSettings);
         }
 
         if ($booking->getStatus()->getValue() === BookingStatus::WAITING) {
@@ -164,8 +175,6 @@ class ApproveBookingRemotelyCommandHandler extends CommandHandler
     /**
      * Validates waiting list appointment capacity and provider availability
      *
-     * @throws ContainerValueNotFoundException
-     * @throws ContainerException
      * @throws BookingCancellationException
      * @throws NotFoundException
      * @throws QueryExecutionException
@@ -182,21 +191,11 @@ class ApproveBookingRemotelyCommandHandler extends CommandHandler
             throw new NotFoundException('This appointment does not exist!');
         }
 
-        /** @var ProviderRepository $providerRepository */
-        $providerRepository = $this->container->get('domain.users.providers.repository');
+        /** @var WaitingListService $waitingListService */
+        $waitingListService = $this->container->get('application.waitingList.service');
 
-        $capacity = $providerRepository->getMaxCapacityByServiceId(
-            $appointment->getProviderId()->getValue(),
-            $appointment->getServiceId()->getValue()
-        );
-
-        $currentBookedPersons = $this->calculateCurrentBookedPersons($appointment);
-        $availableCapacity = $capacity - $currentBookedPersons;
-
-        if ($availableCapacity < $booking->getPersons()->getValue()) {
-            throw new BookingCancellationException(
-                'This slot is already taken! Available capacity: ' . $availableCapacity . ', requested: ' . $booking->getPersons()->getValue()
-            );
+        if (!$waitingListService->canApproveWaitingBooking($appointment, $booking)) {
+            throw new BookingCancellationException('This slot is already taken!');
         }
 
         /** @var AppointmentReservationService $reservationService */
@@ -207,23 +206,6 @@ class ApproveBookingRemotelyCommandHandler extends CommandHandler
         if ($reservationService->isDoubleBooking($appointment, true)) {
             throw new BookingCancellationException('This slot is already taken!');
         }
-    }
-
-    /**
-     * Calculates the total number of persons currently booked for an appointment
-     */
-    private function calculateCurrentBookedPersons(Appointment $appointment): int
-    {
-        $persons = 0;
-        $approvedStatuses = [BookingStatus::APPROVED, BookingStatus::PENDING];
-
-        foreach ($appointment->getBookings()->getItems() as $existingBooking) {
-            if (in_array($existingBooking->getStatus()->getValue(), $approvedStatuses)) {
-                $persons += $existingBooking->getPersons()->getValue();
-            }
-        }
-
-        return $persons;
     }
 
     /**
